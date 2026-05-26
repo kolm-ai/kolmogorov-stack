@@ -230,7 +230,7 @@ export function listArtifactIds() {
 // can run hermetically without touching real lake state.
 export function _resetForTests(artifact_id) {
   const p = _lifecyclePath(artifact_id);
-  try { fs.unlinkSync(p); } catch {}
+  try { fs.unlinkSync(p); } catch {} // deliberate: cleanup
 }
 
 // ---------------------------------------------------------------------------

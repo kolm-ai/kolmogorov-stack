@@ -67,7 +67,7 @@ function runCli(args, { base, apiKey, home, env: extraEnv = {} } = {}) {
     child.stdout.on('data', (d) => { stdout += d.toString(); });
     child.stderr.on('data', (d) => { stderr += d.toString(); });
     child.on('exit', (code) => {
-      if (!home) { try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} }
+      if (!home) { try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} } // deliberate: cleanup
       resolve({ code, stdout, stderr, home: tmp });
     });
   });
@@ -178,7 +178,7 @@ test('W457 #4 — capture status --json falls back to local count on cloud failu
     assert.equal(env.threshold, 1000, 'threshold must default to 1000 in the fallback');
     assert.ok(env.hint, 'hint must point users at starting the capture daemon');
   } finally {
-    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -211,7 +211,7 @@ test('W547 #1 - capture setup --json emits a parseable, redacted setup envelope'
     const diskCfg = JSON.parse(fs.readFileSync(env.config_path, 'utf8'));
     assert.equal(diskCfg.kolm_api_key, apiKey, 'private config file still needs the real key for local setup');
   } finally {
-    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -234,7 +234,7 @@ test('W547 #3 - capture setup supports OpenRouter as a first-class provider', as
     assert.equal(env.required_headers['x-upstream-api-key'], 'sk-or-...');
     assert.ok(!r.stdout.includes(apiKey), 'JSON stdout must not leak the full API key');
   } finally {
-    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -284,7 +284,7 @@ test('W457 #5 — distill runs --json offline-fallback returns local runs envelo
     assert.equal(env.runs[0].namespace, 'ns-w457');
     assert.equal(env.runs[0].step_count, 2);
   } finally {
-    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -303,6 +303,6 @@ test('W457 #6 — distill runs --json on empty local store returns ok:true with 
     assert.ok(Array.isArray(env.runs));
     assert.equal(env.runs.length, 0);
   } finally {
-    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });

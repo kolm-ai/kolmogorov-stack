@@ -94,7 +94,7 @@ async function request(app, { method = 'GET', path: urlPath, body }) {
     const res = await fetch(`http://127.0.0.1:${port}${urlPath}`, opts);
     const text = await res.text();
     let json = null;
-    try { json = JSON.parse(text); } catch (_) {}
+    try { json = JSON.parse(text); } catch (_) {} // deliberate: cleanup
     return { status: res.status, body: json, raw: text };
   } finally {
     await new Promise((r) => server.close(r));

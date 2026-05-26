@@ -24,7 +24,7 @@ const KOLM_CLI = path.resolve(__dirname, '..', 'cli', 'kolm.js');
 
 function isolatedHome() {
   const dir = path.join(os.tmpdir(), 'kolm-w372-' + process.pid + '-' + Math.random().toString(36).slice(2));
-  try { fs.mkdirSync(dir, { recursive: true }); } catch {}
+  try { fs.mkdirSync(dir, { recursive: true }); } catch {} // deliberate: cleanup
   return dir;
 }
 
@@ -55,7 +55,7 @@ async function withIsolatedHome(fn) {
   finally {
     process.env.HOME = prevHome;
     process.env.USERPROFILE = prevUserProfile;
-    try { fs.rmSync(home, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(home, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 }
 
@@ -345,7 +345,7 @@ test('W372 #11 - `kolm devices list` shows the (empty) hint + `register --detect
   assert.equal(list.status, 0);
   assert.match(list.stdout, /DEVICE_ID/);
   assert.match(list.stdout, /local/);
-  try { fs.rmSync(home, { recursive: true, force: true }); } catch {}
+  try { fs.rmSync(home, { recursive: true, force: true }); } catch {} // deliberate: cleanup
 });
 
 test('W372 #12 - `kolm install-device` end-to-end against a freshly detected local device', async () => {
@@ -368,6 +368,6 @@ test('W372 #12 - `kolm install-device` end-to-end against a freshly detected loc
     const installed = path.join(home, '.kolm', 'installed', 'local', 'demo', 'demo.kolm');
     assert.ok(fs.existsSync(installed), 'bytes installed at ' + installed);
   } finally {
-    try { fs.rmSync(home, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(home, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });

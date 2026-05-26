@@ -383,7 +383,7 @@ export async function runTuiChat({ input, output, opts } = {}) {
   const pushMessage = (m) => {
     state.messages.push(m);
     if (state.research) {
-      try { fs.appendFileSync(state.research.file, JSON.stringify({ event: 'message', ...m, ts: new Date().toISOString() }) + '\n'); } catch {}
+      try { fs.appendFileSync(state.research.file, JSON.stringify({ event: 'message', ...m, ts: new Date().toISOString() }) + '\n'); } catch {} // deliberate: cleanup
     }
   };
 

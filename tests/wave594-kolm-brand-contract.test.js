@@ -97,7 +97,16 @@ test('backend-owned source surfaces do not reintroduce legacy Kolmogorov slugs',
   ];
   const failures = [];
   for (const file of files) {
-    const text = fs.readFileSync(file, 'utf8');
+    const raw = fs.readFileSync(file, 'utf8');
+    // The upstream GitHub repo slug is `kolmogorov-stack` — it's a real remote
+    // we can't rename without breaking every `git clone` in the wild. Strip
+    // every github.com URL and every `kolmogorov-stack` filesystem slug (e.g.
+    // `pip install git+https://...#subdirectory=...`) before scanning for the
+    // brand word in user-facing copy.
+    const text = raw
+      .replace(/https?:\/\/(?:[a-z0-9.-]+\.)?github\.com\/[\w./@:?+#=&-]*/gi, '')
+      .replace(/git\+https?:\/\/[^\s"'`]+/gi, '')
+      .replace(/[\w./-]*kolmogorov-stack[\w./@:?+#=&-]*/gi, '');
     if (/kolmogorov/i.test(text)) failures.push(rel(file));
   }
   assert.deepEqual(failures, [], `legacy brand token found in backend-owned files: ${failures.join(', ')}`);

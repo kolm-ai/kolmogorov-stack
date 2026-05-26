@@ -61,7 +61,7 @@ function freshDir() {
   if (eventStore._resetForTests) eventStore._resetForTests();
   if (kolmStore._resetForTests) kolmStore._resetForTests();
   for (const t of W807_TEST_TENANTS) {
-    try { routingResetForTests(t); } catch (_) {}
+    try { routingResetForTests(t); } catch (_) {} // deliberate: cleanup
   }
   _resetTenantBudgetsForTests();
   // Wipe any env-budget so the default path runs unless a test sets it.

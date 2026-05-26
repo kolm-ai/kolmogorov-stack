@@ -787,7 +787,7 @@ export function deletePipeline(id, { tenant_id } = {}) {
   _writeIndex(rows);
   const yamlPath = path.join(_pipelinesDir(), id + '.yaml');
   if (fs.existsSync(yamlPath)) {
-    try { fs.unlinkSync(yamlPath); } catch {}
+    try { fs.unlinkSync(yamlPath); } catch {} // deliberate: cleanup
   }
   return { ok: true, id };
 }
@@ -798,9 +798,9 @@ export function _resetForTests() {
   const dir = _pipelinesDir();
   try {
     for (const f of fs.readdirSync(dir)) {
-      try { fs.unlinkSync(path.join(dir, f)); } catch {}
+      try { fs.unlinkSync(path.join(dir, f)); } catch {} // deliberate: cleanup
     }
-  } catch {}
+  } catch {} // deliberate: cleanup
 }
 
 // recordPipelineRun({pipeline_id, tenant_id, result}) -> persists a run event

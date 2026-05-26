@@ -6,7 +6,7 @@ Linux (via Homebrew on Linux).
 ## Install once the tap is live
 
 ```sh
-brew tap sneaky-hippo/kolm
+brew tap kolm-ai/kolm
 brew install kolm
 kolm --version
 ```
@@ -18,13 +18,13 @@ kolm --version
 
 ## Releasing a new version
 
-1. Tag a release on `sneaky-hippo/kolm-stack` (`v0.2.x`).
+1. Tag a release on `kolm-ai/kolm-stack` (`v0.2.x`).
 2. Compute the tarball SHA-256:
    ```sh
-   curl -fL https://github.com/sneaky-hippo/kolm-stack/archive/refs/tags/v0.2.6.tar.gz | shasum -a 256
+   curl -fL https://github.com/kolm-ai/kolm-stack/archive/refs/tags/v0.2.6.tar.gz | shasum -a 256
    ```
 3. Update `url` + `sha256` in `kolm.rb`.
-4. Open a PR against `homebrew/sneaky-hippo/kolm` (the tap repo).
+4. Open a PR against `homebrew/kolm-ai/kolm` (the tap repo).
 
 ## Notes
 

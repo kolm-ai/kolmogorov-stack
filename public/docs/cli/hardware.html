@@ -191,7 +191,7 @@ kolm hardware --json | jq -r '.primary | "--vram-gb " + (.vram_gb|tostring)' \
   | xargs kolm fit --params-b 7 --pick-best
 </code></pre>
 <h2>Notes</h2>
-<p>The probe calls into <code>src/forge-hardware.js</code> &middot; <code>detectHardware()</code>. NVIDIA detection uses <code>nvidia-smi</code> if present; otherwise it falls back to a CPU-only envelope. AMD ROCm and Apple Metal detection are best-effort &mdash; please file a bug at <a href="https://github.com/sneaky-hippo/kolmogorov-stack">github.com/sneaky-hippo/kolmogorov-stack</a> if your device shows up wrong.</p>
+<p>The probe calls into <code>src/forge-hardware.js</code> &middot; <code>detectHardware()</code>. NVIDIA detection uses <code>nvidia-smi</code> if present; otherwise it falls back to a CPU-only envelope. AMD ROCm and Apple Metal detection are best-effort &mdash; please file a bug at <a href="https://github.com/kolm-ai/kolmogorov-stack">github.com/kolm-ai/kolmogorov-stack</a> if your device shows up wrong.</p>
 <p>The same route powers the Account dashboard auto-fill for VRAM; you should never have to type your VRAM into the quantize wizard.</p>
 <h2>See also</h2>
 <ul>

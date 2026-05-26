@@ -7,7 +7,10 @@ on-device run on a phone, MCP fanout into 4 dev tools, and a closing horizon.
 All images: single periwinkle accent (#7C8CFF) on near-black, museum-quality
 product photography aesthetic, no text, no logos, no faces.
 """
-import os, sys, urllib.request, time
+import os
+import sys
+import urllib.request
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 

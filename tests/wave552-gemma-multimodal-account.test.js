@@ -113,7 +113,7 @@ function cleanupHome(home) {
   delete process.env.KOLM_STORE_DRIVER;
   delete process.env.KOLM_LOCAL_DAEMON;
   delete process.env.KOLM_CONNECTOR_FIXTURE;
-  try { fs.rmSync(home, { recursive: true, force: true }); } catch {}
+  try { fs.rmSync(home, { recursive: true, force: true }); } catch {} // deliberate: cleanup
 }
 
 function withServer(app, fn) {
@@ -323,7 +323,7 @@ test('W552 #7 - compile --as-mcp creates a project-scoped agent surface with cor
     assert.match(r.stdout, /"mcp_project"/);
   } finally {
     cleanupHome(home);
-    try { fs.rmSync(work, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(work, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });
 

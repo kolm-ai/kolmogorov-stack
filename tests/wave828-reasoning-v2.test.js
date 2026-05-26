@@ -307,7 +307,7 @@ test('W828 #10 — bench_trace_aware.py prints BENCH_STUB_REQUIRES_REAL_DATA wit
         pyExe = candidate;
         break;
       }
-    } catch (_) {
+    } catch (_) { // deliberate: cleanup
       // try next candidate
     }
   }

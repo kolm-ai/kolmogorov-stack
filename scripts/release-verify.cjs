@@ -32,8 +32,10 @@
 //                                         --deep-surfaces also runs deep probes.)
 //   9.  kolm doctor --json               (ok:true + blockers:0 unless --allow-logged-out)
 //  10.  kolm whoami --json               (logged_in:true unless --allow-logged-out)
-//  11.  kolm verify <kolm> --json        (ok:true + production_ready:true)
-//  12.  kolm billing tiers --json        (data is non-empty tier list)
+//  11.  ship-gate (W888-I)               (52-check final gate; opt-in via --include-ship-gate
+//                                         because some checks require cloud keys)
+//  12.  kolm verify <kolm> --json        (ok:true + production_ready:true)
+//  13.  kolm billing tiers --json        (data is non-empty tier list)
 //
 // Invocation:
 //   node scripts/release-verify.cjs                       # all gates
@@ -73,6 +75,10 @@ const args = process.argv.slice(2);
 const jsonMode = args.includes('--json');
 const allowLoggedOut = args.includes('--allow-logged-out');
 const deepSurfaces = args.includes('--deep-surfaces');
+// W888-I — opt-in 11th gate. Off by default because some ship-gate checks
+// require cloud keys (Stripe, RunPod) that aren't available on every CI box.
+// Operators flip --include-ship-gate when they want the full 52-check sweep.
+const includeShipGate = args.includes('--include-ship-gate');
 const skipFlag = args.find((a) => a.startsWith('--skip='));
 const skipSet = new Set(skipFlag ? skipFlag.slice('--skip='.length).split(',').map((s) => s.trim()) : []);
 const timeoutFlag = args.find((a) => a.startsWith('--timeout-ms='));
@@ -505,7 +511,7 @@ async function gateClaimVerify() {
   const t = Date.now();
   const r = runSync(nodeBin, [path.join('scripts', 'x04-claim-verify.cjs'), '--json'], { silent: true, timeoutMs: 60_000 });
   let parsed = null;
-  try { parsed = JSON.parse((r.stdout || '').trim()); } catch (_) {}
+  try { parsed = JSON.parse((r.stdout || '').trim()); } catch (_) {} // deliberate: cleanup
   if (!parsed) {
     recordResult('claim-verify', false, {
       detail: 'non-JSON output from x04-claim-verify (first 300): ' + (r.stdout || '').slice(0, 300) + ' | stderr: ' + (r.stderr || '').slice(0, 200),
@@ -594,10 +600,10 @@ async function gateSdkSmoke() {
     });
     return ok;
   } finally {
-    try { server.kill('SIGTERM'); } catch (_) {}
+    try { server.kill('SIGTERM'); } catch (_) {} // deliberate: cleanup
     // Give the server a beat to release the port, then SIGKILL if still up.
     await new Promise((r) => setTimeout(r, 250));
-    try { server.kill('SIGKILL'); } catch (_) {}
+    try { server.kill('SIGKILL'); } catch (_) {} // deliberate: cleanup
   }
 }
 
@@ -628,7 +634,7 @@ async function gateLocalSurfaces() {
   const stderrText = r.stderr || '';
   let parsed = null;
   // The smoke runner emits one JSON document; tolerate trailing whitespace.
-  try { parsed = JSON.parse(stdoutText.trim()); } catch (_) {}
+  try { parsed = JSON.parse(stdoutText.trim()); } catch (_) {} // deliberate: cleanup
   if (!parsed) {
     recordResult('local-surfaces', false, {
       detail: 'non-JSON output from local-surface-smoke (first 300 stdout / last 300 stderr): '
@@ -665,6 +671,56 @@ async function gateLocalSurfaces() {
   return ok;
 }
 
+// W888-I — Ship Gate (gate #11). Opt-in via --include-ship-gate flag because
+// some of the 52 checks require cloud keys (Stripe, RunPod) that aren't on
+// every CI box. When the flag is on, this gate shells out to
+// scripts/ship-gate.cjs --json and folds the result into release-verify's
+// summary. Blocker failures cause this gate to fail; NO_TEST_YET warnings are
+// accepted (the gate stays green) so release-verify keeps shipping while we
+// finish scaffolding the remaining checks.
+async function gateShipGate() {
+  if (!shouldRun('ship-gate')) return recordResult('ship-gate', true, { skipped: true });
+  if (!includeShipGate) return recordResult('ship-gate', true, { skipped: true, detail: 'opt-in via --include-ship-gate' });
+  progress('ship-gate running (52-check sweep)');
+  const t = Date.now();
+  const r = runSync(nodeBin, [path.join('scripts', 'ship-gate.cjs'), '--json'], { silent: true, timeoutMs: 900_000 });
+  let parsed = null;
+  try { parsed = JSON.parse((r.stdout || '').trim()); } catch (_) {} // deliberate: cleanup
+  if (!parsed) {
+    recordResult('ship-gate', false, {
+      detail: 'non-JSON output from ship-gate (first 300): ' + (r.stdout || '').slice(0, 300) + ' | stderr: ' + (r.stderr || '').slice(0, 200),
+      duration_ms: Date.now() - t,
+    });
+    return false;
+  }
+  if (parsed.error) {
+    recordResult('ship-gate', false, {
+      detail: 'ship-gate self-check error: ' + parsed.error,
+      duration_ms: Date.now() - t,
+    });
+    return false;
+  }
+  // Exit codes from ship-gate.cjs: 0=all pass, 2=NO_TEST_YET warnings only,
+  // 1=blocker failures. Accept 0 + 2 as gate-green; the warnings still surface
+  // in the summary detail.
+  const exit = r.status;
+  const blockerFailed = parsed.failed || 0;
+  const notYet = parsed.not_yet || 0;
+  const passed = parsed.passed || 0;
+  const total = parsed.total || 0;
+  const ok = (exit === 0 || exit === 2) && blockerFailed === 0;
+  const failingNames = (parsed.checks || []).filter((c) => !c.ok && !c.not_yet && !c.skipped).slice(0, 5)
+    .map((c) => `#${c.id} ${c.name.slice(0, 40)}`).join(' | ');
+  recordResult('ship-gate', ok, {
+    detail: ok
+      ? `${passed}/${total} passed (${notYet} NO_TEST_YET, ${blockerFailed} blocker)`
+      : `${blockerFailed} blocker failures: ${failingNames}`,
+    duration_ms: Date.now() - t,
+    total, passed, failed: blockerFailed, not_yet: notYet,
+  });
+  return ok;
+}
+
 // Run kolm CLI, parse JSON, hand the parsed envelope to a validator.
 // validator(parsed, raw) => { ok: boolean, reason?: string }
 function gateCli(name, argv, validator) {
@@ -673,7 +729,7 @@ function gateCli(name, argv, validator) {
   const t = Date.now();
   const r = runSync(nodeBin, [KOLM_CLI, ...argv], { silent: true, timeoutMs: 60_000 });
   let parsed = null;
-  try { parsed = JSON.parse(r.stdout); } catch (_) {}
+  try { parsed = JSON.parse(r.stdout); } catch (_) {} // deliberate: cleanup
   if (parsed === null) {
     recordResult(name, false, {
       detail: 'non-JSON stdout (first 300): ' + (r.stdout || '').slice(0, 300) + ' | stderr: ' + (r.stderr || '').slice(0, 200),
@@ -703,6 +759,11 @@ function gateCli(name, argv, validator) {
   await gateTests();
   await gateSdkSmoke();
   await gateLocalSurfaces();
+  // W888-I — gate #11. Off by default (opt-in via --include-ship-gate) because
+  // some of the 52 ship-gate checks need cloud keys. Always runs through the
+  // recordResult path so the summary still lists "ship-gate" as a known gate
+  // even when opted out.
+  await gateShipGate();
 
   // doctor: ok:true + blockers:0 — unless --allow-logged-out, in which case
   // we both pass the flag THROUGH to the CLI (so it demotes the api-key

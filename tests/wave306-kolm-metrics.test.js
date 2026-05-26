@@ -22,14 +22,14 @@ const KOLM_CLI = path.resolve(__dirname, '..', 'cli', 'kolm.js');
 
 function isolatedHome() {
   const dir = path.join(os.tmpdir(), 'kolm-w306-' + process.pid + '-' + Math.random().toString(36).slice(2));
-  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {}
+  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {} // deliberate: cleanup
   return dir;
 }
 
 function seedJobs(home, rows) {
   const kolmDir = path.join(home, '.kolm');
   const jobsDir = path.join(kolmDir, 'jobs');
-  try { fs.mkdirSync(jobsDir, { recursive: true }); } catch (_) {}
+  try { fs.mkdirSync(jobsDir, { recursive: true }); } catch (_) {} // deliberate: cleanup
   const now = Date.now();
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i];
@@ -55,7 +55,7 @@ function runMetrics(extraArgs = [], seed = null) {
     timeout: 30_000,
     env: { ...process.env, HOME: home, USERPROFILE: home, KOLM_API_KEY: '' },
   });
-  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   return { code: res.status, stdout: res.stdout || '', stderr: res.stderr || '' };
 }
 

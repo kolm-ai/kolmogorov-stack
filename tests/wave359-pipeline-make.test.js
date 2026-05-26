@@ -49,10 +49,10 @@ function runCli(args, env = {}) {
     let stdout = '', stderr = '';
     child.stdout.on('data', (b) => { stdout += b.toString('utf8'); });
     child.stderr.on('data', (b) => { stderr += b.toString('utf8'); });
-    const killer = setTimeout(() => { try { child.kill('SIGKILL'); } catch (_) {} }, 60_000);
+    const killer = setTimeout(() => { try { child.kill('SIGKILL'); } catch (_) {} }, 60_000); // deliberate: cleanup
     child.on('close', (code) => {
       clearTimeout(killer);
-      try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {}
+      try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
       resolve({ code, stdout, stderr });
     });
   });
@@ -79,7 +79,7 @@ test('W359 #1 — kolm make --json emits 7 ok events in order', async () => {
       assert.ok(oks[i].step <= oks[i + 1].step, `events out of order at index ${i}`);
     }
   } finally {
-    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -96,7 +96,7 @@ test('W359 #2 — kolm make writes the .kolm file at --out path', async () => {
     assert.equal(buf[0], 0x50);
     assert.equal(buf[1], 0x4b);
   } finally {
-    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -117,7 +117,7 @@ test('W359 #3 — kolm make emits a stand-alone .receipt.json next to the .kolm'
     assert.ok(typeof receipt.bytes === 'number' && receipt.bytes > 0);
     assert.ok(receipt.signature && receipt.signature.alg === 'sha256-anchor');
   } finally {
-    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -137,7 +137,7 @@ test('W359 #4 — step 2 reports correct seed row count when --seeds provided', 
     const isExisting = step2ok.detail.used_existing === true;
     assert.ok(hasCount || isExisting, `step 2 detail must report count or used_existing: ${JSON.stringify(step2ok)}`);
   } finally {
-    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -159,7 +159,7 @@ test('W359 #5 — make() async iterator yields events with step/name/status fiel
     assert.ok(oks.length >= 7, `expected >=7 ok events from generator, got ${oks.length}`);
     assert.ok(fs.existsSync(outPath), 'artifact must exist after iterator drains');
   } finally {
-    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -175,6 +175,6 @@ test('W359 #6 — --no-sign skips signature_sigstore but still emits sha256 anch
     assert.ok(!receipt.signature_sigstore, 'no-sign mode must not embed sigstore bundle');
     assert.equal(receipt.signature.alg, 'sha256-anchor');
   } finally {
-    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });

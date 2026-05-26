@@ -278,7 +278,7 @@ test('W466 #7 — GET /v1/multimodal/bakeoff is auth-gated (401)', async () => {
     );
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -326,7 +326,7 @@ test('W466 #8 — POST /v1/multimodal/bakeoff auth-gated + validates artifacts',
     assert.equal(badModBody.error, 'invalid_modality');
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -352,7 +352,7 @@ test('W466 #9 — GET /v1/multimodal/bakeoff returns no_local_artifacts when no 
     assert.equal(env.tenant_id, tenant.id, 'tenant_id must be forced from auth');
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 

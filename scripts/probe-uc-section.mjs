@@ -25,7 +25,7 @@ for (const v of views) {
     };
   });
   const bbox = await page.locator('.uc-strip').boundingBox();
-  await page.locator('.uc-strip').screenshot({ path: `scripts/qa-uc-${v.name}.png` });
+  await page.locator('.uc-strip').screenshot({ path: `audit-shots/scripts-qa/qa-uc-${v.name}.png` });
   console.log(`${v.name} ${v.w}x${v.h}:`, JSON.stringify({ ...data, sectionBox: bbox }, null, 2));
   await ctx.close();
 }

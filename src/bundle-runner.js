@@ -74,12 +74,12 @@ export async function runArtifactViaBundle(artifactPath, input, opts = {}) {
     const url = pathToFileURL(stagedPath).href;
     mod = await import(url);
   } catch (e) {
-    try { fs.rmSync(stage, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(stage, { recursive: true, force: true }); } catch {} // deliberate: cleanup
     throw kolmError('KOLM_E_BUNDLE_IMPORT_FAILED', `import recipe.bundle.mjs failed: ${e.message}`);
   }
   const fn = mod && (mod.default || mod.run);
   if (typeof fn !== 'function') {
-    try { fs.rmSync(stage, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(stage, { recursive: true, force: true }); } catch {} // deliberate: cleanup
     throw kolmError('KOLM_E_BUNDLE_EXPORT_MISSING', 'recipe.bundle.mjs must default-export a function');
   }
   try {
@@ -102,7 +102,7 @@ export async function runArtifactViaBundle(artifactPath, input, opts = {}) {
   } finally {
     // Best-effort cleanup. A leaked temp dir is annoying but not fatal; the
     // OS reaper handles os.tmpdir() entries eventually.
-    try { fs.rmSync(stage, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(stage, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 }
 
@@ -131,5 +131,5 @@ export async function loadBundleModule(artifactPath) {
 }
 
 export function cleanupBundleStage(stage) {
-  try { fs.rmSync(stage, { recursive: true, force: true }); } catch {}
+  try { fs.rmSync(stage, { recursive: true, force: true }); } catch {} // deliberate: cleanup
 }

@@ -42,7 +42,7 @@ function runCli(args, { extraEnv } = {}) {
   const r = spawnSync(process.execPath, [CLI_PATH, ...args], {
     env, encoding: 'utf8', timeout: 30000,
   });
-  try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   return { code: r.status, stdout: r.stdout || '', stderr: r.stderr || '', signal: r.signal };
 }
 

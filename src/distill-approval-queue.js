@@ -545,7 +545,7 @@ async function _dispatchWebhook(payload, opts) {
     };
   }
   const controller = (typeof AbortController === 'function') ? new AbortController() : null;
-  const timer = controller ? setTimeout(() => { try { controller.abort(); } catch (_) {} }, WEBHOOK_TIMEOUT_MS) : null;
+  const timer = controller ? setTimeout(() => { try { controller.abort(); } catch (_) {} }, WEBHOOK_TIMEOUT_MS) : null; // deliberate: cleanup
   try {
     const resp = await fetchFn(url, {
       method: 'POST',

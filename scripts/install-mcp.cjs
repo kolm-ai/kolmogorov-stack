@@ -133,7 +133,7 @@ function atomicWriteJson(filePath, obj) {
     fs.renameSync(tmp, filePath);
   } catch (e) {
     // Fallback for the rare cross-device case.
-    try { fs.unlinkSync(tmp); } catch (_) {}
+    try { fs.unlinkSync(tmp); } catch (_) {} // deliberate: cleanup
     fs.writeFileSync(filePath, body, 'utf8');
   }
   return body;

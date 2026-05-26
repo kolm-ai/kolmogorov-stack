@@ -190,7 +190,7 @@ function _ollamaBin() {
       const line = (r.stdout || '').split(/\r?\n/).find(l => l.trim().length > 0);
       if (line) return line.trim();
     }
-  } catch {}
+  } catch {} // deliberate: cleanup
   return null;
 }
 
@@ -213,7 +213,7 @@ export function probeOllama() {
       const m = String(r.stdout || r.stderr || '').match(/version[\s:]+([\d.]+)/i);
       version = m ? m[1] : (r.stdout || r.stderr || '').trim().split(/\r?\n/)[0];
     }
-  } catch {}
+  } catch {} // deliberate: cleanup
   return { ok: true, binary: bin, version };
 }
 

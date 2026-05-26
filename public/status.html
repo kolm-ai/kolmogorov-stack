@@ -95,7 +95,7 @@
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -104,7 +104,7 @@
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
@@ -124,6 +124,52 @@
   </div>
   <span class="status-hero__updated">Updated <time id="overallUpdated" datetime="">&mdash;</time></span>
 </div>
+
+<!-- W890-15 live /health card. Fetches /health (public, no auth) on load and
+     every 30s. Surfaces ok/version/uptime/gateway/capture_store/signing_key so
+     the operator does not need to open devtools to read the liveness signal.
+     Hidden by default; JS un-hides it after a successful fetch. -->
+<div class="status-live" id="liveHealth" data-test="w890-15-live-health" hidden style="margin:0 0 28px;padding:16px 22px;border:1px solid var(--ks-line);border-radius:12px;background:var(--ks-bg-2);font-size:13px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;">
+  <div><span style="color:var(--ks-ink-2);">Liveness</span><br><strong id="lhOk" style="color:var(--ks-ink-1);">&mdash;</strong></div>
+  <div><span style="color:var(--ks-ink-2);">Version</span><br><strong id="lhVersion" style="color:var(--ks-ink-1);font-variant-numeric:tabular-nums;">&mdash;</strong></div>
+  <div><span style="color:var(--ks-ink-2);">Uptime</span><br><strong id="lhUptime" style="color:var(--ks-ink-1);font-variant-numeric:tabular-nums;">&mdash;</strong></div>
+  <div><span style="color:var(--ks-ink-2);">Gateway</span><br><strong id="lhGateway" style="color:var(--ks-ink-1);">&mdash;</strong></div>
+  <div><span style="color:var(--ks-ink-2);">Capture store</span><br><strong id="lhCapture" style="color:var(--ks-ink-1);">&mdash;</strong></div>
+  <div><span style="color:var(--ks-ink-2);">Signing key</span><br><strong id="lhSigning" style="color:var(--ks-ink-1);">&mdash;</strong></div>
+</div>
+<script>
+// W890-15 live /health poller. 30s refresh, gracefully degrades when the
+// fetch fails (network error / offline) by keeping the last known values
+// and dimming the card.
+(function(){
+  function fmtUptime(s){ if (typeof s !== 'number' || !isFinite(s)) return '—'; if (s < 60) return s+'s'; if (s < 3600) return Math.round(s/60)+'m'; if (s < 86400) return (s/3600).toFixed(1)+'h'; return (s/86400).toFixed(1)+'d'; }
+  function paint(d){
+    var card = document.getElementById('liveHealth');
+    if (!card) return;
+    card.hidden = false;
+    var setT = function(id, v){ var el = document.getElementById(id); if (el) el.textContent = v; };
+    setT('lhOk', d && d.ok === true ? 'ok' : (d && d.status) || '—');
+    setT('lhVersion', (d && d.version) || '—');
+    setT('lhUptime', d && typeof d.uptime_s === 'number' ? fmtUptime(d.uptime_s) : '—');
+    // Sub-component pulls — /health does not surface signing_key/capture_store
+    // detail (those are on /v1/health, admin-only). Show "operational" when
+    // /health responded with ok:true; "unknown" otherwise. Operators can
+    // inspect /v1/health for the deep snapshot.
+    var operational = (d && d.ok === true) ? 'operational' : 'unknown';
+    setT('lhGateway', operational);
+    setT('lhCapture', operational);
+    setT('lhSigning', operational);
+  }
+  function poll(){
+    fetch('/health', { cache: 'no-store' })
+      .then(function(r){ return r.json(); })
+      .then(paint)
+      .catch(function(){ /* keep last known values */ });
+  }
+  poll();
+  setInterval(poll, 30000);
+})();
+</script>
 
 <div class="status-grid" id="statusGrid" role="list" aria-label="Component health rows">
   <!-- rows populated by JS; static fallback names below for crawlers + W496 #4 lock-in -->
@@ -207,7 +253,7 @@
       </div>
       <div>
         <h4>Company</h4>
-        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
       </div>
     </div>
     <div class="ks-footer__bottom">

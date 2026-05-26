@@ -153,7 +153,7 @@ function render(name, desc, see) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script> // deliberate: cleanup
 <title>${title} | CLI reference | kolm.ai</title>
 <meta name="description" content="${plainDesc.replace(/"/g, '&quot;')}">
 <link rel="canonical" href="https://kolm.ai/docs/cli/${name}">

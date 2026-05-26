@@ -29,14 +29,14 @@ import fs from 'node:fs';
 
 export async function killAndWait(child, ms = 3000) {
   if (!child || child.exitCode !== null) return;
-  try { child.kill('SIGTERM'); } catch {}
+  try { child.kill('SIGTERM'); } catch {} // deliberate: cleanup
   await new Promise((resolve) => {
-    const t = setTimeout(() => { try { child.kill('SIGKILL'); } catch {} resolve(); }, ms);
+    const t = setTimeout(() => { try { child.kill('SIGKILL'); } catch {} resolve(); }, ms); // deliberate: cleanup
     child.once('exit', () => { clearTimeout(t); resolve(); });
   });
-  try { child.stdout?.destroy(); } catch {}
-  try { child.stderr?.destroy(); } catch {}
-  try { child.unref(); } catch {}
+  try { child.stdout?.destroy(); } catch {} // deliberate: cleanup
+  try { child.stderr?.destroy(); } catch {} // deliberate: cleanup
+  try { child.unref(); } catch {} // deliberate: cleanup
 }
 
 export function rmSyncBestEffort(dir, attempts = 5, delayMs = 100) {

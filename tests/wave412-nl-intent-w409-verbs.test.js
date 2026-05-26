@@ -109,7 +109,7 @@ test('W412 #5 — snapshotContext exposes lake/opportunities/datasets fields', a
     assert.equal(snap.counts.opportunities, 0);
     assert.equal(snap.counts.datasets, 0);
   } finally {
-    try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 

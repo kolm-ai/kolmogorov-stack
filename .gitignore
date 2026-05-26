@@ -113,3 +113,14 @@ reports/
 .ui-debug/
 .shots/
 .w605-body.html
+
+# W890-7 — user/project config + capture store. The user TOML lives at
+# ~/.kolm/config.toml (HOME, not repo) but if a contributor symlinks or
+# copies the file into the repo tree these globs catch it. captures.db is
+# the local SQLite capture store; *.db / *.sqlite under data/ are already
+# ignored, this row makes the intent for the repo root explicit.
+.kolm/
+.kolm/config.toml
+**/.kolm/config.toml
+captures.db
+**/captures.db

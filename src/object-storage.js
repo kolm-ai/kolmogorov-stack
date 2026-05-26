@@ -365,7 +365,7 @@ export class ObjectStore {
 
   async _localDelete(key) {
     const file = this._localPath(key);
-    try { fs.rmSync(file, { force: true }); } catch {}
+    try { fs.rmSync(file, { force: true }); } catch {} // deliberate: cleanup
     return { ok: true, provider: this.provider, bucket: null, key: cleanKey(key), deleted: true };
   }
 

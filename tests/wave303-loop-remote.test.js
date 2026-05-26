@@ -18,7 +18,7 @@ const KOLM_CLI = path.resolve(__dirname, '..', 'cli', 'kolm.js');
 
 function isolatedHome() {
   const dir = path.join(os.tmpdir(), 'kolm-w303-' + process.pid + '-' + Math.random().toString(36).slice(2));
-  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {}
+  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {} // deliberate: cleanup
   return dir;
 }
 
@@ -37,7 +37,7 @@ function runLoopRemote(extraArgs = [], envOverrides = {}) {
       ...envOverrides,
     },
   });
-  try { fs.rmSync(tmpHome, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(tmpHome, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   return { code: res.status, stdout: res.stdout || '', stderr: res.stderr || '' };
 }
 
@@ -79,7 +79,7 @@ test('W303 #4 — in-process mode (no --remote) reports mode=in-process', () => 
     timeout: 60_000,
     env: { ...process.env, HOME: home, USERPROFILE: home },
   });
-  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   assert.equal(res.status, 0, `in-process loop must still exit 0; got ${res.status} (stderr: ${(res.stderr || '').slice(0, 400)})`);
   const jsonStart = (res.stdout || '').indexOf('{');
   const report = JSON.parse((res.stdout || '').slice(jsonStart));

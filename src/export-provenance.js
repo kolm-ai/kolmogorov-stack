@@ -64,6 +64,27 @@ function sha256Hex(buf) {
   return crypto.createHash('sha256').update(buf).digest('hex');
 }
 
+// Chunked synchronous hash that avoids the 2 GiB readFileSync limit. Used for
+// large export targets (Trinity Q4_K_M GGUFs land at ~4 GiB).
+function hashFileSyncStream(absPath) {
+  const h = crypto.createHash('sha256');
+  const fd = fs.openSync(absPath, 'r');
+  try {
+    const CHUNK = 1024 * 1024;
+    const buf = Buffer.alloc(CHUNK);
+    let size = 0;
+    while (true) {
+      const read = fs.readSync(fd, buf, 0, CHUNK, null);
+      if (read <= 0) break;
+      h.update(buf.subarray(0, read));
+      size += read;
+    }
+    return { sha256: h.digest('hex'), size_bytes: size };
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
 function _canon(v) {
   if (v === null || typeof v !== 'object') return JSON.stringify(v);
   if (Array.isArray(v)) return '[' + v.map(_canon).join(',') + ']';
@@ -87,8 +108,8 @@ function hashDir(dirAbs) {
       const st = fs.statSync(childAbs);
       if (st.isDirectory()) walk(childRel);
       else if (st.isFile()) {
-        const buf = fs.readFileSync(childAbs);
-        entries.push({ rel: childRel.replace(/\\/g, '/'), sha256: sha256Hex(buf), size: buf.length });
+        const { sha256, size_bytes } = hashFileSyncStream(childAbs);
+        entries.push({ rel: childRel.replace(/\\/g, '/'), sha256, size: size_bytes });
       }
     }
   }
@@ -110,8 +131,8 @@ function hashPath(absPath) {
     const h = hashDir(absPath);
     return { sha256: h.sha256, size_bytes: h.size_bytes, file_count: h.file_count, is_dir: true };
   }
-  const buf = fs.readFileSync(absPath);
-  return { sha256: sha256Hex(buf), size_bytes: buf.length, file_count: 1, is_dir: false };
+  const { sha256, size_bytes } = hashFileSyncStream(absPath);
+  return { sha256, size_bytes, file_count: 1, is_dir: false };
 }
 
 function inferFormat(name, statObj) {

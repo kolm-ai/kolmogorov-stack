@@ -26,6 +26,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { extractEntryToFile } from '../zip-large.js';
 
 const DEFAULT_TIMEOUT_MS = 30_000;
 
@@ -43,7 +44,7 @@ export function detectLlamaCppBin() {
   if (fromEnv) {
     try {
       if (fs.existsSync(fromEnv)) return fromEnv;
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
   const which = process.platform === 'win32' ? 'where' : 'which';
   for (const candidate of ['llama-cli', 'llama']) {
@@ -53,7 +54,7 @@ export function detectLlamaCppBin() {
         const found = (r.stdout || '').split(/\r?\n/).find(l => l.trim().length > 0);
         if (found) return found.trim();
       }
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
   return null;
 }
@@ -79,7 +80,8 @@ export async function runGgufTarget(bundle, input, opts = {}) {
     throw kolmError('KOLM_E_TARGET_MISSING', 'gguf runtime_target requires manifest.runtime_target_config.gguf_path');
   }
   const ggufBuf = bundle?.entries?.[ggufRel];
-  if (!ggufBuf || !ggufBuf.length) {
+  const isLarge = !ggufBuf && bundle?.large_entries && bundle.large_entries[ggufRel];
+  if (!ggufBuf && !isLarge) {
     throw kolmError('KOLM_E_TARGET_MISSING', `gguf runtime_target references gguf_path=${ggufRel} but that entry is missing from the .kolm bundle`);
   }
   const bin = detectLlamaCppBin();
@@ -89,10 +91,17 @@ export async function runGgufTarget(bundle, input, opts = {}) {
   const timeout = opts.timeoutMs || DEFAULT_TIMEOUT_MS;
   const workdir = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-gguf-'));
   const ggufPath = path.join(workdir, path.basename(ggufRel) || 'model.gguf');
-  const ggufSha = crypto.createHash('sha256').update(ggufBuf).digest('hex');
+  let ggufSha;
 
   try {
-    fs.writeFileSync(ggufPath, ggufBuf);
+    if (isLarge) {
+      const ext = await extractEntryToFile(bundle.artifact_path, ggufRel, ggufPath, { computeSha256: true });
+      if (!ext.ok) throw kolmError('KOLM_E_TARGET_MISSING', `gguf large-entry extraction failed: ${ext.reason}`);
+      ggufSha = ext.sha256;
+    } else {
+      fs.writeFileSync(ggufPath, ggufBuf);
+      ggufSha = crypto.createHash('sha256').update(ggufBuf).digest('hex');
+    }
     const prompt = typeof input === 'string' ? input : JSON.stringify(input ?? null);
     const args = [
       '--model', ggufPath,
@@ -115,7 +124,7 @@ export async function runGgufTarget(bundle, input, opts = {}) {
     let timedOut = false;
     const killTimer = setTimeout(() => {
       timedOut = true;
-      try { child.kill('SIGKILL'); } catch {}
+      try { child.kill('SIGKILL'); } catch {} // deliberate: cleanup
     }, timeout);
 
     child.stdout.on('data', (b) => { stdout += b.toString('utf8'); });
@@ -146,6 +155,6 @@ export async function runGgufTarget(bundle, input, opts = {}) {
       llama_cpp_bin: bin,
     };
   } finally {
-    try { fs.rmSync(workdir, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(workdir, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 }

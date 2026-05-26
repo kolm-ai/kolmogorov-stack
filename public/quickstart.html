@@ -103,7 +103,7 @@
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -117,7 +117,7 @@
     <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a>
     <a href="/pricing">Pricing</a>
     <a href="/docs">Docs</a>
-    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+    <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a>
     <a href="/signup?intent=login">Sign in</a>
     <a href="/signup">Get started &rarr;</a>
   </div>
@@ -221,17 +221,17 @@
             <button class="qs-tab" role="tab" aria-selected="false" data-tab="install-brew">brew</button>
             <button class="qs-tab" role="tab" aria-selected="false" data-tab="install-curl">curl</button>
           </div>
-          <pre class="ks-code qs-pane" data-pane="install-npm" data-active="true"><span class="pmpt">$</span> npm i -g github:sneaky-hippo/kolm-stack
+          <pre class="ks-code qs-pane" data-pane="install-npm" data-active="true"><span class="pmpt">$</span> npm i -g github:kolm-ai/kolm-stack
 <span class="pmpt">$</span> kolm --version
   <span class="ok">kolm 1.0.0  node 20.11.0</span></pre>
-          <pre class="ks-code qs-pane" data-pane="install-pip"><span class="pmpt">$</span> pip install git+https://github.com/sneaky-hippo/kolm-stack@main#subdirectory=sdk/python  # GitHub source package; PyPI release pending
+          <pre class="ks-code qs-pane" data-pane="install-pip"><span class="pmpt">$</span> pip install git+https://github.com/kolm-ai/kolm-stack@main#subdirectory=sdk/python  # GitHub source package; PyPI release pending
 <span class="pmpt">$</span> kolm --version
   <span class="ok">kolm 1.0.0  python 3.11.6</span></pre>
           <pre class="ks-code qs-pane" data-pane="install-brew"><span class="pmpt">$</span> brew install node          # runtime setup (no Kolm tap)
-<span class="pmpt">$</span> npm i -g github:sneaky-hippo/kolm-stack
+<span class="pmpt">$</span> npm i -g github:kolm-ai/kolm-stack
 <span class="pmpt">$</span> kolm --version
   <span class="ok">kolm 1.0.0</span></pre>
-          <pre class="ks-code qs-pane" data-pane="install-curl"><span class="pmpt">$</span> git clone https://github.com/sneaky-hippo/kolm-stack
+          <pre class="ks-code qs-pane" data-pane="install-curl"><span class="pmpt">$</span> git clone https://github.com/kolm-ai/kolm-stack
 <span class="pmpt">$</span> cd kolm-stack &amp;&amp; npm install &amp;&amp; npm link
 <span class="pmpt">$</span> kolm --version
   <span class="ok">kolm 1.0.0</span></pre>
@@ -458,7 +458,7 @@ console.log(r.content[0].text);</pre>
           <details><summary>OOM during quantize on a 7B model</summary><div class="a">You need 16 GB free RAM for a 7B INT4 quantize. Free memory, or pass <code>--quantize int8</code> (needs 24 GB), or pass <code>--remote-quantize</code> to run the heavy step in our hosted workers.</div></details>
           <details><summary>Distill says <code>no approved captures</code></summary><div class="a">Captures are <em>pending</em> until you mark them approved. Run <code>kolm capture review --namespace support</code> for a TUI; press <kbd>a</kbd> to approve, <kbd>r</kbd> to reject. You can also auto-approve a fraction with <code>--auto-approve 0.20</code>.</div></details>
           <details><summary>Bake-off score is below threshold</summary><div class="a">Try a bigger student (<code>--student qwen2.5-14b</code>), a richer teacher (<code>--teacher claude-opus</code>), more captures (<code>--min-captures 5000</code>), or a stricter grader. The bake-off report shows the worst 50 examples; read those first.</div></details>
-          <details><summary>Run is slow on Apple Silicon</summary><div class="a">The CLI uses Metal via llama.cpp on M-series chips. Make sure <code>kolm doctor</code> reports <code>metal: ok</code>. If not, package release pending: reinstall with <code>pip install git+https://github.com/sneaky-hippo/kolmogorov-stack@main#subdirectory=sdk/python/tap/kolm</code> when the channel lands (the npm build does not bundle Metal kernels).</div></details>
+          <details><summary>Run is slow on Apple Silicon</summary><div class="a">The CLI uses Metal via llama.cpp on M-series chips. Make sure <code>kolm doctor</code> reports <code>metal: ok</code>. If not, package release pending: reinstall with <code>pip install git+https://github.com/kolm-ai/kolmogorov-stack@main#subdirectory=sdk/python/tap/kolm</code> when the channel lands (the npm build does not bundle Metal kernels).</div></details>
           <details><summary>Verify says <code>signature mismatch</code></summary><div class="a">Someone modified the artifact (or your filesystem is doing transparent compression on a non-block-aligned write). Re-download or re-compile. Never run an artifact that fails verification.</div></details>
           <details><summary>WebPush threshold notification never arrives</summary><div class="a">Push subscriptions are per-browser. Re-enable notifications at <code>/account/notifications</code>. The threshold also fires a webhook if you have <code>kolm webhooks set --on capture.threshold</code>.</div></details>
           <details><summary>I want to start over</summary><div class="a">Run <code>kolm reset --confirm</code>. Removes <code>~/.kolm</code>, revokes the local key, clears the keychain entry. Your captures on the server are preserved; pass <code>--also-server</code> to nuke them too.</div></details>
@@ -535,7 +535,7 @@ console.log(r.content[0].text);</pre>
         <a href="/manifesto">Manifesto</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
       </div>
     </div>
     <div class="ks-foot__base">

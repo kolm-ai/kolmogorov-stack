@@ -179,7 +179,7 @@ export async function enqueue(opts) {
         result: r,
         release: () => {},
       };
-    } catch (e) {
+    } catch (e) { // deliberate: cleanup
       // Teacher failed. Fall through to queue-or-reject so the caller
       // sees a clean queue_full envelope instead of an opaque proxy error.
     }

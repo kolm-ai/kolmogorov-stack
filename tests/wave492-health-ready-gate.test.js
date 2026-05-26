@@ -31,7 +31,7 @@ function runCli(args, env) {
     let stderr = '';
     child.stdout.on('data', (b) => { stdout += b.toString('utf8'); });
     child.stderr.on('data', (b) => { stderr += b.toString('utf8'); });
-    const killer = setTimeout(() => { try { child.kill('SIGKILL'); } catch (_) {} }, 20_000);
+    const killer = setTimeout(() => { try { child.kill('SIGKILL'); } catch (_) {} }, 20_000); // deliberate: cleanup
     child.on('close', (code) => {
       clearTimeout(killer);
       fs.rmSync(home, { recursive: true, force: true });

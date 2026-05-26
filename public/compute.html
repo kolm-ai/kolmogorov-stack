@@ -135,7 +135,7 @@
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -144,7 +144,7 @@
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 <main id="main">
@@ -310,7 +310,7 @@ $ kolm compute rent --spec my.spec.json --backend vast --budget 0.50 --confirm
  Numbers are end-to-end (input parse + match + output)."
 }</pre>
  <p>~1.17M calls/sec, p50 of 1&micro;s, p99 of 2&micro;s for the four-pattern PHI redactor. Those are measured numbers from one box; expect variance with V8 JIT warm-up, recipe complexity, and host load. Generative artifacts (those that bundle a LoRA pack and call vLLM or llama.cpp) trade microseconds for tokens-per-second on the same axis. Run <code>node scripts/bench-tps.mjs --generative --url http://localhost:8765 --n 32</code> against a serve endpoint to get that path; numbers depend on the device the serve loop ran on, which the receipt pins.</p>
- <p>Both modes write a JSON record suitable for committing to <code>docs/bench/</code> and publishing on this page. The raw record from the run above lives at <a href="https://github.com/sneaky-hippo/kolm-stack/blob/main/docs/bench/tps-phi-redactor.json" rel="noopener" style="color:var(--ink);text-decoration:underline">docs/bench/tps-phi-redactor.json</a>.</p>
+ <p>Both modes write a JSON record suitable for committing to <code>docs/bench/</code> and publishing on this page. The raw record from the run above lives at <a href="https://github.com/kolm-ai/kolm-stack/blob/main/docs/bench/tps-phi-redactor.json" rel="noopener" style="color:var(--ink);text-decoration:underline">docs/bench/tps-phi-redactor.json</a>.</p>
 
  <h2>Why renting</h2>
  <ul>
@@ -345,7 +345,7 @@ $ kolm compute rent --spec my.spec.json --backend vast --budget 0.50 --confirm
       </div>
       <div>
         <h4>Company</h4>
-        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
       </div>
     </div>
     <div class="ks-footer__bottom">

@@ -64,7 +64,7 @@ try {
     validateReceipt = mod.validateReceipt;
     usingInline = false;
   }
-} catch {
+} catch { // deliberate: cleanup
   // src/receipt-schema.js not yet present; fall through to inlineValidate.
 }
 

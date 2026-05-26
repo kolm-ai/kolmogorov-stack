@@ -31,6 +31,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { MIN_PRODUCTION_HOLDOUT, MIN_PRODUCTION_TRAIN } from './seeds.js';
+import { readEntryFromLargeZip } from './zip-large.js';
 
 // Re-export so spec-compile.js can keep importing from one place.
 export { MIN_PRODUCTION_HOLDOUT, MIN_PRODUCTION_TRAIN };
@@ -73,14 +74,30 @@ export function computeSeedProductionReady(seedSplit) {
 // Loader: open a .kolm zip and return its parsed manifest. Defers to adm-zip
 // (already a root dep). Throws on missing manifest.json so a corrupt file
 // fails loud instead of silently returning ok:false.
+//
+// W891-2.2 — Trinity GGUF .kolm artifacts exceed Node's 2 GiB readFileSync
+// limit (a Q4_K_M for a 7B model is ~4.4 GB; the .kolm wraps it with ~5 KB of
+// metadata). When the file fits in Buffer we use AdmZip for parity with the
+// rest of the codebase. When it doesn't we fall back to a Zip64-aware
+// central-directory streaming reader that reads just the named entry.
 async function loadManifestFromArtifact(artifactPath) {
-  const { default: AdmZip } = await import('adm-zip');
-  const buf = fs.readFileSync(artifactPath);
-  const zip = new AdmZip(buf);
-  const entry = zip.getEntry('manifest.json');
-  if (!entry) throw new Error(`malformed .kolm: missing manifest.json (${path.basename(artifactPath)})`);
-  return JSON.parse(entry.getData().toString('utf8'));
+  const stat = fs.statSync(artifactPath);
+  if (stat.size <= 2 * 1024 * 1024 * 1024 - 1) {
+    const { default: AdmZip } = await import('adm-zip');
+    const buf = fs.readFileSync(artifactPath);
+    const zip = new AdmZip(buf);
+    const entry = zip.getEntry('manifest.json');
+    if (!entry) throw new Error(`malformed .kolm: missing manifest.json (${path.basename(artifactPath)})`);
+    return JSON.parse(entry.getData().toString('utf8'));
+  }
+  const bytes = await readEntryFromLargeZip(artifactPath, 'manifest.json');
+  if (!bytes) throw new Error(`malformed .kolm: missing manifest.json (${path.basename(artifactPath)})`);
+  return JSON.parse(bytes.toString('utf8'));
 }
+
+// W891-3.1 — readEntryFromLargeZip is now imported from src/zip-large.js
+// so artifact-runner + airgap bundler + production-ready share one Zip64
+// implementation. See the import at the top of this file.
 
 // W367 — executable-bundle gate. For rule / synthesized_rule / compiled_rule
 // artifacts the manifest must declare manifest.entry.{file, sha256}, the named
@@ -90,12 +107,16 @@ async function loadManifestFromArtifact(artifactPath) {
 // actually run — directly contradicting the "same file runs on a laptop, a
 // phone, or an air-gapped server" homepage claim.
 async function loadEntryFileBytes(artifactPath, entryFile) {
-  const { default: AdmZip } = await import('adm-zip');
-  const buf = fs.readFileSync(artifactPath);
-  const zip = new AdmZip(buf);
-  const entry = zip.getEntry(entryFile);
-  if (!entry) return null;
-  return entry.getData();
+  const stat = fs.statSync(artifactPath);
+  if (stat.size <= 2 * 1024 * 1024 * 1024 - 1) {
+    const { default: AdmZip } = await import('adm-zip');
+    const buf = fs.readFileSync(artifactPath);
+    const zip = new AdmZip(buf);
+    const entry = zip.getEntry(entryFile);
+    if (!entry) return null;
+    return entry.getData();
+  }
+  return await readEntryFromLargeZip(artifactPath, entryFile);
 }
 
 const BUNDLEABLE_CLASSES = new Set(['rule', 'synthesized_rule', 'compiled_rule']);

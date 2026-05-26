@@ -46,7 +46,7 @@ function getOrCreateKey() {
   }
   const key = crypto.randomBytes(KEY_BYTES);
   fs.writeFileSync(p, key.toString('hex'), 'utf8');
-  try { fs.chmodSync(p, 0o600); } catch {}
+  try { fs.chmodSync(p, 0o600); } catch {} // deliberate: cleanup
   return key;
 }
 
@@ -68,7 +68,7 @@ function readVault() {
 function writeVault(vault) {
   ensureDir();
   fs.writeFileSync(vaultPath(), JSON.stringify(vault, null, 2), 'utf8');
-  try { fs.chmodSync(vaultPath(), 0o600); } catch {}
+  try { fs.chmodSync(vaultPath(), 0o600); } catch {} // deliberate: cleanup
 }
 
 function encrypt(value) {

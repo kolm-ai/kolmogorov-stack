@@ -255,7 +255,7 @@ function locateRuntime() {
           cmd = String(arr[0]);
           cargs = arr.slice(1).map(String);
         }
-      } catch {
+      } catch { // deliberate: cleanup
         // fall back to raw string
       }
     }
@@ -310,7 +310,7 @@ function whichSync(bin) {
       const candidate = path.join(dir, bin + ext);
       try {
         if (fs.existsSync(candidate)) return candidate;
-      } catch {
+      } catch { // deliberate: cleanup
         // ignore - keep walking
       }
     }

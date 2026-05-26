@@ -55,7 +55,7 @@
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs" aria-current="page">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -64,7 +64,7 @@
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
@@ -87,7 +87,7 @@
 <p>The apex record <code>kolm.ai</code> resolves to the closest region via GeoDNS. The W780 module honors this geo-routing decision and uses <code>$KOLM_REGION</code> as the runtime override for operators who need to pin a request to a specific gateway.</p>
 
 <h2 data-w780="dns-layout">DNS layout</h2>
-<p>The full DNS schema lives at <a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/infra/dns-schema.json"><code>infra/dns-schema.json</code></a>. It describes the Route53 + Cloudflare records required to launch:</p>
+<p>The full DNS schema lives at <a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/infra/dns-schema.json"><code>infra/dns-schema.json</code></a>. It describes the Route53 + Cloudflare records required to launch:</p>
 <ul>
 <li><strong>Apex GeoDNS</strong>  -  <code>kolm.ai</code> resolves to the closest region by client IP. Weight 100 per geo bucket (NA -&gt; us, EU/AF -&gt; eu, APAC/OCEANIA -&gt; apac).</li>
 <li><strong>Per-region hostnames</strong>  -  <code>us.kolm.ai</code>, <code>eu.kolm.ai</code>, <code>ap.kolm.ai</code>. Each terminates its own TLS cert (SAN-per-region by default; rotation is region-independent).</li>
@@ -105,7 +105,7 @@
 </table>
 
 <h2 data-w780="cloudflare-worker">Cloudflare Workers adapter</h2>
-<p>Starter template at <a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/tools/edge/cloudflare-worker.js"><code>tools/edge/cloudflare-worker.js</code></a>. Drop into a Workers project, wire the gateway map via <code>wrangler.toml</code> vars, deploy behind the per-region hostname.</p>
+<p>Starter template at <a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/tools/edge/cloudflare-worker.js"><code>tools/edge/cloudflare-worker.js</code></a>. Drop into a Workers project, wire the gateway map via <code>wrangler.toml</code> vars, deploy behind the per-region hostname.</p>
 <pre><code># wrangler.toml fragment
 [vars]
 KOLM_REGION = "eu-west-1"
@@ -113,7 +113,7 @@ KOLM_REGION_GATEWAY_URLS = '{"us":"https://us.kolm.ai","eu":"https://eu.kolm.ai"
 <p>Routing decision honors <code>x-kolm-residency</code> as a HARD constraint (returns HTTP 451 when no matching gateway) and <code>x-kolm-prefer-region</code> as a soft hint. Response carries <code>x-kolm-routed-region</code> and <code>x-kolm-routed-reason</code> so downstream code can audit the decision.</p>
 
 <h2 data-w780="lambda-at-edge">Lambda@Edge adapter</h2>
-<p>Starter template at <a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/tools/edge/lambda-at-edge.js"><code>tools/edge/lambda-at-edge.js</code></a>. Attach as a viewer-request trigger so the routing decision lands at the edge POP closest to the user.</p>
+<p>Starter template at <a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/tools/edge/lambda-at-edge.js"><code>tools/edge/lambda-at-edge.js</code></a>. Attach as a viewer-request trigger so the routing decision lands at the edge POP closest to the user.</p>
 <p>Lambda@Edge does NOT support env vars at execution time. Bake the gateway map into the <code>GATEWAY_MAP</code> constant at deploy time. The handler rewrites <code>request.origin</code> so CloudFront proxies to the chosen region's backend without re-fetching the body.</p>
 
 <h2 data-w780="region-aware-capture">Region-aware capture routing</h2>
@@ -143,9 +143,9 @@ POST /v1/region/route      -> { region, gateway_url, reason, version }
 <ul>
 <li><a href="/compliance/data-residency">/compliance/data-residency</a> &mdash; W769 per-capture residency tags + region taxonomy</li>
 <li><a href="/airgap">/airgap</a> &mdash; air-gap deploy path for tenants who need no internet at all</li>
-<li><a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/infra/dns-schema.json"><code>infra/dns-schema.json</code></a> &mdash; full DNS schema (Route53 + Cloudflare records)</li>
-<li><a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/tools/edge/cloudflare-worker.js"><code>tools/edge/cloudflare-worker.js</code></a> &mdash; Cloudflare Workers adapter starter</li>
-<li><a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/tools/edge/lambda-at-edge.js"><code>tools/edge/lambda-at-edge.js</code></a> &mdash; AWS Lambda@Edge adapter starter</li>
+<li><a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/infra/dns-schema.json"><code>infra/dns-schema.json</code></a> &mdash; full DNS schema (Route53 + Cloudflare records)</li>
+<li><a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/tools/edge/cloudflare-worker.js"><code>tools/edge/cloudflare-worker.js</code></a> &mdash; Cloudflare Workers adapter starter</li>
+<li><a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/tools/edge/lambda-at-edge.js"><code>tools/edge/lambda-at-edge.js</code></a> &mdash; AWS Lambda@Edge adapter starter</li>
 </ul>
 
 </main>
@@ -167,7 +167,7 @@ POST /v1/region/route      -> { region, gateway_url, reason, version }
       </div>
       <div>
         <h4>Company</h4>
-        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
       </div>
     </div>
     <div class="ks-footer__bottom">

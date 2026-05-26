@@ -628,7 +628,7 @@ test('W777 #21 - `kolm ab --json` (no subverb) -> missing_subverb envelope', () 
   });
   const out = (r.stdout || '').trim();
   let parsed = null;
-  try { parsed = JSON.parse(out); } catch (_) {}
+  try { parsed = JSON.parse(out); } catch (_) {} // deliberate: cleanup
   assert.ok(parsed && typeof parsed === 'object',
     'expected JSON envelope; got stdout=' + out.slice(0, 200) + ' stderr=' + (r.stderr || '').slice(0, 200));
   assert.equal(parsed.ok, false);

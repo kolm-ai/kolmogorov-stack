@@ -94,7 +94,7 @@ function writeCache(key, payload) {
       path.join(dir, `${key}.json`),
       JSON.stringify({ ...payload, cache_key: key, version: NEGATIVE_VARIANT_VERSION }, null, 2),
     );
-  } catch (_) {
+  } catch (_) { // deliberate: cleanup
     // Cache write failure is not fatal — the receipt the caller gets still
     // carries the negatives; we just lose idempotency for the next call.
   }
@@ -355,7 +355,7 @@ export async function generateNegativeVariantsBatch(captures, opts = {}) {
     // Sequential — we don't want to slam the teacher API in parallel for a
     // single distill job. Use Promise.allSettled if the caller wants
     // concurrency and accepts the rate-limit risk.
-    // eslint-disable-next-line no-await-in-loop
+     
     out.push(await generateNegativeVariants(c, opts));
   }
   return out;
@@ -368,7 +368,7 @@ export function _resetCacheForTests() {
   try {
     if (!fs.existsSync(dir)) return;
     for (const f of fs.readdirSync(dir)) {
-      try { fs.unlinkSync(path.join(dir, f)); } catch (_) {}
+      try { fs.unlinkSync(path.join(dir, f)); } catch (_) {} // deliberate: cleanup
     }
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
 }

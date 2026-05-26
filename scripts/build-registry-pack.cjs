@@ -37,11 +37,11 @@ const phiSpec = {
       '  // pack patterns run BEFORE builtins so DOB/MRN/NPI dont get shadowed by',
       '  // generic date/phone matches on the same digit run.',
       '  var packPats = (lib.pack && lib.pack.default_patterns) || [];',
-      "  for (var j=0;j<packPats.length;j++){ var p=packPats[j]; try { patterns.push({name:p.name,regex:new RegExp(p.regex,p.flags||'g'),replacement:p.replacement||('['+p.name+']')}); } catch(e){} }",
+      "  for (var j=0;j<packPats.length;j++){ var p=packPats[j]; try { patterns.push({name:p.name,regex:new RegExp(p.regex,p.flags||'g'),replacement:p.replacement||('['+p.name+']')}); } catch(e){} }", // deliberate: cleanup
       "  var enabled = (lib.pack && lib.pack.enabled_builtins) || ['email','phone','url','date'];",
       '  for (var i=0;i<enabled.length;i++){ var k=enabled[i]; if (lib.patterns[k]) patterns.push({name:k.toUpperCase(),regex:lib.patterns[k],replacement:"["+k.toUpperCase()+"]"}); }',
       '  var extras = (lib.params && lib.params.extra_patterns) || [];',
-      "  for (var x=0;x<extras.length;x++){ var e=extras[x]; try { patterns.push({name:e.name,regex:new RegExp(e.regex,e.flags||'g'),replacement:e.replacement||('['+e.name+']')}); } catch(err){} }",
+      "  for (var x=0;x<extras.length;x++){ var e=extras[x]; try { patterns.push({name:e.name,regex:new RegExp(e.regex,e.flags||'g'),replacement:e.replacement||('['+e.name+']')}); } catch(err){} }", // deliberate: cleanup
       '  var hits = {}, redacted = text;',
       '  for (var n=0;n<patterns.length;n++){ var pat=patterns[n], count=0; redacted = redacted.replace(pat.regex, function(){ count++; return pat.replacement; }); if (count>0) hits[pat.name]=(hits[pat.name]||0)+count; }',
       '  var hitList = []; for (var key in hits) hitList.push({name:key,count:hits[key]});',

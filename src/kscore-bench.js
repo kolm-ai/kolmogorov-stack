@@ -124,7 +124,7 @@ export async function runBench(scorer, opts = {}) {
       row.passed = ks.composite >= (opts.gate ?? 0.85);
     }
     results.push(row);
-    try { onCase(row); } catch {}
+    try { onCase(row); } catch {} // deliberate: cleanup
   }
   return {
     spec: BENCH_SPEC_ID,

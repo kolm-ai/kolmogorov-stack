@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EU sovereign AI &mdash; GDPR, EU AI Act, data inside the EEA · kolm.ai</title>
+<meta name="description" content="Distill frontier models inside the EU. Run them on EU GPUs. Verify every inference with a receipt that satisfies GDPR Art. 30 and EU AI Act Annex IV records of processing.">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/wave889-vertical.css">
+  <link rel="canonical" href="https://kolm.ai/eu-sovereign">
+  <meta property="og:title" content="EU sovereign AI &mdash; GDPR, EU AI Act, data inside the EEA">
+  <meta property="og:description" content="Distill frontier models inside the EU. Run them on EU GPUs. Verify every inference with a receipt that satisfies GDPR Art. 30 and EU AI Act Annex IV records of processing.">
+  <meta property="og:image" content="https://kolm.ai/og/eu-sovereign.svg">
+  <meta property="og:url" content="https://kolm.ai/eu-sovereign">
+  <meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/eu-sovereign",
+  "description": "Distill frontier models inside the EU. Run them on EU GPUs. Verify every inference with a receipt that satisfies GDPR Art. 30 and EU AI Act Annex IV records of processing.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
+</head>
+<body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<div data-include-nav></div>
+
+<section class="v-hero">
+  <div class="v-wrap">
+    <span class="v-eyebrow">EU sovereign AI</span>
+    <h1 class="v-h1">Frontier AI that never leaves the EEA.</h1>
+    <p class="v-lede">Distill open weights inside the EU. Run them on EU GPUs. Every inference produces a CID-pinned receipt that satisfies your GDPR Art. 30 records, your AI Act Annex IV documentation, and your DPA&apos;s third-country transfer test.</p>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup?industry=eu-sovereign">Try it free</a>
+      <a class="v-btn v-btn--ghost" href="/book-demo?industry=eu-sovereign">Speak to EU team</a>
+    </div>
+    <div class="v-caveat">Caveats: customer remains the controller / deployer of record. Kolmogorov ships software + receipts; <a href="/security">EEA-residency posture</a> is documented per deployment.</div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Three commands</span>
+      <h2 class="v-h2">Distill. Run. Verify.</h2>
+      <p>Three CLI verbs. The data and the inference both stay in the EEA.</p>
+    </div>
+    <div class="v-trio">
+      <div class="v-card">
+        <span class="ctag">01 / Distill</span>
+        <h3>Train inside the EEA</h3>
+        <p>Distill against teachers hosted by EU-residency providers, or use OpenEuroLLM and Mistral weights directly. No Chapter V transfer.</p>
+        <div class="cmd">kolm distill --base mistral-7b --region eu</div>
+        <a class="go" href="/distill">Distill pipeline -&gt;</a>
+      </div>
+      <div class="v-card">
+        <span class="ctag">02 / Run</span>
+        <h3>On EU GPUs</h3>
+        <p>INT4 GGUF on Scaleway, OVHcloud, Hetzner, Aruba, or your own EU rack. No US-controlled cloud in the data path unless you choose one.</p>
+        <div class="cmd">kolm run model.kolm --region eu-west</div>
+        <a class="go" href="/run">Run surface -&gt;</a>
+      </div>
+      <div class="v-card">
+        <span class="ctag">03 / Verify</span>
+        <h3>Receipt per inference</h3>
+        <p>Each call writes a receipt that doubles as your GDPR Art. 30 row and your AI Act Annex IV §3 logging entry.</p>
+        <div class="cmd">kolm verify rcpt_01KYC...</div>
+        <a class="go" href="/verify">Verify a receipt -&gt;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Regulatory posture</span>
+      <h2 class="v-h2">Built for EU regulators.</h2>
+      <p>What the architecture gives you. What still belongs to your DPO and AI compliance officer.</p>
+    </div>
+    <div class="v-compl">
+      <div>
+        <div class="label">GDPR</div>
+        <b>Art. 6, 28, 30, 32</b>
+        <p>Self-hosted = controller stays the controller. Receipts pre-fill your Art. 30 register. We are not a processor unless your DPA names us.</p>
+      </div>
+      <div>
+        <div class="label">EU AI Act</div>
+        <b>Annex IV §1-3 technical documentation</b>
+        <p>Distill manifest covers the training data summary. Receipts cover the §3 logging duty. Risk classification stays with the deployer.</p>
+      </div>
+      <div>
+        <div class="label">Schrems II</div>
+        <b>No Chapter V transfer in the path</b>
+        <p>If you choose EU-only teachers and EU-only runtime hosts, the inference never relies on a third-country processor.</p>
+      </div>
+      <div>
+        <div class="label">NIS2 / DORA</div>
+        <b>Audit-trail evidence per inference</b>
+        <p>The receipt ledger sinks to your existing SIEM and supplier-risk register. Reduces operational risk reporting effort.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Sector workflows</span>
+      <h2 class="v-h2">Six patterns running in the EU.</h2>
+      <p>What deployers across the EU are shipping today.</p>
+    </div>
+    <div class="v-flows">
+      <div class="v-flow">
+        <span class="who">Bank / DACH</span>
+        <h3>BaFin / EBA model docs</h3>
+        <p>Generate model documentation that maps cleanly to MaRisk AT 4.3.2 and EBA/GL/2017/16. Receipts double as the change log.</p>
+        <div class="io">in: training run &middot; out: drafted model docs</div>
+      </div>
+      <div class="v-flow">
+        <span class="who">Health system / EU</span>
+        <h3>Clinical doc summarization</h3>
+        <p>SOAP and discharge summaries in DE / FR / IT / ES. All inference stays in-country. Receipts feed the EHR audit log.</p>
+        <div class="io">in: encounter notes &middot; out: structured summary</div>
+      </div>
+      <div class="v-flow">
+        <span class="who">Public sector / EU</span>
+        <h3>Citizen-services chat</h3>
+        <p>Tier-1 deflection answering against the local authority knowledge base. Refuses out-of-scope; routes to staff.</p>
+        <div class="io">in: citizen message &middot; out: drafted reply</div>
+      </div>
+      <div class="v-flow">
+        <span class="who">Industrial / EU</span>
+        <h3>Multilingual support desk</h3>
+        <p>Handle 24 EU languages from a single distilled model. Same receipts across languages for QA.</p>
+        <div class="io">in: ticket &middot; out: drafted reply in the originating language</div>
+      </div>
+      <div class="v-flow">
+        <span class="who">Legal / EU</span>
+        <h3>Contract review against Annex IV</h3>
+        <p>Run risk classification on AI provisions in incoming contracts. Cites the Annex IV clause used.</p>
+        <div class="io">in: contract &middot; out: risk flags + Annex citation</div>
+      </div>
+      <div class="v-flow">
+        <span class="who">Research / EU</span>
+        <h3>OpenEuroLLM &amp; Mistral fine-tunes</h3>
+        <p>Fine-tune the EU-origin base of your choice with the same receipts pipeline. No third-country transfer in the loop.</p>
+        <div class="io">in: corpus &middot; out: distilled .kolm artifact</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-cta-row">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Get started</span>
+      <h2 class="v-h2">Pilot on one process. Roll out across the entity.</h2>
+      <p>Start free with one workflow. The same distill + run + verify path serves entity-wide and EEA-wide deployments.</p>
+    </div>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup?industry=eu-sovereign">Try it free</a>
+      <a class="v-btn v-btn--ghost" href="/book-demo?industry=eu-sovereign">Speak to EU team</a>
+    </div>
+    <div class="v-receipts">
+      <div class="label">Example receipt</div>
+      <p>Every inference: <code>kolm verify rcpt_01KYC1ZVTGDCW3FX06JQSC</code> &middot; <a href="/v1/verify/rcpt_01KYC1ZVTGDCW3FX06JQSC">view receipt -&gt;</a></p>
+    </div>
+  </div>
+</section>
+
+<div data-include-footer></div>
+<script src="/nav.js" defer></script>
+</body>
+</html>

@@ -80,8 +80,8 @@ function _writeStubWorker(tmp) {
     "  if (a.startsWith('--out=')) out = a.slice(6);",
     "}",
     "if (out) {",
-    "  try { fs.mkdirSync(out, { recursive: true }); } catch {}",
-    "  try { fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify({mode:'stub', ok:true})); } catch {}",
+    "  try { fs.mkdirSync(out, { recursive: true }); } catch {}", // deliberate: cleanup
+    "  try { fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify({mode:'stub', ok:true})); } catch {}", // deliberate: cleanup
     "}",
     "process.exit(0);",
     '',
@@ -97,9 +97,9 @@ async function _probeAndDispose(iter) {
   const nextPromise = iter.next();
   await new Promise((r) => setTimeout(r, 80));
   if (typeof iter.return === 'function') {
-    try { await Promise.race([iter.return(), new Promise((r) => setTimeout(r, 200))]); } catch {}
+    try { await Promise.race([iter.return(), new Promise((r) => setTimeout(r, 200))]); } catch {} // deliberate: cleanup
   }
-  try { await Promise.race([nextPromise, new Promise((r) => setTimeout(r, 200))]); } catch {}
+  try { await Promise.race([nextPromise, new Promise((r) => setTimeout(r, 200))]); } catch {} // deliberate: cleanup
 }
 
 function _readSeedsJsonl(tmp) {
@@ -319,7 +319,7 @@ test('W411 golden e2e — proxy capture → redaction → approval → split →
   try {
     const vmod = await import('../src/verify-receipt.js?w411golden=' + Date.now());
     verifyArtifact = vmod.verifyArtifact || vmod.verify || vmod.default || null;
-  } catch {
+  } catch { // deliberate: cleanup
     // module may live elsewhere
   }
   if (typeof verifyArtifact === 'function') {
@@ -341,7 +341,7 @@ test('W411 golden e2e — proxy capture → redaction → approval → split →
   let runtimeMod = null;
   try {
     runtimeMod = await import('../src/runtime.js?w411golden=' + Date.now());
-  } catch {}
+  } catch {} // deliberate: cleanup
   if (runtimeMod) {
     assert.ok(
       typeof runtimeMod.runVersion === 'function' ||

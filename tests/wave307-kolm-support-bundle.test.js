@@ -19,7 +19,7 @@ const KOLM_CLI = path.resolve(__dirname, '..', 'cli', 'kolm.js');
 
 function isolatedHome() {
   const dir = path.join(os.tmpdir(), 'kolm-w307-' + process.pid + '-' + Math.random().toString(36).slice(2));
-  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {}
+  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {} // deliberate: cleanup
   return dir;
 }
 

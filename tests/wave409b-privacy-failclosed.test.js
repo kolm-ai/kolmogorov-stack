@@ -53,7 +53,7 @@ function mkHome() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w409b-'));
 }
 function cleanupHome(home) {
-  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
 }
 
 function setIsolatedHome(home) {
@@ -89,7 +89,7 @@ function postJson(url, body, headers = {}) {
         resolve({ status: res.statusCode, headers: res.headers, body: json });
       });
     });
-    req.setTimeout(8000, () => { try { req.destroy(new Error('timeout')); } catch (_) {} });
+    req.setTimeout(8000, () => { try { req.destroy(new Error('timeout')); } catch (_) {} }); // deliberate: cleanup
     req.on('error', reject);
     req.write(payload); req.end();
   });
@@ -104,7 +104,7 @@ function spinMockUpstream(opts = {}) {
     received.last_prompt = String(m);
     received.count += 1;
     if (opts.fail === 'tcp_drop') {
-      try { req.socket && req.socket.destroy(); } catch (_) {}
+      try { req.socket && req.socket.destroy(); } catch (_) {} // deliberate: cleanup
       return;
     }
     if (opts.fail === '5xx') return res.status(502).json({ error: 'upstream_5xx' });
@@ -128,7 +128,7 @@ function spinMockUpstream(opts = {}) {
 // throws — exercises the W409b fail-closed error path.
 function spinDeadUpstream() {
   const net = http.createServer((req, res) => {
-    try { req.socket && req.socket.destroy(); } catch (_) {}
+    try { req.socket && req.socket.destroy(); } catch (_) {} // deliberate: cleanup
   });
   return new Promise((resolve) => {
     net.listen(0, '127.0.0.1', () => {

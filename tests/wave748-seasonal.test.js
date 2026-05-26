@@ -98,7 +98,7 @@ test('W748 #2 — SEASONS is frozen + length 4 + holds N-hemisphere vocabulary',
   }
   // Mutation attempt must throw or be silently ignored — assert the array
   // is still length 4 after a push attempt.
-  try { SEASONS.push('quintix'); } catch (_) {}
+  try { SEASONS.push('quintix'); } catch (_) {} // deliberate: cleanup
   assert.equal(SEASONS.length, 4, 'frozen SEASONS must survive a push attempt');
 });
 

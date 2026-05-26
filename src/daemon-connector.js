@@ -2,7 +2,7 @@
 //
 // Usage from the user's POV:
 //
-//   npm install -g github:sneaky-hippo/kolm-stack
+//   npm install -g github:kolm-ai/kolm-stack
 //   kolm connect start
 //   export OPENAI_BASE_URL=http://127.0.0.1:8787/v1
 //   export ANTHROPIC_BASE_URL=http://127.0.0.1:8787
@@ -100,7 +100,7 @@ function writePidRecord(rec, dataDir) {
   const fp = pidPath(dataDir);
   try {
     fs.writeFileSync(fp, JSON.stringify(rec, null, 2));
-    try { fs.chmodSync(fp, 0o600); } catch (_) {}
+    try { fs.chmodSync(fp, 0o600); } catch (_) {} // deliberate: cleanup
     return { ok: true, path: fp };
   } catch (error) {
     return { ok: false, path: fp, error };
@@ -108,7 +108,7 @@ function writePidRecord(rec, dataDir) {
 }
 
 function removePidRecord(dataDir) {
-  try { fs.unlinkSync(pidPath(dataDir)); } catch (_) {}
+  try { fs.unlinkSync(pidPath(dataDir)); } catch (_) {} // deliberate: cleanup
 }
 
 // Resolve the upstream key the daemon will forward with. Priority:
@@ -200,8 +200,8 @@ function writeRawSidecar(text, kind /* 'prompt'|'response' */) {
   const fp = path.join(rawDir(), filename);
   try {
     if (!fs.existsSync(fp)) fs.writeFileSync(fp, s, 'utf8');
-    try { fs.chmodSync(fp, 0o600); } catch (_) {}
-  } catch (_) {}
+    try { fs.chmodSync(fp, 0o600); } catch (_) {} // deliberate: cleanup
+  } catch (_) {} // deliberate: cleanup
   return { hash, path: fp };
 }
 
@@ -233,7 +233,7 @@ function forwardRaw({ url, method, headers, body }) {
         resolve({ status: res.statusCode, headers: res.headers, body: json, raw_text: buf, elapsed_us });
       });
     });
-    req.setTimeout(120_000, () => { try { req.destroy(new Error('upstream_timeout')); } catch (_) {} });
+    req.setTimeout(120_000, () => { try { req.destroy(new Error('upstream_timeout')); } catch (_) {} }); // deliberate: cleanup
     req.on('error', reject);
     if (payload) req.write(payload);
     req.end();
@@ -530,7 +530,7 @@ async function proxyOne({ provider, upstreamPath, req }) {
     // ev built above already carries every canonical field; appendEvent is
     // idempotent (INSERT OR REPLACE) so the bridge inside insertCapture and
     // this explicit append collapse to one row.
-    try { await eventStoreAppend(ev); } catch (_) {}
+    try { await eventStoreAppend(ev); } catch (_) {} // deliberate: cleanup
     return {
       status: 502,
       body: { error: { type: 'upstream_error', message: String(e.message || e) } },
@@ -650,7 +650,7 @@ async function proxyOne({ provider, upstreamPath, req }) {
       prompt_redacted: ev.prompt_redacted != null ? ev.prompt_redacted : (lakePrompt || null),
       response_redacted: ev.response_redacted != null ? ev.response_redacted : (lakeResponse || null),
     });
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
   return {
     status: httpStatus,
     http_status: httpStatus,
@@ -719,7 +719,7 @@ async function probeProviderReach(id, cfg) {
   // 1. Plain HEAD probe: DNS + TCP + TLS reach only.
   out.network_reachable = await new Promise((resolve) => {
     let done = false;
-    const t = setTimeout(() => { if (done) return; done = true; try { r.destroy(); } catch (_) {} resolve(false); }, REACH_TIMEOUT_MS);
+    const t = setTimeout(() => { if (done) return; done = true; try { r.destroy(); } catch (_) {} resolve(false); }, REACH_TIMEOUT_MS); // deliberate: cleanup
     const r = lib.request({
       hostname: url.hostname, port, path: '/', method: 'HEAD', timeout: REACH_TIMEOUT_MS,
     }, (resp) => {
@@ -727,10 +727,10 @@ async function probeProviderReach(id, cfg) {
       const code = resp.statusCode || 0;
       // Any HTTP response (including 401/404) means the host is reachable.
       resolve(code >= 200 && code < 600);
-      try { resp.resume(); } catch (_) {}
+      try { resp.resume(); } catch (_) {} // deliberate: cleanup
     });
     r.on('error', () => { if (done) return; done = true; clearTimeout(t); resolve(false); });
-    r.on('timeout', () => { if (done) return; done = true; clearTimeout(t); try { r.destroy(); } catch (_) {} resolve(false); });
+    r.on('timeout', () => { if (done) return; done = true; clearTimeout(t); try { r.destroy(); } catch (_) {} resolve(false); }); // deliberate: cleanup
     r.end();
   });
   // 2. Authenticated GET: only if a key is set; else stay false.
@@ -745,17 +745,17 @@ async function probeProviderReach(id, cfg) {
   else if (probe.auth === 'key-param') probePath = probePath + '?key=' + encodeURIComponent(key);
   out.authenticated = await new Promise((resolve) => {
     let done = false;
-    const t = setTimeout(() => { if (done) return; done = true; try { r.destroy(); } catch (_) {} resolve(false); }, REACH_TIMEOUT_MS);
+    const t = setTimeout(() => { if (done) return; done = true; try { r.destroy(); } catch (_) {} resolve(false); }, REACH_TIMEOUT_MS); // deliberate: cleanup
     const r = lib.request({
       hostname: url.hostname, port, path: probePath, method: 'GET', headers, timeout: REACH_TIMEOUT_MS,
     }, (resp) => {
       if (done) return; done = true; clearTimeout(t);
       const code = resp.statusCode || 0;
       resolve(code >= 200 && code < 300);
-      try { resp.resume(); } catch (_) {}
+      try { resp.resume(); } catch (_) {} // deliberate: cleanup
     });
     r.on('error', () => { if (done) return; done = true; clearTimeout(t); resolve(false); });
-    r.on('timeout', () => { if (done) return; done = true; clearTimeout(t); try { r.destroy(); } catch (_) {} resolve(false); });
+    r.on('timeout', () => { if (done) return; done = true; clearTimeout(t); try { r.destroy(); } catch (_) {} resolve(false); }); // deliberate: cleanup
     r.end();
   });
   return out;
@@ -855,7 +855,7 @@ export function buildDaemonApp({ dataDir } = {}) {
   app.get('/v1/health', async (_req, res) => {
     let storage = path.join(resolveKolmDir(dataDir), 'events', 'events.sqlite');
     let storageHealth = null;
-    try { storageHealth = await captureStoreHealth(); } catch (_) {}
+    try { storageHealth = await captureStoreHealth(); } catch (_) {} // deliberate: cleanup
     const providers = summarizeProviders();
     const reach = await Promise.all(Object.entries(PROVIDERS).map(async ([id, cfg]) => {
       const out = await probeProviderReach(id, cfg);

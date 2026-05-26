@@ -109,7 +109,7 @@ export function recordAttestation(enrollToken, { public_url, attestation, measur
         vendor = parsedResult.vendor;
       }
     }
-  } catch {
+  } catch { // deliberate: cleanup
     // Parser failures should never block the record — we still capture the
     // raw blob so an operator can debug downstream.
   }

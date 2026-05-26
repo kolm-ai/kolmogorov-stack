@@ -110,7 +110,7 @@ function _backupOnce(cfgPath) {
     for (const f of fs.readdirSync(dir)) {
       if (f.startsWith(base + '.kolm-backup-')) { existing = path.join(dir, f); break; }
     }
-  } catch {}
+  } catch {} // deliberate: cleanup
   if (existing) return existing;
   const fresh = cfgPath + '.kolm-backup-' + _ts();
   fs.copyFileSync(cfgPath, fresh);
@@ -128,7 +128,7 @@ function _latestBackup(cfgPath) {
         if (!latest || fs.statSync(p).mtimeMs > fs.statSync(latest).mtimeMs) latest = p;
       }
     }
-  } catch {}
+  } catch {} // deliberate: cleanup
   return latest;
 }
 
@@ -457,7 +457,7 @@ function _findAgent(agent_id) {
 export function detectInstalled() {
   const out = [];
   for (const a of AGENTS) {
-    try { if (a.detector()) out.push(a.id); } catch {}
+    try { if (a.detector()) out.push(a.id); } catch {} // deliberate: cleanup
   }
   return out;
 }

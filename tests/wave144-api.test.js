@@ -32,7 +32,7 @@ async function freePort() {
 
 async function waitForHealth(base, retries = 120) {
   for (let i = 0; i < retries; i++) {
-    try { const r = await fetch(base + '/health'); if (r.ok) return; } catch {}
+    try { const r = await fetch(base + '/health'); if (r.ok) return; } catch {} // deliberate: cleanup
     await new Promise(r => setTimeout(r, 100));
   }
   throw new Error('server did not come up');

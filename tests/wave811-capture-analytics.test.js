@@ -66,8 +66,8 @@ async function _loadMods() {
   if (!_anaMod) _anaMod = await import('../src/capture-analytics.js');
   if (!_storeMod) _storeMod = await import('../src/store.js');
   if (!_eventStoreMod) _eventStoreMod = await import('../src/event-store.js');
-  try { _storeMod.reset(); } catch (_) {}
-  try { _eventStoreMod._resetForTests(); } catch (_) {}
+  try { _storeMod.reset(); } catch (_) {} // deliberate: cleanup
+  try { _eventStoreMod._resetForTests(); } catch (_) {} // deliberate: cleanup
   return { anaMod: _anaMod, storeMod: _storeMod, eventStoreMod: _eventStoreMod };
 }
 

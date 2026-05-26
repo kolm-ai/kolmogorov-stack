@@ -19,7 +19,7 @@ const KOLM_CLI = path.resolve(__dirname, '..', 'cli', 'kolm.js');
 
 function isolatedHome() {
   const dir = path.join(os.tmpdir(), 'kolm-w302-' + process.pid + '-' + Math.random().toString(36).slice(2));
-  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {}
+  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {} // deliberate: cleanup
   return dir;
 }
 
@@ -30,7 +30,7 @@ function runLoop(extraArgs = []) {
     timeout: 60_000,
     env: { ...process.env, HOME: home, USERPROFILE: home },
   });
-  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   return { code: res.status, stdout: res.stdout || '', stderr: res.stderr || '' };
 }
 
@@ -81,7 +81,7 @@ test('W302 #5 — next-steps block does NOT appear when a rung fails', () => {
     timeout: 30_000,
     env: { ...process.env, HOME: tmpHome, USERPROFILE: tmpHome, KOLM_API_KEY: '' },
   });
-  try { fs.rmSync(tmpHome, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(tmpHome, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   assert.notEqual(res.status, 0, 'remote loop with no api_key must exit non-zero');
   assert.doesNotMatch(res.stdout || '', /\nnext steps:\n/, 'next-steps must NOT print on failure');
 });

@@ -121,7 +121,7 @@ export function pluginsDir() {
 function _ensureDir(p) {
   try {
     fs.mkdirSync(p, { recursive: true });
-  } catch (_) {
+  } catch (_) { // deliberate: cleanup
     // best-effort; downstream readers handle ENOENT honestly
   }
 }
@@ -245,7 +245,7 @@ function _enrichPluginEntry(plugin_dir, manifest) {
   let entry_exists = false;
   try {
     entry_exists = fs.statSync(entry_path).isFile();
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
   return {
     name: manifest.name,
     version: manifest.version,
@@ -280,7 +280,7 @@ export function listPlugins() {
     const plugin_dir = path.join(dir, ent.name);
     const manifest_path = path.join(plugin_dir, MANIFEST_FILE);
     let exists = false;
-    try { exists = fs.statSync(manifest_path).isFile(); } catch (_) {}
+    try { exists = fs.statSync(manifest_path).isFile(); } catch (_) {} // deliberate: cleanup
     if (!exists) {
       errors.push({
         plugin: ent.name,
@@ -353,7 +353,7 @@ function _copyDirSync(src, dst) {
     if (ent.isDirectory()) {
       _copyDirSync(s, d);
     } else if (ent.isFile()) {
-      try { fs.copyFileSync(s, d); } catch (_) {}
+      try { fs.copyFileSync(s, d); } catch (_) {} // deliberate: cleanup
     }
   }
 }
@@ -393,7 +393,7 @@ export function registerPlugin(opts) {
   // plugins should fail loud at registration, not at load.
   const src_entry = path.join(src_dir, manifest.entry);
   let entryOk = false;
-  try { entryOk = fs.statSync(src_entry).isFile(); } catch (_) {}
+  try { entryOk = fs.statSync(src_entry).isFile(); } catch (_) {} // deliberate: cleanup
   if (!entryOk) {
     throw new PluginError(
       'entry file missing at source: ' + src_entry,
@@ -414,7 +414,7 @@ export function registerPlugin(opts) {
       const pr = readManifest(priorManifestPath);
       if (pr.ok) prior = pr.manifest;
     }
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
   if (prior && prior.version !== manifest.version && process.env.KOLM_PLUGIN_OVERWRITE !== '1') {
     throw new PluginError(
       'plugin ' + manifest.name + ' already installed at version ' + prior.version
@@ -459,7 +459,7 @@ export function getPlugin(name) {
   const plugin_dir = path.join(dir, name);
   const manifest_path = path.join(plugin_dir, MANIFEST_FILE);
   let exists = false;
-  try { exists = fs.statSync(manifest_path).isFile(); } catch (_) {}
+  try { exists = fs.statSync(manifest_path).isFile(); } catch (_) {} // deliberate: cleanup
   if (!exists) {
     return {
       ok: false,

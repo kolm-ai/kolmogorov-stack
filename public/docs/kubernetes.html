@@ -43,7 +43,7 @@
         <a href="/studio">Studio</a>
         <a href="/pricing">Pricing</a>
         <a href="/docs">Docs</a>
-        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a>
       </nav>
       <div class="ks-nav__cta">
         <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
@@ -67,7 +67,7 @@
   <div class="ks-wrap">
     <h2>Helm chart location</h2>
     <p class="sub">The reference chart lives in the kolm repository at <code>tools/helm/kolm/</code>. Clone the repo or vendor the chart into your platform repo; helm registry hosting is on the roadmap but not live today.</p>
-    <div class="code-card"><pre>git clone https://github.com/sneaky-hippo/kolmogorov-stack
+    <div class="code-card"><pre>git clone https://github.com/kolm-ai/kolmogorov-stack
 cd kolmogorov-stack/tools/helm/kolm
 helm install kolm . --namespace kolm-runtime --create-namespace --values my-values.yaml</pre></div>
     <p>The chart is intentionally small. It ships a Deployment, a Service, a ConfigMap for the runtime config, an HPA template, a ServiceMonitor for Prometheus Operator (optional, behind a feature flag), and the init container that fetches the artifact. No CRDs, no operators, no custom controllers; the chart targets standard upstream Kubernetes.</p>
@@ -127,7 +127,7 @@ spec:
     <p class="sub">The init container pulls the .kolm artifact from your registry into an emptyDir volume that the runtime container then loads. Decoupling pull from load means a slow registry does not block the runtime once the artifact is local.</p>
     <div class="code-card"><pre>initContainers:
   - name: artifact-pull
-    image: ghcr.io/sneaky-hippo/kolm-puller:v1
+    image: ghcr.io/kolm-ai/kolm-puller:v1
     args:
       - pull
       - --registry=$(KOLM_REGISTRY)
@@ -162,7 +162,7 @@ volumes:
     <h2>Sample values.yaml</h2>
     <p class="sub">A minimal values.yaml that exercises the readiness probe, the HPA, the init container, and the zero-downtime annotation.</p>
     <div class="code-card"><pre>image:
-  repository: ghcr.io/sneaky-hippo/kolm-runtime
+  repository: ghcr.io/kolm-ai/kolm-runtime
   tag: v1.0.0
   pullPolicy: IfNotPresent
 
@@ -249,7 +249,7 @@ terminationGracePeriodSeconds: 60</pre></div>
         <a href="/enterprise">Enterprise</a>
         <a href="/manifesto">Manifesto</a>
         <a href="mailto:rodneyyesep@gmail.com">rodneyyesep@gmail.com</a>
-        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
       </div>
     </div>
     <div class="ks-foot__base">

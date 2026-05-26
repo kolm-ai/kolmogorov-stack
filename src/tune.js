@@ -224,7 +224,7 @@ function parseTrainerOutput(py, revision, airgap) {
   // Trainer emits a single line of JSON-RPC on the last non-empty stdout line.
   const lines = stdout.split('\n').map(s => s.trim()).filter(Boolean);
   for (let i = lines.length - 1; i >= 0; i--) {
-    try { stats = JSON.parse(lines[i]); break; } catch {}
+    try { stats = JSON.parse(lines[i]); break; } catch {} // deliberate: cleanup
   }
   if (py.status !== 0) {
     const tail = stderr.split('\n').slice(-5).join('\n');

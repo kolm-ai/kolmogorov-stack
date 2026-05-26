@@ -69,7 +69,7 @@ Honesty contract: the action only runs when the <code>KOLM_API_KEY</code> secret
 
 <section id="template">
 <h2>Template</h2>
-<p>A reference-only template ships in the kolm repo at <a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/.github/workflows/kolm.yml" style="color:var(--accent)"><code>.github/workflows/kolm.yml</code></a>. It is intentionally guarded with <code>if: false</code> on the distill job so the file does not run unintended CI minutes. Flip the guard and configure the secret to enable it.</p>
+<p>A reference-only template ships in the kolm repo at <a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/.github/workflows/kolm.yml" style="color:var(--accent)"><code>.github/workflows/kolm.yml</code></a>. It is intentionally guarded with <code>if: false</code> on the distill job so the file does not run unintended CI minutes. Flip the guard and configure the secret to enable it.</p>
 <p>Copy the template into your repo and commit. The template is self-documented with comments explaining each section.</p>
 </section>
 
@@ -124,7 +124,7 @@ Honesty contract: the action only runs when the <code>KOLM_API_KEY</code> secret
 <section id="publish-releases">
 <h2>Publish .kolm to GitHub Releases</h2>
 <p>With <code>publish_release: true</code>, the action attaches the produced <code>.kolm</code> to a release tagged <code>kolm-distill-&lt;commit-sha&gt;</code>. Downstream consumers can pin to a specific commit:</p>
-<pre>kolm pull github://sneaky-hippo/kolmogorov-stack@abc1234</pre>
+<pre>kolm pull github://kolm-ai/kolmogorov-stack@abc1234</pre>
 <p>The release body includes the K-Score, the teacher used, the namespace, and the commit range that changed since the last release. The artifact is also pushed to the kolm hosted registry so the same <code>kolm://sha256-...</code> URI resolves regardless of GitHub's availability.</p>
 </section>
 
@@ -165,7 +165,7 @@ jobs:
       - name: Fail merge on K-Score regression
         if: steps.kolm.outputs.kscore_passed != 'true'
         run: exit 1</pre>
-<p>For the full annotated reference, see <a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/.github/workflows/kolm.yml" style="color:var(--accent)"><code>.github/workflows/kolm.yml</code></a> in the repo and the <a href="https://github.com/sneaky-hippo/kolmogorov-stack/tree/main/tools/github-actions-kolm" style="color:var(--accent)">tools/github-actions-kolm/README.md</a> for the Action's input / output reference.</p>
+<p>For the full annotated reference, see <a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/.github/workflows/kolm.yml" style="color:var(--accent)"><code>.github/workflows/kolm.yml</code></a> in the repo and the <a href="https://github.com/kolm-ai/kolmogorov-stack/tree/main/tools/github-actions-kolm" style="color:var(--accent)">tools/github-actions-kolm/README.md</a> for the Action's input / output reference.</p>
 </section>
 
 <footer class="page">

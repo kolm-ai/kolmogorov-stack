@@ -1,7 +1,8 @@
 # Replicate Cog container deps. Cog reads python_packages from cog.yaml
 # when building the image; this file is here so users can lint or
 # install locally (uv pip install -r requirements.txt) before pushing.
-cog>=0.10
+# W890-13: every dep pinned with == so the local lint matches the prod image.
+cog==0.10.2
 torch==2.4.1
 transformers==4.45.2
 peft==0.13.2

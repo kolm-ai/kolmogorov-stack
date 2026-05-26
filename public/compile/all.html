@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Compile catalog &middot; 70 model + format pairs &middot; kolm.ai</title>
+<meta name="description" content="Compile any of 10 frontier or open-weight models to 7 target formats (GGUF, EXL2, GPTQ, AWQ, MLX) with kolm. 70 per-pair compile guides.">
+<meta name="theme-color" content="#0b0d10">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://kolm.ai/compile">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+:root{--ink:#e6e9ee;--ink-mute:#9aa3b2;--ink-faint:#6b7280;--bg:#0b0d10;--bg-elev:#11151b;--accent:#5eead4;--line:rgba(230,233,238,.10);--mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter','Segoe UI',system-ui,sans-serif}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.65}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+header.site{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);z-index:50}
+header.site .wrap{display:flex;align-items:center;justify-content:space-between;max-width:1080px;margin:0 auto;padding:14px 24px}
+header.site .logo{font-family:var(--mono);font-weight:600;letter-spacing:1.2px;color:var(--ink);font-size:18px}
+header.site nav a{margin-left:24px;color:var(--ink-mute);font-size:14px}
+main{max-width:880px;margin:0 auto;padding:48px 24px 96px}
+h1{font-size:34px;line-height:1.15;letter-spacing:-1px;font-weight:680;margin:0 0 14px}
+h2{font-size:20px;line-height:1.25;font-weight:640;margin:34px 0 10px;color:var(--ink-mute);font-family:var(--mono);text-transform:uppercase;letter-spacing:1.2px;font-size:12px}
+.lede{font-size:18px;color:var(--ink-mute);margin:0 0 28px}
+ul{padding-left:22px;margin:0 0 24px;column-count:1}
+li{margin:5px 0}
+.muted{color:var(--ink-faint);font-size:13px}
+footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);font-size:13px;border-top:1px solid var(--line)}
+@media (min-width:720px){ul{column-count:2;column-gap:32px}}
+</style>
+</head>
+<body>
+<header class="site"><div class="wrap"><a class="logo" href="/">kolm.ai</a><nav><a href="/forge">Forge</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/signup">Sign up</a></nav></div></header>
+<main>
+  <h1>Compile catalog</h1>
+  <p class="lede">70 per-pair compile guides: 10 source models &rarr; 7 target formats. Every page documents the <code>kolm compile</code> one-liner, a resource estimate, and a verify step.</p>
+
+  <h2>Claude Opus 4 &middot; Anthropic</h2>
+  <ul>
+    <li><a href="/compile/claude-opus-4-to-gguf-q4_k_m">to GGUF Q4_K_M</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/claude-opus-4-to-gguf-q5_k_m">to GGUF Q5_K_M</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/claude-opus-4-to-gguf-q8_0">to GGUF Q8_0</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/claude-opus-4-to-exl2">to EXL2</a> <span class="muted">&middot; ExLlamaV2 / TabbyAPI</span></li>
+    <li><a href="/compile/claude-opus-4-to-gptq">to GPTQ</a> <span class="muted">&middot; AutoGPTQ / vLLM</span></li>
+    <li><a href="/compile/claude-opus-4-to-awq">to AWQ</a> <span class="muted">&middot; AWQ / vLLM</span></li>
+    <li><a href="/compile/claude-opus-4-to-mlx">to MLX</a> <span class="muted">&middot; mlx-lm on Apple Silicon</span></li>
+  </ul>
+  <h2>GPT-4o &middot; OpenAI</h2>
+  <ul>
+    <li><a href="/compile/gpt-4o-to-gguf-q4_k_m">to GGUF Q4_K_M</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/gpt-4o-to-gguf-q5_k_m">to GGUF Q5_K_M</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/gpt-4o-to-gguf-q8_0">to GGUF Q8_0</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/gpt-4o-to-exl2">to EXL2</a> <span class="muted">&middot; ExLlamaV2 / TabbyAPI</span></li>
+    <li><a href="/compile/gpt-4o-to-gptq">to GPTQ</a> <span class="muted">&middot; AutoGPTQ / vLLM</span></li>
+    <li><a href="/compile/gpt-4o-to-awq">to AWQ</a> <span class="muted">&middot; AWQ / vLLM</span></li>
+    <li><a href="/compile/gpt-4o-to-mlx">to MLX</a> <span class="muted">&middot; mlx-lm on Apple Silicon</span></li>
+  </ul>
+  <h2>Llama 3.3 70B &middot; Meta</h2>
+  <ul>
+    <li><a href="/compile/llama-3.3-70b-to-gguf-q4_k_m">to GGUF Q4_K_M</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/llama-3.3-70b-to-gguf-q5_k_m">to GGUF Q5_K_M</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/llama-3.3-70b-to-gguf-q8_0">to GGUF Q8_0</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/llama-3.3-70b-to-exl2">to EXL2</a> <span class="muted">&middot; ExLlamaV2 / TabbyAPI</span></li>
+    <li><a href="/compile/llama-3.3-70b-to-gptq">to GPTQ</a> <span class="muted">&middot; AutoGPTQ / vLLM</span></li>
+    <li><a href="/compile/llama-3.3-70b-to-awq">to AWQ</a> <span class="muted">&middot; AWQ / vLLM</span></li>
+    <li><a href="/compile/llama-3.3-70b-to-mlx">to MLX</a> <span class="muted">&middot; mlx-lm on Apple Silicon</span></li>
+  </ul>
+  <h2>Qwen2.5 72B &middot; Alibaba</h2>
+  <ul>
+    <li><a href="/compile/qwen2.5-72b-to-gguf-q4_k_m">to GGUF Q4_K_M</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/qwen2.5-72b-to-gguf-q5_k_m">to GGUF Q5_K_M</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/qwen2.5-72b-to-gguf-q8_0">to GGUF Q8_0</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/qwen2.5-72b-to-exl2">to EXL2</a> <span class="muted">&middot; ExLlamaV2 / TabbyAPI</span></li>
+    <li><a href="/compile/qwen2.5-72b-to-gptq">to GPTQ</a> <span class="muted">&middot; AutoGPTQ / vLLM</span></li>
+    <li><a href="/compile/qwen2.5-72b-to-awq">to AWQ</a> <span class="muted">&middot; AWQ / vLLM</span></li>
+    <li><a href="/compile/qwen2.5-72b-to-mlx">to MLX</a> <span class="muted">&middot; mlx-lm on Apple Silicon</span></li>
+  </ul>
+  <h2>Qwen2.5 32B &middot; Alibaba</h2>
+  <ul>
+    <li><a href="/compile/qwen2.5-32b-to-gguf-q4_k_m">to GGUF Q4_K_M</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/qwen2.5-32b-to-gguf-q5_k_m">to GGUF Q5_K_M</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/qwen2.5-32b-to-gguf-q8_0">to GGUF Q8_0</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/qwen2.5-32b-to-exl2">to EXL2</a> <span class="muted">&middot; ExLlamaV2 / TabbyAPI</span></li>
+    <li><a href="/compile/qwen2.5-32b-to-gptq">to GPTQ</a> <span class="muted">&middot; AutoGPTQ / vLLM</span></li>
+    <li><a href="/compile/qwen2.5-32b-to-awq">to AWQ</a> <span class="muted">&middot; AWQ / vLLM</span></li>
+    <li><a href="/compile/qwen2.5-32b-to-mlx">to MLX</a> <span class="muted">&middot; mlx-lm on Apple Silicon</span></li>
+  </ul>
+  <h2>Qwen2.5 7B &middot; Alibaba</h2>
+  <ul>
+    <li><a href="/compile/qwen2.5-7b-to-gguf-q4_k_m">to GGUF Q4_K_M</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/qwen2.5-7b-to-gguf-q5_k_m">to GGUF Q5_K_M</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/qwen2.5-7b-to-gguf-q8_0">to GGUF Q8_0</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/qwen2.5-7b-to-exl2">to EXL2</a> <span class="muted">&middot; ExLlamaV2 / TabbyAPI</span></li>
+    <li><a href="/compile/qwen2.5-7b-to-gptq">to GPTQ</a> <span class="muted">&middot; AutoGPTQ / vLLM</span></li>
+    <li><a href="/compile/qwen2.5-7b-to-awq">to AWQ</a> <span class="muted">&middot; AWQ / vLLM</span></li>
+    <li><a href="/compile/qwen2.5-7b-to-mlx">to MLX</a> <span class="muted">&middot; mlx-lm on Apple Silicon</span></li>
+  </ul>
+  <h2>DeepSeek-R1-Distill-Qwen-32B &middot; DeepSeek</h2>
+  <ul>
+    <li><a href="/compile/deepseek-r1-distill-32b-to-gguf-q4_k_m">to GGUF Q4_K_M</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/deepseek-r1-distill-32b-to-gguf-q5_k_m">to GGUF Q5_K_M</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/deepseek-r1-distill-32b-to-gguf-q8_0">to GGUF Q8_0</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/deepseek-r1-distill-32b-to-exl2">to EXL2</a> <span class="muted">&middot; ExLlamaV2 / TabbyAPI</span></li>
+    <li><a href="/compile/deepseek-r1-distill-32b-to-gptq">to GPTQ</a> <span class="muted">&middot; AutoGPTQ / vLLM</span></li>
+    <li><a href="/compile/deepseek-r1-distill-32b-to-awq">to AWQ</a> <span class="muted">&middot; AWQ / vLLM</span></li>
+    <li><a href="/compile/deepseek-r1-distill-32b-to-mlx">to MLX</a> <span class="muted">&middot; mlx-lm on Apple Silicon</span></li>
+  </ul>
+  <h2>DeepSeek-R1-Distill-Qwen-7B &middot; DeepSeek</h2>
+  <ul>
+    <li><a href="/compile/deepseek-r1-distill-7b-to-gguf-q4_k_m">to GGUF Q4_K_M</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/deepseek-r1-distill-7b-to-gguf-q5_k_m">to GGUF Q5_K_M</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/deepseek-r1-distill-7b-to-gguf-q8_0">to GGUF Q8_0</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/deepseek-r1-distill-7b-to-exl2">to EXL2</a> <span class="muted">&middot; ExLlamaV2 / TabbyAPI</span></li>
+    <li><a href="/compile/deepseek-r1-distill-7b-to-gptq">to GPTQ</a> <span class="muted">&middot; AutoGPTQ / vLLM</span></li>
+    <li><a href="/compile/deepseek-r1-distill-7b-to-awq">to AWQ</a> <span class="muted">&middot; AWQ / vLLM</span></li>
+    <li><a href="/compile/deepseek-r1-distill-7b-to-mlx">to MLX</a> <span class="muted">&middot; mlx-lm on Apple Silicon</span></li>
+  </ul>
+  <h2>Mistral Large &middot; Mistral AI</h2>
+  <ul>
+    <li><a href="/compile/mistral-large-to-gguf-q4_k_m">to GGUF Q4_K_M</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/mistral-large-to-gguf-q5_k_m">to GGUF Q5_K_M</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/mistral-large-to-gguf-q8_0">to GGUF Q8_0</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/mistral-large-to-exl2">to EXL2</a> <span class="muted">&middot; ExLlamaV2 / TabbyAPI</span></li>
+    <li><a href="/compile/mistral-large-to-gptq">to GPTQ</a> <span class="muted">&middot; AutoGPTQ / vLLM</span></li>
+    <li><a href="/compile/mistral-large-to-awq">to AWQ</a> <span class="muted">&middot; AWQ / vLLM</span></li>
+    <li><a href="/compile/mistral-large-to-mlx">to MLX</a> <span class="muted">&middot; mlx-lm on Apple Silicon</span></li>
+  </ul>
+  <h2>Gemma 2 27B &middot; Google</h2>
+  <ul>
+    <li><a href="/compile/gemma-2-27b-to-gguf-q4_k_m">to GGUF Q4_K_M</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/gemma-2-27b-to-gguf-q5_k_m">to GGUF Q5_K_M</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/gemma-2-27b-to-gguf-q8_0">to GGUF Q8_0</a> <span class="muted">&middot; llama.cpp / Ollama / LM Studio</span></li>
+    <li><a href="/compile/gemma-2-27b-to-exl2">to EXL2</a> <span class="muted">&middot; ExLlamaV2 / TabbyAPI</span></li>
+    <li><a href="/compile/gemma-2-27b-to-gptq">to GPTQ</a> <span class="muted">&middot; AutoGPTQ / vLLM</span></li>
+    <li><a href="/compile/gemma-2-27b-to-awq">to AWQ</a> <span class="muted">&middot; AWQ / vLLM</span></li>
+    <li><a href="/compile/gemma-2-27b-to-mlx">to MLX</a> <span class="muted">&middot; mlx-lm on Apple Silicon</span></li>
+  </ul>
+
+</main>
+<footer>kolm.ai &middot; the AI compiler &middot; <a href="/forge">Forge</a> &middot; <a href="/pricing">Pricing</a> &middot; <a href="/verify-prod">verify a receipt</a></footer>
+</body>
+</html>

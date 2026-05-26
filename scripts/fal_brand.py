@@ -8,7 +8,10 @@ Generates:
 Strict: NO TEXT, NO LETTERS, NO WORDMARK, NO LOGO TYPOGRAPHY anywhere in any
 render. The wordmark stays in CSS. These renders are pure object photography.
 """
-import os, sys, urllib.request, time
+import os
+import sys
+import urllib.request
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 

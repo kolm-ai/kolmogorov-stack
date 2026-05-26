@@ -36,7 +36,7 @@ const WAVE_MODULE_FILES = (() => {
       if (!/-routes\.js$/.test(name)) continue;
       out.push({ label: 'src/' + name, file: path.join(ROOT, 'src', name) });
     }
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
   return out;
 })();
 
@@ -528,7 +528,7 @@ function canonicalNavBlockForApi() {
       const lineStart = home.lastIndexOf('\n', start) + 1;
       return home.slice(lineStart, finish + end.length);
     }
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
   return [
     begin,
     '<nav class="site-nav" aria-label="Primary">',
@@ -615,7 +615,7 @@ function renderPage(grouped, totalCount, unparseable) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script> // deliberate: cleanup
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>${title}</title>
 <meta name="description" content="${escapeHtml(description)}">

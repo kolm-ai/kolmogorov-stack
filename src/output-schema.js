@@ -151,7 +151,7 @@ export function validateOutputSchemaSpec(spec) {
       errors.push('schema:empty_string');
     } else {
       try {
-        // eslint-disable-next-line no-new
+         
         new RegExp(s);
       } catch (e) {
         errors.push('regex:invalid');

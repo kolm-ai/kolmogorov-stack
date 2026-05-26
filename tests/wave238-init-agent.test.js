@@ -20,7 +20,7 @@ function mkTmp(label) {
 }
 
 function rimraf(dir) {
-  try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
 }
 
 test('W238 init-agent module exports the public surface', async () => {

@@ -25,7 +25,7 @@ const KOLM_CLI = path.resolve(__dirname, '..', 'cli', 'kolm.js');
 
 function isolatedHome() {
   const dir = path.join(os.tmpdir(), 'kolm-w371-' + process.pid + '-' + Math.random().toString(36).slice(2));
-  try { fs.mkdirSync(dir, { recursive: true }); } catch {}
+  try { fs.mkdirSync(dir, { recursive: true }); } catch {} // deliberate: cleanup
   return dir;
 }
 
@@ -41,7 +41,7 @@ function runCli(args, extraEnv = {}) {
     timeout: 60_000,
     env,
   });
-  try { fs.rmSync(home, { recursive: true, force: true }); } catch {}
+  try { fs.rmSync(home, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   return { code: res.status, stdout: res.stdout || '', stderr: res.stderr || '', home };
 }
 
@@ -55,7 +55,7 @@ async function withIsolatedHome(fn) {
   finally {
     process.env.HOME = prevHome;
     process.env.USERPROFILE = prevUserProfile;
-    try { fs.rmSync(home, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(home, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 }
 
@@ -347,7 +347,7 @@ test('W371 #22 - kolm sim create + run end-to-end via CLI', () => {
     const list = JSON.parse(listSim.stdout);
     assert.ok(list.some((s) => s.sim_id === created.sim_id));
   } finally {
-    try { fs.rmSync(home, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(home, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });
 
@@ -366,7 +366,7 @@ test('W371 #23 - kolm train plan <dataset> emits plan envelope', () => {
     assert.ok(['classification', 'generation', 'extraction', 'redaction', 'unknown'].includes(p.task));
     assert.ok(['rule_first', 'classifier', 'lora', 'distill'].includes(p.recommended_path));
   } finally {
-    try { fs.rmSync(home, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(home, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });
 
@@ -387,7 +387,7 @@ test('W371 #24 - kolm bakeoff <ds> --stub-model prints ranked table', () => {
     assert.match(out.stdout, /rule/);
     assert.match(out.stdout, /claude-haiku-4-5/);
   } finally {
-    try { fs.rmSync(home, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(home, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });
 
@@ -407,7 +407,7 @@ test('W371 #25 - kolm replay dataset <path> --against <model> works without clou
     assert.equal(r.count, 5);
     assert.ok('pass_rate' in r.summary);
   } finally {
-    try { fs.rmSync(home, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(home, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });
 

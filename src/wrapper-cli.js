@@ -1319,7 +1319,15 @@ export async function capturesExport(args) {
       _die({ ok: false, error: 'missing_dependency', dep: 'apache-arrow', hint: 'npm install apache-arrow', version: WRAPPER_CLI_VERSION }, 2);
       return;
     }
-    fs.mkdirSync(out, { recursive: true });
+    // W888-L: support both `--out path/to/dir` (full HF datasets layout) and
+    // `--out path/to/file.arrow` (single arrow IPC file readable via
+    // tableFromIPC). The latter is what the wave888i contract pins.
+    const singleFile = /\.(arrow|ipc)$/i.test(out);
+    if (singleFile) {
+      try { fs.mkdirSync(path.dirname(out), { recursive: true }); } catch (_) {} // deliberate: cleanup
+    } else {
+      fs.mkdirSync(out, { recursive: true });
+    }
     const cols = _captureHfColumns();
     const features = {};
     for (const c of cols) features[c.name] = { dtype: c.hfDtype, _type: 'Value' };
@@ -1328,9 +1336,14 @@ export async function capturesExport(args) {
     const table = (all.length === 0)
       ? arrow.tableFromArrays(Object.fromEntries(cols.map((c) => [c.name, []])))
       : arrow.tableFromArrays(columnar);
-    const arrowPath = path.join(out, 'data-00000-of-00001.arrow');
+    const arrowPath = singleFile ? out : path.join(out, 'data-00000-of-00001.arrow');
     const ipc = arrow.tableToIPC(table, 'file');
     fs.writeFileSync(arrowPath, Buffer.from(ipc));
+    if (singleFile) {
+      const arrowBytesSf = fs.statSync(arrowPath).size;
+      _emit({ ok: true, written, out, format, namespace: ns || null, files: [path.basename(arrowPath)], single_file: true, bytes: arrowBytesSf, version: WRAPPER_CLI_VERSION });
+      return;
+    }
     const arrowBytes = fs.statSync(arrowPath).size;
     const fingerprint = _hfFingerprint(features, all.length, arrowBytes);
     fs.writeFileSync(path.join(out, 'dataset_info.json'), JSON.stringify({

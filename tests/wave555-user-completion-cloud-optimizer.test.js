@@ -48,7 +48,7 @@ function tmpHome() {
 function cleanup(dir) {
   delete process.env.KOLM_DATA_DIR;
   delete process.env.KOLM_RUNTIME_POLICY;
-  try { fs.rmSync(dir, { recursive: true, force: true }); } catch {}
+  try { fs.rmSync(dir, { recursive: true, force: true }); } catch {} // deliberate: cleanup
 }
 
 test('W555 #1 - prompt compression and token-budget enforcement are deterministic and budget-bound', () => {

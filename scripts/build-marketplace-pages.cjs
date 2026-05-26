@@ -118,7 +118,7 @@ function kScoreFor(slug) {
       const br = JSON.parse(fs.readFileSync(sibling, 'utf8'));
       const acc = br?.paths?.['kolm-js']?.accuracy;
       if (typeof acc === 'number') return acc;
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
   }
   return null;
 }
@@ -162,7 +162,7 @@ function buildPage(a) {
 <meta name="twitter:image" content="https://kolm.ai/og/marketplace-${a.slug}.svg">
 <link rel="canonical" href="https://kolm.ai/marketplace/${a.slug}">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script> // deliberate: cleanup
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",

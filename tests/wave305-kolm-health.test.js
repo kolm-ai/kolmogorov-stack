@@ -19,7 +19,7 @@ const KOLM_CLI = path.resolve(__dirname, '..', 'cli', 'kolm.js');
 
 function isolatedHome() {
   const dir = path.join(os.tmpdir(), 'kolm-w305-' + process.pid + '-' + Math.random().toString(36).slice(2));
-  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {}
+  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {} // deliberate: cleanup
   return dir;
 }
 
@@ -36,10 +36,10 @@ function spawnAsync(args, env) {
     let stdout = ''; let stderr = '';
     child.stdout.on('data', (b) => { stdout += b.toString('utf8'); });
     child.stderr.on('data', (b) => { stderr += b.toString('utf8'); });
-    const killer = setTimeout(() => { try { child.kill('SIGKILL'); } catch (_) {} }, 20_000);
+    const killer = setTimeout(() => { try { child.kill('SIGKILL'); } catch (_) {} }, 20_000); // deliberate: cleanup
     child.on('close', (code) => {
       clearTimeout(killer);
-      try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {}
+      try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
       resolve({ code, stdout, stderr });
     });
   });

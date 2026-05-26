@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>Troubleshooting &middot; Run &amp; Govern &middot; kolm.ai</title>
+<meta name="description" content="Common deployment failures and the one-line fix for each: SSH refused, hardware does not fit, runtime install failed, smoke test failed, port in use.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Troubleshooting &middot; Run &amp; Govern &middot; kolm.ai">
+<meta property="og:description" content="Common Run-surface failures with a clear -&gt; Run X remediation for each.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/run/troubleshooting">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/docs/run/troubleshooting">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230,233,238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--accent-soft:rgba(17,17,17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px;max-width:780px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+td code{font-size:12px}
+.callout{padding:14px 18px;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;background:var(--bg-elev);margin:18px 0;max-width:780px;font-size:14px;color:var(--ink-mute)}
+.callout b{color:var(--ink)}
+.fix{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);margin:14px 0 20px;max-width:840px}
+.fix .err{font-family:var(--mono);font-size:12.5px;color:#f0b0b0;background:rgba(180,60,60,0.10);padding:6px 10px;border-radius:6px;border:1px solid rgba(180,60,60,0.20);display:inline-block;margin-bottom:8px}
+.fix .why{color:var(--ink-mute);font-size:14px;margin:6px 0 8px}
+.fix .arrow{font-family:var(--mono);color:var(--accent);font-size:12px;letter-spacing:0.08em;margin-right:6px}
+.fix pre{margin:8px 0 0}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px;max-width:920px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / <a href="/docs/run/overview">run</a> / troubleshooting</div>
+<p class="eyebrow">Run &amp; Govern</p>
+<h1>Troubleshooting.</h1>
+<p class="lede">Every Run-surface failure mode in one place, with the one-line remediation. The deploy pipeline always reports the failing step; the headings below mirror that step name verbatim so you can grep this page.</p>
+
+<h2 id="first-line">First line of defence</h2>
+<p>Before reading down the list, run the doctor. It probes every dependency the Run surface touches and prints the same fix lines this page does, scoped to your machine.</p>
+<pre><code>kolm doctor --json | jq '.checks[] | select(.status!="ok")'
+kolm doctor --fix         # attempt the safe-to-automate fixes</code></pre>
+
+<h2 id="ssh-refused">SSH connection refused (preflight)</h2>
+
+<div class="fix">
+  <span class="err">DeployError: preflight: ssh connect ECONNREFUSED 10.0.4.21:22</span>
+  <p class="why">The SSH listener is not reachable on the host:port you registered. Either sshd is not running, a firewall is dropping the packet, or the registry has a stale address.</p>
+  <p><span class="arrow">&rarr; Run</span></p>
+  <pre><code>kolm devices ping prod-gpu-1 --verbose          # confirms it is SSH, not artifact
+ssh -p 22 kolm@10.0.4.21                        # reproduce the raw failure
+# If wrong host/port:
+kolm devices update prod-gpu-1 --host 10.0.4.99 --port 2222
+# If host is up but firewall is blocking:
+sudo ufw allow from &lt;your-ip&gt; to any port 22 proto tcp</code></pre>
+</div>
+
+<h2 id="ssh-auth">SSH authentication failed (preflight)</h2>
+
+<div class="fix">
+  <span class="err">DeployError: preflight: ssh authentication failed (publickey)</span>
+  <p class="why">The key path is wrong, the agent does not have the key loaded, or the remote authorized_keys is missing the public half.</p>
+  <p><span class="arrow">&rarr; Run</span></p>
+  <pre><code>kolm devices show prod-gpu-1 --json | jq .connection
+# Re-register with the correct key path (never copied, only referenced):
+kolm devices update prod-gpu-1 --key ~/.ssh/id_ed25519
+# Or push the public half to the host:
+ssh-copy-id -i ~/.ssh/id_ed25519.pub kolm@10.0.4.21</code></pre>
+</div>
+
+<h2 id="hardware-fit">Hardware does not fit the artifact (preflight)</h2>
+
+<div class="fix">
+  <span class="err">DeployError: preflight: artifact requires &gt;= 24GB VRAM, device has 16GB</span>
+  <p class="why">The artifact's <code>runtime_passport.vram_required_gb</code> is larger than what the device reported on the last hardware probe. The check is run before any bytes move so a misfit aborts in &lt; 1s.</p>
+  <p><span class="arrow">&rarr; Run</span></p>
+  <pre><code># Option 1: deploy a smaller-quant variant of the same artifact
+kolm test-quants &lt;art&gt; --device prod-gpu-1
+kolm deploy &lt;art-q4&gt; --device prod-gpu-1
+
+# Option 2: pick a fatter device
+kolm devices list --select tag=a100
+kolm deploy &lt;art&gt; --device prod-a100-2
+
+# Option 3: refresh hardware (if you added VRAM)
+kolm devices refresh prod-gpu-1</code></pre>
+</div>
+
+<h2 id="upload-fail">Upload or hash mismatch (upload)</h2>
+
+<div class="fix">
+  <span class="err">DeployError: upload: sha256 mismatch (expected abc..., got def...)</span>
+  <p class="why">The bytes on the device after transfer do not hash to the same sha256 as the local artifact. Usually a half-written transfer (disk full, network drop) or a tampered intermediate.</p>
+  <p><span class="arrow">&rarr; Run</span></p>
+  <pre><code>kolm devices exec prod-gpu-1 -- "df -h /var/lib/kolm"   # is the disk full?
+kolm devices exec prod-gpu-1 -- "rm -rf /var/lib/kolm/incoming/*"
+kolm deploy &lt;art&gt; --device prod-gpu-1 --retry-upload  # second attempt; on second failure look at network</code></pre>
+</div>
+
+<h2 id="runtime-install">Runtime install failed (runtime-ensure)</h2>
+
+<div class="fix">
+  <span class="err">DeployError: runtime-ensure: llama.cpp install failed (exit 127 on remote)</span>
+  <p class="why">The bootstrap tried to install or upgrade the runtime on the remote and one of the package manager / source-build steps failed. The remote stderr is captured in the deploy record.</p>
+  <p><span class="arrow">&rarr; Run</span></p>
+  <pre><code>kolm devices runtime status prod-gpu-1                 # what is actually installed
+kolm devices runtime install prod-gpu-1 --runtime llama.cpp --version 0.3.4 --verbose
+# Inspect the captured log:
+kolm deploy logs &lt;deploy-id&gt; --step runtime-ensure --tail 200
+# Fall back to a manual install per the runtimes doc, then mark as installed:
+kolm devices runtime mark prod-gpu-1 --runtime llama.cpp --version 0.3.4 --path /usr/local/bin/llama-server</code></pre>
+</div>
+
+<h2 id="start-fail">Pod failed to start (start)</h2>
+
+<div class="fix">
+  <span class="err">DeployError: start: pod exited with code 137 before serving</span>
+  <p class="why">The runtime started, the model loaded part way, then OOM-killed (exit 137 = SIGKILL, usually OOM). Or the runtime binary crashed; look at its stderr.</p>
+  <p><span class="arrow">&rarr; Run</span></p>
+  <pre><code>kolm deploy logs &lt;deploy-id&gt; --step start --tail 200
+kolm devices exec prod-gpu-1 -- "dmesg | tail -20"     # confirm oom-killer
+# Drop to a smaller quant:
+kolm test-quants &lt;art&gt; --device prod-gpu-1
+# Or raise the device limit (only safe if the device is dedicated):
+kolm devices config prod-gpu-1 --vram-reserve-gb 2</code></pre>
+</div>
+
+<h2 id="port-in-use">Port already in use (start)</h2>
+
+<div class="fix">
+  <span class="err">DeployError: start: bind 0.0.0.0:8080 EADDRINUSE</span>
+  <p class="why">Something on the device is already listening on the port kolm tried to bind. Usually a previous deploy that did not exit cleanly, or a non-kolm process.</p>
+  <p><span class="arrow">&rarr; Run</span></p>
+  <pre><code>kolm devices exec prod-gpu-1 -- "ss -tlnp | grep :8080"
+# If it is a stale kolm pod:
+kolm fleet stop --device prod-gpu-1 --namespace &lt;ns&gt;
+# Otherwise pick a different port:
+kolm namespace config &lt;ns&gt; --port 8081
+kolm deploy &lt;art&gt; --device prod-gpu-1</code></pre>
+</div>
+
+<h2 id="smoke-fail">Smoke test failed (smoke)</h2>
+
+<div class="fix">
+  <span class="err">DeployError: smoke: 3/10 prompts returned malformed JSON, k-score 0.42 &lt; 0.70 floor</span>
+  <p class="why">The pod started and served, but the on-device smoke test (the frozen 10-prompt eval set) failed to clear the k-score floor or returned malformed output. The deploy will auto-rollback if rollback-on-smoke is set; otherwise the bad pod is left running and traffic is not switched.</p>
+  <p><span class="arrow">&rarr; Run</span></p>
+  <pre><code>kolm deploy logs &lt;deploy-id&gt; --step smoke --json
+kolm test-device &lt;art&gt; --device prod-gpu-1 --verbose   # reproduce off the deploy path
+# Likely causes:
+# 1. Wrong runtime version -- check passport
+kolm artifact show &lt;art&gt; --field runtime_passport
+# 2. Quant too aggressive -- try a higher-precision build
+kolm test-quants &lt;art&gt; --device prod-gpu-1
+# 3. Genuine regression -- compare to the last green deploy
+kolm deploy diff &lt;deploy-id&gt; &lt;last-green-deploy-id&gt;</code></pre>
+</div>
+
+<h2 id="record-fail">Receipt write failed (record)</h2>
+
+<div class="fix">
+  <span class="err">DeployError: record: receipt store unreachable (KOLM_RECEIPTS_URL timed out)</span>
+  <p class="why">Pod is healthy and serving; the post-deploy receipt could not be written. Deploy is left in a <code>recorded=false</code> state but service is up. Worth fixing because audit chains depend on it.</p>
+  <p><span class="arrow">&rarr; Run</span></p>
+  <pre><code>kolm config get receipts                              # confirm endpoint + tenant
+kolm deploy record &lt;deploy-id&gt;                        # retry write only; does not touch the pod
+# If the receipt store is genuinely down, queue and retry later:
+kolm receipts queue list</code></pre>
+</div>
+
+<h2 id="ota-stuck">OTA update stuck (per-namespace)</h2>
+
+<div class="fix">
+  <span class="err">FleetWarning: namespace=prod has 3 devices on art_old, 2 on art_new for &gt;30m</span>
+  <p class="why">A rolling or canary update is partially propagated and stalled. Usually because new device joined mid-rollout, a canary device failed smoke, or the policy is set to <code>notify</code> and the operator has not approved yet.</p>
+  <p><span class="arrow">&rarr; Run</span></p>
+  <pre><code>kolm fleet status --select namespace=prod
+kolm namespace updates show prod                       # see policy + pending count
+# Force-promote (skip notify gate):
+kolm namespace updates promote prod
+# Or roll back the partial cohort:
+kolm fleet rollback --select namespace=prod,artifact=art_new</code></pre>
+</div>
+
+<h2 id="device-offline">Device flagged offline by monitor</h2>
+
+<div class="fix">
+  <span class="err">FleetAlert: prod-gpu-1 offline (3 consecutive health misses, last seen 14m ago)</span>
+  <p class="why">The fleet monitor expected a heartbeat / health response and did not get one. The device may be down, the network path may be broken, or the runtime crashed.</p>
+  <p><span class="arrow">&rarr; Run</span></p>
+  <pre><code>kolm devices ping prod-gpu-1
+kolm devices health prod-gpu-1 --verbose
+# If the host is reachable but the pod is down:
+kolm fleet status --device prod-gpu-1
+kolm deploy &lt;last-good-art&gt; --device prod-gpu-1
+# If the host is unreachable, the monitor will keep retrying with backoff.</code></pre>
+</div>
+
+<h2 id="k8s-pull">Kubernetes image pull or pod-pending failures</h2>
+
+<div class="fix">
+  <span class="err">DeployError: k8s: pod stuck in ImagePullBackOff after 90s</span>
+  <p class="why">The runtime image cannot be pulled (registry auth, network egress) or the pod cannot be scheduled (no node has the requested GPU). Common when a new cluster has not been wired with an image pull secret.</p>
+  <p><span class="arrow">&rarr; Run</span></p>
+  <pre><code>kubectl describe pod -n &lt;ns&gt; &lt;pod-name&gt;            # exact reason
+kubectl create secret docker-registry kolm-pull --docker-server=... --docker-username=... --docker-password=...
+kolm devices update &lt;k8s-device&gt; --image-pull-secret kolm-pull
+# If GPU scheduling is the issue:
+kubectl get nodes -o json | jq '.items[].status.allocatable["nvidia.com/gpu"]'</code></pre>
+</div>
+
+<h2 id="ollama">Ollama device push fails</h2>
+
+<div class="fix">
+  <span class="err">DeployError: ollama: Modelfile push failed (404 model not found after create)</span>
+  <p class="why">The Ollama instance accepted the Modelfile but the model did not register. Usually a version skew (the GGUF format is newer than the Ollama runtime supports) or the artifact's GGUF blob was not uploaded before the Modelfile was applied.</p>
+  <p><span class="arrow">&rarr; Run</span></p>
+  <pre><code>kolm devices runtime install &lt;ollama-device&gt; --runtime ollama --version latest
+kolm deploy &lt;art&gt; --device &lt;ollama-device&gt; --verbose
+# Look at the Ollama server logs on the host:
+journalctl -u ollama -n 100 --no-pager</code></pre>
+</div>
+
+<h2 id="docker">Docker daemon errors</h2>
+
+<div class="fix">
+  <span class="err">DeployError: docker: dial unix /var/run/docker.sock: connect: permission denied</span>
+  <p class="why">The user kolm ran <code>devices add</code> as does not have group access to the Docker socket on the host (or on the local box when type=docker, host=local).</p>
+  <p><span class="arrow">&rarr; Run</span></p>
+  <pre><code>sudo usermod -aG docker $USER
+# log out and back in for the group to take effect, then:
+kolm devices ping &lt;docker-device&gt;
+# Or run kolm as the docker group explicitly:
+sg docker -c "kolm deploy &lt;art&gt; --device &lt;docker-device&gt;"</code></pre>
+</div>
+
+<h2 id="rollback-fail">Rollback itself fails</h2>
+
+<div class="fix">
+  <span class="err">RollbackError: previous artifact not on disk; upstream cache miss</span>
+  <p class="why">The device evicted the previous artifact (small disk) and the upstream cache no longer has it. The rollback cannot proceed without bytes.</p>
+  <p><span class="arrow">&rarr; Run</span></p>
+  <pre><code>kolm artifact list --remote                            # confirm the artifact is in the registry
+kolm artifact pull &lt;prev-art&gt; --device prod-gpu-1      # re-seed the device
+kolm deploy --rollback --device prod-gpu-1
+# If the artifact is gone from the registry too, deploy the next-best known-good:
+kolm deploy &lt;art-from-3-deploys-ago&gt; --device prod-gpu-1</code></pre>
+</div>
+
+<div class="callout"><b>Did this not cover your case?</b> Run <code>kolm deploy logs &lt;deploy-id&gt; --json</code> and paste the failing step's <code>stderr</code> into a GitHub issue. The deploy id is printed at the start of every deploy attempt and stored in <code>data/deploy-history.json</code>.</div>
+
+<h2 id="next">Next</h2>
+<div class="related">
+  <a href="/docs/run/deploy"><b>Deploy &rarr;</b><span>The six-step pipeline this page is the failure mode index of.</span></a>
+  <a href="/docs/run/rollback"><b>Rollback &rarr;</b><span>When the right answer is to revert, not fix forward.</span></a>
+  <a href="/docs/reference/doctor-checks"><b>Doctor checks &rarr;</b><span>The full list of probes kolm doctor runs.</span></a>
+</div>
+
+</div></main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/gateway">Gateway</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/docs/gateway">Gateway docs</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

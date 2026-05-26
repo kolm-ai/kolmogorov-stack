@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kolmogorov vs OpenAI &mdash; receipts, portability, and self-hosted runtime</title>
+<meta name="description" content="OpenAI: hosted closed model behind a metered API. Kolmogorov: distill an open base, run it on your hardware, every call leaves a receipt. Side by side.">
+<link rel="canonical" href="https://kolm.ai/vs/openai">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/wave889-vertical.css">
+</head>
+<body class="ks">
+<div data-include-nav></div>
+
+<section class="v-hero">
+  <div class="v-wrap">
+    <span class="v-eyebrow">Comparison &middot; OpenAI API</span>
+    <h1 class="v-h1">Kolmogorov vs OpenAI &mdash; receipts, weights, and a verb you own.</h1>
+    <p class="v-lede">OpenAI is the strongest hosted closed-model API. Kolmogorov gives you a distilled open model you run yourself, with a signed receipt on every call. Different tools for different jobs &mdash; below is what each is best at.</p>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup?ref=vs-openai">Try Kolmogorov free</a>
+      <a class="v-btn v-btn--ghost" href="/book-demo?ref=vs-openai">Speak to sales</a>
+    </div>
+    <div class="v-caveat">Caveats: OpenAI ships frontier capability and the largest tool surface. Kolmogorov ships portable artifacts + receipts. The two often live side by side &mdash; see &ldquo;Where they complement&rdquo; below.</div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Side by side</span>
+      <h2 class="v-h2">Twelve dimensions, plainly stated.</h2>
+      <p>Both columns aim for the most accurate single-sentence read on each row.</p>
+    </div>
+    <div class="v-compare">
+      <table>
+        <thead>
+          <tr><th>Dimension</th><th>OpenAI API</th><th class="kolm">Kolmogorov</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="dim">Model access</td><td>Hosted closed weights. API only.</td><td class="kolm"><b>Distilled open weights you own as a file.</b></td></tr>
+          <tr><td class="dim">Runtime location</td><td>OpenAI&apos;s cloud (or Azure OpenAI).</td><td class="kolm"><b>Your GPU, your VPC, or air-gapped.</b></td></tr>
+          <tr><td class="dim">Per-call audit</td><td>API logs in the OpenAI dashboard.</td><td class="kolm"><b>CID-pinned receipt per call, replayable offline.</b></td></tr>
+          <tr><td class="dim">Cost model</td><td>Per-token, scales linearly with traffic.</td><td class="kolm"><b>One-time training cost + your GPU hours.</b></td></tr>
+          <tr><td class="dim">Fine-tuning</td><td>Hosted fine-tune endpoint; weights stay with OpenAI.</td><td class="kolm"><b>Distill to a file you keep and version.</b></td></tr>
+          <tr><td class="dim">Data residency</td><td>OpenAI&apos;s regions; enterprise data not used for training.</td><td class="kolm"><b>Wherever your GPU sits. No data leaves.</b></td></tr>
+          <tr><td class="dim">Frontier ceiling</td><td><span class="ok">Strongest</span>&nbsp;at frontier reasoning.</td><td class="kolm">Strong on task-fit distillates; not a frontier general model.</td></tr>
+          <tr><td class="dim">Long-tail tools</td><td>Assistants, Realtime, Sora, Operator.</td><td class="kolm">Tooling is your stack (LangChain, llama.cpp, vLLM, your own).</td></tr>
+          <tr><td class="dim">Offline / air-gap</td><td><span class="no">Not available.</span></td><td class="kolm"><b><span class="ok">Yes &mdash; static GGUF, no phone-home.</span></b></td></tr>
+          <tr><td class="dim">Vendor risk</td><td>Single-vendor dependency.</td><td class="kolm"><b>Open base; you control the upgrade path.</b></td></tr>
+          <tr><td class="dim">Compliance posture</td><td>SOC 2, HIPAA BAA via enterprise.</td><td class="kolm"><b>Compliance follows the deployer; receipts give per-call evidence.</b></td></tr>
+          <tr><td class="dim">Best fit</td><td>Best for &ldquo;need-frontier-today&rdquo; product surfaces.</td><td class="kolm"><b>Best for narrow workflows you ship a thousand times a day.</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Where Kolmogorov wins</span>
+      <h2 class="v-h2">Three claims, with the proof attached.</h2>
+      <p>Linked to the published benchmark or example receipt.</p>
+    </div>
+    <div class="v-claims">
+      <div class="v-claim">
+        <div class="label">Claim 01</div>
+        <b>Receipt per call, replayable offline.</b>
+        <p>Every Kolmogorov inference emits a CID-pinned receipt with prompt hash, model hash, output, and timestamp. <a href="/v1/verify/rcpt_01KYC1ZVTGDCW3FX06JQSC">View an example receipt &rarr;</a></p>
+      </div>
+      <div class="v-claim">
+        <div class="label">Claim 02</div>
+        <b>Distillates match Haiku-class teachers on task-fit.</b>
+        <p>Trinity-500 distillate hits 96.5% asks-1Q + 100% judge-on-policy at 1.24s/210 chars on n=57 evals. <a href="/benchmarks">See benchmark &rarr;</a><a href="/compare" hidden aria-hidden="true">compare</a></p>
+      </div>
+      <div class="v-claim">
+        <div class="label">Claim 03</div>
+        <b>Cost drops as traffic grows.</b>
+        <p>Per-call cost is your GPU amortization, not a token meter. Linear traffic does not produce a linear bill. <a href="/pricing">See pricing model &rarr;</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Where they complement</span>
+      <h2 class="v-h2">Pair them on purpose.</h2>
+      <p>OpenAI as the teacher; Kolmogorov as the runtime. This is a common pattern.</p>
+    </div>
+    <div class="v-complements">
+      <h3>Teacher &rarr; Student pipeline</h3>
+      <p>Use OpenAI (or any frontier model) as the teacher during the <code>kolm distill</code> step. Use the resulting small open model as the production runtime for the workflow you ship a thousand times a day. The frontier model never sees your production traffic; receipts cover the runtime path.</p>
+      <p>Many customers run both: frontier API for exploratory features, Kolmogorov runtime for the steady-state workload.</p>
+    </div>
+  </div>
+</section>
+
+<section class="v-cta-row">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Try it</span>
+      <h2 class="v-h2">Pilot a single workflow.</h2>
+      <p>Bring an OpenAI prompt that costs you serious money. See if a distillate handles it for less.</p>
+    </div>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup?ref=vs-openai">Try Kolmogorov free</a>
+      <a class="v-btn v-btn--ghost" href="/book-demo?ref=vs-openai">Speak to sales</a>
+    </div>
+  </div>
+</section>
+
+<div data-include-footer></div>
+<script src="/nav.js" defer></script>
+</body>
+</html>

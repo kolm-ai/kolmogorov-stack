@@ -170,7 +170,7 @@
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs" aria-current="page">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true" style="font-size:0.78em;opacity:0.55;margin-left:3px;">&uarr;</span></a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true" style="font-size:0.78em;opacity:0.55;margin-left:3px;">&uarr;</span></a></li>
     </ul>
     <div class="ks-nav__right">
       <button type="button" class="ks-theme-toggle" id="ksThemeToggle" aria-label="Toggle theme" title="Toggle theme">
@@ -189,7 +189,7 @@
     <a href="/studio">Studio</a>
     <a href="/pricing">Pricing</a>
     <a href="/docs">Docs</a>
-    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub &uarr;</a>
+    <a href="https://github.com/kolm-ai/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub &uarr;</a>
     <a href="/signup?intent=login">Sign in</a>
     <a href="/signup">Get started &rarr;</a>
   </div>
@@ -282,6 +282,18 @@
       <a href="/benchmarks">Benchmarks</a>
       <a href="/docs/cve-in-kscore">CVE in K-score</a>
 
+      <h4>Run &amp; Govern</h4>
+      <a href="/docs/run/devices">Devices</a>
+      <a href="/docs/run/deploy">Deploy pipeline</a>
+      <a href="/docs/run/fleet">Fleet management</a>
+      <a href="/docs/run/testing">On-device testing</a>
+      <a href="/docs/run/monitoring">Monitoring</a>
+      <a href="/docs/run/updates">OTA updates</a>
+      <a href="/docs/run/security">Security</a>
+      <a href="/docs/run/runtimes">Runtime install</a>
+      <a href="/docs/run/rollback">Rollback</a>
+      <a href="/docs/run/troubleshooting">Troubleshooting</a>
+
       <h4>Deploy</h4>
       <a href="/enterprise">Reference architectures</a>
       <a href="/self-host">Self-host</a>
@@ -309,6 +321,9 @@
 
       <h4>Reference</h4>
       <a href="/docs/api">HTTP API</a>
+      <a href="/docs/reference/config-toml">config.toml</a>
+      <a href="/docs/reference/doctor-checks">Doctor checks</a>
+      <a href="/docs/reference/ship-gate">Ship gate</a>
       <a href="/openapi.json">OpenAPI JSON</a>
       <a href="/changelog">Changelog</a>
       <a href="/llms.txt">llms.txt</a>
@@ -546,6 +561,16 @@
   cli.forEach(function(s){
     index.push({ t: 'CLI: ' + s, u: '/docs/cli/' + s });
   });
+  var run = ('overview,devices,deploy,fleet,testing,monitoring,updates,security,runtimes,rollback,troubleshooting').split(',');
+  run.forEach(function(s){
+    index.push({ t: 'Run: ' + titleize(s), u: '/docs/run/' + s });
+  });
+  var reference = [
+    { t: 'Reference: config.toml', u: '/docs/reference/config-toml' },
+    { t: 'Reference: Doctor checks', u: '/docs/reference/doctor-checks' },
+    { t: 'Reference: Ship gate', u: '/docs/reference/ship-gate' }
+  ];
+  reference.forEach(function(e){ index.push(e); });
 
   var backdrop = document.getElementById('docsCmdkBackdrop');
   var input = document.getElementById('docsCmdkInput');
@@ -638,6 +663,14 @@
 })();
 </script>
 
+<!-- W888-R: assistant-backed search layered on top of the W847 Cmd-K modal.
+     The inline IIFE above renders an immediate substring index for keyboard
+     navigation; docs-search-assistant.js overrides the list panel on every
+     `input` event with a two-column "Direct match + Assistant answer" view.
+     Natural-language queries (>= 3 words OR '?') POST /v1/assistant/chat-docs;
+     single-keyword queries stay Lunr-only (no network call). -->
+<script src="/assets/docs-search-assistant.js" defer></script>
+
 <footer class="ks-foot">
   <div class="ks-wrap">
     <div class="ks-foot__grid">
@@ -679,7 +712,7 @@
         <a href="/manifesto">Manifesto</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub &uarr;</a>
+        <a href="https://github.com/kolm-ai/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub &uarr;</a>
       </div>
     </div>
     <div class="ks-foot__base">

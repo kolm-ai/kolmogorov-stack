@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kolm.ai/docs/spec/dot-kolm-v1.0.json",
+  "title": ".kolm passport.json v1.0",
+  "description": "JSON Schema for the passport.json entry inside a .kolm v1.0 artifact bundle. Companion to docs/spec/dot-kolm-v1.0.md section 3.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "spec",
+    "format_version",
+    "artifact_id",
+    "artifact_hash",
+    "cid",
+    "created_at",
+    "task",
+    "artifact_class",
+    "runtime_target",
+    "base_model",
+    "license",
+    "seed_provenance",
+    "hashes",
+    "signature"
+  ],
+  "properties": {
+    "spec": {
+      "type": "string",
+      "const": "kolm-format-1.0"
+    },
+    "format_version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+$"
+    },
+    "artifact_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._-]+$"
+    },
+    "artifact_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "cid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "task": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "artifact_class": {
+      "type": "string",
+      "enum": ["rule", "synthesized_rule", "compiled_rule", "distilled_model"]
+    },
+    "runtime_target": {
+      "type": "string",
+      "enum": ["js", "gguf", "onnx", "wasm", "native"]
+    },
+    "base_model": {
+      "type": "string",
+      "minLength": 1
+    },
+    "license": {
+      "type": "string",
+      "minLength": 1
+    },
+    "seed_provenance": {
+      "type": "object",
+      "required": [
+        "eval_source",
+        "comparator",
+        "production_ready",
+        "holdout_ratio"
+      ],
+      "properties": {
+        "eval_source": {
+          "type": "string",
+          "enum": [
+            "human_curated",
+            "self_generated",
+            "holdout_external",
+            "holdout_tenant_shadow"
+          ]
+        },
+        "comparator": {
+          "type": "string",
+          "enum": ["exact", "judge", "structured", "script"]
+        },
+        "production_ready": {
+          "type": "boolean"
+        },
+        "holdout_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "hashes": {
+      "type": "object",
+      "required": ["passport_json", "weights"],
+      "properties": {
+        "passport_json": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "weights":       { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "tokenizer":     { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "eval_set":      { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "receipts":      { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "evidence_dag":  { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "compile_args":  { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "runtime_passport": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      },
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      }
+    },
+    "signature": {
+      "type": "object",
+      "required": [
+        "algorithm",
+        "public_key",
+        "signature",
+        "key_fingerprint",
+        "signed_at",
+        "payload_canonical_sha256"
+      ],
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "enum": ["ed25519"]
+        },
+        "public_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signature": {
+          "type": "string",
+          "minLength": 1
+        },
+        "key_fingerprint": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "signed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "payload_canonical_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "additionalProperties": true
+    },
+    "weights_filename":  { "type": "string" },
+    "tokenizer_filename":{ "type": "string" },
+    "runtime_passports": { "type": "array",  "items": { "type": "object" } },
+    "eval_score":        { "type": "number", "minimum": 0, "maximum": 1 },
+    "k_score": {
+      "type": "object",
+      "properties": {
+        "point": { "type": "number", "minimum": 0, "maximum": 1 },
+        "ci95": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "calibration_pack_id": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "judge_id":   { "type": "string" },
+    "tier":       { "type": "string", "enum": ["recipe", "adapter", "specialist", "bundle"] },
+    "parent_cid": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "policy": {
+      "type": "object",
+      "properties": {
+        "require_ed25519": { "type": "boolean" },
+        "require_rekor":   { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "compile_args": { "type": "object" },
+    "evidence_dag": { "type": "object" }
+  }
+}

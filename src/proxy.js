@@ -97,7 +97,7 @@ export function computeTeacherResponseSignature({ headers = {}, body = '', vendo
     } else {
       // Fall back to a small set of well-known security-relevant headers.
       for (const k of ['content-type', 'x-request-id', 'anthropic-version', 'openai-organization']) {
-        try { const v = headers.get(k); if (v != null) headerObj[k] = String(v); } catch (_) {}
+        try { const v = headers.get(k); if (v != null) headerObj[k] = String(v); } catch (_) {} // deliberate: cleanup
       }
     }
   } else if (headers && typeof headers === 'object') {

@@ -93,7 +93,7 @@ function runCli(args, env = {}) {
     child.stderr.setEncoding('utf8');
     child.stdout.on('data', (d) => { out += d; });
     child.stderr.on('data', (d) => { err += d; });
-    const t = setTimeout(() => { try { child.kill('SIGKILL'); } catch (_) {} }, 120_000);
+    const t = setTimeout(() => { try { child.kill('SIGKILL'); } catch (_) {} }, 120_000); // deliberate: cleanup
     child.on('error', reject);
     child.on('exit', (status) => {
       clearTimeout(t);
@@ -123,7 +123,7 @@ test('W470 P1-5 #1 — `kolm compile` accepts bare --target rust as an alias for
       /--target must be one of/,
       'bare --target rust must NOT trigger the enum guard',
     );
-  } finally { try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} }
+  } finally { try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} } // deliberate: cleanup
 });
 
 test('W470 P1-5 #2 — `kolm compile` accepts bare --target c as an alias for native-c', async () => {
@@ -137,7 +137,7 @@ test('W470 P1-5 #2 — `kolm compile` accepts bare --target c as an alias for na
       /--target must be one of/,
       'bare --target c must NOT trigger the enum guard',
     );
-  } finally { try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} }
+  } finally { try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} } // deliberate: cleanup
 });
 
 test('W470 P1-5 #3 — `kolm compile` rejects an unknown --target value with the expanded list', async () => {
@@ -149,7 +149,7 @@ test('W470 P1-5 #3 — `kolm compile` rejects an unknown --target value with the
     assert.match(r.stderr + r.stdout, /--target must be one of/, 'unknown target must trigger enum guard');
     assert.match(r.stderr + r.stdout, /native-c \(alias c\)/, 'help text lists native-c alias');
     assert.match(r.stderr + r.stdout, /native-rust \(alias rust\)/, 'help text lists native-rust alias');
-  } finally { try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} }
+  } finally { try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} } // deliberate: cleanup
 });
 
 test('W470 P1-5 #4 — compileSpec({target:"rust"}) auto-enables native compile + bundles a binary', {
@@ -194,7 +194,7 @@ test('W470 P1-5 #4 — compileSpec({target:"rust"}) auto-enables native compile 
     assert.ok(binEntry, 'manifest.binaries[] must include the rust/rcp_echo entry');
     assert.equal(binEntry.sha256, actualHash, 'binaries[].sha256 must match bundled bytes');
   } finally {
-    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -215,7 +215,7 @@ test('W470 P1-5 #5 — compileSpec({target:"native-rust"}) is normalized via the
     assert.ok(entries.includes('native.rust.bin'),
       'compileSpec({target:"rust",compileNative:true}) must still bundle native.rust.bin');
   } finally {
-    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -243,6 +243,6 @@ test('W470 P1-5 #6 — CLI threading: `kolm compile --spec --target native-rust`
     assert.ok(entries.includes('native.rust.bin'),
       'kolm compile --target native-rust MUST bundle native.rust.bin; got entries: ' + entries.join(', '));
   } finally {
-    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });

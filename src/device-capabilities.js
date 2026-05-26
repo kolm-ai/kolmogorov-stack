@@ -338,14 +338,14 @@ export async function detectLocalDevice() {
       profile.runtimes.push('onnx');
       profile.supports.vision = true;
     }
-  } catch {}
+  } catch {} // deliberate: cleanup
 
   // macOS sysctl / system_profiler.
   if (!profile.gpu && process.platform === 'darwin') {
     try {
       const sys = spawnSync('sysctl', ['-n', 'machdep.cpu.brand_string'], { encoding: 'utf8', timeout: 3000 });
       if (sys.status === 0) profile.chip = sys.stdout.trim();
-    } catch {}
+    } catch {} // deliberate: cleanup
     try {
       const sp = spawnSync('system_profiler', ['SPDisplaysDataType'], { encoding: 'utf8', timeout: 5000 });
       if (sp.status === 0 && sp.stdout) {
@@ -358,7 +358,7 @@ export async function detectLocalDevice() {
         profile.runtimes.push('mlx');
         profile.runtimes.push('coreml');
       }
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
 
   // Windows wmic for CPU/GPU. system_profiler doesn't exist; nvidia-smi
@@ -376,7 +376,7 @@ export async function detectLocalDevice() {
           if (name) profile.gpu = { vendor: 'unknown', name, vram_gb: ram ? Math.round(ram / 1024 / 1024 / 1024) : null };
         }
       }
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
 
   // CPU-only fallback.
@@ -410,7 +410,7 @@ export async function listDevices() {
     try {
       const p = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
       out.push(p);
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
   // Newest-first by registered_at.
   out.sort((a, b) => String(b.registered_at || '').localeCompare(String(a.registered_at || '')));
@@ -505,6 +505,215 @@ export function compatibleArtifacts(deviceProfile, artifactsList) {
   });
 }
 
+// ====================================================================
+// W888-C fleet API extensions.
+// Adds detectHardwareRemote / healthCheck / pingAll / recordDeployment
+// on top of the W372 device registry. Keeps the lazy ssh2 contract — only
+// imports src/device-ssh.js when actually opening an SSH connection.
+// ====================================================================
+
+function _isSshKind(device) {
+  if (!device) return false;
+  if (device.type === 'ssh') return true;
+  // Compat: any device with a non-empty connection.host OR ssh.host that
+  // isn't local/laptop is treated as ssh.
+  const hostFromConn = device.connection && device.connection.host;
+  const hostFromSsh  = device.ssh && device.ssh.host;
+  if (!hostFromConn && !hostFromSsh) return false;
+  if (device.kind === 'local') return false;
+  return true;
+}
+
+// detectHardwareRemote(deviceId) — opens an SSHConnection, runs
+// SSHConnection.detectHardware(), persists the snapshot into the device record
+// under `hardware_snapshot` (with a `detected_at` timestamp), and returns it.
+//
+// For non-ssh devices, falls back to the local detector and tags the record
+// with source: 'local'.
+export async function detectHardwareRemote(deviceId) {
+  const d = await getDevice(deviceId);
+  if (!d) {
+    const e = new Error(`unknown device: ${deviceId}`); e.code = 'KOLM_E_UNKNOWN_DEVICE'; throw e;
+  }
+  let snapshot = null;
+  let source = 'unknown';
+  let error = null;
+
+  if (_isSshKind(d)) {
+    try {
+      const { SSHConnection } = await import('./device-ssh.js');
+      const conn = new SSHConnection(d);
+      try {
+        await conn.connect();
+        snapshot = await conn.detectHardware();
+        source = 'ssh';
+      } finally {
+        conn.disconnect();
+      }
+    } catch (e) {
+      error = e && e.message ? e.message : String(e);
+      source = 'ssh-error';
+    }
+  } else {
+    // Local-like — re-use the existing detector but reshape into the
+    // remote-style snapshot for consistency.
+    const local = await detectLocalDevice();
+    snapshot = {
+      gpu: local.gpu ? local.gpu.name : null,
+      gpu_vram_mb: local.gpu && local.gpu.vram_gb ? local.gpu.vram_gb * 1024 : null,
+      driver_version: local.gpu ? (local.gpu.driver || null) : null,
+      compute_capability: local.gpu ? (local.gpu.compute_cap || null) : null,
+      cpu: local.chip || null,
+      cpu_cores: null,
+      ram_mb: local.ram_gb ? local.ram_gb * 1024 : null,
+      disk_free_mb: null,
+      os: local.os || null,
+      arch: null,
+      cuda_version: null,
+      raw: { source: 'local' },
+    };
+    source = 'local';
+  }
+
+  // Persist (best-effort) so subsequent `kolm devices show` reflects the
+  // freshest hardware reading without re-probing.
+  if (snapshot) {
+    const merged = {
+      ...d,
+      hardware_snapshot: snapshot,
+      hardware_detected_at: new Date().toISOString(),
+      hardware_detect_source: source,
+    };
+    try { fs.writeFileSync(_profilePath(deviceId), JSON.stringify(merged, null, 2)); } catch {} // deliberate: cleanup
+  }
+
+  return { device_id: deviceId, source, snapshot, error };
+}
+
+// healthCheck(deviceId) — composite probe: reachability + hardware snapshot +
+// list of installed artifacts at ~/.kolm/installed/. Reads the install dir
+// over SSH (`ls -1`) for ssh devices, or the local filesystem otherwise.
+export async function healthCheck(deviceId) {
+  const t0 = Date.now();
+  const d = await getDevice(deviceId);
+  if (!d) {
+    return { device_id: deviceId, ok: false, status: 'unknown', reason: 'no such device', latency_ms: Date.now() - t0 };
+  }
+  // Step 1: reachability via the existing testDevice() path. Cheap.
+  const reach = await testDevice(deviceId);
+
+  // Step 2: hardware snapshot (best-effort, doesn't block ok:true).
+  let hw = null;
+  let hwError = null;
+  try {
+    const r = await detectHardwareRemote(deviceId);
+    hw = r.snapshot;
+    hwError = r.error;
+  } catch (e) {
+    hwError = e && e.message ? e.message : String(e);
+  }
+
+  // Step 3: list installed artifacts.
+  let artifacts = [];
+  if (_isSshKind(d)) {
+    try {
+      const { SSHConnection } = await import('./device-ssh.js');
+      const conn = new SSHConnection(d);
+      try {
+        await conn.connect();
+        const r = await conn.exec('ls -1 ~/.kolm/installed/ 2>/dev/null || true', { timeoutMs: 5_000 });
+        artifacts = String(r.stdout || '').trim().split(/\r?\n/).filter(Boolean);
+      } finally {
+        conn.disconnect();
+      }
+    } catch (e) {
+      hwError = hwError || (e && e.message ? e.message : String(e));
+    }
+  } else {
+    try {
+      const root = path.join(_home(), '.kolm', 'installed', deviceId);
+      if (fs.existsSync(root)) artifacts = fs.readdirSync(root).filter(n => !n.startsWith('.'));
+    } catch {} // deliberate: cleanup
+  }
+
+  const ok = !!reach.reachable;
+  return {
+    device_id: deviceId,
+    ok,
+    status: ok ? 'online' : 'offline',
+    reachable: reach.reachable,
+    reason: reach.reason || null,
+    hardware: hw,
+    hardware_error: hwError,
+    installed_artifacts: artifacts,
+    latency_ms: Date.now() - t0,
+    checked_at: new Date().toISOString(),
+  };
+}
+
+// pingAll() — concurrent reachability fan-out across every registered device.
+// Used by `kolm devices health --all` and the account fleet dashboard
+// loader. Returns one row per device.
+export async function pingAll() {
+  const devices = await listDevices();
+  const t0 = Date.now();
+  const results = await Promise.all(devices.map(async (d) => {
+    const start = Date.now();
+    try {
+      const r = await testDevice(d.device_id);
+      return {
+        name: d.device_id,
+        kind: d.kind || null,
+        latency_ms: Date.now() - start,
+        status: r.reachable ? 'online' : 'offline',
+        reachable: !!r.reachable,
+        reason: r.reason || null,
+      };
+    } catch (e) {
+      return {
+        name: d.device_id,
+        kind: d.kind || null,
+        latency_ms: Date.now() - start,
+        status: 'error',
+        reachable: false,
+        reason: e && e.message ? e.message : String(e),
+      };
+    }
+  }));
+  results.sort((a, b) => String(a.name).localeCompare(String(b.name)));
+  return { devices: results, total: results.length, elapsed_ms: Date.now() - t0 };
+}
+
+// recordDeployment(deviceId, payload) — append-only deployment journal stamped
+// on the device record. Used by src/deploy-pipeline.js#record() step so
+// `kolm devices show` and the account UI can surface "last deploy = artifact
+// X at time T".
+export async function recordDeployment(deviceId, payload) {
+  const d = await getDevice(deviceId);
+  if (!d) {
+    const e = new Error(`unknown device: ${deviceId}`); e.code = 'KOLM_E_UNKNOWN_DEVICE'; throw e;
+  }
+  const journal = Array.isArray(d.deployed_artifacts) ? d.deployed_artifacts : [];
+  const entry = {
+    artifact_id: payload && payload.artifact_id || 'unknown',
+    artifact_path: payload && payload.artifact_path || null,
+    sha256: payload && payload.sha256 || null,
+    runtime: payload && payload.runtime || null,
+    port: payload && payload.port || null,
+    pid: payload && payload.pid || null,
+    endpoint: payload && payload.endpoint || null,
+    deployed_at: new Date().toISOString(),
+    success: payload && payload.success !== undefined ? !!payload.success : true,
+    steps: payload && payload.steps || null,
+  };
+  journal.unshift(entry);
+  // Cap at 50 entries to keep the on-disk record small.
+  const trimmed = journal.slice(0, 50);
+  const merged = { ...d, deployed_artifacts: trimmed, last_deployed_at: entry.deployed_at };
+  try { fs.writeFileSync(_profilePath(deviceId), JSON.stringify(merged, null, 2)); } catch {} // deliberate: cleanup
+  return entry;
+}
+
 export default {
   CAPABILITY_VERSION,
   KNOWN_RUNTIMES,
@@ -533,4 +742,9 @@ export default {
   registerDevice,
   testDevice,
   compatibleArtifacts,
+  // W888-C additions:
+  detectHardwareRemote,
+  healthCheck,
+  pingAll,
+  recordDeployment,
 };

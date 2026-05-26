@@ -155,6 +155,6 @@ export async function runOnnxTarget(bundle, input, opts = {}) {
     if (e.code && /^KOLM_E_/.test(e.code)) throw e;
     throw kolmError('KOLM_E_ONNX_RUNTIME', String(e.message || e));
   } finally {
-    try { fs.rmSync(workdir, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(workdir, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 }

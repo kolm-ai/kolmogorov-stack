@@ -209,7 +209,7 @@ async function waitForHealth(base, retries = 120) {
     try {
       const res = await fetch(base + '/health');
       if (res.ok) return;
-    } catch {}
+    } catch {} // deliberate: cleanup
     await new Promise(resolve => setTimeout(resolve, 100));
   }
   throw new Error('server did not come up');

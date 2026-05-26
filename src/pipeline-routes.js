@@ -238,7 +238,7 @@ export function registerPipelineRoutes(router, deps = {}) {
           namespace: 'pipeline_runs',
           result,
         });
-      } catch {}
+      } catch {} // deliberate: cleanup
       const status = result.ok ? 200 : (result.state === PIPELINE_STATES.PARTIAL ? 207 : 400);
       return res.status(status).json({
         ok: result.ok,

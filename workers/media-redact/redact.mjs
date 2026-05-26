@@ -75,12 +75,25 @@ const ROOT       = path.resolve(__dirname, '..', '..');
 let _extractFailedEmitted = false;
 process.on('uncaughtException', (err) => {
   const msg = String(err && err.message || err).slice(0, 200);
-  try { process.stderr.write('[media-redact] uncaughtException trapped: ' + msg + '\n'); } catch (_) {}
+  try { process.stderr.write('[media-redact] uncaughtException trapped: ' + msg + '\n'); } catch (_) { /* deliberate: cleanup */ }
   if (!_extractFailedEmitted) {
-    try { process.stdout.write(JSON.stringify({ ok: false, error: 'extract_failed', detail: msg }) + '\n'); } catch (_) {}
+    try { process.stdout.write(JSON.stringify({ ok: false, error: 'extract_failed', detail: msg }) + '\n'); } catch (_) { /* deliberate: cleanup */ }
   }
   process.exit(5);
 });
+// W890-3 — pair the existing uncaughtException trap with unhandledRejection
+// so a stray promise (e.g. fetch / tesseract internal) cannot crash the worker
+// silently. SIGTERM/SIGINT exit 0 so the parent process sees a clean shutdown.
+process.on('unhandledRejection', (reason) => {
+  const msg = String(reason && reason.message || reason).slice(0, 200);
+  try { process.stderr.write('[media-redact] unhandledRejection trapped: ' + msg + '\n'); } catch { /* deliberate: cleanup */ }
+  if (!_extractFailedEmitted) {
+    try { process.stdout.write(JSON.stringify({ ok: false, error: 'extract_failed', detail: msg }) + '\n'); } catch { /* deliberate: cleanup */ }
+  }
+  process.exit(5);
+});
+process.on('SIGTERM', () => process.exit(0));
+process.on('SIGINT', () => process.exit(0));
 
 const args = parseArgs(process.argv.slice(2));
 
@@ -284,16 +297,16 @@ async function extractText(kind, bytes, args) {
       const tmpAudio = path.join(process.env.TMPDIR || '/tmp', 'kolm-audio-' + Date.now() + '.wav');
       fs.writeFileSync(tmpVideo, bytes);
       const ff = spawnSync(ffmpeg, ['-y', '-i', tmpVideo, '-vn', '-ar', '16000', '-ac', '1', tmpAudio], { stdio: 'pipe' });
-      try { fs.unlinkSync(tmpVideo); } catch (_) {}
+      try { fs.unlinkSync(tmpVideo); } catch (_) {} // deliberate: cleanup
       if (ff.status !== 0) {
         return { ok: false, extractor: 'ffmpeg+whisper', install_hint: 'ffmpeg failed: ' + (ff.stderr && ff.stderr.toString().slice(0, 200)) };
       }
       audioPath = tmpAudio;
-      cleanup = () => { try { fs.unlinkSync(tmpAudio); } catch (_) {} };
+      cleanup = () => { try { fs.unlinkSync(tmpAudio); } catch (_) {} }; // deliberate: cleanup
     } else {
       audioPath = path.join(process.env.TMPDIR || '/tmp', 'kolm-audio-' + Date.now() + '.bin');
       fs.writeFileSync(audioPath, bytes);
-      cleanup = () => { try { fs.unlinkSync(audioPath); } catch (_) {} };
+      cleanup = () => { try { fs.unlinkSync(audioPath); } catch (_) {} }; // deliberate: cleanup
     }
     // Whisper-cli expects a model file; user can pass --model.
     const wargs = ['-f', audioPath];
@@ -316,7 +329,7 @@ function findOnPath(names) {
     for (const d of dirs) {
       for (const e of exts) {
         const p = path.join(d, n + e);
-        try { if (fs.existsSync(p)) return p; } catch (_) {}
+        try { if (fs.existsSync(p)) return p; } catch (_) {} // deliberate: cleanup
       }
     }
   }

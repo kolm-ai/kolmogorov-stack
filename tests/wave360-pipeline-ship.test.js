@@ -92,10 +92,10 @@ function runCli(args, env = {}) {
     let stdout = '', stderr = '';
     child.stdout.on('data', (b) => { stdout += b.toString('utf8'); });
     child.stderr.on('data', (b) => { stderr += b.toString('utf8'); });
-    const killer = setTimeout(() => { try { child.kill('SIGKILL'); } catch (_) {} }, 60_000);
+    const killer = setTimeout(() => { try { child.kill('SIGKILL'); } catch (_) {} }, 60_000); // deliberate: cleanup
     child.on('close', (code) => {
       clearTimeout(killer);
-      try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {}
+      try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
       resolve({ code, stdout, stderr });
     });
   });
@@ -125,8 +125,8 @@ test('W360 #1 — kolm ship --force uploads to marketplace and returns URL', asy
     assert.ok(live.detail.marketplace_url && live.detail.marketplace_url.includes('/marketplace/ship-test-1'), `bad url: ${live.detail.marketplace_url}`);
   } finally {
     await m.close();
-    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {}
-    try { fs.rmSync(storeDir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
+    try { fs.rmSync(storeDir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -153,8 +153,8 @@ test('W360 #2 — kolm ship without --force on a non-production artifact fails s
     }
   } finally {
     await m.close();
-    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {}
-    try { fs.rmSync(storeDir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
+    try { fs.rmSync(storeDir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -172,8 +172,8 @@ test('W360 #3 — endpoint stores .kolm bytes byte-for-byte under <storeDir>/<sl
     assert.equal(stored.equals(original), true, 'bytes-uploaded content mismatch');
   } finally {
     await m.close();
-    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {}
-    try { fs.rmSync(storeDir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
+    try { fs.rmSync(storeDir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -196,7 +196,7 @@ test('W360 #4 — ship() exported async iterator yields step/name/status events'
     assert.ok(oks.length >= 4, `expected >=4 ok events, got ${oks.length}: ${JSON.stringify(events)}`);
   } finally {
     await m.close();
-    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {}
-    try { fs.rmSync(storeDir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
+    try { fs.rmSync(storeDir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });

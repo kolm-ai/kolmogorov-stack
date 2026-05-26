@@ -129,7 +129,7 @@ test('W411-T #1 — listEvents({tenant_id}) returns only the requested tenant\'s
   const saved = _snapEnv();
   const tmp = _mkTmp();
   _setEnv(tmp);
-  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} });
+  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} }); // deliberate: cleanup
   await _bustModuleCache();
 
   await _seed('tenant_A_iso', 'ns_iso_1', 10);
@@ -162,7 +162,7 @@ test('W411-T #2 — /v1/lake/stats + /v1/lake/tail are tenant-scoped to the api 
   const saved = _snapEnv();
   const tmp = _mkTmp();
   _setEnv(tmp);
-  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} });
+  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} }); // deliberate: cleanup
   await _bustModuleCache();
 
   const { app, A, B } = await _makeAppTwoTenants();
@@ -209,7 +209,7 @@ test('W411-T #3 — prepareDistillCorpus({tenant_id}) blocks cross-tenant ingest
   const saved = _snapEnv();
   const tmp = _mkTmp();
   _setEnv(tmp);
-  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} });
+  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} }); // deliberate: cleanup
   await _bustModuleCache();
 
   await _seed('tenant_A_compile', 'ns_compile', 6);
@@ -240,7 +240,7 @@ test('W411-T #4 — label approvals are tenant-fenced (queue + stats + submit)',
   const saved = _snapEnv();
   const tmp = _mkTmp();
   _setEnv(tmp);
-  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} });
+  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} }); // deliberate: cleanup
   await _bustModuleCache();
 
   const aIds = await _seed('tenant_A_label', 'ns_lbl', 5);
@@ -291,7 +291,7 @@ test('W411-T #5 — datasets fenced at creation + listing + HTTP inspect', async
   const saved = _snapEnv();
   const tmp = _mkTmp();
   _setEnv(tmp);
-  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} });
+  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} }); // deliberate: cleanup
   await _bustModuleCache();
 
   // Seed 5 events per tenant in the same namespace.
@@ -334,7 +334,7 @@ test('W411-T #6 — HTTP /v1/datasets fences cross-tenant inspect at the route',
   const saved = _snapEnv();
   const tmp = _mkTmp();
   _setEnv(tmp);
-  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} });
+  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} }); // deliberate: cleanup
   await _bustModuleCache();
 
   const { app, A, B } = await _makeAppTwoTenants();
@@ -383,7 +383,7 @@ test('W411-T #7 — HTTP /v1/label-queue/submit returns 403 cross-tenant', async
   const saved = _snapEnv();
   const tmp = _mkTmp();
   _setEnv(tmp);
-  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} });
+  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} }); // deliberate: cleanup
   await _bustModuleCache();
 
   const { app, A, B } = await _makeAppTwoTenants();
@@ -410,7 +410,7 @@ test('W411-T #8 — /v1/lake/storage total_events is tenant-scoped', async (t) =
   const saved = _snapEnv();
   const tmp = _mkTmp();
   _setEnv(tmp);
-  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} });
+  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} }); // deliberate: cleanup
   await _bustModuleCache();
 
   const { app, A, B } = await _makeAppTwoTenants();

@@ -205,7 +205,7 @@ export function execute(projectName, targetDir, opts = {}) {
   for (const f of files) {
     const dst = path.join(absDir, f.path);
     fs.writeFileSync(dst, f.content);
-    try { fs.chmodSync(dst, f.mode); } catch (_) {}
+    try { fs.chmodSync(dst, f.mode); } catch (_) {} // deliberate: cleanup
     written.push({ path: f.path, bytes: Buffer.byteLength(f.content) });
   }
   let git_initialized = false;

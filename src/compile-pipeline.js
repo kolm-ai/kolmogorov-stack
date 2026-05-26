@@ -842,10 +842,10 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
         try {
           const e = JSON.parse(line);
           if (e && e.decision === 'approve') approvedCount += 1;
-        } catch {}
+        } catch {} // deliberate: cleanup
       }
     }
-  } catch {}
+  } catch {} // deliberate: cleanup
   const sourceTypeStats = {
     source_seed_count: sourceSeedCount,
     approved_count: approvedCount,

@@ -11,9 +11,9 @@ Wave: **W824** (Kubernetes-native deployment, sub-items W824-1 through W824-6).
 
 ```sh
 helm install kolm tools/helm/kolm \
-  --set image.repository=ghcr.io/sneaky-hippo/kolm \
+  --set image.repository=ghcr.io/kolm-ai/kolm \
   --set image.tag=v1.0.0 \
-  --set artifactRegistry.url=oci://ghcr.io/sneaky-hippo/artifacts \
+  --set artifactRegistry.url=oci://ghcr.io/kolm-ai/artifacts \
   --set artifactRegistry.secretRef=kolm-registry-pull \
   --set artifactRegistry.artifactId=production-latest
 ```
@@ -37,7 +37,7 @@ by `helm uninstall`. Drop it manually with
 
 | Key | Default | Description |
 |---|---|---|
-| `image.repository` | `ghcr.io/sneaky-hippo/kolm` | Container image repo. |
+| `image.repository` | `ghcr.io/kolm-ai/kolm` | Container image repo. |
 | `image.tag` | (Chart.AppVersion) | Container image tag. |
 | `image.pullPolicy` | `IfNotPresent` | Standard pull policy. |
 | `image.pullSecrets` | `[]` | imagePullSecrets list. |

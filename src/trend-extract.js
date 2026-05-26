@@ -87,9 +87,9 @@ export async function emergingPatterns({
     if (!r || !r.tenant_id || !r.created_at) continue;
     const payload = _parseRow(r);
     if (!payload || !payload.namespace) continue;
-    /* eslint-disable no-await-in-loop */
+     
     const opted = await isOptedIn(r.tenant_id, payload.namespace);
-    /* eslint-enable no-await-in-loop */
+     
     if (!opted) continue;
     if (r.created_at >= recentSince) recent.push(r);
     else if (r.created_at >= priorSince && r.created_at < priorUntil) prior.push(r);
@@ -161,9 +161,9 @@ export async function summarizeTrends() {
     if (!r || !r.tenant_id) continue;
     const payload = _parseRow(r);
     if (!payload || !payload.namespace) continue;
-    /* eslint-disable no-await-in-loop */
+     
     const opted = await isOptedIn(r.tenant_id, payload.namespace);
-    /* eslint-enable no-await-in-loop */
+     
     if (!opted) continue;
     contributors.add(r.tenant_id);
     namespaces.add(r.tenant_id + '|' + payload.namespace);
@@ -183,9 +183,9 @@ export async function summarizeTrends() {
     if (!r || !r.tenant_id) continue;
     const payload = _parseRow(r);
     if (!payload || payload.action !== 'opt_in' || !payload.namespace) continue;
-    /* eslint-disable no-await-in-loop */
+     
     const still = await isOptedIn(r.tenant_id, payload.namespace);
-    /* eslint-enable no-await-in-loop */
+     
     if (still) optInTenants.add(r.tenant_id);
   }
 

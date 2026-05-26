@@ -136,7 +136,7 @@ async function* trainLocal(specPath, opts) {
         if (last3[2].k < last3[1].k && last3[1].k < last3[0].k) {
           autoStopFired = true;
           push(ev(2, 'ok', { auto_stop: true, reason: 'overfit', best_epoch: bestEpoch, best_k: bestK }));
-          try { child.kill('SIGINT'); } catch (_) {}
+          try { child.kill('SIGINT'); } catch (_) {} // deliberate: cleanup
         }
       }
     }
@@ -263,7 +263,7 @@ function getJson(url, apiKey, timeoutMs) {
         });
       });
       req.on('error', (e) => reject(e));
-      req.on('timeout', () => { try { req.destroy(new Error('request timed out')); } catch (_) {} });
+      req.on('timeout', () => { try { req.destroy(new Error('request timed out')); } catch (_) {} }); // deliberate: cleanup
       req.end();
     }).catch(reject);
   });

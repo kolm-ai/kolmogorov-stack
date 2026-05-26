@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
+<title>Onboarding &middot; Account &middot; kolm.ai</title>
+<meta name="description" content="Pick the onboarding path that matches your hardware and goal: have GPU, no GPU, route LLM traffic, or verify a .kolm artifact. Each path takes under 2 minutes.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/account/onboarding">
+<meta property="og:title" content="Onboarding &middot; Account &middot; kolm.ai" />
+<meta property="og:description" content="Pick the onboarding path that matches your hardware and goal." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://kolm.ai/account/onboarding" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+.ob-shell{max-width:980px;margin:0 auto;padding:32px 24px 80px}
+.ob-skip{position:absolute;top:18px;right:24px;font-family:var(--mono);font-size:12px;color:var(--ink-faint);text-decoration:none;border-bottom:1px dashed var(--line)}
+.ob-skip:hover{color:var(--ink)}
+.ob-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+.ob-shell h1{font-size:32px;font-weight:500;letter-spacing:-0.01em;margin:0 0 8px;color:var(--ink)}
+.ob-shell .lede{font-size:15px;color:var(--ink-mute);max-width:62ch;margin:0 0 32px;line-height:1.6}
+.path-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.path-card{display:flex;flex-direction:column;gap:8px;padding:22px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card);text-decoration:none;color:var(--ink);min-height:200px;transition:border-color 140ms,transform 140ms}
+.path-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.path-card[data-resume]{border-color:var(--accent);background:linear-gradient(180deg,rgba(96,165,250,0.06),transparent),var(--bg-card)}
+.path-card .step-chip{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);padding:3px 8px;border:1px solid var(--line);border-radius:999px;align-self:flex-start;margin-bottom:6px}
+.path-card[data-resume] .step-chip{color:var(--accent);border-color:var(--accent)}
+.path-card h2{font-size:18px;font-weight:500;margin:0;color:var(--ink);letter-spacing:-0.005em}
+.path-card .when{font-family:var(--mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.06em;margin:6px 0 0}
+.path-card p{margin:8px 0 0;color:var(--ink-mute);font-size:13.5px;line-height:1.55}
+.path-card .est{margin-top:auto;font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em;padding-top:14px}
+.ob-foot{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-mute);line-height:1.7}
+.ob-foot code{background:var(--bg-elev);padding:2px 6px;border-radius:3px;font-size:12.5px;color:var(--accent)}
+.ob-progress{margin:0 0 24px;padding:12px 16px;background:var(--bg-elev);border:1px dashed var(--line);border-radius:8px;font-family:var(--mono);font-size:12px;color:var(--ink-mute);display:flex;justify-content:space-between;align-items:center;gap:14px}
+.ob-progress[hidden]{display:none}
+.ob-progress strong{color:var(--ink);font-weight:600}
+@media (max-width:720px){.path-grid{grid-template-columns:1fr}.ob-shell h1{font-size:26px}}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/nav.js"></script>
+</head>
+<body class="kolm-account-surface ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" class="ob-shell">
+<a href="/account/overview" class="ob-skip">Skip onboarding &rarr;</a>
+
+<p class="ob-eyebrow">Welcome</p>
+<h1>What do you want to do first?</h1>
+<p class="lede">Pick the path that matches your hardware and goal. Each one is three to four steps, under two minutes, with copy-paste-ready commands. Your progress is saved &mdash; close the tab and finish later.</p>
+
+<div class="ob-progress" id="ob-progress" hidden>
+  <span>Resume your last path: <strong id="ob-progress-path"></strong> &middot; <span id="ob-progress-step"></span></span>
+  <a class="btn" id="ob-progress-resume" href="#" style="border:1px solid var(--accent);color:var(--accent);padding:6px 12px;border-radius:5px;font-family:var(--mono);font-size:11.5px;text-decoration:none">Continue &rarr;</a>
+</div>
+
+<div class="path-grid" id="path-grid">
+  <a class="path-card" href="/account/onboarding/path-gpu.html" data-path="gpu">
+    <span class="step-chip">Path A</span>
+    <h2>I have a GPU.</h2>
+    <p>Install the CLI, point your existing OpenAI/Anthropic SDK at the local gateway, and watch your first capture land in real time. Distill a specialist on your own hardware afterward.</p>
+    <span class="est">3 steps &middot; ~90 s</span>
+  </a>
+  <a class="path-card" href="/account/onboarding/path-no-gpu.html" data-path="no-gpu">
+    <span class="step-chip">Path B</span>
+    <h2>No GPU on this box.</h2>
+    <p>Same install + gateway setup, but compile jobs route to RunPod or Modal on demand. Free-tier Colab notebook is linked for &le;7B at int4. No local hardware required.</p>
+    <span class="est">4 steps &middot; ~120 s</span>
+  </a>
+  <a class="path-card" href="/account/onboarding/path-route.html" data-path="route">
+    <span class="step-chip">Path C</span>
+    <h2>Just route my traffic.</h2>
+    <p>Grab the API key, pick the SDK example (JS or Python), fire one test call, and verify the receipt. No compile, no local install, gateway-only.</p>
+    <span class="est">3 steps &middot; ~60 s</span>
+  </a>
+  <a class="path-card" href="/account/onboarding/path-verify.html" data-path="verify">
+    <span class="step-chip">Path D</span>
+    <h2>Verify a .kolm.</h2>
+    <p>Drag in a .kolm artifact (or paste a content hash) and Kolm walks every signature, hash chain entry, and lifecycle transition. No account needed; the verifier is fully offline-capable.</p>
+    <span class="est">2 steps &middot; ~30 s</span>
+  </a>
+</div>
+
+<p class="ob-foot">
+  Prefer the terminal? Run <code>kolm onboard</code> for the CLI version &mdash; same four paths, same checkpoints, saves to <code>~/.kolm/onboarding.json</code>.
+  Each path ends at <a href="/account/overview" style="color:var(--accent)">/account/overview</a> with a "What's next" tile that ranks your follow-on actions.
+</p>
+</main>
+
+<script>
+(function(){
+  // Persist any resumable progress: when a user starts a path we drop a key in
+  // localStorage; if they return to /onboarding we surface a Resume nudge.
+  var saved=null;
+  try{saved=JSON.parse(localStorage.getItem("kolm-onboarding")||"null");}catch(_){}
+  if(saved&&saved.path&&saved.step){
+    var bar=document.getElementById("ob-progress");
+    var pathLabel={gpu:"Have a GPU",["no-gpu"]:"No GPU",route:"Route traffic",verify:"Verify a .kolm"}[saved.path]||saved.path;
+    document.getElementById("ob-progress-path").textContent=pathLabel;
+    document.getElementById("ob-progress-step").textContent="Step "+saved.step+" of "+(saved.total||3);
+    var btn=document.getElementById("ob-progress-resume");
+    btn.href="/account/onboarding/path-"+saved.path+".html";
+    bar.hidden=false;
+    var card=document.querySelector('[data-path="'+saved.path+'"]');
+    if(card)card.setAttribute("data-resume","true");
+  }
+  document.querySelectorAll(".path-card").forEach(function(c){
+    c.addEventListener("click",function(){
+      try{localStorage.setItem("kolm-onboarding-started",new Date().toISOString());}catch(_){}
+    });
+  });
+})();
+</script>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Route models. Distill specialists. Run anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/changelog">Changelog</a></li><li><a href="/account/onboarding">Reopen tutorial</a></li><li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

@@ -149,7 +149,7 @@ export function optOut({ tenant_id, reason = null } = {}) {
       op: AUDIT_OPS.FEDERATED_OPTOUT,
       payload: { prior_opted_in_at: prior.opted_in_at, reason },
     });
-  } catch {}
+  } catch {} // deliberate: cleanup
   return { tenant_id, opted_out: true, prior_opted_in_at: prior.opted_in_at, reason };
 }
 
@@ -235,7 +235,7 @@ export async function shareApprovalRows({ tenant_id, namespace, since = null } =
       op: AUDIT_OPS.FEDERATED_SHARE,
       payload: { namespace, rows_count: rows.length, since },
     });
-  } catch {}
+  } catch {} // deliberate: cleanup
   return { envelope, rows };
 }
 
@@ -309,7 +309,7 @@ export function auditTrail({ tenant_id, limit = 50 } = {}) {
     try {
       const e = JSON.parse(line);
       if (e.tenant_id === tenant_id) shares.push(e);
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
   shares.reverse();
   return {
@@ -324,6 +324,6 @@ export function auditTrail({ tenant_id, limit = 50 } = {}) {
 // fixtures isolated.
 export function _wipeLocalState() {
   for (const f of [_optInFile(), _sharesFile()]) {
-    try { fs.unlinkSync(f); } catch {}
+    try { fs.unlinkSync(f); } catch {} // deliberate: cleanup
   }
 }

@@ -129,7 +129,7 @@ async function run() {
       const outFile = path.join(OUTDIR, `${pg.name}-${vp.name}.png`);
       try {
         await page.screenshot({ path: outFile, fullPage: false });
-      } catch (e) {}
+      } catch (e) {} // deliberate: cleanup
       await page.close();
     }
   }

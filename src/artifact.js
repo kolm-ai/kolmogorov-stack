@@ -176,6 +176,25 @@ function sha256(buf) {
   return crypto.createHash('sha256').update(buf).digest('hex');
 }
 
+// Chunked sync hash for files that exceed Node's 2 GiB readFileSync limit
+// (large GGUF exports). Same semantics as sha256(Buffer) but on a path.
+function sha256File(absPath) {
+  const h = crypto.createHash('sha256');
+  const fd = fs.openSync(absPath, 'r');
+  try {
+    const CHUNK = 1024 * 1024;
+    const buf = Buffer.alloc(CHUNK);
+    while (true) {
+      const read = fs.readSync(fd, buf, 0, CHUNK, null);
+      if (read <= 0) break;
+      h.update(buf.subarray(0, read));
+    }
+    return h.digest('hex');
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
 // W367 — recipe.bundle.mjs builder. Wraps each rule recipe's source body
 // (already a pure `function generate(input, lib){...}` per the sandbox guard)
 // in an isolating IIFE so multiple recipes can coexist in one file without
@@ -898,10 +917,18 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     const map = {};
     const sorted = extra_files_list.slice().sort((a, b) => a.filename.localeCompare(b.filename));
     for (const f of sorted) {
-      if (!f || typeof f.filename !== 'string' || !Buffer.isBuffer(f.content)) {
-        throw new Error('extra_files entries must be { filename:string, content:Buffer }');
+      if (!f || typeof f.filename !== 'string') {
+        throw new Error('extra_files entries must be { filename:string, content:Buffer } or { filename:string, absPath:string }');
       }
-      map[f.filename] = sha256(f.content);
+      if (Buffer.isBuffer(f.content)) {
+        map[f.filename] = sha256(f.content);
+      } else if (typeof f.absPath === 'string' && fs.existsSync(f.absPath)) {
+        // Path-backed entry: hash directly from disk to support files
+        // larger than Node's 2 GiB readFileSync limit (e.g. Trinity GGUF).
+        map[f.filename] = sha256File(f.absPath);
+      } else {
+        throw new Error(`extra_files[${f.filename}]: needs content:Buffer or absPath:string pointing to an existing file`);
+      }
     }
     hashes.extra_files = map;
   }
@@ -1852,7 +1879,13 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     if (RESERVED_FILENAMES.has(f.filename)) {
       throw new Error(`extra_files: filename '${f.filename}' is reserved`);
     }
-    files.push({ filename: f.filename, content: f.content });
+    // Pass through absPath when content is path-backed so packageArtifact()
+    // can stream directly from disk. Hash already in hashes.extra_files.
+    if (f.absPath && !Buffer.isBuffer(f.content)) {
+      files.push({ filename: f.filename, absPath: f.absPath });
+    } else {
+      files.push({ filename: f.filename, content: f.content });
+    }
   }
 
   return {
@@ -1880,7 +1913,10 @@ export function packageArtifact({ job_id, payload, outPath }) {
     z.on('warning', (e) => { if (e.code !== 'ENOENT') reject(e); });
     z.on('error', reject);
     for (const f of payload.files) {
-      z.append(f.content, { name: f.filename });
+      // Path-backed entries stream directly from disk so files larger than
+      // Node's 2 GiB Buffer limit (e.g. Trinity Q4_K_M ~4 GiB) still pack.
+      const source = (f.absPath && !f.content) ? fs.createReadStream(f.absPath) : f.content;
+      z.append(source, { name: f.filename });
     }
     z.finalize();
     if (!target) {

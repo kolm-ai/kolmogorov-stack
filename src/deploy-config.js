@@ -84,7 +84,7 @@ export function generateDockerCompose(opts = {}) {
   // default; attaching the envelope on a `.envelope` property of the
   // returned String would be lossy. So we return a String with a hidden
   // `__envelope` non-enumerable property the test can read.
-  const out = new String(base); // eslint-disable-line no-new-wrappers
+  const out = new String(base);  
   Object.defineProperty(out, '__envelope', { value: envelope, enumerable: false });
   return out;
 }

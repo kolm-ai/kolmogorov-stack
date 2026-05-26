@@ -4,7 +4,12 @@ FAL gpt-image-2 brand imagery generator for kolm.
 Set FAL_KEY or FAL_API_KEY in your environment before running this script.
 Never hard-code provider keys in this repository.
 """
-import os, sys, time, json, base64, threading, pathlib, traceback
+import os
+import time
+import json
+import threading
+import pathlib
+import traceback
 import requests
 
 KEY = os.environ.get("FAL_KEY") or os.environ.get("FAL_API_KEY")

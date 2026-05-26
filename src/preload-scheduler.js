@@ -144,7 +144,7 @@ export function _readHistoryFile(tenant) {
       if (row && typeof row === 'object' && typeof row.namespace === 'string') {
         out.push(row);
       }
-    } catch {
+    } catch { // deliberate: cleanup
       // Skip corrupted rows; honesty contract is "best-effort replay", not
       // "fail-on-partial-corruption" because the history file is advisory.
     }

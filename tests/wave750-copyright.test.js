@@ -366,7 +366,7 @@ test('W750-followup #13 — KOLM_W750_COPYRIGHT_DETECTOR=off skips the detector 
   };
   try {
     await cs.insertCapture(row);
-  } catch (e) {
+  } catch (e) { // deliberate: cleanup
     // insertCapture may legitimately fail on store-driver issues in CI; the
     // gate we care about is whether the row was mutated PRE-store. We
     // observe the row directly post-call regardless of the throw.
@@ -399,7 +399,7 @@ test('W750-followup #14 — with detector on, insertCapture stamps flag_reason +
   };
   try {
     await cs.insertCapture(row);
-  } catch (e) {
+  } catch (e) { // deliberate: cleanup
     // Same as #13 — we observe the row regardless of store success.
   }
   assert.equal(row.copyright_heuristic_flagged, true,

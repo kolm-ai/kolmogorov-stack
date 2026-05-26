@@ -772,7 +772,10 @@ export function generateAirgapBundle({
     return { ok: false, error: 'artifact_not_found', artifact_path, hint: 'check the path or run `kolm logs` to list artifacts' };
   }
 
-  const artifactBuf = fs.readFileSync(artifact_path);
+  const artifactSize = fs.statSync(artifact_path).size;
+  const TWO_GIB_MINUS_1 = 2 * 1024 * 1024 * 1024 - 1;
+  const useStreaming = artifactSize > TWO_GIB_MINUS_1;
+
   const artifactId = path.basename(artifact_path).replace(/\.kolm$/i, '') || 'artifact';
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const created_at = new Date().toISOString();
@@ -790,6 +793,28 @@ export function generateAirgapBundle({
     '  --alias ' + artifactId,
     '',
   ].join('\n');
+
+  // W891 streaming branch: when the artifact is too large to materialize a
+  // Buffer (Trinity-500 4.59 GB), we stream it through `archiver` and compute
+  // the artifact's sha256 by reading the file in 1 MiB chunks ahead of time.
+  // The non-streaming branch keeps the original in-memory tar-stream path so
+  // small artifacts produce byte-identical output to pre-W891.
+  if (useStreaming) {
+    return _airgapStreaming({
+      artifact_path,
+      artifact_size: artifactSize,
+      artifactId,
+      timestamp,
+      created_at,
+      mtime,
+      vllmConfig,
+      llamaCmd,
+      output_dir,
+      runtime,
+    });
+  }
+
+  const artifactBuf = fs.readFileSync(artifact_path);
 
   // Files (paths inside the tarball, before manifest is computed)
   const files = [
@@ -852,6 +877,108 @@ export function generateAirgapBundle({
     created_at,
     version: DEPLOY_GENERATORS_VERSION,
   };
+}
+
+// W891 streaming airgap: archiver pipes file → tar.gz → output stream without
+// ever holding the artifact in memory. We pre-compute artifact.kolm sha256 by
+// streaming the file once, so the MANIFEST.sha256 inside the tarball still
+// covers every entry deterministically.
+async function _airgapStreaming({
+  artifact_path,
+  artifact_size,
+  artifactId,
+  timestamp,
+  created_at,
+  mtime,
+  vllmConfig,
+  llamaCmd,
+  output_dir,
+  runtime,
+}) {
+  const archiver = require('archiver');
+  const stream = await import('node:stream');
+
+  fs.mkdirSync(output_dir, { recursive: true });
+  const bundle_path = path.join(output_dir, 'kolm-airgap-' + artifactId + '-' + timestamp + '.tar.gz');
+
+  // Stream-compute artifact.kolm sha256 before we open the tarball (we need
+  // it in MANIFEST.sha256 inside the bundle). 1 MiB chunks, bounded memory.
+  const artifactSha = await _streamSha256(artifact_path);
+
+  const installScript = _installScript(runtime);
+  const inMemory = [
+    { name: 'runtime/install.sh',   body: installScript,        mode: 0o755 },
+    { name: 'runtime/wheels/.keep', body: '',                   mode: 0o644 },
+    { name: 'runtime/bin/.keep',    body: '',                   mode: 0o644 },
+    { name: 'config/vllm.json',     body: vllmConfig,           mode: 0o644 },
+    { name: 'config/llama-cpp.cmd', body: llamaCmd,             mode: 0o755 },
+    { name: 'verify.cjs',           body: VERIFIER_BODY,        mode: 0o755 },
+  ];
+
+  // Order matches the non-streaming branch: artifact.kolm first.
+  const manifestLines = [];
+  manifestLines.push(artifactSha + '  artifact.kolm');
+  for (const f of inMemory) {
+    manifestLines.push(_sha256Buf(Buffer.from(f.body, 'utf8')) + '  ' + f.name);
+  }
+  const manifestBody = manifestLines.join('\n') + '\n';
+  const manifest_sha256 = _sha256Buf(Buffer.from(manifestBody, 'utf8'));
+
+  const readme = _readme({ artifact_id: artifactId, runtime, created_at, manifest_sha256 });
+  manifestLines.push(_sha256Buf(Buffer.from(readme, 'utf8')) + '  README.md');
+  const finalManifestBody = manifestLines.join('\n') + '\n';
+
+  const archive = archiver('tar', { gzip: true, gzipOptions: { level: 6 } });
+  const output = fs.createWriteStream(bundle_path);
+  const hash = crypto.createHash('sha256');
+  let bundleBytes = 0;
+  const sizeTap = new stream.PassThrough();
+  sizeTap.on('data', (c) => { hash.update(c); bundleBytes += c.length; });
+
+  archive.pipe(sizeTap).pipe(output);
+
+  archive.file(artifact_path, { name: 'artifact.kolm', date: new Date(mtime * 1000), mode: 0o644 });
+  for (const f of inMemory) {
+    archive.append(f.body, { name: f.name, date: new Date(mtime * 1000), mode: f.mode });
+  }
+  archive.append(readme,             { name: 'README.md',       date: new Date(mtime * 1000), mode: 0o644 });
+  archive.append(finalManifestBody,  { name: 'MANIFEST.sha256', date: new Date(mtime * 1000), mode: 0o644 });
+
+  await new Promise((resolve, reject) => {
+    output.on('close', resolve);
+    archive.on('error', reject);
+    sizeTap.on('error', reject);
+    archive.finalize();
+  });
+
+  const bundle_sha256 = hash.digest('hex');
+  fs.writeFileSync(bundle_path + '.sha256', bundle_sha256 + '  ' + path.basename(bundle_path) + '\n');
+
+  return {
+    ok: true,
+    bundle_path,
+    manifest_sha256,
+    sha256: bundle_sha256,
+    size_bytes: bundleBytes,
+    file_count: inMemory.length + 3, // artifact + readme + manifest
+    artifact_id: artifactId,
+    artifact_size: artifact_size,
+    artifact_sha256: artifactSha,
+    runtime,
+    created_at,
+    version: DEPLOY_GENERATORS_VERSION,
+    streaming: true,
+  };
+}
+
+function _streamSha256(filePath) {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash('sha256');
+    const rs = fs.createReadStream(filePath, { highWaterMark: 1024 * 1024 });
+    rs.on('data', (c) => hash.update(c));
+    rs.on('end', () => resolve(hash.digest('hex')));
+    rs.on('error', reject);
+  });
 }
 
 // Internal exports for tests + adjacent modules that want to drive the

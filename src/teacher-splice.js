@@ -102,10 +102,10 @@ function withTimeout(promise, ms, code) {
     }, ms) : null;
     // node's setTimeout returns a Timeout object — .unref() exists in node
     // but not in browser. Guard so this file stays bundleable.
-    try { timer && timer.unref && timer.unref(); } catch (_) {}
+    try { timer && timer.unref && timer.unref(); } catch (_) {} // deliberate: cleanup
   });
   return Promise.race([promise, timeout]).finally(() => {
-    try { clearTimeout(timer); } catch (_) {}
+    try { clearTimeout(timer); } catch (_) {} // deliberate: cleanup
   });
 }
 

@@ -2534,7 +2534,7 @@ export async function verifyArtifactStructured(artifactPath, opts = {}) {
     try {
       const mod = await import('./production-ready.js');
       verdict = await mod.productionReady(artifactPath);
-    } catch (_e) {
+    } catch (_e) { // deliberate: cleanup
       // production-ready module not importable in this context; skip.
     }
     if (verdict && verdict.ok === false) {

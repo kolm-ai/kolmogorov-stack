@@ -82,7 +82,7 @@ test('W455 #2 — listDistillRuns filters by tenant_id (fail closed)', async () 
     assert.equal(aList[0].loss_final, 1.2);
     assert.equal(aList[0].k_final, 0.50);
   } finally {
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -102,7 +102,7 @@ test('W455 #3 — readDistillRun rejects invalid run ids', async () => {
       assert.equal(r, null, 'id "' + bad + '" must be rejected');
     }
   } finally {
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -149,7 +149,7 @@ test('W455 #4 — readDistillRun returns full envelope for owner; null cross-ten
     const cross = readDistillRun('run_z_42', { tenant_id: 'tenant-other' });
     assert.equal(cross, null, 'cross-tenant lookup must fail closed');
   } finally {
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -207,7 +207,7 @@ test('W455 #6 — GET /v1/distill/runs requires auth', async () => {
       'must surface an auth-error string, got: ' + JSON.stringify(j));
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -225,7 +225,7 @@ test('W455 #7 — GET /v1/distill/runs/:id rejects malformed id', async () => {
     assert.equal(j.error, 'invalid_run_id');
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 

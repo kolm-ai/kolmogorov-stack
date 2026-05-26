@@ -32,7 +32,7 @@ function mkHome() {
 }
 
 function cleanup(home) {
-  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
 }
 
 function snapEnv() {
@@ -122,7 +122,7 @@ function readTenantUsage(tenantId) {
       const j = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
       const tt = (j && j.tenants && j.tenants[tenantId]) || {};
       for (const [k, v] of Object.entries(tt)) agg[k] = (agg[k] || 0) + Number(v || 0);
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
   }
   return agg;
 }

@@ -79,7 +79,7 @@ function freshDir() {
   process.env.KOLM_HOME = path.join(tmp, '.kolm');
   process.env.KOLM_ENV = 'test';
   process.env.RECIPE_RECEIPT_SECRET = 'kolm-public-fixture-v0-1-0';
-  try { resetDriftStore(); } catch (_) {}
+  try { resetDriftStore(); } catch (_) {} // deliberate: cleanup
   return tmp;
 }
 

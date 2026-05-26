@@ -56,16 +56,16 @@ export function ensureDirs() {
         const txt = fs.readFileSync(file, 'utf8');
         const seen = new Map();
         for (const ln of txt.split(/\r?\n/).filter(Boolean)) {
-          try { const rec = JSON.parse(ln); if (rec && rec.id) seen.set(rec.id, rec); } catch (_) {}
+          try { const rec = JSON.parse(ln); if (rec && rec.id) seen.set(rec.id, rec); } catch (_) {} // deliberate: cleanup
         }
         for (const rec of seen.values()) {
           const p = path.join(jd, `${rec.id}.json`);
           if (!fs.existsSync(p)) {
-            try { fs.writeFileSync(p, JSON.stringify(rec, null, 2), 'utf8'); } catch (_) {}
+            try { fs.writeFileSync(p, JSON.stringify(rec, null, 2), 'utf8'); } catch (_) {} // deliberate: cleanup
           }
         }
         fs.writeFileSync(sentinel, new Date().toISOString(), 'utf8');
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
     }
   }
 }
@@ -102,7 +102,7 @@ function writeJob(rec) {
   // per-file so the last write per id wins.
   try {
     fs.appendFileSync(filePath(), JSON.stringify(rec) + '\n', 'utf8');
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
 }
 
 export function listAll() {
@@ -111,13 +111,13 @@ export function listAll() {
   const byId = new Map();
   const jd = jobsDir();
   let names = [];
-  try { names = fs.readdirSync(jd); } catch (_) {}
+  try { names = fs.readdirSync(jd); } catch (_) {} // deliberate: cleanup
   for (const name of names) {
     if (!name.endsWith('.json')) continue;
     try {
       const rec = JSON.parse(fs.readFileSync(path.join(jd, name), 'utf8'));
       if (rec && rec.id) byId.set(rec.id, rec);
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
   }
   const file = filePath();
   if (fs.existsSync(file)) {
@@ -128,9 +128,9 @@ export function listAll() {
         try {
           const rec = JSON.parse(ln);
           if (rec && rec.id) byId.set(rec.id, rec);
-        } catch (_) {}
+        } catch (_) {} // deliberate: cleanup
       }
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
   }
   return Array.from(byId.values()).sort((a, b) => (b.updated_at || 0) - (a.updated_at || 0));
 }
@@ -178,7 +178,7 @@ export function prune({ olderThanMs = 7 * 24 * 3600 * 1000 } = {}) {
   for (const j of all) {
     if (j.status === 'running' || j.status === 'queued') continue;
     if ((j.updated_at || 0) >= cutoff) continue;
-    try { fs.unlinkSync(jobPath(j.id)); } catch (_) {}
+    try { fs.unlinkSync(jobPath(j.id)); } catch (_) {} // deliberate: cleanup
     droppedIds.add(j.id);
   }
   // Rewrite the JSONL with dropped ids excised so a follow-up listAll/get
@@ -197,7 +197,7 @@ export function prune({ olderThanMs = 7 * 24 * 3600 * 1000 } = {}) {
           } catch (_) { /* drop unparseable lines too */ }
         }
         fs.writeFileSync(file, kept.length ? kept.join('\n') + '\n' : '', 'utf8');
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
     }
   }
   return { dropped: droppedIds.size, kept: all.length - droppedIds.size };

@@ -31,7 +31,7 @@ async function run() {
       window.cancelAnimationFrame = function(){};
       // Clear all pending timeouts/intervals (best-effort).
       var hi = setTimeout(function(){}, 0);
-      for (var i = 0; i <= hi; i++) { try { clearTimeout(i); clearInterval(i); } catch (e) {} }
+      for (var i = 0; i <= hi; i++) { try { clearTimeout(i); clearInterval(i); } catch (e) {} } // deliberate: cleanup
     });
     await new Promise(r => setTimeout(r, 400));
     for (const s of SCENES) {

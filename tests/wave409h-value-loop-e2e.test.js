@@ -44,7 +44,7 @@ function mkHome() {
 }
 
 function cleanup(home) {
-  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
 }
 
 function snapEnv() {

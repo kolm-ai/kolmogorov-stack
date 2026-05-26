@@ -44,7 +44,7 @@ before(() => {
 });
 
 after(() => {
-  try { fs.rmSync(TMP, { recursive: true, force: true }); } catch {}
+  try { fs.rmSync(TMP, { recursive: true, force: true }); } catch {} // deliberate: cleanup
 });
 
 // Save + restore console.{log,warn,error} around each test so a stub never
@@ -72,7 +72,7 @@ beforeEach(() => {
   try {
     const ed = path.join(process.env.KOLM_DATA_DIR, 'events');
     if (fs.existsSync(ed)) fs.rmSync(ed, { recursive: true, force: true });
-  } catch {}
+  } catch {} // deliberate: cleanup
 });
 
 test('WC06-log #1 — log.info / log.warn / log.error are functions', () => {

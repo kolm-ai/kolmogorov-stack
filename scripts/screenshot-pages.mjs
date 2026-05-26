@@ -40,7 +40,7 @@ for (const p of PAGES) {
     await page.screenshot({ path: path.join(OUT, `${p.slug}-dark.png`),  fullPage: false });
     await page.evaluate(() => {
       document.documentElement.setAttribute('data-theme', 'light');
-      try { localStorage.setItem('kolm-theme', 'light'); } catch (e) {}
+      try { localStorage.setItem('kolm-theme', 'light'); } catch (e) {} // deliberate: cleanup
     });
     await page.waitForTimeout(600);
     await page.screenshot({ path: path.join(OUT, `${p.slug}-light.png`), fullPage: false });

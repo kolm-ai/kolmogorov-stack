@@ -56,7 +56,7 @@ export async function runNativeTarget(bundle, input, opts = {}) {
 
   try {
     fs.writeFileSync(binPath, bin);
-    try { fs.chmodSync(binPath, 0o755); } catch {}
+    try { fs.chmodSync(binPath, 0o755); } catch {} // deliberate: cleanup
 
     const t0 = process.hrtime.bigint();
     let child;
@@ -81,7 +81,7 @@ export async function runNativeTarget(bundle, input, opts = {}) {
     let timedOut = false;
     const killTimer = setTimeout(() => {
       timedOut = true;
-      try { child.kill('SIGKILL'); } catch {}
+      try { child.kill('SIGKILL'); } catch {} // deliberate: cleanup
     }, timeout);
 
     child.stdout.on('data', (b) => { stdout += b.toString('utf8'); });
@@ -90,7 +90,7 @@ export async function runNativeTarget(bundle, input, opts = {}) {
     try {
       child.stdin.write(JSON.stringify(input ?? null) + '\n');
       child.stdin.end();
-    } catch {
+    } catch { // deliberate: cleanup
       // Child may have already exited; the close event below carries the
       // verdict either way.
     }
@@ -127,6 +127,6 @@ export async function runNativeTarget(bundle, input, opts = {}) {
       binary_sha256: binSha,
     };
   } finally {
-    try { fs.rmSync(workdir, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(workdir, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 }

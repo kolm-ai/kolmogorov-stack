@@ -19,7 +19,7 @@ const REDACTOR = path.join(FIXTURES, 'redactor.kolm');
 const TMP = path.join(os.tmpdir(), 'kolm-w356-' + crypto.randomBytes(4).toString('hex'));
 
 test.before(async () => { await fs.mkdir(TMP, { recursive: true }); });
-test.after(async () => { try { await fs.rm(TMP, { recursive: true, force: true }); } catch {} });
+test.after(async () => { try { await fs.rm(TMP, { recursive: true, force: true }); } catch {} }); // deliberate: cleanup
 
 test('activeSampling: returns N rows ranked by uncertainty', async () => {
   const pool = [

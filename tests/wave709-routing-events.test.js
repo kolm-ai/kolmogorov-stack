@@ -54,7 +54,7 @@ function freshDir() {
   // Wipe routing_decisions rows for every test tenant so each case starts
   // from a clean slate regardless of prior runs.
   for (const t of W709_TEST_TENANTS) {
-    try { routingResetForTests(t); } catch (_) {}
+    try { routingResetForTests(t); } catch (_) {} // deliberate: cleanup
   }
   return tmp;
 }

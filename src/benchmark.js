@@ -169,11 +169,11 @@ function createEgressMonitor() {
   const patches = [];
   const modules = [];
 
-  try { modules.push(['http', require('node:http')]); } catch {}
-  try { modules.push(['https', require('node:https')]); } catch {}
-  try { modules.push(['net', require('node:net')]); } catch {}
-  try { modules.push(['tls', require('node:tls')]); } catch {}
-  try { modules.push(['dns', require('node:dns')]); } catch {}
+  try { modules.push(['http', require('node:http')]); } catch {} // deliberate: cleanup
+  try { modules.push(['https', require('node:https')]); } catch {} // deliberate: cleanup
+  try { modules.push(['net', require('node:net')]); } catch {} // deliberate: cleanup
+  try { modules.push(['tls', require('node:tls')]); } catch {} // deliberate: cleanup
+  try { modules.push(['dns', require('node:dns')]); } catch {} // deliberate: cleanup
 
   function record(api, args) {
     attempts.push({ api, target: describeTarget(args[0]) });

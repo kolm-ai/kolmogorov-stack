@@ -20,7 +20,7 @@ async function call(method, route, body, key) {
   const ct = r.headers.get('content-type') || '';
   const txt = await r.text();
   let parsed = null;
-  if (ct.includes('json')) { try { parsed = JSON.parse(txt); } catch (_) {} }
+  if (ct.includes('json')) { try { parsed = JSON.parse(txt); } catch (_) {} } // deliberate: cleanup
   return { status: r.status, body: parsed ?? txt };
 }
 

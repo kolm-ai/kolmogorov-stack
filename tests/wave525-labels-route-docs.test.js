@@ -135,7 +135,7 @@ async function resetEventStore() {
   try {
     const events = await import('../src/event-store.js');
     if (typeof events._resetForTests === 'function') events._resetForTests();
-  } catch {}
+  } catch {} // deliberate: cleanup
 }
 
 function withServer(app, fn) {
@@ -163,7 +163,7 @@ test('W525 #6 - label detail HTTP route hides cross-tenant event ids', async (t)
   t.after(async () => {
     restoreEnv(saved);
     await resetEventStore();
-    try { fs.rmSync(dir, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   });
 
   await resetEventStore();

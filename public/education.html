@@ -1,329 +1,190 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Education and Academic Research · kolm.ai</title>
-<meta name="description" content="Open-weight AI for research and learning. kolm compiles approved academic tasks into signed local artifacts that align with FERPA, institutional SSO, and...">
-<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
-
-<meta property="og:title" content="Education and Academic Research · kolm.ai">
-<meta property="og:description" content="Open-weight AI for research and learning. kolm compiles approved academic tasks into signed local artifacts that align with FERPA, institutional SSO, and...">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Education and Academic Research · kolm.ai">
-<meta name="twitter:description" content="Open-weight AI for research and learning. kolm compiles approved academic tasks into signed local artifacts that align with FERPA, institutional SSO, and...">
-<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
-<meta property="og:url" content="https://kolm.ai/education">
-<meta property="og:image" content="https://kolm.ai/brand-hero.png">
-<link rel="canonical" href="https://kolm.ai/education">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-
-<style>
- :root {
- --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
- --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
- --ink: #e6e9ee; --ink-mute: #aab0b8; --ink-faint: #6a727c;
- --accent: #e6e9ee; --accent-soft: rgba(230, 233, 238, 0.10); --accent-strong: #c9c2b2;
- --good: #e6e9ee; --bad: #ff6b91;
- --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
- --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
- }
- * { box-sizing: border-box; }
- html, body { margin: 0; padding: 0; }
- body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
- a { color: inherit; text-decoration: none; }
- .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
- @media (max-width: 720px) { .wrap { padding: 0 20px; } }
- section.hero { padding: 96px 0 56px; position: relative; overflow: hidden; }
- section.hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 1100px 540px at 22% 10%, rgba(230, 233, 238, 0.06), transparent 60%); }
- section.hero .wrap { position: relative; z-index: 2; }
- .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 6px 14px; background: rgba(8,9,8,0.62); }
- .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: #e6e9ee; box-shadow: 0 0 10px #e6e9ee; }
- h1 { margin: 26px 0 22px; font-size: clamp(40px, 6vw, 76px); line-height: 0.98; font-weight: 500; letter-spacing: -0.03em; max-width: 18ch; }
- h1 .tone { background: linear-gradient(170deg, #e6e9ee 0%, #e6e9ee 50%, #e6e9ee 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
- p.lede { margin: 0 0 32px; font-size: clamp(16px, 1.3vw, 18.5px); line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
- p.lede b { color: var(--ink); font-weight: 500; }
- p.lede code { font-family: var(--mono); font-size: 0.9em; background: var(--bg-card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
- .cta-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
- a.btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--ink); color: var(--bg); border-radius: 6px; padding: 11px 18px; font-size: 14px; font-weight: 500; }
- a.btn-primary:hover { background: #fff; }
- a.btn-link { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); padding: 11px 14px; font-size: 14px; font-weight: 500; }
- a.btn-link:hover { color: var(--accent); }
- section { padding: 72px 0; }
- section + section { border-top: 1px solid var(--line); }
- .eyebrow { display: inline-flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 18px; }
- .eyebrow .num { color: var(--accent); }
- h2 { margin: 0 0 18px; font-size: clamp(26px, 3.2vw, 38px); line-height: 1.12; font-weight: 500; max-width: 24ch; }
- h2 .tone { color: var(--accent); }
- p.sec-lede { margin: 0 0 36px; font-size: 16px; line-height: 1.55; color: var(--ink-mute); max-width: 60ch; }
- .triplets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
- @media (max-width: 880px) { .triplets { grid-template-columns: 1fr; } }
- .trip { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 8px; padding: 22px; }
- .trip h3 { margin: 0 0 10px; font-size: 17px; font-weight: 500; color: var(--ink); }
- .trip p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-mute); }
- .quad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
- @media (max-width: 880px) { .quad { grid-template-columns: repeat(2, 1fr); } }
- @media (max-width: 540px) { .quad { grid-template-columns: 1fr; } }
- .quad .item { padding: 22px 24px; border-right: 1px solid var(--line); background: var(--bg-elev); }
- .quad .item:last-child { border-right: none; }
- .quad .item .nm { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); }
- .quad .item .v { margin-top: 10px; font-size: 17px; font-weight: 500; color: var(--ink); }
- .quad .item .v.acc { color: var(--good); }
- .quad .item p { margin: 8px 0 0; font-size: 13px; line-height: 1.5; color: var(--ink-mute); }
- .uc-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
- @media (max-width: 720px) { .uc-cards { grid-template-columns: 1fr; } }
- .uc-card { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 10px; padding: 24px; }
- .uc-card h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; color: var(--ink); }
- .uc-card p { margin: 0 0 16px; font-size: 14px; line-height: 1.55; color: var(--ink-mute); }
- .uc-card a { color: var(--good); font-family: var(--mono); font-size: 12px; }
- .artifact { background: var(--bg-elev); border: 1px solid var(--line-strong); border-radius: 10px; padding: 24px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
- .artifact .left { display: flex; align-items: center; gap: 16px; }
- .artifact .nm { font-family: var(--mono); font-size: 17px; color: var(--ink); }
- .artifact .badge { font-family: var(--mono); font-size: 11px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--ink-mute); background: rgba(0,0,0,0.25); }
- .artifact .badge.dev { color: #ffd07a; border-color: rgba(255,208,122,0.4); }
- .artifact .badge.k { color: var(--good); border-color: rgba(230, 233, 238,0.4); }
- .artifact p { margin: 0; font-size: 14px; color: var(--ink-mute); max-width: 56ch; }
- .arch { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 10px; padding: 26px; font-family: var(--mono); font-size: 13px; color: var(--ink-mute); white-space: pre; overflow-x: auto; line-height: 1.5; }
- .closing { padding: 92px 0; }
- .closing h2 { font-size: clamp(30px, 4.2vw, 48px); line-height: 1.08; max-width: 22ch; margin: 0 0 24px; }
- footer.site { padding: 56px 0 40px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
- footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-</style>
+<title>Education AI &mdash; AI tutoring, instructor-aligned, FERPA-aware · kolm.ai</title>
+<meta name="description" content="Distill a model on your curriculum. Run it on a campus GPU. Every tutoring exchange produces a receipt the instructor and the registrar can replay.">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/wave889-vertical.css">
+  <link rel="canonical" href="https://kolm.ai/education">
+  <meta property="og:title" content="Education AI &mdash; AI tutoring, instructor-aligned, FERPA-aware">
+  <meta property="og:description" content="Distill a model on your curriculum. Run it on a campus GPU. Every tutoring exchange produces a receipt the instructor and the registrar can replay.">
+  <meta property="og:image" content="https://kolm.ai/og/education.svg">
+  <meta property="og:url" content="https://kolm.ai/education">
+  <meta property="og:type" content="website">
 <script type="application/ld+json">
 {
- "@context": "https://schema.org",
- "@graph": [
- {
- "@type": "WebPage",
- "name": "kolm for Education &amp; Academic Research",
- "description": "Open-weight AI for research and learning. Signed local artifacts aligned with FERPA, institutional SSO, and academic research-license terms.",
- "url": "https://kolm.ai/education",
- "isPartOf": {
- "@type": "WebSite",
- "name": "kolm.ai",
- "url": "https://kolm.ai/"
- }
- },
- {
- "@type": "BreadcrumbList",
- "itemListElement": [
- { "@type": "ListItem", "position": 1, "name": "kolm", "item": "https://kolm.ai/" },
- { "@type": "ListItem", "position": 2, "name": "Education", "item": "https://kolm.ai/education" }
- ]
- }
- ]
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/education",
+  "description": "Distill a model on your curriculum. Run it on a campus GPU. Every tutoring exchange produces a receipt the instructor and the registrar can replay.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
 }
 </script>
-<link rel="stylesheet" href="/ks.css">
-    <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
-<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<a href="#main" class="ks-skip">Skip to content</a>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<div data-include-nav></div>
 
-<div class="ks-nav-wrap">
-  <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
-    <ul class="ks-nav__list">
-      <li><a href="/wrapper">Wrapper</a></li>
-      <li><a href="/studio">Studio</a></li>
-      <li><a href="/pricing">Pricing</a></li>
-      <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
-    </ul>
-    <div class="ks-nav__right">
-      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
-      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+<section class="v-hero">
+  <div class="v-wrap">
+    <span class="v-eyebrow">Education &amp; research</span>
+    <h1 class="v-h1">AI tutors that teach your syllabus &mdash; not someone else&apos;s.</h1>
+    <p class="v-lede">Distill a small model on your curriculum, your problem sets, and your rubric. Run it on a campus GPU. Every exchange is logged with a receipt so the instructor and the registrar can replay it.</p>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup?industry=education">Try it free</a>
+      <a class="v-btn v-btn--ghost" href="/book-demo?industry=education">Speak to education team</a>
     </div>
-  </nav>
-  <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <div class="v-caveat">Caveats: institution remains the data controller for student records. Kolmogorov ships software + receipts; <a href="/security">FERPA / GDPR posture</a> is documented per deployment.</div>
   </div>
-</div>
-<main id="main">
-<section class="hero">
- <div class="wrap">
- <span class="pill"><span class="dot"></span>Education &middot; universities, K-12, research labs</span>
- <h1>Open-weight AI for <span class="tone">research and learning.</span></h1>
- <p class="lede"><b>kolm.ai</b> compiles approved academic tasks into signed <code>.kolm</code> binaries you can audit, fork, cite, and run on the lab&apos;s own hardware. Student records stay inside the FERPA boundary your registrar already trusts. Every artifact carries open weights, a reproducible eval, and a receipt your IRB can re-verify.</p>
- <div class="cta-row">
- <a href="/enterprise#contact" class="btn-primary">Talk to the academic team</a>
- <a href="mailto:edu@kolm.ai?subject=kolm%20education%20deployment" class="btn-link">edu@kolm.ai <span aria-hidden="true">&rarr;</span></a>
- </div>
- <div style="margin-top:14px;display:flex;gap:14px;flex-wrap:wrap">
- <a href="/research" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px">Research path &rarr;</a>
- <a href="/docs/cookbook" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px">Cookbook &rarr;</a>
- <a href="/security" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px">Security &rarr;</a>
- <a href="/marketplace" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px">Marketplace &rarr;</a>
- </div>
- </div>
 </section>
 
-<section>
- <div class="wrap">
- <div class="eyebrow"><span class="num">01</span><span>Regulatory framing</span></div>
- <h2>Controls your <span class="tone">CIO and IRB already read.</span></h2>
- <p class="sec-lede">Each control below is described as the kolm posture today. We name the Wave marker for every control so your procurement memo can cite the artifact.</p>
-
- <div class="quad">
- <div class="item">
- <div class="nm">FERPA</div>
- <div class="v acc">redactor + boundary</div>
- <p>Student records (PII, grades, disciplinary, IEP) stay inside the institution boundary at runtime. <code>student-pii-redactor.kolm</code> ships a typed detector for the FERPA-relevant span classes.</p>
- </div>
- <div class="item">
- <div class="nm">Institutional SSO</div>
- <div class="v acc">SAML &amp; OIDC</div>
- <p>SSO via Okta, InCommon Federation, Microsoft Entra, and Google Workspace. Service-account scoping per department, lab, or course. Audit log per tenant.</p>
- </div>
- <div class="item">
- <div class="nm">Research license</div>
- <div class="v">academic compile terms</div>
- <p>Free academic compile for non-commercial research, plus a citation-ready model card. Weight files are open and forkable so the lab&apos;s reproducibility statement holds.</p>
- </div>
- <div class="item">
- <div class="nm">COPPA &amp; state K-12</div>
- <div class="v acc">aligned</div>
- <p>K-12 deployments need parental consent and data-minimization wrappers. The district procurement checklist and the Student Data Privacy Consortium (SDPC) addendum template are part of the education procurement packet.</p>
- </div>
- </div>
- </div>
-</section>
-
-<section>
- <div class="wrap">
- <div class="eyebrow"><span class="num">02</span><span>Use cases</span></div>
- <h2>Reference workloads for <span class="tone">academic and K-12 deployments.</span></h2>
- <p class="sec-lede">Each is a signed <code>.kolm</code> artifact compiled against the institution&apos;s own gold set. The lab keeps the weights, the receipts, and the right to audit every output.</p>
-
- <div class="uc-cards">
- <div class="uc-card">
- <h3>TA support triage.</h3>
- <p>Inbound student questions classified against the course rubric and routed (TA queue &middot; office hours &middot; self-serve answer). Suggested replies are drafted on the TA workstation, never round-tripped to a frontier API.</p>
- <a href="/cookbook/support-reply">cookbook / support-reply &rarr;</a>
- </div>
- <div class="uc-card">
- <h3>Research-paper summarization.</h3>
- <p>Lab compiles a domain-tuned summarizer on its own corpus (PubMed, arXiv subfield, conference proceedings). Citations stay grounded, receipts let collaborators verify the exact artifact version.</p>
- <a href="/cookbook/incident-summarizer">cookbook / incident-summarizer &rarr;</a>
- </div>
- <div class="uc-card">
- <h3>Syllabus content moderation.</h3>
- <p>Flags syllabus-violating content in submitted assignments (plagiarism patterns, prohibited collaboration, scope creep). Reviewer-of-record signs every flag, kolm logs the artifact version.</p>
- <a href="/cookbook/nps-classifier">cookbook / nps-classifier &rarr;</a>
- </div>
- <div class="uc-card">
- <h3>On-device tutor distillation.</h3>
- <p>Course-specific tutor distilled from approved instructor examples, deployed as a single signed file to the student tablet. Runs offline. No student data leaves the device.</p>
- <a href="/marketplace#tutor">marketplace / tutor &rarr;</a>
- </div>
- </div>
- </div>
-</section>
-
-<section>
- <div class="wrap">
- <div class="eyebrow"><span class="num">03</span><span>Reference artifact</span></div>
- <h2>One signed <span class="tone">starting point.</span></h2>
- <p class="sec-lede">A reference artifact your lab can fork, recompile against your own gold set, and cite in the methods section.</p>
- <div class="artifact">
- <div class="left">
- <span class="nm">student-pii-redactor.kolm</span>
- <span class="badge dev">in development</span>
- <span class="badge k">K 0.95 target</span>
- </div>
- <p>Typed detector for FERPA-relevant span classes (student name, ID, grade, IEP class, disciplinary text) with stable replacement tokens so downstream models train on shape, not raw PII. Recipe pattern at <a href="/cookbook/phi-redactor" style="color:var(--good)">phi-redactor</a>.</p>
- </div>
- </div>
-</section>
-
-<section>
- <div class="wrap">
- <div class="eyebrow"><span class="num">04</span><span>Architecture</span></div>
- <h2>Open weights, <span class="tone">closed boundary.</span></h2>
- <p class="sec-lede">The compile bridge runs inside the campus network or the lab&apos;s own cloud account. The runtime artifact is a single signed file. Citations and receipts are deterministic.</p>
-
- <div class="arch">
-+--------------------+ +--------------------+ +--------------------+
-| institution gold | --&gt; | kolm compile | --&gt; | signed .kolm |
-| set (de-identified)| | (campus VPC or | | artifact + open |
-| eval cases | | lab cloud acct) | | weights + receipts |
-+--------------------+ +--------------------+ +--------------------+
- | |
- v v
- +---------------+ +---------------+
- | model card + | | re-verify |
- | eval report | | byte-for-byte |
- | (cite-ready) | | (IRB review) |
- +---------------+ +---------------+
- </div>
- </div>
-</section>
-
-<section>
- <div class="wrap">
- <div class="eyebrow"><span class="num">05</span><span>Procurement</span></div>
- <h2>How institutions <span class="tone">buy kolm today.</span></h2>
- <p class="sec-lede">Three live paths matched to the way universities, colleges, and K-12 districts actually procure software.</p>
- <div class="triplets">
- <div class="trip">
- <h3>Academic license.</h3>
- <p>Free compile for non-commercial research, $0 per seat for course-affiliated TAs. Citation-ready model cards on every artifact.</p>
- </div>
- <div class="trip">
- <h3>Institutional Enterprise.</h3>
- <p>Site-wide Enterprise covers labs, departments, IT, and student-affairs deployments. SSO included. Per-department audit logs.</p>
- </div>
- <div class="trip">
- <h3>K-12 cooperative.</h3>
- <p>State-level cooperatives (E-rate, ESSER, state IT contracts) handled through reseller relationships. SDPC privacy addendum template ships with the contract.</p>
- </div>
- </div>
- </div>
-</section>
-
-<section class="closing">
- <div class="wrap">
- <h2>Evaluate research-grade AI <span class="tone">inside the boundary your registrar already trusts.</span></h2>
- <p class="lede" style="max-width:60ch">Book Enterprise review self-serve, or open an academic license request. The FERPA addendum and model-card template arrive in your inbox the same hour your first API key is issued.</p>
- <div class="cta-row">
- <a href="/enterprise/inquiry" class="btn-primary">Book Enterprise review</a>
- <a href="/enterprise" class="btn-link">Enterprise overview <span aria-hidden="true">&rarr;</span></a>
- <a href="mailto:edu@kolm.ai?subject=kolm%20education%20deployment" class="btn-link">edu@kolm.ai <span aria-hidden="true">&rarr;</span></a>
- </div>
- <div style="margin-top:14px"><a href="/enterprise/inquiry" style="color:var(--ink-faint);font-family:var(--mono);font-size:12px">or book architecture review &rarr;</a></div>
- </div>
-</section>
-</main>
-<footer class="ks-footer">
-  <div class="ks-wrap">
-    <div class="ks-footer__grid">
-      <div>
-        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
-        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
-      </div>
-      <div>
-        <h4>Wrapper</h4>
-        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
-      </div>
-      <div>
-        <h4>Studio</h4>
-        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
-      </div>
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Three commands</span>
+      <h2 class="v-h2">Distill. Run. Verify.</h2>
+      <p>Three CLI verbs. Students and instructors never leave your network.</p>
     </div>
-    <div class="ks-footer__bottom">
-      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    <div class="v-trio">
+      <div class="v-card">
+        <span class="ctag">01 / Distill</span>
+        <h3>Train on your course</h3>
+        <p>Use your lectures, problem sets, and rubric as the curriculum. The frontier teacher signal never sees a student PII record.</p>
+        <div class="cmd">kolm distill --base qwen3-8b --recipe edu-course</div>
+        <a class="go" href="/distill">Distill pipeline -&gt;</a>
+      </div>
+      <div class="v-card">
+        <span class="ctag">02 / Run</span>
+        <h3>On a campus GPU</h3>
+        <p>INT4 GGUF runs on a single workstation card. No cloud egress. No data shipped to a vendor cluster.</p>
+        <div class="cmd">kolm run model.kolm --bind campus.local</div>
+        <a class="go" href="/run">Run surface -&gt;</a>
+      </div>
+      <div class="v-card">
+        <span class="ctag">03 / Verify</span>
+        <h3>Receipt per exchange</h3>
+        <p>Each tutoring turn writes a receipt: prompt hash, model hash, output, student-pseudonym ID. Instructor reviews, registrar archives.</p>
+        <div class="cmd">kolm verify rcpt_01KYC...</div>
+        <a class="go" href="/verify">Verify a receipt -&gt;</a>
+      </div>
     </div>
   </div>
-</footer>
+</section>
 
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Compliance posture</span>
+      <h2 class="v-h2">Built for student data.</h2>
+      <p>What the architecture gives you. What still belongs to your CIO and registrar.</p>
+    </div>
+    <div class="v-compl">
+      <div>
+        <div class="label">FERPA</div>
+        <b>20 USC 1232g &middot; 34 CFR 99</b>
+        <p>No outbound network. Education records stay inside your institutional boundary. We are not a school official unless your DPA names us.</p>
+      </div>
+      <div>
+        <div class="label">COPPA</div>
+        <b>K-12 deployments</b>
+        <p>No third-party data sharing in the runtime path. Operator obligations stay with the district. Receipts simplify §312.4 disclosure.</p>
+      </div>
+      <div>
+        <div class="label">GDPR (EU institutions)</div>
+        <b>Art. 6 lawful basis + Art. 28 processor</b>
+        <p>Self-hosted = institution remains the controller. Receipts give you Art. 30 records of processing for free.</p>
+      </div>
+      <div>
+        <div class="label">Academic integrity</div>
+        <b>Replayable tutoring trails</b>
+        <p>Receipts let the instructor reconstruct what the model told a student and when. Honor-code disputes have an artifact.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Campus workflows</span>
+      <h2 class="v-h2">Six patterns in classrooms now.</h2>
+      <p>What instructors, TAs, and research labs are shipping.</p>
+    </div>
+    <div class="v-flows">
+      <div class="v-flow">
+        <span class="who">Instructor</span>
+        <h3>Office-hours tutor</h3>
+        <p>Answers from the course textbook and lecture notes. Refuses out-of-syllabus prompts. Cites the page or slide used.</p>
+        <div class="io">in: student question &middot; out: answer + lecture citation</div>
+      </div>
+      <div class="v-flow">
+        <span class="who">TA</span>
+        <h3>Rubric-aligned feedback</h3>
+        <p>Grade-adjacent feedback against the published rubric. The TA stays the grader of record; the model drafts the comment.</p>
+        <div class="io">in: student essay &middot; out: rubric-keyed comments</div>
+      </div>
+      <div class="v-flow">
+        <span class="who">Research lab</span>
+        <h3>Literature triage</h3>
+        <p>Cluster 2k papers against your reading list. Surface methods, datasets, and metrics. Replayable across the cohort.</p>
+        <div class="io">in: arXiv batch &middot; out: ranked papers + method table</div>
+      </div>
+      <div class="v-flow">
+        <span class="who">Registrar</span>
+        <h3>Policy &amp; transcript Q&amp;A</h3>
+        <p>Answer student questions against the catalog and academic-policy library. Cites the rule paragraph used.</p>
+        <div class="io">in: question &middot; out: answer + catalog page #</div>
+      </div>
+      <div class="v-flow">
+        <span class="who">Library</span>
+        <h3>Research-help desk</h3>
+        <p>Direct students to the right databases and call numbers. No external lookups; uses your discovery-service index.</p>
+        <div class="io">in: topic &middot; out: ranked sources + call numbers</div>
+      </div>
+      <div class="v-flow">
+        <span class="who">K-12 district</span>
+        <h3>IEP draft assistant</h3>
+        <p>Draft IEP goals against your district template. The case manager owns the final document; the model drafts the language.</p>
+        <div class="io">in: goal target + history &middot; out: drafted IEP section</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-cta-row">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Get started</span>
+      <h2 class="v-h2">Pilot one course. Roll out by department.</h2>
+      <p>Start free with one section. Same model + receipts move into department-wide and institution-wide deployments.</p>
+    </div>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup?industry=education">Try it free</a>
+      <a class="v-btn v-btn--ghost" href="/book-demo?industry=education">Speak to education team</a>
+    </div>
+    <div class="v-receipts">
+      <div class="label">Example receipt</div>
+      <p>Every exchange: <code>kolm verify rcpt_01KYC1ZVTGDCW3FX06JQSC</code> &middot; <a href="/v1/verify/rcpt_01KYC1ZVTGDCW3FX06JQSC">view receipt -&gt;</a></p>
+    </div>
+  </div>
+</section>
+
+<div data-include-footer></div>
+<script src="/nav.js" defer></script>
 </body>
 </html>

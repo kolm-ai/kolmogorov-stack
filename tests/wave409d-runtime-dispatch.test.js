@@ -180,7 +180,7 @@ test('W409d #1 — runArtifact(runtime_target=js) routes through dispatchRuntime
     assert.equal(r.receipt.spec, 'rs-1-run');
     assert.equal(r.receipt.runtime, 'js');
   } finally {
-    try { fs.rmSync(path.dirname(art), { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(path.dirname(art), { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });
 
@@ -235,7 +235,7 @@ test('W409d #2 — runArtifact(runtime_target=native) routes through dispatchRun
       assert.equal(r.receipt.runtime, 'native');
     }
   } finally {
-    try { fs.rmSync(path.dirname(art), { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(path.dirname(art), { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });
 
@@ -269,7 +269,7 @@ test('W409d #3 — runArtifact(runtime_target=wasm) routes through dispatchRunti
       `dispatcher selected wasm runner (got ${err && err.code}); JS path could not produce this code`,
     );
   } finally {
-    try { fs.rmSync(path.dirname(art), { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(path.dirname(art), { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });
 
@@ -323,7 +323,7 @@ test('W409d #4 — evalArtifact routes each case through dispatchRuntime', async
     assert.equal(r.passed, 2, `evalArtifact expects native dispatch; passed=${r.passed} errors=${JSON.stringify(r.errors)}`);
     assert.equal(r.accuracy, 1.0);
   } finally {
-    try { fs.rmSync(path.dirname(art), { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(path.dirname(art), { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });
 
@@ -352,7 +352,7 @@ test('W409d #5 — verifier rejects native runtime_target when binary entry miss
     assert.match(rtCheck.detail, /binary/i, 'failure reason must mention the missing binary');
     assert.equal(result.verdict, 'fail', 'overall verdict must be fail when runtime_target is misconfigured');
   } finally {
-    try { fs.rmSync(path.dirname(art), { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(path.dirname(art), { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });
 
@@ -372,7 +372,7 @@ test('W409d #5b — verifier accepts native runtime_target when binary present',
     assert.ok(rtCheck, 'binder must include the Runtime target consistency check');
     assert.equal(rtCheck.status, 'pass', `expected pass (got ${rtCheck && rtCheck.status}: ${rtCheck && rtCheck.detail})`);
   } finally {
-    try { fs.rmSync(path.dirname(art), { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(path.dirname(art), { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });
 
@@ -392,7 +392,7 @@ test('W409d #5c — verifier rejects gguf runtime_target when gguf bytes missing
     assert.equal(rtCheck.status, 'fail');
     assert.match(rtCheck.detail, /gguf/i);
   } finally {
-    try { fs.rmSync(path.dirname(art), { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(path.dirname(art), { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });
 
@@ -411,7 +411,7 @@ test('W409d #5d — verifier accepts gguf runtime_target when gguf bytes present
     assert.ok(rtCheck);
     assert.equal(rtCheck.status, 'pass', `expected pass (got ${rtCheck && rtCheck.status}: ${rtCheck && rtCheck.detail})`);
   } finally {
-    try { fs.rmSync(path.dirname(art), { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(path.dirname(art), { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });
 
@@ -437,10 +437,10 @@ function spawnCli(args, env = {}, options = {}) {
     let stderr = '';
     child.stdout.on('data', (b) => { stdout += b.toString('utf8'); });
     child.stderr.on('data', (b) => { stderr += b.toString('utf8'); });
-    const killer = setTimeout(() => { try { child.kill('SIGKILL'); } catch {} }, 30_000);
+    const killer = setTimeout(() => { try { child.kill('SIGKILL'); } catch {} }, 30_000); // deliberate: cleanup
     child.on('close', (code) => {
       clearTimeout(killer);
-      try { fs.rmSync(home, { recursive: true, force: true }); } catch {}
+      try { fs.rmSync(home, { recursive: true, force: true }); } catch {} // deliberate: cleanup
       resolve({ code, stdout, stderr });
     });
   });
@@ -500,7 +500,7 @@ test('W409d #6 — CLI `kolm run <artifact> --json` envelope proves dispatcher r
     const recipe = env.recipe || env.recipe_id || (env.audit && env.audit.recipe_id);
     assert.ok(recipe === 'rcp_upper' || recipe === 'upper', `recipe id/name should be present; got ${recipe}`);
   } finally {
-    try { fs.rmSync(path.dirname(art), { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(path.dirname(art), { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });
 
@@ -551,7 +551,7 @@ test('W409d #7 — CLI `kolm eval <artifact> --json` exercises dispatcher per ca
     assert.equal(env.passed, 3, `eval must pass all 3 cases; got passed=${env.passed} errors=${JSON.stringify(env.errors)}`);
     assert.equal(env.accuracy, 1.0);
   } finally {
-    try { fs.rmSync(path.dirname(art), { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(path.dirname(art), { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });
 

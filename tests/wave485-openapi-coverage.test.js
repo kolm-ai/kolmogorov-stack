@@ -54,19 +54,31 @@ test('W485 #2 — openapi.json declares ≥ 300 operations (was 11 before the au
   assert.ok(count >= 300, `expected ≥300 operations, got ${count}`);
 });
 
-test('W485 #3 — curated /v1/auth/login keeps its rich request/response schemas (merge-not-replace)', () => {
+test('W485 #3 — curated /v1/auth/login op exists and declares a stable contract', () => {
+  // Original W485 intent: a curated path must not be overwritten by the
+  // auto-generated build pass. W890-9 closes the parallel issue: the
+  // /v1/auth/login + /v1/auth/signup paths were aspirational — Kolm never
+  // implemented password auth, only API key + OAuth — so the curated
+  // LoginRequest / AuthResponse schemas were dead. W890-9 converts both to
+  // explicit `deprecated:true` 410-Gone shells. The merge guarantee still
+  // holds (build-openapi.cjs preserves the curated op verbatim); only the
+  // contract itself changed from aspirational to deprecation-aliased.
   const op = OPENAPI.paths['/v1/auth/login']?.post;
   assert.ok(op, '/v1/auth/login POST must exist');
-  // The curated operation referenced LoginRequest + AuthResponse schemas.
-  // The build script must NOT have overwritten these with the generic shape.
-  const reqRef = op.requestBody?.content?.['application/json']?.schema?.$ref || '';
-  assert.match(reqRef, /LoginRequest|loginRequest/i,
-    'curated /v1/auth/login lost its LoginRequest schema — build script overwrote a hand-curated op');
-  assert.ok(op.responses && (op.responses['200'] || op.responses['2XX']),
-    '/v1/auth/login must declare a 2xx response');
+  assert.strictEqual(op.deprecated, true,
+    '/v1/auth/login must declare deprecated:true (W890-9 deprecation contract)');
+  // The op must declare at least one response. The 200 of the original
+  // curated op or the 410 of the W890-9 deprecation contract both qualify.
+  assert.ok(op.responses && (op.responses['200'] || op.responses['2XX'] || op.responses['410']),
+    '/v1/auth/login must declare a response');
 });
 
-test('W485 #4 — every operation declares a summary and at least one 2xx-class response', () => {
+test('W485 #4 — every operation declares a summary and at least one terminal response', () => {
+  // Original W485 required a 2xx-class response on every op. W890-9 introduced
+  // an explicit deprecation contract for /v1/auth/login + /v1/auth/signup whose
+  // ONLY response is 410 Gone — those ops have no 2xx by design. Widened: ops
+  // marked `deprecated:true` may declare 410 (or any 4xx) as their terminal
+  // contract; all other ops still require 2xx or `default`.
   const bad = [];
   for (const p of Object.keys(OPENAPI.paths)) {
     for (const m of Object.keys(OPENAPI.paths[p])) {
@@ -74,8 +86,12 @@ test('W485 #4 — every operation declares a summary and at least one 2xx-class 
       const op = OPENAPI.paths[p][m];
       if (!op.summary) bad.push(`${m.toUpperCase()} ${p}: missing summary`);
       const responses = op.responses || {};
-      const hasSuccess = Object.keys(responses).some(c => /^2/.test(c) || c === 'default');
-      if (!hasSuccess) bad.push(`${m.toUpperCase()} ${p}: no 2xx response declared`);
+      const codes = Object.keys(responses);
+      const hasSuccess = codes.some(c => /^2/.test(c) || c === 'default');
+      const hasDeprecationTerminal = op.deprecated === true && codes.some(c => /^4/.test(c));
+      if (!hasSuccess && !hasDeprecationTerminal) {
+        bad.push(`${m.toUpperCase()} ${p}: no terminal response declared`);
+      }
     }
   }
   assert.deepEqual(bad, [], `${bad.length} ops fail OpenAPI 3.0 shape: ${bad.slice(0, 6).join(' | ')}${bad.length > 6 ? '...' : ''}`);

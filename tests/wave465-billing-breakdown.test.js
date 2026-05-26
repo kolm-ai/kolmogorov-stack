@@ -245,7 +245,7 @@ test('W465 #6 — GET /v1/billing/breakdown is auth-gated (401 without auth)', a
     );
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -285,7 +285,7 @@ test('W465 #7 — GET /v1/billing/breakdown returns by=namespace envelope + by=t
     assert.equal(env2.error, 'team_id_required');
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -314,7 +314,7 @@ test('W465 #8 — GET /v1/billing/breakdown rejects invalid period (?period=garb
     assert.equal(env2.error, 'invalid_period');
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 

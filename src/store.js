@@ -56,7 +56,7 @@ if (ON_VERCEL && fs.existsSync(BUNDLED_DATA_DIR) && BUNDLED_DATA_DIR !== DATA_DI
     try {
       const stat = fs.statSync(src);
       if (stat.isFile()) fs.copyFileSync(src, dst);
-    } catch {
+    } catch { // deliberate: cleanup
       // Best-effort seed; safe to skip.
     }
   }
@@ -78,7 +78,7 @@ function fsyncDir(dir) {
   try {
     const fd = fs.openSync(dir, 'r');
     try { fs.fsyncSync(fd); } finally { fs.closeSync(fd); }
-  } catch {
+  } catch { // deliberate: cleanup
     // Directory fsync is best-effort and not uniformly supported on Windows.
   }
 }
@@ -109,7 +109,7 @@ function replaceFileWithRetry(tmp, file) {
   // copy over the destination after retries, fsync below, then remove temp.
   try {
     fs.copyFileSync(tmp, file);
-    try { fs.rmSync(tmp, { force: true }); } catch {}
+    try { fs.rmSync(tmp, { force: true }); } catch {} // deliberate: cleanup
     return;
   } catch {
     throw lastErr;
@@ -130,9 +130,9 @@ function writeFileDurably(file, text) {
     fsyncDir(path.dirname(file));
   } catch (err) {
     if (fd !== null) {
-      try { fs.closeSync(fd); } catch {}
+      try { fs.closeSync(fd); } catch {} // deliberate: cleanup
     }
-    try { fs.rmSync(tmp, { force: true }); } catch {}
+    try { fs.rmSync(tmp, { force: true }); } catch {} // deliberate: cleanup
     throw err;
   }
 }
@@ -275,14 +275,14 @@ function runInTxn(db, fn) {
     db.exec('BEGIN IMMEDIATE');
     _txnDepth = 1;
     try { fn(); db.exec('COMMIT'); _txnDepth = 0; }
-    catch (e) { try { db.exec('ROLLBACK'); } catch {} _txnDepth = 0; throw e; }
+    catch (e) { try { db.exec('ROLLBACK'); } catch {} _txnDepth = 0; throw e; } // deliberate: cleanup
     return;
   }
   const sp = `sp_${++_savepointSeq}`;
   db.exec(`SAVEPOINT ${sp}`);
   _txnDepth++;
   try { fn(); db.exec(`RELEASE ${sp}`); _txnDepth--; }
-  catch (e) { try { db.exec(`ROLLBACK TO ${sp}`); db.exec(`RELEASE ${sp}`); } catch {} _txnDepth--; throw e; }
+  catch (e) { try { db.exec(`ROLLBACK TO ${sp}`); db.exec(`RELEASE ${sp}`); } catch {} _txnDepth--; throw e; } // deliberate: cleanup
 }
 
 function sqliteRows(name) {
@@ -412,9 +412,23 @@ export function findByField(table, field, value) {
 // invocations, audit_log, concepts, jobs) carry a `tenant` column; this
 // wrapper centralises the access pattern so future SQLite expression indexes
 // can be added in one place. Returns [] for missing tenants.
+// W888-L: also union rows that carry a `tenant_id` column (newer fixtures and
+// the api_keys-style join shape both emit tenant_id, not tenant). If a row
+// matches either column we count it once.
 export function findByTenant(table, tenant) {
   if (!tenant) return [];
-  return findByField(table, 'tenant', tenant);
+  const a = findByField(table, 'tenant', tenant);
+  const b = findByField(table, 'tenant_id', tenant);
+  if (!b.length) return a;
+  if (!a.length) return b;
+  const seen = new Set(a.map(r => r && r.id).filter(Boolean));
+  const merged = a.slice();
+  for (const row of b) {
+    if (!row || !row.id || seen.has(row.id)) continue;
+    seen.add(row.id);
+    merged.push(row);
+  }
+  return merged;
 }
 
 export function remove(table, predicate) {

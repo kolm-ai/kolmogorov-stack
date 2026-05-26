@@ -71,7 +71,7 @@ test('sqlite store imports JSON seed and persists updates transactionally', asyn
 
   let store;
   t.after(() => {
-    try { store?.close(); } catch {}
+    try { store?.close(); } catch {} // deliberate: cleanup
     if (savedDriver === undefined) delete process.env.KOLM_STORE_DRIVER;
     else process.env.KOLM_STORE_DRIVER = savedDriver;
     if (savedDbPath === undefined) delete process.env.KOLM_DB_PATH;

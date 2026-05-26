@@ -171,7 +171,7 @@
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -184,13 +184,121 @@
     <a href="/studio">Studio</a>
     <a href="/pricing">Pricing</a>
     <a href="/docs">Docs</a>
-    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+    <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a>
     <a href="/signup?intent=login">Sign in</a>
     <a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
 <main id="main" class="ks-wrap mk-page">
+
+  <!-- W889-10.1 — Premium marketplace teaser (early access).
+       The catalog below this section is the live curated seed catalog from
+       W664/W737. The teaser above announces the v2 premium marketplace
+       (publisher revenue share, K-Score comparability across tasks, signed
+       reviewer identities) and captures interest from operators who want
+       early access. Submissions POST to /v1/marketplace/interest which is
+       a public, IP-rate-limited route. -->
+  <section class="mk-teaser" aria-labelledby="mk-teaser-h" style="margin:8px 0 var(--ks-8);padding:24px 28px;border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md);background:rgba(255,255,255,0.02)">
+    <header style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px">
+      <div>
+        <span class="mk-hero__eyebrow" style="display:inline-block;margin-bottom:6px">Premium marketplace</span>
+        <h2 id="mk-teaser-h" style="margin:0;font-size:clamp(22px,2.4vw,28px);font-weight:560;letter-spacing:-0.015em;color:var(--ks-ink)">In early access.</h2>
+      </div>
+      <span style="font-family:var(--ks-mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ks-ink-faint)">Built on <a href="/docs/spec/dot-kolm-v1.0" style="color:var(--ks-ink-3);border-bottom:1px solid var(--ks-line-2)">.kolm v1.0</a></span>
+    </header>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin:14px 0 18px">
+      <p style="margin:0;color:var(--ks-ink-2);font-size:14.5px;line-height:1.65">
+        A registry of kolm-distilled models, datasets, and recipes. Every
+        listing rides on the open <a href="/docs/spec/dot-kolm-v1.0"><code>.kolm</code> v1.0</a> format
+        so a buyer can re-run the holdout and verify the K-Score before they
+        ever load weights into a GPU.
+      </p>
+      <p style="margin:0;color:var(--ks-ink-2);font-size:14.5px;line-height:1.65">
+        Revenue share for creators. K-Score comparability is locked per task
+        family so a model is never ranked against another model that solved a
+        different problem. Reviewer identities are signed; anonymous reviews
+        do not affect the displayed score.
+      </p>
+      <p style="margin:0;color:var(--ks-ink-2);font-size:14.5px;line-height:1.65">
+        Public launch lands when we have <strong>50+ artifacts from 10+
+        independent publishers</strong>. Drop your email below and we'll write
+        you the morning the gate flips.
+      </p>
+    </div>
+    <form id="mk-interest-form" class="mk-interest" action="/v1/marketplace/interest" method="post" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;margin-top:18px">
+      <label for="mk-interest-email" class="kolm-sr" style="position:absolute;left:-9999px">Email address</label>
+      <input id="mk-interest-email" name="email" type="email" required autocomplete="email" placeholder="you@example.com" style="flex:1 1 240px;min-width:0;background:var(--ks-bg-1);color:var(--ks-ink);border:1px solid var(--ks-line-2);padding:9px 12px;border-radius:var(--ks-r-sm);font-family:var(--ks-mono);font-size:13.5px">
+      <label for="mk-interest-areas" class="kolm-sr" style="position:absolute;left:-9999px">Interest areas</label>
+      <input id="mk-interest-areas" name="interest_areas" type="text" maxlength="200" autocomplete="off" placeholder="task families you care about (optional)" style="flex:1 1 240px;min-width:0;background:var(--ks-bg-1);color:var(--ks-ink);border:1px solid var(--ks-line-2);padding:9px 12px;border-radius:var(--ks-r-sm);font-family:var(--ks-mono);font-size:13.5px">
+      <button type="submit" class="ks-btn ks-btn--primary ks-btn--sm" style="white-space:nowrap">Be first to know <span class="ks-btn-arrow" aria-hidden="true">&rarr;</span></button>
+    </form>
+    <p id="mk-interest-msg" role="status" aria-live="polite" style="margin:10px 0 0;min-height:1.4em;font-family:var(--ks-mono);font-size:12px;color:var(--ks-ink-3)"></p>
+
+    <h3 style="margin:28px 0 12px;font-size:14px;letter-spacing:0.04em;color:var(--ks-ink-2);font-weight:560">Preview &mdash; example listings the v2 marketplace will host:</h3>
+    <ul style="list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">
+      <li style="padding:14px 16px;border:1px dashed var(--ks-line-2);border-radius:var(--ks-r-sm);background:var(--ks-bg-1)">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px">
+          <strong style="font-family:var(--ks-mono);font-size:13.5px;color:var(--ks-ink)">qwen2.5-7b-medical-coding</strong>
+          <span class="mk-row__badge mk-row__badge--preview" style="font-family:var(--ks-mono);font-size:10px;color:#d6a65a">Preview</span>
+        </div>
+        <span style="font-family:var(--ks-sans);font-size:12.5px;color:var(--ks-ink-3);line-height:1.55">Healthcare vertical &middot; ICD-10 / CPT code suggestion fine-tune from Qwen2.5-7B. Holdout pinned to deidentified DRG samples.</span>
+      </li>
+      <li style="padding:14px 16px;border:1px dashed var(--ks-line-2);border-radius:var(--ks-r-sm);background:var(--ks-bg-1)">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px">
+          <strong style="font-family:var(--ks-mono);font-size:13.5px;color:var(--ks-ink)">claude-distilled-sql-agent</strong>
+          <span class="mk-row__badge mk-row__badge--preview" style="font-family:var(--ks-mono);font-size:10px;color:#d6a65a">Preview</span>
+        </div>
+        <span style="font-family:var(--ks-sans);font-size:12.5px;color:var(--ks-ink-3);line-height:1.55">Developer tool &middot; SQL-from-prose agent distilled from Claude. Includes BIRD + Spider holdouts plus a runtime passport pinning latency on a single A100.</span>
+      </li>
+      <li style="padding:14px 16px;border:1px dashed var(--ks-line-2);border-radius:var(--ks-r-sm);background:var(--ks-bg-1)">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px">
+          <strong style="font-family:var(--ks-mono);font-size:13.5px;color:var(--ks-ink)">gpt-4o-deep-research-rag</strong>
+          <span class="mk-row__badge mk-row__badge--preview" style="font-family:var(--ks-mono);font-size:10px;color:#d6a65a">Preview</span>
+        </div>
+        <span style="font-family:var(--ks-sans);font-size:12.5px;color:var(--ks-ink-3);line-height:1.55">Knowledge worker &middot; Deep-research RAG pack distilled from GPT-4o. Ships a citation-grounded retriever and a 9-step evidence DAG bundled inside the .kolm.</span>
+      </li>
+    </ul>
+  </section>
+  <script>
+  // W889-10.1 — Marketplace interest capture. Best-effort fetch; failure
+  // modes (offline, 5xx) surface a soft hint without losing the typed email.
+  (function(){
+    var form = document.getElementById('mk-interest-form');
+    var msg  = document.getElementById('mk-interest-msg');
+    if (!form || !msg) return;
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      msg.textContent = 'Submitting...';
+      var fd = new FormData(form);
+      var body = {
+        email: String(fd.get('email') || '').trim(),
+        interest_areas: String(fd.get('interest_areas') || '').trim(),
+      };
+      if (!body.email) { msg.textContent = 'Please enter an email address.'; return; }
+      fetch('/v1/marketplace/interest', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'omit',
+        body: JSON.stringify(body),
+      }).then(function(r){
+        return r.json().then(function(j){ return { ok: r.ok, status: r.status, body: j }; });
+      }).then(function(res){
+        if (res.ok && res.body && res.body.ok) {
+          var pos = res.body.position;
+          msg.textContent = pos ? ('Reserved. You are #' + pos + ' on the early-access list.') : 'Reserved. We will write the morning the marketplace opens.';
+          form.reset();
+        } else if (res.status === 429) {
+          msg.textContent = 'Rate limited - try again in a few minutes.';
+        } else {
+          msg.textContent = (res.body && res.body.detail) || (res.body && res.body.error) || 'Something went wrong. Try again later.';
+        }
+      }).catch(function(){
+        msg.textContent = 'Network error. Try again in a moment.';
+      });
+    });
+  })();
+  </script>
 
   <header class="mk-hero">
     <div class="mk-hero__text">
@@ -439,7 +547,7 @@ $ curl -s https://kolm.ai/v1/marketplace/catalog.json | jq .signature_algo
       </div>
       <div>
         <h4>Company</h4>
-        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/marketplace">Marketplace</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/marketplace">Marketplace</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
       </div>
     </div>
     <div class="ks-footer__bottom">

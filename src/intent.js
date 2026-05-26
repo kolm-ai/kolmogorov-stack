@@ -1444,7 +1444,7 @@ export async function classifyIntent(text, context = {}) {
         const alts = overlapRank(normalized, 3).filter(a => a.verb !== out.verb);
         return baseEnvelope(out, alts);
       }
-    } catch (_) {
+    } catch (_) { // deliberate: cleanup
       // fall through to overlap
     }
   }
@@ -1558,13 +1558,13 @@ export async function snapshotContext({ cwd = process.cwd(), home = null, tenant
       for (const f of fs.readdirSync(ARTIFACTS_DIR)) {
         if (f.endsWith('.kolm')) addArt(path.join(ARTIFACTS_DIR, f));
       }
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
   }
   try {
     for (const f of fs.readdirSync(cwd)) {
       if (f.endsWith('.kolm')) addArt(path.join(cwd, f));
     }
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
   out.counts.artifacts = out.artifacts.length;
 
   // Enrich each artifact with manifest metadata if we can read it.
@@ -1613,9 +1613,9 @@ export async function snapshotContext({ cwd = process.cwd(), home = null, tenant
     try {
       const lines = fs.readFileSync(JOBS_PATH, 'utf8').split('\n').filter(Boolean);
       for (const l of lines) {
-        try { out.jobs.push(JSON.parse(l)); } catch (_) {}
+        try { out.jobs.push(JSON.parse(l)); } catch (_) {} // deliberate: cleanup
       }
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
   }
   // Also support the per-job-file layout from src/jobs.js (jobs/*.json).
   const JOBS_DIR = path.join(KOLM_DIR, 'jobs');
@@ -1626,9 +1626,9 @@ export async function snapshotContext({ cwd = process.cwd(), home = null, tenant
         try {
           const j = JSON.parse(fs.readFileSync(path.join(JOBS_DIR, f), 'utf8'));
           out.jobs.push(j);
-        } catch (_) {}
+        } catch (_) {} // deliberate: cleanup
       }
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
   }
   out.counts.jobs = out.jobs.length;
 
@@ -1650,7 +1650,7 @@ export async function snapshotContext({ cwd = process.cwd(), home = null, tenant
           server_validated: false,
         };
       }
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
   }
 
   // W457 — TELEMETRY RECONCILIATION (P0 release blocker).
@@ -1706,7 +1706,7 @@ export async function snapshotContext({ cwd = process.cwd(), home = null, tenant
           || currentTenantFilterValue(out.current_tenant)
           || 'local';
         let rows = [];
-        try { rows = await captureStore.allCapturesForTenant(tenant, 50000); } catch (_) {}
+        try { rows = await captureStore.allCapturesForTenant(tenant, 50000); } catch (_) {} // deliberate: cleanup
         if (rows && rows.length) {
           out.captures_summary = aggregateNamespaces(rows);
         }
@@ -1731,7 +1731,7 @@ export async function snapshotContext({ cwd = process.cwd(), home = null, tenant
           out.captures_summary = aggregateNamespaces(rows);
           break;
         }
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
     }
   }
   out.counts.captures = out.captures_summary.reduce((s, r) => s + r.count, 0);

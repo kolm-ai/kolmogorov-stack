@@ -33,7 +33,7 @@ const PAGES = [
     for (const theme of ['light', 'dark']) {
       await page.goto(url, { waitUntil: 'networkidle', timeout: 20000 }).catch(() => {});
       await page.evaluate((t) => {
-        try { localStorage.setItem('kolm-theme', t); } catch(e) {}
+        try { localStorage.setItem('kolm-theme', t); } catch(e) {} // deliberate: cleanup
         document.documentElement.setAttribute('data-theme', t);
         document.documentElement.style.colorScheme = t;
       }, theme);

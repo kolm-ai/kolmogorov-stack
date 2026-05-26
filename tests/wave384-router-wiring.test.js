@@ -48,7 +48,7 @@ async function makeAppAndTenant({ admin = false } = {}) {
   try {
     const es = await import('../src/event-store.js');
     es._resetForTests?.();
-  } catch {}
+  } catch {} // deliberate: cleanup
 
   const { buildRouter } = await import('../src/router.js');
   const { provisionAnonTenant } = await import('../src/auth.js');
@@ -775,7 +775,7 @@ test('W384 #26 — pipeline job is tenant-scoped (cross-tenant access returns 40
   process.env.USERPROFILE = dir;
   process.env.KOLM_EVENT_STORE_PATH = path.join(dir, 'events_' + crypto.randomBytes(4).toString('hex') + '.sqlite');
   delete process.env.ADMIN_KEY;
-  try { const es = await import('../src/event-store.js'); es._resetForTests?.(); } catch {}
+  try { const es = await import('../src/event-store.js'); es._resetForTests?.(); } catch {} // deliberate: cleanup
   const { buildRouter } = await import('../src/router.js');
   const { provisionAnonTenant } = await import('../src/auth.js');
   const express = (await import('express')).default;

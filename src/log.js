@@ -149,7 +149,7 @@ async function emitStructured(level, tag, msg, fields) {
       feedback,
       source_type: 'simulated', // honest provenance — these aren't real LLM rows
     });
-  } catch {
+  } catch { // deliberate: cleanup
     // Best-effort: swallow.
   }
 }

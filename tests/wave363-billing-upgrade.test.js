@@ -132,7 +132,7 @@ test('W363 #4 — nothing configured → kolm.ai pricing fallback + jsonl log ro
     assert.ok(row.at);
   } finally {
     restore();
-    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 

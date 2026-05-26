@@ -313,9 +313,9 @@ export async function aggregatePatterns({
     // W411 defense-in-depth — confirm the opt-in is still active for this
     // (tenant, namespace) pair. Inside the loop so a registry bug cannot
     // surface a row whose opt-in was revoked.
-    /* eslint-disable no-await-in-loop */
+     
     const stillOpted = await isOptedIn(row.tenant_id, row.namespace);
-    /* eslint-enable no-await-in-loop */
+     
     if (!stillOpted) continue;
     if (vertical) {
       // Best-effort vertical filter — match if the source namespace contains

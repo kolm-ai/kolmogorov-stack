@@ -29,7 +29,7 @@ const KOLM_CLI = path.resolve(__dirname, '..', 'cli', 'kolm.js');
 
 function isolatedHome() {
   const dir = path.join(os.tmpdir(), 'kolm-w368-' + process.pid + '-' + Math.random().toString(36).slice(2));
-  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {}
+  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {} // deliberate: cleanup
   return dir;
 }
 
@@ -49,7 +49,7 @@ function postJson(url, body, headers = {}) {
         resolve({ status: res.statusCode, headers: res.headers, body: json });
       });
     });
-    req.setTimeout(8000, () => { try { req.destroy(new Error('timeout')); } catch (_) {} });
+    req.setTimeout(8000, () => { try { req.destroy(new Error('timeout')); } catch (_) {} }); // deliberate: cleanup
     req.on('error', reject);
     req.write(payload); req.end();
   });
@@ -65,7 +65,7 @@ function getJson(url) {
         resolve({ status: res.statusCode, headers: res.headers, body: json });
       });
     });
-    req.setTimeout(8000, () => { try { req.destroy(new Error('timeout')); } catch (_) {} });
+    req.setTimeout(8000, () => { try { req.destroy(new Error('timeout')); } catch (_) {} }); // deliberate: cleanup
     req.on('error', reject);
     req.end();
   });
@@ -155,7 +155,7 @@ test('W368 #1 — daemon starts on random port and /v1/health returns JSON', asy
     }
   } finally {
     process.env.HOME = prev || ''; process.env.USERPROFILE = prev || '';
-    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -189,7 +189,7 @@ test('W368 #2 — POST /v1/chat/completions forwards + returns OpenAI shape + x-
   } finally {
     process.env.HOME = prev.HOME || ''; process.env.USERPROFILE = prev.HOME || '';
     if (prev.KEY) process.env.OPENAI_API_KEY = prev.KEY; else delete process.env.OPENAI_API_KEY;
-    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -222,7 +222,7 @@ test('W368 #3 — POST /v1/messages forwards + returns Anthropic shape', async (
   } finally {
     process.env.HOME = prev.HOME || ''; process.env.USERPROFILE = prev.HOME || '';
     if (prev.KEY) process.env.ANTHROPIC_API_KEY = prev.KEY; else delete process.env.ANTHROPIC_API_KEY;
-    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -271,7 +271,7 @@ test('W368 #4 — capture-store row written with all canonical event fields popu
   } finally {
     process.env.HOME = prev.HOME || ''; process.env.USERPROFILE = prev.HOME || '';
     if (prev.KEY) process.env.OPENAI_API_KEY = prev.KEY; else delete process.env.OPENAI_API_KEY;
-    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -301,7 +301,7 @@ test('W368 #5 — privacy membrane scan flags api_key in the prompt', async () =
   } finally {
     process.env.HOME = prev.HOME || ''; process.env.USERPROFILE = prev.HOME || '';
     if (prev.KEY) process.env.OPENAI_API_KEY = prev.KEY; else delete process.env.OPENAI_API_KEY;
-    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -330,7 +330,7 @@ test('W368 #6 — POST without upstream credentials returns 401 with hint', asyn
   } finally {
     process.env.HOME = prev.HOME || ''; process.env.USERPROFILE = prev.HOME || '';
     if (prev.KEY) process.env.OPENAI_API_KEY = prev.KEY;
-    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -359,7 +359,7 @@ test('W368 #7 — Authorization Bearer header overrides env var', async () => {
   } finally {
     process.env.HOME = prev.HOME || ''; process.env.USERPROFILE = prev.HOME || '';
     if (prev.KEY) process.env.OPENAI_API_KEY = prev.KEY;
-    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -373,10 +373,10 @@ test('W368 #8 — kolm connect doctor without daemon + no keys exits gracefully 
     let stdout = ''; let stderr = '';
     proc.stdout.on('data', d => { stdout += d.toString(); });
     proc.stderr.on('data', d => { stderr += d.toString(); });
-    const killer = setTimeout(() => { try { proc.kill('SIGKILL'); } catch (_) {} }, 15000);
+    const killer = setTimeout(() => { try { proc.kill('SIGKILL'); } catch (_) {} }, 15000); // deliberate: cleanup
     proc.on('close', (code) => { clearTimeout(killer); resolve({ code, stdout, stderr }); });
   });
-  try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   // Doctor should not crash; either exits 0 (all warns) or 1 (some fails). It MUST not crash with non-int exit.
   assert.ok(r.code === 0 || r.code === 1, 'unexpected exit code ' + r.code + ' stderr=' + r.stderr.slice(0, 200));
   assert.match(r.stdout, /daemon_running/);
@@ -395,10 +395,10 @@ test('W368 #9 — kolm connect status without daemon prints NOT RUNNING (exit 0)
     let stdout = ''; let stderr = '';
     proc.stdout.on('data', d => { stdout += d.toString(); });
     proc.stderr.on('data', d => { stderr += d.toString(); });
-    const killer = setTimeout(() => { try { proc.kill('SIGKILL'); } catch (_) {} }, 10000);
+    const killer = setTimeout(() => { try { proc.kill('SIGKILL'); } catch (_) {} }, 10000); // deliberate: cleanup
     proc.on('close', (code) => { clearTimeout(killer); resolve({ code, stdout, stderr }); });
   });
-  try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   assert.equal(r.code, 0, 'expected exit 0, got ' + r.code);
   assert.match(r.stdout, /NOT RUNNING/);
 });
@@ -416,10 +416,10 @@ test('W368 #10 — kolm connect config --show emits sanitized key fingerprints',
     let stdout = ''; let stderr = '';
     proc.stdout.on('data', d => { stdout += d.toString(); });
     proc.stderr.on('data', d => { stderr += d.toString(); });
-    const killer = setTimeout(() => { try { proc.kill('SIGKILL'); } catch (_) {} }, 10000);
+    const killer = setTimeout(() => { try { proc.kill('SIGKILL'); } catch (_) {} }, 10000); // deliberate: cleanup
     proc.on('close', (code) => { clearTimeout(killer); resolve({ code, stdout, stderr }); });
   });
-  try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   assert.equal(r.code, 0);
   // Sanitized: should show prefix + "..." + suffix, NOT the full key.
   assert.match(r.stdout, /sk-abc.*wxyz/);
@@ -461,7 +461,7 @@ test('W393 #1 - /v1/health exposes 4-field connector health per provider (boolea
   } finally {
     process.env.HOME = prev.HOME || ''; process.env.USERPROFILE = prev.HOME || '';
     if (prev.KEY) process.env.OPENAI_API_KEY = prev.KEY;
-    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -496,7 +496,7 @@ test('W393 #2 - no API key set means authenticated is false even when host is re
     if (prev.K2) process.env.ANTHROPIC_API_KEY = prev.K2;
     if (prev.K3) process.env.OPENROUTER_API_KEY = prev.K3;
     if (prev.K4) process.env.GEMINI_API_KEY = prev.K4;
-    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -520,6 +520,6 @@ test('W393 #3 - probeProviderReach returns 2 booleans and is bounded (does not h
   } finally {
     process.env.HOME = prev.HOME || ''; process.env.USERPROFILE = prev.HOME || '';
     if (prev.KEY) process.env.OPENAI_API_KEY = prev.KEY;
-    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });

@@ -35,7 +35,7 @@ async function postSubscribe(port, email) {
     body: JSON.stringify({ email }),
   });
   let body = null;
-  try { body = await res.json(); } catch {}
+  try { body = await res.json(); } catch {} // deliberate: cleanup
   return { status: res.status, body };
 }
 

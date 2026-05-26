@@ -930,7 +930,7 @@ function estimateCostPer1k({ provider, model, totalIn, totalOut, n }) {
   try {
     // Late import keeps the harness usable from environments where the
     // provider registry isn't fully resolvable (e.g. minimal CI).
-    // eslint-disable-next-line no-eval
+     
     const importer = (s) => import(s);
     // We can't await dynamically here without going async — fall back to
     // the minimal inline table. The full registry path runs via the

@@ -4,7 +4,10 @@ Each asset is dimensional, atmospheric, single periwinkle accent on near-black.
 Outputs land in public/img/ and are post-processed with PIL to enforce exact
 #7C8CFF accent (hue-tint pipeline) when needed.
 """
-import os, sys, urllib.request, json, time
+import os
+import sys
+import urllib.request
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 

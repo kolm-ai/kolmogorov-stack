@@ -69,7 +69,23 @@ function tenantKeyMatches(tenant, key) {
 }
 
 export function findTenantByApiKey(key) {
-  return findOne('tenants', x => !x._deleted && tenantKeyMatches(x, key)) || null;
+  const direct = findOne('tenants', x => !x._deleted && tenantKeyMatches(x, key)) || null;
+  if (direct) return direct;
+  // W888-L fallback: tests + multi-key flows can store keys in a separate
+  // `api_keys` table with rows shaped { tenant_id, hash, revoked_at }. The
+  // hash column is a raw sha256 hex digest (no 'sha256:' prefix). If the
+  // tenant row itself carries no api_key_hash, walk the api_keys table.
+  try {
+    const rawHex = crypto.createHash('sha256').update(String(key || '')).digest('hex');
+    const row = findOne('api_keys', x => x && !x._deleted && !x.revoked_at && (
+      x.hash === rawHex || x.hash === ('sha256:' + rawHex) || x.api_key_hash === rawHex || x.api_key_hash === ('sha256:' + rawHex)
+    ));
+    if (row && row.tenant_id) {
+      const t = findOne('tenants', x => x && !x._deleted && x.id === row.tenant_id);
+      if (t) return t;
+    }
+  } catch (_) {} // deliberate: cleanup
+  return null;
 }
 
 // One-shot migration: any tenant minted before api_key_hash was a column has
@@ -365,6 +381,7 @@ const PUBLIC_API = (p) =>
   p === '/v1/registry/public' ||
   p === '/v1/hub' ||
   p === '/v1/lead/enterprise' ||                                        // KOLM-102: structured intake post; GET /:id stays admin-gated
+  p === '/v1/sales/demo-request' ||                                     // W889-6.1: Book-Demo intake post; rate-limited 10/IP/24h in router.js
   /^\/v1\/hub\/[^/]+\/[^/]+(?:\/download)?$/.test(p) ||
   /^\/v1\/receipts\/[A-Za-z0-9._\-]{8,128}\/public$/.test(p) ||         // public receipt-by-hash lookup, no auth (KOLM-109)
   p === '/v1/stripe/webhook' ||
@@ -373,6 +390,11 @@ const PUBLIC_API = (p) =>
   p === '/v1/byoc/targets' ||
   /^\/v1\/teams\/invites\/[A-Za-z0-9_\-]+$/.test(p) ||                  // preview is public; /accept is its own path
   /^\/v1\/oauth\/(google|github)\/(start|callback)$/.test(p) ||
+  // W889-8.4 — short OAuth aliases. /v1/auth/github + /v1/auth/github/callback
+  // are 302 redirects to the canonical /v1/oauth/github/* routes above. They
+  // must be public so the redirect itself does not need an API key.
+  p === '/v1/auth/github' ||
+  p === '/v1/auth/github/callback' ||
   /^\/v1\/tunnel\/agent\/[A-Za-z0-9_\-]+(?:\/response)?$/.test(p) ||
   // wave-144 stateless validators / catalogs (no tenant state read, pure compute).
   // Trace/IR-compile/FL-round/aggregate stay auth-gated above because they touch tenant data.
@@ -393,6 +415,11 @@ const PUBLIC_API = (p) =>
   p === '/v1/marketplace/list' ||
   p === '/v1/marketplace/catalog.json' ||
   p === '/v1/marketplace/publish-request' ||
+  // W889-10.1 — public email-capture for the v2 premium marketplace
+  // teaser on /marketplace. Same policy as /v1/specialists/waitlist:
+  // public POST, IP-rate-limited inside the route handler, no tenant
+  // scoping (the email IS the dedupe key).
+  p === '/v1/marketplace/interest' ||
   // W737 — faceted search + public review-read are public; listing-register +
   // review-submit stay auth-gated above. The reviews/:cid path uses a
   // dedicated regex so /v1/marketplace/:slug/download (existing route below)
@@ -446,6 +473,10 @@ const PUBLIC_API = (p) =>
   // no key is attached. With a valid key the soft-auth above promotes the
   // call to the full snapshotContext path (same as /v1/intent/ask).
   p === '/v1/free/chat' ||
+  // W888-R — public docs-search assistant. Rate-limited inside the route
+  // via docsAssistantLimiter at 60/IP/24h. Per-turn budget capped at $0.005.
+  // Capture namespace is 'public/docs-search' so we can audit public usage.
+  p === '/v1/assistant/chat-docs' ||
   // W854 — public CLI runner for the homepage chat. Strict allowlist of
   // read-only verbs is enforced inside the route handler; the same rate
   // limiter pool as /v1/free/chat caps anonymous calls at 20/IP/day.

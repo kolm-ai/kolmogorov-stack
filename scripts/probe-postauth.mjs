@@ -36,5 +36,5 @@ const data = await page.evaluate(() => {
 });
 console.log('dashboard state:', JSON.stringify(data, null, 2));
 
-await page.screenshot({ path: 'scripts/qa-dashboard-authed.png', fullPage: false });
+await page.screenshot({ path: 'audit-shots/scripts-qa/qa-dashboard-authed.png', fullPage: false });
 await b.close();

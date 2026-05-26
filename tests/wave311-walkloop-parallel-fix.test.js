@@ -68,7 +68,7 @@ test('W311 #3 — kolm doctor --loop --json exits 0 in isolation (smoke)', () =>
     timeout: 60_000,
     env: { ...process.env, HOME: home, USERPROFILE: home },
   });
-  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   assert.equal(res.error, undefined, `spawn must not error (${res.error && res.error.message})`);
   assert.equal(res.status, 0, `kolm doctor --loop --json must exit 0 (got ${res.status}, stderr: ${(res.stderr || '').slice(0, 600)})`);
   const jsonStart = (res.stdout || '').indexOf('{');

@@ -450,7 +450,7 @@ test('W786 #18 - GET /v1/carbon/estimate returns 401 without auth', async () => 
       'expected missing api key or auth_required, got: ' + body.error);
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -501,7 +501,7 @@ test('W786 #19 - GET /v1/carbon/estimate returns ok envelope with auth + local_r
     assert.equal(typeof body3.savings.local_is_greener, 'boolean');
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 

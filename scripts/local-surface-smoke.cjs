@@ -140,7 +140,7 @@ async function stopServer(child) {
   child.kill();
   await new Promise((resolve) => {
     const timer = setTimeout(() => {
-      try { child.kill('SIGKILL'); } catch {}
+      try { child.kill('SIGKILL'); } catch {} // deliberate: cleanup
       resolve();
     }, 3000);
     child.once('exit', () => {

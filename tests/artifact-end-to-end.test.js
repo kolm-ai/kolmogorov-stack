@@ -196,5 +196,5 @@ test('signature: tampering manifest in zip is detected', async () => {
     (err) => err.code === 'KOLM_E_SIGNATURE_INVALID',
     'tampered manifest must reject with KOLM_E_SIGNATURE_INVALID'
   );
-  try { fs.unlinkSync(tmp); } catch {}
+  try { fs.unlinkSync(tmp); } catch {} // deliberate: cleanup
 });

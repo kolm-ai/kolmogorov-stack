@@ -96,7 +96,7 @@ function computeCoverageForPhi(rows) {
         const cm = tok.match(/\[PHI_([A-Z]+)_\d+\]/);
         if (cm) present.add(cm[1]);
       }
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
   // Three "user-facing" coverage classes the demo mentions explicitly. Map
   // them to the underlying CLASSES so the report shows the friendlier name.

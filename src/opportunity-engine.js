@@ -261,7 +261,7 @@ export async function findOpportunities(opts = {}) {
         const keys = Object.keys(j || {}).slice(0, 20).sort().join(',');
         if (!keys) continue;
         schemaKeys.set(keys, (schemaKeys.get(keys) || 0) + 1);
-      } catch {}
+      } catch {} // deliberate: cleanup
     }
     const top = [...schemaKeys.entries()].sort((a, b) => b[1] - a[1])[0];
     if (top && top[1] >= Math.floor(minCallCount / 5)) {
@@ -621,7 +621,7 @@ function _loadState() {
         // status row, and so a later status row keeps prior sample_event_ids.
         byId[e.id] = { ...(byId[e.id] || {}), ...e };
       }
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
   return { byId };
 }

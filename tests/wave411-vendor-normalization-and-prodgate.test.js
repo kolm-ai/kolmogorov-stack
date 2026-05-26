@@ -51,7 +51,7 @@ function mkHome() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w411-'));
 }
 function cleanup(home) {
-  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
 }
 
 function setIsolatedHome(home) {
@@ -115,7 +115,7 @@ function withMockUpstream(shape, fn) {
       req.on('data', (chunk) => { body += chunk; });
       req.on('end', () => {
         let parsed = {};
-        try { parsed = JSON.parse(body); } catch (_) {}
+        try { parsed = JSON.parse(body); } catch (_) {} // deliberate: cleanup
         const model = String(parsed.model || 'mock-model');
         let respJson;
         if (shape === 'openai') {

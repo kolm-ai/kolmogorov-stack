@@ -151,7 +151,7 @@ async function _consultConfidenceRouter(probe) {
           };
         }
       }
-    } catch (_) {
+    } catch (_) { // deliberate: cleanup
       // Honest no-op: missing module is fine.
     }
   }

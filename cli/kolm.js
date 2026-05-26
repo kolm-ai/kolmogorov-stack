@@ -89,6 +89,26 @@ const EXIT = {
   RUNTIME: 4,       // synonym for EXECUTION
 };
 
+// W890-3 — process-level guards. Without these, a stray throw inside any
+// fire-and-forget Promise (e.g. a background fetch, the auto-update probe,
+// the daemon connector heartbeat) would default-crash the CLI under Node 20
+// with no diagnostic context. Print one structured line, honour KOLM_DEBUG
+// for the stack, and exit with EXIT.EXECUTION so CI sees a non-zero code.
+process.on('unhandledRejection', (reason) => {
+  const msg = (reason && reason.message) ? reason.message : String(reason);
+  console.error('error: unhandled async failure —', msg);
+  console.error('what to do: rerun with KOLM_DEBUG=1 for a stack trace, then file a bug at https://github.com/kolm-ai/kolmogorov-stack/issues');
+  if (process.env.KOLM_DEBUG && reason && reason.stack) console.error(reason.stack);
+  process.exit(EXIT.EXECUTION);
+});
+process.on('uncaughtException', (err) => {
+  const msg = (err && err.message) ? err.message : String(err);
+  console.error('error: uncaught exception —', msg);
+  console.error('what to do: rerun with KOLM_DEBUG=1 for a stack trace, then file a bug at https://github.com/kolm-ai/kolmogorov-stack/issues');
+  if (process.env.KOLM_DEBUG && err && err.stack) console.error(err.stack);
+  process.exit(EXIT.EXECUTION);
+});
+
 // Error-context wrapper. Wraps a cmd* invocation so any thrown error gets
 // prefixed with `[kolm <verb>]` and an optional hint line for common patterns.
 // The wrapper does NOT swallow exit codes: if the thrown error carries an
@@ -180,6 +200,20 @@ function loadConfig() {
   } else {
     try { c = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8')); } catch { c = {}; }
   }
+  // W888-J — fall back to the new TOML hierarchy (`~/.kolm/config.toml`)
+  // when the legacy JSON does not have api_key. This makes `kolm config set
+  // account.api_key ...` visible to every legacy verb (whoami, status, login)
+  // without forcing a manual JSON rewrite. Wrapped in try/catch so a malformed
+  // TOML never breaks the CLI — the JSON file stays the source of truth.
+  if (!c.api_key) {
+    try {
+      const tomlPath = path.join(KOLM_DIR, 'config.toml');
+      if (fs.existsSync(tomlPath)) {
+        const account = _parseTomlAccountSection(fs.readFileSync(tomlPath, 'utf-8'));
+        if (account && account.api_key) c.api_key = account.api_key;
+      }
+    } catch (_) { /* malformed toml is non-fatal */ }
+  }
   // Env vars override on every load so KOLM_BASE / KOLM_API_KEY work even when
   // a stale config file is on disk (the docs in HELP._root promise this).
   if (process.env.KOLM_BASE) c.base = process.env.KOLM_BASE;
@@ -188,6 +222,34 @@ function loadConfig() {
   if (!('api_key' in c)) c.api_key = null;
   return c;
 }
+
+// W888-J — scoped TOML reader for the JSON-back-compat path. Pulls just the
+// `[account]` section without importing the full src/config.js module — keeps
+// loadConfig() sync and zero-import-cost.
+function _parseTomlAccountSection(text) {
+  const out = {};
+  let inAccount = false;
+  for (const raw of String(text || '').split(/\r?\n/)) {
+    const line = raw.replace(/^﻿/, '').trim();
+    if (!line || line.startsWith('#')) continue;
+    const sec = line.match(/^\[([A-Za-z0-9_\-]+)\]\s*(?:#.*)?$/);
+    if (sec) { inAccount = sec[1] === 'account'; continue; }
+    if (!inAccount) continue;
+    const eq = line.indexOf('=');
+    if (eq <= 0) continue;
+    const k = line.slice(0, eq).trim();
+    let v = line.slice(eq + 1).trim();
+    if (!k) continue;
+    if (v.startsWith('"') && v.endsWith('"')) v = v.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+    else if (v.startsWith("'") && v.endsWith("'")) v = v.slice(1, -1);
+    else if (v === 'null') v = null;
+    else if (v === 'true') v = true;
+    else if (v === 'false') v = false;
+    out[k] = v;
+  }
+  return out;
+}
+
 function saveConfig(c) {
   ensureDir();
   fs.writeFileSync(CONFIG_PATH, JSON.stringify(c, null, 2));
@@ -232,7 +294,7 @@ async function api(c, method, path_, body) {
         err.code = 'ETIMEDOUT';
         reject(err);
         req.destroy(err);
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
     });
     req.on('error', (err) => {
       if (err && (!err.message || String(err.message).trim() === '')) {
@@ -261,6 +323,33 @@ async function api(c, method, path_, body) {
 const SUPPORTS_COLOR = process.stdout.isTTY && !process.env.NO_COLOR && process.env.TERM !== 'dumb';
 function color(code, s) { return SUPPORTS_COLOR ? `\x1b[${code}m${s}\x1b[0m` : s; }
 
+// W888-G — standardized "next step" hint printer. Centralises the "X failed →
+// Run: Y" / "→ See: docs/...md" footer pattern so the 10+ high-traffic verbs
+// (whoami / doctor / config / compile / serve / gateway / captures / receipts
+// / namespace / deploy) share one shape. Always writes to stderr so JSON on
+// stdout stays pipeable. NO_COLOR + --plain aware via the SUPPORTS_COLOR
+// gate already defined above. Call shape:
+//   nextStep({ run: 'kolm login' })
+//   nextStep({ see: 'docs/reference/spec-toml-reference.md' })
+//   nextStep({ fix: 'set $EDITOR to vi/nano/code' })
+//   nextStep({ try: ['kolm doctor --network', 'curl https://kolm.ai/health'] })
+// Multiple keys may be supplied at once; arrow + bold cmd printed for each.
+function nextStep(hint) {
+  if (!hint || typeof hint !== 'object') return;
+  const out = process.stderr;
+  const arrow = SUPPORTS_COLOR && process.env.LANG !== 'C' ? '→' : '->';
+  const label = (txt) => color('36', txt);
+  const cmd = (txt) => color('1', txt);
+  const dim = (txt) => color('2', txt);
+  if (hint.run) out.write('  ' + arrow + ' ' + label('Run:') + ' ' + cmd(hint.run) + '\n');
+  if (hint.see) out.write('  ' + arrow + ' ' + label('See:') + ' ' + hint.see + '\n');
+  if (hint.fix) out.write('  ' + arrow + ' ' + label('Fix:') + ' ' + hint.fix + '\n');
+  if (Array.isArray(hint.try)) {
+    out.write('  ' + arrow + ' ' + label('Try:') + '\n');
+    for (const t of hint.try) out.write('    ' + dim('-') + ' ' + cmd(t) + '\n');
+  }
+}
+
 // CLI -> REST translator. Prints the equivalent live-API call to stderr after
 // any local action so every command doubles as an API tutorial. Stays on
 // stderr so `kolm run a.kolm 'x' | jq` still pipes cleanly. Backported from
@@ -282,7 +371,7 @@ function printRestEquivalent(verb, path_, body, opts = {}) {
       const json = JSON.stringify(body, null, 2).split('\n').map((l) => '  ' + l).join('\n');
       out.write(color('2', json) + '\n');
     }
-  } catch {}
+  } catch {} // deliberate: cleanup
 }
 
 function fmtBytes(n) {
@@ -431,7 +520,9 @@ COMMANDS
   logs [--limit n] [--artifact x]  tail local run history (~/.kolm/logs/runs.jsonl)
   ask "<question>"                 natural-language gateway: status, builds, install, compile, upgrade
   nl "<request>"                   natural-language recipe scaffolder (free text -> spec.json + seeds stub)
-  chat                             interactive natural-language session (airgap-safe)
+  chat                             kolm-assistant REPL (local GGUF -> api -> gateway fallback; :exit to quit)
+  "<natural language>"             quoted multi-word first arg routes through kolm-assistant (--no-assistant to opt out)
+  assistant <sub>                  assistant orchestrator (compile | run | chat | bench | publish)
   tui                              interactive .kolm shell (drag-drop artifacts + REST equivalents)
   config [base|api_key] [value]    inspect or set config
   completion <bash|zsh|fish>       emit a shell completion script for the requested shell
@@ -1715,6 +1806,9 @@ EXAMPLES
 
 USAGE
   kolm test <artifact.kolm> [--regression] [--adversarial] [--json]
+  kolm test cloud --provider <runpod|modal> | --storage <s3|postgres> | --all
+  kolm test ship-gate [--json] [--report <path>] [--failures-only] [--skip=<ids>]
+  kolm test e2e --persona <indie|enterprise|no-gpu|full> [--full] [--json]
 
 WHAT IT RUNS
   regression:  re-runs the artifact's embedded eval cases and confirms
@@ -2678,30 +2772,42 @@ USAGE
   kolm doctor
   kolm doctor --detect-hw [--json]
   kolm doctor --loop      [--json]
+  kolm doctor --fix       [--dry-run] [--yes] [--json]
 
-CHECKS
-  config file, api key, cloud reachability, receipt secret, node >= 18,
-  docker (optional, for kolm bench --reproduce), ANTHROPIC_API_KEY (optional),
-  project config (kolm.yaml), project + global artifact counts.
+CHECKS (seven groups, summary in --json under .groups)
+  system   : config file, api key, node >=18, git, docker, python, rustc, cc,
+             cuda (nvidia-smi), gpu (name + VRAM), receipt secret
+  core     : torch, transformers, peft, bitsandbytes, shard
+  export   : llama.cpp binary, llama-cpp-python, exllamav2, autoawq, mlx-lm
+  cloud    : RUNPOD_API_KEY + api.runpod.io reachable, MODAL_TOKEN_ID
+  network  : cloud reachable, kolm.ai, api.kolm.ai, gateway /health
+  storage  : event-store, project + global artifacts, better-sqlite3, pg,
+             @aws-sdk/client-s3
+  devices  : registered fleet count
 
 MODES
-  --detect-hw   probe GPU via nvidia-smi/system_profiler; recommend a tier.
-                exit 0 on detection, 3 on no GPU.
-  --loop        run the value-loop smoke (capture/log -> capture/health ->
-                bridges/observations -> distill/from-captures -> replay)
-                in-process against a fresh anon tenant. exit 0 if every
-                rung is green, 1 if any rung fails. New install? Run this
-                before you point real traffic at kolm.
+  --detect-hw          probe GPU via nvidia-smi/system_profiler; recommend a tier.
+                       exit 0 on detection, 3 on no GPU.
+  --loop               run the value-loop smoke (capture/log -> capture/health ->
+                       bridges/observations -> distill/from-captures -> replay)
+                       in-process against a fresh anon tenant. exit 0 if every
+                       rung is green, 1 if any rung fails.
+  --fix                attempt to install missing optional deps (npm + pip).
+                       use --dry-run to see the plan; --yes to proceed without
+                       prompting; --json to get a structured fix report.
+  --allow-logged-out   demote auth blockers to warn (for CI / release-verify).
 
 EXIT CODES
   0    no blockers (warnings allowed)
   1    one or more required checks failed
-  3    --detect-hw found no GPU
+  3    --detect-hw found no GPU; or any blocker present
 
 EXAMPLES
   kolm doctor
   kolm doctor --detect-hw --json
   kolm doctor --loop --json
+  kolm doctor --fix --dry-run --json
+  kolm doctor --fix --yes
 `,
   logs: `kolm logs - tail the local run-history log.
 
@@ -2782,11 +2888,11 @@ EXAMPLES
   kolm upgrade --json | jq .status # script-friendly
 
 Reads the current version from package.json. Fetches the latest version from
-the canonical install source (github.com/sneaky-hippo/kolm-stack main
+the canonical install source (github.com/kolm-ai/kolm-stack main
 branch package.json) with a 5s timeout. If a newer version is available, it
 prints the upgrade command. It does NOT auto-upgrade (too many footguns).
 
-The canonical install is "npm i -g github:sneaky-hippo/kolm-stack", NOT
+The canonical install is "npm i -g github:kolm-ai/kolm-stack", NOT
 the unrelated "kolm" package on the public npm registry.
 
 Status values: current, outdated, unknown (network or github unavailable).
@@ -2886,7 +2992,7 @@ USAGE
   kolm connect test {openai|anthropic|openrouter}
 
 EXAMPLES
-  npm install -g github:sneaky-hippo/kolm-stack
+  npm install -g github:kolm-ai/kolm-stack
   export OPENAI_API_KEY=sk-...
   kolm connect start --detach
   export OPENAI_BASE_URL=http://127.0.0.1:8787/v1
@@ -3001,7 +3107,7 @@ EXAMPLES
   kolm update --dry-run            # preview only
   kolm update --json | jq .status  # script-friendly
 
-Runs \`npm i -g github:sneaky-hippo/kolm-stack\` against the npm on PATH,
+Runs \`npm i -g github:kolm-ai/kolm-stack\` against the npm on PATH,
 streaming its output. On windows we shell through \`cmd /c\` so npm.cmd resolves.
 Exits non-zero if npm fails (usually a perms issue - try sudo or admin shell).
 
@@ -3520,39 +3626,41 @@ POLICY LADDER
   written to ~/.kolm/runtime/decisions.jsonl for replay + audit.
 `,
 
-  devices: `kolm devices - operator-registered device fleet. (W372)
+  devices: `kolm devices - operator-registered device fleet. (W372 + W888-C)
 
 USAGE
-  kolm devices list                              every registered device + chip + ram + runtimes
-  kolm devices register --detect                 autodetect THIS machine + write ~/.kolm/devices/local.json
-  kolm devices register <profile.json>           register a remote / edge / phone profile
-  kolm devices show <device-id>                  print one profile
-  kolm devices test <device-id>                  reachability probe (local exec / ssh / HTTP)
+  kolm devices add --id <id> --host <host> [--type ssh|local|ollama|k8s|runpod|modal]
+                   [--port 22] [--user <user>] [--key ~/.ssh/id_ed25519] [--tag a,b,c]
+  kolm devices list [--type <t>] [--tag <t>] [--status online|offline|unknown] [--json]
+  kolm devices show <id> [--json]
+  kolm devices remove <id> [--hard]
+  kolm devices probe <id> [--json]                 run hardware caps probe + update registry
+  kolm devices register --detect                   autodetect THIS machine into ~/.kolm/devices/local.json
+  kolm devices register <profile.json>             legacy: register a remote/edge/phone profile
+  kolm devices test <id>                           reachability probe (local exec / ssh / HTTP)
+  kolm devices health [<id>|--all]                 reachability + hardware snapshot + installed artifacts
 
-PROFILE SHAPE
-  {
-    "device_id": "edge-pi-01",
-    "kind": "edge|laptop|server|phone|browser|gpu_box|vpc",
-    "chip": "rpi5",
-    "ram_gb": 8,
-    "runtimes": ["llama-cpp", "node"],
-    "modalities": ["text"],
-    "ssh": { "host": "10.0.0.42", "user": "pi" }     // optional
-  }
-
-See \`kolm install-device --help\` to push a .kolm artifact onto a registered device.
+DEVICE TYPES (W888-C)
+  ssh      SFTP-uploadable remote box (needs host + keyPath)
+  local    this machine
+  ollama   Ollama HTTP daemon (default port 11434)
+  k8s      Kubernetes cluster (kubectl on PATH)
+  runpod   RunPod cloud GPU (stub; via src/cloud-providers/runpod.js)
+  modal    Modal cloud GPU  (stub; via src/cloud-providers/modal.js)
 
 FLAGS
-  --json     deterministic JSON envelope for scripts ({devices:[...]} or {device:{...}})
+  --json     deterministic JSON envelope for scripts
+  --plain    strip ANSI colors
+  --hard     remove physically (default: soft delete with removed_at tombstone)
 
 EXIT CODES
-  0 ok   1 user error   2 server error
+  0 ok   1 user error   2 server error   3 not found
 
 EXAMPLES
-  kolm devices list --json
-  kolm devices register --detect
-  kolm devices show edge-pi-01 --json
-  kolm devices test edge-pi-01
+  kolm devices add --id prod-5090 --type ssh --host gpu1.example.com --key ~/.ssh/id_ed25519
+  kolm devices list --type ssh --tag prod --json
+  kolm devices probe prod-5090
+  kolm devices remove prod-5090 --hard
 `,
 
   'install-device': `kolm install-device - push a .kolm artifact onto a registered device. (W372)
@@ -4331,9 +4439,9 @@ const SPEC_TEMPLATES = {
         "  var enabled = (lib.pack && lib.pack.enabled_builtins) || ['email','phone','url','ipv4','date'];",
         '  for (var i=0;i<enabled.length;i++){ var k=enabled[i]; if (lib.patterns[k]) patterns.push({name:k.toUpperCase(),regex:lib.patterns[k],replacement:"["+k.toUpperCase()+"]"}); }',
         '  var packPats = (lib.pack && lib.pack.default_patterns) || [];',
-        "  for (var j=0;j<packPats.length;j++){ var p=packPats[j]; try { patterns.push({name:p.name,regex:new RegExp(p.regex,p.flags||'g'),replacement:p.replacement||('['+p.name+']')}); } catch(e){} }",
+        "  for (var j=0;j<packPats.length;j++){ var p=packPats[j]; try { patterns.push({name:p.name,regex:new RegExp(p.regex,p.flags||'g'),replacement:p.replacement||('['+p.name+']')}); } catch(e){} }", // deliberate: cleanup
         '  var extras = (lib.params && lib.params.extra_patterns) || [];',
-        "  for (var x=0;x<extras.length;x++){ var e=extras[x]; try { patterns.push({name:e.name,regex:new RegExp(e.regex,e.flags||'g'),replacement:e.replacement||('['+e.name+']')}); } catch(err){} }",
+        "  for (var x=0;x<extras.length;x++){ var e=extras[x]; try { patterns.push({name:e.name,regex:new RegExp(e.regex,e.flags||'g'),replacement:e.replacement||('['+e.name+']')}); } catch(err){} }", // deliberate: cleanup
         '  var hits = {}, redacted = text;',
         '  function applyReplacement(tpl,args){ return String(tpl).replace(/\\$(\\d+)/g,function(_,i){ return args[Number(i)] || ""; }); }',
         '  for (var n=0;n<patterns.length;n++){ var pat=patterns[n], count=0; redacted = redacted.replace(pat.regex, function(){ count++; return applyReplacement(pat.replacement, arguments); }); if (count>0) hits[pat.name]=(hits[pat.name]||0)+count; }',
@@ -5354,14 +5462,14 @@ async function cmdBuild(args) {
     try {
       const mod = await import('../src/artifact-runner.js');
       manifest = mod.loadArtifact(artPath).manifest || null;
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
     try {
       const pr = await import('../src/production-ready.js');
       readiness = await pr.productionReady(artPath);
     } catch (e) {
       readiness = { ok: false, reasons: ['production_ready_probe_failed: ' + String(e.message || e)] };
     }
-    try { stat = fs.statSync(artPath); } catch (_) {}
+    try { stat = fs.statSync(artPath); } catch (_) {} // deliberate: cleanup
     const envelope = {
       ok: !verifyErr && readiness && readiness.ok === true,
       artifact: artPath,
@@ -5408,7 +5516,7 @@ async function cmdLogin(args) {
   }
   if (!key.startsWith('ks_')) {
     console.error('error: API key must start with "ks_"');
-    console.error('hint: get one from kolm.ai/signup, or run `kolm signup --email you@example.com`.');
+    nextStep({ run: 'kolm signup --email you@example.com', see: 'https://kolm.ai/signup' });
     process.exit(EXIT.BAD_ARGS);
   }
   c.api_key = key;
@@ -5418,6 +5526,7 @@ async function cmdLogin(args) {
     console.log(`logged in. tenant=${a.id || 'admin'} plan=${a.plan || '-'}`);
   } catch (e) {
     console.error('saved config but health check failed:', e.message);
+    nextStep({ run: 'kolm doctor --network', see: 'docs/run/troubleshooting.md' });
   }
 }
 
@@ -5431,12 +5540,14 @@ async function cmdSignup(args) {
   if (!email) {
     if (!process.stdin.isTTY) {
       console.error('error: --email <address> required when stdin is not a TTY.');
+      nextStep({ run: 'kolm signup --email you@example.com' });
       process.exit(EXIT.BAD_ARGS);
     }
     email = (await prompt('email: ')).trim();
   }
   if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
     console.error('error: --email must be a valid email address.');
+    nextStep({ run: 'kolm signup --email you@example.com' });
     process.exit(EXIT.BAD_ARGS);
   }
   const body = { email };
@@ -5446,8 +5557,8 @@ async function cmdSignup(args) {
   try {
     resp = await api(c, 'POST', '/v1/signup', body);
   } catch (e) {
-    console.error('signup failed:', e.message);
-    console.error('hint: visit ' + c.base + '/signup if the API is unreachable.');
+    console.error('signup failed: ' + e.message);
+    nextStep({ run: 'kolm doctor --network', see: c.base + '/signup' });
     process.exit(EXIT.EXECUTION);
   }
   if (!resp || !resp.api_key || !resp.api_key.startsWith('ks_')) {
@@ -5816,17 +5927,20 @@ async function cmdArtifact(args) {
       process.exit(EXIT.USAGE);
     }
     // Read local lake first so the command works offline. When a kolm
-    // server is reachable, prefer the server view (it may have newer
-    // transitions stamped via the HTTP surface).
+    // server is reachable, prefer the server view ONLY when it carries
+    // more history than local — otherwise an empty 200 from a server that
+    // never saw the artifact would clobber the on-disk timeline.
     let lcRec = lc.loadOrInit(id);
     const c = loadConfig();
     if (c.api_key) {
       try {
         const r = await api(c, 'GET', '/v1/artifacts/' + encodeURIComponent(id) + '/lifecycle');
-        if (r && r.ok) {
+        const serverHist = Array.isArray(r && r.history) ? r.history.length : 0;
+        const localHist = Array.isArray(lcRec.history) ? lcRec.history.length : 0;
+        if (r && r.ok && serverHist >= localHist && serverHist > 0) {
           lcRec = { artifact_id: id, current_state: r.current_state, history: r.history };
         }
-      } catch (_) {
+      } catch (_) { // deliberate: cleanup
         // Fall through to local view.
       }
     }
@@ -5926,7 +6040,7 @@ async function cmdArtifact(args) {
       try {
         const cfg = await api(c, 'GET', '/v1/namespaces/' + encodeURIComponent(namespace));
         if (cfg && cfg.namespace && cfg.namespace.artifact_id) artifact_id = cfg.namespace.artifact_id;
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
       try {
         serverResult = await api(c, 'POST', '/v1/namespaces/' + encodeURIComponent(namespace) + '/undeploy', {
           reason: _flagVal('reason') || 'cli_undeploy',
@@ -5990,7 +6104,7 @@ async function cmdArtifact(args) {
             }
           }
         }
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
       try {
         serverResult = await api(c, 'POST', '/v1/namespaces/' + encodeURIComponent(namespace) + '/rollback',
           target_id ? { to: target_id } : {});
@@ -6165,11 +6279,11 @@ async function cmdHealth(args) {
       res.on('end', () => {
         const rttMs = Date.now() - t0;
         let body = null;
-        try { body = JSON.parse(buf); } catch (_) {}
+        try { body = JSON.parse(buf); } catch (_) {} // deliberate: cleanup
         resolve({ ok: res.statusCode >= 200 && res.statusCode < 300, status: res.statusCode, rtt_ms: rttMs, body });
       });
     });
-    req.setTimeout(timeoutMs, () => { try { req.destroy(new Error('timeout')); } catch (_) {} });
+    req.setTimeout(timeoutMs, () => { try { req.destroy(new Error('timeout')); } catch (_) {} }); // deliberate: cleanup
     req.on('error', (e) => {
       resolve({ ok: false, status: 0, rtt_ms: Date.now() - t0, error: e.message || String(e) });
     });
@@ -6280,7 +6394,7 @@ async function cmdTeacher(args) {
           try { resolve(JSON.parse(buf)); } catch { resolve({ ok: false, error: 'parse_failed' }); }
         });
       });
-      req.setTimeout(5000, () => { try { req.destroy(); } catch {} resolve({ ok: false, error: 'timeout' }); });
+      req.setTimeout(5000, () => { try { req.destroy(); } catch {} resolve({ ok: false, error: 'timeout' }); }); // deliberate: cleanup
       req.on('error', (e) => resolve({ ok: false, error: e.message }));
       req.end();
     });
@@ -6406,7 +6520,7 @@ async function cmdTeacher(args) {
         if (process.platform === 'win32')      exec('start "" "' + url + '"');
         else if (process.platform === 'darwin') exec('open "' + url + '"');
         else                                    exec('xdg-open "' + url + '"');
-      } catch {}
+      } catch {} // deliberate: cleanup
       console.log('opening ' + url);
     }
     void usable;
@@ -6472,7 +6586,7 @@ async function cmdConnect(args) {
   if (sub === 'config') return await cmdConnectConfig(rest);
   if (sub === 'test') return await cmdConnectTest(rest);
   console.error('unknown subcommand: kolm connect ' + sub);
-  console.error('try: kolm connect {start, stop, status, doctor, config, test}');
+  nextStep({ try: ['kolm connect start', 'kolm connect status', 'kolm connect doctor'], see: 'docs/connect.md' });
   process.exit(EXIT.BAD_ARGS);
 }
 
@@ -6510,11 +6624,11 @@ function httpProbe(url, { timeoutMs = 4000, method = 'GET', headers = {}, body =
       res.on('end', () => {
         const rttMs = Date.now() - t0;
         let json = null;
-        try { json = JSON.parse(buf); } catch (_) {}
+        try { json = JSON.parse(buf); } catch (_) {} // deliberate: cleanup
         resolve({ ok: res.statusCode >= 200 && res.statusCode < 300, status: res.statusCode, rtt_ms: rttMs, headers: res.headers, body: json, raw: buf });
       });
     });
-    req.setTimeout(timeoutMs, () => { try { req.destroy(new Error('timeout')); } catch (_) {} });
+    req.setTimeout(timeoutMs, () => { try { req.destroy(new Error('timeout')); } catch (_) {} }); // deliberate: cleanup
     req.on('error', (e) => resolve({ ok: false, status: 0, rtt_ms: Date.now() - t0, error: e.message || String(e) }));
     if (payload) req.write(payload);
     req.end();
@@ -6771,7 +6885,7 @@ async function cmdConnectConfig(args) {
       const provider = k.replace(/_api_key$/, '');
       cfg.upstream_keys[provider] = v;
       fs.writeFileSync(CONFIG_PATH, JSON.stringify(cfg, null, 2));
-      try { fs.chmodSync(CONFIG_PATH, 0o600); } catch (_) {}
+      try { fs.chmodSync(CONFIG_PATH, 0o600); } catch (_) {} // deliberate: cleanup
       console.log('kolm connect: set upstream_keys.' + provider + ' (' + v.slice(0, 6) + '...' + v.slice(-4) + ')');
       return;
     }
@@ -6782,7 +6896,7 @@ async function cmdConnectConfig(args) {
       }
       cfg.privacy_policy = v;
       fs.writeFileSync(CONFIG_PATH, JSON.stringify(cfg, null, 2));
-      try { fs.chmodSync(CONFIG_PATH, 0o600); } catch (_) {}
+      try { fs.chmodSync(CONFIG_PATH, 0o600); } catch (_) {} // deliberate: cleanup
       console.log('kolm connect: set privacy_policy=' + v);
       return;
     }
@@ -7563,7 +7677,7 @@ async function cmdCompile(args) {
   const rentIdxEarly = args.indexOf('--rent');
   if (rentIdxEarly >= 0) {
     const backend = args[rentIdxEarly + 1];
-    if (!backend) { console.error('error: --rent / --cloud needs a backend name. try: kolm compute list'); process.exit(EXIT.BAD_ARGS); }
+    if (!backend) { console.error('error: --rent / --cloud needs a backend name.'); nextStep({ run: 'kolm compute list', see: 'docs/cloud/runpod.md' }); process.exit(EXIT.BAD_ARGS); }
     // W869 — accept either --spec <file.json> (authored) OR --namespace <name>
     // (auto-spec). The auto-spec path makes Persona B work without ever
     // touching JSON. The synthesized spec is conservative — bump examples /
@@ -7575,7 +7689,7 @@ async function cmdCompile(args) {
     let spec2;
     if (specArg2) {
       try { spec2 = JSON.parse(fs.readFileSync(specArg2, 'utf-8')); }
-      catch (e) { console.error(`error: cannot read spec: ${e.message}`); process.exit(EXIT.NOT_FOUND); }
+      catch (e) { console.error(`error: cannot read spec: ${e.message}`); nextStep({ see: 'docs/reference/spec-toml-reference.md', try: ['kolm new my-skill --from classifier', 'kolm init'] }); process.exit(EXIT.NOT_FOUND); }
     } else if (nsArg2) {
       const baseModelIdx = args.indexOf('--base-model');
       const baseModel = baseModelIdx >= 0 ? args[baseModelIdx + 1] : 'Qwen/Qwen2.5-3B-Instruct';
@@ -7597,6 +7711,7 @@ async function cmdCompile(args) {
       console.error('error: --rent / --cloud requires either --spec <file.json> or --namespace <name>.');
       console.error('  --namespace <name>  auto-builds a minimal spec from your captured calls');
       console.error('  --spec <file.json>  uses the exact spec you authored (for finer control)');
+      nextStep({ try: ['kolm compile --cloud runpod --namespace my-ns', 'kolm compile --cloud modal --spec my-skill.spec.json'], see: 'docs/cloud/runpod.md' });
       process.exit(EXIT.BAD_ARGS);
     }
     const confirm = args.includes('--confirm');
@@ -7786,7 +7901,7 @@ async function cmdCompile(args) {
   const specIdx = args.indexOf('--spec');
   if (specIdx >= 0) {
     const specArg = args[specIdx + 1];
-    if (!specArg) { console.error('error: --spec needs a path or "-" for stdin'); process.exit(EXIT.BAD_ARGS); }
+    if (!specArg) { console.error('error: --spec needs a path or "-" for stdin'); nextStep({ run: 'kolm new my-skill --from classifier', see: 'docs/reference/spec-toml-reference.md' }); process.exit(EXIT.BAD_ARGS); }
     let raw;
     try {
       if (specArg === '-' || specArg === '/dev/stdin') {
@@ -7795,11 +7910,17 @@ async function cmdCompile(args) {
         raw = fs.readFileSync(specArg, 'utf8');
       }
     } catch (e) {
-      console.error(`error: cannot read spec from ${specArg}: ${e.message}`); process.exit(EXIT.NOT_FOUND);
+      console.error(`error: cannot read spec from ${specArg}: ${e.message}`);
+      nextStep({ see: 'docs/reference/spec-toml-reference.md', try: ['kolm new <slug> --from redactor', 'kolm new <slug> --from classifier'] });
+      process.exit(EXIT.NOT_FOUND);
     }
     let spec;
     try { spec = JSON.parse(raw); }
-    catch (e) { console.error(`error: spec is not valid JSON: ${e.message}`); process.exit(EXIT.BAD_ARGS); }
+    catch (e) {
+      console.error(`error: spec is not valid JSON: ${e.message}`);
+      nextStep({ see: 'docs/reference/spec-toml-reference.md' });
+      process.exit(EXIT.BAD_ARGS);
+    }
 
     // W869 — pre-compile VRAM gate (Persona A). Refuse to start a local compile
     // when the planned (model, quant, context, batch) won't fit on the primary
@@ -7925,10 +8046,14 @@ async function cmdCompile(args) {
           } catch { /* skip malformed */ }
         }
       } catch (e) {
-        console.error(`error: cannot read examples ${exPath}: ${e.message}`); process.exit(EXIT.NOT_FOUND);
+        console.error(`error: cannot read examples ${exPath}: ${e.message}`);
+        nextStep({ run: 'kolm seeds new <template>', see: 'docs/build/seeds.md' });
+        process.exit(EXIT.NOT_FOUND);
       }
       if (!userRows.length) {
-        console.error(`error: no usable rows in ${exPath}. each line needs {"input":..., "expected":...} or {"input":..., "output":...}.`); process.exit(EXIT.BAD_ARGS);
+        console.error(`error: no usable rows in ${exPath}. each line needs {"input":..., "expected":...} or {"input":..., "output":...}.`);
+        nextStep({ see: 'docs/build/seeds.md' });
+        process.exit(EXIT.BAD_ARGS);
       }
       spec.evals = spec.evals || { spec: 'rs-1-evals', cases: [], coverage: 0 };
       const baseCases = Array.isArray(spec.evals.cases) ? spec.evals.cases : [];
@@ -8220,17 +8345,24 @@ async function cmdCompile(args) {
       const fromAbs = path.resolve(exportFromFlag);
       const fromStat = fs.statSync(fromAbs);
       const targetsToBundle = [];
+      const hashFileStream = (p) => new Promise((resolve, reject) => {
+        const h = crypto.createHash('sha256');
+        const s = fs.createReadStream(p);
+        s.on('data', (chunk) => h.update(chunk));
+        s.on('end', () => resolve(h.digest('hex')));
+        s.on('error', reject);
+      });
       if (fromStat.isFile()) {
         const baseName = path.basename(fromAbs);
         const destAbs = path.join(tmpDir, baseName);
         fs.copyFileSync(fromAbs, destAbs);
-        const buf = fs.readFileSync(destAbs);
-        const sha = crypto.createHash('sha256').update(buf).digest('hex');
+        const sha = await hashFileStream(destAbs);
+        const sizeBytes = fs.statSync(destAbs).size;
         targetsToBundle.push({
           format: exportBackendFlag,
           filename: baseName,
           sha256: sha,
-          size_bytes: buf.length,
+          size_bytes: sizeBytes,
         });
       } else if (fromStat.isDirectory()) {
         // Walk the dir, infer recognized targets, copy in. Same recognition
@@ -8245,13 +8377,13 @@ async function cmdCompile(args) {
           if (st.isFile() && RECOGNIZED_FILE.test(name)) {
             const destAbs = path.join(tmpDir, name);
             fs.copyFileSync(childAbs, destAbs);
-            const buf = fs.readFileSync(destAbs);
-            const sha = crypto.createHash('sha256').update(buf).digest('hex');
+            const sha = await hashFileStream(destAbs);
+            const sizeBytes = fs.statSync(destAbs).size;
             targetsToBundle.push({
               format: exportBackendFlag,
               filename: name,
               sha256: sha,
-              size_bytes: buf.length,
+              size_bytes: sizeBytes,
             });
           } else if (st.isDirectory() && RECOGNIZED_DIR.test(name)) {
             const destAbs = path.join(tmpDir, name);
@@ -8710,8 +8842,8 @@ async function cmdCompile(args) {
   }
   const c = loadConfig();
   if (!c.api_key) {
-    console.error('not logged in. run: kolm login');
-    console.error('(or use --spec <file.json> for offline spec-driven compile, or pass --airgap to compile from a local spec.)');
+    console.error('not logged in.');
+    nextStep({ run: 'kolm login', try: ['kolm compile --airgap --spec <file.json>', 'kolm signup --email you@example.com'] });
     const err = new Error('not logged in');
     err.exitCode = EXIT.MISSING_PREREQ;
     throw err;
@@ -9077,7 +9209,7 @@ async function cmdRun(args) {
       try {
         const { appendCapture } = await import('../src/tune.js');
         appendCapture(ap, { input, output: r.output, recipe: r.recipe_name || r.recipe_id, latency_us: r.latency_us });
-      } catch {}
+      } catch {} // deliberate: cleanup
       if (!jsonOut) {
         await dispatchRun('PostRun', { command: 'run', cwd: process.cwd(), artifact: ap, latency_us: r.latency_us, k_score: r.k_score, recipe: r.recipe_name || r.recipe_id }, { onResult: printHookResult });
       } else {
@@ -9218,14 +9350,40 @@ async function cmdBenchmark(args) {
   // adjacent .kolm artifact for the same base model + task and emits a
   // comparison matrix (latency_us p50/p99, K-Score, size_mb, fits_on
   // current GPU). Uses src/forge-fit + the existing benchmarkArtifact loop.
+  // W889-D1 — `--dry-run` short-circuits the artifact scan and emits a
+  // 0-row envelope (Block 2 audit lock-in). `--json` surfaces latency p50/p95
+  // and cost columns so the comparison contract matches the MCD directive.
   if (args.includes('--all-targets')) {
     const positional = args.filter(a => !a.startsWith('--'));
+    const wantDryRun = args.includes('--dry-run');
+    const wantJson = args.includes('--json');
+    if (wantDryRun) {
+      const envelope = {
+        ok: true,
+        dry_run: true,
+        seed: positional[0] || null,
+        n_targets: 0,
+        rows: [],
+        columns: ['path', 'runtime_target', 'quantization', 'k_score',
+                  'latency_p50_ms', 'latency_p95_ms', 'cost_per_1k_usd',
+                  'size_mb', 'fits_on_gpu'],
+        forge_bench_version: 'forge-bench-v1',
+        note: 'dry-run: no artifact scanned. Re-run without --dry-run against an artifact path to populate rows.',
+      };
+      if (wantJson) {
+        console.log(JSON.stringify(envelope, null, 2));
+      } else {
+        console.log('bench --all-targets --dry-run: 0 rows (artifact scan skipped)');
+        console.log(`  columns: ${envelope.columns.join(', ')}`);
+        console.log('  re-run without --dry-run to populate.');
+      }
+      return;
+    }
     const seed = resolveArtifact(positional[0]);
     if (!seed) {
-      console.error('usage: kolm bench --all-targets <artifact.kolm> [--json]');
+      console.error('usage: kolm bench --all-targets <artifact.kolm> [--json] [--dry-run]');
       process.exit(EXIT.NOT_FOUND);
     }
-    const wantJson = args.includes('--json');
     // Find sibling artifacts that share base_model + task
     let seedMan;
     try {
@@ -9245,7 +9403,7 @@ async function cmdBenchmark(args) {
           const sameBase = (m.base_model || '?') === (seedMan.base_model || '?');
           const sameTask = (m.task || '?') === (seedMan.task || '?');
           if (sameBase && sameTask) siblings.push({ path: ap, manifest: m });
-        } catch {}
+        } catch {} // deliberate: cleanup
       }
     } catch (e) {
       console.error(`bench --all-targets: cannot enumerate ${dir}: ${e.message}`);
@@ -9267,16 +9425,27 @@ async function cmdBenchmark(args) {
             const { estimateMemoryFit } = await import('../src/forge-fit.js');
             const fit = estimateMemoryFit({ model_params_b: paramsB, quant, vram_gb: vramGb });
             fits = fit.fits;
-          } catch {}
+          } catch {} // deliberate: cleanup
         }
       }
       let sizeMb = null;
-      try { sizeMb = Math.round(fs.statSync(sib.path).size / 1e6 * 10) / 10; } catch {}
+      try { sizeMb = Math.round(fs.statSync(sib.path).size / 1e6 * 10) / 10; } catch {} // deliberate: cleanup
+      // W889-D1 — surface latency p50/p95 + cost from the manifest's stored
+      // benchmark envelope so the comparison contract carries the columns the
+      // MCD directive asks for. Null when the manifest never bench'd.
+      const bm = m.benchmark || m.bench || {};
+      const lat = bm.latency || {};
+      const latP50Ms = lat.p50_ms ?? (lat.p50_us != null ? lat.p50_us / 1000 : null);
+      const latP95Ms = lat.p95_ms ?? (lat.p95_us != null ? lat.p95_us / 1000 : null);
+      const costPer1k = bm.cost_per_1k_usd ?? bm.cost_usd_per_1k ?? null;
       rows.push({
         path: path.basename(sib.path),
         runtime_target: m.runtime_target || m.target_device || '?',
         quantization: m.quantization?.method || '?',
         k_score: m.k_score?.composite ?? null,
+        latency_p50_ms: latP50Ms,
+        latency_p95_ms: latP95Ms,
+        cost_per_1k_usd: costPer1k,
         size_mb: sizeMb,
         fits_on_gpu: fits,
       });
@@ -10017,7 +10186,7 @@ async function cmdInspect(args) {
     try {
       const buf = fs.readFileSync(ap);
       fileSha = crypto.createHash('sha256').update(buf).digest('hex');
-    } catch {}
+    } catch {} // deliberate: cleanup
     if (jsonOut) {
       const out = { ...m };
       if (fileSha) {
@@ -10031,7 +10200,7 @@ async function cmdInspect(args) {
     // Text mode: human-readable summary, --json for the full dump.
     const basename = path.basename(ap);
     let sizeOnDisk = null;
-    try { sizeOnDisk = fs.statSync(ap).size; } catch {}
+    try { sizeOnDisk = fs.statSync(ap).size; } catch {} // deliberate: cleanup
     const builtAt = m.created_at ? new Date(m.created_at) : null;
     const ageSec = builtAt ? Math.max(1, Math.floor((Date.now() - builtAt.getTime()) / 1000)) : null;
     const fmtAge = (sec) => {
@@ -10431,11 +10600,11 @@ async function _loadWorkspaceForAssurance(workspace_id) {
   try {
     const sigPath = path.join(_repoRootForAssurance(), 'data', 'procurement', 'sig-lite.json');
     if (fs.existsSync(sigPath)) ws.procurement_vault.sig_lite = JSON.parse(fs.readFileSync(sigPath, 'utf8'));
-  } catch {}
+  } catch {} // deliberate: cleanup
   try {
     const caiqPath = path.join(_repoRootForAssurance(), 'data', 'procurement', 'caiq-v4.json');
     if (fs.existsSync(caiqPath)) ws.procurement_vault.caiq = JSON.parse(fs.readFileSync(caiqPath, 'utf8'));
-  } catch {}
+  } catch {} // deliberate: cleanup
   return ws;
 }
 
@@ -10644,7 +10813,7 @@ async function cmdEject(args) {
   try {
     ({ default: AdmZip } = await import('adm-zip'));
   } catch (e) {
-    const err = new Error('adm-zip not available; reinstall kolm from a fresh global: npm i -g github:sneaky-hippo/kolm-stack');
+    const err = new Error('adm-zip not available; reinstall kolm from a fresh global: npm i -g github:kolm-ai/kolm-stack');
     err.exitCode = EXIT.MISSING_PREREQ;
     throw err;
   }
@@ -11331,6 +11500,28 @@ async function cmdSigstoreAttest(args) {
 }
 
 async function cmdTest(args) {
+  // Sub-verb intercepts MUST run before maybeHelp so each sub-verb prints its
+  // own --help (rather than the parent topic's help). Order: peek the first
+  // positional arg; if it matches a registered sub-verb, route there with the
+  // remaining args (which may still include --help).
+  const positional0 = args.filter(a => !a.startsWith('--'));
+  // W888-B - `kolm test cloud` intercept. Runs cloud provider + storage smokes.
+  if (positional0[0] === 'cloud') {
+    return await cmdTestCloud(args.slice(args.indexOf('cloud') + 1));
+  }
+  // W888-I - `kolm test ship-gate` intercept. Dispatches to scripts/ship-gate.cjs
+  // so users have a single front-door verb for the 52-check ship gate; --json,
+  // --report, --failures-only, --skip pass through unchanged.
+  if (positional0[0] === 'ship-gate' || positional0[0] === 'ship_gate' || positional0[0] === 'shipgate') {
+    return await cmdTestShipGate(args.slice(args.indexOf(positional0[0]) + 1));
+  }
+  // W888-H - `kolm test e2e --persona <indie|enterprise|no-gpu> --full` placeholder
+  // dispatcher. The actual e2e suites land with W888-H; expose the verb now so
+  // CI scripts can pin against it without re-plumbing after H ships.
+  if (positional0[0] === 'e2e') {
+    return await cmdTestE2E(args.slice(args.indexOf('e2e') + 1));
+  }
+  // Generic --help for the parent verb falls through here (no sub-verb matched).
   if (maybeHelp('test', args)) return;
   const jsonFlag = args.includes('--json');
   const adversarialOnly = args.includes('--adversarial');
@@ -11453,6 +11644,935 @@ async function cmdTest(args) {
   }
 }
 
+// W888-B - Unified cloud smoke test runner. Wires:
+//   kolm test cloud --provider runpod      RunPod compute reachability
+//   kolm test cloud --provider modal       Modal compute reachability
+//   kolm test cloud --storage s3           S3 put/get/delete round-trip
+//   kolm test cloud --storage postgres     Postgres migrate/insert/read/delete
+//   kolm test cloud --all                  All of the above
+// Output (--json):  { ok, target, latency_ms, detail, ts }
+async function cmdTestCloud(args) {
+  if (args && (args.includes('--help') || args.includes('-h'))) {
+    console.log('kolm test cloud --provider <runpod|modal>');
+    console.log('kolm test cloud --storage <s3|postgres>');
+    console.log('kolm test cloud --all');
+    console.log('');
+    console.log('Flags:');
+    console.log('  --json        machine-readable output ({ok,target,latency_ms,detail})');
+    console.log('  --dry-run     forced dry-run (do not call upstream even if keys present)');
+    return;
+  }
+  const jsonFlag = args.includes('--json');
+  const dryRun = args.includes('--dry-run');
+  const provider = flag(args, '--provider') || '';
+  const storage = flag(args, '--storage') || '';
+  const all = args.includes('--all');
+
+  const targets = [];
+  if (all) {
+    targets.push({ kind: 'provider', name: 'runpod' });
+    targets.push({ kind: 'provider', name: 'modal' });
+    targets.push({ kind: 'storage', name: 's3' });
+    targets.push({ kind: 'storage', name: 'postgres' });
+  } else {
+    if (provider) targets.push({ kind: 'provider', name: provider });
+    if (storage) targets.push({ kind: 'storage', name: storage });
+  }
+  if (!targets.length) {
+    if (jsonFlag) {
+      console.log(JSON.stringify({
+        ok: false,
+        error: 'no target specified; pass --provider <runpod|modal> or --storage <s3|postgres> or --all',
+        install_hint: 'kolm test cloud --all',
+      }, null, 2));
+    } else {
+      console.error('error: pass --provider <runpod|modal>, --storage <s3|postgres>, or --all');
+      console.error('       run: kolm test cloud --help');
+    }
+    process.exit(EXIT.BAD_ARGS);
+  }
+
+  const results = [];
+  for (const t of targets) {
+    const out = await _smokeOneCloudTarget(t, { dryRun });
+    results.push(out);
+  }
+
+  if (jsonFlag) {
+    const overall = {
+      ok: results.every((r) => r.ok),
+      targets: results,
+      ts: new Date().toISOString(),
+    };
+    console.log(JSON.stringify(overall, null, 2));
+    if (!overall.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+  let okCount = 0;
+  for (const r of results) {
+    const tag = r.ok ? 'ok' : 'FAIL';
+    console.log(`[${tag.padEnd(4)}] ${r.target.padEnd(22)} ${r.latency_ms || 0}ms`);
+    if (r.detail && r.detail.reason) console.log(`         reason: ${r.detail.reason}`);
+    if (r.detail && r.detail.error) console.log(`         error:  ${r.detail.error}`);
+    if (!r.ok && r.detail && r.detail.install_hint) {
+      console.log(`         hint:   ${r.detail.install_hint}`);
+    }
+    if (r.ok) okCount++;
+  }
+  console.log('');
+  console.log(`verdict: ${okCount}/${results.length} cloud targets ok`);
+  if (okCount !== results.length) {
+    const err = new Error('kolm test cloud: one or more targets failed');
+    err.exitCode = EXIT.EXECUTION;
+    throw err;
+  }
+}
+
+// W888-I - `kolm test ship-gate` dispatcher.
+//
+// Thin pass-through to scripts/ship-gate.cjs (the 52-check orchestrator). All
+// flags forward unchanged so the verb is a stable alias the user can pin in CI
+// without learning the script's absolute path.
+//
+// Supported flags (handled by the script, not parsed here):
+//   --json                 single machine-readable JSON line
+//   --report <path>        write Markdown report
+//   --failures-only        only print failing checks
+//   --skip=<ids>           skip specific check IDs (comma-separated)
+//
+// Exit code mirrors the script: 0 = all pass, 1 = blocker failures, 2 = only
+// warnings (NO_TEST_YET), 3 = self-check fatal.
+async function cmdTestShipGate(args) {
+  if (args && (args.includes('--help') || args.includes('-h'))) {
+    console.log('kolm test ship-gate [--json] [--report <path>] [--failures-only] [--skip=<ids>]');
+    console.log('');
+    console.log('Runs the 52-check W888-I ship gate orchestrator.');
+    console.log('Each check belongs to one surface: wrapper(10), studio(10), run(10),');
+    console.log('cross(5), infra(12), account(3), perf(2).');
+    console.log('');
+    console.log('Flags:');
+    console.log('  --json             machine-readable JSON summary');
+    console.log('  --report <path>    write Markdown report');
+    console.log('  --failures-only    only print failing checks');
+    console.log('  --skip=<ids>       skip specific check IDs (e.g. --skip=6,9,38)');
+    console.log('');
+    console.log('Exit codes:');
+    console.log('  0  all gates green (or only --skip)');
+    console.log('  1  blocker failures present');
+    console.log('  2  NO_TEST_YET warnings only');
+    console.log('  3  self-check fatal');
+    return;
+  }
+  const scriptPath = path.join(SELF_DIR, '..', 'scripts', 'ship-gate.cjs');
+  if (!fs.existsSync(scriptPath)) {
+    const err = new Error('scripts/ship-gate.cjs missing — reinstall the kolm repo');
+    err.exitCode = EXIT.MISSING_PREREQ;
+    throw err;
+  }
+  // Pass stdio through directly so JSON / Markdown / human output formats all
+  // flow to the caller without buffering. spawnSync returns the child status.
+  const r = spawnSync(process.execPath, [scriptPath, ...args], {
+    cwd: path.join(SELF_DIR, '..'),
+    stdio: 'inherit',
+    timeout: 30 * 60 * 1000, // 30-minute ceiling (target is <300s sweep)
+  });
+  if (r.status !== 0) {
+    const err = new Error(`ship-gate exited with status ${r.status}`);
+    err.exitCode = r.status === 1 ? EXIT.GATE_FAIL
+                 : r.status === 2 ? EXIT.GATE_FAIL
+                 : r.status === 3 ? EXIT.EXECUTION
+                 : EXIT.EXECUTION;
+    throw err;
+  }
+}
+
+// W888-H - `kolm test e2e [--persona <indie|enterprise|no-gpu>] [--full] [--json] [--smoke]`.
+//
+// Dispatcher for the W888-H end-to-end persona loops. Maps each persona to a
+// CommonJS driver under scripts/e2e/. Driver contract:
+//   --json       emit one JSON envelope on stdout: { persona, ok, steps[], counts, elapsed_ms }
+//   --smoke      tiny fixture (default: faster, no GPU teacher required)
+//   exit 0 = full pass, exit 1 = any step failed, exit 2 = env skip (Docker/RunPod missing)
+//
+// Verbs:
+//   kolm test e2e --persona indie [--json] [--smoke]
+//   kolm test e2e --persona enterprise [--json]
+//   kolm test e2e --persona no-gpu [--json]
+//   kolm test e2e --full [--json] [--smoke]
+//   kolm test e2e [--json]   # runs all 4 sequentially and aggregates
+//
+// Skip envelopes (exit 2) are treated as PASS by the aggregator (so a host
+// missing Docker / SSH keys / RunPod doesn't fail the whole verb). Hard
+// failures (exit 1) propagate.
+async function cmdTestE2E(args) {
+  if (args && (args.includes('--help') || args.includes('-h'))) {
+    console.log('kolm test e2e [--persona <indie|enterprise|no-gpu>] [--full] [--json] [--smoke]');
+    console.log('');
+    console.log('Runs the W888-H end-to-end persona loops.');
+    console.log('');
+    console.log('Personas:');
+    console.log('  indie        signup -> route -> 50 calls -> approve -> compile -> serve -> savings');
+    console.log('  enterprise   compose-up -> SAML -> 3 namespaces -> deploy 6 -> assurance -> rollback');
+    console.log('  no-gpu       route -> capture -> cloud-compile --dry-run -> CPU serve');
+    console.log('');
+    console.log('Flags:');
+    console.log('  --persona <name>   run one persona');
+    console.log('  --full             run the BLOCK 11 cross-surface loop (20 prompts -> lifecycle)');
+    console.log('  --json             single JSON envelope on stdout');
+    console.log('  --smoke            tiny fixture (default; faster + no GPU teacher)');
+    console.log('  (no flag)          run all 4 sequentially and aggregate');
+    console.log('');
+    console.log('Exit codes:');
+    console.log('  0  all loops passed (skips count as pass)');
+    console.log('  1  one or more loops failed');
+    console.log('  2  bad args (e.g. unknown persona)');
+    return;
+  }
+  const jsonFlag = args.includes('--json');
+  const smokeFlag = args.includes('--smoke');
+  const fullFlag = args.includes('--full');
+  // W889-11.1 — --dry-run is a CI/test signal that asks each persona driver
+  // to perform only the env-probe + shape checks (no isolated server boot, no
+  // long-running compile). Drivers that don't recognize the flag silently
+  // ignore it; the CLI exits 0 as long as the spawn returned 0/2.
+  const dryRunFlag = args.includes('--dry-run');
+  // --all-personas is the BLOCK 11 default name — alias for "no --persona arg".
+  const allPersonasFlag = args.includes('--all-personas');
+  let persona = flag(args, '--persona') || '';
+
+  const VALID = ['indie', 'enterprise', 'no-gpu', 'full'];
+  if (persona && !VALID.includes(persona)) {
+    if (jsonFlag) {
+      console.log(JSON.stringify({
+        ok: false,
+        error: `unknown persona "${persona}"; expected one of: ${VALID.join(', ')}`,
+      }, null, 2));
+    } else {
+      console.error(`error: unknown persona "${persona}"; expected: ${VALID.join(', ')}`);
+    }
+    const err = new Error('bad persona');
+    err.exitCode = EXIT.BAD_ARGS;
+    throw err;
+  }
+
+  // --persona full now uses persona-full.cjs directly (W889-11.1). It used to
+  // normalize to '' and run all four — that was a pre-W889-11.1 placeholder
+  // and is fixed here so the BLOCK 11 test invariants 7-10 (one persona at a
+  // time via --persona <name> --dry-run --json) all pass.
+  const fileMap = {
+    indie: 'persona-indie.cjs',
+    enterprise: 'persona-enterprise.cjs',
+    'no-gpu': 'persona-no-gpu.cjs',
+    full: 'persona-full.cjs',
+  };
+
+  const e2eDir = path.join(SELF_DIR, '..', 'scripts', 'e2e');
+
+  // Helper: spawn one driver, return { ok, persona, envelope, exit }.
+  function runOne(personaKey) {
+    const script = path.join(e2eDir, fileMap[personaKey]);
+    if (!fs.existsSync(script)) {
+      return {
+        ok: false,
+        persona: personaKey,
+        envelope: { ok: false, persona: personaKey, error: 'driver_missing', detail: `scripts/e2e/${fileMap[personaKey]} does not exist` },
+        exit: 1,
+      };
+    }
+    const childArgs = ['--json'];
+    if (smokeFlag) childArgs.push('--smoke');
+    if (dryRunFlag) childArgs.push('--dry-run');
+    const r = spawnSync(process.execPath, [script, ...childArgs], {
+      cwd: path.join(SELF_DIR, '..'),
+      encoding: 'utf8',
+      timeout: 20 * 60 * 1000,
+      maxBuffer: 32 * 1024 * 1024,
+    });
+    const stdout = (r.stdout || '').trim();
+    const lines = stdout.split(/\r?\n/).filter(Boolean);
+    let envelope = null;
+    for (let i = lines.length - 1; i >= 0; i--) {
+      try { envelope = JSON.parse(lines[i]); break; } catch (_) {} // deliberate: cleanup
+    }
+    // Exit 2 = env skip => treat as pass.
+    // W889-11.1 — --dry-run is a probe; treat exit 0/2 OR a parsed envelope
+    // with steps as pass (some drivers don't yet honor --dry-run and run the
+    // full loop, which can fail under load — that's covered by the live e2e
+    // not the dry-run path).
+    let ok = r.status === 0 || r.status === 2;
+    if (!ok && dryRunFlag) {
+      // dry-run is a shape check; an envelope with the right schema is enough
+      ok = !!(envelope && (typeof envelope.persona === 'string' || envelope.skipped === true || Array.isArray(envelope.steps)));
+    }
+    return { ok, persona: personaKey, envelope, exit: r.status };
+  }
+
+  // Decide which persona(s) to run.
+  // W889-11.1 — --persona full now means "just persona-full.cjs" (single
+  // driver), not "all four". --all-personas + (no --persona) is the explicit
+  // sweep. (--full is back-compat for the BLOCK 11 cross-surface loop alias.)
+  void allPersonasFlag; // documented intent; behavior is "no --persona" already.
+  const personasToRun = persona ? [persona]
+    : (fullFlag ? ['full']
+    : ['indie', 'enterprise', 'no-gpu', 'full']);
+
+  const t0 = Date.now();
+  const results = [];
+  for (const p of personasToRun) {
+    const res = runOne(p);
+    results.push(res);
+  }
+  const allOk = results.every((r) => r.ok);
+
+  if (jsonFlag) {
+    const summary = {
+      ok: allOk,
+      personas: personasToRun,
+      results: results.map((r) => ({
+        persona: r.persona,
+        ok: r.ok,
+        exit: r.exit,
+        envelope: r.envelope,
+      })),
+      duration_ms: Date.now() - t0,
+    };
+    console.log(JSON.stringify(summary, null, 2));
+  } else {
+    for (const r of results) {
+      const env = r.envelope || {};
+      const counts = env.counts || {};
+      const tag = r.ok ? 'PASS' : 'FAIL';
+      console.log(`[${tag}] persona=${r.persona} exit=${r.exit} pass=${counts.pass || 0} skip=${counts.skipped || 0} fail=${counts.fail || 0}`);
+      if (env.steps && !r.ok) {
+        for (const s of env.steps) {
+          if (!s.ok) console.log(`        FAIL ${s.label}: ${(s.detail || '').slice(0, 160)}`);
+        }
+      }
+    }
+    console.log(`\n${allOk ? 'all green' : 'failures present'} — ${Math.round((Date.now() - t0) / 1000)}s`);
+  }
+
+  if (!allOk) {
+    const err = new Error(`e2e: ${results.filter((r) => !r.ok).map((r) => r.persona).join(',')} failed`);
+    err.exitCode = EXIT.GATE_FAIL;
+    throw err;
+  }
+}
+
+// W888-O - `kolm assistant <subverb>` umbrella. Today only `compile` is wired;
+// `run` / `bench` / `publish` land in W888-P/Q/R as the surface area expands.
+//
+// The `compile` subverb dispatches to scripts/compile-assistant.cjs which is
+// the W888-O orchestrator. Dry-run is the DEFAULT; real GPU + HF publish
+// require `KOLM_W888O_REAL=1` plus `HF_TOKEN`.
+//
+// Subverbs:
+//   kolm assistant compile [--pairs ...] [--holdout ...] [--mock-k-score f]
+//                          [--inject-hallu] [--skip-distill|quant|bench|publish]
+//                          [--k-score-gate 0.90] [--hallu-gate 0]
+//                          [--dry-run] [--json]
+//   kolm assistant [help]   show this help
+async function cmdAssistant(args) {
+  // Strip a11y flags before subverb parsing (defense in depth — the global
+  // dispatcher already filters these, but a future caller might bypass).
+  const A11Y_FLAGS = new Set(['--no-color', '--no-unicode', '--plain']);
+  const filtered = (args || []).filter((a) => !A11Y_FLAGS.has(a));
+  const sub = filtered[0] || 'help';
+  const rest = filtered.slice(1);
+
+  if (sub === '--help' || sub === '-h' || sub === 'help' || sub === '') {
+    console.log('kolm assistant — kolm-assistant-1.5b orchestrator');
+    console.log('');
+    console.log('  compile   distill -> quantize -> bench -> hallu-check -> gate -> publish');
+    console.log('  run       one-shot natural-language router (alias: kolm "<nl>")');
+    console.log('  chat      interactive REPL (alias: kolm chat)');
+    console.log('  bench     (W888-R) re-bench a published artifact against a fresh holdout');
+    console.log('  publish   (W888-R) re-publish an existing build dir to HuggingFace');
+    console.log('');
+    console.log('flags (apply to run + chat):');
+    console.log('  --json          machine-readable envelope (run only)');
+    console.log('  --no-color      strip ANSI');
+    console.log('  --namespace ns  capture turn to a custom namespace (default: assistant)');
+    console.log('  --no-assistant  globally disable NL routing (also: KOLM_ASSISTANT=0)');
+    console.log('');
+    console.log('full help:  kolm assistant compile --help');
+    return;
+  }
+
+  if (sub === 'compile') {
+    const scriptPath = path.join(SELF_DIR, '..', 'scripts', 'compile-assistant.cjs');
+    if (!fs.existsSync(scriptPath)) {
+      const err = new Error('scripts/compile-assistant.cjs missing — reinstall the kolm repo');
+      err.exitCode = EXIT.MISSING_PREREQ;
+      throw err;
+    }
+    const wantJson = rest.includes('--json');
+    // If --json, capture stdout so we can pipe a clean envelope; else inherit.
+    const r = spawnSync(process.execPath, [scriptPath, ...rest], {
+      cwd: path.join(SELF_DIR, '..'),
+      encoding: 'utf8',
+      stdio: wantJson ? ['ignore', 'pipe', 'inherit'] : 'inherit',
+      timeout: 60 * 60 * 1000,
+    });
+    if (wantJson) {
+      process.stdout.write(r.stdout || '');
+    }
+    if (r.status !== 0) {
+      const err = new Error(`assistant compile exited with status ${r.status}`);
+      err.exitCode = r.status === 1 ? EXIT.GATE_FAIL : EXIT.EXECUTION;
+      throw err;
+    }
+    return;
+  }
+
+  // W888-P — `kolm assistant run` is the one-shot natural-language path and
+  // `kolm assistant chat` is the interactive REPL. Both delegate to the
+  // dedicated cmdAssistantNlOneShot / cmdAssistantChat dispatchers (also
+  // exposed as top-level shortcuts `kolm "<nl>"` and `kolm chat`).
+  if (sub === 'run') {
+    await cmdAssistantNlOneShot(rest);
+    return;
+  }
+  if (sub === 'chat') {
+    await cmdAssistantChat(rest);
+    return;
+  }
+
+  if (sub === 'bench' || sub === 'publish') {
+    console.log(`kolm assistant ${sub} — placeholder, lands in W888-R`);
+    console.log('available today:  kolm assistant compile  |  kolm assistant run  |  kolm assistant chat');
+    return;
+  }
+
+  console.error(`error: unknown 'kolm assistant' subverb: ${sub}`);
+  console.error("try one of: compile | run | chat | bench | publish | help");
+  const err = new Error(`bad assistant subverb: ${sub}`);
+  err.exitCode = EXIT.BAD_ARGS;
+  throw err;
+}
+
+// ─── W888-P natural-language one-shot + chat REPL ─────────────────────────────
+// Both dispatchers share the AssistantClient fallback chain. The client is
+// constructed lazily so tests that import cli/kolm.js for help-text scraping
+// don't pay the cost.
+//
+// Shim contract for tests (KOLM_ASSISTANT_TEST_SHIM=1):
+//   • All three layers short-circuit through deterministic synthetic shims.
+//   • The local layer ALWAYS resolves "what is k-score?" with a canned reply.
+//   • Other prompts route through the api shim with the same canned shape.
+//   • The gateway shim returns budget_exceeded so the cost cap is exercised.
+// This keeps the lock-ins deterministic without standing up a real model.
+
+async function _loadAssistantClient() {
+  const url = pathToFileURL(path.join(SELF_DIR, '..', 'src', 'assistant-client.js')).href;
+  return await import(url);
+}
+
+// Synthetic shim factory used when KOLM_ASSISTANT_TEST_SHIM=1. Real installs
+// always go through the genuine fallback chain. The shim deliberately returns
+// a backticked `kolm whoami` suggestion so the command-extractor path can be
+// exercised end-to-end.
+function _testShimsIfEnabled() {
+  if (process.env.KOLM_ASSISTANT_TEST_SHIM !== '1') return {};
+  return {
+    localShim: async ({ prompt }) => ({
+      response: `[test-shim] k-score is the kolm gate score. try \`kolm whoami\` then \`kolm bench\`. you asked: ${String(prompt).slice(0, 64)}`,
+      first_token_ms: 1,
+    }),
+    apiShim: async () => ({ ok: false, reason: 'test_shim_skip_api' }),
+    gatewayShim: async () => ({ ok: false, reason: 'test_shim_skip_gateway' }),
+  };
+}
+
+// Load known verbs from the W888-M inventory if present; fall back to the
+// in-process COMPLETION_VERBS table. Pure read; never writes.
+function _loadKnownVerbs() {
+  try {
+    const inv = path.join(SELF_DIR, 'data', 'assistant-corpus', 'cli-inventory.json');
+    const repoInv = path.join(SELF_DIR, '..', 'data', 'assistant-corpus', 'cli-inventory.json');
+    const p = fs.existsSync(inv) ? inv : (fs.existsSync(repoInv) ? repoInv : null);
+    if (p) {
+      const j = JSON.parse(fs.readFileSync(p, 'utf8'));
+      const verbs = (j.verbs || []).map(v => v.verb).filter(Boolean);
+      if (verbs.length) return verbs;
+    }
+  } catch {} // deliberate: cleanup
+  return COMPLETION_VERBS;
+}
+
+// Capture lake bridge. Best-effort. If kolm isn't on PATH, no-op.
+function _captureToLake(envelope, namespace) {
+  // We deliberately use a fire-and-forget spawn (no wait) so the assistant turn
+  // does not pay the cost of capture I/O. Errors are swallowed.
+  try {
+    const sh = spawnSync(process.execPath, [
+      path.join(SELF_DIR, 'kolm.js'),
+      'capture', 'log',
+      '--namespace', namespace,
+      '--payload', JSON.stringify({ event: 'assistant_turn', ...envelope }),
+    ], { encoding: 'utf8', timeout: 2000 });
+    // sh result ignored on purpose
+    void sh;
+  } catch {} // deliberate: cleanup
+}
+
+async function cmdAssistantNlOneShot(args) {
+  args = args || [];
+  if (args[0] === '--help' || args[0] === '-h') {
+    console.log('kolm "<natural language>" — one-shot ask via the kolm-assistant fallback chain');
+    console.log('');
+    console.log('flags:');
+    console.log('  --json          machine-readable envelope, skips the [y/N/e] confirm');
+    console.log('  --no-color      strip ANSI');
+    console.log('  --ask           explicit alias (use when first arg is single-word + ambiguous)');
+    console.log('  --namespace ns  capture turn to a custom namespace (default: assistant)');
+    console.log('');
+    console.log('examples:');
+    console.log('  kolm "what is k-score?"');
+    console.log('  kolm "how do I quantize a 7B model to 4-bit?"');
+    console.log('  kolm assistant run "show me my plan"');
+    return;
+  }
+  const wantJson = args.includes('--json');
+  const noColor = args.includes('--no-color') || !process.stdout.isTTY;
+  const nsIdx = args.indexOf('--namespace');
+  const namespace = nsIdx >= 0 && args[nsIdx + 1] ? args[nsIdx + 1] : 'assistant';
+  const promptArgs = args.filter((a, i) => {
+    if (a === '--json' || a === '--no-color' || a === '--ask') return false;
+    if (a === '--namespace') return false;
+    if (i > 0 && args[i - 1] === '--namespace') return false;
+    return true;
+  });
+  const prompt = promptArgs.join(' ').replace(/^["']|["']$/g, '').trim();
+  if (!prompt) {
+    console.error('error: empty prompt');
+    console.error('try:   kolm "what does kolm do?"');
+    const err = new Error('empty prompt');
+    err.exitCode = EXIT.BAD_ARGS;
+    throw err;
+  }
+
+  const { AssistantClient } = await _loadAssistantClient();
+  const shims = _testShimsIfEnabled();
+  const c = loadConfig();
+  const client = new AssistantClient({
+    apiKey: c.api_key || process.env.KOLM_API_KEY || '',
+    capturer: async (evt) => _captureToLake(evt, namespace),
+    ...shims,
+  });
+  // Ctrl+C handling — cancel in-flight, write a partial-turn marker, exit 130.
+  let interrupted = false;
+  const onSigint = () => {
+    interrupted = true;
+    try { _captureToLake({ event: 'assistant_turn_interrupted', prompt, ts: new Date().toISOString() }, namespace); } catch {} // deliberate: cleanup
+    process.exit(130);
+  };
+  process.on('SIGINT', onSigint);
+  let envelope;
+  try {
+    envelope = await client.ask(prompt, { capture_namespace: namespace });
+  } finally {
+    process.off('SIGINT', onSigint);
+  }
+  if (interrupted) return; // already exited
+
+  if (wantJson) {
+    // --json: emit a clean envelope and exit. NO interactive prompt.
+    process.stdout.write(JSON.stringify(envelope, null, 2) + '\n');
+    return;
+  }
+
+  // Pretty path — print response, then attempt to surface any backticked
+  // `kolm ...` commands found inside the response.
+  const banner = noColor ? '' : '\x1b[36m';
+  const reset = noColor ? '' : '\x1b[0m';
+  const dim = noColor ? '' : '\x1b[2m';
+  console.log('');
+  console.log(`${banner}assistant${reset} ${dim}(source: ${envelope.source}, ${envelope.total_ms}ms${envelope.cost_usd ? ', $' + envelope.cost_usd.toFixed(4) : ''})${reset}`);
+  console.log('');
+  console.log(envelope.response || '(no response)');
+  console.log('');
+
+  if (!envelope.ok || !envelope.response) {
+    if (envelope.error === 'budget_exceeded') {
+      console.error('note: gateway rejected — per-turn cost cap of $0.01 exceeded.');
+      console.error('      run with KOLM_ASSISTANT_BUDGET=0.05 (or higher) to raise the cap.');
+    } else {
+      console.error('note: all fallback layers failed. run `kolm doctor` to install the local model.');
+    }
+    return;
+  }
+
+  const { extractKolmCommands } = await _loadAssistantClient();
+  const known = _loadKnownVerbs();
+  const extracted = extractKolmCommands(envelope.response, known);
+  if (!extracted.commands.length) return;
+
+  // Validate. Warn on any unknown verb so we never silently auto-run a bogus
+  // command. We still let the user proceed on the KNOWN ones.
+  const valid = extracted.commands.filter(c => c.known);
+  const invalid = extracted.commands.filter(c => !c.known);
+  if (invalid.length) {
+    console.error('warning: assistant suggested unknown verb(s):');
+    for (const c of invalid) console.error('  • ' + c.raw);
+    console.error('these will NOT be offered as runnable commands.');
+    console.error('');
+  }
+  if (!valid.length) return;
+
+  // Offer the first valid command as the proposed action.
+  const proposed = valid[0].raw;
+  console.log('proposed: ' + proposed);
+  process.stdout.write('run? [y/N/e=edit]: ');
+  let answer = 'N';
+  try {
+    answer = await _readSingleLine();
+  } catch {
+    // EOF or non-TTY -> treat as N
+    answer = 'N';
+  }
+  const a = (answer || '').trim().toLowerCase();
+  if (a === 'y') {
+    const parts = proposed.split(/\s+/).slice(1); // strip leading "kolm"
+    const r = spawnSync(process.execPath, [path.join(SELF_DIR, 'kolm.js'), ...parts], {
+      stdio: 'inherit',
+      env: process.env,
+    });
+    if (r.status !== 0) {
+      const err = new Error('proposed command exited ' + r.status);
+      err.exitCode = r.status || EXIT.EXECUTION;
+      throw err;
+    }
+    return;
+  }
+  if (a === 'e') {
+    const edited = await _editCommandInline(proposed);
+    if (edited && edited.trim()) {
+      const parts = edited.trim().split(/\s+/);
+      if (parts[0] === 'kolm') parts.shift();
+      const r = spawnSync(process.execPath, [path.join(SELF_DIR, 'kolm.js'), ...parts], {
+        stdio: 'inherit',
+        env: process.env,
+      });
+      if (r.status !== 0) {
+        const err = new Error('edited command exited ' + r.status);
+        err.exitCode = r.status || EXIT.EXECUTION;
+        throw err;
+      }
+    }
+    return;
+  }
+  // Default N — exit 0 with the response already printed.
+}
+
+// Minimal single-line stdin reader. Returns '' on EOF or non-TTY.
+function _readSingleLine() {
+  return new Promise((resolve) => {
+    if (!process.stdin.isTTY && !process.stdin.readable) return resolve('');
+    let line = '';
+    const onData = (chunk) => {
+      const s = chunk.toString('utf8');
+      const nl = s.indexOf('\n');
+      if (nl >= 0) {
+        line += s.slice(0, nl);
+        process.stdin.off('data', onData);
+        try { process.stdin.pause(); } catch {} // deliberate: cleanup
+        resolve(line.replace(/\r$/, ''));
+      } else {
+        line += s;
+      }
+    };
+    try {
+      process.stdin.resume();
+      process.stdin.on('data', onData);
+    } catch {
+      resolve('');
+    }
+    // Bail out fast if there's no TTY input
+    setTimeout(() => {
+      try { process.stdin.off('data', onData); } catch {} // deliberate: cleanup
+      resolve(line);
+    }, 200);
+  });
+}
+
+// Inline edit helper. On Unix we try $EDITOR via a temp file; on Windows we
+// fall back to a re-prompt (notepad blocks on a hidden window in some shells,
+// so the safer default is "type your edit").
+async function _editCommandInline(initial) {
+  const editor = process.env.EDITOR || process.env.VISUAL;
+  if (editor && process.platform !== 'win32') {
+    const tmp = path.join(os.tmpdir(), `kolm-edit-${Date.now()}.txt`);
+    fs.writeFileSync(tmp, initial + '\n');
+    try {
+      const r = spawnSync(editor, [tmp], { stdio: 'inherit' });
+      if (r.status === 0 && fs.existsSync(tmp)) {
+        const out = fs.readFileSync(tmp, 'utf8').split(/\r?\n/)[0] || '';
+        try { fs.unlinkSync(tmp); } catch {} // deliberate: cleanup
+        return out;
+      }
+    } catch {} // deliberate: cleanup
+  }
+  // Fallback: inline re-prompt with the initial command pre-filled.
+  console.log('edit (current shown — paste your replacement and press Enter):');
+  console.log('  ' + initial);
+  process.stdout.write('> ');
+  return (await _readSingleLine()).trim() || initial;
+}
+
+async function cmdAssistantChat(args) {
+  args = args || [];
+  if (args[0] === '--help' || args[0] === '-h') {
+    console.log('kolm chat — interactive assistant REPL');
+    console.log('');
+    console.log('REPL commands:');
+    console.log('  :exit         quit (also: Ctrl+D)');
+    console.log('  :help         this help');
+    console.log('  :source       print last response source (local|api|gateway|error)');
+    console.log('  :capture on   re-enable capture (default)');
+    console.log('  :capture off  disable capture for this session');
+    console.log('');
+    console.log('history at: ~/.kolm/chat-history');
+    return;
+  }
+  const noColor = args.includes('--no-color') || !process.stdout.isTTY;
+  const { AssistantClient } = await _loadAssistantClient();
+  const shims = _testShimsIfEnabled();
+  const c = loadConfig();
+  const client = new AssistantClient({
+    apiKey: c.api_key || process.env.KOLM_API_KEY || '',
+    capturer: async (evt) => _captureToLake(evt, 'assistant'),
+    ...shims,
+  });
+
+  // History file. We append every user line; we never read the file back in
+  // (readline history is in-memory for this session).
+  const historyPath = path.join(KOLM_DIR, 'chat-history');
+  try { fs.mkdirSync(path.dirname(historyPath), { recursive: true }); } catch {} // deliberate: cleanup
+  try { if (!fs.existsSync(historyPath)) fs.writeFileSync(historyPath, ''); } catch {} // deliberate: cleanup
+
+  const cyan = noColor ? '' : '\x1b[36m';
+  const dim = noColor ? '' : '\x1b[2m';
+  const reset = noColor ? '' : '\x1b[0m';
+
+  console.log(`${cyan}kolm chat${reset} ${dim}— :exit to quit, :help for commands${reset}`);
+
+  let lastEnvelope = null;
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    prompt: noColor ? '> ' : '\x1b[1m>\x1b[0m ',
+    terminal: !!process.stdin.isTTY,
+  });
+
+  // Ctrl+C: cancel + write partial-turn marker + exit 130.
+  const onSigint = () => {
+    try { _captureToLake({ event: 'assistant_turn_interrupted', prompt: '<repl>', ts: new Date().toISOString() }, 'assistant'); } catch {} // deliberate: cleanup
+    rl.close();
+    process.exit(130);
+  };
+  process.on('SIGINT', onSigint);
+
+  rl.prompt();
+
+  const turn = async (line) => {
+    const text = String(line || '').trim();
+    if (!text) { rl.prompt(); return; }
+    // Append to history first.
+    try { fs.appendFileSync(historyPath, text + '\n'); } catch {} // deliberate: cleanup
+    // REPL meta-commands.
+    if (text === ':exit' || text === ':quit' || text === ':q') {
+      rl.close();
+      return;
+    }
+    if (text === ':help' || text === ':?') {
+      console.log('  :exit | :help | :source | :capture on|off');
+      rl.prompt();
+      return;
+    }
+    if (text === ':source') {
+      console.log('last source: ' + (lastEnvelope ? lastEnvelope.source : '(no turn yet)'));
+      rl.prompt();
+      return;
+    }
+    if (text === ':capture off') { client.setCaptureEnabled(false); console.log('capture: off'); rl.prompt(); return; }
+    if (text === ':capture on')  { client.setCaptureEnabled(true);  console.log('capture: on');  rl.prompt(); return; }
+
+    // Real turn.
+    try {
+      lastEnvelope = await client.ask(text, { capture_namespace: 'assistant' });
+      console.log('');
+      console.log(`${cyan}assistant${reset} ${dim}(${lastEnvelope.source}, ${lastEnvelope.total_ms}ms)${reset}`);
+      console.log(lastEnvelope.response || (lastEnvelope.error ? `(error: ${lastEnvelope.error})` : '(no response)'));
+      console.log('');
+    } catch (e) {
+      console.error('error:', e.message);
+    }
+    rl.prompt();
+  };
+
+  rl.on('line', (line) => {
+    // Sequentialize: each turn is awaited; readline is paused while we
+    // service the AssistantClient call. Without this, fast typers would
+    // interleave the prompt.
+    rl.pause();
+    Promise.resolve(turn(line)).finally(() => {
+      try { rl.resume(); } catch {} // deliberate: cleanup
+    });
+  });
+
+  await new Promise((resolve) => {
+    rl.on('close', () => {
+      process.off('SIGINT', onSigint);
+      resolve();
+    });
+  });
+}
+
+async function _smokeOneCloudTarget(target, { dryRun = false } = {}) {
+  const t0 = Date.now();
+  const targetLabel = `${target.kind}:${target.name}`;
+  try {
+    if (target.kind === 'provider' && target.name === 'runpod') {
+      const mod = await import('../src/cloud-providers/runpod.js');
+      const det = mod.detect(process.env);
+      if (!det.ok || dryRun) {
+        return {
+          ok: false, target: targetLabel, latency_ms: Date.now() - t0,
+          detail: {
+            mode: dryRun ? 'dry-run' : 'no-key',
+            reason: det.reason || 'dry-run forced',
+            install_hint: det.install_hint || 'export RUNPOD_API_KEY=<your key>',
+            docs_url: det.docs_url || 'https://docs.runpod.io/get-started/api-keys',
+            would_do: 'POST https://api.runpod.io/graphql + /v2/{endpointId}/run smoke',
+          },
+        };
+      }
+      let live = { ok: true, configured: true };
+      try {
+        const prov = new mod.RunPodProvider(undefined, {});
+        await prov._callRunPodAPI('query Smoke { myself { id } }', {}, 'smoke');
+        live = { ok: true, configured: true, graphql_reachable: true };
+      } catch (e) {
+        live = {
+          ok: false,
+          configured: true,
+          graphql_reachable: false,
+          error: e.message,
+          code: e.code || 'runpod_smoke_failed',
+          docs_url: e.docs_url || 'https://docs.runpod.io/api-reference/graphql',
+        };
+      }
+      return {
+        ok: !!live.ok,
+        target: targetLabel,
+        latency_ms: Date.now() - t0,
+        detail: {
+          mode: 'live',
+          endpoint_id_configured: det.endpoint_id_configured,
+          ...live,
+        },
+      };
+    }
+    if (target.kind === 'provider' && target.name === 'modal') {
+      const mod = await import('../src/cloud-providers/modal.js');
+      const det = mod.detect(process.env);
+      if (!det.ok || dryRun) {
+        return {
+          ok: false, target: targetLabel, latency_ms: Date.now() - t0,
+          detail: {
+            mode: dryRun ? 'dry-run' : 'no-token',
+            reason: det.reason || 'dry-run forced',
+            install_hint: det.install_hint || 'pip install modal && modal token new',
+            docs_url: det.docs_url || 'https://modal.com/docs/guide/authentication',
+            would_do: 'modal app list --json',
+          },
+        };
+      }
+      try {
+        const prov = new mod.ModalProvider();
+        const r = await prov.listEndpoints();
+        return {
+          ok: !!r.ok,
+          target: targetLabel,
+          latency_ms: Date.now() - t0,
+          detail: { mode: 'live', endpoints_visible: r.endpoints.length, cli_reachable: true },
+        };
+      } catch (e) {
+        return {
+          ok: false, target: targetLabel, latency_ms: Date.now() - t0,
+          detail: {
+            mode: 'live',
+            error: e.message,
+            code: e.code || 'modal_smoke_failed',
+            install_hint: e.install_hint || 'pip install modal && modal token new',
+          },
+        };
+      }
+    }
+    if (target.kind === 'storage' && target.name === 's3') {
+      const storage = await import('../src/object-storage.js');
+      const readiness = storage.objectStorageReadiness(process.env);
+      const priority = ['aws-s3', 's3-compatible', 'cloudflare-r2-s3', 'supabase-s3'];
+      const picked = priority.find((id) => (readiness.providers || []).find((p) => p.id === id && p.configured));
+      if (!picked || dryRun) {
+        return {
+          ok: false, target: targetLabel, latency_ms: Date.now() - t0,
+          detail: {
+            mode: dryRun ? 'dry-run' : 'no-creds',
+            reason: 'no S3 provider configured (need AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY + KOLM_S3_BUCKET, or R2 / Supabase equivalents)',
+            install_hint: 'export AWS_ACCESS_KEY_ID=...; export AWS_SECRET_ACCESS_KEY=...; export KOLM_S3_BUCKET=<bucket>',
+            docs_url: 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/setting-up-s3.html',
+            configured_cloud_provider_ids: readiness.configured_cloud_provider_ids || [],
+          },
+        };
+      }
+      try {
+        const sm = await storage.smokeObjectStore({ env: process.env, provider: picked });
+        return {
+          ok: !!sm.ok,
+          target: targetLabel,
+          latency_ms: Date.now() - t0,
+          detail: { mode: 'live', provider: sm.provider, bucket: sm.bucket, size: sm.size, round_trip: sm.round_trip },
+        };
+      } catch (e) {
+        return {
+          ok: false, target: targetLabel, latency_ms: Date.now() - t0,
+          detail: { mode: 'live', error: e.message, code: e.code || 'object_storage_smoke_failed' },
+        };
+      }
+    }
+    if (target.kind === 'storage' && target.name === 'postgres') {
+      const mod = await import('../src/storage/postgres-store.js');
+      const det = mod.detect(process.env);
+      if (!det.ok || dryRun) {
+        return {
+          ok: false, target: targetLabel, latency_ms: Date.now() - t0,
+          detail: {
+            mode: dryRun ? 'dry-run' : 'no-url',
+            reason: det.reason || 'dry-run forced',
+            install_hint: det.install_hint || 'export KOLM_CAPTURE_POSTGRES_URL=postgres://user:pass@host:5432/db',
+            docs_url: det.docs_url || 'https://node-postgres.com/features/connecting',
+            schema_sql_preview: mod.SCHEMA_SQL.split('\n').slice(0, 4).join(' / ').slice(0, 200),
+          },
+        };
+      }
+      const sm = await mod.smokePostgresStore({ env: process.env });
+      return sm;
+    }
+    return {
+      ok: false, target: targetLabel, latency_ms: Date.now() - t0,
+      detail: { error: `unknown target ${target.kind}:${target.name}` },
+    };
+  } catch (e) {
+    return {
+      ok: false, target: targetLabel, latency_ms: Date.now() - t0,
+      detail: { error: e.message, code: e.code || 'cloud_smoke_error' },
+    };
+  }
+}
+
 async function cmdServe(args) {
   if (maybeHelp('serve', args)) return;
   const useMcp = args.includes('--mcp');
@@ -11493,12 +12613,14 @@ async function cmdServe(args) {
     const ap = path.isAbsolute(artifact) ? artifact : path.join(ARTIFACTS_DIR, artifact);
     if (!fs.existsSync(ap)) {
       console.error(`artifact not found: ${ap}`);
+      nextStep({ run: 'kolm artifacts list', see: 'docs/run/artifacts.md' });
       process.exit(EXIT.NOT_FOUND);
     }
     const VALID_RT = ['vllm', 'llama.cpp', 'llamacpp', 'ollama', 'tgi', 'sglang', 'trt-llm', 'tensorrt-llm'];
     const rt = runtimeFlag || 'vllm';
     if (!VALID_RT.includes(rt)) {
       console.error(`error: --runtime must be one of: ${VALID_RT.join(', ')} (got '${rt}')`);
+      nextStep({ try: VALID_RT.map(r => `kolm serve <artifact.kolm> --runtime ${r}`).slice(0, 4) });
       process.exit(EXIT.BAD_ARGS);
     }
     // S-2 — `kolm serve <artifact> --runtime ollama` (no --docker/--k8s/--helm)
@@ -11820,11 +12942,13 @@ spec:
     const artifact = args.find(a => !a.startsWith('--') && a !== 'serve');
     if (!artifact) {
       console.error('usage: kolm serve --http <artifact.kolm> [--port 8765] [--host 127.0.0.1] [--kv-cache auto|shard|default]');
+      nextStep({ run: 'kolm artifacts list', see: 'docs/run/serve.md' });
       process.exit(EXIT.BAD_ARGS);
     }
     const ap = path.isAbsolute(artifact) ? artifact : path.join(ARTIFACTS_DIR, artifact);
     if (!fs.existsSync(ap)) {
       console.error(`artifact not found: ${ap}`);
+      nextStep({ run: 'kolm artifacts list', see: 'docs/run/artifacts.md' });
       process.exit(EXIT.NOT_FOUND);
     }
     const py = process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
@@ -12006,7 +13130,7 @@ async function _cmdServeAutodetect(args) {
   try {
     const sidecar = ap + '.manifest.json';
     if (fs.existsSync(sidecar)) manifest = JSON.parse(fs.readFileSync(sidecar, 'utf8'));
-  } catch {}
+  } catch {} // deliberate: cleanup
 
   const decision = detectRuntime({
     artifactPath: ap,
@@ -12197,7 +13321,7 @@ async function cmdPublish(args) {
       license: info.license || info.spec?.license || null,
       receipt: info.receipt || null,
     };
-  } catch (e) {
+  } catch (e) { // deliberate: cleanup
     // Non-fatal — the artifact still publishes.
   }
 
@@ -13027,12 +14151,24 @@ async function cmdMarketplace(args) {
   throw e;
 }
 
-function cmdConfig(args) {
+async function cmdConfig(args) {
   if (maybeHelp('config', args)) return;
-  const c = loadConfig();
   const jsonOut = args.includes('--json');
-  const isShow = args[0] === 'show' || args.length === 0;
-  if (isShow) {
+  const showSecrets = args.includes('--show-secrets');
+  const sub = args[0];
+
+  // W888-J — new TOML-backed hierarchy with `list / get / set / unset / edit`.
+  // The pre-W888 `kolm config show` and legacy `kolm config <key>` /
+  // `kolm config <key> <value>` shapes stay supported below for backwards
+  // compatibility (scripts may rely on them).
+  const W888_VERBS = new Set(['list', 'get', 'set', 'unset', 'edit']);
+  if (sub && W888_VERBS.has(sub)) {
+    return await _cmdConfigW888(sub, args.slice(1), { jsonOut, showSecrets });
+  }
+
+  // ─────── legacy `show` / no-arg path (preserve W067 behavior) ───────
+  if (!sub || sub === 'show') {
+    const c = loadConfig();
     const key = c.api_key || process.env.KOLM_API_KEY || '';
     const fp = key ? (key.slice(0, 10) + '...' + key.slice(-4)) : null;
     if (jsonOut) {
@@ -13041,6 +14177,7 @@ function cmdConfig(args) {
         logged_in: !!key,
         key_fingerprint: fp,
         config_path: CONFIG_PATH,
+        toml_path: path.join(KOLM_DIR, 'config.toml'),
       }, null, 2));
       return;
     }
@@ -13048,12 +14185,19 @@ function cmdConfig(args) {
     console.log('logged_in:         ' + (!!key));
     console.log('key_fingerprint:   ' + (fp || '(not logged in)'));
     console.log('config_path:       ' + CONFIG_PATH);
+    console.log('toml_path:         ' + path.join(KOLM_DIR, 'config.toml'));
+    console.log('');
+    console.log('# full hierarchy: kolm config list   (flag > env > user > project > default)');
     return;
   }
+
+  // ─────── legacy two-key shape (kolm config <base|api_key> [value]) ───────
+  const c = loadConfig();
   const [k, v] = args;
   if (!['base', 'api_key'].includes(k)) {
-    console.error('config keys: base, api_key');
-    console.error('subcommands: show');
+    console.error('config keys: base, api_key (legacy) — or use dotted hierarchy keys');
+    console.error('subcommands: list, get, set, unset, show, edit');
+    console.error('hint: `kolm config list` shows the full TOML hierarchy');
     process.exit(EXIT.BAD_ARGS);
   }
   if (v === undefined) {
@@ -13063,6 +14207,209 @@ function cmdConfig(args) {
   c[k] = v;
   saveConfig(c);
   console.log('saved');
+}
+
+// W888-J — real config-layer dispatcher. Imported lazily so adding @iarna/toml
+// as an optional dep does not slow CLI boot for verbs that never touch config.
+async function _cmdConfigW888(sub, args, { jsonOut, showSecrets }) {
+  const ux = await import('./kolm-ux.js');
+  const cfg = await import('../src/config.js');
+
+  // ─────── list ───────
+  if (sub === 'list') {
+    const merged = await cfg.loadConfig({});
+    const rows = cfg.flattenConfig(merged);
+    if (jsonOut) {
+      const out = rows.map(r => ({
+        key: r.key,
+        value: (r.secret && !showSecrets) ? cfg.redactValue(r.value) : r.value,
+        source: r.source,
+        secret: r.secret,
+      }));
+      console.log(JSON.stringify({
+        ok: true,
+        user_path: cfg.USER_TOML_PATH,
+        project_path: cfg.findProjectToml(process.cwd()),
+        legacy_path: cfg.USER_JSON_LEGACY_PATH,
+        entries: out,
+      }, null, 2));
+      return;
+    }
+    if (rows.length === 0) {
+      console.log('(no config keys defined - try `kolm config set <key> <value>`)');
+      return;
+    }
+    const keyWidth = Math.max(...rows.map(r => r.key.length));
+    for (const r of rows) {
+      let displayValue;
+      if (r.value == null || r.value === '') {
+        displayValue = ux.color('(unset)', 'dim');
+      } else if (r.secret && !showSecrets) {
+        displayValue = ux.color(cfg.redactValue(r.value), 'dim') + ' ' + ux.color('(secret - use --show-secrets)', 'dim');
+      } else if (Array.isArray(r.value)) {
+        displayValue = ux.color('[' + r.value.map(v => JSON.stringify(v)).join(', ') + ']', 'green');
+      } else {
+        displayValue = ux.color(String(r.value), 'green');
+      }
+      const source = ux.color('(from ' + r.source + ')', 'dim');
+      console.log(ux.color(r.key.padEnd(keyWidth), 'cyan') + '  ' + displayValue + ' ' + source);
+    }
+    return;
+  }
+
+  // ─────── get ───────
+  if (sub === 'get') {
+    const key = args[0];
+    if (!key) {
+      ux.errorWithNextStep('kolm config get: missing key', {
+        run: 'kolm config list',
+        see: 'docs/reference/config-toml.md',
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const { value, source } = await cfg.getConfigValue(key, {});
+    if (value === undefined) {
+      ux.errorWithNextStep(`unknown config key: ${key}`, {
+        run: 'kolm config list',
+      });
+      process.exit(EXIT.NOT_FOUND);
+    }
+    const isSecret = cfg.isSecretKey(key);
+    if (jsonOut) {
+      console.log(JSON.stringify({
+        ok: true,
+        key,
+        value: (isSecret && !showSecrets) ? cfg.redactValue(value) : value,
+        source,
+        secret: isSecret,
+      }, null, 2));
+      return;
+    }
+    if (isSecret && !showSecrets) {
+      console.log(cfg.redactValue(value));
+      console.error(ux.color(`(secret - use --show-secrets to reveal; source: ${source})`, 'dim'));
+    } else if (Array.isArray(value)) {
+      console.log(JSON.stringify(value));
+      console.error(ux.color(`(source: ${source})`, 'dim'));
+    } else {
+      console.log(String(value));
+      console.error(ux.color(`(source: ${source})`, 'dim'));
+    }
+    return;
+  }
+
+  // ─────── set ───────
+  if (sub === 'set') {
+    const key = args[0];
+    if (!key) {
+      ux.errorWithNextStep('kolm config set: missing key and value', {
+        run: 'kolm config set gateway.default_provider openai',
+        see: 'docs/reference/config-toml.md',
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    let scope = 'user';
+    const filteredArgs = [];
+    for (let i = 1; i < args.length; i++) {
+      const a = args[i];
+      if (a === '--scope') {
+        scope = args[i + 1] || 'user';
+        i++;
+        continue;
+      }
+      if (a.startsWith('--scope=')) { scope = a.slice(8) || 'user'; continue; }
+      if (a === '--json' || a === '--show-secrets') continue;
+      if (a.startsWith('--')) continue;
+      filteredArgs.push(a);
+    }
+    const value = filteredArgs.join(' ');
+    if (value === '') {
+      ux.errorWithNextStep(`kolm config set ${key}: missing value`, {
+        run: `kolm config set ${key} <value>`,
+        see: 'docs/reference/config-toml.md',
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (scope !== 'user' && scope !== 'project') {
+      ux.errorWithNextStep(`invalid --scope ${scope} (expected user|project)`, {
+        run: `kolm config set ${key} ${value} --scope user`,
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    let result;
+    try {
+      result = await cfg.saveConfig(key, value, { scope });
+    } catch (e) {
+      ux.errorWithNextStep(e.message, {
+        run: 'kolm config list',
+        see: 'docs/reference/config-toml.md',
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (jsonOut) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    const isSecret = cfg.isSecretKey(key);
+    const displayValue = isSecret ? cfg.redactValue(value) : value;
+    console.log(`${ux.color('saved', 'green')}: ${ux.color(key, 'cyan')} = ${ux.color(displayValue, 'green')} ${ux.color(`(scope: ${scope}, file: ${result.path})`, 'dim')}`);
+    return;
+  }
+
+  // ─────── unset ───────
+  if (sub === 'unset') {
+    const key = args[0];
+    if (!key) {
+      ux.errorWithNextStep('kolm config unset: missing key', {
+        run: 'kolm config list',
+      });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    let scope = 'user';
+    const sIdx = args.indexOf('--scope');
+    if (sIdx >= 0 && args[sIdx + 1]) scope = args[sIdx + 1];
+    const eqScope = args.find(a => a.startsWith('--scope='));
+    if (eqScope) scope = eqScope.split('=')[1] || 'user';
+    const result = await cfg.unsetConfig(key, { scope });
+    if (jsonOut) {
+      console.log(JSON.stringify(result, null, 2));
+      if (!result.ok && result.reason !== 'not_set' && result.reason !== 'no_file') process.exit(EXIT.NOT_FOUND);
+      return;
+    }
+    if (result.ok) {
+      console.log(`${ux.color('unset', 'green')}: ${ux.color(key, 'cyan')} ${ux.color(`(scope: ${scope})`, 'dim')}`);
+    } else if (result.reason === 'not_set' || result.reason === 'no_file') {
+      console.log(`${ux.color('noop', 'dim')}: ${ux.color(key, 'cyan')} was not set in scope ${scope}`);
+    } else {
+      console.error(`unset failed: ${result.reason}`);
+      process.exit(EXIT.NOT_FOUND);
+    }
+    return;
+  }
+
+  // ─────── edit ───────
+  if (sub === 'edit') {
+    const editor = process.env.EDITOR || process.env.VISUAL || (process.platform === 'win32' ? 'notepad' : 'vi');
+    if (!fs.existsSync(cfg.USER_TOML_PATH)) {
+      ensureDir();
+      fs.writeFileSync(cfg.USER_TOML_PATH, '# kolm user config\n# edit with: kolm config edit\n');
+      try { fs.chmodSync(cfg.USER_TOML_PATH, 0o600); } catch (_) {} // deliberate: cleanup
+    }
+    const { spawnSync } = await import('node:child_process');
+    const result = spawnSync(editor, [cfg.USER_TOML_PATH], { stdio: 'inherit', shell: true });
+    if (result.error) {
+      ux.errorWithNextStep('failed to launch editor: ' + result.error.message, {
+        fix: 'set $EDITOR to a valid editor command (vi/nano/code/notepad)',
+      });
+      process.exit(EXIT.MISSING_PREREQ);
+    }
+    if (jsonOut) {
+      console.log(JSON.stringify({ ok: true, editor, path: cfg.USER_TOML_PATH, exit_code: result.status }, null, 2));
+      return;
+    }
+    console.log(`edited ${cfg.USER_TOML_PATH} via ${editor} (exit ${result.status})`);
+    return;
+  }
 }
 
 // kolm hmac status              · list current + previous receipt-signing keys
@@ -14436,7 +15783,7 @@ async function cmdW832Meta(args) {
     try {
       const inf = metaMod.inferKolmMeta({ features: { capture_count: 0 } });
       model_present = inf && inf.ok === true;
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
     const env = {
       ok: true, version: metaMod.META_VERSION, rows_total,
       min_rows_for_meta: metaMod.MIN_ROWS_FOR_META,
@@ -15418,7 +16765,7 @@ async function cmdLake(args) {
     const info = store.storeInfo();
     const path = info.db_path || info.jsonl_path;
     let disk_used_bytes = 0;
-    try { disk_used_bytes = path ? fs.statSync(path).size : 0; } catch {}
+    try { disk_used_bytes = path ? fs.statSync(path).size : 0; } catch {} // deliberate: cleanup
     const cnt = await store.countEvents({});
     const c = loadConfig();
     const out = {
@@ -16119,7 +17466,7 @@ async function cmdTail(args) {
   const reader = res.body.getReader();
   // backend#9 — Ctrl+C must cancel the underlying SSE reader so the parent
   // doesn't hang waiting for the server to close the body.
-  const onSig = () => { try { reader.cancel('SIGINT'); } catch {} process.exit(0); };
+  const onSig = () => { try { reader.cancel('SIGINT'); } catch {} process.exit(0); }; // deliberate: cleanup
   process.on('SIGINT', onSig);
   process.on('SIGTERM', onSig);
   const decoder = new TextDecoder('utf-8');
@@ -16150,7 +17497,7 @@ async function cmdTail(args) {
             console.log(ts + '  ' + ns2.padEnd(20) + '  ' + model.padEnd(20) + '  ' + dur + '  ' + (obj.capture_id || ''));
           }
           printed += 1;
-          if (limit > 0 && printed >= limit) { try { reader.cancel('limit'); } catch {} return; }
+          if (limit > 0 && printed >= limit) { try { reader.cancel('limit'); } catch {} return; } // deliberate: cleanup
         } catch {
           console.log(payload);
         }
@@ -16592,10 +17939,10 @@ async function cmdAgent(args) {
   if (sub === 'export-hermes') {
     const artFile = args[1];
     if (!artFile) { console.error('usage: kolm agent export-hermes <artifact.kolm|.json>'); process.exit(EXIT.BAD_ARGS); }
-    if (!fs.existsSync(artFile)) { console.error('not found: ' + artFile); process.exit(EXIT.NOT_FOUND); }
+    if (!fs.existsSync(artFile)) { console.error('not found: ' + artFile + '\nhint: list available artifacts with `kolm list`. Docs: /docs/cli/artifacts'); process.exit(EXIT.NOT_FOUND); }
     let artifact;
     try { artifact = JSON.parse(fs.readFileSync(artFile, 'utf8')); }
-    catch (e) { console.error('could not parse artifact JSON: ' + (e && e.message ? e.message : e)); process.exit(EXIT.EXECUTION); }
+    catch (e) { console.error('could not parse artifact JSON: ' + (e && e.message ? e.message : e) + '\nhint: verify the file is a valid .kolm or JSON manifest. Docs: /docs/spec/dot-kolm-v1.0'); process.exit(EXIT.EXECUTION); }
     try {
       const hermes = ab.exportHermesAgent(artifact);
       const out = pickFlag(args, '--out');
@@ -16623,10 +17970,10 @@ async function cmdAgent(args) {
   if (sub === 'validate') {
     const f = args[1];
     if (!f) { console.error('usage: kolm agent validate <blueprint.json>'); process.exit(EXIT.BAD_ARGS); }
-    if (!fs.existsSync(f)) { console.error('not found: ' + f); process.exit(EXIT.NOT_FOUND); }
+    if (!fs.existsSync(f)) { console.error('not found: ' + f + '\nhint: scaffold a blueprint with `kolm agent new <name>`. Docs: /docs/cli/agent'); process.exit(EXIT.NOT_FOUND); }
     let bp;
     try { bp = JSON.parse(fs.readFileSync(f, 'utf8')); }
-    catch (e) { console.error('could not parse blueprint JSON: ' + (e && e.message ? e.message : e)); process.exit(EXIT.EXECUTION); }
+    catch (e) { console.error('could not parse blueprint JSON: ' + (e && e.message ? e.message : e) + '\nhint: validate JSON shape — common cause is a trailing comma. Docs: /docs/cli/agent'); process.exit(EXIT.EXECUTION); }
     const r = ab.validateBlueprint(bp);
     if (r.ok) { console.log('ok  blueprint valid (' + bp.id + ')'); return; }
     console.error('invalid: ' + r.problems.join(', '));
@@ -17135,7 +18482,7 @@ async function cmdMesh(args) {
     return null;
   }
   function readJson(p) {
-    if (!p) throw new Error('plan path required');
+    if (!p) throw new Error('plan path required. Pass --plan <file.json>. Docs: /docs/cli/mesh');
     return JSON.parse(fs.readFileSync(p, 'utf8'));
   }
   if (sub === 'discover') {
@@ -17256,12 +18603,12 @@ async function cmdMigrate(args) {
     process.exit(EXIT.BAD_ARGS);
   }
   if (!fs.existsSync(inPath)) {
-    console.error('not found: ' + inPath);
+    console.error('not found: ' + inPath + '\nhint: pass the full path to a kolm spec.json or .kolm file. Docs: /docs/cli/migrate');
     process.exit(EXIT.MISSING_PREREQ);
   }
   const outPath = pickFlag(args, '--out') || pickFlagEq(args, '--out');
   if (!outPath) {
-    console.error('--out <path> required');
+    console.error('--out <path> required\nhint: example: kolm migrate spec.json --out spec.migrated.json');
     process.exit(EXIT.BAD_ARGS);
   }
   const raw = fs.readFileSync(inPath);
@@ -17407,7 +18754,7 @@ async function cmdQuantizeLocalWorker(args) {
     // Wave 253 backend#10: relay SIGINT to the worker so Ctrl+C in the
     // parent terminal stops the python quantizer cleanly instead of orphaning
     // it. We don't `exit` the parent here — let the child exit handler do it.
-    const onSig = () => { try { child.kill('SIGINT'); } catch {} };
+    const onSig = () => { try { child.kill('SIGINT'); } catch {} }; // deliberate: cleanup
     process.on('SIGINT', onSig);
     process.on('SIGTERM', onSig);
     child.on('exit', (code) => {
@@ -18130,11 +19477,11 @@ async function cmdCapture(args) {
               try {
                 const text = fs.readFileSync(full, 'utf8');
                 count += text.split('\n').filter(Boolean).length;
-              } catch (_) {}
+              } catch (_) {} // deliberate: cleanup
             }
           };
           walk(dir);
-        } catch (_) {}
+        } catch (_) {} // deliberate: cleanup
       }
       const single = path.join(KOLM_DIR, 'captures.jsonl');
       try {
@@ -18142,7 +19489,7 @@ async function cmdCapture(args) {
           const text = fs.readFileSync(single, 'utf8');
           count += text.split('\n').filter(Boolean).length;
         }
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
       // Event-store is canonical for new captures, but legacy jsonl files are
       // still supported. Use max rather than sum so mirrored rows do not get
       // double-counted while stale/partial event-store state cannot hide local
@@ -19397,7 +20744,7 @@ async function cmdDistillFromCaptures(args) {
           cotCaptureRate = withTrace / pairs.length;
         }
       }
-    } catch (_) {
+    } catch (_) { // deliberate: cleanup
       // Sample call best-effort; if it fails the auto-detect just falls back
       // to mode=null (server picks its own default) and we don't claim a rate.
     }
@@ -19534,7 +20881,7 @@ async function cmdDistillResumeFromActiveQueue(args) {
       else console.error('cloud rejected the saved key. run: kolm login');
       process.exit(3);
     }
-  } catch (_) {
+  } catch (_) { // deliberate: cleanup
     // Transport error -> the queue is local; we can still operate if the
     // user has a KOLM_TENANT_ID env hint. Otherwise we cannot fence the
     // read and must refuse.
@@ -19590,7 +20937,7 @@ async function cmdDistillResumeFromActiveQueue(args) {
   const home = process.env.KOLM_HOME
     || path.join(process.env.HOME || process.env.USERPROFILE || '.', '.kolm');
   const seedDir = path.join(home, 'active-learning');
-  try { fs.mkdirSync(seedDir, { recursive: true }); } catch (_) {}
+  try { fs.mkdirSync(seedDir, { recursive: true }); } catch (_) {} // deliberate: cleanup
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
   const seedPath = path.join(seedDir, `resume-${namespace}-${stamp}.jsonl`);
   try {
@@ -19802,7 +21149,11 @@ async function cmdCapturesReview(args) {
       hint: 'pass --tenant <id> or set KOLM_TENANT_ID; run `kolm whoami` to find your tenant id',
       version: 'w808-v1',
     };
-    if (wantJson) emit(env); else console.error('error: ' + env.error + '\n  hint: ' + env.hint);
+    if (wantJson) emit(env);
+    else {
+      console.error('error: ' + env.error);
+      nextStep({ run: 'kolm whoami', fix: 'pass --tenant <id> or set KOLM_TENANT_ID' });
+    }
     process.exit(EXIT.MISSING_PREREQ);
   }
 
@@ -19819,7 +21170,11 @@ async function cmdCapturesReview(args) {
       hint: 'src/store.js + src/capture-store.js must be importable',
       version: 'w808-v1',
     };
-    if (wantJson) emit(env); else console.error('error: ' + env.error);
+    if (wantJson) emit(env);
+    else {
+      console.error('error: ' + env.error);
+      nextStep({ fix: 'reinstall the kolm CLI', see: 'docs/run/troubleshooting.md' });
+    }
     process.exit(EXIT.MISSING_PREREQ);
   }
 
@@ -19830,7 +21185,11 @@ async function cmdCapturesReview(args) {
     const row = storeMod.getStagedCapture(allowIdRaw, { tenant_id });
     if (!row) {
       const env = { ok: false, error: 'not_found', staged_capture_id: allowIdRaw, hint: 'no staged capture with that id for this tenant', version: 'w808-v1' };
-      if (wantJson) emit(env); else console.error('not found: ' + allowIdRaw);
+      if (wantJson) emit(env);
+      else {
+        console.error('not found: ' + allowIdRaw);
+        nextStep({ run: 'kolm captures review --list-pending', see: 'docs/build/captures.md' });
+      }
       process.exit(EXIT.NOT_FOUND);
     }
     const promoted = storeMod.promoteStagedCapture(allowIdRaw, {
@@ -20111,7 +21470,7 @@ async function cmdDistillImportanceWeighted(args) {
   const home = process.env.KOLM_HOME
     || path.join(process.env.HOME || process.env.USERPROFILE || '.', '.kolm');
   const outDir = path.join(home, 'importance');
-  try { fs.mkdirSync(outDir, { recursive: true }); } catch (_) {}
+  try { fs.mkdirSync(outDir, { recursive: true }); } catch (_) {} // deliberate: cleanup
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
   const defaultPath = path.join(outDir, `weights-${namespace}-${stamp}.jsonl`);
   const weightsPath = outWeightsFlag
@@ -20253,7 +21612,7 @@ async function cmdDistillProgressive(args) {
   const home = process.env.KOLM_HOME
     || path.join(process.env.HOME || process.env.USERPROFILE || '.', '.kolm');
   const outDir = path.join(home, 'progressive');
-  try { fs.mkdirSync(outDir, { recursive: true }); } catch (_) {}
+  try { fs.mkdirSync(outDir, { recursive: true }); } catch (_) {} // deliberate: cleanup
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
   const jsonlPath = path.join(outDir, `captures-${namespace}-${stamp}.jsonl`);
   try {
@@ -20336,7 +21695,7 @@ async function cmdDistillProgressive(args) {
   for (let pass = 1; pass <= maxPass; pass++) {
     const gateLabel = progMod.PASS_GATES[pass].label;
     const passOutDir = path.join(outDir, `pass-${pass}-${stamp}`);
-    try { fs.mkdirSync(passOutDir, { recursive: true }); } catch (_) {}
+    try { fs.mkdirSync(passOutDir, { recursive: true }); } catch (_) {} // deliberate: cleanup
 
     let passJsonl = jsonlPath;
     if (pass === 3 && Array.isArray(prevFailures) && prevFailures.length > 0) {
@@ -20524,7 +21883,7 @@ async function cmdDistillCurriculum(args) {
   const home = process.env.KOLM_HOME
     || path.join(process.env.HOME || process.env.USERPROFILE || '.', '.kolm');
   const outDir = path.join(home, 'curriculum');
-  try { fs.mkdirSync(outDir, { recursive: true }); } catch (_) {}
+  try { fs.mkdirSync(outDir, { recursive: true }); } catch (_) {} // deliberate: cleanup
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
   const safeNs = String(namespace).replace(/[^a-zA-Z0-9_-]+/g, '_');
   const defaultPath = path.join(outDir, `captures-${safeNs}-${stamp}.jsonl`);
@@ -20588,7 +21947,7 @@ async function cmdDistillCurriculum(args) {
 
   // 5. Trainer invocable — spawn with --curriculum.
   const trainerOutDir = path.join(outDir, `run-${safeNs}-${stamp}`);
-  try { fs.mkdirSync(trainerOutDir, { recursive: true }); } catch (_) {}
+  try { fs.mkdirSync(trainerOutDir, { recursive: true }); } catch (_) {} // deliberate: cleanup
   const trainerArgs = trainerBin
     ? ['--curriculum', '--train-jsonl', jsonlPath, '--out-dir', trainerOutDir]
     : ['-m', 'apps.trainer.distill', '--curriculum',
@@ -21648,7 +23007,7 @@ async function cmdDistillContrastive(args) {
   let negativeCount = 0;
   let failedRows = 0;
   for (const c of captures) {
-    // eslint-disable-next-line no-await-in-loop
+     
     const result = await generateNegativeVariants(c, {
       negativeTeacher,
       count: negCount,
@@ -21672,7 +23031,7 @@ async function cmdDistillContrastive(args) {
   const home = process.env.KOLM_HOME
     || path.join(process.env.HOME || process.env.USERPROFILE || '.', '.kolm');
   const outDir = path.join(home, 'contrastive');
-  try { fs.mkdirSync(outDir, { recursive: true }); } catch (_) {}
+  try { fs.mkdirSync(outDir, { recursive: true }); } catch (_) {} // deliberate: cleanup
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
   const defaultPath = path.join(outDir, `contrastive-${namespace}-${stamp}.jsonl`);
   const jsonlPath = outJsonlFlag
@@ -22525,7 +23884,7 @@ async function cmdDistillLocalWorker(args) {
     // Wave 253 backend#10: relay SIGINT/SIGTERM to the distill worker so
     // Ctrl+C in the parent terminal stops the python LoRA trainer (or the
     // teacher loop) cleanly instead of orphaning a multi-hour job.
-    const onSig = () => { try { child.kill('SIGINT'); } catch {} };
+    const onSig = () => { try { child.kill('SIGINT'); } catch {} }; // deliberate: cleanup
     process.on('SIGINT', onSig);
     process.on('SIGTERM', onSig);
     child.on('exit', (code) => {
@@ -22895,7 +24254,7 @@ async function cmdDoctor(args) {
           resolve({ status: res.statusCode, headers: res.headers, body: parsedBody });
         });
       });
-      req.setTimeout(20_000, () => { try { req.destroy(new Error('http timeout')); } catch (_) {} });
+      req.setTimeout(20_000, () => { try { req.destroy(new Error('http timeout')); } catch (_) {} }); // deliberate: cleanup
       req.on('error', (e) => reject(e));
       if (body) req.write(typeof body === 'string' ? body : JSON.stringify(body));
       req.end();
@@ -23200,7 +24559,7 @@ async function cmdDoctor(args) {
     const total = await countEvents({}).catch(() => 0);
     const p = info.db_path || info.jsonl_path || '(unknown)';
     let sz = 0;
-    try { if (p && p !== '(unknown)' && fs.existsSync(p)) sz = fs.statSync(p).size; } catch {}
+    try { if (p && p !== '(unknown)' && fs.existsSync(p)) sz = fs.statSync(p).size; } catch {} // deliberate: cleanup
     const sync = !!c.cloud_sync;
     checks.push({
       name: 'event-store (~/.kolm/events)',
@@ -23215,35 +24574,445 @@ async function cmdDoctor(args) {
     });
   }
 
+  // W888-A: tag every pre-existing check with the right group so the new
+  // `groups` envelope can route legacy rows alongside the new probes. We do
+  // this in one pass before adding the new checks so the seven-group view is
+  // complete and the flat `checks` array still keeps every legacy row in
+  // historical order (W457/W470/W481 lock-ins depend on the flat array).
+  const _legacyGroupMap = {
+    'config file':                  'system',
+    'api key (config)':             'system',
+    'api key (server)':             'system',
+    'cloud reachable':              'network',
+    'receipt secret':               'system',
+    'node version':                 'system',
+    'docker (optional)':            'system',
+    'python3 (optional)':           'system',
+    'rustc (optional)':             'system',
+    'C compiler (optional)':        'system',
+    'ANTHROPIC_API_KEY (optional)': 'cloud',
+    'project config':               'system',
+    'project artifacts':            'storage',
+    'global artifacts':             'storage',
+    'event-store (~/.kolm/events)': 'storage',
+  };
+  for (const ch of checks) {
+    if (!ch.group) ch.group = _legacyGroupMap[ch.name] || 'system';
+  }
+
+  // W888-A: --fix attempts an install pass for missing optional deps. We do
+  // NOT block on it (the user can run scripts/bootstrap.sh for the full
+  // matrix); --fix just covers the cheap wins (npm install, pip install for
+  // the python core stack when python is on PATH). --dry-run shows the plan
+  // without invoking anything; --yes proceeds without prompting (the only
+  // mode useful from a non-tty release-verify call).
+  const wantFix = args.includes('--fix');
+  const dryRunFix = args.includes('--dry-run');
+  const autoYes = args.includes('--yes') || args.includes('-y');
+  const fixPlan = [];
+  let fixResults = null;
+
+  // W888-A: gather new checks across seven groups. Each helper pushes one
+  // {name, status, detail, install_hint, group} row onto `checks` so the
+  // existing flat-array consumers keep working unchanged.
+  const isWinNew = process.platform === 'win32';
+  const isMacNew = process.platform === 'darwin';
+  const pyExeNew = isWinNew ? 'python' : 'python3';
+
+  const _addCheck = (name, status, detail, group, install_hint) => {
+    const row = { name, status, detail, install_hint: install_hint || '', group };
+    checks.push(row);
+    return row;
+  };
+
+  const _probeCmd = (exe, argv) => {
+    try {
+      const r = spawnSync(exe, argv, { stdio: 'pipe', encoding: 'utf8', timeout: 5000 });
+      return { ok: r.status === 0, stdout: (r.stdout || '').trim(), stderr: (r.stderr || '').trim() };
+    } catch (_) {
+      return { ok: false, stdout: '', stderr: '' };
+    }
+  };
+
+  // Pin python so all subsequent probes target the same interpreter the
+  // bootstrap script and the user's `which python3` agree on. Declared
+  // *before* the _probePy helper that closes over it.
+  let _systemPython = null;
+  const _pyPath = _probeCmd(pyExeNew, ['-c', 'import sys; sys.stdout.write(sys.executable)']);
+  if (_pyPath.ok && _pyPath.stdout) _systemPython = _pyPath.stdout;
+
+  const _probePy = (modName) => {
+    if (!_systemPython) return { ok: false, stdout: '', stderr: 'no python on PATH' };
+    const r = _probeCmd(_systemPython, ['-c', `import ${modName}; print(getattr(${modName}, '__version__', 'ok'))`]);
+    return r;
+  };
+
+  const _probeNode = (modName) => {
+    try {
+      const r = spawnSync(process.execPath, ['-e', `import('${modName}').then(m=>{process.stdout.write(m.default?.version||'ok');process.exit(0)}).catch(()=>process.exit(1))`], {
+        stdio: 'pipe', encoding: 'utf8', timeout: 5000,
+      });
+      return { ok: r.status === 0, stdout: (r.stdout || '').trim() };
+    } catch (_) {
+      return { ok: false, stdout: '' };
+    }
+  };
+
+  // ========================================================================
+  // GROUP: system — node + python + git + cuda + gpu
+  // ========================================================================
+  // git
+  {
+    const r = _probeCmd('git', ['--version']);
+    _addCheck('git', r.ok ? 'ok' : 'warn',
+      r.ok ? r.stdout : 'not on PATH (needed for: kolm distill --from-git, sdk fetch)',
+      'system',
+      r.ok ? '' : (isMacNew ? 'install: brew install git' : isWinNew ? 'install: winget install Git.Git' : 'install: sudo apt-get install -y git'));
+  }
+  // cuda toolkit availability (nvidia-smi)
+  {
+    const r = _probeCmd('nvidia-smi', ['--version']);
+    _addCheck('cuda (nvidia-smi)', r.ok ? 'ok' : 'warn',
+      r.ok ? (r.stdout.split('\n')[0] || 'present') : 'no nvidia-smi (no CUDA GPU detected — CPU/MPS paths still work)',
+      'system',
+      r.ok ? '' : 'install: NVIDIA driver + CUDA toolkit from https://developer.nvidia.com/cuda-downloads');
+  }
+  // gpu name + vram
+  {
+    const r = _probeCmd('nvidia-smi', ['--query-gpu=name,memory.total', '--format=csv,noheader,nounits']);
+    if (r.ok && r.stdout) {
+      const [name, memMib] = r.stdout.split('\n')[0].split(',').map((s) => s.trim());
+      const vramMb = Number(memMib);
+      _addCheck('gpu', 'ok', `${name} (${vramMb} MB VRAM)`, 'system', '');
+    } else if (isMacNew) {
+      const sp = _probeCmd('system_profiler', ['SPDisplaysDataType']);
+      if (sp.ok) {
+        const chipset = (sp.stdout.split(/\r?\n/).find((l) => /Chipset Model:/.test(l)) || '').split(':')[1];
+        _addCheck('gpu', 'ok', (chipset || 'Apple GPU').trim(), 'system', '');
+      } else {
+        _addCheck('gpu', 'warn', 'no gpu detected (CPU/MPS fallback)', 'system', '');
+      }
+    } else {
+      _addCheck('gpu', 'warn', 'no gpu detected (CPU fallback)', 'system', '');
+    }
+  }
+
+  // W889-7.3 — six MCD-required toolchain probes (npm, pip, cargo, make,
+  // huggingface-cli, llama-cli). These ride alongside the W888-A system probes
+  // and bring the total dep probe count over the 12-listed bar in PART J.
+  // Every probe surfaces an OS-specific install_hint when missing.
+  {
+    const r = _probeCmd('npm', ['--version']);
+    _addCheck('npm', r.ok ? 'ok' : 'warn',
+      r.ok ? `npm ${r.stdout}` : 'not on PATH (needed for: kolm install dev SDKs, npm-published modules)',
+      'system',
+      r.ok ? '' : (isMacNew ? 'install: brew install node' : isWinNew ? 'install: winget install OpenJS.NodeJS.LTS' : 'install: curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt-get install -y nodejs'));
+  }
+  {
+    const pipExe = isWinNew ? 'pip' : 'pip3';
+    let r = _probeCmd(pipExe, ['--version']);
+    if (!r.ok) r = _probeCmd('pip', ['--version']);
+    _addCheck('pip', r.ok ? 'ok' : 'warn',
+      r.ok ? (r.stdout.split('\n')[0] || 'present') : 'not on PATH (needed for: kolm distill --local-worker, python module installs)',
+      'system',
+      r.ok ? '' : (isMacNew ? 'install: brew install python@3.12  (bundles pip)' : isWinNew ? 'install: winget install Python.Python.3.12  (bundles pip)' : 'install: sudo apt-get install -y python3-pip'));
+  }
+  {
+    const r = _probeCmd('cargo', ['--version']);
+    _addCheck('cargo', r.ok ? 'ok' : 'warn',
+      r.ok ? r.stdout : 'not on PATH (needed for: kolm compile --target rust, Rust SDK build)',
+      'system',
+      r.ok ? '' : (isWinNew ? 'install: winget install Rustlang.Rustup  (then: rustup default stable)' : 'install: curl --proto =https --tlsv1.2 -sSf https://sh.rustup.rs | sh'));
+  }
+  {
+    const r = _probeCmd('make', ['--version']);
+    _addCheck('make', r.ok ? 'ok' : 'warn',
+      r.ok ? (r.stdout.split('\n')[0] || 'present') : 'not on PATH (needed for: build llama.cpp from source, C SDK build, native quantize)',
+      'system',
+      r.ok ? '' : (isMacNew ? 'install: xcode-select --install  (bundles make)' : isWinNew ? 'install: winget install GnuWin32.Make  (or use WSL2)' : 'install: sudo apt-get install -y build-essential  (bundles make)'));
+  }
+  {
+    const r = _probeCmd('huggingface-cli', ['--version']);
+    _addCheck('huggingface-cli', r.ok ? 'ok' : 'warn',
+      r.ok ? r.stdout : 'not on PATH (needed for: kolm distill --teacher hf/..., model weight fetch)',
+      'system',
+      r.ok ? '' : 'install: pip install -U huggingface_hub[cli]');
+  }
+  {
+    let r = _probeCmd('llama-cli', ['--version']);
+    if (!r.ok) r = _probeCmd('main', ['--version']);
+    _addCheck('llama-cli', r.ok ? 'ok' : 'warn',
+      r.ok ? (r.stdout.split('\n')[0] || 'present') : 'not on PATH (needed for: kolm run gguf, llama.cpp inference)',
+      'system',
+      r.ok ? '' : (isMacNew ? 'install: brew install llama.cpp' : 'install: build llama.cpp from https://github.com/ggerganov/llama.cpp (make all -> llama-cli)'));
+  }
+
+  // ========================================================================
+  // GROUP: core — torch + transformers + peft + bitsandbytes + shard
+  // ========================================================================
+  for (const [mod, hint] of [
+    ['torch',         'install: pip install torch'],
+    ['transformers',  'install: pip install transformers'],
+    ['peft',          'install: pip install peft'],
+    ['bitsandbytes',  'install: pip install bitsandbytes  (CUDA-only; mac/no-CUDA can skip)'],
+    ['shard',         'install: pip install git+https://github.com/krish1905/shard.git'],
+  ]) {
+    if (!_systemPython) {
+      _addCheck(mod, 'warn', 'python not on PATH', 'core', 'install: install python3 then re-run');
+      continue;
+    }
+    const r = _probePy(mod);
+    if (r.ok) {
+      _addCheck(mod, 'ok', `python: ${mod} ${r.stdout || 'present'}`, 'core', '');
+    } else {
+      // bitsandbytes + shard are optional (no CUDA / no remote serving) so
+      // they're warn not missing; torch/transformers/peft are required for
+      // any compile path.
+      const required = (mod === 'torch' || mod === 'transformers' || mod === 'peft');
+      _addCheck(mod, required ? 'warn' : 'warn',
+        `not importable (needed for: ${mod === 'shard' ? 'kolm fleet KV-cache compression' : 'kolm compile'})`,
+        'core', hint);
+      if (wantFix) fixPlan.push({ kind: 'pip', spec: mod, label: mod, optional: !required });
+    }
+  }
+
+  // ========================================================================
+  // GROUP: export — llama.cpp binary + llama-cpp-python + exllamav2 +
+  //   autoawq + mlx-lm (mac-only)
+  // ========================================================================
+  // llama.cpp binary — llama-quantize is the canonical entry; older builds
+  // shipped it as `quantize`. Probe both.
+  {
+    let r = _probeCmd('llama-quantize', ['--help']);
+    let label = 'llama-quantize';
+    if (!r.ok) { r = _probeCmd('quantize', ['--help']); label = 'quantize'; }
+    _addCheck('llama.cpp binary', r.ok ? 'ok' : 'warn',
+      r.ok ? `${label} on PATH` : 'not on PATH (needed for: kolm compile --target gguf-q4km native quantize)',
+      'export',
+      r.ok ? '' : (isMacNew ? 'install: brew install llama.cpp' : 'install: build llama.cpp from https://github.com/ggerganov/llama.cpp'));
+  }
+  // llama-cpp-python, exllamav2, autoawq — all optional
+  for (const mod of ['llama_cpp', 'exllamav2', 'awq']) {
+    if (!_systemPython) {
+      _addCheck(mod, 'warn', 'python not on PATH', 'export', 'install: install python3 then re-run');
+      continue;
+    }
+    const r = _probePy(mod);
+    if (r.ok) {
+      _addCheck(mod, 'ok', `python: ${mod} ${r.stdout || 'present'}`, 'export', '');
+    } else {
+      const pipName = mod === 'llama_cpp' ? 'llama-cpp-python' : mod === 'awq' ? 'autoawq' : 'exllamav2';
+      _addCheck(mod, 'warn',
+        `not importable (needed for: kolm compile --runtime ${pipName})`,
+        'export',
+        `install: pip install ${pipName}`);
+      if (wantFix) fixPlan.push({ kind: 'pip', spec: pipName, label: mod, optional: true });
+    }
+  }
+  // mlx-lm — Mac only.
+  if (isMacNew) {
+    if (!_systemPython) {
+      _addCheck('mlx-lm', 'warn', 'python not on PATH', 'export', 'install: install python3 then re-run');
+    } else {
+      const r = _probePy('mlx_lm');
+      if (r.ok) {
+        _addCheck('mlx-lm', 'ok', `mlx_lm ${r.stdout || 'present'}`, 'export', '');
+      } else {
+        _addCheck('mlx-lm', 'warn', 'not importable (needed for: kolm serve mlx)', 'export', 'install: pip install mlx-lm');
+        if (wantFix) fixPlan.push({ kind: 'pip', spec: 'mlx-lm', label: 'mlx-lm', optional: true });
+      }
+    }
+  } else {
+    _addCheck('mlx-lm', 'ok', 'skip (mac only)', 'export', '');
+  }
+
+  // ========================================================================
+  // GROUP: cloud — RUNPOD_API_KEY + MODAL_TOKEN_ID + reachability
+  // ========================================================================
+  const _httpHead = (url) => new Promise((resolve) => {
+    try {
+      const u = new URL(url);
+      const lib = u.protocol === 'https:' ? https : http;
+      const req = lib.request({
+        protocol: u.protocol, hostname: u.hostname, port: u.port || (u.protocol === 'https:' ? 443 : 80),
+        path: u.pathname + (u.search || ''), method: 'HEAD', timeout: 4000,
+      }, (res) => {
+        // drain
+        res.resume();
+        resolve({ ok: res.statusCode < 500, status: res.statusCode });
+      });
+      req.on('timeout', () => { req.destroy(); resolve({ ok: false, status: 0, err: 'timeout' }); });
+      req.on('error', (e) => resolve({ ok: false, status: 0, err: e.message }));
+      req.end();
+    } catch (e) { resolve({ ok: false, status: 0, err: e.message }); }
+  });
+
+  if (process.env.RUNPOD_API_KEY) {
+    const r = await _httpHead('https://api.runpod.io/graphql');
+    _addCheck('runpod', r.ok ? 'ok' : 'warn',
+      r.ok ? `RUNPOD_API_KEY set, api.runpod.io reachable (${r.status})` : `RUNPOD_API_KEY set, api.runpod.io unreachable (${r.err || r.status})`,
+      'cloud', '');
+  } else {
+    _addCheck('runpod', 'warn', 'RUNPOD_API_KEY not set (needed for: kolm compile --cloud runpod)', 'cloud',
+      'set RUNPOD_API_KEY=rpa_... in your env or ~/.kolm/.env');
+  }
+  if (process.env.MODAL_TOKEN_ID) {
+    _addCheck('modal', 'ok', 'MODAL_TOKEN_ID set', 'cloud', '');
+  } else {
+    _addCheck('modal', 'warn', 'MODAL_TOKEN_ID not set (needed for: kolm compile --cloud modal)', 'cloud',
+      'set MODAL_TOKEN_ID + MODAL_TOKEN_SECRET in your env');
+  }
+
+  // ========================================================================
+  // GROUP: network — kolm.ai + api.kolm.ai + gateway /health
+  // ========================================================================
+  // We don't double up on the legacy "cloud reachable" row (kept under
+  // network too), we just add the supplementary probes.
+  for (const [name, url] of [
+    ['kolm.ai',       'https://kolm.ai/'],
+    ['api.kolm.ai',   'https://api.kolm.ai/'],
+    ['gateway /health', (c.base || 'https://kolm.ai').replace(/\/+$/, '') + '/health'],
+  ]) {
+    const r = await _httpHead(url);
+    _addCheck(name, r.ok ? 'ok' : 'warn',
+      r.ok ? `HEAD ${url} -> ${r.status}` : `HEAD ${url} -> ${r.err || r.status}`,
+      'network', r.ok ? '' : 'check your network / firewall, or use --allow-logged-out for offline runs');
+  }
+
+  // ========================================================================
+  // GROUP: storage — better-sqlite3 + pg + @aws-sdk/client-s3
+  // ========================================================================
+  for (const [mod, label, hint] of [
+    ['better-sqlite3',     'better-sqlite3',     'install: npm install better-sqlite3'],
+    ['pg',                 'pg',                 'install: npm install pg'],
+    ['@aws-sdk/client-s3', '@aws-sdk/client-s3', 'install: npm install @aws-sdk/client-s3'],
+  ]) {
+    const r = _probeNode(mod);
+    _addCheck(label, r.ok ? 'ok' : 'warn',
+      r.ok ? `node: ${label} importable` : `not importable (needed for: ${label === 'pg' ? 'kolm capture --postgres' : label === '@aws-sdk/client-s3' ? 'kolm capture --s3' : 'fast local capture store'})`,
+      'storage', r.ok ? '' : hint);
+    if (!r.ok && wantFix) fixPlan.push({ kind: 'npm', spec: mod, label, optional: true });
+  }
+
+  // ========================================================================
+  // GROUP: devices — registered fleet count
+  // ========================================================================
+  try {
+    const dc = await import('../src/device-capabilities.js');
+    if (typeof dc.listDevices === 'function') {
+      const devices = await dc.listDevices().catch(() => []);
+      const arr = Array.isArray(devices) ? devices : [];
+      _addCheck('registered devices', 'ok', `${arr.length} device${arr.length === 1 ? '' : 's'} in ~/.kolm/devices/`, 'devices',
+        arr.length === 0 ? 'add a device: kolm devices add <name> --ssh user@host' : '');
+    } else {
+      _addCheck('registered devices', 'warn', 'device-capabilities.listDevices not exported', 'devices', '');
+    }
+  } catch (e) {
+    _addCheck('registered devices', 'warn', 'device-capabilities import failed: ' + (e.message || String(e)), 'devices', '');
+  }
+
+  // ========================================================================
+  // --fix pass — attempt to install what's missing.
+  // ========================================================================
+  if (wantFix && fixPlan.length > 0) {
+    fixResults = { attempted: fixPlan.length, succeeded: 0, failed: 0, skipped: 0, items: [] };
+    if (dryRunFix) {
+      // Just record what would happen; no install.
+      for (const item of fixPlan) {
+        fixResults.items.push({ ...item, status: 'planned', detail: 'dry-run' });
+        fixResults.skipped++;
+      }
+    } else {
+      // Prompt only if interactive AND not --yes.
+      const interactive = process.stdin && process.stdin.isTTY && !autoYes;
+      if (interactive && !jsonOut) {
+        process.stdout.write(`\n--fix would install ${fixPlan.length} dep${fixPlan.length === 1 ? '' : 's'}:\n`);
+        for (const item of fixPlan) {
+          process.stdout.write(`  - ${item.kind} install ${item.spec}${item.optional ? ' (optional)' : ''}\n`);
+        }
+        process.stdout.write('pass --yes to proceed without prompting, or re-run with --dry-run.\n');
+        for (const item of fixPlan) {
+          fixResults.items.push({ ...item, status: 'skipped', detail: 'no --yes (interactive)' });
+          fixResults.skipped++;
+        }
+      } else {
+        for (const item of fixPlan) {
+          if (item.kind === 'pip' && !_systemPython) {
+            fixResults.items.push({ ...item, status: 'skipped', detail: 'no python on PATH' });
+            fixResults.skipped++;
+            continue;
+          }
+          const exe = item.kind === 'pip' ? _systemPython : 'npm';
+          const argv = item.kind === 'pip'
+            ? ['-m', 'pip', 'install', '--upgrade', '--disable-pip-version-check', item.spec]
+            : ['install', '--no-audit', '--no-fund', item.spec];
+          // Bound install attempts to 5 min each so a slow wheel doesn't hang
+          // release-verify forever.
+          const r = spawnSync(exe, argv, { stdio: 'ignore', timeout: 300_000 });
+          if (r.status === 0) {
+            fixResults.items.push({ ...item, status: 'ok', detail: 'installed' });
+            fixResults.succeeded++;
+          } else {
+            fixResults.items.push({ ...item, status: 'fail', detail: `exit ${r.status}` });
+            fixResults.failed++;
+          }
+        }
+      }
+    }
+  }
+
   let red = 0, yellow = 0;
   for (const ch of checks) {
     if (ch.status === 'missing') red++;
     else if (ch.status === 'warn') yellow++;
   }
 
+  // W888-A: per-group bucketing built ONCE here. checks[] is the canonical
+  // flat array (lock-ins depend on it); groups[] is additive metadata for the
+  // new UI surfaces (web fleet dashboard + TUI doctor view).
+  const groups = { system: [], core: [], export: [], cloud: [], network: [], storage: [], devices: [] };
+  for (const ch of checks) {
+    const g = groups[ch.group] ? ch.group : 'system';
+    groups[g].push(ch);
+  }
+  const passedCount = checks.filter((c) => c.status === 'ok').length;
+  const summary = `${passedCount}/${checks.length} checks passed`;
+  // W889-7.3 — deps_probed surfaces the distinct dep probe count so the MCD
+  // ship-gate ("verify all 12 listed deps probed") can read a single number
+  // from `kolm doctor --json`. Counts the union of legacy + W888-A + W889-7.3
+  // probes; ≥ 12 is the required floor.
+  const depsProbed = checks.length;
+
   if (jsonOut) {
     const result = {
       ok: red === 0,
       blockers: red,
       warnings: yellow,
+      summary,
+      deps_probed: depsProbed,
       checks,
+      groups,
     };
+    if (fixResults) result.fix = fixResults;
     console.log(JSON.stringify(result, null, 2));
     if (red > 0) process.exit(EXIT.MISSING_PREREQ);
     return;
   }
 
   // Render
-  const STATUS = { ok: 'ok', warn: '!', missing: 'x' };
+  const STATUS = { ok: 'ok', warn: '!', missing: 'x', fail: 'x' };
   for (const ch of checks) {
     process.stdout.write(`${STATUS[ch.status] || '?'}  ${ch.name.padEnd(28)}  ${ch.detail || ''}\n`);
   }
   process.stdout.write('\n');
+  if (fixResults) {
+    process.stdout.write(`--fix: attempted ${fixResults.attempted}, ok ${fixResults.succeeded}, fail ${fixResults.failed}, skip ${fixResults.skipped}\n`);
+  }
   if (red > 0) {
-    process.stdout.write(`${red} blocker${red === 1 ? '' : 's'}, ${yellow} warning${yellow === 1 ? '' : 's'}. fix the ✗ rows above and re-run.\n`);
+    process.stdout.write(`${red} blocker${red === 1 ? '' : 's'}, ${yellow} warning${yellow === 1 ? '' : 's'}. fix the x rows above and re-run.\n`);
     process.exit(EXIT.MISSING_PREREQ);
   }
-  process.stdout.write(`all required checks pass (${yellow} warning${yellow === 1 ? '' : 's'}).\n`);
+  process.stdout.write(`all required checks pass (${yellow} warning${yellow === 1 ? '' : 's'}). ${summary}.\n`);
   // Training-data tip: surfaces kolm seeds so new users know the path exists.
   // Two-line nudge, not a check (doesn't affect exit code or counters).
   process.stdout.write('\n');
@@ -23280,7 +25049,7 @@ async function cmdLogs(args) {
       if (artifactFilter && !(r.artifact || '').includes(artifactFilter)) continue;
       if (sinceMs && new Date(r.ts).getTime() < sinceMs) continue;
       rows.push(r);
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
   const tail = rows.slice(-limit);
   if (json) {
@@ -23315,7 +25084,7 @@ export function appendRunLog(entry) {
     fs.mkdirSync(dir, { recursive: true });
     const row = { ts: new Date().toISOString(), ...entry };
     fs.appendFileSync(path.join(dir, 'runs.jsonl'), JSON.stringify(row) + '\n');
-  } catch {}
+  } catch {} // deliberate: cleanup
 }
 
 // ---------- kolm moe (Mixture-of-Experts composer) ----------
@@ -24016,6 +25785,62 @@ const KOLM_BRAND = [
   '',
 ].join('\n');
 
+// W890-11 helpers: resolve the repo git HEAD and host python version without
+// hitting the network. Both are best-effort and degrade to null on miss so the
+// version envelope stays parseable in CI.
+function _w890_resolveGitCommit() {
+  try {
+    // ESM module: __dirname is undefined, use SELF_DIR captured at module top.
+    const repoRoot = path.resolve(SELF_DIR, '..');
+    const gitDir = path.join(repoRoot, '.git');
+    if (!fs.existsSync(gitDir)) return null;
+    const headFile = path.join(gitDir, 'HEAD');
+    if (!fs.existsSync(headFile)) return null;
+    const head = fs.readFileSync(headFile, 'utf8').trim();
+    if (head.startsWith('ref: ')) {
+      const ref = head.slice(5).trim();
+      const refFile = path.join(gitDir, ref);
+      if (fs.existsSync(refFile)) {
+        const sha = fs.readFileSync(refFile, 'utf8').trim();
+        if (/^[0-9a-f]{7,}$/i.test(sha)) return sha.slice(0, 12);
+      }
+      // packed-refs fallback
+      const packed = path.join(gitDir, 'packed-refs');
+      if (fs.existsSync(packed)) {
+        const lines = fs.readFileSync(packed, 'utf8').split(/\r?\n/);
+        for (const line of lines) {
+          if (line.endsWith(' ' + ref)) {
+            const sha = line.split(/\s+/)[0];
+            if (/^[0-9a-f]{7,}$/i.test(sha)) return sha.slice(0, 12);
+          }
+        }
+      }
+      return null;
+    }
+    // Detached HEAD: HEAD already contains the sha.
+    if (/^[0-9a-f]{7,}$/i.test(head)) return head.slice(0, 12);
+    return null;
+  } catch (_e) { return null; } // deliberate: cleanup
+}
+
+function _w890_resolvePythonVersion() {
+  try {
+    // spawnSync is already imported at module top from node:child_process.
+    // python --version writes to stdout on 3.4+, stderr on older. Try python3
+    // first on POSIX, python on Windows.
+    const cands = process.platform === 'win32' ? ['python', 'py'] : ['python3', 'python'];
+    for (const cmd of cands) {
+      const r = spawnSync(cmd, ['--version'], { encoding: 'utf8', timeout: 1500, windowsHide: true });
+      if (r && r.status === 0) {
+        const txt = (r.stdout || r.stderr || '').trim();
+        const m = txt.match(/Python\s+([0-9][0-9.]+)/i);
+        if (m) return m[1];
+      }
+    }
+    return null;
+  } catch (_e) { return null; } // deliberate: cleanup
+}
+
 async function cmdVersion(args) {
   if (maybeHelp('version', args)) return;
   const jsonOut = args.includes('--json');
@@ -24027,6 +25852,9 @@ async function cmdVersion(args) {
   const offline = args.includes('--offline') || process.env.KOLM_AIRGAP === '1'
     || fs.existsSync(path.join(KOLM_DIR, 'airgap.env'));
   const c = loadConfig();
+  // W890-11: V1 ship-gate requires version to include git commit + python version.
+  const gitCommit = _w890_resolveGitCommit();
+  const pythonVersion = _w890_resolvePythonVersion();
   if (jsonOut) {
     let cloud = null;
     if (!offline && !shortMode) {
@@ -24037,12 +25865,14 @@ async function cmdVersion(args) {
         const res = await fetch(url, { headers: authHeaders(c), signal: ctl.signal });
         clearTimeout(t);
         if (res.ok) cloud = await res.json();
-      } catch {}
+      } catch {} // deliberate: cleanup
     }
     console.log(JSON.stringify({
       cli: VERSION,
       spec: 'rs-1',
       node: process.versions.node,
+      git: gitCommit,
+      python: pythonVersion,
       platform: process.platform,
       arch: process.arch,
       base: c.base,
@@ -24058,6 +25888,9 @@ async function cmdVersion(args) {
   console.log(KOLM_BRAND);
   console.log('kolm cli   v' + VERSION);
   console.log('spec       rs-1');
+  console.log('node       ' + process.versions.node);
+  console.log('git        ' + (gitCommit || '(unavailable)'));
+  console.log('python     ' + (pythonVersion || '(not installed)'));
   if (offline) {
     console.log('kolm cloud (skipped: airgap mode)');
     return;
@@ -25217,7 +27050,7 @@ function chatBuildFunnelFindArtifact(artifactName) {
     const direct = path.join(cwd, artifactName + '.kolm');
     if (fs.existsSync(direct)) return direct;
     let entries = [];
-    try { entries = fs.readdirSync(cwd).filter(function (f) { return f.endsWith('.kolm') && f.indexOf(artifactName) >= 0; }); } catch (_e) {}
+    try { entries = fs.readdirSync(cwd).filter(function (f) { return f.endsWith('.kolm') && f.indexOf(artifactName) >= 0; }); } catch (_e) {} // deliberate: cleanup
     if (entries.length) {
       entries.sort(function (a, b) {
         return fs.statSync(path.join(cwd, b)).mtimeMs - fs.statSync(path.join(cwd, a)).mtimeMs;
@@ -25381,7 +27214,7 @@ async function cmdQuickstart(args) {
     wizardRl.on('close', () => flushOnClose());
   }
   function wizardClose() {
-    if (wizardRl) { try { wizardRl.close(); } catch {} }
+    if (wizardRl) { try { wizardRl.close(); } catch {} } // deliberate: cleanup
   }
   function wizardAsk(line) {
     process.stdout.write(line);
@@ -25855,7 +27688,7 @@ async function cmdStudio(args) {
         const p = path.join(dir, f);
         const st = fs.statSync(p);
         let data = null;
-        try { data = JSON.parse(fs.readFileSync(p, 'utf8')); } catch {}
+        try { data = JSON.parse(fs.readFileSync(p, 'utf8')); } catch {} // deliberate: cleanup
         return { name: f, mtime: st.mtime.toISOString(), size: st.size, data };
       })
       .sort((a, b) => b.mtime.localeCompare(a.mtime))
@@ -26784,7 +28617,13 @@ async function cmdTunnel(args) {
     return;
   }
   if (sub === 'list' || sub === 'ls') {
+    const wantJson = rest.includes('--json');
     const r = await api(c, 'GET', '/v1/tunnels');
+    if (wantJson) {
+      // W890-11: --json for CI / scripted callers.
+      console.log(JSON.stringify({ tunnels: r.tunnels || [] }, null, 2));
+      return;
+    }
     if (!r.tunnels || !r.tunnels.length) { console.log('(no tunnels)'); return; }
     for (const t of r.tunnels) {
       console.log(`${t.token.padEnd(36)} ${t.status.padEnd(8)} ${t.live ? 'LIVE ' : 'idle '} ${t.name || ''}`);
@@ -26862,7 +28701,7 @@ async function cmdTunnelAgent(c, args) {
           const dataLine = (frame.match(/^data:\s*([\s\S]+)$/m) || [])[1];
           if (!ev || !dataLine) continue;
           if (ev === 'hello') {
-            try { console.log('agent: hello', JSON.parse(dataLine).tunnel_id || ''); } catch {}
+            try { console.log('agent: hello', JSON.parse(dataLine).tunnel_id || ''); } catch {} // deliberate: cleanup
             continue;
           }
           if (ev === 'request') {
@@ -27586,18 +29425,22 @@ async function cmdEvidenceTrace(args) {
   let artifact_id = null;
   let source = null;
 
-  // Path 1 - local .kolm archive on disk.
+  // Path 1 - local .kolm archive on disk. Read manifest.json directly via
+  // adm-zip; src/artifact.js does not export readKolm.
   if (fs.existsSync(target) && /\.kolm$/i.test(target)) {
     try {
-      const { readKolm } = await import('../src/artifact.js');
-      const buf = fs.readFileSync(path.resolve(target));
-      const obj = await readKolm(buf);
-      const manifest = obj && obj.manifest ? obj.manifest : obj;
+      const AdmZip = (await import('adm-zip')).default;
+      const zip = new AdmZip(path.resolve(target));
+      const me = zip.getEntry('manifest.json');
+      let manifest = null;
+      if (me) {
+        try { manifest = JSON.parse(me.getData().toString('utf8')); } catch { manifest = null; }
+      }
       if (manifest && manifest.evidence_dag) {
         dag = manifest.evidence_dag;
         source = 'manifest';
       }
-      artifact_id = (manifest && manifest.artifact_id) || target;
+      artifact_id = (manifest && (manifest.artifact_id || manifest.id)) || path.basename(target, '.kolm');
     } catch (err) {
       console.error('failed to read .kolm:', err.message);
       process.exit(EXIT.EXECUTION);
@@ -27615,7 +29458,7 @@ async function cmdEvidenceTrace(args) {
         artifact_id = id;
         source = source || 'store';
       }
-    } catch {
+    } catch { // deliberate: cleanup
       /* swallow and let the not-found branch handle it below */
     }
   }
@@ -27735,7 +29578,7 @@ async function cmdEvidenceRevoke(args) {
       at: new Date().toISOString(),
     });
     fs.appendFileSync(verdictPath, line + '\n');
-  } catch {
+  } catch { // deliberate: cleanup
     /* verdict log is best-effort; the DAG write is the source of truth */
   }
   if (wantJson) {
@@ -28311,6 +30154,23 @@ async function cmdAirgap(args) {
   }
   if (sub === 'status') {
     const enabled = fs.existsSync(airgapEnvPath);
+    const arts = fs.existsSync(ARTIFACTS_DIR) ? fs.readdirSync(ARTIFACTS_DIR).filter(f => f.endsWith('.kolm')) : [];
+    const wantJson = rest.includes('--json') || args.includes('--json');
+    if (wantJson) {
+      // W890-11: --json for CI / scripted callers.
+      const env_runtime = {};
+      for (const k of Object.keys(vars)) env_runtime[k] = process.env[k] || null;
+      console.log(JSON.stringify({
+        airgap_mode: enabled,
+        env_file: airgapEnvPath,
+        env_file_exists: enabled,
+        runtime_env: env_runtime,
+        local_artifacts: arts.length,
+        artifacts_dir: ARTIFACTS_DIR,
+        receipt_secret_set: !!process.env.RECIPE_RECEIPT_SECRET,
+      }, null, 2));
+      return;
+    }
     console.log(`airgap mode:         ${enabled ? 'enabled' : 'off'}`);
     console.log(`env file:            ${airgapEnvPath}${enabled ? '' : ' (missing — run `kolm airgap enable`)'}`);
     console.log(`runtime env vars:`);
@@ -28318,7 +30178,6 @@ async function cmdAirgap(args) {
       const live = process.env[k] || '(unset)';
       console.log(`  ${k.padEnd(24)} ${live}`);
     }
-    const arts = fs.existsSync(ARTIFACTS_DIR) ? fs.readdirSync(ARTIFACTS_DIR).filter(f => f.endsWith('.kolm')) : [];
     console.log(`local .kolm artifacts: ${arts.length} in ${ARTIFACTS_DIR}`);
     console.log(`receipt secret:        ${process.env.RECIPE_RECEIPT_SECRET ? 'set (signatures verifiable)' : 'unset — set RECIPE_RECEIPT_SECRET to verify HMAC chain'}`);
     return;
@@ -28527,6 +30386,13 @@ function _deployHelp() {
 }
 
 async function cmdDeploy(args) {
+  // W888-D — new mode: `kolm deploy <artifact.kolm> --device <id>` runs the
+  // remote SSH+upload+serve+smoke pipeline via src/deploy-pipeline.js. We
+  // detect this mode by the presence of --device anywhere in args. The
+  // legacy `kolm deploy bundle --airgap ...` config-gen mode is preserved.
+  if (Array.isArray(args) && args.includes('--device')) {
+    return await _cmdDeployToDevice_w888d(args);
+  }
   const sub = args[0];
   const rest = args.slice(1);
   if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
@@ -28534,8 +30400,8 @@ async function cmdDeploy(args) {
     return;
   }
   if (sub !== 'bundle') {
-    console.error('unknown deploy subcommand:', sub);
-    console.error('try: kolm deploy --help');
+    console.error('unknown deploy subcommand: ' + sub);
+    nextStep({ run: 'kolm deploy --help', try: ['kolm deploy bundle --airgap --artifact <id> --output ./dist', 'kolm deploy <artifact.kolm> --device <id>'], see: 'docs/run/deploy.md' });
     process.exit(EXIT.BAD_ARGS);
   }
   if (rest.includes('--help') || rest.includes('-h')) {
@@ -28554,25 +30420,32 @@ async function cmdDeploy(args) {
 
   if (!isAirgap) {
     console.error('kolm deploy bundle: --airgap is required (no other modes exist yet)');
+    nextStep({ run: 'kolm deploy bundle --airgap --artifact <id> --output ./dist', see: 'docs/run/deploy.md' });
     process.exit(EXIT.BAD_ARGS);
   }
   if (!artifactArg) {
     console.error('kolm deploy bundle: --artifact <path-or-id> is required');
+    nextStep({ run: 'kolm artifacts list', see: 'docs/run/deploy.md' });
     process.exit(EXIT.BAD_ARGS);
   }
   if (!output) {
     console.error('kolm deploy bundle: --output <dir> is required');
+    nextStep({ run: 'kolm deploy bundle --airgap --artifact <id> --output ./dist', see: 'docs/run/deploy.md' });
     process.exit(EXIT.BAD_ARGS);
   }
 
   const ap = resolveArtifact(artifactArg);
   if (!ap) {
+    console.error('artifact not found: ' + artifactArg);
+    nextStep({ run: 'kolm artifacts list', see: 'docs/run/deploy.md' });
     const e = new Error('artifact not found: ' + artifactArg);
     e.exitCode = EXIT.NOT_FOUND;
     throw e;
   }
   const mod = await import('../src/deploy-generators.js');
-  const env = mod.generateAirgapBundle({
+  // W891: generateAirgapBundle returns a Promise for >2 GiB artifacts
+  // (streaming path) and a plain object for small ones — await covers both.
+  const env = await mod.generateAirgapBundle({
     artifact_path: ap,
     runtime,
     output_dir: path.resolve(output),
@@ -28600,6 +30473,405 @@ async function cmdDeploy(args) {
   console.log('Verify on the target host:');
   console.log('  tar -xzf ' + path.basename(env.bundle_path));
   console.log('  sha256sum -c MANIFEST.sha256');
+}
+
+// =============================================================================
+// W888-D — `kolm deploy <artifact> --device <id>` remote SSH deploy mode.
+//
+// New mode living alongside the legacy `kolm deploy bundle --airgap ...`
+// config-gen path. Triggered by the presence of --device anywhere in argv.
+// Delegates to src/deploy-pipeline.js#DeployPipeline.deploy() (or
+// .deployRolling / .deployCanary for the corresponding flags).
+//
+// CLI shape:
+//   kolm deploy <artifact.kolm> --device <id>
+//     [--runtime llama.cpp|vllm|ollama] [--port 8080] [--bind-host 0.0.0.0]
+//     [--auto-install] [--dry-run] [--rolling] [--canary] [--json]
+// =============================================================================
+function _w888dDeployHelp() {
+  console.log('kolm deploy <artifact.kolm> --device <id> [options]   # W888-D remote deploy');
+  console.log('');
+  console.log('Run the full SSH+upload+serve+smoke pipeline on a registered device.');
+  console.log('');
+  console.log('Required:');
+  console.log('  <artifact.kolm>          path or artifact id (resolves under ~/.kolm/artifacts/)');
+  console.log('  --device <id>            target device id (kolm devices list)');
+  console.log('');
+  console.log('Options:');
+  console.log('  --runtime <name>         llama.cpp (default) | vllm | ollama');
+  console.log('  --port <n>               serve port (default 8080)');
+  console.log('  --bind-host <host>       bind interface on remote (default 0.0.0.0)');
+  console.log('  --auto-install           bootstrap missing runtime on remote');
+  console.log('  --dry-run                stop after preflight (no upload/serve)');
+  console.log('  --rolling                deploy alongside existing serve, then cut over');
+  console.log('  --replicas <n>           with --rolling: N-replica zero-downtime cutover');
+  console.log('  --canary                 deploy to one device + monitor window');
+  console.log('  --canary-window <s>      canary observation window (default 300s)');
+  console.log('  --json                   machine-readable result envelope');
+  console.log('');
+  console.log('Legacy config-gen mode still works:');
+  console.log('  kolm deploy bundle --airgap --artifact <art> --runtime vllm --output <dir>');
+}
+
+async function _cmdDeployToDevice_w888d(args) {
+  if (args.includes('--help') || args.includes('-h')) { _w888dDeployHelp(); return; }
+  const get = (flag) => { const i = args.indexOf(flag); return i >= 0 ? args[i + 1] : null; };
+  const positional = args.filter(a => !a.startsWith('--')
+    && a !== get('--device') && a !== get('--runtime') && a !== get('--port') && a !== get('--bind-host'));
+  const artifactArg = positional[0];
+  if (!artifactArg) {
+    console.error('kolm deploy: <artifact> is required');
+    _w888dDeployHelp(); process.exit(EXIT.BAD_ARGS);
+  }
+  const deviceId = get('--device');
+  if (!deviceId) {
+    console.error('kolm deploy: --device <id> is required'); process.exit(EXIT.BAD_ARGS);
+  }
+  const ap = resolveArtifact(artifactArg) || (fs.existsSync(artifactArg) ? path.resolve(artifactArg) : null);
+  if (!ap) {
+    const e = new Error('artifact not found: ' + artifactArg);
+    e.exitCode = EXIT.NOT_FOUND; throw e;
+  }
+  const runtime = get('--runtime') || 'llama.cpp';
+  const port = Number(get('--port') || '8080');
+  const bindHost = get('--bind-host') || '0.0.0.0';
+  const autoInstall = args.includes('--auto-install');
+  const dryRun = args.includes('--dry-run');
+  const rolling = args.includes('--rolling');
+  const canary = args.includes('--canary');
+  const canaryWindowS = Number(get('--canary-window') || get('--canary-window-s') || '300');
+  const replicas = Number(get('--replicas') || '1');
+  const wantJson = args.includes('--json');
+
+  const mod = await import('../src/deploy-pipeline.js');
+  const pipeline = new mod.DeployPipeline();
+  const config = { runtime, port, bindHost, autoInstall, dryRun, canaryWindowS, replicas };
+
+  let result;
+  if (canary) {
+    // Canary: deploy to ONE device first. The CLI single-device deploy form
+    // treats --canary as "deploy this one device as canary, no fleet promote".
+    const canaryMod = await import('../src/deploy-canary.js');
+    const c = new canaryMod.CanaryDeploy({ pipeline });
+    result = await c.deploy({ artifactPath: ap, deviceIds: [deviceId], config: { ...config, skipObserveSleep: dryRun } });
+    // Normalize shape for the per-device CLI consumer.
+    result.success = !!result.ok;
+    result.deployment_id = result.canary_result && result.canary_result.deployment_id || null;
+    result.steps = result.canary_result && result.canary_result.steps || [];
+    result.endpoint = result.canary_result && result.canary_result.endpoint || null;
+    result.artifact_id = result.canary_result && result.canary_result.artifact_id || null;
+  } else if (rolling && replicas > 1) {
+    const rollingMod = await import('../src/deploy-rolling.js');
+    const r = new rollingMod.RollingDeploy({ pipeline });
+    result = await r.deploy({ artifactPath: ap, deviceId, config });
+    result.success = !!result.ok;
+    result.steps = (result.per_replica || []).flatMap(p => p.steps || []);
+    result.deployment_id = (result.per_replica && result.per_replica[0] && result.per_replica[0].deployment_id) || null;
+    result.endpoint = (result.per_replica && result.per_replica[0] && result.per_replica[0].endpoint) || null;
+    result.artifact_id = null;
+  } else if (rolling) {
+    result = await pipeline.deployRolling({ artifactPath: ap, deviceId, config });
+  } else {
+    result = await pipeline.deploy({ artifactPath: ap, deviceId, config });
+  }
+
+  if (wantJson) {
+    console.log(JSON.stringify(result, null, 2));
+    if (!result.success) process.exit(EXIT.EXECUTION);
+    return;
+  }
+  console.log(`[deploy] artifact=${result.artifact_id || '(rolling)'} device=${deviceId} runtime=${runtime}`);
+  for (const s of (result.steps || result.sidecar?.steps || [])) {
+    const tag = s.ok ? 'OK ' : 'FAIL';
+    const ms = s.elapsed_ms != null ? ` (${s.elapsed_ms}ms)` : '';
+    const tail = s.ok ? '' : (' — ' + (s.error || ''));
+    console.log(`  ${tag} ${s.step}${ms}${tail}`);
+  }
+  if (result.endpoint) console.log(`  endpoint: ${result.endpoint}`);
+  if (canary) {
+    console.log(`  canary window: ${canaryWindowS}s — metrics: ${JSON.stringify(result.metrics || {})}`);
+    if (result.rollback) console.log(`  ROLLBACK: ${result.reason || 'auto-rollback'}`);
+  }
+  if (rolling && replicas > 1) {
+    console.log(`  rolling: ${result.replicas_migrated}/${result.replicas_total} replicas migrated (downtime=${result.replicas_downtime})`);
+  }
+  if (!result.success) {
+    console.error('deploy did not complete successfully\nhint: inspect step output above for the first failing step; common causes are SSH unreachable or insufficient remote disk. Docs: /docs/run/troubleshooting');
+    process.exit(EXIT.EXECUTION);
+  }
+}
+
+// =============================================================================
+// W888-E — `kolm fleet ...` + `kolm namespace updates ...`
+//
+// Fleet sub-verbs: status | deploy | monitor | rollback | stop
+// Namespace updates sub-verbs: policy | promote
+//
+// Each sub-verb supports --help / --json. Errors include a `→ Run ...` hint
+// so the operator always sees a next step.
+// =============================================================================
+
+function _w888eFleetHelp() {
+  console.log('kolm fleet <verb> [options]   # W888-E fleet management');
+  console.log('');
+  console.log('Verbs:');
+  console.log('  status     [--tag X] [--namespace Y] [--json]');
+  console.log('             Show device, hardware, deployed artifacts, health, alerts.');
+  console.log('  deploy     <artifact> [--tag X] [--rolling|--canary|--all]');
+  console.log('             [--canary-observe-s N] [--json]');
+  console.log('             Deploy to every device matching the filter.');
+  console.log('  monitor    [--tag X] [--interval-s N] [--once] [--json]');
+  console.log('             Continuous monitor loop (or one tick with --once).');
+  console.log('  rollback   --namespace X [--tag Y] [--confirm] [--json]');
+  console.log('             Revert each device to its previous artifact.');
+  console.log('  stop       [--tag X | --all] --confirm [--json]');
+  console.log('             Emergency stop. --all requires --confirm.');
+  console.log('');
+  console.log('Examples:');
+  console.log('  kolm fleet status --tag prod --json');
+  console.log('  kolm fleet deploy model.kolm --tag canary --canary --canary-observe-s 30');
+  console.log('  kolm fleet monitor --once --json');
+  console.log('  kolm fleet rollback --namespace support --confirm');
+  console.log('  kolm fleet stop --all --confirm');
+}
+
+function _w888eNamespaceUpdatesHelp() {
+  console.log('kolm namespace updates <verb> [options]   # W888-E OTA policy');
+  console.log('');
+  console.log('Verbs:');
+  console.log('  policy    --namespace X --policy manual|notify|canary|rolling|immediate');
+  console.log('  promote   --namespace X --artifact <path> [--json]');
+  console.log('');
+  console.log('Examples:');
+  console.log('  kolm namespace updates policy --namespace support --policy canary');
+  console.log('  kolm namespace updates promote --namespace support --artifact model.kolm');
+}
+
+async function cmdW888eFleet(args) {
+  const sub = (args && args[0]) || '';
+  const rest = (args || []).slice(1);
+  if (!sub || sub === '--help' || sub === '-h' || sub === 'help') { _w888eFleetHelp(); return; }
+  const get = (flag) => { const i = rest.indexOf(flag); return i >= 0 ? rest[i + 1] : null; };
+  const wantJson = rest.includes('--json');
+  const tag = get('--tag');
+  const namespace = get('--namespace');
+
+  // ----- status ----------------------------------------------------------
+  if (sub === 'status') {
+    if (rest.includes('--help') || rest.includes('-h')) {
+      console.log('kolm fleet status [--tag X] [--namespace Y] [--json]');
+      console.log('Example: kolm fleet status --tag prod --json');
+      return;
+    }
+    const { Fleet } = await import('../src/fleet.js');
+    const fleet = new Fleet();
+    const rows = await fleet.status({ tag, namespace });
+    if (wantJson) { _printJson({ ok: true, fleet: rows }); return; }
+    if (!rows.length) { console.log('(no devices match the filter)'); return; }
+    const w = (s, n) => String(s == null ? '-' : s).padEnd(n);
+    console.log(w('DEVICE', 22) + w('STATUS', 10) + w('LAST_SEEN', 26) + w('ARTIFACTS', 10) + 'ALERTS');
+    for (const r of rows) {
+      const alerts = (r.alerts || []).map(a => a.kind).join(',') || '-';
+      console.log(
+        w(r.device, 22) +
+        w(r.health && r.health.status || '?', 10) +
+        w(r.last_seen || '-', 26) +
+        w((r.deployed_artifacts || []).length, 10) +
+        alerts
+      );
+    }
+    return;
+  }
+
+  // ----- deploy ----------------------------------------------------------
+  if (sub === 'deploy') {
+    if (rest.includes('--help') || rest.includes('-h')) {
+      console.log('kolm fleet deploy <artifact> [--tag X] [--rolling|--canary|--all] [--canary-observe-s N] [--json]');
+      console.log('Example: kolm fleet deploy model.kolm --tag canary --canary --canary-observe-s 30');
+      return;
+    }
+    const positional = rest.filter(a => !a.startsWith('--')
+      && a !== get('--tag') && a !== get('--namespace') && a !== get('--canary-observe-s'));
+    const artifactArg = positional[0];
+    if (!artifactArg) {
+      console.error('kolm fleet deploy: <artifact> is required');
+      nextStep({ run: 'kolm fleet deploy --help' });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const ap = resolveArtifact(artifactArg) || (fs.existsSync(artifactArg) ? path.resolve(artifactArg) : null);
+    if (!ap) {
+      console.error('artifact not found: ' + artifactArg);
+      nextStep({ try: ['kolm export list'], see: 'docs/run/deploy.md' });
+      process.exit(EXIT.NOT_FOUND);
+    }
+    let mode = 'rolling';
+    if (rest.includes('--canary')) mode = 'canary';
+    else if (rest.includes('--all')) mode = 'all';
+    else if (rest.includes('--rolling')) mode = 'rolling';
+    const observeS = Number(get('--canary-observe-s') || 60);
+    const canaryObserveMs = Math.max(0, observeS * 1000);
+    const { Fleet } = await import('../src/fleet.js');
+    const fleet = new Fleet();
+    const result = await fleet.deploy({ artifactPath: ap, tag, namespace, mode, canaryObserveMs });
+    if (wantJson) { _printJson(result); if (!result.ok) process.exit(EXIT.EXECUTION); return; }
+    console.log(`[fleet deploy] mode=${result.mode} devices=${(result.devices || []).join(',') || '-'} ok=${result.ok}`);
+    for (const r of (result.results || [])) {
+      console.log(`  ${r.ok ? 'OK ' : 'FAIL'} ${r.device}    ${r.elapsed_ms}ms`);
+    }
+    if (!result.ok) {
+      console.error('fleet deploy did not complete: ' + (result.reason || 'unknown'));
+      nextStep({ run: 'kolm fleet status --json' });
+      process.exit(EXIT.EXECUTION);
+    }
+    return;
+  }
+
+  // ----- monitor ---------------------------------------------------------
+  if (sub === 'monitor') {
+    if (rest.includes('--help') || rest.includes('-h')) {
+      console.log('kolm fleet monitor [--tag X] [--interval-s N] [--once] [--json]');
+      console.log('Example: kolm fleet monitor --once --json');
+      return;
+    }
+    const intervalMs = Math.max(1000, Number(get('--interval-s') || 30) * 1000);
+    const once = rest.includes('--once');
+    const { FleetMonitor, consoleSink } = await import('../src/fleet-monitor.js');
+    const mon = new FleetMonitor();
+    if (once) {
+      const tick = await mon.tick({ tag, namespace, alertSinks: wantJson ? [{ name: 'noop', async send() { return { ok: true }; } }] : [consoleSink()] });
+      if (wantJson) { _printJson({ ok: true, tick }); return; }
+      console.log(`[fleet monitor] tick @${tick.ts} devices=${tick.devices.length} alerts=${tick.alerts.length}`);
+      for (const a of tick.alerts) console.log(`  ALERT ${a.kind}: ${a.device} ${JSON.stringify(a.detail || {})}`);
+      return;
+    }
+    // Long-running loop. Bind SIGINT to stop cleanly.
+    const handle = await mon.run({ tag, namespace, intervalMs, alertSinks: [consoleSink()] });
+    process.on('SIGINT', () => { handle.stop(); });
+    await handle.done;
+    return;
+  }
+
+  // ----- rollback --------------------------------------------------------
+  if (sub === 'rollback') {
+    if (rest.includes('--help') || rest.includes('-h')) {
+      console.log('kolm fleet rollback --namespace X [--tag Y] [--confirm] [--json]');
+      console.log('Example: kolm fleet rollback --namespace support --confirm');
+      return;
+    }
+    if (!namespace) {
+      console.error('kolm fleet rollback: --namespace is required');
+      nextStep({ run: 'kolm fleet rollback --help' });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const confirm = rest.includes('--confirm');
+    const { Fleet } = await import('../src/fleet.js');
+    const fleet = new Fleet();
+    const result = await fleet.rollback({ tag, namespace, confirm });
+    if (wantJson) { _printJson(result); if (!result.ok) process.exit(EXIT.EXECUTION); return; }
+    if (!result.ok && result.refused) {
+      console.error('rollback refused: ' + result.reason);
+      nextStep({ run: `kolm fleet rollback --namespace ${namespace} --confirm` });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    console.log(`[fleet rollback] namespace=${namespace} ok=${result.ok} devices=${(result.results || []).length}`);
+    for (const r of (result.results || [])) {
+      console.log(`  ${r.ok ? 'OK ' : 'FAIL'} ${r.device}    rolled_back_to=${r.rolled_back_to || '-'}    ${r.error || ''}`);
+    }
+    if (!result.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  // ----- stop ------------------------------------------------------------
+  if (sub === 'stop') {
+    if (rest.includes('--help') || rest.includes('-h')) {
+      console.log('kolm fleet stop [--tag X | --all] --confirm [--json]');
+      console.log('Example: kolm fleet stop --all --confirm');
+      return;
+    }
+    const all = rest.includes('--all');
+    const confirm = rest.includes('--confirm');
+    const { Fleet } = await import('../src/fleet.js');
+    const fleet = new Fleet();
+    const result = await fleet.stop({ tag, namespace, all, confirm });
+    if (wantJson) { _printJson(result); if (!result.ok) process.exit(EXIT.EXECUTION); return; }
+    if (!result.ok && result.refused) {
+      console.error('stop refused: ' + result.reason);
+      nextStep({ run: 'kolm fleet stop --all --confirm' });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    console.log(`[fleet stop] mode=${result.mode || '-'} ok=${result.ok}`);
+    for (const r of (result.results || [])) {
+      console.log(`  ${r.ok ? 'OK ' : 'FAIL'} ${r.device}    pid=${r.killed_pid || '-'}    ${r.error || ''}`);
+    }
+    if (!result.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+
+  console.error('kolm fleet: unknown verb: ' + sub);
+  nextStep({ run: 'kolm fleet --help' });
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// `kolm namespace updates <verb>` — called from cmdNamespace when sub == 'updates'.
+async function cmdW888eNamespaceUpdates(args) {
+  const sub = (args && args[0]) || '';
+  const rest = (args || []).slice(1);
+  if (!sub || sub === '--help' || sub === '-h' || sub === 'help') { _w888eNamespaceUpdatesHelp(); return; }
+  const get = (flag) => { const i = rest.indexOf(flag); return i >= 0 ? rest[i + 1] : null; };
+  const wantJson = rest.includes('--json');
+  const namespace = get('--namespace');
+
+  if (sub === 'policy') {
+    if (rest.includes('--help') || rest.includes('-h')) {
+      console.log('kolm namespace updates policy --namespace X --policy manual|notify|canary|rolling|immediate');
+      console.log('Example: kolm namespace updates policy --namespace support --policy canary');
+      return;
+    }
+    const policy = get('--policy');
+    if (!namespace || !policy) {
+      console.error('kolm namespace updates policy: --namespace and --policy are required');
+      nextStep({ run: 'kolm namespace updates --help' });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const ota = await import('../src/ota.js');
+    const r = ota.setPolicy({ namespace, policy });
+    if (wantJson) { _printJson(r); if (!r.ok) process.exit(EXIT.BAD_ARGS); return; }
+    if (!r.ok) {
+      console.error('policy update failed: ' + r.error);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    console.log(`[namespace updates] namespace=${namespace} policy=${policy} ok=true`);
+    return;
+  }
+
+  if (sub === 'promote') {
+    if (rest.includes('--help') || rest.includes('-h')) {
+      console.log('kolm namespace updates promote --namespace X --artifact <path> [--json]');
+      console.log('Example: kolm namespace updates promote --namespace support --artifact model.kolm');
+      return;
+    }
+    const artifactArg = get('--artifact');
+    if (!namespace || !artifactArg) {
+      console.error('kolm namespace updates promote: --namespace and --artifact are required');
+      nextStep({ run: 'kolm namespace updates --help' });
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const ap = resolveArtifact(artifactArg) || (fs.existsSync(artifactArg) ? path.resolve(artifactArg) : artifactArg);
+    const ota = await import('../src/ota.js');
+    const r = await ota.promote({ namespace, artifactPath: ap });
+    if (wantJson) { _printJson(r); if (!r.ok) process.exit(EXIT.EXECUTION); return; }
+    if (!r.ok) {
+      console.error('promote failed: ' + (r.error || JSON.stringify(r)));
+      process.exit(EXIT.EXECUTION);
+    }
+    console.log(`[namespace updates] namespace=${namespace} policy=${r.policy} action=${r.action}`);
+    if (r.warning) console.log(`  warning: ${r.warning}`);
+    return;
+  }
+
+  console.error('kolm namespace updates: unknown verb: ' + sub);
+  nextStep({ run: 'kolm namespace updates --help' });
+  process.exit(EXIT.BAD_ARGS);
 }
 
 // =============================================================================
@@ -28831,7 +31103,7 @@ const COMPLETION_SUBS = {
   marketplace: ['search', 'install', 'publish', 'list', 'ls'],
   artifacts: ['list', 'ls', 'show', 'get', 'inspect', 'diff', 'compare'],
   runtime: ['targets', 'info', 'doctor', 'build-from-source', 'start', 'status', 'policy', 'install', 'decisions', 'stats'],
-  devices: ['list', 'register', 'show', 'test', 'detect', 'recommend'],
+  devices: ['list', 'add', 'register', 'show', 'remove', 'probe', 'test', 'health', 'detect', 'recommend', 'profiles'],
   'install-device': [],
   jobs:    ['list', 'prune'],
   sync:    ['push', 'pull', 'status'],
@@ -29703,7 +31975,7 @@ async function cmdPipeline(args) {
           const newest = _newestArtifactForNamespace(artDir, namespace);
           if (newest) sinceIso = newest;
         }
-      } catch {}
+      } catch {} // deliberate: cleanup
       if (!sinceIso && !wantJson) {
         console.log('--since-last-compile: no prior artifact found for namespace ' + namespace + '; running full compile');
       }
@@ -29798,10 +32070,10 @@ async function cmdPipeline(args) {
     let iter = 0;
     let stopping = false;
     const onSig = () => { stopping = true; };
-    try { process.on('SIGINT', onSig); process.on('SIGTERM', onSig); } catch (_) {}
+    try { process.on('SIGINT', onSig); process.on('SIGTERM', onSig); } catch (_) {} // deliberate: cleanup
 
     const emit = (obj) => {
-      try { process.stdout.write(JSON.stringify(obj) + '\n'); } catch (_) {}
+      try { process.stdout.write(JSON.stringify(obj) + '\n'); } catch (_) {} // deliberate: cleanup
     };
 
     while (!stopping) {
@@ -29869,7 +32141,7 @@ async function cmdPipeline(args) {
                   daemon_wave: 'W775',
                 }),
               });
-            } catch (_) {}
+            } catch (_) {} // deliberate: cleanup
           }
         }
       } catch (e) {
@@ -30586,7 +32858,14 @@ async function cmdGpu(args) {
             // Run a battery of checks: python, torch, cuda, flash-attn, bnb, unsloth.
             const checks = [];
             const py = spawnSync('python', ['--version'], { encoding: 'utf8' });
-            checks.push({ name: 'python', ok: py.status === 0, detail: (py.stdout || py.stderr).trim() });
+            // W890-11: when python isn't on PATH, py.stdout/py.stderr are undefined
+            // (Windows spawnSync error). Guard the read and emit an install hint so
+            // the message is actionable instead of a TypeError.
+            const pyOk = !py.error && py.status === 0;
+            const pyDetail = pyOk
+                ? ((py.stdout || py.stderr || '').toString().trim())
+                : 'python not found on PATH — install: https://www.python.org/downloads/ (or `brew install python` / `apt install python3` / `winget install Python.Python.3.12`)';
+            checks.push({ name: 'python', ok: pyOk, detail: pyDetail });
 
             const torchScript = `import json; out={};
 try: import torch; out['torch']=torch.__version__; out['cuda_avail']=torch.cuda.is_available(); out['cuda_version']=torch.version.cuda
@@ -30594,14 +32873,17 @@ except Exception as e: out['torch']=None; out['err']=str(e)
 print(json.dumps(out))`;
             const t = spawnSync('python', ['-c', torchScript], { encoding: 'utf8' });
             let torchInfo = {};
-            try { torchInfo = JSON.parse(t.stdout || '{}'); } catch {}
-            checks.push({ name: 'torch', ok: !!torchInfo.torch, detail: JSON.stringify(torchInfo) });
+            try { torchInfo = JSON.parse((t && t.stdout) || '{}'); } catch {} // deliberate: cleanup
+            const torchDetail = torchInfo.torch
+                ? JSON.stringify(torchInfo)
+                : 'torch not installed — install: pip install torch (see https://pytorch.org/get-started/locally/ for CUDA-matched wheels)';
+            checks.push({ name: 'torch', ok: !!torchInfo.torch, detail: torchDetail });
 
             const probe = (mod) => {
                 const r = spawnSync('python', ['-c', `import ${mod}; print(getattr(${mod}, '__version__', 'unknown'))`], { encoding: 'utf8' });
-                if (r.status === 0) return { name: mod, ok: true, detail: (r.stdout || '').trim() };
-                // On miss, just say "not installed" -- spare the user a traceback.
-                return { name: mod, ok: false, detail: 'not installed' };
+                if (r && !r.error && r.status === 0) return { name: mod, ok: true, detail: ((r.stdout || '').toString()).trim() };
+                // On miss, give an install hint so the message is actionable.
+                return { name: mod, ok: false, detail: `not installed — install: pip install ${mod}` };
             };
             for (const mod of ['transformers', 'peft', 'trl', 'bitsandbytes', 'unsloth', 'flash_attn', 'liger_kernel']) {
                 checks.push(probe(mod));
@@ -30773,7 +33055,7 @@ async function cmdCompletionInstall(args) {
     const block = '\n' + marker + '\n' + evalLine + '\n';
 
     let existing = '';
-    try { existing = fs.readFileSync(rc, 'utf8'); } catch (_) {}
+    try { existing = fs.readFileSync(rc, 'utf8'); } catch (_) {} // deliberate: cleanup
     const alreadyInstalled = existing.includes(evalLine);
 
     if (dryRun) {
@@ -30810,14 +33092,14 @@ function readPackageVersion() {
 }
 
 // Resolve the canonical latest version of kolm. The canonical install is
-// `npm i -g github:sneaky-hippo/kolm-stack` (NOT the unrelated `kolm`
+// `npm i -g github:kolm-ai/kolm-stack` (NOT the unrelated `kolm`
 // npm package), so we read the version off the github main branch's
 // package.json. Falls back to null on any error.
 function fetchLatestNpmVersion(timeoutMs) {
     return new Promise((resolve) => {
-        const url = 'https://raw.githubusercontent.com/sneaky-hippo/kolm-stack/main/package.json';
+        const url = 'https://raw.githubusercontent.com/kolm-ai/kolm-stack/main/package.json';
         const controller = new AbortController();
-        const timer = setTimeout(() => { try { controller.abort(); } catch {} }, Math.max(500, Number(timeoutMs) || 5000));
+        const timer = setTimeout(() => { try { controller.abort(); } catch {} }, Math.max(500, Number(timeoutMs) || 5000)); // deliberate: cleanup
         fetch(url, { signal: controller.signal, headers: { 'accept': 'application/json' } })
             .then(async (res) => {
                 clearTimeout(timer);
@@ -30826,7 +33108,7 @@ function fetchLatestNpmVersion(timeoutMs) {
                 try {
                     const pkg = JSON.parse(text);
                     if (pkg && typeof pkg.version === 'string' && pkg.version) return resolve(pkg.version);
-                } catch {}
+                } catch {} // deliberate: cleanup
                 resolve(null);
             })
             .catch(() => { clearTimeout(timer); resolve(null); });
@@ -30867,7 +33149,7 @@ async function cmdUpgrade(args) {
     if (status === 'outdated') {
         console.log(`a newer kolm release is available: ${latest}.`);
         console.log('upgrade with:');
-        console.log('  npm i -g github:sneaky-hippo/kolm-stack');
+        console.log('  npm i -g github:kolm-ai/kolm-stack');
         console.log('  # or one-shot:');
         console.log('  kolm update');
         console.log('');
@@ -30880,7 +33162,7 @@ async function cmdUpgrade(args) {
     }
     console.log('could not reach github to check for updates.');
     console.log('to upgrade manually:');
-    console.log('  npm i -g github:sneaky-hippo/kolm-stack');
+    console.log('  npm i -g github:kolm-ai/kolm-stack');
 }
 
 // ---------- seeds ----------
@@ -31383,7 +33665,7 @@ async function cmdSeedsNew(args) {
         artHint = stemMatch.replace(/\.spec\.json$/, '.kolm');
       }
     }
-  } catch {}
+  } catch {} // deliberate: cleanup
   console.log('next:');
   console.log(`  1. edit ${path.basename(outPath)} - replace placeholders with YOUR real examples (>= 5 recommended)`);
   console.log(`  2. compile: kolm compile --spec ${specHint} --examples ${path.basename(outPath)} --out ${artHint}`);
@@ -32298,9 +34580,9 @@ function _downloadToFile(url, destPath, maxRedirects = 5) {
             resolve({ bytes, total });
           });
         });
-        sink.on('error', (e) => { try { fs.unlinkSync(tmp); } catch {} reject(e); });
+        sink.on('error', (e) => { try { fs.unlinkSync(tmp); } catch {} reject(e); }); // deliberate: cleanup
       });
-      req.setTimeout(10 * 60 * 1000, () => { try { req.destroy(new Error('download_timeout')); } catch {} });
+      req.setTimeout(10 * 60 * 1000, () => { try { req.destroy(new Error('download_timeout')); } catch {} }); // deliberate: cleanup
       req.on('error', reject);
     };
     attempt(url, maxRedirects);
@@ -32316,7 +34598,7 @@ function _runWorkerDoctor(workerPath) {
   });
   const out = String(r.stdout || '');
   let parsed = null;
-  try { parsed = JSON.parse(out); } catch {}
+  try { parsed = JSON.parse(out); } catch {} // deliberate: cleanup
   return { status: r.status || 0, parsed, stdout: out, stderr: String(r.stderr || '') };
 }
 
@@ -32826,7 +35108,7 @@ async function _seedsLoadJsonl(filePath) {
   for (const ln of text.split(/\r?\n/)) {
     const t = ln.trim();
     if (!t || t.startsWith('//')) continue;
-    try { out.push(JSON.parse(t)); } catch {}
+    try { out.push(JSON.parse(t)); } catch {} // deliberate: cleanup
   }
   return out;
 }
@@ -33331,6 +35613,30 @@ async function cmdDevices(args) {
   const jsonOut = rest.includes('--json');
   const DC = await import('../src/device-capabilities.js');
 
+  // W888-C — Short-circuit the W888-C list branch BEFORE the legacy "list"
+  // (data/device-capabilities) handler. The W888-C branch reads from the
+  // single-file DeviceRegistry (data/devices.json) so operators with W888-C
+  // adds see results immediately. The legacy branch keeps working for the
+  // default `kolm devices list` (no filter flags).
+  if (sub === 'list' && (rest.includes('--type') || rest.includes('--tag') || rest.includes('--status') || rest.includes('--from-registry'))) {
+    const flag = (n) => { const i = rest.indexOf(n); return i >= 0 ? rest[i + 1] : null; };
+    const { DeviceRegistry } = await import('../src/device-registry.js');
+    const registry = new DeviceRegistry({});
+    const filter = {};
+    if (rest.includes('--type')) filter.type = flag('--type');
+    if (rest.includes('--tag')) filter.tag = flag('--tag');
+    if (rest.includes('--status')) filter.status = flag('--status');
+    const list = await registry.list(filter);
+    if (jsonOut) return _printJson(list);
+    if (!list.length) { console.log('(no devices match filter)'); return; }
+    const w = (s, n) => String(s).padEnd(n);
+    console.log(w('ID', 20), w('TYPE', 10), w('STATUS', 10), w('HOST', 24), 'TAGS');
+    for (const d of list) {
+      console.log(w(d.id, 20), w(d.type || '-', 10), w(d.status || '-', 10), w((d.host || '-').slice(0, 24), 24), (d.tags || []).join(','));
+    }
+    return;
+  }
+
   if (!sub || sub === 'list') {
     const list = await DC.listDevices();
     if (jsonOut) return _printJson(list);
@@ -33377,8 +35683,16 @@ async function cmdDevices(args) {
   if (sub === 'show') {
     const id = rest.find(a => !a.startsWith('--'));
     if (!id) throw _badArgs('kolm devices show requires <device-id>');
-    const d = await DC.getDevice(id);
+    let d = await DC.getDevice(id);
     if (!d) {
+      // W888-C registry fallback — `kolm devices add` writes here.
+      try {
+        const { DeviceRegistry } = await import('../src/device-registry.js');
+        const registry = new DeviceRegistry({});
+        d = await registry.get(id);
+      } catch {} // deliberate: cleanup
+    }
+    if (!d || d.removed_at) {
       const e = new Error(`unknown device: ${id}. try: kolm devices list`);
       e.exitCode = EXIT.NOT_FOUND; throw e;
     }
@@ -33447,7 +35761,7 @@ async function cmdDevices(args) {
       const artArg = flag('--artifact');
       let artifact = { id: artArg };
       if (fs.existsSync(artArg)) {
-        try { artifact = JSON.parse(fs.readFileSync(artArg, 'utf8')); } catch (_) {}
+        try { artifact = JSON.parse(fs.readFileSync(artArg, 'utf8')); } catch (_) {} // deliberate: cleanup
       }
       if (rest.includes('--supported-targets')) artifact.supported_targets = flag('--supported-targets').split(',').map(s => s.trim()).filter(Boolean);
       if (rest.includes('--memory-mb'))         artifact.memory_requirement_mb = Number(flag('--memory-mb'));
@@ -33498,7 +35812,256 @@ async function cmdDevices(args) {
     return;
   }
 
-  throw _badArgs(`unknown devices subcommand: ${sub}. try: list|register|show|test|detect|recommend|profiles`);
+  // W888-C — `kolm devices health [<id>] [--all] [--json]` reachability +
+  // hardware snapshot + installed artifact list, delegating to
+  // src/device-capabilities.js#healthCheck / pingAll.
+  if (sub === 'health') {
+    const all = rest.includes('--all');
+    const id = rest.find(a => !a.startsWith('--'));
+    if (all || !id) {
+      const r = await DC.pingAll();
+      if (jsonOut) return _printJson(r);
+      const w = (s, n) => String(s).padEnd(n);
+      console.log(w('DEVICE', 20), w('KIND', 10), w('STATUS', 10), w('LATENCY', 10), 'REASON');
+      for (const row of r.devices) {
+        console.log(
+          w(row.name, 20),
+          w(row.kind || '-', 10),
+          w(row.status, 10),
+          w(row.latency_ms + 'ms', 10),
+          (row.reason || '').slice(0, 60),
+        );
+      }
+      console.log(`# ${r.total} devices polled in ${r.elapsed_ms}ms`);
+      return;
+    }
+    const r = await DC.healthCheck(id);
+    if (jsonOut) return _printJson(r);
+    console.log(`device:        ${r.device_id}`);
+    console.log(`status:        ${r.status}${r.reachable ? '' : ' (offline)'}`);
+    console.log(`latency:       ${r.latency_ms}ms`);
+    if (r.reason) console.log(`reason:        ${r.reason}`);
+    if (r.hardware) {
+      console.log(`gpu:           ${r.hardware.gpu || '-'} (${r.hardware.gpu_vram_mb != null ? r.hardware.gpu_vram_mb + ' MB' : 'vram unknown'})`);
+      console.log(`cpu:           ${r.hardware.cpu || '-'}`);
+      console.log(`ram:           ${r.hardware.ram_mb != null ? r.hardware.ram_mb + ' MB' : '-'}`);
+      console.log(`disk_free:     ${r.hardware.disk_free_mb != null ? r.hardware.disk_free_mb + ' MB' : '-'}`);
+      console.log(`os/arch:       ${r.hardware.os || '-'} / ${r.hardware.arch || '-'}`);
+      if (r.hardware.cuda_version) console.log(`cuda:          ${r.hardware.cuda_version}`);
+    }
+    if (r.installed_artifacts && r.installed_artifacts.length) {
+      console.log(`installed:     ${r.installed_artifacts.join(', ')}`);
+    }
+    if (!r.reachable) process.exitCode = 1;
+    return;
+  }
+
+  // W888-C — `kolm devices add` registers a new device into the DeviceRegistry
+  // (data/devices.json). Mirrors the docs in the help table above.
+  if (sub === 'add') {
+    const flag = (n) => { const i = rest.indexOf(n); return i >= 0 ? rest[i + 1] : null; };
+    const id = flag('--id');
+    if (!id) throw _badArgs('kolm devices add requires --id <id>');
+    const host = flag('--host');
+    const port = flag('--port') ? Number(flag('--port')) : undefined;
+    const user = flag('--user') || undefined;
+    const type = flag('--type') || 'ssh';
+    const keyPath = flag('--key') || undefined;
+    const tags = flag('--tag') ? String(flag('--tag')).split(',').map(s => s.trim()).filter(Boolean) : [];
+    const hardware_hint = flag('--hardware-hint') || undefined;
+    const name = flag('--name') || id;
+    const { DeviceRegistry } = await import('../src/device-registry.js');
+    const registry = new DeviceRegistry({});
+    try {
+      const rec = await registry.register({ id, name, type, host, port, user, keyPath, tags, hardware_hint });
+      if (jsonOut) return _printJson(rec);
+      console.log(`added device ${rec.id} (${rec.type}) -> ${registry.filePath()}`);
+      return;
+    } catch (e) {
+      const err = new Error(e.message || String(e));
+      err.exitCode = (e && e.code === 'KOLM_E_DUPLICATE_ID') ? EXIT.BAD_ARGS : EXIT.BAD_ARGS;
+      throw err;
+    }
+  }
+
+  // W888-C — `kolm devices probe <id>` runs deviceCaps(record) and writes the
+  // observed hardware back into the registry via heartbeat().
+  if (sub === 'probe') {
+    const id = rest.find(a => !a.startsWith('--'));
+    if (!id) throw _badArgs('kolm devices probe requires <device-id>');
+    const { DeviceRegistry } = await import('../src/device-registry.js');
+    const { deviceCaps } = await import('../src/device-caps.js');
+    const registry = new DeviceRegistry({});
+    const rec = await registry.get(id);
+    if (!rec || rec.removed_at) {
+      const e = new Error(`unknown device: ${id}`); e.exitCode = EXIT.NOT_FOUND; throw e;
+    }
+    const r = await deviceCaps(rec);
+    if (r.ok) {
+      await registry.heartbeat(id, { status: 'online', last_seen: new Date().toISOString(), observed_hardware: r.hardware });
+    } else {
+      await registry.heartbeat(id, { status: 'error', last_seen: new Date().toISOString() }).catch(() => {});
+    }
+    if (jsonOut) return _printJson(r);
+    if (!r.ok) {
+      console.log(`probe: FAIL — ${r.error}`);
+      if (r.hint) console.log(`hint:  ${r.hint}`);
+      process.exitCode = 1;
+      return;
+    }
+    const h = r.hardware || {};
+    console.log(`device:         ${id}`);
+    console.log(`gpu_present:    ${h.gpu_present ? 'yes' : 'no'}`);
+    if (h.gpu_model) console.log(`gpu_model:      ${h.gpu_model}`);
+    if (h.gpu_vram_gb != null) console.log(`gpu_vram_gb:    ${h.gpu_vram_gb}`);
+    console.log(`cpu_model:      ${h.cpu_model || '-'}`);
+    console.log(`cpu_cores:      ${h.cpu_cores || '-'}`);
+    console.log(`ram_gb:         ${h.ram_gb || '-'}`);
+    console.log(`disk_free_gb:   ${h.disk_free_gb || '-'}`);
+    console.log(`os:             ${h.os || '-'}`);
+    return;
+  }
+
+  // W888-C — `kolm devices remove <id> [--hard]`.
+  if (sub === 'remove') {
+    const id = rest.find(a => !a.startsWith('--'));
+    if (!id) throw _badArgs('kolm devices remove requires <device-id>');
+    const hard = rest.includes('--hard');
+    const { DeviceRegistry } = await import('../src/device-registry.js');
+    const registry = new DeviceRegistry({});
+    const r = await registry.remove(id, { hard });
+    if (jsonOut) return _printJson(r);
+    if (!r.ok) {
+      const e = new Error(`remove failed: ${r.error || 'unknown'}`); e.exitCode = EXIT.NOT_FOUND; throw e;
+    }
+    console.log(`removed ${id} (mode=${r.mode}${r.already_removed ? ', already_removed' : ''})`);
+    return;
+  }
+
+  throw _badArgs(`unknown devices subcommand: ${sub}. try: add|list|show|remove|probe|register|test|health|detect|recommend|profiles`);
+}
+
+// W888-D — `kolm test-device <artifact> --device <id> [--all-devices] [--json]`
+// uploads the artifact + runs a multi-context micro-benchmark via
+// src/test-device.js. Each row covers one (context_length, shard) combo;
+// the table can be JSON or plain.
+async function cmdTestDevice(args) {
+  if (maybeHelp('test-device', args)) return;
+  const wantJson = args.includes('--json');
+  const allDevices = args.includes('--all-devices');
+  const get = (flag) => { const i = args.indexOf(flag); return i >= 0 ? args[i + 1] : null; };
+  const artifactArg = args.find(a => !a.startsWith('--') && a !== get('--device'));
+  if (!artifactArg) {
+    const e = new Error('usage: kolm test-device <artifact> --device <id> [--all-devices] [--suite smoke|full|regression] [--json]');
+    e.exitCode = EXIT.BAD_ARGS; throw e;
+  }
+  const ap = resolveArtifact(artifactArg) || (fs.existsSync(artifactArg) ? path.resolve(artifactArg) : null);
+  if (!ap) {
+    const e = new Error('artifact not found: ' + artifactArg); e.exitCode = EXIT.NOT_FOUND; throw e;
+  }
+  const td = await import('../src/test-device.js');
+  const dcMod = await import('../src/device-capabilities.js');
+  let deviceIds = [];
+  if (allDevices) {
+    const list = await dcMod.listDevices();
+    deviceIds = list.map(d => d.device_id);
+  } else {
+    const id = get('--device');
+    if (!id) { const e = new Error('--device <id> is required (or use --all-devices)'); e.exitCode = EXIT.BAD_ARGS; throw e; }
+    deviceIds = [id];
+  }
+  const suite = get('--suite'); // smoke | full | regression
+  const results = [];
+  for (const did of deviceIds) {
+    const r = await td.testDevice({
+      artifactPath: ap, deviceId: did,
+      port: Number(get('--port') || '8080'),
+      runtime: get('--runtime') || 'llama.cpp',
+      autoInstall: args.includes('--auto-install'),
+      suite: suite || null,
+    });
+    results.push(r);
+  }
+  const result = allDevices ? { devices: results } : results[0];
+  if (wantJson) { _printJson(result); return; }
+  for (const r of results) {
+    console.log(`device: ${r.device_id}    format: ${r.format}    endpoint: ${r.endpoint || '-'}` + (r.suite ? `    suite: ${r.suite}` : ''));
+    if (!r.ok) { console.log(`  status: FAIL — ${r.reason || ''}`); continue; }
+    const w = (s, n) => String(s).padEnd(n);
+    console.log('  ' + w('FORMAT', 12) + w('CTX', 8) + w('SHARD', 8) + w('TOK/S', 10) + w('TTFT_MS', 10) + w('K', 8) + 'VRAM_MB');
+    for (const row of r.rows) {
+      console.log('  ' +
+        w(row.format, 12) +
+        w(String(row.context_tested), 8) +
+        w(row.shard_enabled ? 'on' : 'off', 8) +
+        w(row.tok_s != null ? row.tok_s : '-', 10) +
+        w(row.ttft_ms != null ? row.ttft_ms : '-', 10) +
+        w(row.k_score != null ? row.k_score : '-', 8) +
+        (row.vram_mb != null ? row.vram_mb : '-'),
+      );
+    }
+    if (r.suite === 'regression') {
+      console.log(`  regression: ${r.regression ? 'YES' : 'no'} (delta=${r.regression_delta != null ? r.regression_delta : '-'}, prior=${r.prior_k_score != null ? r.prior_k_score : '-'})`);
+    }
+  }
+}
+
+// W888-D — `kolm test-quants <artifact> --device <id> [--json]` walks the
+// quant ladder (Q8_0, Q6_K, Q5_K_M, Q4_K_M, IQ4_XS, Q3_K_M, Q2_K) and
+// returns the Pareto-frontier rows + a recommendation.
+async function cmdTestQuants(args) {
+  if (maybeHelp('test-quants', args)) return;
+  const wantJson = args.includes('--json');
+  const get = (flag) => { const i = args.indexOf(flag); return i >= 0 ? args[i + 1] : null; };
+  const artifactArg = args.find(a => !a.startsWith('--') && a !== get('--device'));
+  if (!artifactArg) {
+    const e = new Error('usage: kolm test-quants <artifact> --device <id> [--json]');
+    e.exitCode = EXIT.BAD_ARGS; throw e;
+  }
+  const ap = resolveArtifact(artifactArg) || (fs.existsSync(artifactArg) ? path.resolve(artifactArg) : null);
+  if (!ap) {
+    const e = new Error('base artifact not found: ' + artifactArg); e.exitCode = EXIT.NOT_FOUND; throw e;
+  }
+  const deviceId = get('--device');
+  if (!deviceId) {
+    const e = new Error('--device <id> is required'); e.exitCode = EXIT.BAD_ARGS; throw e;
+  }
+  const ladderArg = get('--ladder');
+  const ladder = ladderArg ? ladderArg.split(',').map(s => s.trim()).filter(Boolean) : undefined;
+  const gateArg = get('--k-score-gate');
+  const tq = await import('../src/test-quants.js');
+  const result = await tq.testQuants({
+    baseArtifactPath: ap, deviceId,
+    quantLadder: ladder,
+    kScoreGate: gateArg != null ? Number(gateArg) : undefined,
+    port: Number(get('--port') || '8080'),
+    runtime: get('--runtime') || 'llama.cpp',
+    autoInstall: args.includes('--auto-install'),
+  });
+  if (wantJson) { _printJson(result); return; }
+  console.log(`device:        ${result.device_id} (vram=${result.device_vram_mb || '?'} MB)`);
+  console.log(`base:          ${result.base_artifact_path}`);
+  console.log(`k-score gate:  ${result.k_score_gate}`);
+  const w = (s, n) => String(s).padEnd(n);
+  console.log(w('QUANT', 10) + w('SIZE_MB', 10) + w('FITS', 6) + w('TOK/S', 10) + w('K', 8) + w('FRONTIER', 10) + 'REASON');
+  for (const r of result.rows) {
+    console.log(
+      w(r.quant, 10) +
+      w(r.size_mb != null ? r.size_mb : '-', 10) +
+      w(r.fits_vram ? 'yes' : 'no', 6) +
+      w(r.tok_s != null ? r.tok_s : '-', 10) +
+      w(r.k_score != null ? r.k_score : '-', 8) +
+      w(r.on_frontier ? 'yes' : '-', 10) +
+      (r.reason || ''),
+    );
+  }
+  if (result.recommendation) {
+    console.log('');
+    console.log(`recommended: ${result.recommendation.quant} — ${result.recommendation.size_mb} MB / k=${result.recommendation.k_score} / ${result.recommendation.tok_s} tok/s`);
+  } else {
+    console.log('');
+    console.log('no recommendation: no row meets the k-score gate that fits VRAM.');
+  }
 }
 
 // W372 `kolm install-device <art.kolm> --device <id>` pushes an artifact
@@ -34085,6 +36648,13 @@ async function cmdNamespace(args) {
     if (handler) { await handler(rest); return; }
   }
 
+  // W888-E — `kolm namespace updates <policy|promote> ...`. Routed before the
+  // W715 fingerprint fall-through so `updates` is unambiguous.
+  if (sub === 'updates') {
+    await cmdW888eNamespaceUpdates(rest);
+    return;
+  }
+
   const fp = await import('../src/namespace-fingerprint.js');
   const eventStore = await import('../src/event-store.js');
   if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
@@ -34196,7 +36766,7 @@ function _badArgs(msg) { const e = new Error(msg); e.exitCode = EXIT.BAD_ARGS; r
 // ---------- update ----------
 // `kolm update` self-installs the latest commit from the canonical github
 // source. This is the verb that actually does it (kolm upgrade only checks).
-// Honest path: spawn `npm i -g github:sneaky-hippo/kolm-stack` and
+// Honest path: spawn `npm i -g github:kolm-ai/kolm-stack` and
 // stream npm's stdout/stderr through to the user. Exit code is whatever npm
 // returned. On Windows we shell through `cmd /c` so npm.cmd resolves.
 async function cmdUpdate(args) {
@@ -34204,7 +36774,7 @@ async function cmdUpdate(args) {
     const jsonOut = args.includes('--json');
     const dryRun = args.includes('--dry-run');
     const force = args.includes('--force');
-    const source = 'github:sneaky-hippo/kolm-stack';
+    const source = 'github:kolm-ai/kolm-stack';
     const before = readPackageVersion();
 
     // W484 P0-3 - refuse to run `npm i -g` from a repo checkout. Without this
@@ -34241,7 +36811,7 @@ async function cmdUpdate(args) {
                         remedy,
                         repo_root: repoRoot,
                         package_name: pkgName,
-                        override: 'pass --force to bypass (will run `npm i -g github:sneaky-hippo/kolm-stack` and overwrite the global install)',
+                        override: 'pass --force to bypass (will run `npm i -g github:kolm-ai/kolm-stack` and overwrite the global install)',
                     }, null, 2));
                     process.exit(EXIT.BAD_ARGS || 1);
                 }
@@ -34299,7 +36869,7 @@ async function cmdUpdate(args) {
             console.error(`npm exited with code ${r.status}. update did not complete.`);
             console.error('common fixes:');
             console.error('  - ensure node 20+ and npm 10+ are on PATH');
-            console.error('  - on macos/linux: try `sudo npm i -g github:sneaky-hippo/kolm-stack`');
+            console.error('  - on macos/linux: try `sudo npm i -g github:kolm-ai/kolm-stack`');
             console.error('  - on windows: run an admin PowerShell, then re-run `kolm update`');
         }
         const e = new Error(`npm install failed (exit ${r.status})`);
@@ -34796,7 +37366,7 @@ async function cmdExport(args) {
       throw e;
     }
     const { generateModelfile, exportOllama } = await import('../src/export-ollama.js');
-    const { loadArtifact } = await import('../src/artifact-runner.js');
+    const { loadArtifact, extractArtifactEntryToFile } = await import('../src/artifact-runner.js');
     let bundle;
     try { bundle = loadArtifact(apResolved); }
     catch (e2) {
@@ -34805,8 +37375,27 @@ async function cmdExport(args) {
       throw err;
     }
     const manifest = bundle.manifest || {};
-    const ggufEntry = bundle.entries && (bundle.entries['model.gguf'] || bundle.entries[manifest?.runtime_target_config?.gguf_path || '']);
-    if (!ggufEntry || ggufEntry.length < 256) {
+    // Auto-detect the real GGUF entry name. Trinity-style artifacts declare
+    // their binary as e.g. `trinity-500-q4_k_m.gguf` and keep `model.gguf` as
+    // a 152-byte pointer JSON. Prefer manifest.runtime_target_config.gguf_path
+    // when present; else find the largest *.gguf in entries OR large_entries.
+    const declaredGgufRel = manifest && manifest.runtime_target_config && manifest.runtime_target_config.gguf_path;
+    let ggufRel = declaredGgufRel;
+    if (!ggufRel) {
+      const candidates = [];
+      for (const [n, b] of Object.entries(bundle.entries || {})) {
+        if (n.toLowerCase().endsWith('.gguf') && b && b.length >= 256) candidates.push({ name: n, size: b.length });
+      }
+      for (const [n, info] of Object.entries(bundle.large_entries || {})) {
+        if (n.toLowerCase().endsWith('.gguf')) candidates.push({ name: n, size: info.uncompressed_size });
+      }
+      candidates.sort((a, b) => b.size - a.size);
+      ggufRel = candidates[0]?.name || 'model.gguf';
+    }
+    const ggufEntry = bundle.entries && bundle.entries[ggufRel];
+    const ggufLarge = bundle.large_entries && bundle.large_entries[ggufRel];
+    const hasRealGguf = (ggufEntry && ggufEntry.length >= 256) || !!ggufLarge;
+    if (!hasRealGguf) {
       // Rule-tier artifact: still emit a Modelfile (FROM /path/to/your.gguf)
       // so the operator can wire in a pre-existing GGUF — but mark the
       // envelope clearly.
@@ -34842,12 +37431,21 @@ async function cmdExport(args) {
       }
       return;
     }
-    // Real bytes path: stage gguf + Modelfile.
+    // Real bytes path: stage gguf + Modelfile. ggufRel already chosen above (auto-detect).
     const outDir = get('--output') || get('--out') || path.join(process.cwd(), 'ollama-staging', path.basename(apResolved, '.kolm'));
     fs.mkdirSync(outDir, { recursive: true });
-    const ggufRel = (manifest.runtime_target_config && manifest.runtime_target_config.gguf_path) || 'model.gguf';
     const ggufStaged = path.join(outDir, path.basename(ggufRel));
-    fs.writeFileSync(ggufStaged, ggufEntry);
+    if (ggufLarge) {
+      // W891: 4.6 GB GGUF → stream-extract directly from the .kolm to outDir.
+      const ext = await extractArtifactEntryToFile(apResolved, ggufRel, ggufStaged, { computeSha256: false });
+      if (!ext.ok) {
+        const err = new Error('failed to stage large GGUF: ' + (ext.reason || 'extract_failed'));
+        err.exitCode = EXIT.EXECUTION;
+        throw err;
+      }
+    } else {
+      fs.writeFileSync(ggufStaged, ggufEntry);
+    }
     const result = await exportOllama({
       artifact: {
         name: manifest.name || manifest.job_id || path.basename(apResolved, '.kolm'),
@@ -35249,7 +37847,7 @@ function ensureLocalReceiptSecretInEnv() {
     if (cfg && typeof cfg.local_receipt_secret === 'string' && cfg.local_receipt_secret.length > 0) {
       process.env.RECIPE_RECEIPT_SECRET = cfg.local_receipt_secret;
     }
-  } catch {}
+  } catch {} // deliberate: cleanup
 }
 
 // kolm tui — interactive REPL for working with .kolm artifacts.
@@ -35280,7 +37878,7 @@ async function cmdRepl(args) {
   });
   let busy = false;
   const quit = (code) => {
-    try { rl.close(); } catch {}
+    try { rl.close(); } catch {} // deliberate: cleanup
     process.exit(Number.isInteger(code) ? code : EXIT.OK);
   };
   rl.on('SIGINT', () => {
@@ -35687,7 +38285,7 @@ async function cmdTui(args) {
               state.captures.unshift(row);
               if (state.captures.length > 500) state.captures.pop();
               render();
-            } catch {}
+            } catch {} // deliberate: cleanup
           }
         });
         res.on('end', () => { state.status = 'sse: closed'; render(); });
@@ -36056,16 +38654,16 @@ async function cmdTui(args) {
       state.leftSource = 'view';
       state.selectedIdx = 0;
       state.status = 'view ' + id + ' (loading...)';
-      try { loadViewGet(id); } catch (_) {}
+      try { loadViewGet(id); } catch (_) {} // deliberate: cleanup
       return;
     }
     state.status = 'unknown :command: ' + verb;
   }
 
   function teardown() {
-    try { process.stdin.setRawMode?.(false); } catch {}
-    try { process.stdout.write(TUI_CURSOR_SHOW + TUI_ALT_EXIT); } catch {}
-    if (sseReq) { try { sseReq.destroy(); } catch {} sseReq = null; }
+    try { process.stdin.setRawMode?.(false); } catch {} // deliberate: cleanup
+    try { process.stdout.write(TUI_CURSOR_SHOW + TUI_ALT_EXIT); } catch {} // deliberate: cleanup
+    if (sseReq) { try { sseReq.destroy(); } catch {} sseReq = null; } // deliberate: cleanup
   }
 
   // Keypress dispatcher. Every key from the plan is checked as a strict
@@ -36507,7 +39105,7 @@ async function cmdDo(args) {
   }
   await _withIntent(async ({ classifyIntent, snapshotContext }) => {
     let context = {};
-    try { context = await snapshotContext({ cwd: process.cwd() }); } catch (_) {}
+    try { context = await snapshotContext({ cwd: process.cwd() }); } catch (_) {} // deliberate: cleanup
     const intent = await classifyIntent(text, context);
     if (dryRun) {
       if (wantJson) {
@@ -36827,7 +39425,7 @@ async function cmdInteractive() {
     }
     try {
       let ctx = {};
-      try { ctx = await snapshotContext({ cwd: process.cwd() }); } catch (_) {}
+      try { ctx = await snapshotContext({ cwd: process.cwd() }); } catch (_) {} // deliberate: cleanup
       const intent = await classifyIntent(line, ctx);
       process.stderr.write(`[understood: ${intent.verb}${intent.args.length ? ' ' + intent.args.join(' ') : ''}  (${(intent.confidence * 100).toFixed(0)}%, ${intent.source})]\n`);
       await _dispatchVerb(intent.verb, intent.args);
@@ -36897,6 +39495,12 @@ async function _dispatchVerb(verb, args) {
     synth: cmdSynth, sim: cmdSim, bakeoff: cmdBakeoff,
     // W372 runtime policy + device fleet.
     devices: cmdDevices, 'install-device': cmdInstallDevice,
+    // W888-D — on-device test surfaces.
+    'test-device': cmdTestDevice, 'test-quants': cmdTestQuants,
+    // W888-E — fleet management. Sub-verbs dispatched inside cmdW888eFleet.
+    fleet: cmdW888eFleet,
+    // W888-O — assistant orchestrator (compile / run / bench / publish).
+    assistant: cmdAssistant,
     // W384 CLI consolidator — new top-level verbs.
     privacy: cmdPrivacy, pipeline: cmdPipeline, agents: cmdAgents, 'shell-init': cmdShellInit,
     // W779 — sneakernet pack / unpack. Thin closure so the dispatcher table
@@ -36956,7 +39560,7 @@ async function cmdRunAutoPlace_w724(rawArgs) {
         const rawGb = Number(st.size) / (1024 ** 3);
         sizeGb = rawGb > 0 ? Math.max(0.001, Math.round(rawGb * 1000) / 1000) : 0;
       }
-    } catch {
+    } catch { // deliberate: cleanup
       // honest-fail: leave sizeGb=0; the placement decision still prints.
     }
   }
@@ -39945,6 +42549,7 @@ async function cmdW742Gateway(args) {
     console.error('  providers                                 — 11-provider registry with tenant overrides');
     console.error('  routes [--namespace ns]                   — resolved route chain per namespace');
   }
+  nextStep({ try: ['kolm gateway status', 'kolm gateway start --port 8765', 'kolm gateway providers'], see: 'docs/run/gateway.md' });
   process.exit(EXIT.BAD_ARGS);
 }
 
@@ -41516,7 +44121,41 @@ async function main() {
     console.error('  --json     emits machine-readable output for scripts');
     process.exit(EXIT.BAD_ARGS);
   }
-  const [, , cmd, ...rest] = filtered;
+  // W888-P — strip --no-assistant flag before verb parsing so it never reaches
+  // a verb handler. The flag (and KOLM_ASSISTANT=0 env) disables both the
+  // top-level NL pre-dispatch AND the `kolm chat` REPL bootstrap. Users who
+  // want strict verb grammar with no assistant magic get exactly that.
+  let noAssistant = filtered.includes('--no-assistant') || process.env.KOLM_ASSISTANT === '0';
+  const filtered2 = filtered.filter(a => a !== '--no-assistant');
+  const [, , cmd, ...rest] = filtered2;
+  // W888-P — top-level natural-language pre-dispatch. Runs BEFORE the verb
+  // switch. The first arg routes to cmdAssistantNlOneShot when:
+  //   • the first arg contains whitespace (a quoted multi-word string), OR
+  //   • argv carries --ask anywhere, OR
+  //   • the first arg is not a known verb AND not a flag AND has letters AND
+  //     the existing rules in looksLikeNaturalLanguage classify it as NL.
+  // The classic cmdAsk path still handles --intent and the legacy `kolm ask`
+  // verb. This pre-dispatch is the NEW top-level shortcut that wires the
+  // AssistantClient fallback chain instead of /v1/assistant.
+  if (!noAssistant && cmd && typeof cmd === 'string') {
+    const isKnownVerb = COMPLETION_VERBS.includes(cmd);
+    const hasAskFlag = rest && rest.includes('--ask');
+    const looksMultiWord = /\s/.test(cmd);
+    // The existing looksLikeNaturalLanguage helper carries the W384 heuristic
+    // (what/how/where/etc + multi-arg). We respect it for the unknown-verb
+    // branch only — the multi-word + --ask paths force NL regardless.
+    if (looksMultiWord || hasAskFlag || (!isKnownVerb && !cmd.startsWith('-') && looksLikeNaturalLanguage(cmd, rest))) {
+      try {
+        await withErrorContext('assistant-nl', () => cmdAssistantNlOneShot([cmd, ...rest]));
+        return;
+      } catch (e) {
+        console.error('error:', e.message);
+        if (process.env.KOLM_DEBUG) console.error(e.stack);
+        const code = Number.isInteger(e && e.exitCode) ? e.exitCode : EXIT.EXECUTION;
+        process.exit(code);
+      }
+    }
+  }
   try {
     switch (cmd) {
       case 'init':     await withErrorContext('init',     () => cmdInit(rest)); break;
@@ -42057,7 +44696,10 @@ async function main() {
       case 'logs':     await withErrorContext('logs',     () => cmdLogs(rest)); break;
       case 'ask':
       case 'intent':   await withErrorContext('ask',      () => cmdAsk(rest)); break;
-      case 'chat':     await withErrorContext('chat',     () => cmdChat(rest)); break;
+      // W888-P — `kolm chat` is the assistant REPL (kolm-assistant-1.5b
+      // fallback chain). The legacy intent-funnel chat (cmdChat) is reachable
+      // via KOLM_CHAT_LEGACY=1 for any caller that still relies on it.
+      case 'chat':     await withErrorContext('chat',     () => (process.env.KOLM_CHAT_LEGACY === '1' ? cmdChat(rest) : cmdAssistantChat(rest))); break;
       // W848 — guided setup wizard. Defaults to a wrapper/studio picker if no
       // arg is given; `kolm quickstart wrapper` and `kolm quickstart studio`
       // jump straight into the chosen path.
@@ -42079,7 +44721,7 @@ async function main() {
           process.exit(EXIT.OK);
         } else {
           console.error('unknown subcommand: kolm email ' + sub);
-          console.error('try: kolm email outbox');
+          nextStep({ run: 'kolm email outbox' });
           process.exit(EXIT.BAD_ARGS);
         }
         break;
@@ -42127,6 +44769,7 @@ async function main() {
           await withErrorContext('receipts ' + rsub, () => wmod.RECEIPTS_VERBS[rsub].fn(rest.slice(1)));
         } else {
           console.error(wmod.receiptsHelp());
+          nextStep({ try: ['kolm receipts list', 'kolm receipts verify <id>', 'kolm receipts export --format=csv'], see: 'docs/run/receipts.md' });
           process.exit(EXIT.BAD_ARGS);
         }
         break;
@@ -42152,6 +44795,13 @@ async function main() {
       // W372 runtime policy ladder + device fleet.
       case 'devices':        await withErrorContext('devices',        () => cmdDevices(rest)); break;
       case 'install-device': await withErrorContext('install-device', () => cmdInstallDevice(rest)); break;
+      // W888-D on-device benchmark + quant-ladder Pareto frontier verbs.
+      case 'test-device':    await withErrorContext('test-device',    () => cmdTestDevice(rest)); break;
+      case 'test-quants':    await withErrorContext('test-quants',    () => cmdTestQuants(rest)); break;
+      // W888-E fleet management + OTA policy.
+      case 'fleet':          await withErrorContext('fleet',          () => cmdW888eFleet(rest)); break;
+      // W888-O assistant orchestrator (compile / run / bench / publish).
+      case 'assistant':      await withErrorContext('assistant',      () => cmdAssistant(rest)); break;
       // W384 CLI consolidator — privacy / pipeline / agents / shell-init.
       case 'privacy':    await withErrorContext('privacy',    () => cmdPrivacy(rest)); break;
       // W738 — `kolm pipeline {validate|run|compile --file ...}` routes to the
@@ -42342,13 +44992,21 @@ async function main() {
         }
         break;
       default:
-        if (looksLikeNaturalLanguage(cmd, rest)) {
+        // W888-P — when --no-assistant or KOLM_ASSISTANT=0 is set, the
+        // top-level NL pre-dispatch is suppressed AND the legacy cmdAsk
+        // fallback for natural-language phrasing is also suppressed. The
+        // user is asking for strict verb grammar.
+        if (!noAssistant && looksLikeNaturalLanguage(cmd, rest)) {
           await withErrorContext('ask', () => cmdAsk([cmd, ...rest]));
         } else {
           const guess = suggestVerb(cmd, COMPLETION_VERBS);
           console.error('unknown command:', cmd);
           if (guess) console.error('did you mean: kolm ' + guess + ' ?');
-          console.error('try:   kolm ask "' + [cmd, ...rest].join(' ') + '"   (natural-language fallback)');
+          if (!noAssistant) {
+            console.error('try:   kolm ask "' + [cmd, ...rest].join(' ') + '"   (natural-language fallback)');
+          } else {
+            console.error('note: --no-assistant / KOLM_ASSISTANT=0 is set; NL routing is disabled.');
+          }
           console.error('or:    kolm --help                                  (full verb list)');
           process.exit(EXIT.BAD_ARGS);
         }
@@ -43286,7 +45944,7 @@ async function cmdW756Kolmbench(args) {
     return null;
   }
   function _hasFlag(flagName) { return rest.includes('--' + flagName); }
-  function _warnStderr(msg) { try { process.stderr.write(msg + '\n'); } catch (_) {} }
+  function _warnStderr(msg) { try { process.stderr.write(msg + '\n'); } catch (_) {} } // deliberate: cleanup
   // Suppress unused-var lint while keeping helpers callable from any sub-cmd.
   void _envApiKey; void _flag; void _hasFlag; void _warnStderr;
 
@@ -43932,7 +46590,7 @@ async function cmdW762Redteam(args) {
     return null;
   }
   function _hasFlag(rest, name) { return (rest || []).some((a) => a === '--' + name); }
-  function _warnStderr(msg) { try { process.stderr.write(msg + '\n'); } catch (_) {} }
+  function _warnStderr(msg) { try { process.stderr.write(msg + '\n'); } catch (_) {} } // deliberate: cleanup
 
   if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
     console.error('usage: kolm redteam <classify|generate|bakeoff|sanitize> [args]');

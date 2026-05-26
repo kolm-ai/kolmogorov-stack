@@ -156,7 +156,7 @@ test('W464 #4 — POST /v1/multimodal/redact-audio requires auth', async () => {
       'must surface an auth error string, got: ' + JSON.stringify(j));
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -179,7 +179,7 @@ test('W464 #5 — POST /v1/multimodal/redact-audio 400 without media_uri or path
     assert.equal(j.error, 'media_uri_or_path_required');
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -191,7 +191,7 @@ test('W464 #6 — GET /v1/multimodal/redact-audio/doctor requires auth', async (
     assert.equal(r.status, 401);
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -268,7 +268,7 @@ test('W464 #8 — worker returns no_detector_installed when no redactor wired', 
     timeout: 30 * 1000,
     env,
   });
-  try { fs.unlinkSync(tmpFile); } catch (_) {}
+  try { fs.unlinkSync(tmpFile); } catch (_) {} // deliberate: cleanup
 
   // If a real redactor is wired (unlikely in CI), the run may succeed (exit 0)
   // on the silent WAV. That is acceptable. The honesty contract is only
@@ -371,7 +371,7 @@ process.exit(0);
     env,
   });
 
-  try { fs.rmSync(stubDir, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(stubDir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
 
   assert.equal(r.status, 0, 'worker must exit 0 with stub: ' + String(r.stderr || ''));
   const envObj = JSON.parse(String(r.stdout || '').trim().split('\n').pop() || '{}');

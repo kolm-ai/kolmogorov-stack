@@ -47,7 +47,7 @@ function spawnAsync(args, env, timeoutMs = 20_000) {
     let stdout = ''; let stderr = '';
     child.stdout.on('data', (b) => { stdout += b.toString('utf8'); });
     child.stderr.on('data', (b) => { stderr += b.toString('utf8'); });
-    const killer = setTimeout(() => { try { child.kill('SIGKILL'); } catch (_) {} }, timeoutMs);
+    const killer = setTimeout(() => { try { child.kill('SIGKILL'); } catch (_) {} }, timeoutMs); // deliberate: cleanup
     child.on('close', (code) => {
       clearTimeout(killer);
       resolve({ code, stdout, stderr });
@@ -166,7 +166,7 @@ async function pullFileLocal({ row, file, cacheDir, base, onProgress }) {
     const e = new Error(`http_${r.statusCode}`); e.statusCode = r.statusCode; throw e;
   }
   if (already > 0 && r.statusCode !== 206) {
-    try { fs.unlinkSync(part); } catch (_) {}
+    try { fs.unlinkSync(part); } catch (_) {} // deliberate: cleanup
     already = 0;
   }
   return await new Promise((resolve, reject) => {
@@ -180,7 +180,7 @@ async function pullFileLocal({ row, file, cacheDir, base, onProgress }) {
     ws.on('finish', () => {
       if (verifySha) {
         const actual = hash.digest('hex');
-        if (actual !== file.sha256) { try { fs.unlinkSync(part); } catch (_) {} return reject(new Error(`sha256_mismatch expected=${file.sha256} actual=${actual}`)); }
+        if (actual !== file.sha256) { try { fs.unlinkSync(part); } catch (_) {} return reject(new Error(`sha256_mismatch expected=${file.sha256} actual=${actual}`)); } // deliberate: cleanup
       }
       fs.renameSync(part, dest);
       resolve({ ok: true, bytes: bytesDone, path: dest, resumed: already > 0, already_cached: false });

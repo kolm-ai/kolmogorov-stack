@@ -86,6 +86,8 @@
     <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/nav.js"></script>
 <script defer src="/kolm-chat.js"></script>
+<link rel="stylesheet" href="/assets/assistant-widget.css">
+<script type="module" src="/assets/assistant-widget.js" defer></script>
 </head>
 <body class="kolm-account-surface ks">
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
@@ -99,7 +101,7 @@
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -112,7 +114,7 @@
     <a href="/studio">Studio</a>
     <a href="/pricing">Pricing</a>
     <a href="/docs">Docs</a>
-    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+    <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a>
     <a href="/signup?intent=login">Sign in</a>
     <a href="/signup">Get started &rarr;</a>
   </div>
@@ -123,10 +125,22 @@
 
 <main id="main">
 <div class="acct-shell">
-<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview" aria-current="page">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured calls</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li></ul></nav>
+<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview" aria-current="page">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured calls</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/fleet">Fleet</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li></ul></nav>
 <section class="acct-content">
 <h1>Your production AI console.</h1>
 <p class="lede">Route models, distill approved work, deploy signed <code>.kolm</code> artifacts, and govern every runtime from one account.</p>
+<section class="kpanel" data-w888f="whats-next" aria-label="What's next" id="whats-next">
+  <h2>What's next</h2>
+  <p class="pdesc">Ranked from your current account state: compile-ready namespaces first, then drift, then key rotation, then routine follow-ups. <a href="/account/onboarding" style="color:var(--accent)">Reopen tutorial</a> if you want the guided 4-path walkthrough.</p>
+  <div id="whats-next-body" class="metric-grid" style="grid-template-columns:repeat(2,1fr)" aria-busy="true">
+    <div class="metric-card"><div class="skel" style="width:200px"></div><div class="skel" style="width:260px;margin-top:8px"></div></div>
+    <div class="metric-card"><div class="skel" style="width:200px"></div><div class="skel" style="width:260px;margin-top:8px"></div></div>
+  </div>
+  <div id="whats-next-empty" class="empty" hidden style="margin-top:10px">
+    <strong>Start routing traffic to see your first captures here.</strong> Set <code>OPENAI_BASE_URL=http://127.0.0.1:8787/v1</code> and your first call lands in this list within seconds. <a href="/account/onboarding" style="color:var(--accent)">Pick an onboarding path &rarr;</a>
+  </div>
+</section>
+<script src="/account/whats-next.js" defer></script>
 <section class="kpanel" data-postauth-chat-console aria-label="kolm console">
   <div data-kolm-chat data-kolm-chat-mode="auth" data-kolm-chat-heading="kolm console" data-kolm-chat-subtitle="ask in plain English. the console returns the exact CLI command, the why, and links to the surface."></div>
 </section>
@@ -566,7 +580,7 @@ Promise.allSettled([
       </div>
       <div>
         <h4>Company</h4>
-        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="/account/onboarding">Reopen tutorial</a></li><li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
       </div>
     </div>
     <div class="ks-footer__bottom">

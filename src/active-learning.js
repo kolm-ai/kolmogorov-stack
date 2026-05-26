@@ -583,7 +583,7 @@ async function _loadCapturesForCoverage(tenantId, namespace) {
       if (r.namespace !== namespace) continue;
       candidates.push(_normalizeForCoverage(r));
     }
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
   // 3. canonical event-store events — the authoritative capture lake.
   try {
     const { listEvents } = await import('./event-store.js');

@@ -58,7 +58,7 @@ function logUpgradeRequest(entry) {
     const file = upgradeRequestsFile();
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.appendFileSync(file, JSON.stringify(entry) + '\n', 'utf8');
-  } catch (_) {
+  } catch (_) { // deliberate: cleanup
     // Filesystem failures are non-fatal — the user still gets a working URL.
   }
 }
@@ -110,7 +110,7 @@ export async function resolveUpgradeUrl({ plan, tenantId, email, existingLinkFn 
     try {
       const url = existingLinkFn();
       if (url) return { checkout_url: url, source: 'stripe_payment_link' };
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
   }
 
   // Path 2: Stripe Checkout Session via plain fetch.
@@ -139,7 +139,7 @@ export async function resolveUpgradeUrl({ plan, tenantId, email, existingLinkFn 
         baseUrl: stripeBaseUrl || undefined,
       });
       return { checkout_url: url, source: 'stripe_checkout_api' };
-    } catch (_) {
+    } catch (_) { // deliberate: cleanup
       // Fall through to next path on Stripe failure.
     }
   }

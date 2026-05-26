@@ -163,7 +163,7 @@ test('W350 #5 — no kolm-probe-* style temp files leak under tmpdir on failure'
     evals: { spec: 'rs-1-evals', n: 1, coverage: 1.0, cases: [{ id: 'e1', input: {}, expected: { right: true } }] },
     training_stats: { pass_rate_positive: 0.0, latency_p50_us: 50 },
   };
-  try { await compileSpec(SPEC, { outDir: out, allowSeedAutoResolve: false }); } catch {}
+  try { await compileSpec(SPEC, { outDir: out, allowSeedAutoResolve: false }); } catch {} // deliberate: cleanup
   const after = new Set(fs.readdirSync(os.tmpdir()).filter(f => /^kolm-/i.test(f) && f.endsWith('.kolm')));
   // Any NEW .kolm under tmpdir matching kolm-* is a leak.
   const leaked = [...after].filter(f => !before.has(f));

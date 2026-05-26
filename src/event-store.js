@@ -111,6 +111,7 @@ function _openSqlite() {
       CREATE INDEX IF NOT EXISTS idx_events_provider_model ON events(provider, model);
       CREATE INDEX IF NOT EXISTS idx_events_media_kind ON events(media_kind);
       CREATE INDEX IF NOT EXISTS idx_events_media_hash ON events(media_hash);
+      CREATE INDEX IF NOT EXISTS idx_events_status ON events(status);
     `);
     // W377 — additive ALTER TABLE for older DBs that pre-date the media_*
     // columns. SQLite has no ADD COLUMN IF NOT EXISTS, so we read pragma
@@ -127,10 +128,10 @@ function _openSqlite() {
       ];
       for (const [col, type] of toAdd) {
         if (!existing.has(col)) {
-          try { _db.exec(`ALTER TABLE events ADD COLUMN ${col} ${type}`); } catch {}
+          try { _db.exec(`ALTER TABLE events ADD COLUMN ${col} ${type}`); } catch {} // deliberate: cleanup
         }
       }
-    } catch {}
+    } catch {} // deliberate: cleanup
     _driver = 'sqlite';
     return _db;
   } catch (e) {
@@ -160,7 +161,7 @@ function _ensureDriver() {
 
 // Reset module state — only for tests that switch HOME / KOLM_DATA_DIR.
 export function _resetForTests() {
-  try { if (_db) _db.close(); } catch {}
+  try { if (_db) _db.close(); } catch {} // deliberate: cleanup
   _db = null;
   _driver = null;
   _eventsDir = null;
@@ -245,7 +246,7 @@ function _jsonlAll() {
       if (!row || !row.event_id) continue;
       if (!seen.has(row.event_id)) order.push(row.event_id);
       seen.set(row.event_id, row);
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
   // W411 addendum #9 — apply backfillLegacy to every read so legacy JSONL rows
   // (pre-W411, missing tenant_id/source_type/review_state/production_eligible)

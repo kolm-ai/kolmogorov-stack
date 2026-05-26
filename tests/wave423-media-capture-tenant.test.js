@@ -84,7 +84,7 @@ test('W423 #4 — tenant_id source is req.tenant_record?.id || req.tenant', () =
 test('W423 #5 — behavior: eventAppend({tenant_id}) round-trips tenant_id', async () => {
   const { appendEvent, _resetForTests } = await import('../src/event-store.js');
   if (typeof _resetForTests === 'function') {
-    try { _resetForTests(); } catch (_) {}
+    try { _resetForTests(); } catch (_) {} // deliberate: cleanup
   }
   const ev = await appendEvent({
     event_id: 'w423-media-test',

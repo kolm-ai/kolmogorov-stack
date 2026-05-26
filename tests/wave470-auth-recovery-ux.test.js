@@ -58,12 +58,12 @@ function runCli(args, env = {}) {
     child.stderr.setEncoding('utf8');
     child.stdout.on('data', (d) => { out += d; });
     child.stderr.on('data', (d) => { err += d; });
-    const t = setTimeout(() => { try { child.kill('SIGKILL'); } catch (_) {} }, 60_000);
+    const t = setTimeout(() => { try { child.kill('SIGKILL'); } catch (_) {} }, 60_000); // deliberate: cleanup
     child.on('error', reject);
     child.on('exit', (status) => {
       clearTimeout(t);
       let body = null;
-      try { body = JSON.parse(out); } catch (_) {}
+      try { body = JSON.parse(out); } catch (_) {} // deliberate: cleanup
       resolve({ status, stdout: out, stderr: err, body });
     });
   });
@@ -94,7 +94,7 @@ test('W470 P0-4 #1 — doctor --json with config-holding rejected-by-server key 
     assert.match(apiSrv.detail, /kolm logout/, 'detail must mention `kolm logout` as recovery');
   } finally {
     await new Promise((r) => server.close(() => r()));
-    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -116,7 +116,7 @@ test('W470 P0-4 #2 — doctor --json with no api_key on disk returns ok:false + 
     assert.match(apiSrv.detail, /kolm signup/, 'first-time path must mention `kolm signup`');
     assert.match(apiSrv.detail, /kolm login/, 'existing-user path must mention `kolm login`');
   } finally {
-    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -137,6 +137,6 @@ test('W470 P0-4 #3 — whoami --json reports logged_in:false + actionable hint o
     assert.match(String(r.body.hint || ''), /kolm login/, 'hint must include `kolm login`');
   } finally {
     await new Promise((r) => server.close(() => r()));
-    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });

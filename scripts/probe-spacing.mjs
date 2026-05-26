@@ -14,13 +14,13 @@ for (const [name, w, h] of widths) {
   const page = await ctx.newPage();
   await page.goto(URL + '/', { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(800);
-  await page.screenshot({ path: `scripts/qa-home-${name}-1.png`, fullPage: false });
+  await page.screenshot({ path: `audit-shots/scripts-qa/qa-home-${name}-1.png`, fullPage: false });
   await page.evaluate(() => window.scrollTo(0, 1200));
   await page.waitForTimeout(300);
-  await page.screenshot({ path: `scripts/qa-home-${name}-2.png`, fullPage: false });
+  await page.screenshot({ path: `audit-shots/scripts-qa/qa-home-${name}-2.png`, fullPage: false });
   await page.evaluate(() => window.scrollTo(0, 2400));
   await page.waitForTimeout(300);
-  await page.screenshot({ path: `scripts/qa-home-${name}-3.png`, fullPage: false });
+  await page.screenshot({ path: `audit-shots/scripts-qa/qa-home-${name}-3.png`, fullPage: false });
   console.log(`captured ${name} @ ${w}x${h}`);
   await ctx.close();
 }

@@ -59,7 +59,7 @@ beforeEach(() => {
   try {
     const ed = path.join(process.env.KOLM_DATA_DIR, 'events');
     if (fs.existsSync(ed)) fs.rmSync(ed, { recursive: true, force: true });
-  } catch {}
+  } catch {} // deliberate: cleanup
 });
 
 test('WC04-cs #1 STATES is frozen + lists the 4 documented states', () => {

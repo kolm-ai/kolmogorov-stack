@@ -493,7 +493,7 @@ async function runT6() {
   } finally {
     cs.close();
     cb.close();
-    try { trainerProc.kill('SIGTERM'); } catch {}
+    try { trainerProc.kill('SIGTERM'); } catch {} // deliberate: cleanup
   }
 }
 

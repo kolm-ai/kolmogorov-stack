@@ -113,7 +113,7 @@ test('W419 #8 — behavior: findOpportunities({tenant_id}) only sees its own ten
   const { appendEvent, _resetForTests } = await import('../src/event-store.js');
 
   if (typeof _resetForTests === 'function') {
-    try { _resetForTests(); } catch (_) {}
+    try { _resetForTests(); } catch (_) {} // deliberate: cleanup
   }
 
   // 10 identical requests for tenant A — should trigger cache_candidate.

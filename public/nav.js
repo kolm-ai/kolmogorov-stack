@@ -824,7 +824,7 @@ return profile('platform', 'Product map', 'Gateway, compiler, runtime, proof.', 
    { href: '/use-cases', label: 'Use cases' },
    { href: '/pricing', label: 'Pricing' },
    { href: '/docs', label: 'Docs' },
-   { href: 'https://github.com/sneaky-hippo/kolmogorov-stack', label: 'GitHub', rel: 'noopener' },
+   { href: 'https://github.com/kolm-ai/kolmogorov-stack', label: 'GitHub', rel: 'noopener' },
   ];
   function render(target, tag) {
    target.innerHTML = '';

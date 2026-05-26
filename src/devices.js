@@ -489,7 +489,7 @@ export async function detectLocal() {
       if (brand.includes('M3 Max')) return { id: 'apple-m3-max', source: 'sysctl', confidence: 0.9 };
       if (brand.includes('M2 Pro')) return { id: 'apple-m2-pro', source: 'sysctl', confidence: 0.9 };
       if (brand.includes('M2 Max')) return { id: 'apple-m3-max', source: 'sysctl', confidence: 0.7, note: 'approx as m3-max profile' };
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
 
   // Fallback: generic CPU.
@@ -872,7 +872,7 @@ export async function detectProfile(hints = {}) {
       else if (/DGX Spark|GB10/i.test(name)) pick = showProfile('workstation-dgx-spark');
       if (pick) { source = 'nvidia-smi'; confidence = 0.95; }
     }
-  } catch {}
+  } catch {} // deliberate: cleanup
 
   // macOS sysctl / system_profiler.
   if (!pick && process.platform === 'darwin') {
@@ -883,7 +883,7 @@ export async function detectProfile(hints = {}) {
       if (/M3 Ultra/.test(brand)) pick = showProfile('workstation-m3-ultra-512');
       else if (/Apple M/.test(brand)) pick = showProfile('desktop-cpu-arm64');
       if (pick) { source = 'sysctl'; confidence = 0.85; }
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
 
   // Windows wmic GPU fallback.
@@ -896,7 +896,7 @@ export async function detectProfile(hints = {}) {
       else if (/RTX 4090/i.test(name)) pick = showProfile('desktop-gpu-rtx-4090');
       else if (/RTX 3090/i.test(name)) pick = showProfile('desktop-gpu-rtx-3090');
       if (pick) { source = 'wmic'; confidence = 0.7; }
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
 
   // Honest fallback — match CPU arch + RAM only.

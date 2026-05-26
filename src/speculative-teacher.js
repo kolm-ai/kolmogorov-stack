@@ -118,7 +118,7 @@ const TASK_CLUSTER_HINTS = Object.freeze({
 function _whichSync(name) {
   if (!name) return null;
   if (name.includes('/') || name.includes('\\')) {
-    try { if (fs.existsSync(name) && fs.statSync(name).isFile()) return name; } catch (_) {}
+    try { if (fs.existsSync(name) && fs.statSync(name).isFile()) return name; } catch (_) {} // deliberate: cleanup
     return null;
   }
   const P = process.env.PATH || '';
@@ -130,7 +130,7 @@ function _whichSync(name) {
     if (!dir) continue;
     for (const ext of exts) {
       const full = path.join(dir, name + ext);
-      try { if (fs.existsSync(full) && fs.statSync(full).isFile()) return full; } catch (_) {}
+      try { if (fs.existsSync(full) && fs.statSync(full).isFile()) return full; } catch (_) {} // deliberate: cleanup
     }
   }
   return null;
@@ -161,7 +161,7 @@ export function resolveTeacher(env = process.env) {
         const head = _whichSync(String(parsed[0]));
         if (head) return { ok: true, argv: [head, ...parsed.slice(1).map(String)], source: 'env-array' };
       }
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
     // Fall back to single-string command.
     const resolved = _whichSync(String(envCmd));
     if (resolved) return { ok: true, argv: [resolved], source: 'env' };
@@ -627,7 +627,7 @@ export async function benchSpeculative(opts = {}) {
           avg_accepted_run: summary[cluster].avg_accepted_run,
           bench_id: benchId,
         });
-      } catch (_) {
+      } catch (_) { // deliberate: cleanup
         // event-store write is best-effort; bench result still returns.
       }
     }

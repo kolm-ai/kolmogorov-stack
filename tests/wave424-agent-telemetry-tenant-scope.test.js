@@ -223,7 +223,7 @@ test('W424 #3 — listAgents({tenant_id}) returns only requested tenant', async 
   const saved = _snapEnv();
   const tmp = _mkTmp();
   _setEnv(tmp);
-  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} });
+  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} }); // deliberate: cleanup
   await _bustModuleCache();
 
   await _seedAgentEvents('tenant_A_at', 'ns_at', 'claude-code', 5);
@@ -254,7 +254,7 @@ test('W424 #4 — listSessions/getSession/recommend/failing/stats are all tenant
   const saved = _snapEnv();
   const tmp = _mkTmp();
   _setEnv(tmp);
-  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} });
+  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} }); // deliberate: cleanup
   await _bustModuleCache();
 
   await _seedAgentEvents('tenant_A_sess', 'ns_sess', 'codex', 4);
@@ -307,7 +307,7 @@ test('W424 #5 — /v1/agents/* requires auth and is scoped to caller\'s tenant_r
   const saved = _snapEnv();
   const tmp = _mkTmp();
   _setEnv(tmp);
-  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} });
+  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} }); // deliberate: cleanup
   await _bustModuleCache();
 
   const { app, A, B } = await _makeAppTwoTenants();

@@ -88,7 +88,7 @@ function ensurePerUserSecret() {
   if (!isNonEmptyString(json.local_receipt_secret)) {
     json.local_receipt_secret = 'kolm-local-' + crypto.randomBytes(24).toString('hex');
     fs.writeFileSync(cfg, JSON.stringify(json, null, 2));
-    try { fs.chmodSync(cfg, 0o600); } catch {}
+    try { fs.chmodSync(cfg, 0o600); } catch {} // deliberate: cleanup
   }
   process.env.RECIPE_RECEIPT_SECRET = json.local_receipt_secret;
   return json.local_receipt_secret;
@@ -551,14 +551,18 @@ export async function compileSpec(spec, opts = {}) {
             else if (st.isFile()) {
               exportFiles.push({
                 filename: path.posix.join(f.filename, childRel.replace(/\\/g, '/')),
-                content: fs.readFileSync(childAbs),
+                absPath: childAbs,
               });
             }
           }
         };
         walk('');
       } else {
-        exportFiles.push({ filename: f.filename, content: fs.readFileSync(f.absPath) });
+        // Pass absPath instead of buffering — large GGUF targets (Trinity
+        // Q4_K_M ~4 GiB) blow past Node's 2 GiB readFileSync limit. The zip
+        // packager streams from disk; the manifest pre-hash already
+        // cross-checked the file in loadExportProvenance.
+        exportFiles.push({ filename: f.filename, absPath: f.absPath });
       }
     }
     extraFiles = [...(extraFiles || []), ...exportFiles];
@@ -618,7 +622,7 @@ export async function compileSpec(spec, opts = {}) {
           fallback: fr.fallback,
         });
         runtimePassports.push(passport);
-      } catch {
+      } catch { // deliberate: cleanup
         // estimatePassport throws on bad shape — drop the row rather than
         // poison the whole manifest. The export still ships; the row is just
         // absent from runtime_passports[].
@@ -1008,7 +1012,7 @@ export async function compileSpec(spec, opts = {}) {
     // file at `final` is a leak. The try/finally below removes it on failure.
     postBuildCleanup.push(final);
     fs.copyFileSync(built.outPath, final);
-    try { fs.unlinkSync(built.outPath); } catch {}
+    try { fs.unlinkSync(built.outPath); } catch {} // deliberate: cleanup
   }
   postBuildOk = true;
   } finally {
@@ -1146,7 +1150,25 @@ export async function compileSpec(spec, opts = {}) {
   }
 
   const bytes = fs.statSync(final).size;
-  const sha = crypto.createHash('sha256').update(fs.readFileSync(final)).digest('hex');
+  // Stream hash — readFileSync hits Node's 2 GiB Buffer cap on large GGUF artifacts
+  // (Trinity Q4_K_M ~4.4 GB). Chunked sync reader matches the pattern in
+  // src/artifact.js sha256File() and src/export-provenance.js hashFileSyncStream().
+  const sha = await (async () => {
+    const h = crypto.createHash('sha256');
+    const fd = fs.openSync(final, 'r');
+    try {
+      const CHUNK = 1024 * 1024;
+      const buf = Buffer.alloc(CHUNK);
+      while (true) {
+        const read = fs.readSync(fd, buf, 0, CHUNK, null);
+        if (read <= 0) break;
+        h.update(buf.subarray(0, read));
+      }
+      return h.digest('hex');
+    } finally {
+      fs.closeSync(fd);
+    }
+  })();
   // evals_report surfaces honest pass/fail breakdown to callers so the CLI
   // can show "2 / 7 cases pass" + list the failing case IDs. Without this
   // the user sees a sub-gate K-score and has no idea which examples failed.

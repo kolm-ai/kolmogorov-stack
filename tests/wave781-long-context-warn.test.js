@@ -310,7 +310,7 @@ test('W781 #11 - GET /v1/long-context/p90 is auth-gated (401 without auth)', asy
     assert.notEqual(body.ok, true);
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -335,7 +335,7 @@ test('W781 #12 - GET /v1/long-context/p90 returns ok envelope w/ auth + version 
     assert.equal(body.n, 0);
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -375,7 +375,7 @@ test('W781 #13 - POST /v1/long-context/check forces tenant_id from auth (defense
     assert.equal(body.n, 0);
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 

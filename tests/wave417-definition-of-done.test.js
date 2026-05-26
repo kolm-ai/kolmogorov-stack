@@ -134,8 +134,8 @@ function _writeStubWorker(tmp) {
     "let out = null;",
     "for (const a of args) { if (a.startsWith('--out=')) out = a.slice(6); }",
     "if (out) {",
-    "  try { fs.mkdirSync(out, { recursive: true }); } catch {}",
-    "  try { fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify({mode:'stub', ok:true})); } catch {}",
+    "  try { fs.mkdirSync(out, { recursive: true }); } catch {}", // deliberate: cleanup
+    "  try { fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify({mode:'stub', ok:true})); } catch {}", // deliberate: cleanup
     "}",
     "process.exit(0);",
     '',

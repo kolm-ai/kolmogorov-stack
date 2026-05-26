@@ -85,7 +85,7 @@ function lastmodFor(full) {
   let statDate = null;
   try {
     statDate = fs.statSync(full).mtime.toISOString().slice(0, 10);
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
   try {
     const iso = execSync(`git log -1 --format=%cI -- "${full}"`,
       { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
@@ -94,7 +94,7 @@ function lastmodFor(full) {
       if (statDate && statDate > gitDate) return statDate;
       return gitDate;
     }
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
   return statDate || new Date().toISOString().slice(0, 10);
 }
 

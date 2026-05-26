@@ -289,7 +289,7 @@ test('W438 #5 — synth phase skipped when corpus is too small', async () => {
       })) {
         events.push(ev);
       }
-    } catch (e) {
+    } catch (e) { // deliberate: cleanup
       // Pipeline may throw earlier (synthetic-only gate, etc.) — that is
       // fine, the assertion below only requires "no recipe_synthesis event".
     }

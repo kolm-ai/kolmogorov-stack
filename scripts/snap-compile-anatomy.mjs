@@ -8,7 +8,7 @@ await page.waitForTimeout(900);
 const sec = await page.locator('section.compile-anatomy').first();
 await sec.scrollIntoViewIfNeeded();
 await page.waitForTimeout(400);
-await sec.screenshot({ path: 'scripts/qa-compile-anatomy-1440.png' });
+await sec.screenshot({ path: 'audit-shots/scripts-qa/qa-compile-anatomy-1440.png' });
 const box = await sec.boundingBox();
 console.log('1440 box:', JSON.stringify(box));
 
@@ -20,7 +20,7 @@ await page2.waitForTimeout(900);
 const sec2 = await page2.locator('section.compile-anatomy').first();
 await sec2.scrollIntoViewIfNeeded();
 await page2.waitForTimeout(400);
-await sec2.screenshot({ path: 'scripts/qa-compile-anatomy-390.png' });
+await sec2.screenshot({ path: 'audit-shots/scripts-qa/qa-compile-anatomy-390.png' });
 const box2 = await sec2.boundingBox();
 console.log('390 box:', JSON.stringify(box2));
 await b.close();

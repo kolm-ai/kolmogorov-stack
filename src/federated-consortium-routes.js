@@ -350,9 +350,9 @@ export function _wipeLocalConsortiumState() {
   try {
     const d = _dir();
     for (const f of fs.readdirSync(d)) {
-      try { fs.unlinkSync(path.join(d, f)); } catch {}
+      try { fs.unlinkSync(path.join(d, f)); } catch {} // deliberate: cleanup
     }
-  } catch {}
+  } catch {} // deliberate: cleanup
 }
 
 export default { registerFederatedConsortiumRoutes };

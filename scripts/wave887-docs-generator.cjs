@@ -23,7 +23,7 @@ function page({ slug, title, desc, eyebrow, h1, lede, sections, related }) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script> // deliberate: cleanup
 <title>${title} &middot; kolm.ai</title>
 <meta name="description" content="${desc}">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
@@ -92,7 +92,7 @@ td code{font-size:12px}
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolm" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -133,7 +133,7 @@ ${relatedHtml}
       </div>
       <div>
         <h4>Company</h4>
-        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolm" rel="noopener">GitHub</a></li></ul>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li></ul>
       </div>
     </div>
     <div class="ks-footer__bottom">
@@ -576,7 +576,7 @@ curl -X POST https://kolm.ai/v1/gateway/dispatch/support ...</code></pre>`,
       {
         h2: 'Single-host (Docker Compose)',
         html: `<p>Fastest path. <code>docker compose up</code> brings up the gateway, Postgres for the capture lake, and Caddy for TLS.</p>
-<pre><code>git clone https://github.com/sneaky-hippo/kolm
+<pre><code>git clone https://github.com/kolm-ai/kolm
 cd kolm/deploy/compose
 cp .env.example .env                 # fill ANTHROPIC_API_KEY etc.
 docker compose up -d
@@ -880,7 +880,7 @@ capture_lake          = "s3"</code></pre>`,
         h2: 'docker-compose.yml',
         html: `<pre><code>services:
   gateway:
-    image: ghcr.io/sneaky-hippo/kolm-gateway:latest
+    image: ghcr.io/kolm-ai/kolm-gateway:latest
     environment:
       KOLM_BASE_URL: "http://gateway:3000"
       ANTHROPIC_API_KEY: \${ANTHROPIC_API_KEY}
@@ -1091,7 +1091,7 @@ function productPage() {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script> // deliberate: cleanup
 <title>Gateway &middot; wrap any LLM provider with receipts, captures, and local-first routing &middot; kolm.ai</title>
 <meta name="description" content="The kolm gateway sits in front of 11 LLM providers, signs an Ed25519 receipt on every call, captures the trace for replay, and routes locally-first via a confidence gate. ~3–8 ms overhead.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
@@ -1152,7 +1152,7 @@ pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolm" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -1170,7 +1170,7 @@ pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:
   <div class="cta">
     <a class="btn-primary" href="/signup">Get a key &rarr;</a>
     <a class="btn-ghost" href="/docs/gateway">Read the docs</a>
-    <a class="btn-ghost" href="https://github.com/sneaky-hippo/kolm" rel="noopener">GitHub</a>
+    <a class="btn-ghost" href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
   </div>
 </header>
 
@@ -1262,7 +1262,7 @@ curl https://kolm.ai/v1/verify/&lt;receipt_id&gt;</code></pre>
       </div>
       <div>
         <h4>Company</h4>
-        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolm" rel="noopener">GitHub</a></li></ul>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li></ul>
       </div>
     </div>
     <div class="ks-footer__bottom">

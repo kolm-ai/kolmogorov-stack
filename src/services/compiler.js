@@ -75,7 +75,7 @@ async function handle(req, res) {
       try {
         const jobs = compile.listJobs(null, 1000);
         queueDepth = jobs.filter((j) => j.status === 'queued' || j.status === 'running').length;
-      } catch {}
+      } catch {} // deliberate: cleanup
       return reply(res, 200, {
         ok: true,
         service: 'compiler',
@@ -147,7 +147,7 @@ async function handle(req, res) {
           if (typeof compile.cancelJob === 'function') {
             compile.cancelJob(id, tenant);
           }
-        } catch {}
+        } catch {} // deliberate: cleanup
         return reply(res, 200, { ok: true, job_id: id, status: 'cancelled' });
       }
     }

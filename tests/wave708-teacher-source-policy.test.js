@@ -216,6 +216,6 @@ test('W708 #6 — distill() stamps teacher_source + policy_enforced on run-meta 
     if (saved.A === undefined) delete process.env.ANTHROPIC_API_KEY; else process.env.ANTHROPIC_API_KEY = saved.A;
     if (saved.O === undefined) delete process.env.OPENAI_API_KEY; else process.env.OPENAI_API_KEY = saved.O;
     if (saved.S === undefined) delete process.env.KOLM_TEACHER_SOURCE; else process.env.KOLM_TEACHER_SOURCE = saved.S;
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });

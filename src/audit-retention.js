@@ -73,14 +73,14 @@ export function getCurrentRetentionDays() {
   }
   if (n < MIN_RETENTION_DAYS) {
     if (process.env.KOLM_AUDIT_DEBUG === '1') {
-      // eslint-disable-next-line no-console
+       
       console.error(`[audit-retention] KOLM_AUDIT_RETENTION_DAYS=${n} below MIN=${MIN_RETENTION_DAYS}; ignoring`);
     }
     return DEFAULT_RETENTION_DAYS;
   }
   if (n > MAX_RETENTION_DAYS) {
     if (process.env.KOLM_AUDIT_DEBUG === '1') {
-      // eslint-disable-next-line no-console
+       
       console.error(`[audit-retention] KOLM_AUDIT_RETENTION_DAYS=${n} above MAX=${MAX_RETENTION_DAYS}; clamping`);
     }
     return MAX_RETENTION_DAYS;
@@ -195,7 +195,7 @@ async function _resolveTenantDays(tenant_id, es) {
       if (n < MIN_RETENTION_DAYS || n > MAX_RETENTION_DAYS) continue;
       return n;
     }
-  } catch (_) {
+  } catch (_) { // deliberate: cleanup
     // event-store unreachable — fall back to env/DEFAULT.
   }
   return getCurrentRetentionDays();

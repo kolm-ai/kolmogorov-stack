@@ -174,7 +174,7 @@ test('15. `--out <path>` writes scaffold to file (not stdout)', () => {
     assert.ok(!r.stdout.includes('"suggested_seed_examples"'),
       'stdout should not contain the full scaffold when --out is set');
   } finally {
-    try { fs.unlinkSync(tmp); } catch {}
+    try { fs.unlinkSync(tmp); } catch {} // deliberate: cleanup
   }
 });
 

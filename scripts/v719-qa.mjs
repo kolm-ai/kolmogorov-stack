@@ -28,7 +28,7 @@ for (const s of SCENARIOS) {
   const ctx = await browser.newContext({ viewport: { width: s.width, height: s.height }, deviceScaleFactor: 2 });
   const page = await ctx.newPage();
   await page.addInitScript((theme) => {
-    try { localStorage.setItem('kolm-theme', theme); } catch (_) {}
+    try { localStorage.setItem('kolm-theme', theme); } catch (_) {} // deliberate: cleanup
     if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
   }, s.theme);
   await page.goto(URL + s.path, { waitUntil: 'networkidle' });

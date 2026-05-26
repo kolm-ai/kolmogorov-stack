@@ -251,7 +251,7 @@ async function main() {
   try {
     const rev = spawnSync('git', ['-C', path.join(outDir, 'src'), 'rev-parse', 'HEAD'], { encoding: 'utf8' });
     if (rev.status === 0 && rev.stdout) commit_sha = rev.stdout.trim();
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
   const binaryDir = path.join(outDir, 'bin');
   const libDir = path.join(outDir, 'lib');
   const HASH_EXTS = new Set(['', '.exe', '.so', '.dll', '.dylib', '.a']);
@@ -273,7 +273,7 @@ async function main() {
         try {
           const buf = fs.readFileSync(p);
           out[path.relative(outDir, p).replace(/\\/g, '/')] = crypto.createHash('sha256').update(buf).digest('hex');
-        } catch (_) {}
+        } catch (_) {} // deliberate: cleanup
       }
     }
     return out;

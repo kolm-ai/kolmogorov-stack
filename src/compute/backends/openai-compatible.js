@@ -80,7 +80,7 @@ export function createOpenAICompatibleAdapter({
         if (res.ok) {
           return { ok: true, latency_ms: Date.now() - t0, ...det, probe: path };
         }
-      } catch {
+      } catch { // deliberate: cleanup
         // Try the next common health endpoint.
       }
     }

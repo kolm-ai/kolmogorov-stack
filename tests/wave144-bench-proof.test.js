@@ -44,7 +44,7 @@ function runProof(args, extraEnv = {}) {
     },
     timeout: 60000,
   });
-  const tmpCleanup = () => { try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} };
+  const tmpCleanup = () => { try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} }; // deliberate: cleanup
   if (proc.status !== 0) {
     tmpCleanup();
     throw new Error(`bench-proof.mjs exited ${proc.status}: ${proc.stderr || proc.stdout}`);
@@ -105,7 +105,7 @@ test('bench-proof: --specs filter is respected and unknown specs exit non-zero',
     assert.notEqual(proc.status, 0, 'unknown spec must exit non-zero');
     assert.match(proc.stderr + proc.stdout, /no specs match|available:/);
   } finally {
-    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });
 

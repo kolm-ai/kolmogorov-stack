@@ -41,7 +41,7 @@ beforeEach(() => {
 });
 
 after(() => {
-  try { fs.rmSync(TMP, { recursive: true, force: true }); } catch {}
+  try { fs.rmSync(TMP, { recursive: true, force: true }); } catch {} // deliberate: cleanup
 });
 
 // ------------------------------------------------------------------ terms

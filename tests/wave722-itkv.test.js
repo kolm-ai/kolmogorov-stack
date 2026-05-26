@@ -73,7 +73,7 @@ function findPython() {
       if (!r.error && (r.status === 0 || /python/i.test((r.stdout || '') + (r.stderr || '')))) {
         return c;
       }
-    } catch {
+    } catch { // deliberate: cleanup
       // continue
     }
   }

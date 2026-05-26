@@ -34,7 +34,7 @@ function runWithStdin(stdin, args, env = {}) {
     child.on('close', (code) => resolve({ status: code, stdout: out, stderr: err }));
     if (stdin != null) child.stdin.write(stdin);
     child.stdin.end();
-    setTimeout(() => { try { child.kill('SIGKILL'); } catch {} }, 12000);
+    setTimeout(() => { try { child.kill('SIGKILL'); } catch {} }, 12000); // deliberate: cleanup
   });
 }
 

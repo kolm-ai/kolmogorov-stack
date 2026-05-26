@@ -34,8 +34,8 @@ const _tmpCwd = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-wrapper-email-'));
 fs.mkdirSync(path.join(_tmpCwd, 'data'), { recursive: true });
 process.chdir(_tmpCwd);
 process.on('exit', () => {
-  try { process.chdir(_origCwd); } catch (_) {}
-  try { fs.rmSync(_tmpCwd, { recursive: true, force: true }); } catch (_) {}
+  try { process.chdir(_origCwd); } catch (_) {} // deliberate: cleanup
+  try { fs.rmSync(_tmpCwd, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
 });
 
 // Force the no-key branch for the duration of this file. Save + restore so

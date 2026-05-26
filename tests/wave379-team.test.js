@@ -38,7 +38,7 @@ async function withSandbox(tag, fn) {
   } finally {
     if (prevData === undefined) delete process.env.KOLM_DATA_DIR; else process.env.KOLM_DATA_DIR = prevData;
     if (prevSelf === undefined) delete process.env.KOLM_TEAM_SELF_EMAIL; else process.env.KOLM_TEAM_SELF_EMAIL = prevSelf;
-    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 }
 

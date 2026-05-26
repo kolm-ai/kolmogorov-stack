@@ -194,7 +194,7 @@ export async function startDistillJob({
   }
   // Some test doubles return a plain object; only call detach helpers
   // when they exist on the real ChildProcess.
-  try { fs.closeSync(logOut); } catch (_) {}
+  try { fs.closeSync(logOut); } catch (_) {} // deliberate: cleanup
   if (typeof child.unref === 'function') child.unref();
   const pid = child.pid || 0;
   jobs.update(rec.id, { pid, status: 'running' });
@@ -213,9 +213,9 @@ export async function startDistillJob({
           if (fs.existsSync(manifestPath)) {
             patch.meta.manifest_path = manifestPath;
           }
-        } catch (_) {}
+        } catch (_) {} // deliberate: cleanup
         jobs.update(rec.id, patch);
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
     });
   }
   return { ...rec, pid, status: 'running' };

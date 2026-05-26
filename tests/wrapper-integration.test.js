@@ -53,8 +53,8 @@ function runCli(args, env = {}, timeoutMs = 90_000) {
     child.stdout.on('data', (c) => { stdout += c; });
     child.stderr.on('data', (c) => { stderr += c; });
     const timer = setTimeout(() => {
-      try { child.kill('SIGTERM'); } catch (_) {}
-      setTimeout(() => { try { child.kill('SIGKILL'); } catch (_) {} }, 1000);
+      try { child.kill('SIGTERM'); } catch (_) {} // deliberate: cleanup
+      setTimeout(() => { try { child.kill('SIGKILL'); } catch (_) {} }, 1000); // deliberate: cleanup
     }, timeoutMs);
     child.on('error', (e) => {
       clearTimeout(timer);

@@ -436,7 +436,7 @@ function whichSync(name) {
   if (name.includes('/') || name.includes('\\')) {
     try {
       if (fs.existsSync(name) && fs.statSync(name).isFile()) return name;
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
     return null;
   }
   const PATH = process.env.PATH || '';
@@ -450,7 +450,7 @@ function whichSync(name) {
       const full = path.join(dir, name + ext);
       try {
         if (fs.existsSync(full) && fs.statSync(full).isFile()) return full;
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
     }
   }
   return null;

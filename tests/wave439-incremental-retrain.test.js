@@ -218,7 +218,7 @@ test('W439 #3 — compileFull surfaces since + dropped_since on corpus_prepare',
         if (ev.phase === 'corpus_prepare') corpusEv = ev;
         if (corpusEv) break; // we only need this phase
       }
-    } catch {}
+    } catch {} // deliberate: cleanup
     assert.ok(corpusEv, 'compileFull must emit a corpus_prepare event');
     assert.equal(corpusEv.since, sinceIso, 'corpus_prepare.since must echo the filter');
     assert.equal(corpusEv.dropped_since, 6, 'must drop the 6 old approved events');

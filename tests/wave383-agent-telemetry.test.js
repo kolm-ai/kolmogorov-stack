@@ -56,7 +56,7 @@ async function _reset() {
   eventStore._resetForTests();
   // Wipe disk between tests so each one starts clean.
   const dir = path.join(process.env.KOLM_DATA_DIR, 'events');
-  try { fs.rmSync(dir, { recursive: true, force: true }); } catch {}
+  try { fs.rmSync(dir, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   fs.mkdirSync(dir, { recursive: true });
 }
 
@@ -386,7 +386,7 @@ test('W383 #18 — WINDOWS constant exposed and matches default', () => {
   try {
     'use strict';
     tele.WINDOWS.acceptance_s = 999;
-  } catch {}
+  } catch {} // deliberate: cleanup
   assert.equal(tele.WINDOWS.acceptance_s, 90, 'WINDOWS is effectively frozen');
 });
 

@@ -162,7 +162,7 @@ test('W462 #4 — POST /v1/multimodal/redact-image requires auth', async () => {
       'must surface an auth error string, got: ' + JSON.stringify(j));
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -185,7 +185,7 @@ test('W462 #5 — POST /v1/multimodal/redact-image 400 without media_uri or path
     assert.equal(j.error, 'media_uri_or_path_required');
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -197,7 +197,7 @@ test('W462 #6 — GET /v1/multimodal/redact-image/doctor requires auth', async (
     assert.equal(r.status, 401);
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -247,10 +247,10 @@ test('W462 #8 — worker returns no_detector_installed when deps/models absent',
   let sharpPresent = false, ortPresent = false;
   try {
     sharpPresent = fs.existsSync(path.join(REPO_ROOT, 'workers', 'multimodal-redact-image', 'node_modules', 'sharp'));
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
   try {
     ortPresent = fs.existsSync(path.join(REPO_ROOT, 'workers', 'multimodal-redact-image', 'node_modules', 'onnxruntime-node'));
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
   const facePath  = path.join(os.homedir(), '.kolm', 'models', 'yolov8n-face.onnx');
   const platePath = path.join(os.homedir(), '.kolm', 'models', 'license-plate-detector.onnx');
   const faceOk  = (() => { try { return fs.existsSync(facePath);  } catch (_) { return false; } })();
@@ -266,7 +266,7 @@ test('W462 #8 — worker returns no_detector_installed when deps/models absent',
     stdio: 'pipe',
     timeout: 30 * 1000,
   });
-  try { fs.unlinkSync(tmpFile); } catch (_) {}
+  try { fs.unlinkSync(tmpFile); } catch (_) {} // deliberate: cleanup
 
   if (fullKit) {
     // Full local kit present: garbage bytes likely fail decode → exit 5.

@@ -12,7 +12,7 @@ no SaaS dependency, no account required, no build server.
 ## In one minute
 
 ```bash
-npm i -g github:sneaky-hippo/kolm-stack    # source-install; `kolm` lands on PATH
+npm i -g github:kolm-ai/kolm-stack    # source-install; `kolm` lands on PATH
 
 # 1. Scaffold a starter spec from a template
 kolm new my-redactor --from redactor

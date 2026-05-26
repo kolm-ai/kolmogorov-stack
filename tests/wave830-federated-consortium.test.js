@@ -48,7 +48,7 @@ function freshDir() {
   process.env.USERPROFILE = tmp;
   process.env.KOLM_ENV = 'test';
   fs.mkdirSync(process.env.KOLM_DATA_DIR, { recursive: true });
-  try { _wipeLocalConsortiumState(); } catch (_) {}
+  try { _wipeLocalConsortiumState(); } catch (_) {} // deliberate: cleanup
   return tmp;
 }
 

@@ -22,7 +22,7 @@ const KOLM_SRC = fs.readFileSync(KOLM_CLI, 'utf8');
 // safe; an empty override crashes libuv UV_HANDLE_CLOSING on Windows).
 function isolatedHome() {
   const dir = path.join(os.tmpdir(), 'kolm-w300-' + process.pid + '-' + Math.random().toString(36).slice(2));
-  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {}
+  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {} // deliberate: cleanup
   return dir;
 }
 
@@ -33,7 +33,7 @@ function run(args) {
     timeout: 60_000,
     env: { ...process.env, HOME: home, USERPROFILE: home },
   });
-  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   return { code: res.status, stdout: res.stdout || '', stderr: res.stderr || '' };
 }
 

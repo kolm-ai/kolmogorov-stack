@@ -45,13 +45,13 @@ function runCli(args) {
     const child = spawn(process.execPath, [CLI_PATH, ...args], { env });
     // Close stdin immediately so `--input -` (fs.readFileSync(0)) returns
     // empty rather than blocking forever waiting for piped data.
-    try { child.stdin.end(); } catch (_) {}
+    try { child.stdin.end(); } catch (_) {} // deliberate: cleanup
     let stdout = '';
     let stderr = '';
     child.stdout.on('data', (d) => { stdout += d.toString(); });
     child.stderr.on('data', (d) => { stderr += d.toString(); });
     child.on('exit', (code) => {
-      try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+      try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
       resolve({ code, stdout, stderr });
     });
   });

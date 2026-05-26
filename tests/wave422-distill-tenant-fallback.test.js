@@ -114,12 +114,12 @@ const fs = require('fs');
 const path = require('path');
 const out = (process.argv.find(a => a.startsWith('--out=')) || '').slice('--out='.length);
 if (out) {
-  try { fs.mkdirSync(out, { recursive: true }); } catch {}
+  try { fs.mkdirSync(out, { recursive: true }); } catch {} // deliberate: cleanup
   try {
     fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify({
       ok: true, fixture: 'w422-noop', written_at: new Date().toISOString(),
     }, null, 2));
-  } catch {}
+  } catch {} // deliberate: cleanup
 }
 process.exit(0);
 `;
@@ -175,7 +175,7 @@ test('W422 #2 — distill({pairs_override}) bypasses prepareDistillCorpus', asyn
   const tmp = _mkTmp();
   _setEnv(tmp);
   _ensureNoopWorker();
-  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} });
+  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} }); // deliberate: cleanup
   await _bustModuleCache();
 
   // Seed events in the namespace under a tenant — these MUST NOT leak into
@@ -213,7 +213,7 @@ test('W422 #3 — distill({tenant_id}) fences corpus to the named tenant', async
   const tmp = _mkTmp();
   _setEnv(tmp);
   _ensureNoopWorker();
-  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} });
+  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} }); // deliberate: cleanup
   await _bustModuleCache();
 
   await _seed('tenant_A_w422', 'ns_fence', 5, 'TENANT_A_W422');
@@ -255,7 +255,7 @@ test('W422 #4 — distill() with no tenant defaults to local; other tenants stay
   const tmp = _mkTmp();
   _setEnv(tmp);
   _ensureNoopWorker();
-  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} });
+  t.after(() => { _restoreEnv(saved); try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} }); // deliberate: cleanup
   await _bustModuleCache();
 
   // 4 local rows + 6 hosted-tenant rows in the SAME namespace. The default

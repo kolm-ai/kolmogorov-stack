@@ -85,7 +85,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -94,7 +94,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
@@ -178,7 +178,7 @@ POST /v1/sbom/verify                # body: { "sbom": { ... } }</code></pre>
   <li><strong>npm.</strong> <code>npm ci</code> (not <code>npm install</code>) on every build &mdash; verifies <code>package-lock.json</code> integrity hashes resolve exactly. <code>--ignore-scripts</code> in CI to block postinstall hooks. Future: <code>npm audit signatures</code> as a gate.</li>
   <li><strong>pip.</strong> Use <code>pip-tools</code>'s <code>pip-compile --generate-hashes</code> to produce a fully hash-pinned <code>requirements.txt</code>, then <code>pip install --require-hashes -r requirements.txt</code>. Without <code>--require-hashes</code>, a malicious mirror can serve a different wheel under the same version number.</li>
   <li><strong>cargo.</strong> <code>Cargo.lock</code> already carries integrity checksums per crate. Commit it. Use <code>cargo install --locked</code>. <code>cargo audit</code> as a CI gate.</li>
-  <li><strong>GitHub Actions.</strong> Pin actions to a SHA (<code>uses: actions/checkout@&lt;sha&gt;</code>) rather than a tag. <a href="https://github.com/sneaky-hippo/kolmogorov-stack">This repo</a> is on the W763-followup roadmap for SHA pinning.</li>
+  <li><strong>GitHub Actions.</strong> Pin actions to a SHA (<code>uses: actions/checkout@&lt;sha&gt;</code>) rather than a tag. <a href="https://github.com/kolm-ai/kolmogorov-stack">This repo</a> is on the W763-followup roadmap for SHA pinning.</li>
 </ul>
 
 <div class="warn"><strong>Honest scope:</strong> Strict hash pinning of every transitive dependency is a sustained audit, not a single ship. We emit SBOMs today; we will progressively tighten hash pinning across W763-followup waves. The SBOM surfaces the audit gap (it carries an <code>unhashed_count</code> on Python deps and a <code>scope</code> per npm dep) so an auditor can see exactly which lines need tightening.</div>
@@ -235,7 +235,7 @@ POST /v1/sbom/verify                # body: { "sbom": { ... } }</code></pre>
       </div>
       <div>
         <h4>Company</h4>
-        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
       </div>
     </div>
     <div class="ks-footer__bottom">

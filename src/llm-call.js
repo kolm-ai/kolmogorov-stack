@@ -248,7 +248,7 @@ Output ONLY the JSON array.`;
           const outp = typeof row.output === 'string' ? row.output : (row.output != null ? JSON.stringify(row.output) : null);
           if (inp && outp) out.push({ input: inp, output: outp });
         }
-      } catch (_) {
+      } catch (_) { // deliberate: cleanup
         // Per-batch failure is non-fatal; other batches keep going.
       }
     }

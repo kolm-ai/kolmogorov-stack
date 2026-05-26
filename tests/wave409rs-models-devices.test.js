@@ -38,7 +38,7 @@ function mkTmp() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w409rs-'));
 }
 function cleanup(dir) {
-  try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
 }
 
 // Spawn CLI in a clean HOME so config + caches don't bleed.

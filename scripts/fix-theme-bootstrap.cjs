@@ -7,7 +7,7 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..', 'public');
 const BAD_RE = /<script>\(function\(\)\{try\{var t=localStorage\.getItem\('kolm-theme'\);if\(t==='light'\)\{document\.documentElement\.setAttribute\('data-theme','light'\);document\.documentElement\.style\.background='#f7f4ec';document\.documentElement\.style\.colorScheme='light';\}\}catch\(e\)\{\}\}\)\(\);<\/script>/g;
-const GOOD = "<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>";
+const GOOD = "<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>"; // deliberate: cleanup
 
 let scanned = 0;
 let touched = 0;

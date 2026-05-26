@@ -54,7 +54,7 @@ async function withIsolatedHome(fn) {
     if (prevHome === undefined) delete process.env.HOME; else process.env.HOME = prevHome;
     if (prevUserProfile === undefined) delete process.env.USERPROFILE; else process.env.USERPROFILE = prevUserProfile;
     if (prevAppData === undefined) delete process.env.APPDATA; else process.env.APPDATA = prevAppData;
-    try { fs.rmSync(home, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(home, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 }
 

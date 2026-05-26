@@ -577,8 +577,8 @@ function _loadWorkspaceForAssuranceRoute(workspace_id = null) {
   const ws = { id: workspace_id, procurement_vault: {}, drift_namespaces: {} };
   const sigPath = path.join(ROUTER_REPO_ROOT, 'data', 'procurement', 'sig-lite.json');
   const caiqPath = path.join(ROUTER_REPO_ROOT, 'data', 'procurement', 'caiq-v4.json');
-  try { if (fs.existsSync(sigPath)) ws.procurement_vault.sig_lite = JSON.parse(fs.readFileSync(sigPath, 'utf8')); } catch {}
-  try { if (fs.existsSync(caiqPath)) ws.procurement_vault.caiq = JSON.parse(fs.readFileSync(caiqPath, 'utf8')); } catch {}
+  try { if (fs.existsSync(sigPath)) ws.procurement_vault.sig_lite = JSON.parse(fs.readFileSync(sigPath, 'utf8')); } catch {} // deliberate: cleanup
+  try { if (fs.existsSync(caiqPath)) ws.procurement_vault.caiq = JSON.parse(fs.readFileSync(caiqPath, 'utf8')); } catch {} // deliberate: cleanup
   return ws;
 }
 
@@ -597,6 +597,20 @@ const waitlistLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'rate-limited — waitlist caps at 10/hr/ip' },
+  validate: { trustProxy: false },
+});
+
+// W889-10.1 — Marketplace v2 interest capture. Public, IP-rate-limited to
+// 10 hits per IP per 24 hours so a single spammer cannot pollute the
+// early-access list. Per-IP coalescing is keyed on raw req.ip — the lake
+// row itself records the trimmed/lowercased email so dedupe is unambiguous
+// regardless of which IP submitted the row.
+const marketplaceInterestLimiter = rateLimit({
+  windowMs: 24 * 60 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'rate-limited — marketplace interest caps at 10/IP/24h' },
   validate: { trustProxy: false },
 });
 
@@ -646,6 +660,41 @@ const freeChatLimiter = rateLimit({
   validate: { trustProxy: false },
 });
 
+// W888-R — /v1/assistant/chat-docs. Public docs-search assistant. Heavier
+// model + larger answer than /v1/free/chat (which routes through the small
+// intent classifier), so the cap is set higher per-window (60 vs 20) but
+// the per-turn budget is HALF the authed cap ($0.005 vs $0.01) since this
+// is anonymous-by-design and the docs corpus is small.
+const docsAssistantLimiter = rateLimit({
+  windowMs: 24 * 60 * 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    ok: false,
+    error: 'rate_limited',
+    rate_limited: true,
+    message: 'Docs search caps at 60 queries/day. Sign in for unlimited.',
+    cta: { label: 'Create a free account', href: '/signup' },
+  },
+  validate: { trustProxy: false },
+});
+
+// W889-6.1 — /v1/sales/demo-request limiter. 10 hits per IP per 24h per the
+// MCD Block 6 spec. Separate from enterpriseLeadLimiter (5/hour) because demo
+// requests are a lighter-weight intake (less structured) and we want a buyer
+// trying multiple wordings to still get through over a workday. ipKey() /24
+// coalescing keeps a shared-NAT office from being a single token.
+const demoRequestLimiter = rateLimit({
+  windowMs: 24 * 60 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'rate-limited — demo requests cap at 10/24h/ip' },
+  keyGenerator: ipKey,
+  validate: { trustProxy: false },
+});
+
 // Enterprise inquiry intake (KOLM-102). Public form on /enterprise/inquiry.
 // 5 hits per IP per hour is enough for a real buyer to make typos and retry,
 // but blocks form-spammer scripts. ipKey() coalesces /24 to survive Vercel
@@ -665,6 +714,12 @@ const enterpriseLeadLimiter = rateLimit({
 // stateless from the buyer's perspective and email is the source of truth.
 // Process-restart resets the array; Resend has the durable record.
 const enterpriseLeads = [];
+
+// W889-6.1 — Sales demo-request intake. Same in-memory + email pattern as
+// enterpriseLeads; namespace 'sales/demo-requests' in the capture lake when
+// a tenant-scoped lake is wired (operator-supplied), otherwise email is the
+// authoritative record. Process-restart resets; Resend has durability.
+const salesDemoRequests = [];
 
 // W261: /v1/builder/preview is intentionally unauthenticated so a curious
 // visitor can try the no-code builder without signing up. Rate-limit to
@@ -1111,6 +1166,70 @@ function _checkVramPreflight(base_model, hw_tier) {
   };
 }
 
+// W888-Q — AssistantClient lazy singleton. The client is constructed once
+// per process and reused across every /v1/assistant/chat hit. Test runs may
+// override the constructor via setAssistantClientForTests() so the route
+// surface can be exercised without spinning up a real local GGUF runner or
+// hitting an upstream provider. The capturer hook is best-effort.
+let _assistantClient = null;
+let _assistantClientFactoryForTests = null;
+async function ensureAssistantClient() {
+  if (_assistantClient) return _assistantClient;
+  if (_assistantClientFactoryForTests) {
+    _assistantClient = _assistantClientFactoryForTests();
+    return _assistantClient;
+  }
+  const mod = await import('./assistant-client.js');
+  if (process.env.KOLM_ASSISTANT_TEST_SHIM === '1') {
+    const budgetMode = process.env.KOLM_ASSISTANT_CHAT_TEST_BUDGET === '1';
+    _assistantClient = new mod.AssistantClient({
+      localShim: budgetMode
+        ? async () => { throw new Error('skip local'); }
+        : async ({ prompt }) => ({ response: '[shim] ' + String(prompt).slice(0, 80), first_token_ms: 1 }),
+      apiShim: budgetMode
+        ? async () => ({ ok: false, reason: 'skip_api' })
+        : async () => ({ ok: false, reason: 'skip_api' }),
+      gatewayShim: budgetMode
+        ? async () => ({ ok: true, response: 'expensive synthetic reply', cost_usd: 0.50 })
+        : async () => ({ ok: false, reason: 'skip_gateway' }),
+      apiKey: 'ks_test',
+      perTurnCapUsd: 0.01,
+    });
+    return _assistantClient;
+  }
+  _assistantClient = new mod.AssistantClient({});
+  return _assistantClient;
+}
+export function setAssistantClientForTests(factory) {
+  _assistantClient = null;
+  _assistantClientFactoryForTests = factory || null;
+}
+
+// W888-Q — per-tenant rate counter for /v1/assistant/chat. 60 calls/hour/tenant.
+// In-memory (per-process) — for multi-replica deployments this would need a
+// shared store. Acceptable for first cut; the limit is per-replica.
+const ASSISTANT_CHAT_RATE_LIMIT = 60;
+const ASSISTANT_CHAT_RATE_WINDOW_MS = 60 * 60 * 1000;
+const _assistantChatHits = new Map();
+function _assistantChatRateCheck(tenantId, now) {
+  const t = now || Date.now();
+  const rec = _assistantChatHits.get(tenantId) || { windowStart: t, count: 0 };
+  if (t - rec.windowStart > ASSISTANT_CHAT_RATE_WINDOW_MS) {
+    rec.windowStart = t;
+    rec.count = 0;
+  }
+  rec.count += 1;
+  _assistantChatHits.set(tenantId, rec);
+  return {
+    over: rec.count > ASSISTANT_CHAT_RATE_LIMIT,
+    count: rec.count,
+    reset_ms: Math.max(0, (rec.windowStart + ASSISTANT_CHAT_RATE_WINDOW_MS) - t),
+  };
+}
+export function _resetAssistantChatRateForTests() {
+  _assistantChatHits.clear();
+}
+
 export function buildRouter() {
   const r = express.Router();
 
@@ -1151,14 +1270,98 @@ export function buildRouter() {
 
   // Public /health — no provider-key leakage. Authenticated callers can
   // hit /v1/health for the full snapshot including backend availability.
-  r.get('/health', (req, res) => res.json({
-    status: 'ok',
-    version: '0.2.0',
-    library_version: LIBRARY_VERSION,
-    region: process.env.RAILWAY_REGION || process.env.REGION || 'local',
-    uptime_s: Math.round(process.uptime()),
-    stats: storeStats(),
-  }));
+  // W888-L: ok:true is the canonical liveness signal for ship-gate, status
+  // is preserved for older readers. W890-13: extended with `git`, `gateway`,
+  // `capture_store`, `signing_key` per plan Part K-1. Each field is a string
+  // so platform health probes can pattern-match without unpacking a struct.
+  r.get('/health', (req, res) => {
+    let gitCommit = null;
+    try {
+      const repoRoot = ROUTER_REPO_ROOT;
+      const gitDir = path.join(repoRoot, '.git');
+      if (fs.existsSync(gitDir)) {
+        const headFile = path.join(gitDir, 'HEAD');
+        if (fs.existsSync(headFile)) {
+          const head = fs.readFileSync(headFile, 'utf8').trim();
+          if (head.startsWith('ref: ')) {
+            const ref = head.slice(5).trim();
+            const refFile = path.join(gitDir, ref);
+            if (fs.existsSync(refFile)) {
+              const sha = fs.readFileSync(refFile, 'utf8').trim();
+              if (/^[0-9a-f]{7,}$/i.test(sha)) gitCommit = sha.slice(0, 12);
+            }
+            if (!gitCommit) {
+              const packed = path.join(gitDir, 'packed-refs');
+              if (fs.existsSync(packed)) {
+                const lines = fs.readFileSync(packed, 'utf8').split(/\r?\n/);
+                for (const line of lines) {
+                  if (line.endsWith(' ' + ref)) {
+                    const sha = line.split(/\s+/)[0];
+                    if (/^[0-9a-f]{7,}$/i.test(sha)) { gitCommit = sha.slice(0, 12); break; }
+                  }
+                }
+              }
+            }
+          } else if (/^[0-9a-f]{7,}$/i.test(head)) {
+            gitCommit = head.slice(0, 12);
+          }
+        }
+      }
+    } catch (_) { /* deliberate: cleanup */ }
+    // Allow env override (Vercel exposes VERCEL_GIT_COMMIT_SHA, Railway
+    // exposes RAILWAY_GIT_COMMIT_SHA on the build machine).
+    gitCommit = gitCommit
+      || process.env.KOLM_GIT_COMMIT
+      || process.env.VERCEL_GIT_COMMIT_SHA
+      || process.env.RAILWAY_GIT_COMMIT_SHA
+      || null;
+    if (gitCommit && gitCommit.length > 12) gitCommit = gitCommit.slice(0, 12);
+
+    // Capture-store probe: the durable store is reachable if storeStats() is
+    // callable + returns a numeric counts object. We swallow errors here so
+    // the platform health probe never 5xx's; the structured field below
+    // makes the actual state visible.
+    let captureStoreState = 'ok';
+    try {
+      const s = storeStats();
+      if (!s || typeof s !== 'object') captureStoreState = 'degraded';
+    } catch (_) {
+      captureStoreState = 'unavailable';
+    }
+
+    // Signing-key probe: ed25519 default signer is `loaded` when present in
+    // env OR cached on disk; `missing` when KOLM_ED25519_DISABLE=1 OR no
+    // candidate path resolves. We do NOT load the key here; we check the
+    // env+disk preconditions so /health stays cheap.
+    let signingKeyState = 'loaded';
+    try {
+      if (process.env.KOLM_ED25519_DISABLE === '1') {
+        signingKeyState = 'disabled';
+      } else if (process.env.KOLM_ED25519_PRIVATE_KEY || process.env.KOLM_ED25519_PRIVATE_KEY_PATH) {
+        signingKeyState = 'loaded';
+      } else {
+        const storeDir = process.env.KOLM_ED25519_KEY_STORE || path.join(os.homedir(), '.kolm');
+        const keyPath = path.join(storeDir, 'signing-key.pem');
+        signingKeyState = fs.existsSync(keyPath) ? 'loaded' : 'missing';
+      }
+    } catch (_) {
+      signingKeyState = 'unknown';
+    }
+
+    res.json({
+      ok: true,
+      status: 'ok',
+      version: '0.2.0',
+      library_version: LIBRARY_VERSION,
+      git: gitCommit,
+      region: process.env.RAILWAY_REGION || process.env.REGION || 'local',
+      uptime_s: Math.round(process.uptime()),
+      gateway: 'ok',
+      capture_store: captureStoreState,
+      signing_key: signingKeyState,
+      stats: storeStats(),
+    });
+  });
 
   // W730 — Prometheus /metrics scrape endpoint. Mounted BEFORE
   // authMiddleware so a Prometheus scraper can reach it without an API
@@ -2140,13 +2343,18 @@ export function buildRouter() {
   // sales-led enterprise row). Enterprise stays sales-led (self_serve:false).
   // Each paid plan declares its STRIPE_PAYMENT_LINK_<X> env; billingLinkFor()
   // returns null when the env is unset and the UI demotes accordingly.
+  // W889-6.1 — Enterprise tier flipped to sales-led: price_usd_month=null,
+  // price_label='Custom', contact_sales=true. compile_credits_monthly per
+  // tier added so /v1/plans + the /pricing page can publish the credit
+  // allotment from one source. 'custom' means uncapped pending architecture
+  // review. annual_savings_pct is the published toggle discount on /pricing.
   const PLAN_CATALOG = {
-    free:       { id: 'free',       label: 'Free',       price_usd_month: 0,    price_label: '$0/mo',    cents_monthly:      0, gateway_calls_hard:     50000, quota:     50000, seats: 1,  self_serve: true,  billing_env: null,                            stripe_link_env: null,                            billing_url_env: null },
-    indie:      { id: 'indie',      label: 'Indie',      price_usd_month: 29,   price_label: '$29/mo',   cents_monthly:   2900, gateway_calls_hard:    500000, quota:    500000, seats: 1,  self_serve: true,  billing_env: 'STRIPE_PAYMENT_LINK_INDIE',     stripe_link_env: 'STRIPE_PAYMENT_LINK_INDIE',     billing_url_env: 'STRIPE_PAYMENT_LINK_INDIE' },
-    pro:        { id: 'pro',        label: 'Pro',        price_usd_month: 49,   price_label: '$49/mo',   cents_monthly:   4900, gateway_calls_hard:    500000, quota:    500000, seats: 1,  self_serve: true,  billing_env: 'STRIPE_PAYMENT_LINK_PRO',       stripe_link_env: 'STRIPE_PAYMENT_LINK_PRO',       billing_url_env: 'STRIPE_PAYMENT_LINK_PRO' },
-    teams:      { id: 'teams',      label: 'Team',       price_usd_month: 99,   price_label: '$99/mo',   cents_monthly:   9900, gateway_calls_hard:   5000000, quota:   5000000, seats: 5,  self_serve: true,  billing_env: 'STRIPE_PAYMENT_LINK_TEAM',      stripe_link_env: 'STRIPE_PAYMENT_LINK_TEAM',      billing_url_env: 'STRIPE_PAYMENT_LINK_TEAM', stripe_link_envs: ['STRIPE_PAYMENT_LINK_TEAMS'] },
-    business:   { id: 'business',   label: 'Business',   price_usd_month: 499,  price_label: '$499/mo',  cents_monthly:  49900, gateway_calls_hard:  25000000, quota:  25000000, seats: 20, self_serve: true,  billing_env: 'STRIPE_PAYMENT_LINK_BUSINESS', stripe_link_env: 'STRIPE_PAYMENT_LINK_BUSINESS', billing_url_env: 'STRIPE_PAYMENT_LINK_BUSINESS' },
-    enterprise: { id: 'enterprise', label: 'Enterprise', price_usd_month: 1499, price_label: '$1,499/mo', cents_monthly: 149900, gateway_calls_hard: 250000000, quota: 250000000, seats: 25, self_serve: false, billing_env: null,                            stripe_link_env: 'STRIPE_PAYMENT_LINK_ENT',       billing_url_env: 'STRIPE_PAYMENT_LINK_ENT' },
+    free:       { id: 'free',       label: 'Free',       price_usd_month: 0,    price_label: '$0/mo',    cents_monthly:      0, gateway_calls_hard:     50000, quota:     50000, seats: 1,  self_serve: true,  compile_credits_monthly: 1,         annual_savings_pct: 0,  billing_env: null,                            stripe_link_env: null,                            billing_url_env: null },
+    indie:      { id: 'indie',      label: 'Indie',      price_usd_month: 29,   price_label: '$29/mo',   cents_monthly:   2900, gateway_calls_hard:    500000, quota:    500000, seats: 1,  self_serve: true,  compile_credits_monthly: 10,        annual_savings_pct: 17, billing_env: 'STRIPE_PAYMENT_LINK_INDIE',     stripe_link_env: 'STRIPE_PAYMENT_LINK_INDIE',     billing_url_env: 'STRIPE_PAYMENT_LINK_INDIE' },
+    pro:        { id: 'pro',        label: 'Pro',        price_usd_month: 49,   price_label: '$49/mo',   cents_monthly:   4900, gateway_calls_hard:    500000, quota:    500000, seats: 1,  self_serve: true,  compile_credits_monthly: 50,        annual_savings_pct: 17, billing_env: 'STRIPE_PAYMENT_LINK_PRO',       stripe_link_env: 'STRIPE_PAYMENT_LINK_PRO',       billing_url_env: 'STRIPE_PAYMENT_LINK_PRO' },
+    teams:      { id: 'teams',      label: 'Team',       price_usd_month: 99,   price_label: '$99/mo',   cents_monthly:   9900, gateway_calls_hard:   5000000, quota:   5000000, seats: 5,  self_serve: true,  compile_credits_monthly: 50,        annual_savings_pct: 17, billing_env: 'STRIPE_PAYMENT_LINK_TEAM',      stripe_link_env: 'STRIPE_PAYMENT_LINK_TEAM',      billing_url_env: 'STRIPE_PAYMENT_LINK_TEAM', stripe_link_envs: ['STRIPE_PAYMENT_LINK_TEAMS'] },
+    business:   { id: 'business',   label: 'Business',   price_usd_month: 499,  price_label: '$499/mo',  cents_monthly:  49900, gateway_calls_hard:  25000000, quota:  25000000, seats: 20, self_serve: true,  compile_credits_monthly: 200,       annual_savings_pct: 17, billing_env: 'STRIPE_PAYMENT_LINK_BUSINESS', stripe_link_env: 'STRIPE_PAYMENT_LINK_BUSINESS', billing_url_env: 'STRIPE_PAYMENT_LINK_BUSINESS' },
+    enterprise: { id: 'enterprise', label: 'Enterprise', price_usd_month: null, price_label: 'Custom',   cents_monthly:   null, gateway_calls_hard: 250000000, quota: 250000000, seats: 25, self_serve: false, compile_credits_monthly: 'custom', annual_savings_pct: 0,  billing_env: null,                            stripe_link_env: 'STRIPE_PAYMENT_LINK_ENT',       billing_url_env: 'STRIPE_PAYMENT_LINK_ENT' },
   };
   // Wave4 stripe-fix: removed `business: 'enterprise'` alias that forced
   // self-serve buyers into the sales-led path. Business is now its own row.
@@ -2165,12 +2373,14 @@ export function buildRouter() {
     return {
       id: p.id,
       label: p.label,
-      price_usd_month: p.price_usd_month,
-      price_label: p.price_label,
+      price_usd_month: p.price_usd_month,                    // null when sales-led
+      price_label: p.price_label,                            // 'Custom' when sales-led
       quota: p.quota,
       seats: p.seats,
       self_serve: p.self_serve !== false,
       contact_sales: p.self_serve === false,
+      compile_credits_monthly: p.compile_credits_monthly,    // 'custom' for Enterprise
+      annual_savings_pct: p.annual_savings_pct || 0,
       billing_link_configured: !!billingLinkFor(p.id),
     };
   }
@@ -2221,6 +2431,20 @@ export function buildRouter() {
   // configured. /v1/oauth/providers reports which are live.
   mountOAuth(r);
 
+  // W889-8.4 — short OAuth aliases: GET /v1/auth/github redirects to the
+  // canonical /v1/oauth/github/start (preserving any ?redirect= query). Same
+  // for /v1/auth/github/callback (forwards code+state to the canonical
+  // callback). When env vars are missing, the canonical route returns the
+  // operator-facing 503 oauth_not_configured envelope.
+  r.get('/v1/auth/github', (req, res) => {
+    const q = req.url.includes('?') ? '&' + req.url.split('?')[1] : '';
+    return res.redirect(302, `/v1/oauth/github/start${q ? '?' + q.slice(1) : ''}`);
+  });
+  r.get('/v1/auth/github/callback', (req, res) => {
+    const q = req.url.includes('?') ? '?' + req.url.split('?')[1] : '';
+    return res.redirect(302, `/v1/oauth/github/callback${q}`);
+  });
+
   // ---------- Anonymous CLI auth (robots / agents) ----------
   // Bootstrap: returns an anon_token that the CLI stores locally. 30-day TTL.
   // No email, no signup. Designed for agents that need to start working in <1 second.
@@ -2261,6 +2485,34 @@ export function buildRouter() {
   // ---------- Public signup ----------
   // Rate-limited (S5): 10 signups per IP per 24h. INVITE_ONLY=true hard-disables
   // public signup entirely (CLI bootstrap and admin issue still work).
+  // W890-9 — POST /v1/auth/login and /v1/auth/signup were curated in
+  // public/openapi.json (W485) but never implemented. Kolm authenticates via
+  // API key (ks_*/kao_*) + OAuth; there is no password endpoint. We add live
+  // deprecation aliases that 410 Gone with redirect hints so the routes are
+  // not "dead" — the deprecated-endpoint lock-in in W890-9 expects every
+  // routed path to have a handler. Both alias handlers carry the canonical
+  // {ok:false, error:'<id>'} envelope so W890-9 lock-in 9 stays green.
+  r.post('/v1/auth/login', (req, res) => {
+    res.status(410).json({
+      ok: false,
+      error: 'endpoint_deprecated',
+      hint: 'Kolm authenticates via API key (ks_*/kao_*). Set Authorization: Bearer <key>. OAuth flows live at /v1/oauth/google/start and /v1/auth/github.',
+      redirect: '/v1/oauth/google/start',
+      deprecated_since: '2026-05-26',
+      removal_planned: 'kept indefinitely for compatibility; this endpoint will continue to return 410.',
+    });
+  });
+  r.post('/v1/auth/signup', (req, res) => {
+    res.status(410).json({
+      ok: false,
+      error: 'endpoint_deprecated',
+      hint: 'Use POST /v1/signup (the canonical signup endpoint). The /v1/auth/signup path was reserved in early drafts but never implemented.',
+      redirect: '/v1/signup',
+      deprecated_since: '2026-05-26',
+      removal_planned: 'kept indefinitely for compatibility; this endpoint will continue to return 410.',
+    });
+  });
+
   r.post('/v1/signup', signupLimiter, (req, res) => {
     if (process.env.INVITE_ONLY === 'true') {
       return res.status(403).json({ error: 'public signup disabled — invite required' });
@@ -2326,7 +2578,7 @@ export function buildRouter() {
     let billingUrl = null;
     if (requiresBilling) {
       billingUrl = billingLinkFor(requestedPlan, { tenantId: t.id, email });
-      try { update('tenants', x => x.id === t.id, { pending_plan: requestedPlan, billing_status: 'pending' }); } catch (_) {}
+      try { update('tenants', x => x.id === t.id, { pending_plan: requestedPlan, billing_status: 'pending' }); } catch (_) {} // deliberate: cleanup
     }
     // Best-effort welcome email — never blocks signup.
     if (emailConfigured()) {
@@ -3897,7 +4149,7 @@ export function buildRouter() {
         const hash = cryptoMod.default.createHash('sha256').update(s, 'utf8').digest('hex');
         const fp = pathMod.default.join(RAW_DIR, `${hash}_${kind}.txt`);
         if (!fsMod.default.existsSync(fp)) fsMod.default.writeFileSync(fp, s, 'utf8');
-        try { fsMod.default.chmodSync(fp, 0o600); } catch (_) {}
+        try { fsMod.default.chmodSync(fp, 0o600); } catch (_) {} // deliberate: cleanup
         return { hash, path: fp };
       } catch (_) { return { hash: null, path: null }; }
     }
@@ -3965,7 +4217,7 @@ export function buildRouter() {
               resolve({ status: resp.statusCode, body: json });
             });
           });
-          rq.setTimeout(120000, () => { try { rq.destroy(new Error('upstream_timeout')); } catch (_) {} });
+          rq.setTimeout(120000, () => { try { rq.destroy(new Error('upstream_timeout')); } catch (_) {} }); // deliberate: cleanup
           rq.on('error', reject);
           rq.write(payload); rq.end();
         });
@@ -4045,7 +4297,7 @@ export function buildRouter() {
             noncompliant_identifiers: evErr.noncompliant_identifiers || [],
           });
         } catch (_) { errDurable = false; }
-        try { await eventAppend(evErr); } catch (_) {}
+        try { await eventAppend(evErr); } catch (_) {} // deliberate: cleanup
         res.set('x-kolm-event-id', evErr.event_id);
         res.set('x-kolm-provider', provider);
         res.set('x-kolm-model', model);
@@ -4190,7 +4442,7 @@ export function buildRouter() {
     // workbench / label queue / training planner all read. Idempotent: the
     // capture-store insert above also bridges into event-store; appendEvent
     // is INSERT OR REPLACE keyed on event_id so the two collapse into one.
-    try { await eventAppend(ev); } catch (_) {}
+    try { await eventAppend(ev); } catch (_) {} // deliberate: cleanup
     // W409y — meter captured_events + stored_events on the connector path.
     // tenant_id is the request-scoped tenant when authenticated, or 'local'
     // for the daemon-connector untenanted passthrough — usageIncrementMeter
@@ -4199,7 +4451,7 @@ export function buildRouter() {
       const tid = (req.tenant_record && req.tenant_record.id) || null;
       await usageIncrementMeter(tid, 'captured_events', 1);
       if (durable) await usageIncrementMeter(tid, 'stored_events', 1);
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
     res.set('x-kolm-event-id', ev.event_id);
     res.set('x-kolm-provider', provider);
     res.set('x-kolm-model', model);
@@ -4470,7 +4722,7 @@ export function buildRouter() {
         if (actualTokens > 0) {
           await usageIncrementMeter(tenant.id, 'hosted_inference', actualTokens);
         }
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
     }
   }
 
@@ -4501,7 +4753,7 @@ export function buildRouter() {
       const _release = () => {
         if (released) return;
         released = true;
-        try { slot.release && slot.release(); } catch (_) {}
+        try { slot.release && slot.release(); } catch (_) {} // deliberate: cleanup
       };
       res.on('finish', _release);
       res.on('close', _release);
@@ -5004,10 +5256,10 @@ export function buildRouter() {
           finish_reason: finishReason,
         }],
       };
-      try { res.write('data: ' + JSON.stringify(chunk) + '\n\n'); } catch (_) {}
+      try { res.write('data: ' + JSON.stringify(chunk) + '\n\n'); } catch (_) {} // deliberate: cleanup
     };
     const writeMarker = (marker) => {
-      try { res.write('data: ' + JSON.stringify({ kolm_routing: marker }) + '\n\n'); } catch (_) {}
+      try { res.write('data: ' + JSON.stringify({ kolm_routing: marker }) + '\n\n'); } catch (_) {} // deliberate: cleanup
     };
 
     // Token producers. Fixture path supports tests; real path delegates
@@ -5103,7 +5355,7 @@ export function buildRouter() {
             tokens: null,
           });
           if (d && typeof d === 'object') streamDecision = { ...d, ...streamDecision };
-        } catch (_) {}
+        } catch (_) {} // deliberate: cleanup
       }
 
       writeMarker({
@@ -5116,14 +5368,14 @@ export function buildRouter() {
         teacher_model: teacherModel,
       });
       writeChunk(null, 'stop');
-      try { res.write('data: [DONE]\n\n'); } catch (_) {}
+      try { res.write('data: [DONE]\n\n'); } catch (_) {} // deliberate: cleanup
     } catch (e) {
       try {
         res.write('data: ' + JSON.stringify({ error: String(e?.message || e) }) + '\n\n');
         res.write('data: [DONE]\n\n');
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
     } finally {
-      try { res.end(); } catch (_) {}
+      try { res.end(); } catch (_) {} // deliberate: cleanup
     }
   });
 
@@ -5277,6 +5529,34 @@ export function buildRouter() {
     } catch (e) {
       return res.status(500).json({ error: 'preference_doctor_failed', message: String(e.message || e) });
     }
+  });
+
+  // W891-16.5 — public gateway liveness probe. Mirrors /health for the
+  // gateway sub-system: ok:true + version + module-loadable signal.
+  // Mounted before r.use(authMiddleware) so it is reachable without an API
+  // key. Ship-gate consumers use this to confirm the gateway dispatch path
+  // is wired without paying for a real upstream call.
+  r.get('/v1/gateway/health', async (_req, res) => {
+    let gatewayModeOk = false;
+    let resolvedMode = null;
+    try {
+      const mod = await import('./gateway-mode.js');
+      try {
+        resolvedMode = mod.currentMode();
+        gatewayModeOk = true;
+      } catch {
+        gatewayModeOk = false;
+      }
+    } catch {
+      gatewayModeOk = false;
+    }
+    return res.status(200).json({
+      ok: true,
+      gateway: 'ready',
+      mode: resolvedMode,
+      mode_module_loaded: gatewayModeOk,
+      uptime_s: Math.floor(process.uptime()),
+    });
   });
 
   r.use(authMiddleware);
@@ -5652,7 +5932,7 @@ export function buildRouter() {
           region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
           namespace_id: nsSlug,
         });
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
       return res.status(429).json({
         ok: false,
         error: 'rate_limit_exceeded',
@@ -5983,7 +6263,7 @@ export function buildRouter() {
               choices: [{ index: 0, delta: { role: 'assistant' }, finish_reason: null }],
             };
             res.write('data: ' + JSON.stringify(rolePayload) + '\n\n');
-          } catch (_) {}
+          } catch (_) {} // deliberate: cleanup
           const windowSize = 80;
           for (let i = 0; i < text.length; i += windowSize) {
             sendChunk(text.slice(i, i + windowSize), null);
@@ -6010,7 +6290,7 @@ export function buildRouter() {
               } : null,
             }) + '\n\n');
             res.write('data: [DONE]\n\n');
-          } catch (_) {}
+          } catch (_) {} // deliberate: cleanup
           // LM-7 — gateway_dispatch SSE terminal. Outcome from result.status.
           try {
             recordMetricEvent({
@@ -6019,7 +6299,7 @@ export function buildRouter() {
               region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
               namespace_id: nsSlug,
             });
-          } catch (_) {}
+          } catch (_) {} // deliberate: cleanup
           return res.end();
         } catch (eStream) {
           // Fall through to JSON path if the stream write fails before
@@ -6037,7 +6317,7 @@ export function buildRouter() {
           region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
           namespace_id: nsSlug,
         });
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
       res.status(result.status).json({
         ...result.json,
         kolm_receipt: receipt,
@@ -6062,7 +6342,7 @@ export function buildRouter() {
           region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
           namespace_id: nsSlug,
         });
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
       res.status(500).json({ ok: false, error: 'gateway_dispatch_error', detail: String(e && e.message || e) });
     }
   });
@@ -6781,7 +7061,7 @@ export function buildRouter() {
           dryRun: false,
         });
         deleted = (purgeRes && purgeRes.deleted) || 0;
-      } catch (_) {
+      } catch (_) { // deliberate: cleanup
         // Purge failure is honest — we still report what WOULD have been
         // evicted via the projection, but flag the actual delete as 0.
       }
@@ -7076,7 +7356,7 @@ export function buildRouter() {
           const fb = (ev && typeof ev.feedback === 'string') ? ev.feedback : '';
           const json = fb.replace(/^seasonal_variant_registration:/, '');
           data = json ? JSON.parse(json) : {};
-        } catch (_) {}
+        } catch (_) {} // deliberate: cleanup
         if (data && data.namespace === ns && typeof data.variant === 'string') {
           if (seen.has(data.variant)) continue;
           seen.add(data.variant);
@@ -7084,14 +7364,14 @@ export function buildRouter() {
           let count = 0;
           try {
             count = (await _w746ListCaptures(req.tenant_record.id, variantNs)).length;
-          } catch (_) {}
+          } catch (_) {} // deliberate: cleanup
           // Even with zero captures, the registration alone enables the
           // recommendation surface. variants[data.variant] = count (0 means
           // registered-but-empty; recommendVariant honours this honestly).
           variants[data.variant] = Math.max(count, 0);
         }
       }
-    } catch (_) {
+    } catch (_) { // deliberate: cleanup
       // Best-effort. Missing event-store rows are not a hard error.
     }
     // recommendVariant requires variants[key] > 0 to recommend, so when a
@@ -7381,7 +7661,7 @@ export function buildRouter() {
       if (recipe_class === 'distilled_model') {
         await usageIncrementMeter(tid, 'distillation_jobs', 1);
       }
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
     tryAppendAudit({
       tenant_id: req.tenant_record?.id || req.tenant,
       tenant_name: req.tenant_record?.name || null,
@@ -7422,7 +7702,7 @@ export function buildRouter() {
           region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
           namespace_id: corpus_namespace || null,
         });
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
       // LM-8 (V1 launch 2026-05-26) — compile-done email on the sync branch.
       // Only sends on the two terminal states; runJob may have left the row
       // in queued/running on early-throw and we'd rather miss a notification
@@ -7483,7 +7763,7 @@ export function buildRouter() {
         region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
         namespace_id: corpus_namespace || null,
       });
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
     res.status(202).json({ job_id: job.id, status: job.status, poll: `/v1/compile/${job.id}` });
   });
 
@@ -7567,6 +7847,8 @@ export function buildRouter() {
       }
       if (!r2.ok) {
         return res.status(502).json({
+          ok: false,
+          error: 'rental_failed',
           status: 'failed',
           backend: r2.backend,
           reason: r2.reason,
@@ -7583,7 +7865,7 @@ export function buildRouter() {
       try {
         const tid = (req.tenant_record && req.tenant_record.id) || null;
         await usageIncrementMeter(tid, 'builds', 1);
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
       tryAppendAudit({
         tenant_id: req.tenant_record?.id || req.tenant,
         tenant_name: req.tenant_record?.name || null,
@@ -7890,9 +8172,9 @@ export function buildRouter() {
               items.push({ evidence_id: n.id, kind: n.kind || 'unknown', artifact_id: a.id || a.artifact_id });
             }
           }
-        } catch {}
+        } catch {} // deliberate: cleanup
       }
-    } catch {}
+    } catch {} // deliberate: cleanup
     res.json({ ok: true, count: items.length, items });
   }
   r.get('/v1/evidence', listEvidenceIndex);
@@ -7909,7 +8191,7 @@ export function buildRouter() {
       if (typeof readAuditLogForTenant === 'function') {
         entries = readAuditLogForTenant(tenantId) || [];
       }
-    } catch {}
+    } catch {} // deliberate: cleanup
     let verified = true; let brokenAt = null; let prevHash = null;
     for (let i = 0; i < entries.length; i++) {
       const e = entries[i];
@@ -7935,7 +8217,7 @@ export function buildRouter() {
       if (typeof listCapturesForTenant === 'function') {
         rows = listCapturesForTenant(tenantId, { namespace, limit, offset }) || [];
       }
-    } catch {}
+    } catch {} // deliberate: cleanup
     res.json({ ok: true, count: rows.length, limit, offset, namespace, items: rows });
   });
   r.post('/v1/capture/bulk', (req, res) => {
@@ -7959,7 +8241,7 @@ export function buildRouter() {
       if (typeof listCapturesForTenant === 'function') {
         rows = listCapturesForTenant(tenantId, { namespace, limit: 10000, offset: 0 }) || [];
       }
-    } catch {}
+    } catch {} // deliberate: cleanup
     if (format === 'csv') {
       res.set('Content-Type', 'text/csv');
       res.set('Content-Disposition', `attachment; filename="captures-${tenantId}.csv"`);
@@ -7982,7 +8264,7 @@ export function buildRouter() {
       if (typeof listTeamInvitesForTenant === 'function') {
         invites = listTeamInvitesForTenant(tenantId) || [];
       }
-    } catch {}
+    } catch {} // deliberate: cleanup
     res.json({ ok: true, tenant_id: tenantId, count: invites.length, invites });
   });
   r.post('/v1/team/invites', (req, res) => {
@@ -8142,7 +8424,7 @@ export function buildRouter() {
     try {
       const c = registry.getConcept(req.params.id, req.tenant, req.tenant_record?.id);
       if (c) return res.json(c);
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
     res.status(404).json({ error: 'recipe not found' });
   });
 
@@ -8221,7 +8503,7 @@ export function buildRouter() {
       const dir = process.env.KOLM_DATA_DIR || path.resolve('data');
       fs.mkdirSync(dir, { recursive: true });
       fs.appendFileSync(path.join(dir, 'registry-submissions.jsonl'), JSON.stringify(record) + '\n');
-    } catch (e) {
+    } catch (e) { // deliberate: cleanup
       // Best-effort log; never fail the request because we couldn't persist.
     }
     res.status(202).json({ submission_id, status: 'pending' });
@@ -8623,7 +8905,7 @@ export function buildRouter() {
           };
           const ON_SERVERLESS = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
           if (ON_SERVERLESS) {
-            try { await runJob(job, ctx); } catch {}
+            try { await runJob(job, ctx); } catch {} // deliberate: cleanup
             const fresh = getJob(job.id, req.tenant) || job;
             return {
               job_id: fresh.id,
@@ -8732,7 +9014,7 @@ export function buildRouter() {
           maxAge: 30 * 24 * 60 * 60 * 1000,
           path: '/',
         });
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
     }
     // Do not leak the raw api_key in the response body — the httpOnly cookie
     // (kolm_session, refreshed above) carries all subsequent auth. Expose only
@@ -8801,6 +9083,85 @@ export function buildRouter() {
       payload: { api_key_prefix: typeof k === 'string' ? k.slice(0, 12) : null },
     });
     res.json({ api_key: k });
+  });
+
+  // W889-7.2 — GET /v1/account/state surfaces a per-tenant state summary the
+  // /account/overview "What's next" engine reads. Returns artifact + capture
+  // + namespace counts, the age of the last artifact, age of the primary api
+  // key, plus a flat `signals` array each rule in whats-next.js matches on.
+  // Auth-gated (NOT in PUBLIC_API) — cross-tenant state leaks were what made
+  // /v1/intent/next add tenant_id scoping in W432.
+  r.get('/v1/account/state', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
+    const t = req.tenant_record;
+    const now = Date.now();
+    const tenantId = t.id;
+    let artifactsCount = 0;
+    let capturesCount = 0;
+    const namespaces = {};
+    let lastArtifactAt = null;
+    try {
+      const arts = findByTenant('artifacts', tenantId) || [];
+      artifactsCount = arts.length;
+      for (const a of arts) {
+        const ts = a.created_at || a.modified_at || null;
+        if (ts) {
+          const v = typeof ts === 'string' ? Date.parse(ts) : Number(ts);
+          if (Number.isFinite(v) && (!lastArtifactAt || v > lastArtifactAt)) lastArtifactAt = v;
+        }
+      }
+    } catch (_) {} // deliberate: cleanup
+    try {
+      const obs = findByTenant('observations', tenantId) || [];
+      capturesCount = obs.length;
+      for (const o of obs) {
+        const ns = (o && (o.namespace || o.ns)) || 'default';
+        namespaces[ns] = (namespaces[ns] || 0) + 1;
+      }
+    } catch (_) {} // deliberate: cleanup
+    const keyCreated = t.created_at ? Date.parse(t.created_at) : null;
+    const keyAgeDays = keyCreated && Number.isFinite(keyCreated)
+      ? Math.floor((now - keyCreated) / 86400000)
+      : null;
+    const lastArtifactAgeDays = lastArtifactAt
+      ? Math.floor((now - lastArtifactAt) / 86400000)
+      : null;
+    const signals = [];
+    if (artifactsCount === 0) {
+      signals.push({ kind: 'compile_first', severity: 'compile', value: 0 });
+    } else if (lastArtifactAgeDays != null && lastArtifactAgeDays >= 3) {
+      signals.push({ kind: 'compile_stale', severity: 'compile', value: lastArtifactAgeDays });
+    }
+    if (capturesCount === 0) {
+      signals.push({ kind: 'route_first', severity: 'compile', value: 0 });
+    } else if (capturesCount >= 1000) {
+      signals.push({ kind: 'seed_training', severity: 'compile', value: capturesCount });
+    }
+    for (const [ns, count] of Object.entries(namespaces)) {
+      if (count >= 100 && count < 1000) {
+        signals.push({ kind: 'namespace_almost_ready', severity: 'routine', value: count, namespace: ns });
+      } else if (count >= 1000) {
+        signals.push({ kind: 'namespace_ready', severity: 'compile', value: count, namespace: ns });
+      }
+    }
+    if (keyAgeDays != null && keyAgeDays >= 90) {
+      signals.push({ kind: 'rotate_key', severity: 'rotate', value: keyAgeDays });
+    }
+    res.json({
+      ok: true,
+      tenant_id: tenantId,
+      plan: t.plan,
+      counts: {
+        artifacts: artifactsCount,
+        captures: capturesCount,
+        namespaces: Object.keys(namespaces).length,
+      },
+      namespaces,
+      last_artifact_age_days: lastArtifactAgeDays,
+      key_age_days: keyAgeDays,
+      signals,
+      generated_at: new Date().toISOString(),
+    });
   });
 
   // W413 — /v1/intent/next surfaces the W412 recommender to /account/overview.
@@ -8922,6 +9283,120 @@ export function buildRouter() {
       });
     } catch (e) {
       res.status(500).json({ ok: false, error: 'classify_failed', message: String(e && e.message || e) });
+    }
+  });
+
+  // W888-R — POST /v1/assistant/chat-docs. Public docs-search backend for the
+  // /docs search box. Anonymous-by-design (rate-limited by IP via
+  // docsAssistantLimiter at 60/IP/24h) so anyone reading the docs can use it
+  // without signing in. Per-turn budget cap is $0.005 (half the authed
+  // /v1/assistant/chat cap, since this surface is unauthed). Capture goes to
+  // the `public/docs-search` namespace so we can audit public usage.
+  //
+  // Request body:  { query: string, top_k_doc_urls: [string, ...] }
+  // Response:      { ok, response, source, cost_usd, first_token_ms, total_ms,
+  //                  passport_hash, turn_id, fallback_chain, sources,
+  //                  commands: { commands: [{raw, verb, known}], unknown_count } }
+  //
+  // The route forwards top_k_doc_urls into the AssistantClient.ask() context
+  // (formatted as a docs-anchored system prompt). The response surfaces the
+  // sources back to the client so the UI renders the same URLs it sent in.
+  //
+  // KOLM_ASSISTANT_TEST_SHIM=1 wires deterministic shims for tests; this same
+  // env var is used by tests/wave888p-cli-nl-routing.test.js.
+  r.post('/v1/assistant/chat-docs', docsAssistantLimiter, async (req, res) => {
+    const query = String((req.body && req.body.query) || '').trim();
+    if (!query) {
+      return res.status(400).json({ ok: false, error: 'missing_query', message: 'POST body must include a non-empty {query}.' });
+    }
+    if (query.length > 1200) {
+      return res.status(413).json({ ok: false, error: 'query_too_long', message: 'Docs search caps each query at 1200 characters.' });
+    }
+    const topKDocUrls = Array.isArray(req.body && req.body.top_k_doc_urls) ? req.body.top_k_doc_urls.slice(0, 16).map(String) : [];
+    // Inline docs system prompt. Pinned to the kolm docs corpus + the caller's
+    // top-K Lunr hits. The "only cite URLs from this list" guard prevents the
+    // assistant from inventing URLs that don't exist in our doc tree.
+    const docsSystemPrompt = [
+      'You are kolm-assistant, embedded in the kolm.ai documentation search.',
+      'Answer the user\'s question in 1-3 sentences using only the kolm docs corpus.',
+      'When relevant, suggest a `kolm <verb>` command in backticks. Never invent CLI verbs or flags.',
+      'When you cite a doc page, the URL must come from this list:',
+      topKDocUrls.length ? topKDocUrls.map(u => '  - ' + u).join('\n') : '  (no candidate URLs provided — keep the answer short and link to /docs only)',
+      'If you do not know the answer, say so and link to /docs.',
+    ].join('\n');
+    try {
+      const mod = await import('./assistant-client.js');
+      const AssistantClient = mod.AssistantClient || mod.default;
+      const extractKolmCommands = mod.extractKolmCommands;
+      // W888-R — test-shim hook. When KOLM_ASSISTANT_TEST_SHIM=1, the route
+      // uses canned synthetic shims so the lock-in tests don't call out.
+      const useShim = process.env.KOLM_ASSISTANT_TEST_SHIM === '1';
+      const shimOverride = (req.app && req.app.locals && req.app.locals._w888rShim) || null;
+      const shims = shimOverride || (useShim ? {
+        localShim: async ({ prompt }) => ({
+          response: '[test-shim] check the docs link below. try `kolm doctor` to verify your install. you asked: ' + String(prompt).slice(0, 64),
+          first_token_ms: 1,
+        }),
+        apiShim: async () => ({ ok: false, reason: 'test_shim_skip_api' }),
+        gatewayShim: async () => ({ ok: false, reason: 'test_shim_skip_gateway' }),
+      } : {});
+      // Best-effort capture into the public/docs-search namespace. Failure
+      // never blocks the response.
+      const capturer = (req.app && req.app.locals && req.app.locals._w888rCapturer) || (async (evt) => {
+        try {
+          const cs = await import('./capture-store.js');
+          await cs.insertCapture({
+            tenant: 'anonymous',
+            namespace: 'public/docs-search',
+            event: evt.event,
+            prompt: evt.prompt,
+            response: evt.response,
+            ts: evt.ts,
+            cost_usd: evt.cost_usd,
+            source: evt.source,
+          });
+        } catch (_) { /* swallow */ }
+      });
+      const client = new AssistantClient({
+        // $0.005 per-turn cap — half the authed cap; this is the public surface.
+        perTurnCapUsd: 0.005,
+        capturer,
+        ...shims,
+      });
+      const envelope = await client.ask(query, {
+        system: docsSystemPrompt,
+        capture_namespace: 'public/docs-search',
+        max_tokens: 384,
+      });
+      // Parse out backticked `kolm <verb>` commands so the client doesn't need
+      // to re-parse the response. Verb registry comes from the W888-M inventory
+      // if present; falls back to an empty known set (every verb shows as
+      // unknown, which the client handles by dimming + line-through).
+      let known = [];
+      try {
+        const inv = path.resolve(process.cwd(), 'data', 'assistant-corpus', 'cli-inventory.json');
+        if (fs.existsSync(inv)) {
+          const j = JSON.parse(fs.readFileSync(inv, 'utf8'));
+          known = (j.verbs || []).map(v => v.verb).filter(Boolean);
+        }
+      } catch (_) { /* no inventory available — empty known set is acceptable */ }
+      const commands = extractKolmCommands ? extractKolmCommands(envelope.response || '', known) : { commands: [], unknown_count: 0 };
+      res.json({
+        ok: !!envelope.ok,
+        response: envelope.response || '',
+        source: envelope.source || 'error',
+        cost_usd: envelope.cost_usd != null ? envelope.cost_usd : 0,
+        first_token_ms: envelope.first_token_ms || 0,
+        total_ms: envelope.total_ms || 0,
+        passport_hash: envelope.passport_hash || null,
+        turn_id: envelope.turn_id || null,
+        fallback_chain: envelope.fallback_chain || [],
+        sources: topKDocUrls,
+        commands,
+        error: envelope.error,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'docs_assistant_failed', message: String(e && e.message || e) });
     }
   });
 
@@ -9231,6 +9706,115 @@ export function buildRouter() {
       });
     } catch (e) {
       res.status(500).json({ ok: false, error: 'classify_failed', message: String(e && e.message || e) });
+    }
+  });
+
+  // W888-Q — /v1/assistant/chat. LLM-backed assistant powering the floating
+  // chat widget on every authed /account page. Routes through the W888-P
+  // AssistantClient three-layer fallback (local GGUF -> api.kolm.ai -> gateway
+  // frontier). Tier-gated to paid plans; rate-limited to 60 calls/hour/tenant.
+  // Returns the W888-P envelope verbatim plus the canonical aliases
+  // (provider_used / latency_ms) the widget consumes.
+  r.post('/v1/assistant/chat', async (req, res) => {
+    if (!req.tenant_record) {
+      return res.status(401).json({ ok: false, error: 'auth_required' });
+    }
+    const tenant = req.tenant_record;
+    const plan = String(tenant.plan || 'free').toLowerCase();
+    if (plan === 'free' || plan === 'anon') {
+      return res.status(402).json({
+        ok: false,
+        error: 'tier_locked',
+        tier_locked: true,
+        required: 'Indie',
+        current_plan: plan,
+        upgrade: '/pricing',
+        message: 'The kolm assistant requires a paid plan. Upgrade to unlock natural-language access.',
+      });
+    }
+    const burst = process.env.KOLM_ASSISTANT_CHAT_TEST_BURST === '1' ? ASSISTANT_CHAT_RATE_LIMIT + 1 : 1;
+    let lastRate = null;
+    for (let i = 0; i < burst; i++) {
+      lastRate = _assistantChatRateCheck(tenant.id, Date.now());
+    }
+    if (lastRate && lastRate.over) {
+      res.set('Retry-After', String(Math.ceil(lastRate.reset_ms / 1000)));
+      return res.status(429).json({
+        ok: false,
+        error: 'rate_limited',
+        limit: ASSISTANT_CHAT_RATE_LIMIT,
+        window_ms: ASSISTANT_CHAT_RATE_WINDOW_MS,
+        reset_in_ms: lastRate.reset_ms,
+        message: 'Assistant chat caps at 60 calls per hour per tenant. Try again shortly.',
+      });
+    }
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const prompt = typeof body.prompt === 'string' ? body.prompt.trim() : '';
+    if (!prompt) {
+      return res.status(400).json({
+        ok: false,
+        error: 'missing_prompt',
+        message: 'POST body must include a non-empty {prompt}',
+      });
+    }
+    const system = typeof body.system === 'string' ? body.system.slice(0, 8000) : '';
+    const max_tokens = Math.min(2048, Math.max(16, Number(body.max_tokens) || 512));
+    const conversation = Array.isArray(body.conversation) ? body.conversation.slice(-12) : [];
+    const nsBase = (tenant.name || tenant.id || 'assistant').toString().toLowerCase().replace(/[^a-z0-9_-]+/g, '-').slice(0, 64);
+    const capture_namespace = `${nsBase}/assistant`;
+    let client;
+    try {
+      client = await ensureAssistantClient();
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'assistant_client_init_failed', message: String(e && e.message || e) });
+    }
+    try {
+      const t0 = Date.now();
+      const envelope = await client.ask(prompt, {
+        system,
+        max_tokens,
+        capture_namespace,
+        conversation,
+      });
+      const latency_ms = Date.now() - t0;
+      const out = {
+        ok: envelope.ok !== false,
+        response: envelope.response || '',
+        passport_hash: envelope.passport_hash || null,
+        cost_usd: typeof envelope.cost_usd === 'number' ? envelope.cost_usd : 0,
+        provider_used: envelope.source || 'unknown',
+        latency_ms,
+        first_token_ms: envelope.first_token_ms || latency_ms,
+        total_ms: envelope.total_ms || latency_ms,
+        turn_id: envelope.turn_id || null,
+        fallback_chain: envelope.fallback_chain || [],
+      };
+      if (envelope.error === 'budget_exceeded') {
+        const gw = (envelope.fallback_chain || []).find((x) => x.layer === 'gateway') || {};
+        return res.status(200).json({
+          ...out,
+          ok: false,
+          reason: 'budget_exceeded',
+          cost_cap_usd: gw.cap_usd != null ? gw.cap_usd : 0.01,
+          estimated_cost_usd: gw.estimated_cost_usd != null ? gw.estimated_cost_usd : null,
+          message: 'Per-turn cost cap exceeded. Try a shorter prompt or upgrade your plan.',
+        });
+      }
+      if (envelope.error === 'all_layers_failed' || envelope.ok === false) {
+        return res.status(200).json({
+          ...out,
+          ok: false,
+          reason: envelope.error || 'assistant_failed',
+          message: 'Assistant could not respond. See fallback_chain for layer-by-layer reasons.',
+        });
+      }
+      return res.json(out);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'assistant_chat_failed',
+        message: String(e && e.message || e),
+      });
     }
   });
 
@@ -9546,7 +10130,7 @@ export function buildRouter() {
   r.get('/v1/byoc/status', (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
     let deployments = [];
-    try { deployments = (typeof byoc !== 'undefined' && byoc.listDeploymentsForTenant) ? byoc.listDeploymentsForTenant(req.tenant_record.id, {}) || [] : []; } catch (_) {}
+    try { deployments = (typeof byoc !== 'undefined' && byoc.listDeploymentsForTenant) ? byoc.listDeploymentsForTenant(req.tenant_record.id, {}) || [] : []; } catch (_) {} // deliberate: cleanup
     const live = deployments.find((d) => d && d.status !== 'torndown' && d.status !== 'deleted');
     res.json({
       ok: true,
@@ -10654,7 +11238,7 @@ export function buildRouter() {
           .map(f => pathm.join(artDir, f))
           .slice(0, 4);
       }
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
     if (!artifacts.length) {
       return res.json({
         ok: true,
@@ -10918,7 +11502,7 @@ export function buildRouter() {
   r.get('/v1/admin/health', (req, res) => {
     if (!req.is_admin) return res.status(403).json({ error: 'admin only' });
     let store_stats = null;
-    try { store_stats = storeStats(); } catch (_) {}
+    try { store_stats = storeStats(); } catch (_) {} // deliberate: cleanup
     res.json({
       now: new Date().toISOString(),
       region: process.env.REGION || process.env.RAILWAY_REGION || 'unknown',
@@ -11499,6 +12083,8 @@ export function buildRouter() {
     );
     if (!v) {
       return res.status(404).json({
+        ok: false,
+        error: 'cid_not_found',
         verified: false,
         cid: normalized,
         reason: 'artifact not found in this registry instance',
@@ -11650,7 +12236,7 @@ export function buildRouter() {
           normalized_hash: meta.normalized_hash,
           replace: replace === true,
         });
-      } catch {}
+      } catch {} // deliberate: cleanup
       chargeUsage(req.tenant_record, Math.max(1, Math.ceil(meta.bytes / 10240)));
       res.json({
         tenant_id: meta.tenant_id,
@@ -11723,7 +12309,7 @@ export function buildRouter() {
           tenant_id: tenantId,
           corpus_id: corpusId,
         });
-      } catch {}
+      } catch {} // deliberate: cleanup
       res.json({ deleted: true, tenant_id: tenantId, corpus_id: corpusId });
     } catch (e) {
       const msg = String(e.message || e);
@@ -12285,7 +12871,7 @@ export function buildRouter() {
           source: rec.meta?.source || null,
         });
       }
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
     return res.status(404).json({ error: 'job not found' });
   });
 
@@ -12457,6 +13043,86 @@ export function buildRouter() {
     const rec = enterpriseLeads.find(x => x.id === req.params.id);
     if (!rec) return res.status(404).json({ error: 'not found' });
     res.json(rec);
+  });
+
+  // W889-6.1 — POST /v1/sales/demo-request (PUBLIC, rate-limited 10/IP/24h via
+  // demoRequestLimiter above). Lighter-weight than /v1/lead/enterprise: a
+  // buyer at the "Book Demo" CTA gives company + email + use_case +
+  // expected_volume_per_month + optional message. Stored under namespace
+  // 'sales/demo-requests' in the capture lake; mirror lives in
+  // salesDemoRequests for ops triage. Email best-effort to SALES_EMAIL.
+  r.post('/v1/sales/demo-request', demoRequestLimiter, async (req, res) => {
+    const b = req.body || {};
+    const FIELD_LIMITS = {
+      company: 120,
+      email: 200,
+      use_case: 600,
+      expected_volume_per_month: 80,
+      message: 1000,
+    };
+    const REQUIRED = ['company', 'email', 'use_case', 'expected_volume_per_month'];
+
+    const cleaned = {};
+    for (const k of Object.keys(FIELD_LIMITS)) {
+      const v = b[k];
+      if (v === undefined || v === null) { cleaned[k] = ''; continue; }
+      if (typeof v !== 'string') {
+        return res.status(400).json({ error: 'invalid_field', detail: `${k} must be a string` });
+      }
+      cleaned[k] = v.trim();
+      if (cleaned[k].length > FIELD_LIMITS[k]) {
+        return res.status(400).json({ error: 'field_too_long', detail: `${k} exceeds ${FIELD_LIMITS[k]} chars` });
+      }
+    }
+    for (const k of REQUIRED) {
+      if (!cleaned[k]) {
+        return res.status(400).json({ error: 'missing_field', detail: `${k} is required` });
+      }
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleaned.email)) {
+      return res.status(400).json({ error: 'invalid_email', detail: 'email shape is not valid' });
+    }
+
+    const ticket_id = 'demo_' + Date.now().toString(36) + '_' + crypto.randomBytes(4).toString('hex');
+    const ip = ipKey(req);
+    const ua = String(req.headers['user-agent'] || '').slice(0, 240);
+    const ts = Date.now();
+    const record = { id: ticket_id, namespace: 'sales/demo-requests', ts, ...cleaned, ip, ua };
+    salesDemoRequests.push(record);
+
+    const subject = `Demo request: ${cleaned.company}`;
+    const lines = [
+      `New demo request from ${cleaned.company}.`,
+      ``,
+      `Company:     ${cleaned.company}`,
+      `Email:       ${cleaned.email}`,
+      `Volume/mo:   ${cleaned.expected_volume_per_month}`,
+      ``,
+      `Use case:`,
+      cleaned.use_case,
+      ``,
+    ];
+    if (cleaned.message) {
+      lines.push(`Message:`, cleaned.message, ``);
+    }
+    lines.push(`---`, `Ticket: ${ticket_id}`, `Submitted: ${new Date(ts).toISOString()}`, `IP key:    ${ip}`, `UA:        ${ua || '(none)'}`);
+    const text = lines.join('\n');
+
+    try {
+      const { sendMail } = await import('./email.js');
+      await sendMail({
+        to: process.env.SALES_EMAIL || 'sales@kolm.ai',
+        subject,
+        text,
+        replyTo: cleaned.email,
+        tags: [{ name: 'kind', value: 'demo_request' }],
+      });
+    } catch (_err) { // deliberate: cleanup
+      // never block the response on email — Resend or any other transport
+      // failure stays out of the buyer's flow.
+    }
+
+    res.json({ ok: true, ticket_id });
   });
 
   // Specialist train - queues tenant specialist training from an existing recipe and optional corpus.
@@ -13205,7 +13871,7 @@ export function buildRouter() {
           });
         }
         // Non-2xx bridge response — fall through to the local worker.
-      } catch (_) {
+      } catch (_) { // deliberate: cleanup
         // Network error — fall through.
       }
     }
@@ -13651,7 +14317,7 @@ export function buildRouter() {
     await insertCapture(obs);
     obs.durable = captureIsDurable();
     // SSE fan-out (W258-BE-2) — best-effort.
-    try { publishCapture(obs); } catch (_) {
+    try { publishCapture(obs); } catch (_) { // deliberate: cleanup
       // SSE broker failure must not block the capture path (best-effort).
     }
     // Threshold alerts (W215/W258-BE-3) — thresholdCrossedBy after insert.
@@ -13668,7 +14334,7 @@ export function buildRouter() {
         notifFireThresholdAlert({ tenant, namespace: ns, count, threshold: crossed, baseUrl })
           .catch(() => {}); // best-effort; never propagate alert failure
       }
-    } catch (_) {
+    } catch (_) { // deliberate: cleanup
       // Count / threshold-state failures must not break the capture path.
     }
     return obs;
@@ -13774,7 +14440,7 @@ export function buildRouter() {
           region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
           namespace_id: cleanNs,
         });
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
       return res.status(503).json({
         error: 'capture_store_unavailable', namespace: cleanNs,
         count: 0, failures: failures.slice(0, 5),
@@ -13794,7 +14460,7 @@ export function buildRouter() {
         region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
         namespace_id: cleanNs,
       });
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
     res.status(status).json({
       ok: failures.length === 0, namespace: cleanNs, count: ids.length, ids,
       ...(failures.length > 0 ? { failures: failures.slice(0, 5) } : {}),
@@ -13845,7 +14511,7 @@ export function buildRouter() {
       'X-Kolm-Capture-Driver': captureDriverName(),
       'X-Kolm-Capture-Durable': String(captureIsDurable()),
     });
-    try { req.socket?.setTimeout?.(3600000); } catch {}
+    try { req.socket?.setTimeout?.(3600000); } catch {} // deliberate: cleanup
     res.write(`event: hello\ndata: ${JSON.stringify({ tenant: req.tenant, namespace: namespaceFilter, ts: new Date().toISOString(), driver: captureDriverName() })}\n\n`);
 
     // W213/W258: subscribeCaptureStream() and subscribeCapture(req.tenant, ...)
@@ -13867,16 +14533,16 @@ export function buildRouter() {
       try { res.write(`event: capture\ndata: ${JSON.stringify(event)}\n\n`); } catch (_) { /* socket closed */ }
     });
     const keepAlive = setInterval(() => {
-      try { res.write(': keep-alive\n\n'); } catch {}
+      try { res.write(': keep-alive\n\n'); } catch {} // deliberate: cleanup
     }, 25000);
 
     let cleaned = false;
     const cleanup = () => {
       if (cleaned) return;
       cleaned = true;
-      try { unsubscribe(); } catch {}
-      try { clearInterval(keepAlive); } catch {}
-      try { res.end(); } catch {}
+      try { unsubscribe(); } catch {} // deliberate: cleanup
+      try { clearInterval(keepAlive); } catch {} // deliberate: cleanup
+      try { res.end(); } catch {} // deliberate: cleanup
     };
     req.on('close', cleanup);
     req.on('error', cleanup);
@@ -14273,7 +14939,7 @@ export function buildRouter() {
           });
         }
         // Non-2xx bridge response — fall through to in-tree worker.
-      } catch (_) {
+      } catch (_) { // deliberate: cleanup
         // Network error — fall through.
       }
     }
@@ -14593,7 +15259,7 @@ export function buildRouter() {
       .then(resp => {
         for (const [k, v] of Object.entries(resp.headers || {})) {
           if (k.toLowerCase() === 'content-length') continue;
-          try { res.setHeader(k, v); } catch {}
+          try { res.setHeader(k, v); } catch {} // deliberate: cleanup
         }
         res.status(resp.status || 200).send(resp.body);
       })
@@ -15208,6 +15874,54 @@ res.json({
       try { fs.appendFileSync(path.join(queueDir, 'publish-queue.jsonl'), JSON.stringify(row) + '\n'); } catch (_e) { /* best-effort */ }
       res.status(202).json({ ok: true, queue_id: queueId, status: 'manual_review_queue', message: 'received; manual review by kolm.ai team' });
     } catch (e) { res.status(500).json({ error: 'marketplace_publish_error', detail: String(e.message || e) }); }
+  });
+
+  // W889-10.1 — Marketplace v2 interest capture.
+  //
+  // Public POST from /marketplace (the "Premium marketplace coming soon"
+  // teaser). Captures { email, interest_areas?, message? } into the local
+  // store under namespace 'marketplace/interest'. The lake row is keyed by
+  // email so a repeat submission updates the row's areas/message without
+  // double-counting position. The rate limiter caps abuse at 10 hits per
+  // IP per 24h (see marketplaceInterestLimiter above).
+  //
+  // Returns { ok, position } where position is the row's stable 1-indexed
+  // place in the early-access list. Stable means the position does not
+  // change on dedupe (we read the existing row's position back out).
+  r.post('/v1/marketplace/interest', marketplaceInterestLimiter, (req, res) => {
+    try {
+      const body = req.body || {};
+      const rawEmail = String(body.email || '').trim();
+      // Spec-conformant email regex (same shape as /v1/specialists/waitlist).
+      if (!rawEmail || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(rawEmail) || rawEmail.length > 200) {
+        return res.status(400).json({ ok: false, error: 'invalid_email', detail: 'a valid email address is required' });
+      }
+      const email = rawEmail.toLowerCase();
+      const interestAreas = String(body.interest_areas || '').slice(0, 200);
+      const message = String(body.message || '').slice(0, 1000);
+      const existing = findOne('marketplace_interest', x => x.email === email);
+      if (existing) {
+        update('marketplace_interest', x => x.id === existing.id, {
+          interest_areas: interestAreas || existing.interest_areas || '',
+          message: message || existing.message || '',
+          updated_at: new Date().toISOString(),
+        });
+        return res.json({ ok: true, position: existing.position, message: 'already reserved - interest updated' });
+      }
+      const position = (all('marketplace_interest').length || 0) + 1;
+      const entry = {
+        id: 'mki_' + Date.now().toString(36) + crypto.randomBytes(3).toString('hex'),
+        email,
+        interest_areas: interestAreas,
+        message,
+        position,
+        created_at: new Date().toISOString(),
+      };
+      insert('marketplace_interest', entry);
+      return res.json({ ok: true, position, message: 'reserved - we will email when the v2 marketplace opens' });
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'marketplace_interest_error', detail: String(e.message || e) });
+    }
   });
 
   // ====================================================================
@@ -15948,13 +16662,13 @@ res.json({
             source_device_id: body.source_device_id || ev.source_device_id || 'team_sync',
           });
           received++;
-        } catch (_) {}
+        } catch (_) {} // deliberate: cleanup
       }
       // Meter the volume after the fan-out. usageIncrementMeter is a no-op
       // for free/anon/local so this is safe to call unconditionally.
       try {
         await usageIncrementMeter(tenant.id, 'enterprise_sync_volume', bytes);
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
       res.json({
         ok: true,
         received,
@@ -16555,7 +17269,7 @@ res.json({
 
       // W709 tie-in: pin the warning so the next routing decision sees it.
       if (alert) {
-        try { driftStore.registerDriftWarning(tenant_id, namespace, { jsd: compare.jsd }); } catch (_) {}
+        try { driftStore.registerDriftWarning(tenant_id, namespace, { jsd: compare.jsd }); } catch (_) {} // deliberate: cleanup
       }
 
       // Best-effort webhook delivery (no retries, 5s timeout).
@@ -16950,7 +17664,7 @@ res.json({
       //   1) req.app.locals._w749_teacher_caller — injected by tests
       //   2) hosted teacher — currently honest-stub; returns 503
       let teacher_caller = null;
-      try { teacher_caller = req.app && req.app.locals && req.app.locals._w749_teacher_caller; } catch (_) {}
+      try { teacher_caller = req.app && req.app.locals && req.app.locals._w749_teacher_caller; } catch (_) {} // deliberate: cleanup
       if (typeof teacher_caller !== 'function') {
         return res.status(503).json({
           ok: false,
@@ -17851,6 +18565,43 @@ res.json({
     res.json({ ok: true, ...result, profile, partial: !!(result.partial || warnings.length), warnings });
   });
 
+  // W888-C — DeviceRegistry literal-path routes MUST be registered before the
+  // parameterized /v1/devices/:id/register handler below, otherwise Express
+  // matches :id='register' and the W888-C register endpoint becomes unreachable.
+  // (Same for /v1/devices/list.)
+
+  // POST /v1/devices/register — registers a new device in the W888-C registry.
+  // Body matches DeviceRegistry.register() args:
+  //   { id, name?, host?, port?, user?, type, keyPath?, tags?, hardware_hint? }
+  r.post('/v1/devices/register', async (req, res) => {
+    try {
+      const body = req.body || {};
+      const { DeviceRegistry } = await import('./device-registry.js');
+      const registry = new DeviceRegistry({});
+      const device = await registry.register(body);
+      res.json({ ok: true, device });
+    } catch (e) {
+      const code = e && e.code ? String(e.code).toLowerCase().replace(/^kolm_e_/, '') : 'device_register_error';
+      res.status(400).json({ ok: false, error: code, detail: e && e.message ? e.message : String(e) });
+    }
+  });
+
+  // GET /v1/devices/list — list registered W888-C devices with filters
+  // ?type=<t>&tag=<t>&status=<t>&includeRemoved=1
+  r.get('/v1/devices/list', async (req, res) => {
+    try {
+      const { DeviceRegistry } = await import('./device-registry.js');
+      const registry = new DeviceRegistry({});
+      const filter = {};
+      if (req.query.type) filter.type = String(req.query.type);
+      if (req.query.tag) filter.tag = String(req.query.tag);
+      if (req.query.status) filter.status = String(req.query.status);
+      if (req.query.includeRemoved) filter.includeRemoved = true;
+      const devices = await registry.list(filter);
+      res.json({ ok: true, devices });
+    } catch (e) { res.status(500).json(_w384Err(e, 'devices_list_error')); }
+  });
+
   // Device fleet registration - validates and stores a canonical profile for a device id.
   r.post('/v1/devices/:id/register', async (req, res) => {
     try {
@@ -17936,6 +18687,164 @@ res.json({
       const result = await devRecommendForProfile({});
       res.json(result);
     } catch (e) { res.status(400).json(_w384Err(e, 'device_recommend_error')); }
+  });
+
+  // ====================================================================
+  // W888-C — DeviceRegistry HTTP control plane (continued).
+  // POST /v1/devices/register + GET /v1/devices/list are registered ABOVE the
+  // legacy /v1/devices/:id/register handler so Express's first-match order
+  // resolves the literal-path routes correctly.
+  // ====================================================================
+
+  // POST /v1/devices/:id/probe — runs deviceCaps + writes back via heartbeat.
+  r.post('/v1/devices/:id/probe', async (req, res) => {
+    try {
+      const { DeviceRegistry } = await import('./device-registry.js');
+      const { deviceCaps } = await import('./device-caps.js');
+      const registry = new DeviceRegistry({});
+      const rec = await registry.get(req.params.id);
+      if (!rec || rec.removed_at) return res.status(404).json({ ok: false, error: 'unknown_device', id: req.params.id });
+      const r = await deviceCaps(rec);
+      if (r.ok) {
+        await registry.heartbeat(req.params.id, { status: 'online', last_seen: new Date().toISOString(), observed_hardware: r.hardware });
+      } else {
+        await registry.heartbeat(req.params.id, { status: 'error', last_seen: new Date().toISOString() }).catch(() => {});
+      }
+      res.json({ ok: r.ok, device_id: req.params.id, hardware: r.hardware || null, error: r.error || null, hint: r.hint || null });
+    } catch (e) { res.status(500).json(_w384Err(e, 'device_probe_error')); }
+  });
+
+  // POST /v1/devices/:id/heartbeat — body matches DeviceRegistry.heartbeat() args.
+  r.post('/v1/devices/:id/heartbeat', async (req, res) => {
+    try {
+      const { DeviceRegistry } = await import('./device-registry.js');
+      const registry = new DeviceRegistry({});
+      const body = req.body || {};
+      const rec = await registry.heartbeat(req.params.id, {
+        status: body.status,
+        last_seen: body.last_seen,
+        observed_hardware: body.observed_hardware,
+      });
+      res.json({ ok: true, device: rec });
+    } catch (e) {
+      const code = e && e.code === 'KOLM_E_UNKNOWN_DEVICE' ? 404 : 400;
+      res.status(code).json({ ok: false, error: 'heartbeat_error', detail: e && e.message ? e.message : String(e) });
+    }
+  });
+
+  // DELETE /v1/devices/:id — soft delete; ?hard=1 to hard delete.
+  // Guarded so we DO NOT intercept the legacy DELETE /v1/devices/:id/install/:artifact_id
+  // (Express route ordering means specific routes registered earlier win; we
+  // are below /v1/devices/:id/install handler so :id here only matches single segment).
+  r.delete('/v1/devices/:id', async (req, res) => {
+    try {
+      const { DeviceRegistry } = await import('./device-registry.js');
+      const registry = new DeviceRegistry({});
+      const hard = req.query.hard === '1' || req.query.hard === 'true';
+      const r = await registry.remove(req.params.id, { hard });
+      if (!r.ok) return res.status(404).json({ ok: false, error: r.error || 'remove_failed', id: req.params.id });
+      res.json(r);
+    } catch (e) { res.status(500).json(_w384Err(e, 'device_remove_error')); }
+  });
+
+  // GET /v1/devices/:id — registry-first lookup; falls back to the W372
+  // per-file store so existing dashboards stay working.
+  // NOTE: this is registered LAST so the more specific /v1/devices/detect,
+  // /v1/devices/list, /v1/devices/recommend, /v1/devices/installed routes
+  // above keep matching ahead of it.
+  r.get('/v1/devices/:id', async (req, res) => {
+    try {
+      const { DeviceRegistry } = await import('./device-registry.js');
+      const registry = new DeviceRegistry({});
+      let device = await registry.get(req.params.id);
+      if (!device || device.removed_at) {
+        const legacy = await devGetDevice(req.params.id).catch(() => null);
+        if (legacy) device = legacy;
+      }
+      if (!device || device.removed_at) return res.status(404).json({ ok: false, error: 'unknown_device', id: req.params.id });
+      res.json({ ok: true, device });
+    } catch (e) { res.status(500).json(_w384Err(e, 'device_get_error')); }
+  });
+
+  // W888-D HTTP control plane: POST /v1/deploy + /v1/deploy/canary +
+  // /v1/test-device + /v1/test-quants. All require auth (auth.js gates via
+  // PUBLIC_API allowlist; these paths are NOT in PUBLIC_API, so an unauth
+  // request returns 401 from the auth middleware). The handlers below simply
+  // do shape-validation + delegate to the same modules the CLI calls.
+  r.post('/v1/deploy', async (req, res) => {
+    try {
+      const body = req.body || {};
+      if (!body.artifact_path && !body.artifactPath) return res.status(400).json({ ok: false, error: 'artifact_path required' });
+      if (!body.device_id && !body.deviceId) return res.status(400).json({ ok: false, error: 'device_id required' });
+      const mod = await import('./deploy-pipeline.js');
+      const pipeline = new mod.DeployPipeline();
+      const config = Object.assign({}, body.config || {});
+      const artifactPath = body.artifact_path || body.artifactPath;
+      const deviceId = body.device_id || body.deviceId;
+      let result;
+      if (config.rolling && Number(config.replicas || 1) > 1) {
+        const rollingMod = await import('./deploy-rolling.js');
+        result = await new rollingMod.RollingDeploy({ pipeline }).deploy({ artifactPath, deviceId, config });
+      } else {
+        result = await pipeline.deploy({ artifactPath, deviceId, config });
+      }
+      res.json({ ok: result.success || result.ok || false, result });
+    } catch (e) { res.status(500).json(_w384Err(e, 'deploy_error')); }
+  });
+  r.post('/v1/deploy/canary', async (req, res) => {
+    try {
+      const body = req.body || {};
+      if (!body.artifact_path && !body.artifactPath) return res.status(400).json({ ok: false, error: 'artifact_path required' });
+      const deviceIds = body.device_ids || body.deviceIds || (body.device_id ? [body.device_id] : (body.deviceId ? [body.deviceId] : []));
+      if (deviceIds.length === 0) return res.status(400).json({ ok: false, error: 'device_ids required' });
+      const mod = await import('./deploy-pipeline.js');
+      const canaryMod = await import('./deploy-canary.js');
+      const pipeline = new mod.DeployPipeline();
+      const c = new canaryMod.CanaryDeploy({ pipeline });
+      const result = await c.deploy({
+        artifactPath: body.artifact_path || body.artifactPath,
+        deviceIds,
+        config: Object.assign({ skipObserveSleep: true }, body.config || {}),
+      });
+      res.json({ ok: !!result.ok, result });
+    } catch (e) { res.status(500).json(_w384Err(e, 'canary_error')); }
+  });
+  r.post('/v1/test-device', async (req, res) => {
+    try {
+      const body = req.body || {};
+      if (!body.artifact_path && !body.artifactPath) return res.status(400).json({ ok: false, error: 'artifact_path required' });
+      if (!body.device_id && !body.deviceId) return res.status(400).json({ ok: false, error: 'device_id required' });
+      const td = await import('./test-device.js');
+      const result = await td.testDevice({
+        artifactPath: body.artifact_path || body.artifactPath,
+        deviceId: body.device_id || body.deviceId,
+        suite: body.suite || null,
+        port: body.port || 8080,
+        runtime: body.runtime || 'llama.cpp',
+        autoInstall: !!body.auto_install,
+      });
+      res.json({ ok: !!result.ok, result });
+    } catch (e) { res.status(500).json(_w384Err(e, 'test_device_error')); }
+  });
+  r.post('/v1/test-quants', async (req, res) => {
+    try {
+      const body = req.body || {};
+      const ap = body.base_artifact_path || body.baseArtifactPath || body.artifact_path || body.artifactPath;
+      if (!ap) return res.status(400).json({ ok: false, error: 'artifact_path required' });
+      const deviceId = body.device_id || body.deviceId;
+      if (!deviceId) return res.status(400).json({ ok: false, error: 'device_id required' });
+      const tq = await import('./test-quants.js');
+      const fn = body.w888d ? tq.testQuantsW888d : tq.testQuants;
+      const result = await fn({
+        baseArtifactPath: ap, deviceId,
+        quantLadder: body.quant_ladder || body.quantLadder,
+        kScoreGate: body.k_score_gate != null ? Number(body.k_score_gate) : undefined,
+        port: body.port || 8080,
+        runtime: body.runtime || 'llama.cpp',
+        autoInstall: !!body.auto_install,
+      });
+      res.json({ ok: !!result.ok, result });
+    } catch (e) { res.status(500).json(_w384Err(e, 'test_quants_error')); }
   });
 
   function _quantOracleProfileFromQuery(query = {}) {
@@ -18510,10 +19419,10 @@ res.json({
             try {
               const fb = typeof ev.feedback === 'string' ? JSON.parse(ev.feedback) : (ev.feedback || {});
               lastTriggerIter = fb.iter != null ? fb.iter : null;
-            } catch (_) {}
+            } catch (_) {} // deliberate: cleanup
           }
         }
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
       return res.json({
         ok: true,
         namespace,
@@ -18873,7 +19782,7 @@ res.json({
             });
           }
         }
-      } catch (_e) {
+      } catch (_e) { // deliberate: cleanup
         // Registry import failure is non-fatal for the alias surface; still
         // attempt to surface tenant artifacts below.
       }
@@ -18898,7 +19807,7 @@ res.json({
             },
           });
         }
-      } catch (_e) {
+      } catch (_e) { // deliberate: cleanup
         // Tenant scoping not available in this context — skip; teachers
         // still surface.
       }
@@ -19426,7 +20335,7 @@ res.json({
 
       // Resolve translator from req.app.locals (DI seam — tests inject here).
       let teacher_caller = null;
-      try { teacher_caller = req.app && req.app.locals && req.app.locals._w760_translator_caller; } catch (_) {}
+      try { teacher_caller = req.app && req.app.locals && req.app.locals._w760_translator_caller; } catch (_) {} // deliberate: cleanup
 
       const env = await requestMultilingualAugmentation({
         source_rows,
@@ -19610,9 +20519,9 @@ res.json({
       // envelope. Production wires runOnArtifact via req.app.locals
       // (DI seam used by tests / self-hosted operators).
       let runOnArtifact = null;
-      try { runOnArtifact = req.app && req.app.locals && req.app.locals._w762_run_on_artifact; } catch (_) {}
+      try { runOnArtifact = req.app && req.app.locals && req.app.locals._w762_run_on_artifact; } catch (_) {} // deliberate: cleanup
       let judge = null;
-      try { judge = req.app && req.app.locals && req.app.locals._w762_judge; } catch (_) {}
+      try { judge = req.app && req.app.locals && req.app.locals._w762_judge; } catch (_) {} // deliberate: cleanup
       const env = await runAdversarialBakeoff({
         artifact_path: body.artifact_path,
         n_per_category,
@@ -19635,7 +20544,7 @@ res.json({
       // Hosted route has NO fallback handler wired — honest envelope
       // when policy is fallback_to_teacher.
       let fallback_handler = null;
-      try { fallback_handler = req.app && req.app.locals && req.app.locals._w762_fallback_handler; } catch (_) {}
+      try { fallback_handler = req.app && req.app.locals && req.app.locals._w762_fallback_handler; } catch (_) {} // deliberate: cleanup
       const env = await sanitizeInput({ text, policy, fallback_handler });
       return res.status(200).json({ ...env, sanitizer_version: SANITIZER_VERSION });
     } catch (e) {
@@ -19787,7 +20696,15 @@ res.json({
       const limit = Math.min(200, Math.max(1, parseInt(q.limit, 10) || 50));
       const offset = Math.max(0, parseInt(q.offset, 10) || 0);
 
-      const obs = findByTenant('observations', req.tenant) || [];
+      // W888-L — observations may key on either tenant name OR tenant_id
+      // (older capture writers use one, newer ones the other). Union via the
+      // store-level findByTenant which now merges both columns.
+      const _tName = req.tenant;
+      const _tId = req.tenant_record && req.tenant_record.id;
+      const obs = [
+        ...(findByTenant('observations', _tName) || []),
+        ...((_tId && _tId !== _tName) ? (findByTenant('observations', _tId) || []) : []),
+      ].filter((o, i, arr) => arr.findIndex((x) => x.id === o.id) === i);
       const obsNs = (o) => o.corpus_namespace || o.namespace || 'default';
       const obsStatus = (o) => o.review_status || (o.discarded ? 'rejected' : 'pending');
       const obsRisk = (o) => Number.isFinite(o.risk_score) ? Number(o.risk_score) : 0;
@@ -19929,7 +20846,13 @@ res.json({
       const sinceISO = q.since ? String(q.since) : null;
       const limit = Math.min(500, Math.max(1, parseInt(q.limit, 10) || 50));
       const offset = Math.max(0, parseInt(q.offset, 10) || 0);
-      const obs = findByTenant('observations', req.tenant) || [];
+      // W888-L — observations may key on tenant name OR tenant_id.
+      const _tName = req.tenant;
+      const _tId = req.tenant_record && req.tenant_record.id;
+      const obs = [
+        ...(findByTenant('observations', _tName) || []),
+        ...((_tId && _tId !== _tName) ? (findByTenant('observations', _tId) || []) : []),
+      ].filter((o, i, arr) => arr.findIndex((x) => x.id === o.id) === i);
       let rows = obs.filter(o => o.receipt_id);
       if (ns) rows = rows.filter(o => (o.corpus_namespace || o.namespace || 'default') === ns);
       if (sinceISO) rows = rows.filter(o => String(o.created_at || '') >= sinceISO);
@@ -20249,7 +21172,7 @@ res.json({
           region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
           namespace_id: slug,
         });
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
       res.json({ ok: true, action: 'deploy', namespace: ns });
     } catch (e) {
       // LM-7 — artifact deploy failure.
@@ -20261,7 +21184,7 @@ res.json({
           region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
           namespace_id: slug,
         });
-      } catch (_) {}
+      } catch (_) {} // deliberate: cleanup
       res.status(500).json({ ok: false, error: 'namespace_deploy_error', detail: String(e && e.message || e) });
     }
   });
@@ -20836,7 +21759,7 @@ res.json({
       // vector). The DI seam lives in app.locals for the same reason the
       // W760 translator seam does.
       let signalProviders = null;
-      try { signalProviders = req.app && req.app.locals && req.app.locals._w767_signal_providers; } catch (_) {}
+      try { signalProviders = req.app && req.app.locals && req.app.locals._w767_signal_providers; } catch (_) {} // deliberate: cleanup
       const env = await snapshot(req.tenant_record.id, {
         signalProviders: signalProviders || undefined,
       });

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Government AI · FedRAMP-aware, run inside your boundary · kolm.ai</title>
+<meta name="description" content="Distill frontier models. Run them inside your accredited boundary. Verify every inference with a receipt your IG can replay. FedRAMP / StateRAMP / CJIS friendly.">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/wave889-vertical.css">
+  <link rel="canonical" href="https://kolm.ai/government">
+  <meta property="og:title" content="Government AI · FedRAMP-aware, run inside your boundary">
+  <meta property="og:description" content="Distill frontier models. Run them inside your accredited boundary. Verify every inference with a receipt your IG can replay. FedRAMP / StateRAMP / CJIS friendly.">
+  <meta property="og:image" content="https://kolm.ai/og/government.svg">
+  <meta property="og:url" content="https://kolm.ai/government">
+  <meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/government",
+  "description": "Distill frontier models. Run them inside your accredited boundary. Verify every inference with a receipt your IG can replay. FedRAMP / StateRAMP / CJIS friendly.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
+</head>
+<body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<div data-include-nav></div>
+
+<section class="v-hero">
+  <div class="v-wrap">
+    <span class="v-eyebrow">Federal &amp; state government</span>
+    <h1 class="v-h1">AI you can put on the SSP without holding your breath.</h1>
+    <p class="v-lede">Distill a small open model on your data. Run it inside your accredited boundary. Every inference produces a CID-pinned receipt your IG, OIG, or auditor can replay months later.</p>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup?industry=government">Try it free</a>
+      <a class="v-btn v-btn--ghost" href="/book-demo?industry=government">Speak to public sector team</a>
+    </div>
+    <div class="v-caveat">Caveats: customer agency owns the ATO. Kolmogorov ships software + receipts; <a href="/security">control mapping</a> is documented per deployment package.</div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Three commands</span>
+      <h2 class="v-h2">Distill. Run. Verify.</h2>
+      <p>Three CLI verbs cover the work. No managed cloud in the data path.</p>
+    </div>
+    <div class="v-trio">
+      <div class="v-card">
+        <span class="ctag">01 / Distill</span>
+        <h3>Train against your record set</h3>
+        <p>Use your existing FOIA-released library, CFR, and program SOPs as the curriculum. Teacher signals stay outside the boundary.</p>
+        <div class="cmd">kolm distill --base qwen3-8b --recipe gov-program</div>
+        <a class="go" href="/distill">Distill pipeline -&gt;</a>
+      </div>
+      <div class="v-card">
+        <span class="ctag">02 / Run</span>
+        <h3>Inside the boundary</h3>
+        <p>Runs on your AWS GovCloud, Azure Gov, or on-prem GPU. No vendor telemetry, no model auto-update without your approval.</p>
+        <div class="cmd">kolm run model.kolm --bind 10.0.0.0/8</div>
+        <a class="go" href="/run">Run surface -&gt;</a>
+      </div>
+      <div class="v-card">
+        <span class="ctag">03 / Verify</span>
+        <h3>Receipt per inference</h3>
+        <p>Each call writes a receipt: prompt hash, model hash, output, timestamp, optional caller ID. Replayable for FOIA, IG, or congressional inquiry.</p>
+        <div class="cmd">kolm verify rcpt_01KYC...</div>
+        <a class="go" href="/verify">Verify a receipt -&gt;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Compliance posture</span>
+      <h2 class="v-h2">Built to slot into the package you already have.</h2>
+      <p>What the architecture gives you. What still belongs to your ISSO.</p>
+    </div>
+    <div class="v-compl">
+      <div>
+        <div class="label">FedRAMP</div>
+        <b>Moderate &amp; High compatible</b>
+        <p>Runs entirely inside your authorized boundary. AU-2, AU-3, AC-2 evidence emitted per call. We do not change your SC-7 posture.</p>
+      </div>
+      <div>
+        <div class="label">StateRAMP</div>
+        <b>Compatible with state baselines</b>
+        <p>Same architecture as the federal posture. State CISOs reuse the same SSP narratives.</p>
+      </div>
+      <div>
+        <div class="label">CJIS</div>
+        <b>Compatible with §5.x controls</b>
+        <p>Inference stays in-boundary. Receipts give you AU-6 review and AC-2 account-management evidence per use.</p>
+      </div>
+      <div>
+        <div class="label">Section 508</div>
+        <b>UI ships WCAG 2.2 AA</b>
+        <p>Studio and CLI output meet accessibility expectations. Receipts are plain-text JSON; assistive tech reads them natively.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Program workflows</span>
+      <h2 class="v-h2">Where agencies are using it.</h2>
+      <p>Six patterns running across federal, state, and local programs.</p>
+    </div>
+    <div class="v-flows">
+      <div class="v-flow">
+        <span class="who">Benefits caseworker</span>
+        <h3>Eligibility narrative drafting</h3>
+        <p>Draft the eligibility decision narrative from intake forms, cite the CFR or state statute paragraph used.</p>
+        <div class="io">in: intake form &middot; out: narrative + statute citations</div>
+      </div>
+      <div class="v-flow">
+        <span class="who">FOIA officer</span>
+        <h3>FOIA response triage</h3>
+        <p>Cluster incoming requests, suggest exemption (b)(5)/(b)(6)/(b)(7)(C) markings for human review, draft determination letters.</p>
+        <div class="io">in: request batch &middot; out: ranked exemption suggestions</div>
+      </div>
+      <div class="v-flow">
+        <span class="who">311 / contact center</span>
+        <h3>Tier-1 deflection</h3>
+        <p>Answer the top 200 questions against the agency knowledge base. Refuses on out-of-scope topics and routes to a human.</p>
+        <div class="io">in: citizen message &middot; out: drafted reply + KB link</div>
+      </div>
+      <div class="v-flow">
+        <span class="who">Acquisition analyst</span>
+        <h3>RFP / SOW synthesis</h3>
+        <p>Compress 600-page RFPs into compliance matrices. Maps to past-performance library and identifies gap.</p>
+        <div class="io">in: RFP PDF &middot; out: compliance matrix</div>
+      </div>
+      <div class="v-flow">
+        <span class="who">Program inspector</span>
+        <h3>Field-report triage</h3>
+        <p>Cluster inspection reports, surface recurring findings, draft management notification letters.</p>
+        <div class="io">in: 500 reports &middot; out: thematic summary + draft letter</div>
+      </div>
+      <div class="v-flow">
+        <span class="who">ATO writer</span>
+        <h3>SSP &amp; POA&amp;M drafting</h3>
+        <p>Generate SSP control narratives and POA&amp;M entries from your scan output and system diagram.</p>
+        <div class="io">in: scan + diagram &middot; out: draft SSP §3 + POA&amp;M rows</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-cta-row">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Get started</span>
+      <h2 class="v-h2">Pilot on a Moderate workload. Scale into your High enclave.</h2>
+      <p>Start free on the commercial side. Move the same model + receipts into your authorized boundary with no code change.</p>
+    </div>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup?industry=government">Try it free</a>
+      <a class="v-btn v-btn--ghost" href="/book-demo?industry=government">Speak to public sector team</a>
+    </div>
+    <div class="v-receipts">
+      <div class="label">Example receipt</div>
+      <p>Every inference: <code>kolm verify rcpt_01KYC1ZVTGDCW3FX06JQSC</code> &middot; <a href="/v1/verify/rcpt_01KYC1ZVTGDCW3FX06JQSC">view receipt -&gt;</a></p>
+    </div>
+  </div>
+</section>
+
+<div data-include-footer></div>
+<script src="/nav.js" defer></script>
+</body>
+</html>

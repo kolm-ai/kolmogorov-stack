@@ -95,9 +95,9 @@ export async function runWasmTarget(bundle, input, opts = {}) {
     } catch (e) {
       runError = String(e.message || e);
     } finally {
-      try { fs.closeSync(stdinFd); } catch {}
-      try { fs.closeSync(stdoutFd); } catch {}
-      try { fs.closeSync(stderrFd); } catch {}
+      try { fs.closeSync(stdinFd); } catch {} // deliberate: cleanup
+      try { fs.closeSync(stdoutFd); } catch {} // deliberate: cleanup
+      try { fs.closeSync(stderrFd); } catch {} // deliberate: cleanup
     }
     const us = Number(process.hrtime.bigint() - t0) / 1000;
 
@@ -125,6 +125,6 @@ export async function runWasmTarget(bundle, input, opts = {}) {
       wasm_sha256: wasmSha,
     };
   } finally {
-    try { fs.rmSync(workdir, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(workdir, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 }

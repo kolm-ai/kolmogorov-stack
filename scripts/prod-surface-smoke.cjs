@@ -62,7 +62,7 @@ function loadApiKey() {
   try {
     const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
     if (config && config.api_key) return { value: config.api_key, source: configPath };
-  } catch {}
+  } catch {} // deliberate: cleanup
   return { value: null, source: null };
 }
 

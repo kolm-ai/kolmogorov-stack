@@ -46,17 +46,11 @@ export function verifyStripeSignature(rawBody, sigHeader, secret, tolerance = 30
   return ok ? { ok: true } : { ok: false, reason: 'signature mismatch' };
 }
 
-// Cents → plan id. Numbers must match `cents_monthly` in PLAN_CATALOG.
-// Wave4 stripe-fix: indie (2900) + team (9900) + business (49900) +
-// enterprise (149900) are first-class self-serve rows that mirror the
-// homepage tier grid. Legacy amounts (900 starter, 14900 old-team,
-// 49900-as-team, 299900 old-enterprise) stay mapped so existing Payment
-// Links / webhooks still resolve. NOTE on 49900: the current canonical
-// price for the Business row is $499 (49900 cents). The legacy "Team @
-// $499" link (also 49900 cents) is therefore re-bucketed to business
-// here — operators with an active Team $499 link should re-provision
-// via scripts/stripe-provision.mjs so the metadata reflects the new
-// tier mapping, or remap manually with STRIPE_PAYMENT_LINK_TEAMS.
+// Cents → plan id. W889-6.1: Enterprise is now sales-led with cents_monthly:null
+// in PLAN_CATALOG; the 149900 / 299900 mappings here remain only so legacy
+// Payment Links (provisioned before the Contact-Sales flip) still resolve to
+// the enterprise plan on the webhook side. New Enterprise checkouts go through
+// /v1/sales/demo-request and never produce a self-serve Stripe charge.
 const AMOUNT_TO_PLAN = {
   900:    'pro',         // legacy starter link
   2900:   'indie',       // Indie $29
@@ -64,7 +58,7 @@ const AMOUNT_TO_PLAN = {
   9900:   'teams',       // Team $99
   14900:  'teams',       // legacy team link
   49900:  'business',    // Business $499 (was Team $499 in pre-wave4 catalog)
-  149900: 'enterprise',  // Enterprise $1,499
+  149900: 'enterprise',  // legacy Enterprise $1,499 link — pre-W889-6.1
   299900: 'enterprise',  // legacy enterprise link
 };
 

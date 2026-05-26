@@ -109,14 +109,14 @@ async function startServer({ secret = 'test123', offline = '1' } = {}) {
     const health = await waitForHealth(port);
     return { child, port, health, stdout: () => stdout, stderr: () => stderr };
   } catch (e) {
-    try { child.kill('SIGKILL'); } catch {}
+    try { child.kill('SIGKILL'); } catch {} // deliberate: cleanup
     throw new Error(`server failed to start. stdout=${stdout} stderr=${stderr} err=${e.message}`);
   }
 }
 
 function stopServer(s) {
   if (!s || !s.child) return;
-  try { s.child.kill('SIGTERM'); } catch {}
+  try { s.child.kill('SIGTERM'); } catch {} // deliberate: cleanup
 }
 
 test('W264 #1 — /v1/health returns ok + mode self-hosted', async () => {
@@ -381,5 +381,5 @@ test('W264 #12 — vercel.json + sw.js wired to W264 surface', () => {
 // `test.after` because node:test orders that per-suite; doing it at module
 // scope keeps each test self-contained while still cleaning up after the run.
 process.on('exit', () => {
-  try { if (fs.existsSync(TMP_ART)) fs.rmSync(TMP_ART, { recursive: true, force: true }); } catch {}
+  try { if (fs.existsSync(TMP_ART)) fs.rmSync(TMP_ART, { recursive: true, force: true }); } catch {} // deliberate: cleanup
 });

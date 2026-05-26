@@ -105,7 +105,7 @@ export async function getNamespaceThreshold(namespace, tenantId) {
       if (n < MIN_THRESHOLD || n > MAX_THRESHOLD) continue;
       return n;
     }
-  } catch (_) {
+  } catch (_) { // deliberate: cleanup
     // Fall through to default on any error — never let the threshold
     // lookup break the routing path.
   }

@@ -243,7 +243,7 @@ function runOne(hook, payload, cwd) {
     child.on('error', (e) => finish(-1, e.message));
     child.on('close', (code) => finish(code == null ? -1 : code, null));
     const timer = setTimeout(() => {
-      try { child.kill('SIGKILL'); } catch {}
+      try { child.kill('SIGKILL'); } catch {} // deliberate: cleanup
       finish(124, `hook exceeded ${hook.timeout_ms}ms`);
     }, hook.timeout_ms);
     timer.unref?.();

@@ -314,7 +314,7 @@ function main() {
       if (existing && typeof existing.generated_at === 'string') {
         doc.generated_at = existing.generated_at;
       }
-    } catch (e) {
+    } catch (e) { // deliberate: cleanup
       // fall through — if existing is malformed, comparison will fail loudly
     }
   }

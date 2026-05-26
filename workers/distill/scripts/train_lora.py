@@ -44,9 +44,9 @@ def main():
     # Hard dependency check — give the operator a single-line install hint
     # instead of a Python traceback.
     torch = _require("torch", "pip install torch")
-    transformers = _require("transformers", "pip install transformers")
-    peft = _require("peft", "pip install peft")
-    datasets_mod = _require("datasets", "pip install datasets")
+    transformers = _require("transformers", "pip install transformers")  # noqa: F841 — availability probe; raises early w/ install hint
+    peft = _require("peft", "pip install peft")  # noqa: F841 — availability probe; raises early w/ install hint
+    datasets_mod = _require("datasets", "pip install datasets")  # noqa: F841 — availability probe; raises early w/ install hint
     _require("accelerate", "pip install accelerate")
 
     from transformers import (AutoModelForCausalLM, AutoTokenizer,

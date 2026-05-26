@@ -222,7 +222,7 @@ export async function orchestrateImprovement(opts = {}) {
           // We bound the drain to ~20 events so even an unbounded iterator
           // does not leak a long-running async loop.
           let count = 0;
-          // eslint-disable-next-line no-restricted-syntax
+           
           for await (const ev of iter) {
             count += 1;
             if (ev && ev.done) break;

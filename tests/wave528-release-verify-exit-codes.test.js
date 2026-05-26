@@ -24,6 +24,10 @@ const SRC = fs.readFileSync(DRIVER, 'utf8');
 const ALL_GATES = [
   'lint:refs', 'control-files', 'openapi-sync', 'claim-verify',
   'sdk-manifest', 'test', 'sdk-smoke', 'local-surfaces',
+  // ship-gate (W888-I) is opt-in via --include-ship-gate but always lands in
+  // gates[] (as skipped when not opted in) so the summary lists it as a known
+  // gate. Include it here so the all-skipped lock-in sees it.
+  'ship-gate',
   'doctor', 'whoami', 'verify-claims', 'billing-tiers',
 ];
 

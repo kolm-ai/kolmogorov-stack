@@ -330,7 +330,7 @@ export async function getAutopilotStatus({ tenant, namespace } = {}) {
       const fb = JSON.parse(enabledRow.feedback || '{}');
       autopilotId = fb && fb.autopilot_id || null;
       enabledAt = fb && fb.enabled_at || enabledRow.created_at || null;
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
   }
   if (enabledRow && !disabledRow) {
     enabled = true;

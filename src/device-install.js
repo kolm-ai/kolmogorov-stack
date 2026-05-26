@@ -42,8 +42,20 @@ function _deviceRoot(deviceId) {
 }
 
 function _sha256File(p) {
+  // W891 2 GiB Buffer fix: stream via 1 MiB chunks so a >2 GiB .kolm
+  // (e.g. Trinity Q4_K_M = 4.3 GiB) doesn't trip ERR_FS_FILE_TOO_LARGE
+  // from a single readFileSync.
   const h = crypto.createHash('sha256');
-  h.update(fs.readFileSync(p));
+  const fd = fs.openSync(p, 'r');
+  try {
+    const buf = Buffer.allocUnsafe(1024 * 1024);
+    let bytes;
+    while ((bytes = fs.readSync(fd, buf, 0, buf.length, null)) > 0) {
+      h.update(buf.subarray(0, bytes));
+    }
+  } finally {
+    fs.closeSync(fd);
+  }
   return h.digest('hex');
 }
 
@@ -189,10 +201,14 @@ async function _httpPutToManifest(localPath, device) {
   try {
     const url = String(device.manifest_url || '');
     if (!/^https?:\/\//.test(url)) throw new Error('manifest_url must be http(s)://');
-    const body = fs.readFileSync(localPath);
-    const headers = { 'content-type': 'application/zip' };
+    // W891 2 GiB Buffer fix: stream the body rather than readFileSync.
+    // undici (Node 20+ fetch) accepts a Readable for body; declare duplex
+    // 'half' so the streaming PUT isn't rejected with "duplex member".
+    const stat = fs.statSync(localPath);
+    const body = fs.createReadStream(localPath);
+    const headers = { 'content-type': 'application/zip', 'content-length': String(stat.size) };
     if (device.api_key) headers.authorization = `Bearer ${device.api_key}`;
-    const resp = await fetch(url, { method: 'PUT', headers, body });
+    const resp = await fetch(url, { method: 'PUT', headers, body, duplex: 'half' });
     return { ok: resp.ok, transport: 'http', status: resp.status, url };
   } catch (e) {
     return { ok: false, transport: 'http', reason: e.message };

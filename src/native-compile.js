@@ -211,7 +211,7 @@ function makeTmpDir() {
 }
 
 function rmDir(dir) {
-  try { fs.rmSync(dir, { recursive: true, force: true }); } catch {}
+  try { fs.rmSync(dir, { recursive: true, force: true }); } catch {} // deliberate: cleanup
 }
 
 // SOURCE_DATE_EPOCH = 0 — the reproducible-builds convention for "no time

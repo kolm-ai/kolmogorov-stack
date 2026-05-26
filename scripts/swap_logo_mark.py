@@ -6,7 +6,8 @@ Catches three variants:
   3. footer-only stacked rects with stroke-only kbar gradient (less common)
 Idempotent.
 """
-import re, pathlib
+import re
+import pathlib
 
 NEW_MARK_HEADER = '''<svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
           <path d="M 5 5 L 21 5 L 27 11 L 27 27 L 5 27 Z" fill="currentColor"/>

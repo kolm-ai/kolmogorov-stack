@@ -201,7 +201,7 @@ test('14. `kolm seeds new "<brief>" --out=<tmpfile>` writes valid JSONL (one JSO
       assert.equal(parsed.synthesized, true, `line ${i + 1} must carry synthesized:true tag`);
     }
   } finally {
-    try { fs.unlinkSync(tmp); } catch {}
+    try { fs.unlinkSync(tmp); } catch {} // deliberate: cleanup
   }
 });
 

@@ -46,7 +46,7 @@ export async function run({ image, command = [], env = {}, timeoutMs = 30 * 60 *
     const outChunks = []; const errChunks = [];
     child.stdout.on('data', (c) => outChunks.push(c));
     child.stderr.on('data', (c) => errChunks.push(c));
-    const killer = setTimeout(() => { try { child.kill('SIGKILL'); } catch {} }, timeoutMs);
+    const killer = setTimeout(() => { try { child.kill('SIGKILL'); } catch {} }, timeoutMs); // deliberate: cleanup
     child.on('close', (code) => {
       clearTimeout(killer);
       resolve({

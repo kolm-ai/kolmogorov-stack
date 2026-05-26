@@ -468,13 +468,13 @@ export async function runTui(opts) {
       if (cmd === 'help' || cmd === 'h' || cmd === '?') {
         helpScreen();
       } else if (cmd === 'exit' || cmd === 'quit' || cmd === 'q') {
-        if (state.server) { try { state.server.close(); } catch (e) {} }
+        if (state.server) { try { state.server.close(); } catch (e) {} } // deliberate: cleanup
         rl.close();
         return;
       } else if (cmd === 'clear' || cmd === 'cls') {
         clear();
       } else if (cmd === 'drop' || cmd === 'unload') {
-        if (state.server) { try { state.server.close(); } catch (e) {} state.server = null; }
+        if (state.server) { try { state.server.close(); } catch (e) {} state.server = null; } // deliberate: cleanup
         state.artifact = null;
         wln('  ' + C.mute + 'artifact unloaded.' + RESET);
       } else if (cmd === 'recipe') {
@@ -505,7 +505,7 @@ export async function runTui(opts) {
           wln('  ' + C.bad + 'serve failed: ' + e.message + RESET);
         }
       } else if (cmd === 'stop') {
-        if (state.server) { try { state.server.close(); } catch (e) {} state.server = null; wln('  ' + C.mute + 'stopped.' + RESET); }
+        if (state.server) { try { state.server.close(); } catch (e) {} state.server = null; wln('  ' + C.mute + 'stopped.' + RESET); } // deliberate: cleanup
         else wln('  ' + C.mute + 'not serving.' + RESET);
       } else if (cmd === 'run') {
         if (!state.artifact) { wln('  ' + C.bad + 'load a .kolm first.' + RESET); prompt(); return; }
@@ -528,7 +528,7 @@ export async function runTui(opts) {
   });
 
   rl.on('close', function () {
-    if (state.server) { try { state.server.close(); } catch (e) {} }
+    if (state.server) { try { state.server.close(); } catch (e) {} } // deliberate: cleanup
     process.stdout.write(ALT_BUFFER_OUT + SHOW_CURSOR);
     wln('');
     wln('  ' + C.mute + 'bye.' + RESET);

@@ -160,6 +160,6 @@ test('W432 #9 — behavior: listDatasets cross-tenant fence (sanity end-to-end)'
   } finally {
     if (prevDataDir === undefined) delete process.env.KOLM_DATA_DIR;
     else process.env.KOLM_DATA_DIR = prevDataDir;
-    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });

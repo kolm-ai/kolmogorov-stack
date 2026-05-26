@@ -404,7 +404,7 @@ function fullPage(entries) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script> // deliberate: cleanup
 <title>Changelog · kolm.ai</title>
 <meta name="description" content="Reverse-chronological wave-by-wave log of every kolm.ai release. What shipped, what changed, when.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
@@ -589,7 +589,7 @@ function assertSafe(html) {
 
 function writeIdempotent(targetPath, content) {
   let prev = '';
-  try { prev = fs.readFileSync(targetPath, 'utf8'); } catch (_) {}
+  try { prev = fs.readFileSync(targetPath, 'utf8'); } catch (_) {} // deliberate: cleanup
   if (prev === content) return 0;
   fs.writeFileSync(targetPath, content, 'utf8');
   return 1;
@@ -606,7 +606,7 @@ function build() {
   // between the two HTML comment markers. Falls back to fullPage() ONLY when
   // the markers are missing entirely (first-time build).
   let existing = '';
-  try { existing = fs.readFileSync(OUT, 'utf8'); } catch (_) {}
+  try { existing = fs.readFileSync(OUT, 'utf8'); } catch (_) {} // deliberate: cleanup
   const beginAt = existing.indexOf(AUTO_BEGIN);
   const endAt = existing.indexOf(AUTO_END);
   let html;

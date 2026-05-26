@@ -103,7 +103,7 @@ function request(urlStr, opts = {}) {
       resolve({ statusCode: res.statusCode || 0, headers: res.headers, res });
     });
     req.setTimeout(opts.timeoutMs || DEFAULT_TIMEOUT_MS, () => {
-      try { req.destroy(new Error('timeout')); } catch (_) {}
+      try { req.destroy(new Error('timeout')); } catch (_) {} // deliberate: cleanup
     });
     req.on('error', reject);
     req.end();
@@ -187,7 +187,7 @@ export async function pullFile({ row, file, cacheDir, onProgress, timeoutMs }) {
       return { ok: true, bytes: sz, path: dest, resumed: false, already_cached: true };
     }
     // Size mismatch — re-download.
-    try { fs.unlinkSync(dest); } catch (_) {}
+    try { fs.unlinkSync(dest); } catch (_) {} // deliberate: cleanup
   }
 
   // Resume?
@@ -219,7 +219,7 @@ export async function pullFile({ row, file, cacheDir, onProgress, timeoutMs }) {
   // Validate we got a partial-response if we asked for one.
   if (already > 0 && r.statusCode !== 206) {
     // Server ignored Range — start over.
-    try { fs.unlinkSync(part); } catch (_) {}
+    try { fs.unlinkSync(part); } catch (_) {} // deliberate: cleanup
     already = 0;
   }
 
@@ -246,20 +246,20 @@ export async function pullFile({ row, file, cacheDir, onProgress, timeoutMs }) {
       const since = bytesDone - lastProgress;
       if (onProgress && since > 256 * 1024) {
         lastProgress = bytesDone;
-        try { onProgress({ bytes_done: bytesDone, bytes_total: totalLen, file: file.path }); } catch (_) {}
+        try { onProgress({ bytes_done: bytesDone, bytes_total: totalLen, file: file.path }); } catch (_) {} // deliberate: cleanup
       }
     });
     r.res.on('error', (e) => {
-      try { ws.destroy(); } catch (_) {}
+      try { ws.destroy(); } catch (_) {} // deliberate: cleanup
       reject(e);
     });
     r.res.pipe(ws);
     ws.on('finish', () => {
-      if (onProgress) try { onProgress({ bytes_done: bytesDone, bytes_total: totalLen, file: file.path }); } catch (_) {}
+      if (onProgress) try { onProgress({ bytes_done: bytesDone, bytes_total: totalLen, file: file.path }); } catch (_) {} // deliberate: cleanup
       if (verifySha) {
         const actual = hash.digest('hex');
         if (actual !== file.sha256) {
-          try { fs.unlinkSync(part); } catch (_) {}
+          try { fs.unlinkSync(part); } catch (_) {} // deliberate: cleanup
           return reject(new Error(`sha256_mismatch expected=${file.sha256} actual=${actual}`));
         }
       }
@@ -380,12 +380,12 @@ export function clearCache(cacheDir, modelId) {
   const removed = [];
   for (const [key, e] of Object.entries(idx.entries)) {
     if (modelId && e.model_id !== modelId) continue;
-    try { if (fs.existsSync(e.path)) fs.unlinkSync(e.path); } catch (_) {}
+    try { if (fs.existsSync(e.path)) fs.unlinkSync(e.path); } catch (_) {} // deliberate: cleanup
     // Remove the slug directory if empty.
     try {
       const dir = path.dirname(e.path);
       if (fs.existsSync(dir) && fs.readdirSync(dir).length === 0) fs.rmdirSync(dir);
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
     delete idx.entries[key];
     removed.push(key);
   }
@@ -417,21 +417,21 @@ export async function prefetchTier({ tier, cacheDir, concurrency = 3, onVariantS
       if (allCached) {
         const skipped = { ok: true, skipped: true, total_bytes: 0 };
         results.push({ row, result: skipped });
-        if (onVariantDone) try { onVariantDone({ row, result: skipped }); } catch (_) {}
+        if (onVariantDone) try { onVariantDone({ row, result: skipped }); } catch (_) {} // deliberate: cleanup
         continue;
       }
-      if (onVariantStart) try { onVariantStart({ row }); } catch (_) {}
+      if (onVariantStart) try { onVariantStart({ row }); } catch (_) {} // deliberate: cleanup
       try {
         const result = await pullVariant({ row, cacheDir, onProgress, probe, timeoutMs });
         results.push({ row, result });
         if (result.ok) totalBytesDownloaded += result.total_bytes;
         else failures.push({ row, result });
-        if (onVariantDone) try { onVariantDone({ row, result }); } catch (_) {}
+        if (onVariantDone) try { onVariantDone({ row, result }); } catch (_) {} // deliberate: cleanup
       } catch (e) {
         const result = { ok: false, reason: 'exception', detail: String(e.message || e) };
         results.push({ row, result });
         failures.push({ row, result });
-        if (onVariantDone) try { onVariantDone({ row, result }); } catch (_) {}
+        if (onVariantDone) try { onVariantDone({ row, result }); } catch (_) {} // deliberate: cleanup
       }
     }
   }

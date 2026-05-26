@@ -57,7 +57,7 @@ function writeStub(tmpDir, envelope) {
     '',
   ].join('\n');
   fs.writeFileSync(stubPath, body);
-  try { fs.chmodSync(stubPath, 0o755); } catch (_) {}
+  try { fs.chmodSync(stubPath, 0o755); } catch (_) {} // deliberate: cleanup
   return stubPath;
 }
 

@@ -81,7 +81,7 @@ function sha256File(filePath) {
 function readManifestFromArtifact(artifactPath) {
   const sib = artifactPath.replace(/\.kolm$/, '.manifest.json');
   if (fs.existsSync(sib)) {
-    try { return JSON.parse(fs.readFileSync(sib, 'utf8')); } catch (_) {}
+    try { return JSON.parse(fs.readFileSync(sib, 'utf8')); } catch (_) {} // deliberate: cleanup
   }
   const stat = fs.existsSync(artifactPath) ? fs.statSync(artifactPath) : null;
   return {
@@ -95,7 +95,7 @@ function readManifestFromArtifact(artifactPath) {
 function readReceiptChain(artifactPath) {
   const sib = artifactPath.replace(/\.kolm$/, '.receipts.json');
   if (fs.existsSync(sib)) {
-    try { return JSON.parse(fs.readFileSync(sib, 'utf8')); } catch (_) {}
+    try { return JSON.parse(fs.readFileSync(sib, 'utf8')); } catch (_) {} // deliberate: cleanup
   }
   return { leaves: [], note: 'no receipt chain found next to artifact' };
 }

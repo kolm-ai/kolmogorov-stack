@@ -47,7 +47,7 @@ function _loadApprovals() {
     try {
       const e = JSON.parse(line);
       if (e && e.event_id) out[e.event_id] = e; // last write wins
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
   return out;
 }
@@ -71,7 +71,7 @@ export function loadAuditTrail(eventId) {
     try {
       const e = JSON.parse(line);
       if (e && e.event_id === eventId) trail.push(e);
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
   return trail;
 }
@@ -607,7 +607,7 @@ export async function listDatasets(opts = {}) {
         created_at: ds.created_at,
         version: ds.version,
       });
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
   return out.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
 }

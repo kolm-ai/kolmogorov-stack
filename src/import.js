@@ -108,7 +108,7 @@ export function detectFormat(filePath) {
   } catch {
     return 'unknown';
   } finally {
-    try { fs.closeSync(fd); } catch {}
+    try { fs.closeSync(fd); } catch {} // deliberate: cleanup
   }
 }
 

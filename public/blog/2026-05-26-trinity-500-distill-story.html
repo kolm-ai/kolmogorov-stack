@@ -241,7 +241,7 @@ kolm serve trinity-500.kolm --port 8080</code></pre>
 
 <p>A 2000-pair Trinity v2 is collecting in the background (700 Claude + 700 GPT-4o + 600 DeepSeek). Same recipe, more pairs, same teacher mix. The hypothesis is the LoRA learns the long tail better but the latency and length numbers stay the same. We will publish the comparison when it lands.</p>
 
-<p>The artifact, the training data slice (the parts that are not under teacher TOS), the eval set, and the full reproduce script live at <a href="https://github.com/sneaky-hippo/kolmogorov-stack">the kolm GitHub</a>. The HF page is <a href="https://huggingface.co/kolm-ai/trinity-support-7b">kolm-ai/trinity-support-7b</a>.</p>
+<p>The artifact, the training data slice (the parts that are not under teacher TOS), the eval set, and the full reproduce script live at <a href="https://github.com/kolm-ai/kolmogorov-stack">the kolm GitHub</a>. The HF page is <a href="https://huggingface.co/kolm-ai/trinity-support-7b">kolm-ai/trinity-support-7b</a>.</p>
 
 <div class="endnote">
 <b>Limitations.</b> Trinity-500 is one domain (e-commerce customer support, English-only) and one base model (Qwen2.5-7B). The "beats Haiku" result is specifically on a narrow rubric Haiku was not built for; on broad benchmarks the comparison flips. The 96.5% asks-1Q number is rule-based regex on response shape, not semantic correctness (the judge axes catch that separately). The judge is claude-opus-4-5; LLM judges have known biases toward terse responses, which may flatter shorter models like Trinity-500 and gpt-4o-mini. Reproduce the holdout yourself with <code>kolm bench --models trinity-500.kolm,claude-haiku-4-5,gpt-4o-mini --eval public/benchmarks/trinity-500-holdout.jsonl</code> to confirm.

@@ -51,7 +51,7 @@
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -85,7 +85,7 @@
     <pre># docker-compose.yml
 services:
   gateway:
-    image: ghcr.io/sneaky-hippo/kolm-gateway:latest
+    image: ghcr.io/kolm-ai/kolm-gateway:latest
     ports:
       - "8080:8080"
     environment:
@@ -141,7 +141,7 @@ volumes:
     </ul>
     <h2>Kubernetes via Helm</h2>
     <p>The same image runs in Kubernetes with the published chart. The chart includes a StatefulSet for Postgres, a Deployment for the gateway (with HPA on request rate), and a Service of type ClusterIP. Pair with cert-manager for TLS and external-dns for DNS.</p>
-    <pre>helm repo add kolm https://sneaky-hippo.github.io/kolmogorov-stack/charts
+    <pre>helm repo add kolm https://kolm-ai.github.io/kolmogorov-stack/charts
 helm repo update
 
 helm install gateway kolm/gateway \

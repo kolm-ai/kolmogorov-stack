@@ -193,11 +193,11 @@ export async function runExport({ artifact, quant, target_dir }) {
       const s = fs.statSync(path.join(target_dir, f));
       if (s.isFile()) size_bytes += s.size;
     }
-  } catch {}
+  } catch {} // deliberate: cleanup
   let mlxConfig = null;
   const cfgPath = path.join(target_dir, 'config.json');
   if (fs.existsSync(cfgPath)) {
-    try { mlxConfig = JSON.parse(fs.readFileSync(cfgPath, 'utf8')); } catch {}
+    try { mlxConfig = JSON.parse(fs.readFileSync(cfgPath, 'utf8')); } catch {} // deliberate: cleanup
   }
   return {
     ok: true,

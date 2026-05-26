@@ -166,6 +166,6 @@ test('W549 #2 - hosted OpenRouter uses x-upstream-api-key, not Authorization ks_
       if (v == null) delete process.env[k];
       else process.env[k] = v;
     }
-    try { fs.rmSync(home, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(home, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });

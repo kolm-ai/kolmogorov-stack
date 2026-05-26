@@ -79,7 +79,7 @@ function _kolmDir() {
 }
 function _metaTrainingDir() {
   const d = path.join(_kolmDir(), 'meta-training');
-  try { fs.mkdirSync(d, { recursive: true }); } catch (_) {}
+  try { fs.mkdirSync(d, { recursive: true }); } catch (_) {} // deliberate: cleanup
   return d;
 }
 function _trainingRowsPath() {
@@ -95,8 +95,8 @@ function _defaultModelPath() {
 
 export function resetForTests() {
   // Wipe both the rows file and the default model file. Idempotent.
-  try { fs.rmSync(_trainingRowsPath(), { force: true }); } catch (_) {}
-  try { fs.rmSync(_defaultModelPath(), { force: true }); } catch (_) {}
+  try { fs.rmSync(_trainingRowsPath(), { force: true }); } catch (_) {} // deliberate: cleanup
+  try { fs.rmSync(_defaultModelPath(), { force: true }); } catch (_) {} // deliberate: cleanup
 }
 
 // =============================================================================

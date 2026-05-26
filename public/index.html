@@ -345,7 +345,7 @@
       <li><a href="/use-cases">Use cases</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true" style="font-size:0.78em;opacity:0.55;margin-left:3px;">↗</span></a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true" style="font-size:0.78em;opacity:0.55;margin-left:3px;">↗</span></a></li>
     </ul>
     <div class="ks-nav__right">
       <button type="button" class="ks-theme-toggle" id="ksThemeToggle" aria-label="Toggle theme" title="Toggle theme">
@@ -364,7 +364,7 @@
     <a href="/use-cases">Use cases</a>
     <a href="/pricing">Pricing</a>
     <a href="/docs">Docs</a>
-    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    <a href="https://github.com/kolm-ai/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
     <a href="/signup?intent=login">Sign in</a>
     <a href="/signup">Get started &rarr;</a>
   </div>
@@ -443,8 +443,9 @@
         </div>
       </div>
       <p class="ks-lede hero-quant" data-w260="thesis" style="max-width:58ch;">Point your OpenAI client at one URL. Capture what's worth keeping. Compile a signed model that runs on your own hardware. After compile, the per-token bill goes to zero.</p>
-      <div class="ks-hero__ctas" data-w260="v02-strip">
+      <div class="ks-hero__ctas" data-w260="v02-strip" data-above-fold="hero-ctas">
         <a class="ks-btn ks-btn--primary ks-btn--lg" href="/signup">Start free <span class="ks-btn-arrow">&rarr;</span></a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/book-demo" data-above-fold="book-demo">Book demo</a>
         <a class="ks-btn ks-btn--ghost ks-btn--lg" href="#chat">Try it without signing up</a>
         <span class="test-anchor" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;"><a href="/verify-prod">Verify a receipt</a><a href="#how">See how it works</a></span>
       </div>
@@ -963,7 +964,7 @@ $ curl -s https://kolm.ai/v1/free/chat \
             <option value="29" selected>Indie: $29</option>
             <option value="99">Team: $99</option>
             <option value="499">Business: $499</option>
-            <option value="1499">Enterprise: $1,499</option>
+            <option value="" data-w889="contact-sales">Enterprise: Contact Sales</option>
           </select>
         </div>
       </div>
@@ -1049,9 +1050,9 @@ $ curl -s https://kolm.ai/v1/free/chat \
         </ul>
         <div class="fr-tier__cta"><a href="/signup?plan=business" class="fr-btn fr-btn--ghost">Start Business</a></div>
       </div>
-      <div class="fr-tier">
+      <div class="fr-tier" data-tier="enterprise" data-w889="contact-sales-tier">
         <p class="fr-tier__name">Enterprise</p>
-        <p class="fr-tier__price">$1,499<small>/ mo</small></p>
+        <p class="fr-tier__price" data-contact-sales="true">Custom<small> &middot; Contact Sales</small></p>
         <p class="fr-tier__tag">For a regulated org: SAML, BAA, dedicated SRE.</p>
         <ul>
           <li>250M gateway calls / mo</li>
@@ -1059,7 +1060,7 @@ $ curl -s https://kolm.ai/v1/free/chat \
           <li>BAA + DPA on request</li>
           <li>Air-gap + 20 seats</li>
         </ul>
-        <div class="fr-tier__cta"><a href="/signup?plan=enterprise" class="fr-btn fr-btn--ghost">Start Enterprise</a></div>
+        <div class="fr-tier__cta"><a href="/book-demo" class="fr-btn fr-btn--ghost" data-w889="book-demo-cta">Book Demo</a></div>
       </div>
     </div>
     <p class="ks-mono ks-dim" style="margin-top: 16px; font-size: 12.5px;">Full pricing, Enterprise, and self-host options at <a href="/pricing">/pricing</a>.</p>
@@ -1183,7 +1184,7 @@ $ curl -s https://kolm.ai/v1/free/chat \
       <a class="ks-btn ks-btn--primary ks-btn--lg" href="/signup">Start free <span class="ks-btn-arrow" aria-hidden="true">&rarr;</span></a>
       <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/quickstart">Read the quickstart</a>
     </div>
-    <p class="ks-finale__meta">Apache-2.0 - No credit card - Self-hostable - <a href="https://github.com/sneaky-hippo/kolmogorov-stack" class="ks-accent" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a></p>
+    <p class="ks-finale__meta">Apache-2.0 - No credit card - Self-hostable - <a href="https://github.com/kolm-ai/kolmogorov-stack" class="ks-accent" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a></p>
   </div>
 </section>
 
@@ -1356,6 +1357,58 @@ $ curl -s https://kolm.ai/v1/free/chat \
   </div>
 </section>
 
+<!-- ================== W888-S meta-demo callout ================== -->
+<section class="ks-section" data-section="meta-demo" id="meta-demo" style="padding:var(--ks-8,48px) 0;border-top:1px solid var(--ks-line-2);background:var(--ks-bg-0)">
+  <div class="ks-wrap" style="max-width:980px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:var(--ks-4,12px)">
+      <span style="font-family:var(--ks-mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ks-ink-3)">Meta-demo</span>
+      <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,0.18)"></span>
+      <span style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3)">live on this page</span>
+    </div>
+    <h2 class="ks-h2" style="margin:0 0 var(--ks-3,8px);font-size:clamp(28px,4vw,40px);font-weight:580;letter-spacing:-0.01em;line-height:1.12">The assistant answering this page was distilled with kolm.</h2>
+    <p class="ks-lede" style="max-width:64ch;margin:0 0 var(--ks-5,16px);color:var(--ks-ink-2);font-size:17px;line-height:1.55">kolm-assistant-1.5b was distilled from Claude 4.7 and GPT-4o teacher pairs through the kolm gateway, quantized to Q4_K_M (~1.0 GB), and pinned to a passport. Every reply below carries that passport hash; click <b style="color:var(--ks-ink);font-weight:560">Verify -&gt;</b> on any answer to see the chain.</p>
+
+    <div data-kolm-assistant data-passport-hash="8d6c4b9c1369fba9" data-placeholder="Ask the assistant about kolm. e.g. how does distill work? what is K-Score?" style="margin:var(--ks-6,24px) 0;border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1);padding:var(--ks-5,16px);min-height:220px"></div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:var(--ks-5,16px);align-items:center;margin-top:var(--ks-5,16px);font-family:var(--ks-mono);font-size:13px;color:var(--ks-ink-2)">
+      <span><b style="color:var(--ks-ink);font-weight:560">Base:</b> Qwen2.5-1.5B-Instruct</span>
+      <span><b style="color:var(--ks-ink);font-weight:560">Format:</b> GGUF Q4_K_M</span>
+      <span><b style="color:var(--ks-ink);font-weight:560">Size:</b> ~1.0 GB</span>
+      <span><b style="color:var(--ks-ink);font-weight:560">Gate:</b> K-Score &gt;= 0.90 + 0 hallucinated CLI</span>
+      <span style="margin-left:auto"><a href="/about-the-assistant" style="color:var(--ks-ink);border-bottom:1px solid var(--ks-accent-edge);text-decoration:none">How it was made &rarr;</a></span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .kolm-asst { display:block; font-family: var(--ks-sans, system-ui, -apple-system, "Segoe UI", sans-serif); }
+  .kolm-asst__head { display:flex; align-items:baseline; gap:10px; margin-bottom:12px; flex-wrap:wrap }
+  .kolm-asst__title { font-family: var(--ks-mono); font-size:13px; color:var(--ks-ink); font-weight:560 }
+  .kolm-asst__sub { font-family: var(--ks-mono); font-size:12px; color:var(--ks-ink-3) }
+  .kolm-asst__log { display:flex; flex-direction:column; gap:10px; max-height:340px; overflow-y:auto; padding:8px 0 12px; min-height:80px }
+  .kolm-asst__user { align-self:flex-end; max-width:78%; }
+  .kolm-asst__user-label { display:block; font-family:var(--ks-mono); font-size:10.5px; color:var(--ks-ink-3); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:3px; text-align:right }
+  .kolm-asst__user-body { background:var(--ks-bg-2, #eef0f3); color:var(--ks-ink); padding:9px 12px; border-radius:10px; font-size:14.5px; line-height:1.5; white-space:pre-wrap; word-wrap:break-word }
+  .kolm-asst__reply { max-width:88% }
+  .kolm-asst__reply-body { background:var(--ks-bg-0, #fff); color:var(--ks-ink); border:1px solid var(--ks-line-2); padding:11px 13px; border-radius:10px; font-size:14.5px; line-height:1.55; white-space:pre-wrap; word-wrap:break-word }
+  .kolm-asst__reply-meta { font-family:var(--ks-mono); font-size:11.5px; color:var(--ks-ink-3); margin-top:6px; padding-left:2px; display:flex; flex-wrap:wrap; gap:10px; align-items:center }
+  .kolm-asst__chip { display:inline-block; padding:1px 7px; border:1px solid var(--ks-line-2); border-radius:999px; background:var(--ks-bg-1); color:var(--ks-ink-2); font-size:11px; letter-spacing:0.02em }
+  .kolm-asst__chip--pending { color:var(--ks-ink-3); border-style:dashed }
+  .kolm-asst__verify { color:var(--ks-ink); border-bottom:1px solid var(--ks-accent-edge); text-decoration:none }
+  .kolm-asst__verify:hover { border-bottom-color:var(--ks-ink) }
+  .kolm-asst__pending { font-family:var(--ks-mono); font-size:12.5px; color:var(--ks-ink-3); padding-left:2px }
+  .kolm-asst__form { display:flex; gap:8px; margin-top:8px; border-top:1px solid var(--ks-line-2); padding-top:12px }
+  .kolm-asst__form input[type=text] { flex:1; padding:9px 12px; border:1px solid var(--ks-line-2); border-radius:8px; background:var(--ks-bg-0,#fff); color:var(--ks-ink); font-size:14.5px; font-family:inherit; outline:none }
+  .kolm-asst__form input[type=text]:focus { border-color:var(--ks-ink); }
+  .kolm-asst__form input[type=text]:disabled { opacity:0.6 }
+  .kolm-asst__form button { padding:9px 16px; border:1px solid var(--ks-ink); border-radius:8px; background:var(--ks-ink); color:var(--ks-bg-0,#fff); font-family:var(--ks-mono); font-size:13px; cursor:pointer }
+  .kolm-asst__form button:disabled { opacity:0.55; cursor:wait }
+  .kolm-asst__hint { font-family:var(--ks-mono); font-size:11.5px; color:var(--ks-ink-3); margin:8px 0 0 }
+  .kolm-asst__hint a { color:var(--ks-ink-2); border-bottom:1px solid var(--ks-line-2); text-decoration:none }
+</style>
+
+<script defer src="/assistant-widget.js"></script>
+
 </main>
 
 <!-- ================== Footer ================== -->
@@ -1403,7 +1456,7 @@ $ curl -s https://kolm.ai/v1/free/chat \
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">

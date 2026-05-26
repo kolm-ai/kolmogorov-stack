@@ -260,7 +260,7 @@ function ensureArtifactDir() {
     // /data might be a read-only mount on certain k8s setups. Fall back to
     // an in-process tmp dir; the operator sees this in the health probe.
     const tmp = path.join(ROOT, '.kolm-self-hosted-tmp');
-    try { fs.mkdirSync(tmp, { recursive: true }); } catch {}
+    try { fs.mkdirSync(tmp, { recursive: true }); } catch {} // deliberate: cleanup
     return tmp;
   }
   return ART_DIR;

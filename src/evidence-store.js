@@ -135,7 +135,7 @@ export function readNode(node_id) {
  * tests can run hermetically without touching real lake state.
  */
 export function _resetForTests(artifact_id) {
-  try { fs.unlinkSync(_evidencePath(artifact_id)); } catch {}
+  try { fs.unlinkSync(_evidencePath(artifact_id)); } catch {} // deliberate: cleanup
   const idx = _readIndex();
   const ids = idx.by_artifact[artifact_id] || [];
   for (const id of ids) {

@@ -367,7 +367,7 @@ Resources:
 
           # Kolm install
           mkdir -p /opt/kolm /var/lib/kolm /var/log/kolm
-          npm install -g kolm@latest || npm install -g github:sneaky-hippo/kolmogorov-stack
+          npm install -g kolm@latest || npm install -g github:kolm-ai/kolmogorov-stack
 
           # Fetch API key from SSM (re-fetched each boot for rotation)
           KOLM_API_KEY=$(aws ssm get-parameter \

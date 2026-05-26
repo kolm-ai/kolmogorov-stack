@@ -61,7 +61,7 @@
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -70,7 +70,7 @@
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 <main id="main">
@@ -100,7 +100,7 @@
  <span class="k">variables</span>:
  KOLM_BACKEND: local_cpu
  <span class="k">script</span>:
- - npm install -g github:sneaky-hippo/kolm-stack
+ - npm install -g github:kolm-ai/kolm-stack
  - mkdir -p artifacts
  - |
  for r in recipes/*.recipe.json; do
@@ -142,7 +142,7 @@
  <span class="k">rules</span>:
  - <span class="k">if</span>: <span class="g">'$CI_COMMIT_TAG'</span>
  <span class="k">script</span>:
- - npm install -g github:sneaky-hippo/kolm-stack
+ - npm install -g github:kolm-ai/kolm-stack
  - mkdir -p out
  - |
  for r in recipes/*.recipe.json; do
@@ -188,7 +188,7 @@
  <span class="k">rules</span>:
  - <span class="k">if</span>: <span class="g">'$CI_PIPELINE_SOURCE == "schedule"'</span>
  <span class="k">script</span>:
- - npm install -g github:sneaky-hippo/kolm-stack
+ - npm install -g github:kolm-ai/kolm-stack
  - |
  fails=0
  for art in releases/**/*.kolm; do
@@ -231,7 +231,7 @@
       </div>
       <div>
         <h4>Company</h4>
-        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
       </div>
     </div>
     <div class="ks-footer__bottom">

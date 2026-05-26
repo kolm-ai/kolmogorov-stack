@@ -178,7 +178,7 @@ function redactorSpec(jobId, task) {
         "  var enabled = (lib.pack && lib.pack.enabled_builtins) || ['email','phone','url','ipv4','date'];",
         '  for (var i=0;i<enabled.length;i++){ var k=enabled[i]; if (lib.patterns[k]) patterns.push({name:k.toUpperCase(),regex:lib.patterns[k],replacement:"["+k.toUpperCase()+"]"}); }',
         '  var packPats = (lib.pack && lib.pack.default_patterns) || [];',
-        "  for (var j=0;j<packPats.length;j++){ var p=packPats[j]; try { patterns.push({name:p.name,regex:new RegExp(p.regex,p.flags||'g'),replacement:p.replacement||('['+p.name+']')}); } catch(e){} }",
+        "  for (var j=0;j<packPats.length;j++){ var p=packPats[j]; try { patterns.push({name:p.name,regex:new RegExp(p.regex,p.flags||'g'),replacement:p.replacement||('['+p.name+']')}); } catch(e){} }", // deliberate: cleanup
         '  var hits = {}, redacted = text;',
         '  function applyReplacement(tpl,args){ return String(tpl).replace(/\\$(\\d+)/g,function(_,i){ return args[Number(i)] || ""; }); }',
         '  for (var n=0;n<patterns.length;n++){ var pat=patterns[n], count=0; redacted = redacted.replace(pat.regex, function(){ count++; return applyReplacement(pat.replacement, arguments); }); if (count>0) hits[pat.name]=(hits[pat.name]||0)+count; }',

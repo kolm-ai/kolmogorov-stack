@@ -23,7 +23,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function isolatedHome() {
   const dir = path.join(os.tmpdir(), 'kolm-w407b-' + process.pid + '-' + Math.random().toString(36).slice(2));
-  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {}
+  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {} // deliberate: cleanup
   return dir;
 }
 
@@ -42,7 +42,7 @@ function postJson(url, body, headers = {}) {
         resolve({ status: res.statusCode, headers: res.headers, body: json });
       });
     });
-    req.setTimeout(8000, () => { try { req.destroy(new Error('timeout')); } catch (_) {} });
+    req.setTimeout(8000, () => { try { req.destroy(new Error('timeout')); } catch (_) {} }); // deliberate: cleanup
     req.on('error', reject);
     req.write(payload); req.end();
   });
@@ -59,7 +59,7 @@ function getJson(url) {
         resolve({ status: res.statusCode, headers: res.headers, body: json });
       });
     });
-    req.setTimeout(8000, () => { try { req.destroy(new Error('timeout')); } catch (_) {} });
+    req.setTimeout(8000, () => { try { req.destroy(new Error('timeout')); } catch (_) {} }); // deliberate: cleanup
     req.on('error', reject);
     req.end();
   });
@@ -127,7 +127,7 @@ test('W407b #1 - default privacy policy is "redact" when no config + no env var'
   } finally {
     process.env.HOME = prev.HOME || ''; process.env.USERPROFILE = prev.USERPROFILE || '';
     if (prev.POLICY != null) process.env.KOLM_PRIVACY_POLICY = prev.POLICY;
-    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -151,7 +151,7 @@ test('W407b #2 - explicit privacy_policy=allow in config.json is still honored (
   } finally {
     process.env.HOME = prev.HOME || ''; process.env.USERPROFILE = prev.USERPROFILE || '';
     if (prev.POLICY != null) process.env.KOLM_PRIVACY_POLICY = prev.POLICY;
-    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -184,7 +184,7 @@ test('W407b #3 - GET /v1/models returns 200 with non-empty OpenAI-shaped data', 
     }
   } finally {
     process.env.HOME = prev.HOME || ''; process.env.USERPROFILE = prev.USERPROFILE || '';
-    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -251,7 +251,7 @@ test('W407b #4 - raw SSN does not land in the lake when default policy is in eff
     process.env.HOME = prev.HOME || ''; process.env.USERPROFILE = prev.USERPROFILE || '';
     if (prev.POLICY != null) process.env.KOLM_PRIVACY_POLICY = prev.POLICY;
     if (prev.KEY) process.env.OPENAI_API_KEY = prev.KEY; else delete process.env.OPENAI_API_KEY;
-    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -281,6 +281,6 @@ test('W407b #5 - /v1/health per-provider block carries the 4-field connector hea
     }
   } finally {
     process.env.HOME = prev.HOME || ''; process.env.USERPROFILE = prev.USERPROFILE || '';
-    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });

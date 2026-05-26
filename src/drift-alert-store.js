@@ -291,7 +291,7 @@ export function _resetForTests(tenant_id = null) {
       remove(DRIFT_WEBHOOKS_TABLE, () => true);
       _warnings.clear();
     }
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
 }
 
 export default {

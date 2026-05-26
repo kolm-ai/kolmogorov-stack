@@ -168,7 +168,7 @@ test('W425 #5 (behavior) — cross-tenant read returns empty / tenant_mismatch',
   _setEnv(tmp);
   t.after(() => {
     _restoreEnv(saved);
-    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   });
 
   const traceCapture = await import('../src/trace-capture.js');

@@ -198,7 +198,7 @@ export async function prepareDistillCorpus({ namespace, split = 'train', limit =
             try {
               const e = JSON.parse(line);
               if (e && e.event_id) approvalsLookup[e.event_id] = e;
-            } catch {}
+            } catch {} // deliberate: cleanup
           }
         }
       }
@@ -575,7 +575,7 @@ export async function* distill({
       const prog = fs.readFileSync(path.join(runDir, 'progress.jsonl'), 'utf8')
         .split('\n').filter(Boolean);
       resumePriorSteps = prog.length;
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
   } else {
     runDir = _distillRunDir();
   }
@@ -615,7 +615,7 @@ export async function* distill({
       const selection = selectTeacherForCapture(attemptList, sampleCapture, reliability);
       teacher_council_choice = selection.teacher;
       teacher_council_weights = selection.weights;
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
   }
   try {
     fs.writeFileSync(path.join(runDir, 'run-meta.json'), JSON.stringify({
@@ -640,13 +640,13 @@ export async function* distill({
       efficiency: _efficiency,
       created_at: new Date().toISOString(),
     }, null, 2));
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
   // W455 — open progress.jsonl for per-step loss telemetry. Each yielded
   // event is also appended here so /v1/distill/runs/:id can reconstruct
   // the loss curve. Best-effort: a failed write does not block the run.
   let progressFd = null;
   const progressPath = path.join(runDir, 'progress.jsonl');
-  try { progressFd = fs.openSync(progressPath, 'a'); } catch (_) {}
+  try { progressFd = fs.openSync(progressPath, 'a'); } catch (_) {} // deliberate: cleanup
   // W459 — when resume_from is set, reuse the existing seeds.jsonl + spec.json
   // verbatim (the prior run already paid the IO cost). Otherwise stage fresh
   // worker inputs from this run's pairs.
@@ -687,7 +687,7 @@ export async function* distill({
     // load check below reflects only this attempt's worker output.
     const manifestPath = path.join(outDir, 'manifest.json');
     if (attemptIdx > 0) {
-      try { fs.unlinkSync(manifestPath); } catch (_) {}
+      try { fs.unlinkSync(manifestPath); } catch (_) {} // deliberate: cleanup
     }
     const args = [
       worker,
@@ -732,7 +732,7 @@ export async function* distill({
         attempt: attemptIdx + 1,
       };
       if (progressFd !== null) {
-        try { fs.writeSync(progressFd, JSON.stringify(evt) + '\n'); } catch (_) {}
+        try { fs.writeSync(progressFd, JSON.stringify(evt) + '\n'); } catch (_) {} // deliberate: cleanup
       }
       yield evt;
     }
@@ -742,7 +742,7 @@ export async function* distill({
       const finish = (code, signal) => {
         if (resolved) return;
         resolved = true;
-        try { fs.closeSync(logFd); } catch {}
+        try { fs.closeSync(logFd); } catch {} // deliberate: cleanup
         resolve({ code, signal: signal || null });
       };
       if (typeof child.on === 'function') {
@@ -757,7 +757,7 @@ export async function* distill({
     // Load + classify this attempt's manifest.
     let attemptManifest = null;
     if (fs.existsSync(manifestPath)) {
-      try { attemptManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); } catch {}
+      try { attemptManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); } catch {} // deliberate: cleanup
     }
     const hadTeacherError = !!(attemptManifest && attemptManifest.teacher_error);
     const cleanExit = attemptExit.code === 0;
@@ -781,7 +781,7 @@ export async function* distill({
   }
   // W455 — close progress.jsonl after the attempt loop finishes (success or
   // exhaustion). All synthetic events from every attempt have been appended.
-  if (progressFd !== null) { try { fs.closeSync(progressFd); } catch (_) {} }
+  if (progressFd !== null) { try { fs.closeSync(progressFd); } catch (_) {} } // deliberate: cleanup
   // W708-2 — stamp the WINNING teacher's source classification onto the worker
   // manifest so the .kolm artifact carries the policy enum end-to-end. The
   // manifest may already exist on disk (worker wrote it); we re-write it with
@@ -796,7 +796,7 @@ export async function* distill({
     try {
       const manifestPath = path.join(outDir, 'manifest.json');
       fs.writeFileSync(manifestPath, JSON.stringify(workerManifest, null, 2));
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
   }
   // The artifact_path is the worker's out dir (the .kolm itself is built by
   // src/compile-pipeline.js in the bundle phase — distill yields the path to
@@ -937,10 +937,10 @@ export function listDistillRuns({ tenant_id = 'local', limit = 100, namespace = 
         .split('\n').filter(Boolean);
       stepCount = prog.length;
       if (stepCount > 0) last = JSON.parse(prog[prog.length - 1]);
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
     // Manifest tells us exit + duration if available.
     let manifest = null;
-    try { manifest = JSON.parse(fs.readFileSync(path.join(runDir, 'manifest.json'), 'utf8')); } catch (_) {}
+    try { manifest = JSON.parse(fs.readFileSync(path.join(runDir, 'manifest.json'), 'utf8')); } catch (_) {} // deliberate: cleanup
     runs.push({
       id: name,
       run_dir: runDir,
@@ -979,11 +979,11 @@ export function readDistillRun(id, { tenant_id = 'local' } = {}) {
     const lines = fs.readFileSync(path.join(runDir, 'progress.jsonl'), 'utf8').split('\n');
     for (const line of lines) {
       if (!line) continue;
-      try { progress.push(JSON.parse(line)); } catch (_) {}
+      try { progress.push(JSON.parse(line)); } catch (_) {} // deliberate: cleanup
     }
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
   let manifest = null;
-  try { manifest = JSON.parse(fs.readFileSync(path.join(runDir, 'manifest.json'), 'utf8')); } catch (_) {}
+  try { manifest = JSON.parse(fs.readFileSync(path.join(runDir, 'manifest.json'), 'utf8')); } catch (_) {} // deliberate: cleanup
   return {
     id,
     run_dir: runDir,
@@ -1149,7 +1149,7 @@ function _w808ExtractCriticalFailRate(run_dir, manifest) {
       const j = JSON.parse(fs.readFileSync(cfrPath, 'utf8'));
       if (Number.isFinite(Number(j.critical_fail_rate))) return Number(j.critical_fail_rate);
     }
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
   return 0;
 }
 

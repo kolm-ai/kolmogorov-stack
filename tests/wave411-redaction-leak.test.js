@@ -277,7 +277,7 @@ test('W411 leak #4 — distill worker seeds.jsonl contains zero raw PHI bytes', 
       "import path from 'node:path';",
       "let out = null;",
       "for (const a of process.argv.slice(2)) if (a.startsWith('--out=')) out = a.slice(6);",
-      "if (out) { try { fs.mkdirSync(out, { recursive: true }); fs.writeFileSync(path.join(out,'manifest.json'), JSON.stringify({mode:'stub'})); } catch {} }",
+      "if (out) { try { fs.mkdirSync(out, { recursive: true }); fs.writeFileSync(path.join(out,'manifest.json'), JSON.stringify({mode:'stub'})); } catch {} }", // deliberate: cleanup
       "process.exit(0);",
       '',
     ].join('\n'));
@@ -298,9 +298,9 @@ test('W411 leak #4 — distill worker seeds.jsonl contains zero raw PHI bytes', 
     const nextPromise = iter.next();
     await new Promise((r) => setTimeout(r, 80));
     if (typeof iter.return === 'function') {
-      try { await Promise.race([iter.return(), new Promise((r) => setTimeout(r, 200))]); } catch {}
+      try { await Promise.race([iter.return(), new Promise((r) => setTimeout(r, 200))]); } catch {} // deliberate: cleanup
     }
-    try { await Promise.race([nextPromise, new Promise((r) => setTimeout(r, 200))]); } catch {}
+    try { await Promise.race([nextPromise, new Promise((r) => setTimeout(r, 200))]); } catch {} // deliberate: cleanup
 
     const runRoot = path.join(tmp, 'distill-runs');
     const runDirs = fs.readdirSync(runRoot)

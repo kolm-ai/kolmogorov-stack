@@ -3,7 +3,8 @@ Collapse homepage from 13 sections to 6.
 Deletes specific sections by their h2 signature.
 Idempotent — running twice is safe.
 """
-import re, pathlib
+import re
+import pathlib
 
 p = pathlib.Path('public/index.html')
 src = p.read_text(encoding='utf-8')

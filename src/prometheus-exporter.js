@@ -126,6 +126,48 @@ function _preRegisterCanonicalMetrics() {
     help: 'HTTP request duration in seconds by method, route, and status.',
     labelnames: ['method', 'route', 'status'],
   });
+  // W890-15 — V1 production-monitoring spec names (KOLM_W888 Part K-1).
+  // These six metrics are the canonical scrape contract for dashboards and
+  // alerting. The kolm_* siblings above remain for internal infrastructure
+  // signal (queues, kernels, decoding); the gateway_*/captures_*/artifacts_*
+  // /devices_* names below are the names the plan, runbook, and Grafana
+  // dashboards reference. Both sets co-exist on /metrics scrapes.
+  registerMetric({
+    name: 'gateway_requests_total',
+    type: 'counter',
+    help: 'Total gateway dispatch requests by route, tenant, and status class.',
+    labelnames: ['route', 'tenant', 'status'],
+  });
+  registerMetric({
+    name: 'gateway_latency_p50',
+    type: 'gauge',
+    help: 'Rolling p50 of gateway end-to-end latency in milliseconds.',
+    labelnames: ['route'],
+  });
+  registerMetric({
+    name: 'gateway_errors_total',
+    type: 'counter',
+    help: 'Total gateway request errors by route, tenant, and error class.',
+    labelnames: ['route', 'tenant', 'error_class'],
+  });
+  registerMetric({
+    name: 'captures_total',
+    type: 'counter',
+    help: 'Total capture events written to the durable store by tenant.',
+    labelnames: ['tenant', 'namespace'],
+  });
+  registerMetric({
+    name: 'artifacts_compiled_total',
+    type: 'counter',
+    help: 'Total .kolm artifacts compiled by target format.',
+    labelnames: ['target', 'tenant'],
+  });
+  registerMetric({
+    name: 'devices_online',
+    type: 'gauge',
+    help: 'Current count of devices reporting online by class.',
+    labelnames: ['device_class'],
+  });
 }
 
 // Pre-register on module load so the first scrape after boot is honest.

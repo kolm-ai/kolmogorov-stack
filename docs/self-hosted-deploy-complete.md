@@ -48,7 +48,7 @@ kolm doctor          # probes Node, Python, GPU, signing keys
 ### Option B — git clone (air-gap or custom build)
 
 ```bash
-git clone https://github.com/sneaky-hippo/kolmogorov-stack.git
+git clone https://github.com/kolm-ai/kolmogorov-stack.git
 cd kolmogorov-stack
 npm install --omit=dev
 node cli/kolm.js --version
@@ -58,11 +58,11 @@ node cli/kolm.js --version
 ### Option C — Docker
 
 ```bash
-docker pull ghcr.io/sneaky-hippo/kolm:latest
+docker pull ghcr.io/kolm-ai/kolm:latest
 docker run --rm -p 8080:8080 \
   -e KOLM_DATA_DIR=/var/kolm \
   -v kolm-data:/var/kolm \
-  ghcr.io/sneaky-hippo/kolm:latest
+  ghcr.io/kolm-ai/kolm:latest
 ```
 
 ### Option D — Helm chart (Kubernetes)
@@ -619,7 +619,7 @@ into a support ticket.
 
 ## 15. Support
 
-- **Issues:** https://github.com/sneaky-hippo/kolmogorov-stack/issues
+- **Issues:** https://github.com/kolm-ai/kolmogorov-stack/issues
 - **Security:** security@kolm.ai (PGP key at `/.well-known/security.txt`)
 - **Enterprise support:** support@kolm.ai (response within 4 business hours)
 - **Status:** https://status.kolm.ai (managed cloud only — self-hosted is your status)

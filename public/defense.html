@@ -1,55 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Defense AI: IL5/IL6, ITAR, air-gap, signed artifacts · kolm.ai</title>
-<meta name="description" content="Defense-grade AI compilation for DoD primes, mission-system integrators, and national-security agencies. IL5/IL6 enclaves, ITAR-bounded training data, air-gapped deployment, signed Ed25519 receipts that verify offline.">
-<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
-<meta property="og:title" content="Defense AI &middot; kolm.ai">
-<meta property="og:description" content="IL5/IL6, ITAR, SCIF-ready. Air-gapped compile and run. Signed receipts that verify offline. Real workflows.">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://kolm.ai/defense">
-<meta property="og:image" content="https://kolm.ai/brand-hero.png">
-<link rel="canonical" href="https://kolm.ai/defense">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="manifest" href="/manifest.webmanifest">
-<link rel="preload" href="/ks.css" as="style">
+<title>Defense AI · Air-gapped, ITAR-conscious, receipts every call · kolm.ai</title>
+<meta name="description" content="Distill frontier models. Run them air-gapped on your own hardware. Verify every call with a receipt. ITAR / EAR / DoD IL5+IL6 / FedRAMP High friendly.">
+<link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/ks.css">
-    <link rel="stylesheet" href="/warm-paper.css">
-<style>
-  .hc-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--ks-3); padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); }
-  @media (max-width: 720px) { .hc-stats { grid-template-columns: 1fr 1fr; } }
-  .hc-stat { padding: var(--ks-3) var(--ks-4); }
-  .hc-stat b { display: block; font-family: var(--ks-mono); font-size: 10.5px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; font-weight: 500; }
-  .hc-stat span { font-family: var(--ks-mono); font-size: 16px; color: var(--ks-accent); font-variant-numeric: tabular-nums; }
-  .hc-flows { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--ks-4); }
-  .hc-flow { padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); display: flex; flex-direction: column; gap: var(--ks-3); }
-  .hc-flow .who { font-family: var(--ks-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ks-accent); }
-  .hc-flow h3 { margin: 0; font-size: 17px; font-weight: 580; color: var(--ks-ink); }
-  .hc-flow p { margin: 0; font-size: 14px; color: var(--ks-ink-2); line-height: 1.6; }
-  .hc-flow .out { padding: 10px 14px; background: #0c0e12; border: 1px dashed var(--ks-line-2); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-2); line-height: 1.5; }
-  .hc-flow .out b { color: var(--ks-accent); font-weight: 600; }
-  .hc-flow .met { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-top: var(--ks-3); border-top: 1px solid var(--ks-line-1); }
-  .hc-flow .met div { font-family: var(--ks-mono); }
-  .hc-flow .met b { display: block; font-size: 10px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; font-weight: 500; }
-  .hc-flow .met span { font-size: 14px; color: var(--ks-accent); font-variant-numeric: tabular-nums; }
-  .hc-rules { display: grid; grid-template-columns: 50px minmax(0, 1fr); gap: var(--ks-3) var(--ks-5); }
-  @media (max-width: 720px) { .hc-rules { grid-template-columns: 1fr; gap: var(--ks-2); } }
-  .hc-rules .n { font-family: var(--ks-mono); font-size: 14px; color: var(--ks-accent); font-weight: 600; padding-top: 3px; }
-  .hc-rules .b { padding-bottom: var(--ks-4); border-bottom: 1px solid var(--ks-line-1); }
-  .hc-rules .b:last-child { border-bottom: 0; }
-  .hc-rules h3 { margin: 0 0 6px; font-size: 16px; font-weight: 580; color: var(--ks-ink); }
-  .hc-rules p { margin: 0; font-size: 14px; color: var(--ks-ink-2); line-height: 1.65; }
-  .hc-rules code { background: var(--ks-bg-2); padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
-  .hc-map { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--ks-3); }
-  .hc-map > div { padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); }
-  .hc-map .ctrl { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-accent); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
-  .hc-map b { display: block; font-size: 14px; font-weight: 580; color: var(--ks-ink); margin-bottom: 3px; }
-  .hc-map p { margin: 0; font-size: 13px; color: var(--ks-ink-3); line-height: 1.55; }
-  .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
-</style>
+<link rel="stylesheet" href="/wave889-vertical.css">
+  <link rel="canonical" href="https://kolm.ai/defense">
+  <meta property="og:title" content="Defense AI · Air-gapped, ITAR-conscious, receipts every call">
+  <meta property="og:description" content="Distill frontier models. Run them air-gapped on your own hardware. Verify every call with a receipt. ITAR / EAR / DoD IL5+IL6 / FedRAMP High friendly.">
+  <meta property="og:image" content="https://kolm.ai/og/defense.svg">
+  <meta property="og:url" content="https://kolm.ai/defense">
+  <meta property="og:type" content="website">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -58,7 +22,7 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/defense",
-  "description": "Defense-grade AI compilation for DoD primes, mission-system integrators, and national-security agencies. IL5/IL6 enclaves, ITAR-bounded training data, air-gapped deployment, signed Ed25519 receipts that verify offline.",
+  "description": "Distill frontier models. Run them air-gapped on your own hardware. Verify every call with a receipt. ITAR / EAR / DoD IL5+IL6 / FedRAMP High friendly.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -73,408 +37,154 @@
 </script>
 </head>
 <body class="ks">
-<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<a href="#main" class="ks-skip">Skip to content</a>
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<div data-include-nav></div>
 
-<div class="ks-nav-wrap">
-  <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
-    <ul class="ks-nav__list">
-      <li><a href="/wrapper">Wrapper</a></li>
-      <li><a href="/studio">Studio</a></li>
-      <li><a href="/pricing">Pricing</a></li>
-      <li><a href="/docs">Docs</a></li>
-      <li><a href="/enterprise">Enterprise</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
-    </ul>
-    <div class="ks-nav__right">
-      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
-      <a href="/contact?topic=defense" class="ks-btn ks-btn--primary ks-btn--sm">Talk to us <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
+<section class="v-hero">
+  <div class="v-wrap">
+    <span class="v-eyebrow">Defense &amp; intelligence</span>
+    <h1 class="v-h1">Frontier AI you can take inside the wire.</h1>
+    <p class="v-lede">Distill a frontier model, quantize it to INT4, and run it air-gapped on your own GPUs. No outbound calls. No vendor telemetry. Every inference produces a signed receipt your auditor can replay.</p>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup?industry=defense">Try it free</a>
+      <a class="v-btn v-btn--ghost" href="/book-demo?industry=defense">Speak to defense team</a>
     </div>
-  </nav>
-  <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a>
-    <a href="/pricing">Pricing</a>
-    <a href="/docs">Docs</a>
-    <a href="/enterprise">Enterprise</a>
-    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
-    <a href="/signup?intent=login">Sign in</a>
-    <a href="/contact?topic=defense">Talk to us &rarr;</a>
-  </div>
-</div>
-
-<main id="main">
-
-<section class="ks-hero">
-  <div class="ks-hero__bg" aria-hidden="true"></div>
-  <div class="ks-wrap" style="display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(32px, 5vw, 72px); align-items: center;">
-    <div>
-      <span class="ks-eyebrow">For DoD primes, mission integrators, and national-security agencies</span>
-      <h1 class="ks-hero__h1" style="font-size: clamp(38px, 5.5vw, 60px); max-width: 19ch;">
-        Defense AI that <span class="grad">never leaves the SCIF.</span>
-      </h1>
-      <p class="ks-hero__lede">
-        Compile mission tasks into signed local artifacts inside an IL5 or IL6 enclave. ITAR-bounded training data. Air-gapped deployment, byte-exact reproducibility on the air-gap side of the diode. The cloud round-trip you were trying to avoid does not exist in this build.
-      </p>
-      <div class="ks-hero__ctas">
-        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/contact?topic=defense">Talk to defense team <span class="ks-btn-arrow">&rarr;</span></a>
-        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/airgap">Read the air-gap kit</a>
-      </div>
-      <p class="ks-hero__meta">
-        <span style="color: var(--ks-pos);">&#9679;</span> Used for ISR triage, OSINT analysis, classified-doc summarization, and mission-system bring-up.
-      </p>
-      <p class="ks-hero__meta" style="margin-top:8px; font-family:var(--ks-mono); font-size:11.5px; color:var(--ks-ink-3); letter-spacing:0.04em">
-        See also the combined <a href="/for/government-defense" style="color:var(--ks-ink-2); border-bottom:1px solid var(--ks-line-3); text-decoration:none">government &amp; defense air-gap framing &rarr;</a>
-      </p>
-    </div>
-    <div class="hc-stats">
-      <div class="hc-stat"><b>IL5 / IL6</b><span>Enclave-ready</span></div>
-      <div class="hc-stat"><b>Deploy</b><span>Air-gap / SCIF</span></div>
-      <div class="hc-stat"><b>ITAR</b><span>Boundary-bounded</span></div>
-      <div class="hc-stat"><b>FedRAMP High</b><span>Inheritable controls</span></div>
-      <div class="hc-stat"><b>DoD SRG</b><span>L5 mapped</span></div>
-      <div class="hc-stat"><b>FIPS 140-3</b><span>Crypto modules</span></div>
-      <div class="hc-stat"><b>NIST 800-171</b><span>Mapped</span></div>
-      <div class="hc-stat"><b>CMMC L3</b><span>On the roadmap</span></div>
-    </div>
+    <div class="v-caveat">Caveats: customer is the data controller for ITAR/EAR/CUI handling. Kolmogorov ships software + receipts; <a href="/security">security posture</a> is documented per deployment.</div>
   </div>
 </section>
 
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Real workflows in production</span>
-      <h2 class="ks-h2">Defense workflows kolm runs today.</h2>
-      <p class="ks-lede">Each ships with a written intended-use, an evaluation report against held-out mission data, and a signed manifest that drops into your ATO package.</p>
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Three commands</span>
+      <h2 class="v-h2">Distill. Run. Verify.</h2>
+      <p>One CLI, three verbs. Models stay where the mission lives.</p>
     </div>
-    <div class="hc-flows">
-      <div class="hc-flow">
-        <div class="who">ISR / analysis</div>
-        <h3>Multi-source triage</h3>
-        <p>Reads structured intel reports (no raw collect), classifies by mission priority, surfaces the cited sources behind each call. Defers anything ambiguous to a human analyst.</p>
-        <div class="out">input: ingested-report<br>output: priority + cited-sources<br>defer-on-novel: yes</div>
-        <div class="met"><div><b>Throughput</b><span>4,200 / hr</span></div><div><b>Defer rate</b><span>13%</span></div></div>
+    <div class="v-trio">
+      <div class="v-card">
+        <span class="ctag">01 / Distill</span>
+        <h3>Train a mission-fit model</h3>
+        <p>Pull mission jargon, doctrine, and approved exemplars into a small student model. The teacher never sees production traffic.</p>
+        <div class="cmd">kolm distill --base qwen3-8b --recipe defense-osint</div>
+        <a class="go" href="/distill">Distill pipeline -&gt;</a>
       </div>
-      <div class="hc-flow">
-        <div class="who">OSINT</div>
-        <h3>Open-source summarization</h3>
-        <p>Turns long-form open-source feeds into per-event summaries with source citations. Compiled per language pair from the unit's labeled corpus. Runs on the analyst's CSfC-approved laptop.</p>
-        <div class="out">input: osint-feed (UTF-8)<br>output: event-summary + cites<br>language: per-artifact</div>
-        <div class="met"><div><b>Latency</b><span>3.1s</span></div><div><b>Source recall</b><span>0.92</span></div></div>
+      <div class="v-card">
+        <span class="ctag">02 / Run</span>
+        <h3>Serve it from a SCIF rack</h3>
+        <p>INT4 GGUF runs on a single 5090 or H100. Air-gapped install, no license phone-home, no model auto-update.</p>
+        <div class="cmd">kolm run model.kolm --air-gap --bind 127.0.0.1</div>
+        <a class="go" href="/run">Run surface -&gt;</a>
       </div>
-      <div class="hc-flow">
-        <div class="who">Mission systems</div>
-        <h3>Classified-doc summarization</h3>
-        <p>Reads classified report packages inside the SCIF, drafts per-package summaries with classification markings preserved. Zero network. Receipts go to the unit's audit fence.</p>
-        <div class="out">input: classified-pkg (SCIF)<br>output: summary + markings<br>network: zero</div>
-        <div class="met"><div><b>Packages / day</b><span>820</span></div><div><b>Accept rate</b><span>86%</span></div></div>
-      </div>
-      <div class="hc-flow">
-        <div class="who">Acquisition / proposal</div>
-        <h3>Compliance matrix assembly</h3>
-        <p>Reads an RFP, extracts every "shall" requirement into a compliance matrix, drafts the proposal section pointer for each. Compiled from the prime's past winning proposals.</p>
-        <div class="out">input: rfp.docx (PWS + SOO)<br>output: matrix + sec-pointers<br>verifier: no-missed-shall</div>
-        <div class="met"><div><b>RFPs / week</b><span>14</span></div><div><b>Shall recall</b><span>0.97</span></div></div>
-      </div>
-      <div class="hc-flow">
-        <div class="who">Logistics / sustainment</div>
-        <h3>Maintenance log triage</h3>
-        <p>Reads aircraft or vehicle maintenance logs, classifies by likely root cause, surfaces TM section references. Compiled per platform from the unit's historical CASREP data.</p>
-        <div class="out">input: maint-log + platform<br>output: root-cause + tm-refs<br>escalate-on: safety-flag</div>
-        <div class="met"><div><b>Logs / hr</b><span>1,800</span></div><div><b>Auto-classify</b><span>74%</span></div></div>
-      </div>
-      <div class="hc-flow">
-        <div class="who">Cyber / SOC</div>
-        <h3>Alert triage and IR assistant</h3>
-        <p>Reads SOC alerts from the unit's SIEM, drafts the IR ticket in the SOC's house style, cites the playbook section behind each call. Runs on the SOC's CDS-isolated cluster.</p>
-        <div class="out">input: siem-alert<br>output: ir-ticket-draft + refs<br>escalation: always-available</div>
-        <div class="met"><div><b>P95 latency</b><span>1.6s</span></div><div><b>Auto-draft</b><span>78%</span></div></div>
+      <div class="v-card">
+        <span class="ctag">03 / Verify</span>
+        <h3>Receipt per inference</h3>
+        <p>Each call emits a CID-pinned receipt: prompt hash, model hash, weights hash, output, timestamp. Replayable offline.</p>
+        <div class="cmd">kolm verify rcpt_01KYC...</div>
+        <a class="go" href="/verify">Verify a receipt -&gt;</a>
       </div>
     </div>
   </div>
 </section>
 
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">How the air-gap is honest</span>
-      <h2 class="ks-h2">What makes this SCIF-deployable.</h2>
-      <p class="ks-lede">No vendor-speak. The exact mechanism for each property, with the CLI verb or install flag you can verify yourself the first time you bring up the appliance.</p>
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Compliance posture</span>
+      <h2 class="v-h2">Designed for the cleared world.</h2>
+      <p>What the architecture gives you out of the box. What still belongs to your security officer.</p>
     </div>
-    <div class="hc-rules">
-      <div class="n">01</div><div class="b">
-        <h3>Compile runs inside your enclave</h3>
-        <p>The self-hosted compile server kit ships as a signed Docker image and Helm chart. Deploy into your IL5 or IL6 enclave, point your build pipeline at it, and never reach back across the diode. Inbound only, signed bundles, gpg-verifiable.</p>
+    <div class="v-compl">
+      <div>
+        <div class="label">ITAR / EAR</div>
+        <b>22 CFR §120-130 &middot; 15 CFR §730-774</b>
+        <p>No outbound network in air-gap mode. Weights are static files under your custody chain. You own the export determination.</p>
       </div>
-      <div class="n">02</div><div class="b">
-        <h3>ITAR boundary is enforced at the boundary</h3>
-        <p>Training corpus, captured prompts, base-model weights, and resulting artifact weights all stay inside the export-control boundary you already maintain. There are no third-party API calls in the build path; the boundary you draw is the boundary kolm respects.</p>
+      <div>
+        <div class="label">DoD IL5 / IL6</div>
+        <b>Hosted on your accredited enclave</b>
+        <p>Runs inside your boundary. Receipts ledger sinks to your existing SIEM (Splunk, Elastic, on-prem). No Kolmogorov cloud in the path.</p>
       </div>
-      <div class="n">03</div><div class="b">
-        <h3>Receipts verify offline</h3>
-        <p>Every <code>.kolm</code> carries a signed manifest (spec, seeds, split, train, evals, signatures) that re-verifies offline. A different machine on the air-gap side computes the same <code>artifact_hash</code> bit-for-bit. The receipt chain is byte-exact reproducible.</p>
+      <div>
+        <div class="label">FedRAMP High</div>
+        <b>Compatible with High-baseline enclaves</b>
+        <p>SC-7 boundary protection, AU-2 auditable events, and CM-6 configuration settings are user-controlled. We do not change them.</p>
       </div>
-      <div class="n">04</div><div class="b">
-        <h3>FIPS 140-3 crypto modules</h3>
-        <p>Ed25519 signing and SHA-256 hashing route through FIPS-validated modules. The crypto operator is logged; key custodian and dual-control activation are mandatory in the IL6 profile. KMS-resident keys; no plaintext private material on disk.</p>
-      </div>
-      <div class="n">05</div><div class="b">
-        <h3>One-way ingress, audit-only egress</h3>
-        <p>Updates arrive on a signed USB or a one-way data diode; the appliance verifies signatures before applying. The only outbound path is the audit-log stream to the unit's SIEM, gated by your accreditor. No vendor cloud is ever in the path.</p>
-      </div>
-      <div class="n">06</div><div class="b">
-        <h3>Signed bundles, signed runtime</h3>
-        <p>The OVA, the Helm chart, every kolm container, and every model weight ship with detached signatures. <code>kolm verify-bundle</code> re-checks the chain against the pinned public key bundle on every boot. Tampering breaks the chain; the appliance refuses to start.</p>
-      </div>
-      <div class="n">07</div><div class="b">
-        <h3>Classification markings preserved end-to-end</h3>
-        <p>Capture metadata carries the classification banner from intake through artifact compile. The artifact manifest pins the maximum-allowed classification; an attempt to run a higher-marked input against a lower-cleared artifact fails closed at the gateway.</p>
+      <div>
+        <div class="label">CMMC 2.0</div>
+        <b>Level 2 / 3 friendly</b>
+        <p>Receipts give you AC-2, AU-3, and SI-4 evidence per inference. Map the CID ledger to your POA&amp;M template.</p>
       </div>
     </div>
   </div>
 </section>
 
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Compliance mapping</span>
-      <h2 class="ks-h2">How kolm controls map to the frameworks your accreditor cares about.</h2>
-      <p class="ks-lede">The shorter answer to "is this ATO-able?" Full mapping in PDF on request, inheriting from the host enclave where appropriate.</p>
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Mission workflows</span>
+      <h2 class="v-h2">What teams ship on this.</h2>
+      <p>Six patterns in production at defense and intelligence customers.</p>
     </div>
-    <div class="hc-map">
-      <div><div class="ctrl">DoD CC SRG L5</div><b>IL5 baseline</b><p>Controlled Unclassified Information and mission support. kolm inherits enclave controls; per-tenant Ed25519 keys, audit log, per-namespace RBAC.</p></div>
-      <div><div class="ctrl">DoD CC SRG L6</div><b>IL6 baseline</b><p>Classified up to Secret on the SIPR fabric. Mandatory dual-control break-glass, FIPS 140-3 crypto modules, kolm.crypto operator audited.</p></div>
-      <div><div class="ctrl">NIST 800-171 r2</div><b>CUI handling</b><p>Per-namespace boundary, encryption at rest and in transit, audit log, identification and authentication via your enclave SSO.</p></div>
-      <div><div class="ctrl">NIST 800-53 r5</div><b>Control catalog</b><p>AC, AU, IA, SC families map directly. SI, CA, PL inherit from the host enclave; kolm contributes RA-3 risk-assessment artifacts via the manifest.</p></div>
-      <div><div class="ctrl">FedRAMP High</div><b>Inheritable</b><p>For SaaS-dedicated and BYOC GovCloud, kolm controls inherit from your existing High baseline. Sensitive boundary documented in the ATO package.</p></div>
-      <div><div class="ctrl">ITAR 22 CFR 120</div><b>Export control</b><p>No defense article or technical data crosses the enclave boundary at compile or run time. US-person access enforced via your existing IAM.</p></div>
-      <div><div class="ctrl">EAR 15 CFR 730</div><b>Dual-use control</b><p>Encryption modules use FIPS-validated implementations under license exception ENC; export determinations documented per part 740.17.</p></div>
-      <div><div class="ctrl">CMMC L3</div><b>Roadmap</b><p>L1 and L2 controls map today from NIST 800-171 baseline; L3 organizational maturity is on the 2026 Q4 roadmap, no marketing claim.</p></div>
-      <div><div class="ctrl">FIPS 140-3</div><b>Crypto modules</b><p>Ed25519, AES-256-GCM, SHA-256 via FIPS-validated module set. Module version pinned in the artifact manifest at compile.</p></div>
-      <div><div class="ctrl">NIAP CC</div><b>Common Criteria</b><p>Inherits NIAP-validated components for crypto and audit. Full TOE evaluation only for customers with a specific accreditation requirement.</p></div>
-      <div><div class="ctrl">DCSA NISPOM</div><b>Cleared-facility</b><p>Cleared-personnel-only build process available on the SaaS-dedicated tier. NISPOM-compatible audit retention.</p></div>
-      <div><div class="ctrl">Section 889</div><b>Supply chain</b><p>kolm.ai is a US C-corp with no covered telecom equipment in the build chain; SBOM included in every bundle.</p></div>
-      <div><div class="ctrl">EO 14028</div><b>Supply chain security</b><p>Signed bundles, SBOM, provenance-aware build process. SLSA Build L3 attestation per release.</p></div>
-      <div><div class="ctrl">CISA BOD 23-01</div><b>Asset visibility</b><p>Asset inventory and vuln-scanning friendly; SBOM per artifact in CycloneDX format.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Honest scope</span>
-      <h2 class="ks-h2">What kolm does, and what we tell every defense buyer up front.</h2>
-      <p class="ks-lede">No "AI weapon" claims. No autonomous-targeting marketing. Read this before the rest of the page becomes interesting.</p>
-    </div>
-    <div class="hc-rules">
-      <div class="n">A</div><div class="b">
-        <h3>Kolm is not a weapon system</h3>
-        <p>The CLI does not output a kinetic decision. Our distilled artifacts route, summarize, structure, draft, and triage. Anything that crosses into a targeting decision is your application logic, your label, your DoDD 3000.09 review, and your commander's call.</p>
+    <div class="v-flows">
+      <div class="v-flow">
+        <span class="who">OSINT analyst</span>
+        <h3>Open-source triage</h3>
+        <p>Cluster, tag, and summarize foreign-language source material against your taxonomy. Distilled student, fully offline.</p>
+        <div class="io">in: 2k articles &middot; out: ranked threads + entity graph</div>
       </div>
-      <div class="n">B</div><div class="b">
-        <h3>We do not file your ATO</h3>
-        <p>If you are deploying kolm in an enclave, the AO owns the ATO. What kolm gives you: the artifact manifests, the signed receipts, the SBOM, the build-provenance attestations your authorization package will need. The eMASS form is yours to file.</p>
+      <div class="v-flow">
+        <span class="who">ATO writer</span>
+        <h3>ATO documentation drafting</h3>
+        <p>Generate SSPs, control narratives, and POA&amp;M entries from your existing artifacts. Cites the source control line.</p>
+        <div class="io">in: NIST 800-53 catalog + system diagram &middot; out: draft SSP §3</div>
       </div>
-      <div class="n">C</div><div class="b">
-        <h3>Models will be wrong sometimes</h3>
-        <p>Our distilled models drop K-score by under 3 points after quantization. They still hallucinate, miss edge cases, and exhibit bias. Every kolm workflow ships with a defer-on-low-confidence path and a human-in-the-loop gate by default; the override is logged with the operator's name on it.</p>
+      <div class="v-flow">
+        <span class="who">Mission coder</span>
+        <h3>Classified-adjacent code gen</h3>
+        <p>Pair-program against internal APIs your developer cannot share with a cloud model. Student trained on your unclass docs.</p>
+        <div class="io">in: function spec &middot; out: code + test stub</div>
       </div>
-      <div class="n">D</div><div class="b">
-        <h3>We will not skip the export-control review</h3>
-        <p>If you are bringing training data that touches ITAR-controlled technical data, we will ask for the export determination before we engage. Period. The boundary you draw is the boundary kolm respects, and we will not sign a contract that papers over a determination you have not made.</p>
+      <div class="v-flow">
+        <span class="who">Watch officer</span>
+        <h3>Mission planning Q&amp;A</h3>
+        <p>Answer doctrine and ROE questions against your published library. Refuses on out-of-corpus prompts.</p>
+        <div class="io">in: question &middot; out: cited paragraph + page #</div>
+      </div>
+      <div class="v-flow">
+        <span class="who">SIGINT analyst</span>
+        <h3>Comms pattern analysis</h3>
+        <p>Surface anomalies in structured comms metadata. Student model, deterministic temperature, replayable.</p>
+        <div class="io">in: metadata batch &middot; out: ranked anomalies + receipts</div>
+      </div>
+      <div class="v-flow">
+        <span class="who">Acquisitions</span>
+        <h3>Proposal &amp; RFP synthesis</h3>
+        <p>Compress 800-page RFPs into compliance matrices and gap lists. Maps to your past-performance library.</p>
+        <div class="io">in: RFP PDF &middot; out: matrix + draft response sections</div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Reference architectures</span>
-      <h2 class="ks-h2">How defense teams actually deploy kolm.</h2>
-      <p class="ks-lede">Same product, several placements. Pick the one that matches your enclave, your network, and your AO's risk tolerance.</p>
+<section class="v-cta-row">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Get started</span>
+      <h2 class="v-h2">Pilot on unclass first. Move inside when you are ready.</h2>
+      <p>Start free on the open side. Move the same model + receipts into your accredited enclave with no code change.</p>
     </div>
-    <div class="hc-flows">
-      <div class="hc-flow">
-        <div class="who">A. GovCloud BYOC</div>
-        <h3>Inside your IL5 enclave</h3>
-        <p>Helm chart installed in your AWS GovCloud or Azure Government account. Kolm runs in the same enclave as your existing mission systems. Residency US East-Gov or US West-Gov. Audit-only egress to your SIEM.</p>
-        <div class="out">helm install kolm kolm/defense \<br>  --set residency=us-gov-east-1 \<br>  --set kms.arn=arn:aws-us-gov:kms:... \<br>  --set egress=audit-only</div>
-      </div>
-      <div class="hc-flow">
-        <div class="who">B. On-prem SCIF</div>
-        <h3>Signed bare-metal install</h3>
-        <p>kolm runs inside your SCIF on Kubernetes or bare metal. Inbound updates only, via signed bundle and gpg verification. Audit-only egress is gated by the AO. No vendor cloud is ever in the path.</p>
-        <div class="out">$ kolm install --on-prem \<br>   --bundle kolm-2026-05.tar.zst \<br>   --signature kolm-2026-05.sig \<br>   --egress audit-only</div>
-      </div>
-      <div class="hc-flow">
-        <div class="who">C. Air-gap appliance</div>
-        <h3>OVA boot, zero outbound</h3>
-        <p>Signed OVA appliance that boots offline. Pre-loaded model registry. Upgrades arrive on a signed USB or a one-way data diode; the appliance verifies signatures before applying. Receipts verify offline; the appliance never reaches a network.</p>
-        <div class="out">appliance: kolm-2026-05.ova<br>signature: kolm-2026-05.sig<br>verify: gpg --verify (offline)<br>boot: zero outbound</div>
-      </div>
-      <div class="hc-flow">
-        <div class="who">D. Tactical edge</div>
-        <h3>Ruggedized laptop or comms kit</h3>
-        <p>Single signed <code>.kolm</code> file deploys to a tactical laptop or comms kit. The artifact runs locally with zero network calls. P95 latency 90 ms on a Dell 7400 Rugged. Audit log syncs when the kit next reaches a friendly network.</p>
-        <div class="out">$ kolm run osint-summary.kolm \<br>   --in feed.utf8 \<br>   --out summary.json \<br>   --offline</div>
-      </div>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup?industry=defense">Try it free</a>
+      <a class="v-btn v-btn--ghost" href="/book-demo?industry=defense">Speak to defense team</a>
+    </div>
+    <div class="v-receipts">
+      <div class="label">Example receipt</div>
+      <p>Every inference: <code>kolm verify rcpt_01KYC1ZVTGDCW3FX06JQSC</code> &middot; <a href="/v1/verify/rcpt_01KYC1ZVTGDCW3FX06JQSC">view receipt -&gt;</a></p>
     </div>
   </div>
 </section>
 
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Integrations</span>
-      <h2 class="ks-h2">Adapters for the systems your unit and program office already run.</h2>
-      <p class="ks-lede">Defense IT is its own ecosystem. Kolm ships first-party adapters for the protocols that matter and stays out of the way of the ones that do not.</p>
-    </div>
-    <div class="hc-map">
-      <div><div class="ctrl">AWS GovCloud</div><b>BYOC</b><p>Native install on GovCloud East and West. KMS, S3, IAM, CloudTrail all wired.</p></div>
-      <div><div class="ctrl">Azure Government</div><b>BYOC</b><p>Native install on Azure Government and Azure Government Secret. Key Vault and Sentinel integrated.</p></div>
-      <div><div class="ctrl">Oracle Government Cloud</div><b>BYOC</b><p>Helm chart compatible with Oracle Government realms; tested on the L2 and L5 profiles.</p></div>
-      <div><div class="ctrl">Splunk ES</div><b>SIEM</b><p>Native CEF and JSON stream for audit logs. Splunk Enterprise Security tested.</p></div>
-      <div><div class="ctrl">Elastic / Kibana</div><b>SIEM</b><p>Audit log streams to Elastic with pre-built Kibana dashboards. Fleet-managed agent for on-prem.</p></div>
-      <div><div class="ctrl">CSfC</div><b>Network kit</b><p>Compatible with CSfC dual-encryption network kits. Inner-layer mTLS, outer-layer per the CSfC architecture.</p></div>
-      <div><div class="ctrl">DISA STIGs</div><b>Hardening</b><p>OS STIGs applied via the appliance image. RHEL 9 STIG and Ubuntu CIS L1 baselines verified.</p></div>
-      <div><div class="ctrl">DCSA NISPOM</div><b>Cleared support</b><p>Cleared-personnel-only support tier available. Receipts compatible with NISPOM audit retention.</p></div>
-      <div><div class="ctrl">PIV / CAC</div><b>Smart-card auth</b><p>PIV and CAC card authentication for the kolm console. Inherits enclave PKI.</p></div>
-      <div><div class="ctrl">JWICS / SIPR</div><b>Fabric-aware</b><p>Fabric-aware install profiles for SIPR (L6 build); JWICS profile available on request for cleared customers.</p></div>
-      <div><div class="ctrl">Maven / Anvil</div><b>Program adjacency</b><p>kolm artifacts callable from Project Maven and Joint Air Operations toolchains when the program permits.</p></div>
-      <div><div class="ctrl">SBOM CycloneDX</div><b>Provenance</b><p>CycloneDX SBOM per release; SLSA Build L3 provenance attestations bundled.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Operational footprint</span>
-      <h2 class="ks-h2">What the program office needs to know.</h2>
-      <p class="ks-lede">Day-2 facts. Capacity, support tiers, change management, the boring numbers that decide whether this is something your AO will actually accredit.</p>
-    </div>
-    <div class="hc-rules">
-      <div class="n">i</div><div class="b">
-        <h3>Footprint per unit or detachment</h3>
-        <p>Reference deployment: three application nodes (8 vCPU, 32 GB RAM each), one inference node with a single A10G or equivalent ruggedized GPU (24 GB VRAM), one Postgres instance, one S3-compatible bucket. Handles ~3,000 inferences per hour on a 7B INT4 specialist.</p>
-      </div>
-      <div class="n">ii</div><div class="b">
-        <h3>Change management</h3>
-        <p>Updates arrive as signed bundles every two weeks (security) or monthly (features). The bundle includes a release note, an SBOM, a signature, and a rollback receipt. Air-gap customers ingest via signed USB or diode; you apply on your cadence.</p>
-      </div>
-      <div class="n">iii</div><div class="b">
-        <h3>Support tier</h3>
-        <p>Cleared-personnel support tier available for IL5 and IL6 customers. 24/7 paging with a 1-hour Sev-1 response under enterprise contracts. Phone-and-key authentication for all support sessions.</p>
-      </div>
-      <div class="n">iv</div><div class="b">
-        <h3>Disaster recovery</h3>
-        <p>Air-gap appliances inherit your DR posture (we ship runbooks for cold-storage restore of artifacts, signing keys, and audit logs). GovCloud BYOC: RPO 15 min, RTO 4 hours with cross-region replication.</p>
-      </div>
-      <div class="n">v</div><div class="b">
-        <h3>Telemetry</h3>
-        <p>Prometheus-format metrics on <code>/metrics</code> (opt-in). OpenTelemetry traces (opt-in). Structured logs on stdout. Zero mission content in any telemetry stream by default; opt-in flags add only structural identifiers (artifact CID, namespace name).</p>
-      </div>
-      <div class="n">vi</div><div class="b">
-        <h3>Pricing</h3>
-        <p>BYOC: your cloud bill plus our flat enterprise license. Air-gap appliance: per-appliance license with a multi-year support tier. Tactical-edge: per-device license at scale. Talk to us; we have not blown a program office's budget yet.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div style="background: linear-gradient(180deg, var(--ks-accent-soft) 0%, transparent 100%); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-lg); padding: var(--ks-10); text-align: center;">
-      <span class="ks-eyebrow">Get started</span>
-      <h2 class="ks-h2" style="font-size: clamp(28px, 4vw, 40px); margin: var(--ks-3) auto; max-width: 24ch;">Talk to a real engineer about the mission.</h2>
-      <p class="ks-prose" style="margin: 0 auto var(--ks-5); max-width: 60ch;">Not a sales rep with a script. You will be on a call with someone who has stood up an air-gap install before and can answer "does this fit our AO's risk posture?" or "what does the eMASS package look like?" in the same conversation.</p>
-      <div style="display: inline-flex; gap: var(--ks-3); flex-wrap: wrap; justify-content: center;">
-        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/contact?topic=defense">Talk to defense team <span class="ks-btn-arrow">&rarr;</span></a>
-        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/airgap">Read the air-gap kit</a>
-        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/security">Read the security model</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="test-anchor">
-  <span data-test="w220-claim">kolm.ai</span>
-  <span data-test="w260-trust">SOC 2 Type I</span>
-  <span data-test="w271-frontier">Frontier methods</span>
-  <span data-test="w335-claim">Open-source AI compiler</span>
-  <span data-test="w373-receipts">Ed25519 receipts</span>
-  <span data-test="w408-quantize-matrix">DeepSeek-R1 32B INT4</span>
-</div>
-
-</main>
-
-<footer class="ks-foot">
-  <div class="ks-wrap">
-    <div class="ks-foot__grid">
-      <div class="ks-foot__col">
-        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
-        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Product</h4>
-        <a href="/gateway">Gateway</a>
-        <a href="/capture">Capture</a>
-        <a href="/distill">Distill</a>
-        <a href="/compile">Compile</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/registry">Registry</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/sdks">SDKs</a>
-        <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
-        <a href="/faq">FAQ</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Trust</h4>
-        <a href="/security">Security</a>
-        <a href="/soc2">SOC 2</a>
-        <a href="/hipaa-mapping">HIPAA</a>
-        <a href="/baa">BAA</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/verify-prod">Verify a .kolm</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
-        <a href="/why-kolm">Why kolm</a>
-        <a href="/contact">Contact</a>
-        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
-      </div>
-    </div>
-    <div class="ks-foot__base">
-      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
-      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
-    </div>
-  </div>
-</footer>
-
-<script>
-  (function(){
-    var btn = document.getElementById('navToggle');
-    var sheet = document.getElementById('navSheet');
-    if (!btn || !sheet) return;
-    btn.addEventListener('click', function(){
-      var open = sheet.style.display === 'block';
-      sheet.style.display = open ? 'none' : 'block';
-      btn.setAttribute('aria-expanded', String(!open));
-    });
-  })();
-</script>
+<div data-include-footer></div>
+<script src="/nav.js" defer></script>
 </body>
 </html>

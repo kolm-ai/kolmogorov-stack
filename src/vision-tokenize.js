@@ -201,7 +201,7 @@ export async function tokenizeImage(opts) {
     return inner;
   } finally {
     if (tempPath) {
-      try { fs.unlinkSync(tempPath); } catch (_) {}
+      try { fs.unlinkSync(tempPath); } catch (_) {} // deliberate: cleanup
     }
   }
 }

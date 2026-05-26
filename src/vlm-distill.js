@@ -223,8 +223,8 @@ export function _resetForTests() {
     const dir = jobRoot();
     if (fs.existsSync(dir)) {
       for (const e of fs.readdirSync(dir)) {
-        try { fs.unlinkSync(path.join(dir, e)); } catch (_) {}
+        try { fs.unlinkSync(path.join(dir, e)); } catch (_) {} // deliberate: cleanup
       }
     }
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
 }

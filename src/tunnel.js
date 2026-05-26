@@ -72,7 +72,7 @@ export function closeTunnel(token, byTenantId) {
   if (t.tenant_id !== byTenantId) throw Object.assign(new Error('forbidden'), { code: 'forbidden' });
   const ent = live.get(token);
   if (ent) {
-    try { ent.agent.end(); } catch {}
+    try { ent.agent.end(); } catch {} // deliberate: cleanup
     for (const p of ent.pending.values()) p.reject(new Error('tunnel closed'));
     live.delete(token);
   }
@@ -87,7 +87,7 @@ export function attachAgent(token, res) {
   // If an agent already attached, knock the old one off (last-write wins).
   const prev = live.get(token);
   if (prev) {
-    try { prev.agent.end(); } catch {}
+    try { prev.agent.end(); } catch {} // deliberate: cleanup
     for (const p of prev.pending.values()) p.reject(new Error('agent replaced'));
   }
   res.setHeader('Content-Type', 'text/event-stream');
@@ -98,7 +98,7 @@ export function attachAgent(token, res) {
   const ent = { agent: res, pending: new Map(), pingTimer: null };
   ent.pingTimer = setInterval(() => {
     try { res.write(`: ping ${Date.now()}\n\n`); }
-    catch {}
+    catch {} // deliberate: cleanup
   }, AGENT_IDLE_PING_MS);
   if (ent.pingTimer.unref) ent.pingTimer.unref();
   live.set(token, ent);
@@ -186,7 +186,7 @@ export function purgeExpired() {
   for (const t of expired) {
     const ent = live.get(t.token);
     if (ent) {
-      try { ent.agent.end(); } catch {}
+      try { ent.agent.end(); } catch {} // deliberate: cleanup
       live.delete(t.token);
     }
     update('tunnels', x => x.id === t.id, { _deleted: true, status: 'expired' });

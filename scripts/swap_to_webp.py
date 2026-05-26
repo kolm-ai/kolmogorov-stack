@@ -1,7 +1,6 @@
 """Swap PNG references to WebP siblings across HTML/CSS, except for
 og:image / twitter:image meta tags (Twitter parsers still expect PNG/JPG).
 Idempotent."""
-import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "public"

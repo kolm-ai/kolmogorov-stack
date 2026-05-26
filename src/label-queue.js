@@ -37,7 +37,7 @@ function _loadApprovals() {
     try {
       const e = JSON.parse(line);
       if (e && e.event_id) out[e.event_id] = e;
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
   return out;
 }
@@ -78,7 +78,7 @@ export async function nextToLabel(opts = {}) {
           for (const id of o.sample_event_ids) boost.add(id);
         }
       }
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
   const head = undecided.filter(e => boost.has(e.event_id));
   const tail = undecided.filter(e => !boost.has(e.event_id));

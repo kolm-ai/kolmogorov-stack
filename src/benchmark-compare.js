@@ -397,7 +397,7 @@ async function probeNativeBin(bundle) {
         const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-native-'));
         const binPath = path.join(tmpDir, path.basename(rec[kind].bin.bin_filename));
         fs.writeFileSync(binPath, entry.getData());
-        try { fs.chmodSync(binPath, 0o755); } catch {}
+        try { fs.chmodSync(binPath, 0o755); } catch {} // deliberate: cleanup
         return { available: true, binPath, recipe_id: rid, kind, bin_hash: rec[kind].bin.bin_hash };
       }
     }

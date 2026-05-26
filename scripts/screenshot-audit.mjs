@@ -64,7 +64,7 @@ const VIEWPORTS = [
           await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
           // Pre-baked theme toggle: set localStorage + data-theme before paint.
           await page.evaluate((t) => {
-            try { localStorage.setItem('theme', t); } catch (e) {}
+            try { localStorage.setItem('theme', t); } catch (e) {} // deliberate: cleanup
             document.documentElement.setAttribute('data-theme', t);
           }, theme);
           await page.waitForTimeout(420);

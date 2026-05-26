@@ -3,7 +3,10 @@
 Strict prompt: screen is mostly black with only a single small periwinkle dot.
 NO words, NO logos, NO wordmark, NO subtitles.
 """
-import os, sys, urllib.request, time
+import os
+import sys
+import urllib.request
+import time
 from pathlib import Path
 
 if not os.environ.get("FAL_KEY"):

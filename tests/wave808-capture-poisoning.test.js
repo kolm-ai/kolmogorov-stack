@@ -80,7 +80,7 @@ async function _loadMods() {
   if (!_proxyMod) _proxyMod = await import('../src/proxy.js');
   // Per-test reset — wipes the in-memory state so a foreign-test row never
   // shows up in this test's findByTenant/findByField scan.
-  try { _storeMod.reset(); } catch (_) {}
+  try { _storeMod.reset(); } catch (_) {} // deliberate: cleanup
   if (typeof _storeMod._resetStagedCapturesForTests === 'function') _storeMod._resetStagedCapturesForTests();
   if (typeof _proxyMod._resetTeacherFingerprintsForTests === 'function') _proxyMod._resetTeacherFingerprintsForTests();
   return { anomMod: _anomMod, storeMod: _storeMod, proxyMod: _proxyMod };

@@ -28,6 +28,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { compileJs } from './verifier.js';
+import { readEntryFromLargeZip, listEntriesFromLargeZip, extractEntryToFile } from './zip-large.js';
 import { verifyManifestSignature, decodePack, decodeIndex } from './artifact.js';
 import { scoreCase } from './case-scorer.js';
 import { runWasmTarget } from './runners/wasm-runner.js';
@@ -87,7 +88,7 @@ function getOrCreateTrustSecret() {
     const fresh = crypto.randomBytes(32).toString('hex');
     fs.mkdirSync(path.dirname(CLOUD_TRUST_SECRET_PATH), { recursive: true });
     fs.writeFileSync(CLOUD_TRUST_SECRET_PATH, fresh, 'utf8');
-    try { fs.chmodSync(CLOUD_TRUST_SECRET_PATH, 0o600); } catch {}
+    try { fs.chmodSync(CLOUD_TRUST_SECRET_PATH, 0o600); } catch {} // deliberate: cleanup
     return fresh;
   } catch {
     // Memory fallback if we can't write — entries from this session aren't
@@ -130,7 +131,7 @@ function loadCloudTrust() {
 function persistTrust(j) {
   fs.mkdirSync(path.dirname(CLOUD_TRUST_PATH), { recursive: true });
   fs.writeFileSync(CLOUD_TRUST_PATH, JSON.stringify({ version: 2, entries: j.entries }, null, 2));
-  try { fs.chmodSync(CLOUD_TRUST_PATH, 0o600); } catch {}
+  try { fs.chmodSync(CLOUD_TRUST_PATH, 0o600); } catch {} // deliberate: cleanup
 }
 
 // recordCloudTrusted now supports both call shapes:
@@ -291,14 +292,68 @@ function sha256Hex(buf) {
   return crypto.createHash('sha256').update(buf).digest('hex');
 }
 
+// Streaming sha256 for files larger than the 2 GiB Buffer cap (Trinity-500
+// Q4_K_M is ~4.6 GB). Reads in 1 MiB chunks so memory stays bounded.
+function streamSha256Hex(filePath) {
+  const fd = fs.openSync(filePath, 'r');
+  try {
+    const hash = crypto.createHash('sha256');
+    const CHUNK = 1024 * 1024;
+    const buf = Buffer.alloc(CHUNK);
+    let offset = 0;
+    while (true) {
+      const got = fs.readSync(fd, buf, 0, CHUNK, offset);
+      if (got <= 0) break;
+      hash.update(buf.subarray(0, got));
+      offset += got;
+    }
+    return hash.digest('hex');
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
 // Open a .kolm and return its contents as a structured bundle. Verifies the
 // signature by default; verifier-report callers can opt into a lenient load so
 // signature-invalid artifacts still produce explicit failing evidence rows.
+//
+// W891 2 GiB branch:
+//   When the file exceeds Node's 2 GiB Buffer cap (Trinity-500 Q4_K_M is
+//   ~4.6 GB), we cannot fs.readFileSync the whole archive. We switch to the
+//   streaming Zip64 reader (src/zip-large.js): small structural entries
+//   (manifest/recipes/signature/evals/receipt/lora.bin/index.sqlite-vec) are
+//   read into Buffers as before, but oversized entries (model.gguf) are
+//   declared in `large_entries` instead. Callers (gguf-runner) reach those
+//   entries via the streaming extractor on the returned `artifact_path`.
+const TWO_GIB_MINUS_1 = 2 * 1024 * 1024 * 1024 - 1;
+const STREAM_ENTRY_THRESHOLD = TWO_GIB_MINUS_1;
+
 export function loadArtifact(artifactPath, opts = {}) {
   const allowInvalidSignature = opts && opts.allowInvalidSignature === true;
-  const fileBuf = fs.readFileSync(artifactPath);
-  const zip = new AdmZip(fileBuf);
-  const entries = Object.fromEntries(zip.getEntries().map(e => [e.entryName, e.getData()]));
+  const fileSize = fs.statSync(artifactPath).size;
+  const useStreaming = fileSize > TWO_GIB_MINUS_1;
+
+  let entries;
+  let largeEntries;
+  let fileBuf = null;  // hoisted: cloud-trust fallback at line ~386 needs this for the non-streaming branch.
+  if (useStreaming) {
+    const listed = listEntriesFromLargeZip(artifactPath);
+    entries = {};
+    largeEntries = {};
+    for (const e of listed) {
+      if (e.uncompressed_size > STREAM_ENTRY_THRESHOLD) {
+        largeEntries[e.name] = { uncompressed_size: e.uncompressed_size, compressed_size: e.compressed_size };
+        continue;
+      }
+      const buf = readEntryFromLargeZip(artifactPath, e.name);
+      if (buf) entries[e.name] = buf;
+    }
+  } else {
+    fileBuf = fs.readFileSync(artifactPath);
+    const zip = new AdmZip(fileBuf);
+    entries = Object.fromEntries(zip.getEntries().map(e => [e.entryName, e.getData()]));
+    largeEntries = {};
+  }
 
   const required = ['manifest.json', 'recipes.json', 'signature.sig'];
   for (const f of required) {
@@ -310,7 +365,9 @@ export function loadArtifact(artifactPath, opts = {}) {
   const signature = entries['signature.sig'].toString('utf8');
   const evals_json = entries['evals.json']?.toString('utf8') || null;
   const receipt_json = entries['receipt.json']?.toString('utf8') || null;
-  const model_pointer = entries['model.gguf']?.toString('utf8') || null;
+  const model_pointer = entries['model.gguf'] && entries['model.gguf'].length < 64 * 1024
+    ? entries['model.gguf'].toString('utf8')
+    : null;
 
   // Verify HMAC locally first. This works for offline-compiled artifacts
   // (signed with the per-user local_receipt_secret) and for fleet-shared
@@ -327,7 +384,8 @@ export function loadArtifact(artifactPath, opts = {}) {
     // sha256. We still confirm structural integrity (signature envelope is
     // well-formed and manifest_hash binds to the manifest we're about to
     // execute) so a swapped-in malicious manifest is still rejected.
-    const trustedSha = isCloudTrusted(fileBuf);
+    const trustedInput = useStreaming ? streamSha256Hex(artifactPath) : fileBuf;
+    const trustedSha = isCloudTrusted(trustedInput);
     if (trustedSha) {
       const integrity = structuralIntegrityOk(manifest_json, signature);
       if (!integrity.ok) {
@@ -400,12 +458,20 @@ export function loadArtifact(artifactPath, opts = {}) {
     // bytes like target.wasm / target/linux-x64/recipe / model.gguf without
     // re-opening the zip. Keys are entry names; values are Buffers.
     entries,
+    // W891 — entries too large for a Buffer (Trinity-500 4.6 GB GGUF) are
+    // declared here instead. Runners (gguf-runner) stream them to disk via
+    // extractEntryToFile(artifact_path, name, dest).
+    large_entries: largeEntries,
     signature_valid: signatureValid,
     signature_mode: signatureMode,
     signature_error: signatureError,
     artifact_path: artifactPath,
   };
 }
+
+// W891 — re-exported so runners can stream-extract large entries without
+// taking a separate dep on src/zip-large.js.
+export { extractEntryToFile as extractArtifactEntryToFile };
 
 // W287 — declarative health probe for a runtime target. Returns
 // { ok: true } when the manifest's declared runtime_target is supported on
@@ -609,7 +675,7 @@ export async function runArtifact(artifactPath, input, opts = {}) {
           runtime: target,
           tried: e.tried || null,
         });
-      } catch {}
+      } catch {} // deliberate: cleanup
     }
     throw e;
   }
@@ -634,7 +700,7 @@ export async function runArtifact(artifactPath, input, opts = {}) {
     ok: true,
     runtime: dispatched.runtime || target,
   };
-  if (typeof opts.audit === 'function') { try { opts.audit(audit); } catch {} }
+  if (typeof opts.audit === 'function') { try { opts.audit(audit); } catch {} } // deliberate: cleanup
   return {
     output: dispatched.output,
     recipe_id,

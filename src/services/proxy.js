@@ -228,8 +228,8 @@ export function createProxyServer({ upstream = DEFAULT_UPSTREAM, defaultNamespac
 
         // parse + extract for capture
         let reqJson = null, respJson = null;
-        try { reqJson = JSON.parse(requestBody.toString('utf8') || '{}'); } catch {}
-        try { respJson = JSON.parse(upstreamResp.body.toString('utf8') || '{}'); } catch {}
+        try { reqJson = JSON.parse(requestBody.toString('utf8') || '{}'); } catch {} // deliberate: cleanup
+        try { respJson = JSON.parse(upstreamResp.body.toString('utf8') || '{}'); } catch {} // deliberate: cleanup
         const prompt = extractPromptFromBody(reqJson) || summarize(requestBody.toString('utf8'), 400);
         const response = extractResponseText(respJson) || summarize(upstreamResp.body.toString('utf8'), 400);
 
@@ -242,7 +242,7 @@ export function createProxyServer({ upstream = DEFAULT_UPSTREAM, defaultNamespac
             const { redacted, map } = redactor.redact(prompt);
             promptOut = redacted;
             mapHash = redactor.mapHash(map);
-          } catch {}
+          } catch {} // deliberate: cleanup
         }
         const row = {
           capture_id: captureId,

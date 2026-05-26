@@ -394,7 +394,7 @@ test('W783 #15 - GET /v1/chargeback is auth-gated (401 without auth)', async () 
     assert.equal(res2.status, 401);
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -426,7 +426,7 @@ test('W783 #16 - GET /v1/chargeback envelope w/ auth + tenant_id forced from aut
     assert.match(body.version, /^w783-/);
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -486,7 +486,7 @@ test('W783 #17 - POST /v1/chargeback/export streams CSV w/ Content-Type + X-Kolm
     assert.equal(parsed.tenant_id, tenant.id);
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 

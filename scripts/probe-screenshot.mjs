@@ -22,7 +22,7 @@ for (const [u, name] of [['/', 'home'], ['/pricing', 'pricing'], ['/use-cases', 
   await page.goto('http://localhost:8787' + u, { waitUntil: 'domcontentloaded' });
   await page.evaluate((k) => localStorage.setItem('kolm_api_key', k), KEY);
   await page.waitForTimeout(700);
-  await page.screenshot({ path: `scripts/qa-authed-${name}.png`, fullPage: false });
+  await page.screenshot({ path: `audit-shots/scripts-qa/qa-authed-${name}.png`, fullPage: false });
 }
 await b.close();
 console.log('captured 6 pages');

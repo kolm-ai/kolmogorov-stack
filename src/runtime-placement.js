@@ -185,7 +185,7 @@ function _probeNvmeBandwidth() {
   } catch {
     return null;
   } finally {
-    try { fs.unlinkSync(tmpPath); } catch {}
+    try { fs.unlinkSync(tmpPath); } catch {} // deliberate: cleanup
   }
 }
 

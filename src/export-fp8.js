@@ -184,7 +184,7 @@ export async function runExport({ artifact, quant, target_dir }) {
     let detail = null;
     try {
       detail = JSON.parse((r.stdout || '').trim().split(/\r?\n/).pop() || '{}');
-    } catch {}
+    } catch {} // deliberate: cleanup
     return {
       ok: false,
       error: `fp8_exited_${r.status || 'err'}`,
@@ -199,7 +199,7 @@ export async function runExport({ artifact, quant, target_dir }) {
       const s = fs.statSync(path.join(target_dir, f));
       if (s.isFile()) size_bytes += s.size;
     }
-  } catch {}
+  } catch {} // deliberate: cleanup
   return {
     ok: true,
     format: 'fp8',

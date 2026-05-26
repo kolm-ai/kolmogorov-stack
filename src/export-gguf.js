@@ -98,7 +98,7 @@ export function locateConvertScript() {
     path.join(os.homedir(), '.kolm', 'build', 'llama.cpp', 'convert_hf_to_gguf.py'),
   ].filter(Boolean);
   for (const c of candidates) {
-    try { if (fs.existsSync(c)) return c; } catch {}
+    try { if (fs.existsSync(c)) return c; } catch {} // deliberate: cleanup
   }
   // gguf-convert pip CLI (newer llama.cpp ships convert as `gguf-convert`)
   const which = process.platform === 'win32' ? 'where' : 'which';
@@ -108,7 +108,7 @@ export function locateConvertScript() {
       const line = (r.stdout || '').split(/\r?\n/).find(l => l.trim().length > 0);
       if (line) return line.trim();
     }
-  } catch {}
+  } catch {} // deliberate: cleanup
   return null;
 }
 
@@ -145,7 +145,7 @@ export function locateBinary(name) {
       const line = (r.stdout || '').split(/\r?\n/).find(l => l.trim().length > 0);
       if (line) return line.trim();
     }
-  } catch {}
+  } catch {} // deliberate: cleanup
   // Common build locations
   const buildDirs = [
     path.join(process.cwd(), 'tools', 'llama.cpp', 'build', 'bin'),
@@ -267,7 +267,7 @@ export function buildImatrix({ ggufBase, corpusPath, outFile, chunks = 200, ngl 
         const obj = JSON.parse(line);
         const txt = obj.text || obj.prompt || obj.input || obj.question || obj.user || '';
         if (txt && typeof txt === 'string') out.push(txt);
-      } catch {}
+      } catch {} // deliberate: cleanup
     }
     if (out.length === 0) {
       return { ok: false, error: 'corpus_jsonl_had_no_extractable_text', corpus: corpusPath };

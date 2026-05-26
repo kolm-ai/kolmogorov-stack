@@ -68,7 +68,7 @@
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -77,7 +77,7 @@
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 <main id="main">
@@ -107,7 +107,7 @@
  - uses: actions/checkout@v4
  - uses: actions/setup-node@v4
  with: { node-version: <span class="g">'20'</span> }
- - run: npm install -g github:sneaky-hippo/kolm-stack
+ - run: npm install -g github:kolm-ai/kolm-stack
  - <span class="k">name</span>: compile + verify
  env:
  KOLM_API_KEY: ${{ secrets.KOLM_API_KEY }}
@@ -144,7 +144,7 @@
  runs-on: ubuntu-22.04
  steps:
  - uses: actions/checkout@v4
- - run: npm install -g github:sneaky-hippo/kolm-stack
+ - run: npm install -g github:kolm-ai/kolm-stack
  - <span class="k">name</span>: compile + sign + bind
  env:
  KOLM_API_KEY: ${{ secrets.KOLM_API_KEY }}
@@ -179,7 +179,7 @@
  runs-on: ubuntu-22.04
  steps:
  - uses: actions/checkout@v4
- - run: npm install -g github:sneaky-hippo/kolm-stack
+ - run: npm install -g github:kolm-ai/kolm-stack
  - run: |
  for art in releases/**/*.kolm; do
  kolm inspect "$art" || { echo "FAIL: $art" >&2; exit 1; }
@@ -207,7 +207,7 @@
       </div>
       <div>
         <h4>Company</h4>
-        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
       </div>
     </div>
     <div class="ks-footer__bottom">

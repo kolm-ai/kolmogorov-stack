@@ -193,7 +193,7 @@ test('W459 #2 — distill() retries with next teacher on worker_error', async ()
     if (savedTeacher === undefined) delete process.env.KOLM_DISTILL_TEACHER; else process.env.KOLM_DISTILL_TEACHER = savedTeacher;
     if (savedAK === undefined) delete process.env.ANTHROPIC_API_KEY; else process.env.ANTHROPIC_API_KEY = savedAK;
     if (savedOK === undefined) delete process.env.OPENAI_API_KEY; else process.env.OPENAI_API_KEY = savedOK;
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -240,7 +240,7 @@ test('W459 #3 — exhausted attempts surface the failure chain', async () => {
     if (savedTeacher === undefined) delete process.env.KOLM_DISTILL_TEACHER; else process.env.KOLM_DISTILL_TEACHER = savedTeacher;
     if (savedAK === undefined) delete process.env.ANTHROPIC_API_KEY; else process.env.ANTHROPIC_API_KEY = savedAK;
     if (savedOK === undefined) delete process.env.OPENAI_API_KEY; else process.env.OPENAI_API_KEY = savedOK;
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -281,7 +281,7 @@ test('W459 #4 — teacher_fallback=false uses only the first teacher', async () 
     if (savedTeacher === undefined) delete process.env.KOLM_DISTILL_TEACHER; else process.env.KOLM_DISTILL_TEACHER = savedTeacher;
     if (savedAK === undefined) delete process.env.ANTHROPIC_API_KEY; else process.env.ANTHROPIC_API_KEY = savedAK;
     if (savedOK === undefined) delete process.env.OPENAI_API_KEY; else process.env.OPENAI_API_KEY = savedOK;
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -350,7 +350,7 @@ test('W459 #5 — resume_from reuses runDir and appends progress.jsonl', async (
   } finally {
     if (savedHome === undefined) delete process.env.HOME; else process.env.HOME = savedHome;
     if (savedUser === undefined) delete process.env.USERPROFILE; else process.env.USERPROFILE = savedUser;
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -394,7 +394,7 @@ test('W459 #6 — resume_from with mismatched tenant throws', async () => {
   } finally {
     if (savedHome === undefined) delete process.env.HOME; else process.env.HOME = savedHome;
     if (savedUser === undefined) delete process.env.USERPROFILE; else process.env.USERPROFILE = savedUser;
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -457,7 +457,7 @@ test('W459 #8 — run-meta.json records teacher_planned + first teacher', async 
     if (savedUser === undefined) delete process.env.USERPROFILE; else process.env.USERPROFILE = savedUser;
     if (savedTeacher === undefined) delete process.env.KOLM_DISTILL_TEACHER; else process.env.KOLM_DISTILL_TEACHER = savedTeacher;
     if (savedAK === undefined) delete process.env.ANTHROPIC_API_KEY; else process.env.ANTHROPIC_API_KEY = savedAK;
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 

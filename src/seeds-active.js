@@ -41,13 +41,13 @@ function readPool(text) {
     try {
       const arr = JSON.parse(t);
       if (Array.isArray(arr)) return arr;
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
   const out = [];
   for (const ln of t.split(/\r?\n/)) {
     const s = ln.trim();
     if (!s || s.startsWith('//')) continue;
-    try { out.push(JSON.parse(s)); } catch {}
+    try { out.push(JSON.parse(s)); } catch {} // deliberate: cleanup
   }
   return out;
 }
@@ -141,7 +141,7 @@ export async function activeSampling(artifactPath, poolPath, opts = {}) {
             const r2 = await runner.runArtifact(artAbs, v, { timeoutMs: opts.timeoutMs || 1500 });
             const otherStr = typeof r2.output === 'string' ? r2.output : JSON.stringify(r2.output);
             if (otherStr === baseStr) agree++;
-          } catch {
+          } catch { // deliberate: cleanup
             // perturbation errored — adds to uncertainty
           }
         }

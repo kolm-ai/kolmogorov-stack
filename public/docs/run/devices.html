@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>Devices &middot; Run &amp; Govern &middot; kolm.ai</title>
+<meta name="description" content="Register and manage the machines kolm deploys to. SSH, Kubernetes, Docker, Ollama, and local. Hardware auto-detect, tags, and the full kolm devices verb surface.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Devices &middot; Run &amp; Govern &middot; kolm.ai">
+<meta property="og:description" content="Register and manage the machines kolm deploys to. SSH, Kubernetes, Docker, Ollama, and local.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/run/devices">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/docs/run/devices">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230,233,238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--accent-soft:rgba(17,17,17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px;max-width:780px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+td code{font-size:12px}
+.callout{padding:14px 18px;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;background:var(--bg-elev);margin:18px 0;max-width:780px;font-size:14px;color:var(--ink-mute)}
+.callout b{color:var(--ink)}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px;max-width:920px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / <a href="/docs/run/overview">run</a> / devices</div>
+<p class="eyebrow">Run &amp; Govern</p>
+<h1>Devices.</h1>
+<p class="lede">A device is any target kolm can deploy a signed <code>.kolm</code> artifact to. Register a device once, then any artifact or fleet command can reach it by id or tag. Hardware is auto-detected on first connect, refreshed on demand, and persisted in <code>data/devices.json</code>.</p>
+
+<h2 id="one-line">One-line example</h2>
+<pre><code>kolm devices add prod-gpu-1 --type ssh --host 10.0.4.21 --user kolm --key ~/.ssh/id_ed25519 --tag prod --tag a100</code></pre>
+<p>That single command opens an SSH session, runs the hardware probe (<code>nvidia-smi</code> / <code>rocm-smi</code> / <code>system_profiler</code>), writes the result to the registry, and reports back. From now on <code>kolm deploy &lt;artifact&gt; --device prod-gpu-1</code> just works.</p>
+
+<h2 id="device-types">Device types</h2>
+<table>
+  <thead><tr><th>Type</th><th>Backed by</th><th>Use when</th></tr></thead>
+  <tbody>
+    <tr><td><code>ssh</code></td><td><code>src/device-ssh.js</code> (ssh2)</td><td>Any Linux/Mac host you can reach over SSH. The default for bare-metal GPU servers and edge boxes.</td></tr>
+    <tr><td><code>k8s</code></td><td><code>src/device-k8s.js</code> (kubectl shell-out)</td><td>You have a kubeconfig pointing at a cluster. Treats a context+namespace pair as one device.</td></tr>
+    <tr><td><code>docker</code></td><td><code>src/device-docker.js</code> (docker CLI)</td><td>Local or remote Docker daemon. Pods become containers; cleanup is one <code>docker rm</code>.</td></tr>
+    <tr><td><code>ollama</code></td><td><code>src/device-ollama.js</code> (HTTP)</td><td>You already run Ollama somewhere. kolm pushes the artifact via Modelfile, no SSH required.</td></tr>
+    <tr><td><code>local</code></td><td><code>src/device-local.js</code></td><td>The machine running the CLI. Always registered as <code>local</code>, no flags required.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="add-syntax">kolm devices add &mdash; full flag surface</h2>
+<pre><code>kolm devices add &lt;name&gt; --type &lt;ssh|k8s|docker|ollama&gt; [flags]
+
+# SSH
+  --host &lt;ip-or-fqdn&gt;         required for ssh
+  --port &lt;n&gt;                  default 22
+  --user &lt;username&gt;           default current user
+  --key &lt;path&gt;                path to private key (never copied, only referenced)
+  --password-stdin            read password from stdin (not recommended; key auth preferred)
+  --jump-host &lt;name&gt;          chain through another registered ssh device
+
+# Kubernetes
+  --kubeconfig &lt;path&gt;         default ~/.kube/config
+  --context &lt;name&gt;            kubeconfig context
+  --namespace &lt;name&gt;          default 'default'
+
+# Docker
+  --docker-host &lt;url&gt;         e.g. tcp://10.0.4.21:2375 or unix:///var/run/docker.sock
+  --tls-cert &lt;path&gt; --tls-key &lt;path&gt; --tls-ca &lt;path&gt;
+
+# Ollama
+  --ollama-url &lt;url&gt;          e.g. http://10.0.4.21:11434
+
+# All types
+  --tag &lt;label&gt;               repeatable; used by fleet selectors (--tag prod --tag a100)
+  --namespace &lt;name&gt;          logical namespace this device serves (default 'default')
+  --no-probe                  skip hardware auto-detect on add (defer to next 'devices refresh')
+  --json                      print the resulting device row as JSON
+</code></pre>
+
+<h2 id="auto-detect">Hardware auto-detect</h2>
+<p>On every <code>add</code> and every <code>devices refresh</code>, kolm runs a probe matched to the device OS and reports back:</p>
+<ul>
+  <li><b>NVIDIA.</b> <code>nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv</code> &rarr; GPU model, VRAM, driver.</li>
+  <li><b>AMD ROCm.</b> <code>rocm-smi --showproductname --showmeminfo vram</code>.</li>
+  <li><b>Apple Silicon.</b> <code>system_profiler SPDisplaysDataType</code> &rarr; chip family, unified memory total.</li>
+  <li><b>Intel + CPU fallback.</b> <code>lscpu</code> / <code>sysctl</code> &rarr; cores, ISA, RAM.</li>
+  <li><b>Disk.</b> <code>df -BG</code> on the deploy target path (default <code>/var/lib/kolm</code>).</li>
+</ul>
+<p>The result lands at <code>devices[].hardware</code> in <code>data/devices.json</code> and feeds the runtime-selector in <a href="/docs/run/runtimes">runtimes</a>.</p>
+
+<h2 id="tags">Tags and namespaces</h2>
+<p>Tags are a free-form label set per device. The fleet layer uses them as selectors:</p>
+<pre><code>kolm fleet deploy art_a1b2c3d4 --select tag=prod --select tag=a100
+kolm fleet deploy art_a1b2c3d4 --select namespace=prod
+kolm fleet status --select tag=edge</code></pre>
+<p>A namespace is the logical routing target. One namespace can have many devices; the gateway routes by namespace and the namespace fans out to whichever devices are healthy.</p>
+
+<h2 id="examples">Four worked examples</h2>
+
+<h3>1. Production GPU server</h3>
+<pre><code>kolm devices add prod-gpu-1 \
+  --type ssh --host 10.0.4.21 --user kolm \
+  --key ~/.ssh/id_ed25519_kolm \
+  --namespace prod --tag prod --tag a100
+
+# Output:
+# device prod-gpu-1 added
+# hardware: NVIDIA A100-SXM4-80GB | 80GB VRAM | driver 535.183.01
+# disk: 1.8TB free at /var/lib/kolm
+# status: ready</code></pre>
+
+<h3>2. Edge Jetson</h3>
+<pre><code>kolm devices add edge-jetson-7 \
+  --type ssh --host 192.168.50.7 --user nvidia \
+  --key ~/.ssh/edge_fleet \
+  --namespace edge --tag edge --tag jetson --tag orin
+
+# Probe detects: NVIDIA Orin (8GB shared), JetPack 6.0, 256GB NVMe.
+# kolm will prefer Q4/Q5 GGUFs on this device per the quant Pareto map.</code></pre>
+
+<h3>3. Mac Mini (M-series)</h3>
+<pre><code>kolm devices add mac-mini-dev \
+  --type ssh --host 192.168.1.41 --user rodney \
+  --namespace dev --tag mac --tag arm64
+
+# Probe: Apple M4 Pro, 24GB unified, mlx-lm available.
+# Runtime selector will pick mlx-lm for inference.</code></pre>
+
+<h3>4. Kubernetes cluster</h3>
+<pre><code>kolm devices add prod-k8s \
+  --type k8s --kubeconfig ~/.kube/prod \
+  --context prod-us-east-1 --namespace kolm \
+  --tag prod --tag k8s
+
+# Probe lists nodes + GPU pools via kubectl describe nodes.
+# Deploys generate a Job + Service per artifact in the chosen ns.</code></pre>
+
+<h2 id="manage">Listing, health, removal</h2>
+<pre><code>kolm devices list                  # tabular, --json available
+kolm devices status &lt;name&gt;         # one device
+kolm devices health                # ping all, report unreachable
+kolm devices refresh &lt;name&gt;        # re-run hardware probe
+kolm devices remove &lt;name&gt;         # purge from registry; no remote side-effect</code></pre>
+
+<div class="callout"><b>Caveats.</b> Removing a device only deletes the local registry row. Artifacts already deployed there keep running and keep reporting until you also <code>kolm fleet stop --device &lt;name&gt;</code>. SSH keys are never stored in the registry &mdash; only paths are referenced &mdash; so deleting a device does not touch your key material.</div>
+
+<h2 id="next">Next</h2>
+<div class="related">
+  <a href="/docs/run/deploy"><b>Deploy &rarr;</b><span>Push an artifact to a registered device.</span></a>
+  <a href="/docs/run/fleet"><b>Fleet &rarr;</b><span>Operate many devices at once.</span></a>
+  <a href="/docs/run/security"><b>Security &rarr;</b><span>SSH paths, integrity verify, audit trail.</span></a>
+</div>
+
+</div></main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/gateway">Gateway</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/docs/gateway">Gateway docs</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

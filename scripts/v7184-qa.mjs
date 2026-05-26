@@ -25,7 +25,7 @@ for (const s of SCENARIOS) {
   const page = await ctx.newPage();
   // Pre-seed theme so it loads correctly
   await page.addInitScript((theme) => {
-    try { localStorage.setItem('kolm-theme', theme); } catch (_) {}
+    try { localStorage.setItem('kolm-theme', theme); } catch (_) {} // deliberate: cleanup
     if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
   }, s.theme);
   await page.goto(URL, { waitUntil: 'networkidle' });

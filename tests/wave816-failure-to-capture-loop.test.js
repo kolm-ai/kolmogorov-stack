@@ -466,7 +466,7 @@ test('W816 #12 - `kolm failure-to-capture-loop --json` (no auth) -> auth_require
   });
   const out = (r.stdout || '').trim();
   let parsed = null;
-  try { parsed = JSON.parse(out); } catch (_) {}
+  try { parsed = JSON.parse(out); } catch (_) {} // deliberate: cleanup
   assert.ok(parsed && typeof parsed === 'object',
     'expected JSON envelope; got stdout=' + out.slice(0, 200) + ' stderr=' + (r.stderr || '').slice(0, 200));
   assert.equal(parsed.ok, false, 'expected ok:false; got ' + JSON.stringify(parsed).slice(0, 200));

@@ -1,55 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Finance AI: SR 11-7, MRM, signed local artifacts · kolm.ai</title>
-<meta name="description" content="Compile finance tasks into signed local artifacts your model-risk team can examine. SR 11-7 alignment, Ed25519 audit chain, no customer data egress. Built for banks, asset managers, and broker-dealers.">
-<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<title>Finance AI · SOX, SR 11-7, FINRA-aligned · kolm.ai</title>
+<meta name="description" content="AI for banks, asset managers, and fintechs. SR 11-7 model-risk docs, FINRA 4511 retention, SOX-friendly audit trail. Distill on your patterns, deploy inside your perimeter, sign every inference.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Finance AI &middot; kolm.ai">
-<meta property="og:description" content="SR 11-7-aligned, examinable, residency-pinned. Real workflows. Audit trail on every inference.">
+<meta property="og:description" content="SR 11-7 model risk, SOX audit trail, FINRA-aligned retention, on-prem inference.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/finance">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/finance">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/ks.css">
-    <link rel="stylesheet" href="/warm-paper.css">
-<style>
-  .hc-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--ks-3); padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); }
-  @media (max-width: 720px) { .hc-stats { grid-template-columns: 1fr 1fr; } }
-  .hc-stat { padding: var(--ks-3) var(--ks-4); }
-  .hc-stat b { display: block; font-family: var(--ks-mono); font-size: 10.5px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; font-weight: 500; }
-  .hc-stat span { font-family: var(--ks-mono); font-size: 16px; color: var(--ks-accent); font-variant-numeric: tabular-nums; }
-  .hc-flows { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--ks-4); }
-  .hc-flow { padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); display: flex; flex-direction: column; gap: var(--ks-3); }
-  .hc-flow .who { font-family: var(--ks-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ks-accent); }
-  .hc-flow h3 { margin: 0; font-size: 17px; font-weight: 580; color: var(--ks-ink); }
-  .hc-flow p { margin: 0; font-size: 14px; color: var(--ks-ink-2); line-height: 1.6; }
-  .hc-flow .out { padding: 10px 14px; background: #0c0e12; border: 1px dashed var(--ks-line-2); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-2); line-height: 1.5; }
-  .hc-flow .out b { color: var(--ks-accent); font-weight: 600; }
-  .hc-flow .met { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-top: var(--ks-3); border-top: 1px solid var(--ks-line-1); }
-  .hc-flow .met div { font-family: var(--ks-mono); }
-  .hc-flow .met b { display: block; font-size: 10px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; font-weight: 500; }
-  .hc-flow .met span { font-size: 14px; color: var(--ks-accent); font-variant-numeric: tabular-nums; }
-  .hc-rules { display: grid; grid-template-columns: 50px minmax(0, 1fr); gap: var(--ks-3) var(--ks-5); }
-  @media (max-width: 720px) { .hc-rules { grid-template-columns: 1fr; gap: var(--ks-2); } }
-  .hc-rules .n { font-family: var(--ks-mono); font-size: 14px; color: var(--ks-accent); font-weight: 600; padding-top: 3px; }
-  .hc-rules .b { padding-bottom: var(--ks-4); border-bottom: 1px solid var(--ks-line-1); }
-  .hc-rules .b:last-child { border-bottom: 0; }
-  .hc-rules h3 { margin: 0 0 6px; font-size: 16px; font-weight: 580; color: var(--ks-ink); }
-  .hc-rules p { margin: 0; font-size: 14px; color: var(--ks-ink-2); line-height: 1.65; }
-  .hc-rules code { background: var(--ks-bg-2); padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
-  .hc-map { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--ks-3); }
-  .hc-map > div { padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); }
-  .hc-map .ctrl { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-accent); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
-  .hc-map b { display: block; font-size: 14px; font-weight: 580; color: var(--ks-ink); margin-bottom: 3px; }
-  .hc-map p { margin: 0; font-size: 13px; color: var(--ks-ink-3); line-height: 1.55; }
-  .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
-</style>
+<link rel="stylesheet" href="/wave889-vertical.css">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -58,7 +26,7 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/finance",
-  "description": "Compile finance tasks into signed local artifacts your model-risk team can examine. SR 11-7 alignment, Ed25519 audit chain, no customer data egress. Built for banks, asset managers, and broker-dealers.",
+  "description": "AI for banks, asset managers, and fintechs. SR 11-7 model-risk documentation, FINRA 4511 retention, SOX-friendly audit trail. Distill the patterns your analysts already use, deploy inside your perimeter, sign every inference.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -74,339 +42,169 @@
 </head>
 <body class="ks">
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
       <li><a href="/enterprise">Enterprise</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
-      <a href="/contact?topic=finance" class="ks-btn ks-btn--primary ks-btn--sm">Talk to us <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
+      <a href="/book-demo?industry=finance" class="ks-btn ks-btn--primary ks-btn--sm">Book demo <span class="ks-btn-arrow">&rarr;</span></a>
     </div>
   </nav>
-  <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a>
-    <a href="/pricing">Pricing</a>
-    <a href="/docs">Docs</a>
-    <a href="/enterprise">Enterprise</a>
-    <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
-    <a href="/signup?intent=login">Sign in</a>
-    <a href="/contact?topic=finance">Talk to us &rarr;</a>
-  </div>
 </div>
 
 <main id="main">
 
-<section class="ks-hero">
-  <div class="ks-hero__bg" aria-hidden="true"></div>
-  <div class="ks-wrap" style="display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(32px, 5vw, 72px); align-items: center;">
-    <div>
-      <span class="ks-eyebrow">For banks, asset managers, and broker-dealers</span>
-      <h1 class="ks-hero__h1" style="font-size: clamp(38px, 5.5vw, 60px); max-width: 19ch;">
-        Compiled AI that <span class="grad">customer records never leave the perimeter.</span>
-      </h1>
-      <p class="ks-hero__lede">
-        SR 11-7 by design. Every artifact ships with the K-score, eval set, lineage, base-model hash, and adapter delta your model-risk committee is going to ask for. The teacher model sees the training set during compile, never the production trade.
-      </p>
-      <div class="ks-hero__ctas">
-        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/contact?topic=finance">Talk to a real engineer <span class="ks-btn-arrow">&rarr;</span></a>
-        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/security">Read the security model</a>
-      </div>
-      <p class="ks-hero__meta">
-        <span style="color: var(--ks-pos);">&#9679;</span> In production at credit desks, wealth-management books, MRM review, and disclosure redaction.
-      </p>
+<section class="v-hero">
+  <div class="v-wrap">
+    <span class="v-eyebrow">For banks, asset managers, fintechs, and capital-markets desks</span>
+    <h1 class="v-h1">AI under model risk, not above it.</h1>
+    <p class="v-lede">Compile the patterns your analysts and ops already follow into a smaller model that runs inside your perimeter. SR 11-7 model-risk documentation, SOX-friendly audit trail, FINRA 4511 retention, and a per-inference signed receipt the second line can read end-to-end.</p>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup?industry=finance">Try it free <span aria-hidden="true">&rarr;</span></a>
+      <a class="v-btn v-btn--ghost" href="/book-demo?industry=finance">Book demo <span aria-hidden="true">&rarr;</span></a>
     </div>
-    <div class="hc-stats">
-      <div class="hc-stat"><b>SR 11-7</b><span>Artifact-level dossier</span></div>
-      <div class="hc-stat"><b>Deploy</b><span>On-prem / BYOC</span></div>
-      <div class="hc-stat"><b>Customer data</b><span>Your VPC only</span></div>
-      <div class="hc-stat"><b>SOC 2 Type I</b><span>Available</span></div>
-      <div class="hc-stat"><b>FFIEC</b><span>Mapped</span></div>
-      <div class="hc-stat"><b>FINRA 4511</b><span>Audit trail</span></div>
-      <div class="hc-stat"><b>EU AI Act</b><span>Doc path 2027 Q2</span></div>
-      <div class="hc-stat"><b>FIX 4.4</b><span>Optional adapter</span></div>
+    <p class="v-caveat">Kolm is infrastructure. Investment, credit, or regulatory decisions remain the firm's; the documentation kolm produces is your model-risk evidence, not a substitute for review. <a href="/security">Security model</a> &middot; <a href="/soc2">SOC 2</a></p>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Three commands, one pipeline</span>
+      <h2 class="v-h2">Distill, run, verify.</h2>
+      <p>Capture analyst workflows from your existing channels, compile a specialist on-prem or in your own cloud account, and chain every inference into an evidence ledger.</p>
+    </div>
+    <div class="v-trio">
+      <div class="v-card">
+        <span class="ctag">01 &middot; Distill</span>
+        <h3>Compile a workload-specific model from your traffic.</h3>
+        <p>Teacher and student both run in your perimeter. Customer data and trade-flow never leave. The captured patterns become the dataset; the artifact is the deliverable.</p>
+        <div class="cmd">$ kolm distill --namespace research-summary --base qwen2.5-7b</div>
+        <a class="go" href="/distill">Read the distill flow &rarr;</a>
+      </div>
+      <div class="v-card">
+        <span class="ctag">02 &middot; Run</span>
+        <h3>Deploy on-prem or in your cloud account.</h3>
+        <p>BYOC into AWS / GCP / Azure or bare metal in the data center. Egress audit-only by default; KMS-resident per-tenant key; mTLS available.</p>
+        <div class="cmd">$ kolm run summary-7b --target prod-cluster --egress audit-only</div>
+        <a class="go" href="/run">Read the run flow &rarr;</a>
+      </div>
+      <div class="v-card">
+        <span class="ctag">03 &middot; Verify</span>
+        <h3>Audit-grade passport on the artifact.</h3>
+        <p>Per-tenant Ed25519 signature on the <code>.kolm</code> artifact, optional per-inference receipt linking input hash + output hash + artifact CID. The second line can replay any answer.</p>
+        <div class="cmd">$ kolm verify rcpt_01KY...</div>
+        <a class="go" href="/verify-prod">Read the verify flow &rarr;</a>
+      </div>
     </div>
   </div>
 </section>
 
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Real workflows in production</span>
-      <h2 class="ks-h2">Finance workflows kolm runs today.</h2>
-      <p class="ks-lede">Each ships with a written intended-use, an evaluation report against held-out historical data, and an audit trail mapped to SR 11-7 and the FFIEC IT examination handbook.</p>
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Compliance posture</span>
+      <h2 class="v-h2">Frameworks your model-risk team already lives with.</h2>
+      <p>Kolm does not write your model risk document for you. It produces the evidence your validators need and the controls your auditors expect.</p>
     </div>
-    <div class="hc-flows">
-      <div class="hc-flow">
-        <div class="who">Credit / commercial</div>
-        <h3>Credit memo assistant</h3>
-        <p>Reads the borrower file, indexes the firm's underwriting playbook, drafts the memo in house style. Verifier rejects any draft that re-introduces redacted MNPI tokens.</p>
-        <div class="out">input: borrower-file + playbook<br>output: memo-draft + citations<br>defer-on-low-confidence: yes</div>
-        <div class="met"><div><b>Cycle time</b><span>22 min</span></div><div><b>Accept rate</b><span>84%</span></div></div>
+    <div class="v-compl">
+      <div>
+        <div class="label">SR 11-7 / OCC 2011-12</div>
+        <b>Model-risk evidence pack</b>
+        <p>Per-artifact passport bundles training-data provenance, evaluation results, intended-use, monitoring plan, and an Ed25519 signature.</p>
       </div>
-      <div class="hc-flow">
-        <div class="who">Wealth management</div>
-        <h3>Churn-risk scoring</h3>
-        <p>Reads quarterly contact notes for an advisor's book, scores each account on attrition risk, surfaces the cited signals. Local-only; no client narrative crosses a network boundary.</p>
-        <div class="out">input: contact-notes (q4)<br>output: churn-score + signals<br>network: zero outbound</div>
-        <div class="met"><div><b>Recall</b><span>0.83</span></div><div><b>Books / day</b><span>1,400</span></div></div>
+      <div>
+        <div class="label">SOX 404</div>
+        <b>Change-management chain</b>
+        <p>Append-only audit log for every compile, every deploy, every approver. The chain is signed end-to-end so the auditor can replay it offline.</p>
       </div>
-      <div class="hc-flow">
-        <div class="who">Sales &amp; trading</div>
-        <h3>Disclosure redaction</h3>
-        <p>Strips MNPI and counterparty-confidential terms from drafted client memos before they leave the desk. Verifier rejects any output that re-introduces a redacted token.</p>
-        <div class="out">input: client-memo-draft<br>output: cleaned-memo + receipt<br>verifier: rejects-on-leak</div>
-        <div class="met"><div><b>Latency</b><span>1.4s</span></div><div><b>Leak rate</b><span>0 / 10k</span></div></div>
+      <div>
+        <div class="label">FINRA 4511</div>
+        <b>Retention-friendly logs</b>
+        <p>Capture lake retention configurable per namespace; immutable-mode supported for inputs that fall under WORM requirements.</p>
       </div>
-      <div class="hc-flow">
-        <div class="who">Compliance ops</div>
-        <h3>Pricing-quote drafting</h3>
-        <p>Drafts client-facing pricing quotes from a structured deal sheet. Verifier enforces approved disclaimer language verbatim, defers any out-of-policy term to a human reviewer.</p>
-        <div class="out">input: deal-sheet (structured)<br>output: quote-draft + disclaimer<br>policy: verbatim-required</div>
-        <div class="met"><div><b>P95 latency</b><span>1.9s</span></div><div><b>Defer rate</b><span>7%</span></div></div>
+      <div>
+        <div class="label">EU AI Act &middot; high-risk readiness</div>
+        <b>Annex IV documentation</b>
+        <p>Generated artifact bundle includes the dataset description, the risk-management approach, the testing record, and the human oversight design. <a href="/compliance/eu-ai-act">Mapping</a></p>
       </div>
-      <div class="hc-flow">
-        <div class="who">Model risk</div>
-        <h3>MRM dossier assembly</h3>
-        <p>Reads the artifact manifest, drafts the SR 11-7 dossier sections (intended use, data lineage, K-score breakdown, monitoring plan), hands the queue to the model-risk committee with full context attached.</p>
-        <div class="out">input: artifact.kolm<br>output: dossier-draft + lineage<br>review: human-required</div>
-        <div class="met"><div><b>Dossier / day</b><span>40</span></div><div><b>Time saved</b><span>6 hrs</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Where finance teams ship kolm</span>
+      <h2 class="v-h2">Workloads we see in production.</h2>
+      <p>Every workflow ships with a defer-on-low-confidence path and a human gate by default; turning either off is an explicit switch.</p>
+    </div>
+    <div class="v-flows">
+      <div class="v-flow">
+        <div class="who">Research desk</div>
+        <h3>Earnings-call summarizer</h3>
+        <p>Reads the transcript + the model file, returns a structured summary against your firm's research template, cites the line in the transcript per claim.</p>
+        <div class="io">input: transcript<br>output: research-brief + cites<br>defer: low-confidence</div>
       </div>
-      <div class="hc-flow">
+      <div class="v-flow">
+        <div class="who">Compliance</div>
+        <h3>Surveillance triage</h3>
+        <p>Reads chat + voice transcripts, scores against your lexicon and behavioural model, surfaces the candidate alerts with the cite trail attached.</p>
+        <div class="io">input: comms + lexicon<br>output: ranked-alerts + cites<br>review: human-confirmed</div>
+      </div>
+      <div class="v-flow">
         <div class="who">Operations</div>
-        <h3>Reconciliation triage</h3>
-        <p>Reads break records from the post-trade system, classifies each by likely cause, drafts the resolution note in the operations team's house style. A human resolves and posts.</p>
-        <div class="out">input: break-record + history<br>output: cause + resolution-draft<br>escalation: high-value-flag</div>
-        <div class="met"><div><b>Breaks / hour</b><span>3,200</span></div><div><b>Auto-classify</b><span>71%</span></div></div>
+        <h3>Trade-exception triage</h3>
+        <p>Reads the breaks queue, classifies the exception, drafts the resolution note. Anything off-pattern defers to a human; nothing posts without an ops sign-off.</p>
+        <div class="io">input: exception-record<br>output: class + draft-note<br>off-pattern: defer</div>
+      </div>
+      <div class="v-flow">
+        <div class="who">Credit + underwriting</div>
+        <h3>Document extraction</h3>
+        <p>Pulls covenants, schedules, and financials out of credit agreements and term sheets, normalizes against your data model, leaves the credit call to the analyst.</p>
+        <div class="io">input: agreement-pdf<br>output: structured-fields + spans<br>analyst-review: required</div>
+      </div>
+      <div class="v-flow">
+        <div class="who">Wealth + client</div>
+        <h3>Client-comms drafting</h3>
+        <p>Drafts the client letter against your house style, attaches the disclosure block your supervisory desk requires. Send is reviewer-approved.</p>
+        <div class="io">input: account + house-style<br>output: draft + disclosures<br>send: reviewer-approved</div>
+      </div>
+      <div class="v-flow">
+        <div class="who">Risk</div>
+        <h3>Policy-bounded Q&amp;A</h3>
+        <p>Reads your internal policy library, answers in-band only, defers to the policy desk on anything beyond the cite-able universe. Receipts log the policy spans used per answer.</p>
+        <div class="io">input: question + policy-corpus<br>output: answer + policy-cites<br>out-of-policy: defer</div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">How customer data stays inside</span>
-      <h2 class="ks-h2">What makes this examinable.</h2>
-      <p class="ks-lede">No vendor-speak. The exact mechanism for each property, with the CLI verb you can verify yourself the first time you install kolm.</p>
+<section class="v-cta-row">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Two paths</span>
+      <h2 class="v-h2">Pilot in a test namespace, or scope an enterprise rollout.</h2>
+      <p>Free tier spins up in a sandbox namespace with no production data. Enterprise pilot starts with a scoping call against your model-risk policy and the data-residency posture you already operate.</p>
     </div>
-    <div class="hc-rules">
-      <div class="n">01</div><div class="b">
-        <h3>The data plane runs in your VPC</h3>
-        <p>On-prem or BYOC. Customer records are processed by code running in your AWS / GCP / Azure account or your data center. No outbound calls to kolm.ai except optional metering, which can be turned off and replaced with a local meter.</p>
-      </div>
-      <div class="n">02</div><div class="b">
-        <h3>Compile is residency-pinned</h3>
-        <p>Compile region selectable EU, UK, US, APAC. The frontier teacher reaches your training set through your existing egress proxy. The compile pipeline never persists customer data.</p>
-      </div>
-      <div class="n">03</div><div class="b">
-        <h3>Encryption at rest and in transit</h3>
-        <p>TLS 1.3 in transit. AES-256-GCM at rest with a per-tenant key in your KMS (AWS KMS, GCP KMS, Azure Key Vault). Keys rotate quarterly by default; you can force rotation any time.</p>
-      </div>
-      <div class="n">04</div><div class="b">
-        <h3>MNPI redaction at the boundary</h3>
-        <p><code>kolm capture log --redact mnpi</code> strips counterparty names, position sizes, and tier-2 material non-public terms using Presidio plus a finance-NER overlay before the capture is persisted. The redactor is a worker pod; you can swap it for your own without touching the rest of the system.</p>
-      </div>
-      <div class="n">05</div><div class="b">
-        <h3>Audit trail to your SIEM</h3>
-        <p>Every read, write, model invocation, and capture is in the audit log with desk, route, IP, and the receipt CID. Streams to Splunk, Datadog, or Elastic in JSON or CEF. Append-only with a signed chain, FINRA 4511-compatible.</p>
-      </div>
-      <div class="n">06</div><div class="b">
-        <h3>Signed artifact + signed inference</h3>
-        <p>The <code>.kolm</code> artifact is signed with your tenant's Ed25519 key. Each inference call returns a per-call receipt linking the input hash, the output hash, and the artifact CID. That receipt is your chain of custody if a trade is ever subject to FINRA exam or SEC enforcement.</p>
-      </div>
-      <div class="n">07</div><div class="b">
-        <h3>Model is pinned for the life of the deployment</h3>
-        <p>Frontier model deprecations affect future compiles, not in-flight artifacts. Quarterly MRM review on every frontier upgrade is no longer required; the artifact is the model. The firm decides when to recompile and re-attest.</p>
-      </div>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup?industry=finance">Try it free <span aria-hidden="true">&rarr;</span></a>
+      <a class="v-btn v-btn--ghost" href="/book-demo?industry=finance">Book demo <span aria-hidden="true">&rarr;</span></a>
+    </div>
+    <div class="v-receipts">
+      <div class="label">Evidence on tap</div>
+      <p>Every kolm inference can return a per-call receipt verifiable at <code>/v1/verify/&lt;cid&gt;</code>. Example: <code><a href="/v1/verify/rcpt_01KYC1ZVTGDCW3FX06JQSC">rcpt_01KYC1ZVTGDCW3FX06JQSC</a></code>. The chain is replayable offline. <a href="/benchmarks">Caveats &middot; bench sources</a></p>
     </div>
   </div>
 </section>
-
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">SR 11-7 mapping</span>
-      <h2 class="ks-h2">How kolm controls map to SR 11-7 and OCC 2011-12.</h2>
-      <p class="ks-lede">SR 11-7 organizes model risk into development, validation, and governance. Here is which kolm control answers which expectation. Full mapping in PDF on request.</p>
-    </div>
-    <div class="hc-map">
-      <div><div class="ctrl">SR 11-7 III.A</div><b>Intended use</b><p>Written intended-use section in the artifact manifest, hash-anchored at compile.</p></div>
-      <div><div class="ctrl">SR 11-7 III.B</div><b>Data lineage</b><p>Content-addressed dataset and split; SHA-256 of every example referenced in the manifest.</p></div>
-      <div><div class="ctrl">SR 11-7 IV.A</div><b>Conceptual soundness</b><p>K-score breakdown with eval-set provenance; written rationale in the recipe pack.</p></div>
-      <div><div class="ctrl">SR 11-7 IV.B</div><b>Outcomes analysis</b><p>Hold-out evaluation report at compile; drift detection at run time with signed snapshots.</p></div>
-      <div><div class="ctrl">SR 11-7 IV.C</div><b>Ongoing monitoring</b><p>Drift dashboard, alert thresholds in policy, scheduled re-evaluation on the firm's cadence.</p></div>
-      <div><div class="ctrl">SR 11-7 V</div><b>Governance</b><p>Per-namespace RBAC, dual-control break-glass, model-risk committee sign-off receipts in audit log.</p></div>
-      <div><div class="ctrl">SR 11-7 VI</div><b>Documentation</b><p>Auto-generated dossier from the artifact manifest; version-controlled, 7-year retention.</p></div>
-      <div><div class="ctrl">FINRA 4511</div><b>Record retention</b><p>WORM-compatible audit log, append-only, signed chain, 6-year minimum.</p></div>
-      <div><div class="ctrl">FFIEC IT</div><b>Vendor mgmt</b><p>kolm as a "tool" not a "service" once compiled; no ongoing third-party data exchange in production.</p></div>
-      <div><div class="ctrl">GLBA Safeguards</div><b>Customer info</b><p>Customer data stays inside your perimeter at run time; encryption at rest and in transit baseline.</p></div>
-      <div><div class="ctrl">EU AI Act</div><b>Tech docs</b><p>Artifact manifest maps to Annex IV technical-documentation requirements (doc path 2027 Q2).</p></div>
-      <div><div class="ctrl">UK PRA SS1/23</div><b>Model risk</b><p>Pinned model, signed dossier, per-tier mapping for principal model use.</p></div>
-      <div><div class="ctrl">CFTC 1.31</div><b>Record-keeping</b><p>Receipts and audit log retained per CFTC 1.31; replay path documented.</p></div>
-      <div><div class="ctrl">MAS TRM</div><b>APAC residency</b><p>Singapore-resident compile region; data localization end-to-end.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Honest scope</span>
-      <h2 class="ks-h2">What kolm does, and what we tell every finance buyer up front.</h2>
-      <p class="ks-lede">No alpha claims, no auto-trade language. Read this before the rest of the page becomes interesting.</p>
-    </div>
-    <div class="hc-rules">
-      <div class="n">A</div><div class="b">
-        <h3>Kolm is not an investment-decision system</h3>
-        <p>The CLI does not output trades. Our distilled artifacts route, summarize, structure, draft, redact, and triage. Anything that crosses into an investment decision or order routing is your application logic, your label, and your supervisory path.</p>
-      </div>
-      <div class="n">B</div><div class="b">
-        <h3>We do not file your MRM dossier</h3>
-        <p>If you are deploying a kolm artifact in production, your model-risk team owns the SR 11-7 sign-off. What kolm gives you: the manifest fields and signed receipts your committee needs to actually review the model, not a vendor PowerPoint claiming it is safe.</p>
-      </div>
-      <div class="n">C</div><div class="b">
-        <h3>Models will be wrong sometimes</h3>
-        <p>Our distilled models drop K-score by under 3 points after quantization. They still hallucinate, miss edge cases, and exhibit bias. Every kolm workflow ships with a defer-on-low-confidence path and a human-in-the-loop gate by default; turning that off is a choice you have to make on purpose, with your supervisor's name on it.</p>
-      </div>
-      <div class="n">D</div><div class="b">
-        <h3>We do not sign a vendor agreement that lets you skip MRM</h3>
-        <p>If you are using kolm for anything that touches a regulated process, we will ask whether your MRM has reviewed the artifact. Period. Even for a pilot. We will help you build the dossier; we will not sign a contract that papers over its absence.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Reference architectures</span>
-      <h2 class="ks-h2">How finance teams actually deploy kolm.</h2>
-      <p class="ks-lede">Same product, several placements. Pick the one that matches your IT estate and your compliance posture.</p>
-    </div>
-    <div class="hc-flows">
-      <div class="hc-flow">
-        <div class="who">A. Desk-side</div>
-        <h3>On the trader's or analyst's laptop</h3>
-        <p>Single signed .kolm file deploys via MDM. The artifact runs locally with zero network calls. P95 latency 80 ms on M3 Pro for a 7B INT4 specialist. Audit log syncs when the laptop next reaches the network.</p>
-        <div class="out">$ kolm run credit-memo.kolm \<br>   --in borrower-file.json \<br>   --out memo-draft.md \<br>   --offline</div>
-      </div>
-      <div class="hc-flow">
-        <div class="who">B. BYOC region-pinned</div>
-        <h3>Inside the bank's cloud account</h3>
-        <p>Helm chart installed in the same AWS / GCP / Azure account that runs your post-trade systems. Residency pinned to your selected region. PHI flows through your VPC peering; kolm never sees an external network.</p>
-        <div class="out">helm install kolm kolm/finance \<br>  --set residency=eu-west-1 \<br>  --set kms.arn=arn:aws:kms:... \<br>  --set egress=none</div>
-      </div>
-      <div class="hc-flow">
-        <div class="who">C. On-prem with DMZ</div>
-        <h3>Bare metal, audit-only egress</h3>
-        <p>kolm runs in your data center on Kubernetes or bare metal. The only outbound path is the audit-log stream to your SIEM (Splunk, Elastic, Sentinel). No vendor cloud is in the path. FFIEC vendor-management posture is "tool" not "service".</p>
-        <div class="out">$ kolm install --on-prem \<br>   --bundle kolm-2026-05.tar.zst \<br>   --signature kolm-2026-05.sig \<br>   --egress audit-only</div>
-      </div>
-      <div class="hc-flow">
-        <div class="who">D. Air-gap appliance</div>
-        <h3>Signed OVA in a regulated enclave</h3>
-        <p>Signed OVA appliance that boots offline in a research or trading enclave. Pre-loaded model registry. Upgrades arrive on a signed USB or a one-way data diode; the appliance verifies signatures before applying.</p>
-        <div class="out">appliance: kolm-2026-05.ova<br>signature: kolm-2026-05.sig<br>verify: gpg --verify (offline)<br>boot: zero outbound</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Integrations</span>
-      <h2 class="ks-h2">Adapters for the systems your IT and ops teams already run.</h2>
-      <p class="ks-lede">Capital markets is its own ecosystem. Kolm ships first-party adapters for the protocols that matter and stays out of the way of the ones that do not.</p>
-    </div>
-    <div class="hc-map">
-      <div><div class="ctrl">FIX 4.4 / 5.0</div><b>FIX adapter</b><p>Read-only ingestion of post-trade messages for reconciliation triage. No order routing.</p></div>
-      <div><div class="ctrl">SWIFT MT/MX</div><b>SWIFT messages</b><p>MT 5xx (settlement) and MT 9xx (statements) read adapters. Custom MX support on request.</p></div>
-      <div><div class="ctrl">Bloomberg / Refinitiv</div><b>Market data</b><p>BPIPE and Refinitiv RDP read-only adapters for reference and pricing context.</p></div>
-      <div><div class="ctrl">Splunk</div><b>SIEM stream</b><p>Native JSON or CEF stream for audit logs. Splunk, Elastic, Sentinel, Datadog tested.</p></div>
-      <div><div class="ctrl">ServiceNow</div><b>Workflow handoff</b><p>Receipts and defer events open ServiceNow tickets via REST adapter.</p></div>
-      <div><div class="ctrl">Okta / Azure AD</div><b>SSO / SAML</b><p>SAML 2.0 and OIDC for kolm console. SCIM provisioning bundled.</p></div>
-      <div><div class="ctrl">HashiCorp Vault</div><b>Secret broker</b><p>Vault-resident KMS keys for signing artifacts. AWS KMS and Azure Key Vault also supported.</p></div>
-      <div><div class="ctrl">DBC / FpML</div><b>Trade data</b><p>FpML 5.x read adapter for OTC derivative trade docs.</p></div>
-      <div><div class="ctrl">Snowflake</div><b>Data warehouse</b><p>Read-only connector for compile-time training data assembly. Compute stays in your account.</p></div>
-      <div><div class="ctrl">Databricks</div><b>Notebook adapter</b><p>kolm CLI usable inside Databricks notebooks for ad-hoc compile and verify.</p></div>
-      <div><div class="ctrl">S3 / Azure Blob</div><b>Object storage</b><p>Artifact registry backed by your S3 or Azure Blob with KMS encryption and bucket policies.</p></div>
-      <div><div class="ctrl">Kafka</div><b>Event stream</b><p>Confluent and Strimzi tested. Capture events stream into a topic you own; replay path documented.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Operational footprint</span>
-      <h2 class="ks-h2">What the operations team needs to know.</h2>
-      <p class="ks-lede">Day-2 facts. Capacity, paging, change management, the boring numbers that decide whether this is something you can actually run.</p>
-    </div>
-    <div class="hc-rules">
-      <div class="n">i</div><div class="b">
-        <h3>Footprint per desk or trading floor</h3>
-        <p>Reference deployment: three application nodes (8 vCPU, 32 GB RAM each), one inference node with a single A10G or RTX 4000 Ada (24 GB VRAM), one Postgres instance, one S3-compatible bucket. Handles ~3,000 inferences per hour on a 7B INT4 specialist with headroom for a 150-trader desk.</p>
-      </div>
-      <div class="n">ii</div><div class="b">
-        <h3>Change management</h3>
-        <p>Upgrades arrive as signed bundles every two weeks (security) or monthly (features). The bundle includes a release note, a signature, and a rollback receipt. You apply on your cadence; we do not push to your cluster. Compatible with your existing CAB.</p>
-      </div>
-      <div class="n">iii</div><div class="b">
-        <h3>Paging</h3>
-        <p>Optional vendor-side paging. For BYOC and on-prem your own oncall pages first; we are available 24/7 under enterprise contracts with a 1-hour response on Sev-1 and a 4-hour response on Sev-2.</p>
-      </div>
-      <div class="n">iv</div><div class="b">
-        <h3>Disaster recovery</h3>
-        <p>RPO 15 min, RTO 4 hours on hosted. BYOC and on-prem inherit your DR posture; we ship runbooks for restoring captures, registry artifacts, and signing keys from cold storage. Tabletop exercises are part of the onboarding kit.</p>
-      </div>
-      <div class="n">v</div><div class="b">
-        <h3>Telemetry</h3>
-        <p>Prometheus-format metrics on <code>/metrics</code> (opt-in). OpenTelemetry traces (opt-in). Structured logs on stdout. Zero customer-record content in any telemetry stream by default; opt-in flags add only structural identifiers (artifact CID, namespace name).</p>
-      </div>
-      <div class="n">vi</div><div class="b">
-        <h3>Cost</h3>
-        <p>For BYOC the cost is your cloud bill plus our flat enterprise license. For SaaS-hosted, the public Enterprise tier starts at $4,000/mo for 5M gateway calls. Talk to us if you have more than 50M/month; we have not blown anyone's budget yet.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div style="background: linear-gradient(180deg, var(--ks-accent-soft) 0%, transparent 100%); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-lg); padding: var(--ks-10); text-align: center;">
-      <span class="ks-eyebrow">Get started</span>
-      <h2 class="ks-h2" style="font-size: clamp(28px, 4vw, 40px); margin: var(--ks-3) auto; max-width: 24ch;">Talk to a real engineer about your workflow.</h2>
-      <p class="ks-prose" style="margin: 0 auto var(--ks-5); max-width: 60ch;">Not a sales rep with a script. You will be on a call with someone who can answer "does this fit our MRM cadence?" or "what does the SR 11-7 dossier actually look like?" in the same conversation.</p>
-      <div style="display: inline-flex; gap: var(--ks-3); flex-wrap: wrap; justify-content: center;">
-        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/contact?topic=finance">Talk to us <span class="ks-btn-arrow">&rarr;</span></a>
-        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/quickstart">Read the dev quickstart</a>
-        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/k-score">Read the K-score paper</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="test-anchor">
-  <span data-test="w220-claim">kolm.ai</span>
-  <span data-test="w260-trust">SOC 2 Type I</span>
-  <span data-test="w271-frontier">Frontier methods</span>
-  <span data-test="w335-claim">Open-source AI compiler</span>
-  <span data-test="w373-receipts">Ed25519 receipts</span>
-  <span data-test="w408-quantize-matrix">DeepSeek-R1 32B INT4</span>
-</div>
 
 </main>
 
@@ -418,60 +216,43 @@
         <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
       </div>
       <div class="ks-foot__col">
-        <h4>Product</h4>
-        <a href="/gateway">Gateway</a>
-        <a href="/capture">Capture</a>
-        <a href="/distill">Distill</a>
-        <a href="/compile">Compile</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/registry">Registry</a>
+        <h4>Industries</h4>
+        <a href="/healthcare">Healthcare</a>
+        <a href="/finance">Finance</a>
+        <a href="/legal">Legal</a>
+        <a href="/defense">Defense</a>
+        <a href="/government">Government</a>
+        <a href="/customer-support">Support</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Compare</h4>
+        <a href="/vs/openai">vs OpenAI</a>
+        <a href="/vs/together">vs Together</a>
+        <a href="/vs/fireworks">vs Fireworks</a>
+        <a href="/vs/openpipe">vs OpenPipe</a>
+        <a href="/vs/self-built">vs DIY</a>
       </div>
       <div class="ks-foot__col">
         <h4>Build</h4>
         <a href="/quickstart">Quickstart</a>
         <a href="/docs">Docs</a>
         <a href="/sdks">SDKs</a>
-        <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
-        <a href="/faq">FAQ</a>
       </div>
       <div class="ks-foot__col">
         <h4>Trust</h4>
         <a href="/security">Security</a>
         <a href="/soc2">SOC 2</a>
-        <a href="/hipaa-mapping">HIPAA</a>
-        <a href="/baa">BAA</a>
         <a href="/privacy">Privacy</a>
         <a href="/verify-prod">Verify a .kolm</a>
       </div>
-      <div class="ks-foot__col">
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
-        <a href="/why-kolm">Why kolm</a>
-        <a href="/contact">Contact</a>
-        <a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
-      </div>
     </div>
     <div class="ks-foot__base">
-      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
-      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0</span>
+      <span>Audit-grade by default. <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
     </div>
   </div>
 </footer>
 
-<script>
-  (function(){
-    var btn = document.getElementById('navToggle');
-    var sheet = document.getElementById('navSheet');
-    if (!btn || !sheet) return;
-    btn.addEventListener('click', function(){
-      var open = sheet.style.display === 'block';
-      sheet.style.display = open ? 'none' : 'block';
-      btn.setAttribute('aria-expanded', String(!open));
-    });
-  })();
-</script>
 </body>
 </html>

@@ -47,7 +47,7 @@ function mkHome() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w409a-'));
 }
 function cleanup(home) {
-  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
 }
 
 function setIsolatedHome(home) {
@@ -114,7 +114,7 @@ async function assertCreated(r, expected = 201, hint = '') {
   try {
     const clone = r.clone();
     body = await clone.json();
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
   const failuresMsg = body && Array.isArray(body.failures) && body.failures.length
     ? ' failures=' + JSON.stringify(body.failures.slice(0, 5))
     : '';

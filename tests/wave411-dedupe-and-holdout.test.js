@@ -307,10 +307,10 @@ test('W411 dedupe #4 — distill() drops holdout_only from pairs_override (seeds
     // Dispose of the iterator so the worker spawn doesn't keep the test alive.
     // The detached child is unref'd, so we don't need to wait on it.
     if (typeof iter.return === 'function') {
-      try { await Promise.race([iter.return(), new Promise((r) => setTimeout(r, 100))]); } catch {}
+      try { await Promise.race([iter.return(), new Promise((r) => setTimeout(r, 100))]); } catch {} // deliberate: cleanup
     }
     // Best-effort consume the in-flight next() so the GC can reclaim it.
-    try { await Promise.race([nextPromise, new Promise((r) => setTimeout(r, 100))]); } catch {}
+    try { await Promise.race([nextPromise, new Promise((r) => setTimeout(r, 100))]); } catch {} // deliberate: cleanup
   } finally {
     restoreEnv(saved);
   }

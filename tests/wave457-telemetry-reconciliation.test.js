@@ -216,7 +216,7 @@ test('W457 #1 — kolm what / lake stats / opportunities all read the same canon
     'on isolated HOME with no api_key capture status must source from local event-store');
 
   // Cleanup
-  try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
 });
 
 test('W457 #2 — snapshotContext prefers the canonical event-store over capture-store', async () => {
@@ -285,6 +285,6 @@ test('W457 #3 — event-store countEvents matches snapshotContext aggregation', 
     if (savedHome === undefined) delete process.env.HOME; else process.env.HOME = savedHome;
     if (savedUp === undefined) delete process.env.USERPROFILE; else process.env.USERPROFILE = savedUp;
     if (savedDd === undefined) delete process.env.KOLM_DATA_DIR; else process.env.KOLM_DATA_DIR = savedDd;
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });

@@ -57,7 +57,7 @@ function writeStub(tmpDir, envelope) {
     '',
   ].join('\n');
   fs.writeFileSync(stubPath, body);
-  try { fs.chmodSync(stubPath, 0o755); } catch (_) {}
+  try { fs.chmodSync(stubPath, 0o755); } catch (_) {} // deliberate: cleanup
   return stubPath;
 }
 
@@ -108,7 +108,7 @@ await test('W773b #2 - SAMPLING_STRATEGIES Object.freeze()-d with uniform/adapti
   }
   // Frozen means push throws (strict) or silently fails (sloppy). Either is
   // acceptable - the post-mutation length must still be 4.
-  try { mod.SAMPLING_STRATEGIES.push('bogus'); } catch (_) {}
+  try { mod.SAMPLING_STRATEGIES.push('bogus'); } catch (_) {} // deliberate: cleanup
   assert.equal(mod.SAMPLING_STRATEGIES.length, 4,
     'SAMPLING_STRATEGIES.push must NOT extend the frozen array');
 });
@@ -614,7 +614,7 @@ await test('W773b #14 - num_frames cap: request 9999 -> capped at 32 observable 
     '',
   ].join('\n');
   fs.writeFileSync(echoStubPath, echoBody);
-  try { fs.chmodSync(echoStubPath, 0o755); } catch (_) {}
+  try { fs.chmodSync(echoStubPath, 0o755); } catch (_) {} // deliberate: cleanup
   process.env.KOLM_VIDEO_TOKENIZE_CMD = JSON.stringify([process.execPath, echoStubPath]);
 
   try {

@@ -72,7 +72,7 @@ function httpJson(method, url, body) {
       res.on('end', () => {
         const text = Buffer.concat(chunks).toString('utf8');
         let json = null;
-        try { json = JSON.parse(text); } catch {}
+        try { json = JSON.parse(text); } catch {} // deliberate: cleanup
         resolve({ statusCode: res.statusCode, headers: res.headers, body: text, json });
       });
     });

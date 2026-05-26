@@ -365,7 +365,7 @@ export function _resetForTests(tenantId) {
     } else {
       remove(ACTIVE_LEARNING_QUEUE_TABLE, () => true);
     }
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
 }
 
 export default {

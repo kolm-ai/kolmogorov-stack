@@ -70,8 +70,8 @@ function freshDir() {
   if (eventStore._resetForTests) eventStore._resetForTests();
   if (kolmStore._resetForTests) kolmStore._resetForTests();
   for (const t of W710_TEST_TENANTS) {
-    try { routingResetForTests(t); } catch (_) {}
-    try { alqResetForTests(t); } catch (_) {}
+    try { routingResetForTests(t); } catch (_) {} // deliberate: cleanup
+    try { alqResetForTests(t); } catch (_) {} // deliberate: cleanup
   }
   return tmp;
 }

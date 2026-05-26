@@ -67,7 +67,7 @@ test('sec#14 — cloud-trust file carries an hmac on each entry; tampering inval
     assert.equal(mod.isCloudTrusted(sha), false, 'tampered entry is rejected');
   } finally {
     process.env.HOME = prevHome; process.env.USERPROFILE = prevUser;
-    try { fs.rmSync(tmpHome, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(tmpHome, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });
 
@@ -123,7 +123,7 @@ test('backend#7 — jobs.create writes a per-job file; jobs.update is atomic', a
     assert.ok(all.find(x => x.id === j.id), 'listAll surfaces created job');
   } finally {
     process.env.KOLM_JOBS_DIR = prev; process.env.KOLM_JOBS_FILE = prevFile; process.env.KOLM_JOB_LOG_DIR = prevLog;
-    try { fs.rmSync(tmpJobs, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(tmpJobs, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });
 
@@ -149,7 +149,7 @@ test('backend#7 — legacy jobs.jsonl is migrated to per-job files on first ensu
     assert.ok(fs.existsSync(sentinel), 'migration sentinel created');
   } finally {
     process.env.KOLM_JOBS_DIR = prev; process.env.KOLM_JOBS_FILE = prevFile; process.env.KOLM_JOB_LOG_DIR = prevLog;
-    try { fs.rmSync(tmpJobs, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(tmpJobs, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 });
 

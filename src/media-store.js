@@ -167,7 +167,7 @@ export async function storeBlob(buffer, opts = {}) {
   const abs = path.join(dir, filename);
   // Skip the write if we already have this byte sequence on disk.
   let already = false;
-  try { await fsp.stat(abs); already = true; } catch {}
+  try { await fsp.stat(abs); already = true; } catch {} // deliberate: cleanup
   if (!already) {
     // writeFile is atomic enough for our purposes — single fs.write under the
     // hood — and idempotent on retry because the filename is content-addressed.

@@ -50,7 +50,7 @@ function mkHome() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w445-'));
 }
 function cleanup(home) {
-  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
 }
 function setIsolatedHome(home) {
   process.env.KOLM_DATA_DIR = path.join(home, '.kolm');

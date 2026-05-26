@@ -113,14 +113,14 @@ export async function trainTokenizer({
     child.on('error', (e) => reject(e));
     child.on('exit', (code) => {
       if (corpusInfo.transient) {
-        try { fs.unlinkSync(corpusInfo.path); } catch {}
+        try { fs.unlinkSync(corpusInfo.path); } catch {} // deliberate: cleanup
       }
       // The worker prints one JSON line on success. Strip any stderr
       // banner and parse the first JSON line we find on stdout.
       const lines = stdout.split(/\r?\n/).filter(Boolean);
       let envelope = null;
       for (const ln of lines.reverse()) {
-        try { envelope = JSON.parse(ln); break; } catch {}
+        try { envelope = JSON.parse(ln); break; } catch {} // deliberate: cleanup
       }
       if (!envelope) {
         return reject(new Error(`tokenizer worker produced no JSON envelope (exit ${code}): ${stderr || stdout}`));

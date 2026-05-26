@@ -44,7 +44,7 @@ function validVersionEntry(entry) {
 const manifestPath = path.join(publicDir, 'sdk-versions.json');
 let manifest = { spec: 'rs-1', versions: [] };
 if (fs.existsSync(manifestPath)) {
-  try { manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); } catch {}
+  try { manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); } catch {} // deliberate: cleanup
 }
 manifest.versions = Array.isArray(manifest.versions) ? manifest.versions.filter(validVersionEntry) : [];
 const existingIndex = manifest.versions.findIndex(v => v.sha === sha);

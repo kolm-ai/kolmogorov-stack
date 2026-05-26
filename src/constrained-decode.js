@@ -58,7 +58,7 @@ function resolveWorkerCommand() {
           cmd = String(arr[0]);
           cargs = arr.slice(1).map(String);
         }
-      } catch {
+      } catch { // deliberate: cleanup
         // fall through: treat as raw string
       }
     }

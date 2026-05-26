@@ -84,10 +84,10 @@ function runCli(args, env = {}) {
     let stdout = '', stderr = '';
     child.stdout.on('data', (b) => { stdout += b.toString('utf8'); });
     child.stderr.on('data', (b) => { stderr += b.toString('utf8'); });
-    const killer = setTimeout(() => { try { child.kill('SIGKILL'); } catch (_) {} }, 30_000);
+    const killer = setTimeout(() => { try { child.kill('SIGKILL'); } catch (_) {} }, 30_000); // deliberate: cleanup
     child.on('close', (code) => {
       clearTimeout(killer);
-      try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {}
+      try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
       resolve({ code, stdout, stderr });
     });
   });
@@ -107,7 +107,7 @@ test('W361 #1 — kolm train --watch --json emits >=1 progress event + final ok'
     assert.equal(final.step, 3, 'last event must be the finalize step');
     assert.equal(final.status, 'ok', `finalize must be ok, got ${final.status}: ${JSON.stringify(final)}`);
   } finally {
-    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -127,7 +127,7 @@ test('W361 #2 — auto-stop fires when holdout K drops 2 consecutive epochs', as
     assert.equal(autoStop.detail.reason, 'overfit');
     assert.equal(autoStop.detail.best_epoch, 1, 'best epoch should be 1 (K=0.85)');
   } finally {
-    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -148,7 +148,7 @@ test('W361 #3 — train() iterator yields events with step/name/status', async (
     const finalize = events.find((e) => e.step === 3);
     assert.ok(finalize, 'finalize step (3) missing');
   } finally {
-    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 

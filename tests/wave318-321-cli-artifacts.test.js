@@ -76,7 +76,7 @@ function runCli(args, { base, apiKey } = {}) {
     child.stdout.on('data', (d) => { stdout += d.toString(); });
     child.stderr.on('data', (d) => { stderr += d.toString(); });
     child.on('exit', (code) => {
-      try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+      try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
       resolve({ code, stdout, stderr });
     });
   });

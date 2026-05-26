@@ -448,7 +448,7 @@ export async function mineFromChat(jsonPath, opts = {}) {
     for (const ln of text.split(/\r?\n/)) {
       const t = ln.trim();
       if (!t) continue;
-      try { arr.push(JSON.parse(t)); } catch {}
+      try { arr.push(JSON.parse(t)); } catch {} // deliberate: cleanup
     }
     parsed = arr;
   }

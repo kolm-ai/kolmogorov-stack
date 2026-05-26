@@ -436,7 +436,7 @@ test('W785 #15 - all 5 cloud-distill routes are auth-gated (401 without auth)', 
     }
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -514,7 +514,7 @@ test('W785 #16 - HTTP E2E: submit -> status -> list -> cancel via real router', 
     assert.equal(b6.error, 'invalid_transition');
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 

@@ -35,7 +35,7 @@ const INSTALL_HINT = [
 function whichSync(name) {
   if (!name) return null;
   if (name.includes('/') || name.includes('\\')) {
-    try { if (fs.existsSync(name) && fs.statSync(name).isFile()) return name; } catch (_) {}
+    try { if (fs.existsSync(name) && fs.statSync(name).isFile()) return name; } catch (_) {} // deliberate: cleanup
     return null;
   }
   const P = process.env.PATH || '';
@@ -47,7 +47,7 @@ function whichSync(name) {
     if (!dir) continue;
     for (const ext of exts) {
       const full = path.join(dir, name + ext);
-      try { if (fs.existsSync(full) && fs.statSync(full).isFile()) return full; } catch (_) {}
+      try { if (fs.existsSync(full) && fs.statSync(full).isFile()) return full; } catch (_) {} // deliberate: cleanup
     }
   }
   return null;
@@ -62,7 +62,7 @@ function resolveTrainer() {
         const head = whichSync(parsed[0]);
         if (head) return { argv: [head, ...parsed.slice(1)], source: 'env-array' };
       }
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
     const resolved = whichSync(envCmd);
     if (resolved) return { argv: [resolved], source: 'env' };
     return null;
@@ -149,7 +149,7 @@ export function trainOnPolicy({
   const manifestPath = path.join(runDir, 'manifest.json');
   let manifest = null;
   if (fs.existsSync(manifestPath)) {
-    try { manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); } catch (_) {}
+    try { manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); } catch (_) {} // deliberate: cleanup
   }
   return {
     ok: true,

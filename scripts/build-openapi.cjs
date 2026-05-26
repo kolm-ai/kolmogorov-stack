@@ -119,6 +119,23 @@ function buildOperation(route, tagLabel) {
   if (route.stub) {
     op['x-kolm-source-indexed'] = true;
   }
+  // W890-9 — every POST/PUT/PATCH op carries a minimal JSON requestBody
+  // pointing at the shared GenericRequest schema. The schema is intentionally
+  // permissive (additionalProperties:true) because the body shape varies per
+  // endpoint. Curated ops that override `requestBody` keep their richer
+  // schemas (the merge loop never overwrites an existing operation).
+  const method = String(route.method || '').toLowerCase();
+  if (method === 'post' || method === 'put' || method === 'patch') {
+    op.requestBody = {
+      required: false,
+      content: {
+        'application/json': {
+          schema: { $ref: '#/components/schemas/GenericRequest' },
+          example: { ok: true },
+        },
+      },
+    };
+  }
   op.responses = {
     '200': { $ref: '#/components/responses/JsonEnvelope' },
     '400': { $ref: '#/components/responses/BadRequest' },
@@ -312,6 +329,15 @@ for (const p of Object.keys(merged.paths)) {
 if (!merged.components) merged.components = {};
 if (!merged.components.responses) merged.components.responses = {};
 const RESPS = merged.components.responses;
+// W890-9 — every shared response carries a canonical example so the
+// auto-generated routes inherit at least one example by reference.
+const RESP_EXAMPLES = {
+  JsonEnvelope: { ok: true },
+  BadRequest: { ok: false, error: 'invalid_input', hint: 'check the request body / required fields' },
+  Unauthorized: { ok: false, error: 'unauthorized', hint: 'set Authorization: Bearer <kolm_api_key> (ks_*/kao_*) or X-API-Key header' },
+  RateLimited: { ok: false, error: 'rate_limited', retry_after_s: 60 },
+  ServerError: { ok: false, error: 'server_error', error_id: 'a1b2c3d4e5f6', hint: 'capture the error_id and include it in any bug report' },
+};
 function ensureResp(name, description) {
   if (!RESPS[name]) {
     RESPS[name] = {
@@ -319,16 +345,23 @@ function ensureResp(name, description) {
       content: {
         'application/json': {
           schema: { $ref: '#/components/schemas/JsonEnvelope' },
+          example: RESP_EXAMPLES[name] || { ok: true },
         },
       },
     };
+  } else {
+    // Backfill the example onto an existing shared response if missing.
+    const c = RESPS[name].content;
+    if (c && c['application/json'] && !c['application/json'].example) {
+      c['application/json'].example = RESP_EXAMPLES[name] || { ok: true };
+    }
   }
 }
 ensureResp('JsonEnvelope', 'Standard {ok, ...} envelope. Successful 2xx responses share this shape unless overridden.');
 ensureResp('BadRequest', '400 — input validation failed. body: { ok:false, error, hint }.');
 ensureResp('Unauthorized', '401 — missing or invalid API key.');
 ensureResp('RateLimited', '429 — per-tenant rate limit hit. Retry-After header included.');
-ensureResp('ServerError', '500 — unexpected upstream error. The envelope describes the failure mode.');
+ensureResp('ServerError', '500 — unexpected upstream error. The envelope describes the failure mode. The error_id header (X-Kolm-Error-Id) lets ops trace the failure.');
 
 // Ensure shared schema exists.
 if (!merged.components.schemas) merged.components.schemas = {};
@@ -343,6 +376,20 @@ if (!merged.components.schemas.JsonEnvelope) {
     },
     additionalProperties: true,
     required: ['ok'],
+    example: { ok: true },
+  };
+} else if (!merged.components.schemas.JsonEnvelope.example) {
+  merged.components.schemas.JsonEnvelope.example = { ok: true };
+}
+// W890-9 — minimal request body schema used by every auto-generated
+// POST/PUT/PATCH op. Curated ops keep their richer schemas (LoginRequest,
+// SignupRequest, etc.); the merge loop never overwrites an existing op.
+if (!merged.components.schemas.GenericRequest) {
+  merged.components.schemas.GenericRequest = {
+    type: 'object',
+    description: 'Permissive request body envelope used for auto-generated route shells. Curated endpoints override this with a richer per-endpoint schema. additionalProperties is true so callers can pass forward-compatible fields without breaking the contract.',
+    additionalProperties: true,
+    example: { ok: true },
   };
 }
 
@@ -393,6 +440,58 @@ for (const [oapiPath, methods] of Object.entries(merged.paths)) {
   }
 }
 
+// W890-9 — backfill requestBody on every POST/PUT/PATCH op that lacks one.
+// Curated ops that already declare requestBody (auth/login, auth/signup,
+// compile, quantize, etc.) keep their richer schemas; the backfill is
+// idempotent and only writes where the field is absent.
+let backfilledReq = 0;
+for (const [oapiPath, methods] of Object.entries(merged.paths)) {
+  for (const [m, op] of Object.entries(methods)) {
+    if (!['post', 'put', 'patch'].includes(m)) continue;
+    if (!op || op.requestBody) continue;
+    op.requestBody = {
+      required: false,
+      content: {
+        'application/json': {
+          schema: { $ref: '#/components/schemas/GenericRequest' },
+          example: { ok: true },
+        },
+      },
+    };
+    backfilledReq++;
+  }
+}
+
+// W890-9 — backfill an example onto each operation. Any op whose response
+// (200 / 2xx) currently has only `$ref: '#/components/responses/JsonEnvelope'`
+// inherits the JsonEnvelope example automatically — no per-op writes needed.
+// For ops where the response is an inline content schema without an example,
+// we backfill a minimal `{ ok: true }` example so machine generators (Postman
+// collections, SDK code-gen) produce realistic call payloads.
+let backfilledEx = 0;
+function ensureResponseExample(responseObj) {
+  if (!responseObj) return false;
+  if (responseObj.$ref) return false; // shared ref already carries example
+  if (!responseObj.content) return false;
+  for (const ct of Object.keys(responseObj.content)) {
+    const c = responseObj.content[ct];
+    if (!c.example && !c.examples) {
+      c.example = { ok: true };
+      return true;
+    }
+  }
+  return false;
+}
+for (const [oapiPath, methods] of Object.entries(merged.paths)) {
+  for (const [m, op] of Object.entries(methods)) {
+    if (!['get', 'post', 'put', 'patch', 'delete'].includes(m)) continue;
+    if (!op || !op.responses) continue;
+    for (const code of Object.keys(op.responses)) {
+      if (ensureResponseExample(op.responses[code])) backfilledEx++;
+    }
+  }
+}
+
 // Sort paths and methods for determinism.
 const sortedPaths = {};
 const pathKeys = Object.keys(merged.paths).sort();
@@ -414,4 +513,6 @@ console.log('  total path entries: ' + Object.keys(merged.paths).length);
 console.log('  ops added:          ' + added);
 console.log('  ops kept (curated): ' + skipped);
 console.log('  ops refreshed:      ' + refreshed);
+console.log('  req backfilled:     ' + backfilledReq);
+console.log('  ex  backfilled:     ' + backfilledEx);
 console.log('  tags:               ' + (merged.tags ? merged.tags.length : 0));

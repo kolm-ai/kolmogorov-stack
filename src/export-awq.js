@@ -186,7 +186,7 @@ export async function runExport({ artifact, quant, target_dir, calibration = DEF
     let detail = null;
     try {
       detail = JSON.parse((r.stdout || '').trim().split(/\r?\n/).pop() || '{}');
-    } catch {}
+    } catch {} // deliberate: cleanup
     return {
       ok: false,
       error: `awq_exited_${r.status || 'err'}`,
@@ -201,14 +201,14 @@ export async function runExport({ artifact, quant, target_dir, calibration = DEF
       const s = fs.statSync(path.join(target_dir, f));
       if (s.isFile()) size_bytes += s.size;
     }
-  } catch {}
+  } catch {} // deliberate: cleanup
   let qcfg = null;
   const cfgPath = path.join(target_dir, 'config.json');
   if (fs.existsSync(cfgPath)) {
     try {
       const full = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
       qcfg = full.quantization_config || null;
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
   return {
     ok: true,

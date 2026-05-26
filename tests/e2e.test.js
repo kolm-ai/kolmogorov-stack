@@ -45,7 +45,7 @@ async function waitForHealth(base = BASE, retries = 120) {
     try {
       const r = await fetch(base + '/health');
       if (r.ok) return await r.json();
-    } catch {}
+    } catch {} // deliberate: cleanup
     await new Promise(r => setTimeout(r, 100));
   }
   throw new Error('server did not come up');

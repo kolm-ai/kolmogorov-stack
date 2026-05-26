@@ -6,7 +6,7 @@
 
 # Container image — override repository + tag for your registry.
 image:
-  repository: ghcr.io/sneaky-hippo/kolm
+  repository: ghcr.io/kolm-ai/kolm
   tag: ""              # empty → falls back to .Chart.AppVersion (1.0.0)
   pullPolicy: IfNotPresent
   pullSecrets: []      # e.g. [{ name: ghcr-pull }]
@@ -42,7 +42,7 @@ persistence:
 # Artifact registry — the initContainer (W824-5) pulls the `.kolm` artifact
 # from here before the main container starts.
 artifactRegistry:
-  url: ""                          # e.g. oci://ghcr.io/sneaky-hippo/artifacts
+  url: ""                          # e.g. oci://ghcr.io/kolm-ai/artifacts
   secretRef: ""                    # pull secret name in the install namespace
   artifactId: "production-latest"  # KOLM_ARTIFACT_ID passed to `kolm pull`
 

@@ -57,7 +57,7 @@ function startFakeCloud(handler) {
         let body = Buffer.concat(chunks).toString('utf8');
         let parsed = null;
         if (body) {
-          try { parsed = JSON.parse(body); } catch {}
+          try { parsed = JSON.parse(body); } catch {} // deliberate: cleanup
         }
         handler(req, res, { body, parsed });
       });

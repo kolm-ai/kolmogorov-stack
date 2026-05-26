@@ -94,7 +94,7 @@ const built = await buildAndZip({
 
 const finalPath = path.join(outDir, 'qwen-smoke.kolm');
 fs.copyFileSync(built.outPath, finalPath);
-if (built.outPath !== finalPath) { try { fs.unlinkSync(built.outPath); } catch {} }
+if (built.outPath !== finalPath) { try { fs.unlinkSync(built.outPath); } catch {} } // deliberate: cleanup
 
 const bytes = fs.statSync(finalPath).size;
 const sha256 = crypto.createHash('sha256').update(fs.readFileSync(finalPath)).digest('hex');

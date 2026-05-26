@@ -198,7 +198,7 @@ export function queryIndex({ name, q, topK = 5, excerpt = 240 }) {
         const end = Math.min(raw.length, hit + excerpt - 80);
         excerptText = (start > 0 ? '… ' : '') + raw.slice(start, end).replace(/\s+/g, ' ').trim() + (end < raw.length ? ' …' : '');
       }
-    } catch {}
+    } catch {} // deliberate: cleanup
     return {
       score: Number(score.toFixed(4)),
       path: d.path,

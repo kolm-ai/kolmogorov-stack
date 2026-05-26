@@ -419,7 +419,7 @@ test('W782 #13 - approval routes are auth-gated (401 without auth)', async () =>
     }
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -483,7 +483,7 @@ test('W782 #14 - E2E: request -> get -> approve -> double-approve blocked', asyn
     assert.equal(b4.error, 'invalid_transition');
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 

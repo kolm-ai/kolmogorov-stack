@@ -175,7 +175,7 @@ test('W454 #4 — POST /v1/media/redact-job requires auth', async () => {
       'must surface an auth error string, got: ' + JSON.stringify(j));
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -199,7 +199,7 @@ test('W454 #5 — POST /v1/media/redact-job 400 without media_uri or path', asyn
     assert.equal(j.error, 'media_uri_or_path_required');
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -211,7 +211,7 @@ test('W454 #6 — GET /v1/media/redact-job/doctor requires auth', async () => {
     assert.equal(r.status, 401);
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -255,7 +255,7 @@ test('W454 #8 — worker returns extractor_not_installed when tesseract.js absen
   try {
     const workerPkgDir = path.join(REPO_ROOT, 'workers', 'media-redact', 'node_modules', 'tesseract.js');
     tesseractPresent = fs.existsSync(workerPkgDir);
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
   if (tesseractPresent) {
     // tesseract.js IS installed — this asserts the happy path returns ok:true
     // OR a media-load error (no real PNG bytes were passed).
@@ -269,7 +269,7 @@ test('W454 #8 — worker returns extractor_not_installed when tesseract.js absen
     });
     // tesseract on garbage bytes likely errors → exit 5 (extract_failed) is fine.
     assert.ok([0, 5].includes(r.status), 'tesseract path must exit 0 or 5 on garbage bytes');
-    try { fs.unlinkSync(tmpFile); } catch (_) {}
+    try { fs.unlinkSync(tmpFile); } catch (_) {} // deliberate: cleanup
     return;
   }
 
@@ -282,7 +282,7 @@ test('W454 #8 — worker returns extractor_not_installed when tesseract.js absen
     stdio: 'pipe',
     timeout: 30 * 1000,
   });
-  try { fs.unlinkSync(tmpFile); } catch (_) {}
+  try { fs.unlinkSync(tmpFile); } catch (_) {} // deliberate: cleanup
   assert.equal(r.status, 3, 'worker must exit 3 when extractor is not installed: ' + String(r.stderr || ''));
   const env = JSON.parse(String(r.stdout || '').trim().split('\n').pop() || '{}');
   assert.equal(env.ok, false);

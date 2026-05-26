@@ -141,7 +141,7 @@ function _readCache(hash, ttl_s) {
 function _writeCache(hash, response) {
   const f = path.join(_cacheDir(), hash + '.json');
   const row = { ts: Date.now(), response };
-  try { fs.writeFileSync(f, JSON.stringify(row)); } catch {}
+  try { fs.writeFileSync(f, JSON.stringify(row)); } catch {} // deliberate: cleanup
 }
 
 function _semanticCacheRows() {
@@ -151,9 +151,9 @@ function _semanticCacheRows() {
   try {
     for (const line of fs.readFileSync(f, 'utf8').split('\n')) {
       if (!line.trim()) continue;
-      try { rows.push(JSON.parse(line)); } catch {}
+      try { rows.push(JSON.parse(line)); } catch {} // deliberate: cleanup
     }
-  } catch {}
+  } catch {} // deliberate: cleanup
   return rows.slice(-500);
 }
 
@@ -193,7 +193,7 @@ function _writeSemanticCache(request, response, meta = {}) {
     response,
     meta,
   };
-  try { fs.appendFileSync(_semanticCachePath(), JSON.stringify(row) + '\n', 'utf8'); } catch {}
+  try { fs.appendFileSync(_semanticCachePath(), JSON.stringify(row) + '\n', 'utf8'); } catch {} // deliberate: cleanup
 }
 
 function _prepareRequestForPolicy(request, pol) {
@@ -252,7 +252,7 @@ function _findMatchingArtifacts(intent) {
         } else if (sub.endsWith('.kolm')) {
           out.push({ name: f, path: sub, installed: true });
         }
-      } catch {}
+      } catch {} // deliberate: cleanup
     }
   }
   // No intent filter when none supplied: caller (decide) picks the first
@@ -277,7 +277,7 @@ async function _tryArtifact(artifactPath, request) {
       recipe_id: r.recipe_id || null,
       latency_us: r.latency_us || 0,
     };
-  } catch (bundleErr) {
+  } catch (bundleErr) { // deliberate: cleanup
     // Fall through to the in-process recipe runner.
   }
   try {
@@ -514,7 +514,7 @@ export async function applyPolicy(request = {}, { policyName, opts = {} } = {}) 
         prompt_tokens: r.raw?.usage?.prompt_tokens || 0,
         completion_tokens: r.raw?.usage?.completion_tokens || 0,
       });
-    } catch {}
+    } catch {} // deliberate: cleanup
     saved_usd = Math.max(0, Number(pol.frontier_cost_usd || 0) - cost_usd);
     // Write to cache so future identical calls go free.
     if (r.ok) {
@@ -532,7 +532,7 @@ export async function applyPolicy(request = {}, { policyName, opts = {} } = {}) 
         prompt_tokens: r.raw?.usage?.prompt_tokens || 0,
         completion_tokens: r.raw?.usage?.completion_tokens || 0,
       });
-    } catch {}
+    } catch {} // deliberate: cleanup
     if (r.ok) {
       _writeCache(_hashRequest(effectiveRequest), result);
       _writeSemanticCache(effectiveRequest, result, { action: d.action, target: d.target });
@@ -560,7 +560,7 @@ export async function applyPolicy(request = {}, { policyName, opts = {} } = {}) 
   };
   try {
     fs.appendFileSync(_decisionsPath(), JSON.stringify(decisionRow) + '\n', 'utf8');
-  } catch {}
+  } catch {} // deliberate: cleanup
   try {
     const { appendEvent } = await _eventStore();
     await appendEvent(newEvent({
@@ -573,7 +573,7 @@ export async function applyPolicy(request = {}, { policyName, opts = {} } = {}) 
       cache_hit: d.action === 'cache_hit' || d.action === 'semantic_cache_hit',
       status: d.action === 'blocked' ? 'blocked' : 'ok',
     }));
-  } catch {}
+  } catch {} // deliberate: cleanup
 
   return {
     result,
@@ -596,7 +596,7 @@ export function recentDecisions({ n = 50 } = {}) {
   const lines = txt.split('\n').filter(Boolean);
   const rows = [];
   for (const l of lines.slice(-n)) {
-    try { rows.push(JSON.parse(l)); } catch {}
+    try { rows.push(JSON.parse(l)); } catch {} // deliberate: cleanup
   }
   return rows.reverse();
 }

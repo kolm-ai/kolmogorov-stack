@@ -108,7 +108,7 @@
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -117,7 +117,7 @@
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 <main id="main" class="auth-main">
@@ -204,7 +204,7 @@
  <div class="cli-details-body">
  <div id="cli-bridge">
  <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px">Use it from the CLI</div>
- <pre id="cli-snippet" style="margin:0;padding:12px 14px;background:#0b0d10;border:1px solid var(--line);border-radius:8px;color:#e6e9ee;font-family:var(--mono);font-size:13px;overflow-x:auto;white-space:pre;line-height:1.55"><code id="cli-snippet-code">npm i -g github:sneaky-hippo/kolm-stack
+ <pre id="cli-snippet" style="margin:0;padding:12px 14px;background:#0b0d10;border:1px solid var(--line);border-radius:8px;color:#e6e9ee;font-family:var(--mono);font-size:13px;overflow-x:auto;white-space:pre;line-height:1.55"><code id="cli-snippet-code">npm i -g github:kolm-ai/kolm-stack
 kolm login --key ks_...
 kolm init
 kolm new my-skill --from classifier
@@ -419,7 +419,7 @@ kolm compile --spec my-skill.spec.json</code></pre>
  var snippet = $('cli-snippet-code');
  if (snippet) {
  snippet.textContent =
- 'npm i -g github:sneaky-hippo/kolm-stack\n' +
+ 'npm i -g github:kolm-ai/kolm-stack\n' +
  'kolm login --key ' + key + '\n' +
  'kolm init\n' +
  'kolm new my-skill --from classifier\n' +
@@ -499,7 +499,10 @@ kolm compile --spec my-skill.spec.json</code></pre>
  if (ctaDashboard) {
  ctaDashboard.addEventListener('click', function(ev){
  ev.preventDefault();
- persistThenGo('/dashboard');
+ // New signups land on the 4-path onboarding picker; the dashboard is one
+ // click away via the "Skip onboarding" link. Existing /v1/signin flow
+ // upstream still goes to /dashboard since those users have already chosen.
+ persistThenGo('/account/onboarding');
  });
  }
 })();
@@ -522,7 +525,7 @@ kolm compile --spec my-skill.spec.json</code></pre>
       </div>
       <div>
         <h4>Company</h4>
-        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
       </div>
     </div>
     <div class="ks-footer__bottom">

@@ -22,7 +22,7 @@ async function setup() {
   await fs.mkdir(TMP, { recursive: true });
 }
 async function teardown() {
-  try { await fs.rm(TMP, { recursive: true, force: true }); } catch {}
+  try { await fs.rm(TMP, { recursive: true, force: true }); } catch {} // deliberate: cleanup
 }
 
 test.before(setup);

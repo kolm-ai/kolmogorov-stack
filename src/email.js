@@ -247,7 +247,7 @@ function _appendOutbox(envelope) {
     // Even the outbox is best-effort — disk full, read-only FS, etc. We log
     // and swallow rather than throw because email is never load-bearing for
     // the calling handler.
-    try { console.error('[email] outbox write failed', _e && _e.message); } catch (_) {}
+    try { console.error('[email] outbox write failed', _e && _e.message); } catch (_) {} // deliberate: cleanup
     return false;
   }
 }

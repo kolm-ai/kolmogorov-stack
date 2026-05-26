@@ -73,7 +73,7 @@ function _fileHint(ev) {
       const j = JSON.parse(ev.feedback);
       if (j && typeof j.file_hint === 'string') return j.file_hint;
       if (j && typeof j.file === 'string') return j.file;
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
   return null;
 }

@@ -44,7 +44,7 @@ async function freePort() {
 
 async function waitForHealth(base, retries = 80) {
   for (let i = 0; i < retries; i++) {
-    try { const r = await fetch(base + '/health'); if (r.ok) return; } catch {}
+    try { const r = await fetch(base + '/health'); if (r.ok) return; } catch {} // deliberate: cleanup
     await new Promise(r => setTimeout(r, 100));
   }
   throw new Error('server did not come up: ' + base);
@@ -211,7 +211,7 @@ test('W252 #7 — proxy returns 507 + x-kolm-capture-durable:false when writeCap
   // Use os.tmpdir() and place a regular file where the dir would be.
   const fakeFile = path.join(os.tmpdir(), `kolm-w252-proxy-capdir-${process.pid}-${Date.now()}`);
   fs.writeFileSync(fakeFile, 'not a directory', 'utf8');
-  t.after(() => { try { fs.unlinkSync(fakeFile); } catch {} });
+  t.after(() => { try { fs.unlinkSync(fakeFile); } catch {} }); // deliberate: cleanup
 
   const proxyPort = await freePort();
   const { createProxyServer } = await import(`../src/services/proxy.js?fresh=${Date.now()}`);

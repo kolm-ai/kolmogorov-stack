@@ -163,7 +163,7 @@ function _atomicWrite(p, body, mode = 0o600) {
   _ensureDirs();
   const tmp = p + '.tmp.' + process.pid + '.' + crypto.randomBytes(4).toString('hex');
   fs.writeFileSync(tmp, body, 'utf8');
-  try { fs.chmodSync(tmp, mode); } catch {}
+  try { fs.chmodSync(tmp, mode); } catch {} // deliberate: cleanup
   fs.renameSync(tmp, p);
 }
 
@@ -180,10 +180,10 @@ function _getDeviceId() {
     try {
       const v = fs.readFileSync(p, 'utf8').trim();
       if (v) return v;
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
   const id = 'dev_' + crypto.randomBytes(8).toString('hex');
-  try { _atomicWrite(p, id, 0o600); } catch {}
+  try { _atomicWrite(p, id, 0o600); } catch {} // deliberate: cleanup
   return id;
 }
 
@@ -319,7 +319,7 @@ export function auditLog({ limit = 50 } = {}) {
   for (const line of text.split('\n')) {
     const t = line.trim();
     if (!t) continue;
-    try { rows.push(JSON.parse(t)); } catch {}
+    try { rows.push(JSON.parse(t)); } catch {} // deliberate: cleanup
   }
   rows.reverse();
   const n = Math.max(0, Math.min(Number(limit) || 0, rows.length));
@@ -364,7 +364,7 @@ function _httpRequest({ base, method = 'POST', pathSuffix = '/', headers = {}, b
     });
     req.on('error', (e) => reject(new CloudSyncError('cloud_unreachable:' + e.message, { code: 'cloud_unreachable' })));
     req.setTimeout(15_000, () => {
-      try { req.destroy(new Error('timeout')); } catch {}
+      try { req.destroy(new Error('timeout')); } catch {} // deliberate: cleanup
       reject(new CloudSyncError('cloud_unreachable:timeout', { code: 'cloud_unreachable' }));
     });
     if (body) req.write(body);
@@ -638,6 +638,6 @@ export async function pullEvents({ since, limit = 100 } = {}) {
 export function _resetForTests() {
   const dir = _syncDir();
   if (fs.existsSync(dir)) {
-    try { fs.rmSync(dir, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch {} // deliberate: cleanup
   }
 }

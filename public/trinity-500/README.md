@@ -1,4 +1,4 @@
-<!-- mirrored from HF model card at huggingface.co/kolm/trinity-500 -->
+<!-- mirrored from HF model card at huggingface.co/kolm-ai/trinity-500-support-7b -->
 ---
 license: apache-2.0
 language:
@@ -166,7 +166,7 @@ For full provenance see `passport.json` in this repository.
   title  = {Trinity-500: distilled with the open-source kolm stack},
   author = {Kolm contributors},
   year   = {2026},
-  url    = {https://huggingface.co/kolm/trinity-500},
+  url    = {https://huggingface.co/kolm-ai/trinity-500-support-7b},
   note   = {Run ID trinity-500-2026-05-26, adapter sha256 c8d77117}
 }
 ```

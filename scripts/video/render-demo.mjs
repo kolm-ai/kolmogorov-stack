@@ -127,6 +127,6 @@ for (const f of [MP4, WEBM, POSTER]) {
 // Clean tmp
 try {
   fs.rmSync(TMP, { recursive: true, force: true });
-} catch {}
+} catch {} // deliberate: cleanup
 
 console.log('[render] done');

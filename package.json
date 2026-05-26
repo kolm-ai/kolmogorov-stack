@@ -4,6 +4,15 @@
   "description": "kolm - the private AI compiler. Compile your task into a .kolm artifact, trained on your data, that runs on your hardware.",
   "private": true,
   "type": "module",
+  "homepage": "https://kolm.ai",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kolm-ai/kolmogorov-stack.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kolm-ai/kolmogorov-stack/issues"
+  },
+  "license": "Apache-2.0",
   "bin": {
     "kolm": "cli/kolm.js"
   },
@@ -80,6 +89,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.32.1",
+    "@iarna/toml": "2.2.5",
     "adm-zip": "0.5.17",
     "apache-arrow": "21.1.0",
     "archiver": "7.0.1",
@@ -89,7 +99,10 @@
     "express": "4.22.1",
     "express-rate-limit": "7.5.1",
     "helmet": "8.1.0",
-    "parquetjs-lite": "0.8.7"
+    "parquetjs-lite": "0.8.7",
+    "pdfkit": "0.18.0",
+    "pg": "8.13.1",
+    "ssh2": "1.16.0"
   },
   "engines": {
     "node": ">=20.0.0"

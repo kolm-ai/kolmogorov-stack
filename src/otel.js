@@ -226,7 +226,7 @@ async function flush() {
     trimQueue();
     if (process.env.KOLM_OTEL_DEBUG) {
       // Failure should not bring down the host process; log once at debug.
-      // eslint-disable-next-line no-console
+       
       console.warn('[kolm.otel] export failed:', err && err.message);
     }
   }
@@ -510,7 +510,7 @@ function createInferenceSpans(parentSpan, timings) {
   const tracer = _getRegisteredTracer();
   if (!tracer && !STATE.enabled) {
     if (process.env.KOLM_OTEL_DEBUG) {
-      // eslint-disable-next-line no-console
+       
       console.warn('[kolm.otel] createInferenceSpans no-op: no tracer registered, KOLM_OTEL=0');
     }
     return false;

@@ -70,7 +70,7 @@ function makeSpawnMock() {
 
 function withTmpDir() {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w430-'));
-  return { tmp, cleanup: () => { try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} } };
+  return { tmp, cleanup: () => { try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} } }; // deliberate: cleanup
 }
 
 function withEnv(extra = {}) {

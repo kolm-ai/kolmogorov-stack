@@ -616,11 +616,11 @@ async function main() {
             document.documentElement.removeAttribute('data-theme');
             document.documentElement.style.colorScheme = 'dark';
           }
-        } catch (e) {}
+        } catch (e) {} // deliberate: cleanup
       }, themeName);
       if (auth.ok && auth.token) {
         await context.addInitScript(token => {
-          try { localStorage.setItem('ks_api_key', token); } catch (e) {}
+          try { localStorage.setItem('ks_api_key', token); } catch (e) {} // deliberate: cleanup
         }, auth.token);
       }
       const page = await context.newPage();

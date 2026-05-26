@@ -74,7 +74,7 @@ test('W718 #2 — GAMMA_DEFAULTS shape contract', () => {
   }
   // Frozen so an accidental write throws.
   const before = GAMMA_DEFAULTS.domain;
-  try { GAMMA_DEFAULTS.domain = 999; } catch (_) {}
+  try { GAMMA_DEFAULTS.domain = 999; } catch (_) {} // deliberate: cleanup
   assert.equal(GAMMA_DEFAULTS.domain, before, 'GAMMA_DEFAULTS should be immutable');
 });
 

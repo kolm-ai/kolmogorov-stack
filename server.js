@@ -101,7 +101,10 @@ app.get('/use-cases', (_req, res) => {
 // exists as the spec-asset folder.
 app.get('/docs', (_req, res) => {
   const f = path.join(__dirname, 'public', 'docs.html');
-  if (fs.existsSync(f)) return res.sendFile(f);
+  if (fs.existsSync(f)) {
+    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
+    return res.sendFile(f);
+  }
   res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
 
@@ -170,7 +173,10 @@ app.get('/docs/:lang', (req, res, next) => {
   const lang = req.params.lang;
   if (!DOCS_I18N_LANGS.has(lang)) return next();
   const file = path.join(__dirname, 'public', 'docs', 'i18n', lang + '.html');
-  if (fs.existsSync(file)) return res.sendFile(file);
+  if (fs.existsSync(file)) {
+    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
+    return res.sendFile(file);
+  }
   next();
 });
 
@@ -201,11 +207,26 @@ const VERCEL_MIRROR_REWRITES = [
   { url: '/api-routes.json', file: 'openapi.json' },
   { url: '/bench/leaderboard', file: 'bench/leaderboard.json' },
   { url: '/security/hof', file: 'security.html' },
+  // W889-8.1 + 8.2 — vertical landing + /vs/ comparison aliases that need to
+  // resolve on Railway-direct + self-host, not only via Vercel rewrites.
+  { url: '/account/signup', file: 'signup.html' },
+  { url: '/government', file: 'government.html' },
+  { url: '/education', file: 'education.html' },
+  { url: '/customer-support', file: 'customer-support.html' },
+  { url: '/code-gen', file: 'code-gen.html' },
+  { url: '/eu-sovereign', file: 'eu-sovereign.html' },
+  { url: '/vs/openai', file: 'vs/openai.html' },
+  { url: '/vs/fireworks', file: 'vs/fireworks.html' },
+  { url: '/vs/openpipe', file: 'vs/openpipe.html' },
+  { url: '/vs/self-built', file: 'vs/self-built.html' },
 ];
 for (const { url, file } of VERCEL_MIRROR_REWRITES) {
   app.get(url, (_req, res) => {
     const f = path.join(__dirname, 'public', file);
-    if (fs.existsSync(f)) return res.sendFile(f);
+    if (fs.existsSync(f)) {
+      res.set('Cache-Control', 'public, max-age=60, must-revalidate');
+      return res.sendFile(f);
+    }
     res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
   });
 }
@@ -275,7 +296,7 @@ const ROUTE_ALIASES = {
   '/audit': 'audit-log',
   '/cli': 'quickstart',
   '/contact': 'community',
-  '/insurance': 'health-insurance',
+  '/insurance': 'insurance',
   // W403 added /datasets vercel rewrite to /docs/datasets.html. Mirror it here
   // so Railway-direct + self-host serve the same route.
   '/datasets': 'docs/datasets',
@@ -295,7 +316,10 @@ for (const route of ['/', '/dashboard', '/playground', '/docs', '/signup', '/sig
   app.get(route, (_req, res) => {
     const name = route === '/' ? 'index' : (ROUTE_ALIASES[route] || route.slice(1));
     const file = path.join(__dirname, 'public', name + '.html');
-    if (fs.existsSync(file)) return res.sendFile(file);
+    if (fs.existsSync(file)) {
+      res.set('Cache-Control', 'public, max-age=60, must-revalidate');
+      return res.sendFile(file);
+    }
     res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
   });
 }
@@ -305,7 +329,34 @@ app.get('/use-cases/:slug', (req, res, next) => {
   const slug = req.params.slug;
   if (!/^[a-z0-9-]+$/.test(slug)) return next();
   const file = path.join(__dirname, 'public', 'use-cases', slug + '.html');
-  if (fs.existsSync(file)) return res.sendFile(file);
+  if (fs.existsSync(file)) {
+    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
+    return res.sendFile(file);
+  }
+  next();
+});
+
+// W889-8.3 — extensionless compile pair pages: /compile/<source>-to-<format> →
+// public/compile/<slug>.html. Slugs include `.` and `_` (e.g. qwen2.5-7b-to-gguf-q4_k_m)
+// so the validation regex is permissive but still anchored.
+app.get('/compile/:slug', (req, res, next) => {
+  const slug = req.params.slug;
+  if (!/^[a-z0-9._-]+$/.test(slug)) return next();
+  const file = path.join(__dirname, 'public', 'compile', slug + '.html');
+  if (fs.existsSync(file)) {
+    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
+    return res.sendFile(file);
+  }
+  next();
+});
+
+// W889-8.4 — /book-demo → public/book-demo.html (mirrors vercel rewrite).
+app.get('/book-demo', (req, res, next) => {
+  const file = path.join(__dirname, 'public', 'book-demo.html');
+  if (fs.existsSync(file)) {
+    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
+    return res.sendFile(file);
+  }
   next();
 });
 
@@ -314,7 +365,10 @@ app.get('/integrations/:slug', (req, res, next) => {
   const slug = req.params.slug;
   if (!/^[a-z0-9-]+$/.test(slug)) return next();
   const file = path.join(__dirname, 'public', 'integrations', slug + '.html');
-  if (fs.existsSync(file)) return res.sendFile(file);
+  if (fs.existsSync(file)) {
+    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
+    return res.sendFile(file);
+  }
   next();
 });
 
@@ -323,7 +377,10 @@ app.get('/articles/:slug', (req, res, next) => {
   const slug = req.params.slug;
   if (!/^[a-z0-9-]+$/.test(slug)) return next();
   const file = path.join(__dirname, 'public', 'articles', slug + '.html');
-  if (fs.existsSync(file)) return res.sendFile(file);
+  if (fs.existsSync(file)) {
+    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
+    return res.sendFile(file);
+  }
   next();
 });
 
@@ -332,7 +389,10 @@ app.get('/research/:slug', (req, res, next) => {
   const slug = req.params.slug;
   if (!/^[a-z0-9-]+$/.test(slug)) return next();
   const file = path.join(__dirname, 'public', 'research', slug + '.html');
-  if (fs.existsSync(file)) return res.sendFile(file);
+  if (fs.existsSync(file)) {
+    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
+    return res.sendFile(file);
+  }
   next();
 });
 
@@ -345,10 +405,16 @@ app.get('/cookbook/:slug', (req, res, next) => {
   if (!/^[a-z0-9-]+$/.test(slug)) return next();
   if (COOKBOOK_VERTICALS.has(slug)) {
     const file = path.join(__dirname, 'public', slug + '.html');
-    if (fs.existsSync(file)) return res.sendFile(file);
+    if (fs.existsSync(file)) {
+      res.set('Cache-Control', 'public, max-age=60, must-revalidate');
+      return res.sendFile(file);
+    }
   }
   const file = path.join(__dirname, 'public', 'cookbook', slug + '.html');
-  if (fs.existsSync(file)) return res.sendFile(file);
+  if (fs.existsSync(file)) {
+    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
+    return res.sendFile(file);
+  }
   next();
 });
 
@@ -360,7 +426,10 @@ app.get('/r/:hash', (req, res, next) => {
   const hash = req.params.hash;
   if (!/^[a-z0-9_-]+$/i.test(hash)) return next();
   const file = path.join(__dirname, 'public', 'r.html');
-  if (fs.existsSync(file)) return res.sendFile(file);
+  if (fs.existsSync(file)) {
+    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
+    return res.sendFile(file);
+  }
   next();
 });
 
@@ -378,9 +447,15 @@ app.get('*', (req, res, next) => {
   const rel = p.slice(1);
   if (!/^[a-z0-9][a-z0-9_\-\/]*$/i.test(rel)) return next();
   const direct = path.join(__dirname, 'public', rel + '.html');
-  if (fs.existsSync(direct)) return res.sendFile(direct);
+  if (fs.existsSync(direct)) {
+    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
+    return res.sendFile(direct);
+  }
   const indexed = path.join(__dirname, 'public', rel, 'index.html');
-  if (fs.existsSync(indexed)) return res.sendFile(indexed);
+  if (fs.existsSync(indexed)) {
+    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
+    return res.sendFile(indexed);
+  }
   next();
 });
 
@@ -395,18 +470,37 @@ app.use((req, res, next) => {
 });
 
 // Generic 500 — catches any unhandled error in routes. Standardized shape:
-// `{ error, detail? }` where `detail` is omitted in production to avoid
-// leaking stack-tail strings or internal paths.
+// `{ error, detail?, error_id }` where `detail` is omitted in production to
+// avoid leaking stack-tail strings or internal paths and `error_id` is a
+// short opaque id the operator can grep for in logs and Sentry.
 app.use((err, req, res, _next) => {
-  console.error('[500]', err);
+  // Short error id — 12 hex chars from a timestamped random source. Stable
+  // for the lifetime of the response; surfaced to the client AND logged so
+  // an operator can correlate the user's report with the server log/Sentry.
+  const errorId = `e_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+  console.error(`[500] error_id=${errorId} path=${req && req.path} method=${req && req.method}`, err);
+  // W890-3 — every 500 is reported to Sentry with context (request path,
+  // method, tenant if attached). No-op when SENTRY_DSN is unset.
+  try {
+    if (globalThis.__kolmSentry && typeof globalThis.__kolmSentry.captureException === 'function') {
+      globalThis.__kolmSentry.captureException(err, {
+        tags: { kind: 'http_500', method: req && req.method, error_id: errorId },
+        extra: { path: req && req.path, query: req && req.query, tenant: req && req.tenant && req.tenant.id },
+      });
+    }
+  } catch { /* deliberate: cleanup */ }
   if (req.accepts('html')) {
     const _500Path = path.join(__dirname, 'public', '500.html');
-    if (fs.existsSync(_500Path)) return res.status(500).sendFile(_500Path);
+    if (fs.existsSync(_500Path)) {
+      res.set('X-Kolm-Error-Id', errorId);
+      return res.status(500).sendFile(_500Path);
+    }
   }
-  const body = { error: 'internal server error' };
+  const body = { error: 'internal server error', error_id: errorId };
   if (process.env.NODE_ENV !== 'production' || process.env.KOLM_DEBUG) {
     body.detail = String(err.message || err);
   }
+  res.set('X-Kolm-Error-Id', errorId);
   res.status(500).json(body);
 });
 
@@ -442,7 +536,60 @@ async function bootSeedDemoConcepts(tenant) {
 if (process.argv[1] && process.argv[1].endsWith('server.js')) {
   // Opt-in crash reporting. No-op when SENTRY_DSN is unset OR @sentry/node
   // is not installed in this deploy.
-  await initSentry();
+  const sentry = await initSentry();
+  // Make the Sentry handle reachable from the 500 middleware below so the
+  // generic error handler can capture context (request URL, status code,
+  // tenant if known) before responding to the client.
+  if (sentry) globalThis.__kolmSentry = sentry;
+
+  // W890-3 — process-level guards. Every entry point registers BOTH handlers
+  // before listen() so a stray throw or unhandled promise can't take the
+  // server down without a structured trail. uncaughtException triggers a
+  // graceful shutdown (drain in-flight requests via server.close()), while
+  // unhandledRejection logs + reports without crashing — the same Node 20
+  // default behaviour, but with Sentry context attached.
+  process.on('unhandledRejection', (reason, promise) => {
+    console.error('[unhandledRejection]', reason);
+    try {
+      if (globalThis.__kolmSentry && typeof globalThis.__kolmSentry.captureException === 'function') {
+        globalThis.__kolmSentry.captureException(reason, { tags: { kind: 'unhandledRejection' } });
+      }
+    } catch { /* deliberate: cleanup */ }
+  });
+  process.on('uncaughtException', (err) => {
+    console.error('[uncaughtException]', err);
+    try {
+      if (globalThis.__kolmSentry && typeof globalThis.__kolmSentry.captureException === 'function') {
+        globalThis.__kolmSentry.captureException(err, { tags: { kind: 'uncaughtException' } });
+      }
+    } catch { /* deliberate: cleanup */ }
+    // Graceful shutdown: stop accepting new connections, let in-flight finish,
+    // then exit. setTimeout fallback guarantees we don't hang on a stuck conn.
+    try {
+      if (globalThis.__kolmServer && typeof globalThis.__kolmServer.close === 'function') {
+        globalThis.__kolmServer.close(() => process.exit(1));
+        setTimeout(() => process.exit(1), 10_000).unref();
+        return;
+      }
+    } catch { /* deliberate: cleanup */ }
+    process.exit(1);
+  });
+  // SIGTERM / SIGINT — Railway sends SIGTERM on deploys; honour it by closing
+  // the listening socket and exiting cleanly so we don't drop in-flight
+  // requests on rolling restarts.
+  const onSig = (sig) => () => {
+    console.log(`[${sig}] graceful shutdown initiated`);
+    try {
+      if (globalThis.__kolmServer && typeof globalThis.__kolmServer.close === 'function') {
+        globalThis.__kolmServer.close(() => process.exit(0));
+        setTimeout(() => process.exit(0), 10_000).unref();
+        return;
+      }
+    } catch { /* deliberate: cleanup */ }
+    process.exit(0);
+  };
+  process.on('SIGTERM', onSig('SIGTERM'));
+  process.on('SIGINT', onSig('SIGINT'));
 
   // Auto-provision the demo tenant.
   const demo = provisionTenant(process.env.DEFAULT_TENANT || 'demo');
@@ -464,7 +611,10 @@ if (process.argv[1] && process.argv[1].endsWith('server.js')) {
   const webhookOk = !!process.env.STRIPE_WEBHOOK_SECRET;
   const stripeStatus = stripePresent === 5 && webhookOk ? 'wired' : `degraded (${stripePresent}/5 links, webhook ${webhookOk ? 'ok' : 'missing'})`;
 
-  app.listen(PORT, () => {
+  // W890-3 — keep a handle to the http.Server so graceful-shutdown hooks
+  // above can call .close() and let in-flight requests drain on SIGTERM /
+  // uncaughtException.
+  const httpServer = app.listen(PORT, () => {
     console.log('\nkolm server');
     console.log(`  home:       http://localhost:${PORT}`);
     console.log(`  dashboard:  http://localhost:${PORT}/dashboard`);
@@ -476,6 +626,7 @@ if (process.argv[1] && process.argv[1].endsWith('server.js')) {
     console.log(`  stripe:     ${stripeStatus}`);
     console.log('');
   });
+  globalThis.__kolmServer = httpServer;
 }
 
 export { app };

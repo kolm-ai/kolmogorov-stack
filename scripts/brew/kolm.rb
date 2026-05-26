@@ -1,14 +1,14 @@
 # Homebrew formula stub for kolm  -  the AI compiler.
 # Status: PREVIEW (formula not yet on a tap; pending v0.1.0 GitHub release).
-# To publish: `brew tap-new sneaky-hippo/kolm && cp this file there && brew audit --new kolm && git commit && git push`.
+# To publish: `brew tap-new kolm-ai/kolm && cp this file there && brew audit --new kolm && git commit && git push`.
 class Kolm < Formula
   desc "AI compiler  -  produce signed.kolm artifacts that run anywhere"
   homepage "https://kolm.ai"
-  url "https://github.com/sneaky-hippo/kolm-stack/archive/refs/tags/v0.1.0.tar.gz"
+  url "https://github.com/kolm-ai/kolm-stack/archive/refs/tags/v0.1.0.tar.gz"
   # SHA256 to be set on first tagged release.
   sha256 "0000000000000000000000000000000000000000000000000000000000000000"
   license "MIT"
-  head "https://github.com/sneaky-hippo/kolm-stack.git", branch: "main"
+  head "https://github.com/kolm-ai/kolm-stack.git", branch: "main"
 
   depends_on "node@22"
 

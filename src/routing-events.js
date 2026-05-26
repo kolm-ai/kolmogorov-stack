@@ -116,7 +116,7 @@ export async function recordRoutingDecision({
         driftWarningJsd = Number.isFinite(Number(w.jsd)) ? Number(w.jsd) : null;
       }
     }
-  } catch (_) {
+  } catch (_) { // deliberate: cleanup
     // Honest fallback — drift-alert-store missing or refactored. Do not
     // crash the routing decision path; the warning is best-effort metadata.
   }
@@ -142,7 +142,7 @@ export async function recordRoutingDecision({
   };
 
   // 1. Durable first-class row (full schema freedom).
-  try { insert(ROUTING_DECISIONS_TABLE, row); } catch (_) {
+  try { insert(ROUTING_DECISIONS_TABLE, row); } catch (_) { // deliberate: cleanup
     // Storage backends are expected to never throw; we still don't want
     // a transient flush failure to crash the routing path. The lake row
     // below is the secondary record.
@@ -178,7 +178,7 @@ export async function recordRoutingDecision({
         teacher_cost_micro_usd: teacherCost,
       }),
     });
-  } catch (_) {
+  } catch (_) { // deliberate: cleanup
     // Lake row is non-critical — the durable routing_decisions row above
     // is the source of truth for the dashboard.
   }
@@ -197,7 +197,7 @@ export async function recordRoutingDecision({
       if (mod && typeof mod.enqueueFromRoutingDecision === 'function') {
         mod.enqueueFromRoutingDecision(tenant_id, ns, row);
       }
-    } catch (_) {
+    } catch (_) { // deliberate: cleanup
       // Never propagate — active-learning is opportunistic.
     }
   }
@@ -302,7 +302,7 @@ export function _resetForTests(tenant_id) {
     } else {
       remove(ROUTING_DECISIONS_TABLE, () => true);
     }
-  } catch (_) {}
+  } catch (_) {} // deliberate: cleanup
 }
 
 export default {

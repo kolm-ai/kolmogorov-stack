@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 
 const outDir = path.resolve(__dirname, '..', 'public', 'docs', 'cli');
-const KOLM_GITHUB_URL = process.env.KOLM_GITHUB_URL || 'https://github.com/sneaky-hippo/kolm';
+const KOLM_GITHUB_URL = process.env.KOLM_GITHUB_URL || 'https://github.com/kolm-ai/kolm';
 
 const verbs = [
   {
@@ -682,7 +682,7 @@ function render(v) {
   .docs-main ul { color: var(--ks-ink-2); line-height: 1.8; padding-left: 18px; }
   .docs-main ul li::marker { color: var(--ks-accent); }
 </style>
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#fbfaf6';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#fbfaf6';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script> // deliberate: cleanup
 </head>
 <body class="ks">
 <!-- W221/W559 hidden canonical nav anchors (test contract). -->

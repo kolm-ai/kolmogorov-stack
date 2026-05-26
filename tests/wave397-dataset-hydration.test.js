@@ -39,7 +39,7 @@ function mkHome() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w397-'));
 }
 function cleanup(home) {
-  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
 }
 
 function setIsolatedHome(home) {
@@ -333,7 +333,7 @@ test('W397 #6 . `kolm bakeoff <ds_id>` hydrates events via the CLI dispatcher', 
     const out = ds.stdout || '';
     const jLine = out.split(/\r?\n/).find(l => l.trim().startsWith('{'));
     if (jLine) {
-      try { dsId = JSON.parse(jLine).dataset_id; } catch (_) {}
+      try { dsId = JSON.parse(jLine).dataset_id; } catch (_) {} // deliberate: cleanup
     }
     if (!dsId) {
       // dataset create may stream multi-line JSON; pull the dataset_id directly.

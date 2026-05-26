@@ -157,7 +157,7 @@ function postJson(url, body, headers, timeoutMs) {
         });
       });
       req.on('error', (e) => reject(e));
-      req.on('timeout', () => { try { req.destroy(new Error('request timed out')); } catch (_) {} });
+      req.on('timeout', () => { try { req.destroy(new Error('request timed out')); } catch (_) {} }); // deliberate: cleanup
       req.write(body);
       req.end();
     }).catch(reject);

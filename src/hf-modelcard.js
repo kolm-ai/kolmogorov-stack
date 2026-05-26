@@ -263,7 +263,7 @@ function _detectFormats(artifactDir) {
         if (lower === 'modelfile') formats.add('ollama');
         if (lower.endsWith('.mlx')) formats.add('mlx');
       }
-    } catch {
+    } catch { // deliberate: cleanup
       // Directory may not exist — that is fine.
     }
   }

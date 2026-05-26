@@ -107,7 +107,7 @@ export async function run(opts = {}) {
       await appendEvent(ev);
       stats.migrated++;
       if (verbose) {
-        // eslint-disable-next-line no-console
+         
         console.log('[migrate] ' + ev.event_id + ' ns=' + ev.namespace + ' tenant=' + ev.tenant_id);
       }
     } catch (e) {

@@ -60,7 +60,6 @@ def quantize_and_upload(model: str, quant: str = "nf4-int4", gpu: str = DEFAULT_
 
     Returns a dict with {ok, model, quant, gpu, artifact_path, bytes}.
     """
-    import os
     import time
     from pathlib import Path
 

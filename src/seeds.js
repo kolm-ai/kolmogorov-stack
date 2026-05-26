@@ -433,7 +433,7 @@ export function classifyEvalSource(seedsPath, rows) {
     const raw = fs.readFileSync(seedsPath, 'utf8');
     if (/synthetic, public domain, illustrative only/i.test(raw)) return 'synthetic_starter';
     if (/CC0/.test(raw) && /seed dataset/i.test(raw)) return 'synthetic_starter';
-  } catch {}
+  } catch {} // deliberate: cleanup
   return 'tenant_captured';
 }
 

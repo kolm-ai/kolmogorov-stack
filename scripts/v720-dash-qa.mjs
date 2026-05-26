@@ -11,7 +11,7 @@ for (const theme of ['dark', 'light']) {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 });
   const page = await ctx.newPage();
   await page.addInitScript((t) => {
-    try { localStorage.setItem('kolm-theme', t); } catch (_) {}
+    try { localStorage.setItem('kolm-theme', t); } catch (_) {} // deliberate: cleanup
     if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
   }, theme);
   await page.goto(URL + '/dashboard', { waitUntil: 'domcontentloaded' });

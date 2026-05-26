@@ -37,7 +37,7 @@ async function run() {
       await page.goto(URL, { waitUntil: 'networkidle', timeout: 30000 });
       // Set theme explicitly via the localStorage flag the site reads on boot.
       await page.evaluate((t) => {
-        try { localStorage.setItem('kolm-theme', t); } catch (_) {}
+        try { localStorage.setItem('kolm-theme', t); } catch (_) {} // deliberate: cleanup
         document.documentElement.setAttribute('data-theme', t);
       }, theme);
       await page.waitForTimeout(400);

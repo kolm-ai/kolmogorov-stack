@@ -115,7 +115,7 @@ export class TeacherReliabilityTable {
       if (parsed && typeof parsed === 'object') {
         return new TeacherReliabilityTable(parsed);
       }
-    } catch (_) {
+    } catch (_) { // deliberate: cleanup
       // Corrupt file -> empty table. Caller can re-bakeoff.
     }
     return new TeacherReliabilityTable();

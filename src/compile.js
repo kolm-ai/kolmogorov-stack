@@ -346,7 +346,7 @@ export async function runJob(job, ctx) {
     });
 
     if (!synthesis_result || !synthesis_result.accepted || !synthesis_result.source) {
-      try { fs.rmSync(seedsDir, { recursive: true, force: true }); } catch {}
+      try { fs.rmSync(seedsDir, { recursive: true, force: true }); } catch {} // deliberate: cleanup
       setStatus(job, 'failed', {
         error: 'recipe_synthesis_failed: could not synthesize a recipe from the provided examples that passes the quality gate. Add more examples or sharpen the input/output pairs.',
         error_code: 'KOLM_E_RECIPE_SYNTHESIS_FAILED',
@@ -459,7 +459,7 @@ export async function runJob(job, ctx) {
         progress: 80,
         failed_at: new Date().toISOString(),
       });
-      try { fs.rmSync(seedsDir, { recursive: true, force: true }); } catch {}
+      try { fs.rmSync(seedsDir, { recursive: true, force: true }); } catch {} // deliberate: cleanup
       return;
     }
     // The build payload returns either a number (legacy v1 K-score) or the v2
@@ -479,7 +479,7 @@ export async function runJob(job, ctx) {
         artifact_bytes: null,
         failed_at: new Date().toISOString(),
       });
-      try { fs.rmSync(seedsDir, { recursive: true, force: true }); } catch {}
+      try { fs.rmSync(seedsDir, { recursive: true, force: true }); } catch {} // deliberate: cleanup
       return;
     }
 
@@ -503,7 +503,7 @@ export async function runJob(job, ctx) {
       completed_at: new Date().toISOString(),
     });
 
-    try { fs.rmSync(seedsDir, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(seedsDir, { recursive: true, force: true }); } catch {} // deliberate: cleanup
 
     // Machine self-serve deploy hook.
     if (job.deploy_hook) {

@@ -199,7 +199,7 @@ export async function tokenizeAudio(opts) {
     return workerCrashEnvelope(String(e && e.message || e), a);
   } finally {
     if (tmpPath) {
-      try { fs.unlinkSync(tmpPath); } catch (_) {}
+      try { fs.unlinkSync(tmpPath); } catch (_) {} // deliberate: cleanup
     }
   }
 }

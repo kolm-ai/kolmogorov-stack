@@ -401,7 +401,7 @@ export async function emitSpliceWeaknessSignal(opts = {}) {
       status: fallbackFailed ? 'error' : 'ok',
       feedback: fb,
     });
-  } catch (_) {
+  } catch (_) { // deliberate: cleanup
     // Non-critical: routing-events write above is the source of truth.
   }
 

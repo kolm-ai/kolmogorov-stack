@@ -85,7 +85,7 @@ export function locateConverter() {
       const line = (r.stdout || '').split(/\r?\n/).find((l) => l.trim().length > 0);
       if (line) return { kind: 'console', path: line.trim() };
     }
-  } catch {}
+  } catch {} // deliberate: cleanup
   // Always-available fallback if exllamav2 is importable; we let probeToolchain
   // verify importability and return this shape so callers can spawn it.
   return { kind: 'module', module: 'exllamav2.conversion.convert' };
@@ -243,14 +243,14 @@ export async function runExport({ artifact, quant, target_dir }) {
   let measurement = null;
   const measPath = path.join(target_dir, 'measurement.json');
   if (fs.existsSync(measPath)) {
-    try { measurement = JSON.parse(fs.readFileSync(measPath, 'utf8')); } catch {}
+    try { measurement = JSON.parse(fs.readFileSync(measPath, 'utf8')); } catch {} // deliberate: cleanup
   }
   let size_bytes = 0;
   for (const f of fs.readdirSync(target_dir)) {
     try {
       const s = fs.statSync(path.join(target_dir, f));
       if (s.isFile()) size_bytes += s.size;
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
   return {
     ok: true,

@@ -121,7 +121,7 @@ export async function buildPreview({ spec, seeds_jsonl_text } = {}) {
     split = prepareSeedSplit({ seedsPath, task: specShaped.name, cwd: tmpDir });
   } finally {
     // Best-effort cleanup; the helper must not leak temp files even on success.
-    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
   if (!split) {
     throw new Error('synthesis_failed: prepareSeedSplit returned null (seedsPath unresolved)');

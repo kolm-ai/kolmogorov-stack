@@ -193,7 +193,7 @@ export async function tokenizeVideo(opts = {}) {
       env: { ...process.env, ...(opts.env || {}) },
     });
   } catch (e) {
-    if (tempPath) { try { fs.unlinkSync(tempPath); } catch (_) {} }
+    if (tempPath) { try { fs.unlinkSync(tempPath); } catch (_) {} } // deliberate: cleanup
     return {
       ok: false,
       kind: 'video',
@@ -211,7 +211,7 @@ export async function tokenizeVideo(opts = {}) {
       frames_sha256: null,
     };
   } finally {
-    if (tempPath) { try { fs.unlinkSync(tempPath); } catch (_) {} }
+    if (tempPath) { try { fs.unlinkSync(tempPath); } catch (_) {} } // deliberate: cleanup
   }
 
   // Parse the worker's last non-empty stdout line.

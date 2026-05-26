@@ -242,7 +242,7 @@ test('W463 #6 — POST /v1/trace/compile is auth-gated + validates trace_id + sc
       'route must scope tenant_id to authenticated tenant');
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -268,7 +268,7 @@ test('W463 #7 — POST /v1/trace/verify returns ok:true envelope on cache-hit re
     assert.equal(env.coverage, 1.0);
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -299,7 +299,7 @@ test('W463 #8 — compile/verify of an unknown trace_id surfaces empty/404 hones
     assert.equal(r.status, 404, 'route must map empty-trace to 404');
   } finally {
     srv.close();
-    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmpdir, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 

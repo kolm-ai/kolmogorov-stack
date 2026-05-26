@@ -15,15 +15,19 @@ const SECRET = process.env.STRIPE_SECRET_KEY;
 const DOMAIN = process.env.KOLM_DOMAIN || 'https://kolm.ai';
 if (!SECRET) { console.error('STRIPE_SECRET_KEY required'); process.exit(2); }
 
-// Wave-4 canonical price ladder. Mirrors PLAN_CATALOG in src/router.js
-// (lines 2127-2153). The `free` tier ($0) intentionally has no Stripe
-// Product/Price/PaymentLink — provisioned-by-default in the gateway, not
-// purchased through Stripe.
+// Wave-4 canonical price ladder. Mirrors PLAN_CATALOG in src/router.js.
+// The `free` tier ($0) has no Stripe Product/Price/PaymentLink — provisioned
+// by default in the gateway, not purchased through Stripe. W889-6.1 (2026-05-26)
+// removed `enterprise` from this list: the Enterprise tier is now sales-led,
+// captured via POST /v1/sales/demo-request and the /book-demo form, so no
+// self-serve Stripe SKU is provisioned for it. `compile_credits_monthly` is
+// attached as Product metadata so Stripe-side reports and the dashboard
+// reflect the included GPU-minute allotment per tier.
 const TIERS = [
-  { id: 'indie',      label: 'Indie',      cents:   2900 },
-  { id: 'teams',      label: 'Teams',      cents:   9900 },
-  { id: 'business',   label: 'Business',   cents:  49900 },
-  { id: 'enterprise', label: 'Enterprise', cents: 149900 },
+  { id: 'indie',    label: 'Indie',    cents:  2900, compile_credits_monthly:  10, is_self_serve: true },
+  { id: 'teams',    label: 'Teams',    cents:  9900, compile_credits_monthly:  50, is_self_serve: true },
+  { id: 'business', label: 'Business', cents: 49900, compile_credits_monthly: 200, is_self_serve: true },
+  // enterprise: { ..., is_self_serve: false } — captured via /v1/sales/demo-request, no Stripe SKU.
 ];
 
 async function stripe(method, path, body) {
@@ -60,6 +64,8 @@ async function ensureProduct(tier) {
     name: `kolm ${tier.label}`,
     description: `kolm ${tier.label} tier — monthly recurring`,
     'metadata[kolm_tier]': tier.id,
+    'metadata[compile_credits_monthly]': String(tier.compile_credits_monthly ?? ''),
+    'metadata[is_self_serve]': String(tier.is_self_serve !== false),
   });
 }
 

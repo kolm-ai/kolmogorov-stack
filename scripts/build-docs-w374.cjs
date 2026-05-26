@@ -24,7 +24,7 @@ const CONNECT = path.join(DOCS, 'connect');
 if (!fs.existsSync(CONNECT)) fs.mkdirSync(CONNECT, { recursive: true });
 
 const SHARED_HEAD = `<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>`;
-const THEME_SCRIPT = `<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>`;
+const THEME_SCRIPT = `<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>`; // deliberate: cleanup
 
 const SHARED_CSS = `
 :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#10b981;--accent-soft:rgba(16,185,129,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}

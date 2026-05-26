@@ -170,7 +170,7 @@ export function usageFilePath(period) {
 }
 
 function ensureDir() {
-  try { fs.mkdirSync(dataDir(), { recursive: true }); } catch (_) {}
+  try { fs.mkdirSync(dataDir(), { recursive: true }); } catch (_) {} // deliberate: cleanup
 }
 
 function readPeriod(period) {
@@ -198,8 +198,8 @@ function writePeriod(state) {
   try { fs.renameSync(tmp, file); } catch (e) {
     // On Windows a concurrent reader can briefly hold the destination open;
     // fall back to a non-atomic write so the increment is never lost.
-    try { fs.writeFileSync(file, JSON.stringify(state, null, 2), 'utf8'); } catch (_) {}
-    try { fs.unlinkSync(tmp); } catch (_) {}
+    try { fs.writeFileSync(file, JSON.stringify(state, null, 2), 'utf8'); } catch (_) {} // deliberate: cleanup
+    try { fs.unlinkSync(tmp); } catch (_) {} // deliberate: cleanup
   }
 }
 
@@ -221,7 +221,7 @@ function withLock(fn) {
 // ---------------------------------------------------------------------------
 export function resetPeriod(period) {
   const file = usageFilePath(period);
-  try { if (fs.existsSync(file)) fs.unlinkSync(file); } catch (_) {}
+  try { if (fs.existsSync(file)) fs.unlinkSync(file); } catch (_) {} // deliberate: cleanup
 }
 
 // ---------------------------------------------------------------------------

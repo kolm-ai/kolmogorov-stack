@@ -83,8 +83,8 @@ function _stubWorker(tmp) {
     "  if (a.startsWith('--out=')) out = a.slice(6);",
     "}",
     "if (out) {",
-    "  try { fs.mkdirSync(out, { recursive: true }); } catch {}",
-    "  try { fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify({mode:'stub', ok:true})); } catch {}",
+    "  try { fs.mkdirSync(out, { recursive: true }); } catch {}", // deliberate: cleanup
+    "  try { fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify({mode:'stub', ok:true})); } catch {}", // deliberate: cleanup
     "}",
     "process.exit(0);",
     '',
@@ -149,10 +149,10 @@ async function _probeAndDispose(iter) {
   await new Promise((r) => setTimeout(r, 80));
   // Dispose of the iterator so the unref'd child doesn't keep us alive.
   if (typeof iter.return === 'function') {
-    try { await Promise.race([iter.return(), new Promise((r) => setTimeout(r, 200))]); } catch {}
+    try { await Promise.race([iter.return(), new Promise((r) => setTimeout(r, 200))]); } catch {} // deliberate: cleanup
   }
   // Consume the in-flight next() (best-effort) so GC can reclaim it.
-  try { await Promise.race([nextPromise, new Promise((r) => setTimeout(r, 200))]); } catch {}
+  try { await Promise.race([nextPromise, new Promise((r) => setTimeout(r, 200))]); } catch {} // deliberate: cleanup
   return [];
 }
 

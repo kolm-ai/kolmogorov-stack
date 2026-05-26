@@ -58,7 +58,7 @@ function runCli(args, { extraEnv, home } = {}) {
 function parseJson(out) {
   const trimmed = (out || '').trim();
   if (trimmed.startsWith('{')) {
-    try { return JSON.parse(trimmed); } catch (_) {}
+    try { return JSON.parse(trimmed); } catch (_) {} // deliberate: cleanup
   }
   const line = (out || '').split(/\r?\n/).map(s => s.trim()).find(s => s.startsWith('{'));
   if (!line) throw new Error('no JSON line in stdout: ' + JSON.stringify(out).slice(0, 200));
@@ -66,7 +66,7 @@ function parseJson(out) {
 }
 
 function cleanup(home) {
-  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {}
+  try { fs.rmSync(home, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
 }
 
 // ===========================================================================

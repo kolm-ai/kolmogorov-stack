@@ -158,7 +158,7 @@ function _readKScore(ev) {
         if (Number.isFinite(Number(fb.k_score))) return Number(fb.k_score);
         if (Number.isFinite(Number(fb.kscore))) return Number(fb.kscore);
       }
-    } catch (_) {}
+    } catch (_) {} // deliberate: cleanup
   }
   return null;
 }

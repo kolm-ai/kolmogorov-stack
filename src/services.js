@@ -195,7 +195,7 @@ export function stop(name, { signal = 'SIGTERM' } = {}) {
 export function purge(name) {
   const rec = readRecord(name);
   if (rec && pidAlive(rec.pid)) {
-    try { process.kill(rec.pid, 'SIGKILL'); } catch (_) {}
+    try { process.kill(rec.pid, 'SIGKILL'); } catch (_) {} // deliberate: cleanup
   }
   deleteRecord(name);
 }

@@ -120,7 +120,7 @@ test('W470 P0-1 #4 — _resetForTests fully clears event-store state across impo
     if (prev !== undefined) process.env.KOLM_DATA_DIR = prev;
     else delete process.env.KOLM_DATA_DIR;
     eventStore._resetForTests();
-    try { fsM.rmSync(tmp1, { recursive: true, force: true }); } catch (_) {}
-    try { fsM.rmSync(tmp2, { recursive: true, force: true }); } catch (_) {}
+    try { fsM.rmSync(tmp1, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
+    try { fsM.rmSync(tmp2, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });

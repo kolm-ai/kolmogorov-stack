@@ -297,7 +297,7 @@ export async function listRecentAlerts({
   for (const row of nsFiltered.slice(0, cap)) {
     let parsed = null;
     if (row.feedback) {
-      try { parsed = JSON.parse(row.feedback); } catch {}
+      try { parsed = JSON.parse(row.feedback); } catch {} // deliberate: cleanup
     }
     alerts.push({
       event_id: row.event_id || null,

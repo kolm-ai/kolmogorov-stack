@@ -352,7 +352,7 @@ async function doctor() {
         const tail = probe.stdout.trim().split('\n').filter(Boolean).pop();
         const parsed = JSON.parse(tail);
         if (parsed && parsed.decoders) decoders = parsed.decoders;
-      } catch {
+      } catch { // deliberate: cleanup
         // leave decoders as nulls
       }
     }

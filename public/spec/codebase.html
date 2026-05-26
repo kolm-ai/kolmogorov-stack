@@ -98,7 +98,7 @@
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -107,7 +107,7 @@
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 <main id="main">
@@ -119,7 +119,7 @@
 <h1>kolm codebase: the production architecture in one sitting.</h1>
 <p class="subtitle">An verifiable map of the shipped runtime. Modules, trust boundaries, persistence, compile pipeline, and CLI surface, with line counts and source links.</p>
 <p class="authors">kolm engineering . hello@kolm.ai</p>
-<p class="stamp">v1.0 . 2026-05-15 . citeable as <code>kolm.ai/spec/codebase</code> . source <a href="https://github.com/sneaky-hippo/kolm-stack" style="color:inherit">github.com/sneaky-hippo/kolm-stack</a></p>
+<p class="stamp">v1.0 . 2026-05-15 . citeable as <code>kolm.ai/spec/codebase</code> . source <a href="https://github.com/kolm-ai/kolm-stack" style="color:inherit">github.com/kolm-ai/kolm-stack</a></p>
 
 <div class="abstract">
 <b>What this is.</b> A buyer-grade architecture overview of the shipped kolm runtime. We deliberately favor "what runs in production" over "what we plan to ship." Five components do all the work: a Node.js HTTP server (<code>server.js</code> + <code>src/router.js</code>), a content-addressable artifact builder (<code>src/artifact.js</code>), a tenant- and billing-aware persistence layer (<code>src/store.js</code>), an HMAC receipt signer (<code>src/receipt.js</code>), and a single-binary CLI (<code>cli/kolm.js</code>). The runtime produces signed <code>.kolm</code> files conforming to <a href="/spec/rs-1" style="color:var(--accent)">RS-1</a>, gated by a compile-time K-score. Every byte in an artifact is hash-addressed; every inference receipt is HMAC-signed and re-verifiable offline. The whole codebase is Apache-2.0; nothing in this page requires a credential to read.
@@ -218,7 +218,7 @@
 <p>The compile is <b>K-gated</b> at the package stage: if the computed K-score falls below the recipe-declared <code>min_k</code> (default 0.85), the artifact is not written and the job ends in <code>status=failed.kgate</code> with the score breakdown in the failure body. Buyers see a precise reason ("accuracy axis 0.71 below floor 0.85") rather than a generic compile failure.</p>
 
 <h2>6. The CLI</h2>
-<p>The CLI is one file, <code>cli/kolm.js</code>, 9k lines. It ships as the <code>kolm</code> bin via <code>npm i -g github:sneaky-hippo/kolm-stack</code>. Verbs available today:</p>
+<p>The CLI is one file, <code>cli/kolm.js</code>, 9k lines. It ships as the <code>kolm</code> bin via <code>npm i -g github:kolm-ai/kolm-stack</code>. Verbs available today:</p>
 
 <div class="tbl-wrap">
 <table>
@@ -293,7 +293,7 @@
 <h2>12. License</h2>
 <p>The entire codebase is <a href="https://www.apache.org/licenses/LICENSE-2.0" style="color:var(--accent)">Apache-2.0</a>. The <a href="/spec/rs-1" style="color:var(--accent)">RS-1 spec</a> is MIT. The intent is that any runtime, ours, a competitor's, an academic project, can implement the format without asking permission and ship the verifier in a regulated stack without legal review.</p>
 
-<div class="actions"><a class="btn primary" href="https://github.com/sneaky-hippo/kolm-stack" rel="noopener">Browse the source &rarr;</a><a class="btn" href="/spec/rs-1">RS-1 spec &rarr;</a><a class="btn" href="/verify-prod">Verify a .kolm &rarr;</a></div>
+<div class="actions"><a class="btn primary" href="https://github.com/kolm-ai/kolm-stack" rel="noopener">Browse the source &rarr;</a><a class="btn" href="/spec/rs-1">RS-1 spec &rarr;</a><a class="btn" href="/verify-prod">Verify a .kolm &rarr;</a></div>
 
 </div>
 </section>
@@ -315,7 +315,7 @@
       </div>
       <div>
         <h4>Company</h4>
-        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
       </div>
     </div>
     <div class="ks-footer__bottom">

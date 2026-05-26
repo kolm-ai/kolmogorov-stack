@@ -33,7 +33,7 @@ export const KOLM_DIFF_VERSION = 'w739-v1';
 // require cost. Mirrors the marketplace.js / artifact-runner.js pattern.
 function loadAdmZip() {
   try {
-    // eslint-disable-next-line global-require
+     
     return require('adm-zip');
   } catch {
     try {

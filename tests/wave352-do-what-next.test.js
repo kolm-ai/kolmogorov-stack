@@ -37,7 +37,7 @@ function runCli(args, { home: presetHome, env: extra } = {}) {
     child.stderr.on('data', (d) => { stderr += d.toString(); });
     child.on('exit', (code) => {
       if (!presetHome) {
-        try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+        try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
       }
       resolve({ code, stdout, stderr });
     });
@@ -136,7 +136,7 @@ test('W549 #3 - kolm what --json surfaces local API-key presence as current_tena
     assert.equal(env.current_tenant.server_validated, false);
     assert.equal(env.current_tenant.key_fingerprint, 'ks_w54...');
   } finally {
-    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -153,7 +153,7 @@ test('W549 #4 - kolm what human-mode does not print [object Object] for config-o
     assert.doesNotMatch(r.stdout, /\[object Object\]/);
     assert.match(r.stdout, /tenant:\s+ks_w54\.\.\./);
   } finally {
-    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 
@@ -182,7 +182,7 @@ test('W352 #8 - kolm what --json reflects jobs.jsonl when present', async () => 
     assert.ok(env.counts.jobs >= 2, `expected jobs.jsonl rows to count, got ${env.counts.jobs}`);
     assert.ok(env.jobs.some(j => j.id === 'j1'));
   } finally {
-    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });
 

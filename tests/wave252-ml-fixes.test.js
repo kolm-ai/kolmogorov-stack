@@ -194,7 +194,7 @@ test('W252 #3a - validateRecipeClass rejects distilled_model with 0-byte weights
       });
     }, /weights file is empty.*0 bytes/);
   } finally {
-    try { fs.unlinkSync(tmp); } catch {}
+    try { fs.unlinkSync(tmp); } catch {} // deliberate: cleanup
   }
 });
 
@@ -202,7 +202,7 @@ test('W252 #3b - validateRecipeClass rejects distilled_model with missing weight
   const RC = await import('../src/recipe-class.js');
   const missing = path.join(os.tmpdir(), `wave252-missing-${process.pid}-${Date.now()}.gguf`);
   // Make sure it does not exist.
-  try { fs.unlinkSync(missing); } catch {}
+  try { fs.unlinkSync(missing); } catch {} // deliberate: cleanup
   assert.throws(() => {
     RC.validateRecipeClass({
       id: 'absent-distilled',
@@ -226,7 +226,7 @@ test('W252 #3c - validateRecipeClass accepts distilled_model with non-empty weig
     });
     assert.equal(c, 'distilled_model');
   } finally {
-    try { fs.unlinkSync(tmp); } catch {}
+    try { fs.unlinkSync(tmp); } catch {} // deliberate: cleanup
   }
 });
 

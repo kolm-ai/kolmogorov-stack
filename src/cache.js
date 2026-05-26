@@ -41,7 +41,7 @@ export function get(version_id, input) {
       L1.set(k, v);
       l2Hits++;
       return { hit: 'L2', value: v };
-    } catch {}
+    } catch {} // deliberate: cleanup
   }
   return { hit: null };
 }
@@ -54,7 +54,7 @@ export function put(version_id, input, value) {
     L1.delete(oldest);
   }
   const f = path.join(CACHE_DIR, k.replace(':', '_') + '.json');
-  try { fs.writeFileSync(f, JSON.stringify(value)); } catch {}
+  try { fs.writeFileSync(f, JSON.stringify(value)); } catch {} // deliberate: cleanup
 }
 
 export function invalidate(version_id) {

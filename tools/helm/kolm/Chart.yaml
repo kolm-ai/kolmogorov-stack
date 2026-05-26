@@ -6,9 +6,9 @@
 #
 # Install:
 #   helm install kolm tools/helm/kolm \
-#     --set image.repository=ghcr.io/sneaky-hippo/kolm \
+#     --set image.repository=ghcr.io/kolm-ai/kolm \
 #     --set image.tag=v1.0.0 \
-#     --set artifactRegistry.url=oci://ghcr.io/sneaky-hippo/artifacts \
+#     --set artifactRegistry.url=oci://ghcr.io/kolm-ai/artifacts \
 #     --set artifactRegistry.secretRef=kolm-registry-pull
 #
 # Upgrade is rolling (maxSurge=1, maxUnavailable=0, W824-6) so model swaps
@@ -28,7 +28,7 @@ keywords:
   - quantization
 home: https://kolm.ai
 sources:
-  - https://github.com/sneaky-hippo/kolmogorov-stack
+  - https://github.com/kolm-ai/kolmogorov-stack
 maintainers:
   - name: kolm.ai
     url: https://kolm.ai
