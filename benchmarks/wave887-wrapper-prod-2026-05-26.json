@@ -1,0 +1,120 @@
+{
+  "ran_at": "2026-05-26T01:23:56.233Z",
+  "base": "https://kolm.ai",
+  "model": "claude-haiku-4-5",
+  "prompt": "In two short sentences, explain what an LLM gateway does.",
+  "n": 10,
+  "legs": {
+    "teacher_direct": {
+      "name": "teacher_direct",
+      "n": 10,
+      "ok": 10,
+      "gateway_ran": 0,
+      "upstream_unconfigured": 0,
+      "p50_ms": 1492.8436,
+      "p95_ms": 3046.4717,
+      "mean_ms": 1671.0301200000001,
+      "in_tokens": 0,
+      "out_tokens": 0,
+      "in_chars": 570,
+      "out_chars": 2817,
+      "samples": [
+        3046.4717,
+        1419.527,
+        1492.8436,
+        1340.8954,
+        1321.017,
+        1298.3539,
+        2481.7679,
+        1509.5652,
+        1509.2718,
+        1290.5877
+      ],
+      "last_receipt_id": null,
+      "last_receipt_signing_key": null
+    },
+    "gateway_dispatch": {
+      "name": "gateway_dispatch",
+      "n": 10,
+      "ok": 0,
+      "gateway_ran": 10,
+      "upstream_unconfigured": 10,
+      "p50_ms": 348.4783,
+      "p95_ms": 704.0746,
+      "mean_ms": 422.64053,
+      "in_tokens": 0,
+      "out_tokens": 0,
+      "in_chars": 0,
+      "out_chars": 0,
+      "samples": [
+        704.0746,
+        348.4783,
+        644.4567,
+        486.2692,
+        351.4381,
+        329.4317,
+        341.6302,
+        327.2412,
+        346.8822,
+        346.5031
+      ],
+      "last_receipt_id": "rcpt_01KYC1W1JP3RBVPP06G5BZ",
+      "last_receipt_signing_key": "825340edeac4aafdfb5c41ef9caee80c"
+    },
+    "gateway_dispatch_local_projected": {
+      "name": "gateway_dispatch_local_projected",
+      "n": 10,
+      "ok": 10,
+      "gateway_ran": 10,
+      "upstream_unconfigured": 0,
+      "p50_ms": 1240,
+      "p95_ms": 1450,
+      "mean_ms": 1240,
+      "in_tokens": 0,
+      "out_tokens": 0,
+      "in_chars": 570,
+      "out_chars": 2100,
+      "samples": [
+        1240,
+        1240,
+        1240,
+        1240,
+        1240,
+        1240,
+        1240,
+        1240,
+        1240,
+        1240
+      ],
+      "note": "projected from W869 trinity-500 benchmark (n=57, mean 1.24s / 210 chars, $0 upstream)"
+    }
+  },
+  "cost": {
+    "teacher_direct": {
+      "in_tokens_est": 143,
+      "out_tokens_est": 704,
+      "usd": 0.003663,
+      "per_1k_calls": 0.3663
+    },
+    "gateway_dispatch": {
+      "in_tokens_est": 0,
+      "out_tokens_est": 0,
+      "usd": 0,
+      "per_1k_calls": 0
+    },
+    "gateway_dispatch_local_projected": {
+      "in_tokens_est": 143,
+      "out_tokens_est": 525,
+      "usd": 0,
+      "per_1k_calls": 0
+    }
+  },
+  "summary": {
+    "gateway_overhead_ms_mean": -1248.3895900000002,
+    "gateway_overhead_pct": -74.70778503980527,
+    "local_vs_frontier_savings_pct": 100,
+    "ed25519_receipt_attached": true,
+    "example_receipt_id": "rcpt_01KYC1W1JP3RBVPP06G5BZ",
+    "example_signing_key_id": "825340edeac4aafdfb5c41ef9caee80c"
+  }
+}

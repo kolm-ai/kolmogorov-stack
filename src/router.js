@@ -10452,9 +10452,27 @@ export function buildRouter() {
   // return verified=true unless the recomputed CID matches the requested CID.
   // Surfaces `manifest_hash_mismatch` envelope with both expected_cid and
   // actual_cid so an auditor can diff the discrepancy without trusting us.
-  r.get('/v1/verify/:cid', (req, res) => {
+  r.get('/v1/verify/:cid', async (req, res) => {
     const cid = String(req.params.cid || '').trim();
     if (!cid) return res.status(400).json({ error: 'cid required' });
+    // W887 W-L: receipt IDs (rcpt_...) shadow this artifact-verifier in
+    // declaration order. Delegate to the W-D receipt verifier when the param
+    // looks like a kolm-audit-1 receipt id so /v1/verify/<rcpt_...> works.
+    if (/^rcpt_[A-Za-z0-9]{20,}$/.test(cid)) {
+      try {
+        const all2 = await import('./store.js');
+        const rows = all2.all('observations') || [];
+        const row = rows.find(o => o.receipt_id === cid);
+        if (!row || !row.receipt) {
+          return res.status(404).json({ ok: false, error: 'receipt_not_found', receipt_id: cid });
+        }
+        const grec = await import('./gateway-receipt.js');
+        const verifyResult = grec.verifyReceipt(row.receipt);
+        return res.json({ ok: true, receipt_id: cid, receipt: row.receipt, verify: verifyResult });
+      } catch (e) {
+        return res.status(500).json({ ok: false, error: 'verify_error', detail: String(e && e.message || e) });
+      }
+    }
     if (!/^cidv1:sha256:[0-9a-f]{8,64}$/i.test(cid) && !/^[0-9a-f]{8,64}$/i.test(cid)) {
       return res.status(400).json({ error: 'cid must be cidv1:sha256:hex or hex' });
     }

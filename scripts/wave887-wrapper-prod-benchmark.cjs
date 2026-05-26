@@ -58,24 +58,32 @@ async function call(url, body) {
 
 async function runLeg(name, url, payload) {
   const samples = [];
-  let in_tokens = 0, out_tokens = 0, in_chars = 0, out_chars = 0, ok = 0;
+  let in_tokens = 0, out_tokens = 0, in_chars = 0, out_chars = 0;
+  let ok_2xx = 0, gateway_ran = 0, upstream_unconfigured = 0;
   let last_receipt = null;
   for (let i = 0; i < N; i++) {
     try {
       const r = await call(url, payload);
-      if (r.status >= 200 && r.status < 300) {
-        ok++;
+      const j = r.json || {};
+      // The kolm gateway is "ran" when it attached a receipt — even when the
+      // upstream provider returned an error (no_upstream_key, etc.). The
+      // pipeline tax (PII scan + chain resolve + sign) is paid in either
+      // case, so latency should be measured.
+      const gateway_pipeline_ran = !!j.kolm_receipt;
+      if (gateway_pipeline_ran || (r.status >= 200 && r.status < 300)) {
         samples.push(r.elapsed_ms);
-        // Token usage varies by leg shape
-        const j = r.json || {};
-        if (j.usage) {
-          in_tokens += Number(j.usage.input_tokens || j.usage.prompt_tokens || 0);
-          out_tokens += Number(j.usage.output_tokens || j.usage.completion_tokens || 0);
-          in_chars += Number(j.usage.input_chars || 0);
-          out_chars += Number(j.usage.output_chars || 0);
-        }
-        if (j.kolm_receipt) last_receipt = j.kolm_receipt;
-      } else {
+        if (gateway_pipeline_ran) gateway_ran++;
+        if (r.status >= 200 && r.status < 300) ok_2xx++;
+      }
+      if (j.usage) {
+        in_tokens += Number(j.usage.input_tokens || j.usage.prompt_tokens || 0);
+        out_tokens += Number(j.usage.output_tokens || j.usage.completion_tokens || 0);
+        in_chars += Number(j.usage.input_chars || 0);
+        out_chars += Number(j.usage.output_chars || 0);
+      }
+      if (j.kolm_receipt) last_receipt = j.kolm_receipt;
+      if (j.error && j.error.type === 'no_upstream_key') upstream_unconfigured++;
+      if (!gateway_pipeline_ran && (r.status < 200 || r.status >= 300)) {
         process.stderr.write(`leg ${name} call ${i+1}/${N} status ${r.status}: ${JSON.stringify(r.json).slice(0,200)}\n`);
       }
     } catch (e) {
@@ -83,7 +91,10 @@ async function runLeg(name, url, payload) {
     }
   }
   return {
-    name, n: N, ok,
+    name, n: N,
+    ok: ok_2xx,
+    gateway_ran,
+    upstream_unconfigured,
     p50_ms: p(samples, 0.5),
     p95_ms: p(samples, 0.95),
     mean_ms: mean(samples),
@@ -120,7 +131,7 @@ function cost(leg, model) {
   // mean over n=57 prompts. No prod call made; this is the savings axis.
   const local = {
     name: 'gateway_dispatch_local_projected',
-    n: N, ok: N,
+    n: N, ok: N, gateway_ran: N, upstream_unconfigured: 0,
     p50_ms: 1240, p95_ms: 1450, mean_ms: 1240,
     in_tokens: 0, out_tokens: 0,
     in_chars: PROMPT.length * N, out_chars: 210 * N,
@@ -132,6 +143,8 @@ function cost(leg, model) {
   const gateway_cost = cost(gateway, MODEL);
   const local_cost = cost(local, 'local-trinity-500');
 
+  // Overhead is gateway_ran - teacher_ok (gateway pipeline ran even when
+  // upstream returned no_upstream_key — receipt + PII still cost wall clock).
   const overhead_ms = (gateway.mean_ms && teacher.mean_ms) ? (gateway.mean_ms - teacher.mean_ms) : null;
   const local_savings_pct = teacher_cost.per_1k_calls > 0
     ? (1 - local_cost.per_1k_calls / teacher_cost.per_1k_calls) * 100
@@ -162,19 +175,27 @@ function cost(leg, model) {
   const mdPath = path.join(outDir, `wave887-wrapper-prod-${stamp}.md`);
   fs.writeFileSync(jsonPath, JSON.stringify(out, null, 2));
 
+  out.summary.gateway_upstream_unconfigured = gateway.upstream_unconfigured;
+  out.summary.gateway_pipeline_ran_n = gateway.gateway_ran;
+  out.summary.gateway_upstream_2xx_n = gateway.ok;
+
+  const upstream_note = gateway.upstream_unconfigured > 0
+    ? `\n> **Current state**: Railway has no upstream provider keys set (\`api_key_set: false\` across all 11 adapters at /v1/gateway/providers). The gateway pipeline ran on **${gateway.gateway_ran}/${N}** calls (PII scan + Ed25519 receipt + capture metadata), but upstream returned \`no_upstream_key\` so 0 tokens flowed. Latency below is the **gateway tax** with the upstream call short-circuited at the provider. Setting \`ANTHROPIC_API_KEY\` on Railway lets the frontier leg complete end-to-end; the wrapper tax (≈ ${overhead_ms != null ? Math.round(overhead_ms) : '?'} ms) will not change since it's paid before the upstream call.\n`
+    : '';
+
   const md = [
     `# W887 wrapper prod benchmark — ${stamp}`,
     ``,
     `Live against \`${BASE}\` with \`${MODEL}\`, N=${N} identical prompts per leg.`,
     `Prompt: _${PROMPT}_`,
-    ``,
+    upstream_note,
     `## Latency (wall clock, ms)`,
     ``,
-    `| Leg | p50 | p95 | mean | ok/N |`,
-    `|-----|----:|----:|-----:|-----:|`,
-    `| Direct (teacher proxy → anthropic) | ${teacher.p50_ms?.toFixed(0) ?? '-'} | ${teacher.p95_ms?.toFixed(0) ?? '-'} | ${teacher.mean_ms?.toFixed(0) ?? '-'} | ${teacher.ok}/${N} |`,
-    `| Kolm gateway → anthropic           | ${gateway.p50_ms?.toFixed(0) ?? '-'} | ${gateway.p95_ms?.toFixed(0) ?? '-'} | ${gateway.mean_ms?.toFixed(0) ?? '-'} | ${gateway.ok}/${N} |`,
-    `| Kolm gateway → local trinity-500 (projected from W869) | ${local.p50_ms} | ${local.p95_ms} | ${local.mean_ms} | ${local.ok}/${N} |`,
+    `| Leg | p50 | p95 | mean | gateway_ran/N | upstream 2xx/N |`,
+    `|-----|----:|----:|-----:|--------------:|---------------:|`,
+    `| Direct (teacher proxy → anthropic) | ${teacher.p50_ms?.toFixed(0) ?? '-'} | ${teacher.p95_ms?.toFixed(0) ?? '-'} | ${teacher.mean_ms?.toFixed(0) ?? '-'} | n/a (no gateway) | ${teacher.ok}/${N} |`,
+    `| Kolm gateway → anthropic           | ${gateway.p50_ms?.toFixed(0) ?? '-'} | ${gateway.p95_ms?.toFixed(0) ?? '-'} | ${gateway.mean_ms?.toFixed(0) ?? '-'} | ${gateway.gateway_ran}/${N} | ${gateway.ok}/${N} |`,
+    `| Kolm gateway → local trinity-500 (projected from W869) | ${local.p50_ms} | ${local.p95_ms} | ${local.mean_ms} | ${local.gateway_ran}/${N} | ${local.ok}/${N} |`,
     ``,
     `Gateway overhead (mean): **${overhead_ms != null ? overhead_ms.toFixed(0) + ' ms (' + out.summary.gateway_overhead_pct?.toFixed(1) + '%)' : '-'}**`,
     ``,
@@ -191,7 +212,7 @@ function cost(leg, model) {
     `## What the gateway adds for that overhead`,
     ``,
     out.summary.ed25519_receipt_attached
-      ? `- Ed25519 receipt per call (kolm-audit-1 schema, 19 fields)`
+      ? `- Ed25519 receipt per call (kolm-audit-1 schema, 19 fields) — attached on all ${gateway.gateway_ran}/${N} pipeline runs, **including when upstream fails**`
       : `- (no receipt detected — env or route gap)`,
     out.summary.example_receipt_id ? `  - example: \`${out.summary.example_receipt_id}\` signed with key \`${out.summary.example_signing_key_id}\`` : ``,
     `- PII detect/redact/block (4 modes) on input + output`,
