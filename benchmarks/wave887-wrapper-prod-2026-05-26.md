@@ -52,5 +52,22 @@ Local-vs-frontier savings: **100.0%** ($0.3663 → $0 per 1k calls).
 - Capture-eligible flag drives the distill flywheel
 - Verify URL: `https://kolm.ai/v1/verify/<receipt_id>`
 
+## Receipt verification live in prod
+
+`GET https://kolm.ai/v1/verify/rcpt_01KYC1W1JP3RBVPP06G5BZ` returns the signed
+receipt + verification result:
+
+```
+{ "ok": true,
+  "receipt_id": "rcpt_01KYC1W1JP3RBVPP06G5BZ",
+  "receipt": { schema:"kolm-audit-1", signing_key_id:"825340edeac4...",
+               signature_ed25519:{ alg:"ed25519", signature:"..." } },
+  "verify":  { valid:true, ... } }
+```
+
+This closes the `kolm-audit-1` `verify_url` field's contract: every receipt
+the gateway emits is independently verifiable by any party from the public
+endpoint, no auth required.
+
 ## Raw
 Raw timings + receipt IDs: [`wave887-wrapper-prod-2026-05-26.json`](./wave887-wrapper-prod-2026-05-26.json)
