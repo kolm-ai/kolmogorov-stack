@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>Trinity-500: a 7B that ties gpt-4o-mini &middot; kolm.ai blog</title>
+<meta name="description" content="410 council pairs from Claude, GPT-4o, and DeepSeek-R1. 79 seconds of LoRA on a 5090. 96.5% asks-one-question, 100% on-policy, half the chars of gpt-4o-mini. Here is how Trinity-500 was built.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Trinity-500: a 7B that beats Haiku and ties gpt-4o-mini &middot; kolm.ai blog">
+<meta property="og:description" content="410 council pairs, 79s LoRA, 96.5% asks-1Q, 100% on-policy. The full distillation story.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/blog/2026-05-26-trinity-500-distill-story">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://kolm.ai/blog/2026-05-26-trinity-500-distill-story">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="kolm.ai blog" href="/feed.xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Trinity-500: a 7B that beats Haiku and ties gpt-4o-mini on support","description":"410 council pairs from three teachers, 79 seconds of LoRA, beats Haiku and ties gpt-4o-mini at half the chars.","url":"https://kolm.ai/blog/2026-05-26-trinity-500-distill-story","datePublished":"2026-05-26","dateModified":"2026-05-26","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<style>
+:root{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(17,17,17,0.10);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#1f2937;--accent-soft:rgba(31,41,55,0.06);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=dark]{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230,233,238,0.10);--bg:#0e1116;--bg-elev:#161a20;--accent:#cbd5e1;--accent-soft:rgba(203,213,225,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.wrap{max-width:780px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.crumbs a:hover{color:var(--ink)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
+.meta{font-family:var(--mono);font-size:11.5px;letter-spacing:0.10em;color:var(--ink-faint);margin:0 0 32px}
+h1{font-size:38px;line-height:1.10;font-weight:520;letter-spacing:-0.02em;margin:0 0 18px;color:var(--ink)}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);margin:0 0 36px}
+h2{font-size:22px;font-weight:540;letter-spacing:-0.015em;margin:44px 0 12px;color:var(--ink);scroll-margin-top:80px}
+h3{font-size:16px;font-weight:540;letter-spacing:-0.005em;margin:28px 0 8px;color:var(--ink)}
+p{color:var(--ink-mute);font-size:15.5px;line-height:1.68}
+pre{background:#0b0e12;color:#e9eef3;border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15.5px;line-height:1.72}
+li{margin:6px 0}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-mute)}
+th{color:var(--ink);font-weight:540}
+td code{font-size:12px}
+.kolm-post a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+.kolm-post a:hover{border-bottom-color:var(--accent)}
+.back{display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:0.10em;color:var(--ink-faint);text-decoration:none;margin-bottom:24px;border-bottom:1px dashed var(--line);padding-bottom:1px}
+.back:hover{color:var(--ink)}
+.endnote{margin-top:48px;padding:18px 20px;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev);font-size:14px;color:var(--ink-mute);line-height:1.6}
+.endnote b{color:var(--ink);font-weight:540}
+hr.rule{border:none;border-top:1px solid var(--line);margin:36px 0}
+.tabular{font-variant-numeric:tabular-nums}
+table.tabular td:not(:first-child){text-align:right}
+.win td:first-child{color:var(--ink);font-weight:540}
+</style>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="skip-link">Skip to content</a>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<a href="/blog" class="back">&larr; kolm.ai blog</a>
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/blog">blog</a> / trinity-500-distill-story</div>
+<p class="eyebrow">Case study &middot; Trinity-500</p>
+<h1>Trinity-500: a 7B that beats Haiku and ties gpt-4o-mini on support.</h1>
+<p class="meta">2026-05-26 &middot; ~12 minute read</p>
+
+<article class="kolm-post">
+
+<p class="lede">410 training pairs from three teachers (Claude, GPT-4o, DeepSeek-R1), 79 seconds of LoRA on one RTX 5090, and a 7B student that asks the right clarifying question 96.5% of the time, stays on policy 100% of the time, and writes answers half as long as gpt-4o-mini. This is the first kolm-published artifact and the case study we are pointing at for what council distillation looks like when it works.</p>
+
+<h2>The recipe in one screen</h2>
+
+<table aria-label="Recipe summary">
+<tbody>
+<tr><th>Base</th><td>Qwen2.5-7B-Instruct</td></tr>
+<tr><th>Adapter</th><td>LoRA r=16, alpha=32, dropout=0.05</td></tr>
+<tr><th>Training</th><td>bf16, grad-checkpoint on, batch=1, max_seq_len=384, lr=2e-4, 1 epoch</td></tr>
+<tr><th>Teachers</th><td>claude-opus-4-7 (243 pairs), gpt-4o (124 pairs), deepseek-r1-distill-qwen-32b (43 pairs)</td></tr>
+<tr><th>Pairs collected</th><td>410 (from 500 seeds, 82% yield)</td></tr>
+<tr><th>Training time</th><td>79.18 seconds on RTX 5090</td></tr>
+<tr><th>Adapter size</th><td>~20 MB safetensors</td></tr>
+<tr><th>Final train loss</th><td>~1.323</td></tr>
+<tr><th>Holdout</th><td>57 prompts, 5 baseline checks, rule-based plus LLM judge</td></tr>
+</tbody>
+</table>
+
+<p>That is the whole thing. The reason the recipe fits on one screen is that the parts that usually take weeks (collecting good prompts, getting clean teacher rationales, weighting multiple teachers, evaluating on a holdout an auditor will accept) are baked into kolm. The novelty here is the council, not the LoRA.</p>
+
+<h2>Why council distillation</h2>
+
+<p>Single-teacher distillation has a known failure mode: the student inherits whatever the teacher hallucinates plus whatever idioms the teacher prefers. Two students distilled from Claude end up looking similar; two students distilled from Claude versus GPT-4o end up writing differently. The standard answer is to distill from a stronger teacher; the kolm answer is to distill from several teachers at once, weighted by the cost and value you assign to each.</p>
+
+<p>For Trinity-500 the split was 300 seeds to Claude, 150 to GPT-4o, 50 to DeepSeek-R1-32B (running locally on the same 5090 at INT4 via the kolm proxy). The weighting reflects what each teacher is best at on customer support: Claude for tone and policy nuance, GPT-4o for terse structure, DeepSeek-R1 for the harder reasoning chains that bring out the rationale traces. The council pipeline lets you set the weights and runs each teacher in parallel; the merge step tags every training row with <code>_teacher_phase</code> and <code>_teacher_slug</code> so you can audit which row came from which teacher.</p>
+
+<h2>Step 1: seed generation</h2>
+
+<p>We used <code>claude-sonnet-4-5</code> through the kolm proxy as the seed generator, asking it to produce 500 customer-support prompts in 50-row batches with dedup on lowercase trim. About 12 minutes wall clock. The seeds cover the long tail of e-commerce support: order tracking, refund eligibility, sizing questions, gift card balance, account merge, address change, the usual. Examples:</p>
+
+<pre><code>I bought a jacket two weeks ago and the color in person looks
+different from the website. Can I return it for store credit?
+
+My account says I have 3 unused gift cards but only 2 show up
+when I try to redeem them at checkout. What do I do?
+
+The tracking number you sent me hasnt updated since Tuesday.
+Where is my package?</code></pre>
+
+<p>The full seed file is 500 lines of jsonl, sliced externally into three teacher buckets because the local distill worker does not accept <code>--seed-offset</code> (a trap; documenting it here so the next person does not chase it).</p>
+
+<h2>Step 2: council collection</h2>
+
+<p>Three teachers ran sequentially (could have been parallel; we ran sequential for easier debugging). Each phase calls <code>kolm distill --local-worker --mode=collect</code> with a different teacher slug. The collect mode runs the teacher against the seed slice, stores the (prompt, response) pairs in jsonl, and exits idempotent: if the file already has the target row count, the phase is a no-op.</p>
+
+<pre><code># Phase A: Claude on 300 seeds
+kolm distill --local-worker --mode=collect \
+  --teacher anthropic:claude-opus-4-7 \
+  --seeds seeds-claude.jsonl \
+  --max-rows 300
+
+# Phase B: GPT-4o on 150 seeds
+kolm distill --local-worker --mode=collect \
+  --teacher openai:gpt-4o \
+  --seeds seeds-gpt4o.jsonl \
+  --max-rows 150
+
+# Phase C: DeepSeek-R1-32B local on 50 seeds
+kolm distill --local-worker --mode=collect \
+  --teacher kolm:deepseek-r1-distill-qwen-32b \
+  --seeds seeds-deepseek.jsonl \
+  --max-rows 50</code></pre>
+
+<p>500 seeds produced 410 valid pairs. The 82% yield is normal: some teacher responses came back as content-policy refusals (gift card fraud edge cases), some local DeepSeek runs OOM'd mid-generation, a handful of proxy 5xx errors. The merge step concats all three jsonl files, tags every row with provenance, and writes <code>merged/training-pairs.jsonl</code>.</p>
+
+<p>One trap worth flagging: the kolm proxy was the only auth we needed. No local <code>ANTHROPIC_API_KEY</code> or <code>OPENAI_API_KEY</code> anywhere; the W870 teacher-chat proxy auto-injects from the kolm bearer. The whole council pipeline runs on a fresh laptop with one kolm key.</p>
+
+<h2>Step 3: the LoRA</h2>
+
+<p>79.18 seconds on RTX 5090. The fast number is real, and most of it is the bf16 plus gradient-checkpoint plus batch=1 plus max_seq_len=384 recipe that lets a 7B student train with a 32B teacher resident in the same VRAM. Earlier we tried fp16 plus batch=2 and OOM'd; bf16 plus grad-checkpoint plus batch=1 fits with about 4 GB of headroom.</p>
+
+<pre><code>kolm distill --merged ./merged \
+  --base qwen2.5-7b-instruct \
+  --adapter-rank 16 \
+  --adapter-alpha 32 \
+  --dropout 0.05 \
+  --max-seq-len 384 \
+  --bf16 \
+  --gradient-checkpointing \
+  --batch-size 1 \
+  --learning-rate 2e-4 \
+  --epochs 1 \
+  --output ./student</code></pre>
+
+<p>The adapter lands at ~20 MB. We then merge into a full-weights checkpoint, sign with the kolm signing key, and write a passport. The full distill+merge+sign+passport flow is about three minutes wall clock on the 5090.</p>
+
+<h2>Step 4: the holdout, scored four ways</h2>
+
+<p>57 holdout prompts (none seen in training), four models scored on the same rubric. Rule-based scorer plus LLM judge (claude-opus-4-5 as the judge; the council teachers were excluded from judging their own student). Four axes:</p>
+
+<ul>
+  <li><b>asks-1Q</b> (rule-based): does the response end with exactly one clarifying question?</li>
+  <li><b>judge clarify</b>: does the question the model asks actually move the support case forward?</li>
+  <li><b>judge no-inv</b>: did the model avoid inventing a policy, price, ID, or fact?</li>
+  <li><b>judge on-policy</b>: did the response stay inside the brand voice and refund rules the system prompt sets?</li>
+</ul>
+
+<p>Plus latency and response length.</p>
+
+<table class="tabular" aria-label="Benchmark results n=57">
+<thead><tr><th>Model</th><th>1-Q %</th><th>clarify %</th><th>no-inv %</th><th>on-policy %</th><th>lat (s)</th><th>chars</th></tr></thead>
+<tbody>
+<tr class="win"><td>trinity-500</td><td>96.5</td><td>100.0</td><td>45.6</td><td>100.0</td><td>1.24</td><td>210</td></tr>
+<tr><td>base qwen2.5-7b</td><td>84.2</td><td>75.4</td><td>19.3</td><td>77.2</td><td>1.74</td><td>375</td></tr>
+<tr><td>claude-haiku-4-5</td><td>64.9</td><td>78.9</td><td>12.3</td><td>80.7</td><td>2.72</td><td>640</td></tr>
+<tr><td>gpt-4o-mini</td><td>96.5</td><td>91.2</td><td>43.9</td><td>94.7</td><td>1.74</td><td>287</td></tr>
+</tbody>
+</table>
+
+<h2>Reading the table</h2>
+
+<p>Three things are worth reading in order:</p>
+
+<p><b>One.</b> Trinity-500 ties gpt-4o-mini on rule-based asks-1Q (96.5% vs 96.5%) and beats every other model on every LLM-judged axis. It also writes responses that are 27% shorter than gpt-4o-mini (210 chars vs 287) and 67% shorter than Haiku (210 vs 640). Half the words, more of the right words.</p>
+
+<p><b>Two.</b> The LoRA delta over the un-distilled base is the part that matters. Judge clarify lifted from 75.4% to 100%. Judge on-policy lifted from 77.2% to 100%. Latency dropped from 1.74s to 1.24s because the trained student stops doing chain-of-thought hedging in the response and just answers. That is the council showing up in the weights.</p>
+
+<p><b>Three.</b> Haiku underperformed because the rubric is customer-support and Haiku writes like a model trained on a much broader corpus. Not a fair frontier comparison; it is the "narrow specialist beats general frontier" result the kolm thesis is built on. On creative writing Haiku would win. Trinity-500 is right for customer support, wrong for everything else.</p>
+
+<h2>The artifact ships everywhere</h2>
+
+<p>Trinity-500 is published on Hugging Face as <code>kolm-ai/trinity-support-7b</code> in four quants:</p>
+
+<ul>
+  <li><b>Q4_K_M</b>: 4-bit, ~4.4 GB. Best general balance. Fits on any 8 GB GPU.</li>
+  <li><b>Q5_K_M</b>: 5-bit, ~5.1 GB. Quality bump if you have the headroom.</li>
+  <li><b>Q8_0</b>: 8-bit, ~7.6 GB. Effectively lossless versus FP16 for this domain.</li>
+  <li><b>IQ4_XS</b>: 4-bit imatrix-calibrated, ~3.9 GB. Edge devices and CPU-only.</li>
+</ul>
+
+<p>The imatrix for the IQ variant is calibrated from the chat-template-rendered 410-pair corpus plus the 57 holdout prompts, so the quantization is shaped by the domain. The runtime passport on the <code>.kolm</code> file lists every quant variant, its measured memory footprint, p50 and p95 latency, throughput in tokens per second, and the quality delta from FP16 (computed on the same 57 holdout prompts). For Q4_K_M on a 5090 the delta is about 0.4 points on the K-Score scale, which is within run-to-run variance.</p>
+
+<p>Three deploy paths, all covered:</p>
+
+<pre><code># Local llama.cpp + GGUF
+llama-server -m trinity-support-7b-q4_k_m.gguf -c 4096
+
+# Local Ollama (Modelfile included)
+ollama create trinity-support-7b -f ./Modelfile
+ollama run trinity-support-7b
+
+# kolm serve auto-detect (vLLM, MLX, llama.cpp, plain transformers)
+kolm serve trinity-500.kolm --port 8080</code></pre>
+
+<h2>The repro receipt</h2>
+
+<p>Every kolm artifact carries a passport that maps to an evidence DAG. The Trinity-500 passport names the three teacher slugs, the council weights, the seed generator, the holdout file, the LoRA hyperparameters, the GGUF quant settings, and the Ed25519 signature. You can verify the artifact reproduces from source with one CLI call:</p>
+
+<pre><code>kolm verify trinity-500.kolm --reproduce</code></pre>
+
+<p>The reproduce flag re-runs the council collect, re-trains the LoRA, re-merges and re-quantizes, and compares the resulting weights hash against the signed one in the passport. On the 5090 the whole reproduce is about 8 minutes. The verify step is what makes the artifact something an auditor accepts.</p>
+
+<h2>What changed between the pilot and the scale-up</h2>
+
+<p>The W869 pilot was 12 training pairs and 36 steps; this scale-up is 410 pairs and one epoch. Three things moved from "works in the lab" to "works in production":</p>
+
+<ol>
+  <li><b>External seed slicing.</b> The local distill worker does not support <code>--seed-offset</code>, so multi-teacher runs need the seeds pre-sliced into per-teacher files. The <code>trinity-500-split-seeds.mjs</code> script does that.</li>
+  <li><b>Teacher-server readiness gate.</b> The local DeepSeek server reports <code>ready</code> on port-bind before <code>model_loaded:true</code>. The collector polls the JSON, not the bare /health 200, to avoid sending traffic to an unloaded model.</li>
+  <li><b>Idempotent phases.</b> Each teacher phase skips if its training-pairs file already meets the row target. That lets us re-run safely after a proxy 5xx or a local OOM.</li>
+</ol>
+
+<h2>What is next</h2>
+
+<p>A 2000-pair Trinity v2 is collecting in the background (700 Claude + 700 GPT-4o + 600 DeepSeek). Same recipe, more pairs, same teacher mix. The hypothesis is the LoRA learns the long tail better but the latency and length numbers stay the same. We will publish the comparison when it lands.</p>
+
+<p>The artifact, the training data slice (the parts that are not under teacher TOS), the eval set, and the full reproduce script live at <a href="https://github.com/sneaky-hippo/kolmogorov-stack">the kolm GitHub</a>. The HF page is <a href="https://huggingface.co/kolm-ai/trinity-support-7b">kolm-ai/trinity-support-7b</a>.</p>
+
+<div class="endnote">
+<b>Limitations.</b> Trinity-500 is one domain (e-commerce customer support, English-only) and one base model (Qwen2.5-7B). The "beats Haiku" result is specifically on a narrow rubric Haiku was not built for; on broad benchmarks the comparison flips. The 96.5% asks-1Q number is rule-based regex on response shape, not semantic correctness (the judge axes catch that separately). The judge is claude-opus-4-5; LLM judges have known biases toward terse responses, which may flatter shorter models like Trinity-500 and gpt-4o-mini. Reproduce the holdout yourself with <code>kolm bench --models trinity-500.kolm,claude-haiku-4-5,gpt-4o-mini --eval public/benchmarks/trinity-500-holdout.jsonl</code> to confirm.
+</div>
+
+</article>
+
+<hr class="rule">
+<a href="/blog" class="back">&larr; back to kolm.ai blog</a>
+
+</div></main>
+
+</body>
+</html>

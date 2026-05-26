@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 
 const outDir = path.resolve(__dirname, '..', 'public', 'docs', 'cli');
-const KOLM_GITHUB_URL = process.env.KOLM_GITHUB_URL || 'https://github.com/sneaky-hippo/kolmogorov-stack';
+const KOLM_GITHUB_URL = process.env.KOLM_GITHUB_URL || 'https://github.com/sneaky-hippo/kolm';
 
 const verbs = [
   {

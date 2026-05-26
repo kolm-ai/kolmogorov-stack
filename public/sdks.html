@@ -105,12 +105,13 @@
 </script>
 </head>
 <body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <header class="ks-nav">
     <div class="ks-wrap ks-nav__row">
-      <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
       <nav class="ks-nav__links" aria-label="Primary">
         <a href="/wrapper">Wrapper</a>
         <a href="/studio">Studio</a>
@@ -188,10 +189,11 @@
       <li id="node">
         <div class="fr-spec-list__head">
           <h3 class="fr-spec-list__name">Node.js</h3>
-          <span class="fr-spec-list__delta">@kolm/sdk &middot; Apache-2.0 &middot; shipped</span>
+          <span class="fr-spec-list__delta">@kolm/kolm-sdk v0.2.0 &middot; Apache-2.0 &middot; shipped</span>
         </div>
-        <p class="fr-spec-list__p">The reference binding. Promise-based, typed, OAuth + API key auth, streaming responses, retry policies with exponential backoff. The VS Code extension sits on top of it.</p>
-        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> npm install @kolm/sdk</pre>
+        <p class="fr-spec-list__p">The reference binding. Promise-based, typed, OAuth + API key auth, streaming responses, retry policies with exponential backoff. The VS Code extension sits on top of it. Install from source today; npm publish in flight.</p>
+        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> npm install github:sneaky-hippo/kolmogorov-stack<span class="fr-cli__flag">#path:sdk/node</span>
+<span class="fr-cli__comment"># npm pending: npm install @kolm/kolm-sdk</span></pre>
         <div class="fr-spec-list__specs" style="margin-top:10px"><span><strong>Runtime</strong>node &gt;= 18</span><span><strong>Module</strong>esm + cjs</span><span><strong>Types</strong>typescript</span><span><strong>Coverage</strong>all /v1/*</span></div>
         <a href="/api" class="fr-spec-list__cta">/api reference</a>
       </li>
@@ -211,11 +213,12 @@
       <li id="mcp">
         <div class="fr-spec-list__head">
           <h3 class="fr-spec-list__name">Model Context Protocol server</h3>
-          <span class="fr-spec-list__delta">@kolm/mcp-server &middot; Apache-2.0 &middot; shipped</span>
+          <span class="fr-spec-list__delta">@kolm/recipe-mcp v0.2.0 &middot; Apache-2.0 &middot; shipped</span>
         </div>
-        <p class="fr-spec-list__p">For Claude Desktop and any IDE that speaks MCP. Exposes the kolm verbs as MCP tools so a Claude-resident developer can capture, distill, compile, score, and verify without leaving the editor.</p>
-        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> npm install -g @kolm/mcp-server
-<span class="fr-cli__comment"># then register it in your MCP host config</span></pre>
+        <p class="fr-spec-list__p">For Claude Desktop and any IDE that speaks MCP. Exposes the kolm verbs as MCP tools so a Claude-resident developer can capture, distill, compile, score, and verify without leaving the editor. Install from source today; npm publish in flight.</p>
+        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> npm install <span class="fr-cli__flag">-g</span> github:sneaky-hippo/kolmogorov-stack<span class="fr-cli__flag">#path:sdk/mcp</span>
+<span class="fr-cli__comment"># then register it in your MCP host config</span>
+<span class="fr-cli__comment"># npm pending: npm install -g @kolm/recipe-mcp</span></pre>
         <div class="fr-spec-list__specs" style="margin-top:10px"><span><strong>Runtime</strong>node &gt;= 18</span><span><strong>Transport</strong>stdio</span><span><strong>Hosts</strong>Claude Desktop, IDE Claude</span></div>
         <a href="/integrations/claude-code" class="fr-spec-list__cta">/integrations/claude-code</a>
       </li>
@@ -223,10 +226,12 @@
       <li id="vscode">
         <div class="fr-spec-list__head">
           <h3 class="fr-spec-list__name">VS Code extension</h3>
-          <span class="fr-spec-list__delta">kolm.kolm-vscode &middot; Apache-2.0 &middot; shipped</span>
+          <span class="fr-spec-list__delta">kolm-vscode v0.3.0 &middot; Apache-2.0 &middot; shipped</span>
         </div>
-        <p class="fr-spec-list__p">Distill, score, and verify from inside the editor. Status-bar K-score on the active .kolm file. Inline distill commands. Receipt explorer. CI verbs mirror the command palette.</p>
-        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> code <span class="fr-cli__flag">--install-extension</span> kolm.kolm-vscode</pre>
+        <p class="fr-spec-list__p">Distill, score, and verify from inside the editor. Status-bar K-score on the active .kolm file. Inline distill commands. Receipt explorer. CI verbs mirror the command palette. Build the .vsix from <code>sdk/vscode/</code> today; Marketplace listing in flight.</p>
+        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> cd sdk/vscode &amp;&amp; npx <span class="fr-cli__flag">--yes</span> @vscode/vsce package
+<span class="fr-cli__prompt">$</span> code <span class="fr-cli__flag">--install-extension</span> kolm-vscode-0.3.0.vsix
+<span class="fr-cli__comment"># Marketplace pending: code --install-extension kolm.kolm-vscode</span></pre>
         <div class="fr-spec-list__specs" style="margin-top:10px"><span><strong>VS Code</strong>&gt;= 1.90</span><span><strong>Built on</strong>@kolm/node</span><span><strong>Surface</strong>status-bar K-score</span></div>
         <a href="/integrations/vscode" class="fr-spec-list__cta">/integrations/vscode</a>
       </li>
@@ -246,11 +251,12 @@
       <li id="rust">
         <div class="fr-spec-list__head">
           <h3 class="fr-spec-list__name">Rust</h3>
-          <span class="fr-spec-list__delta">kolm v0.1.0 &middot; Apache-2.0 &middot; shipped</span>
+          <span class="fr-spec-list__delta">kolm v0.2.0 &middot; Apache-2.0 &middot; shipped</span>
         </div>
-        <p class="fr-spec-list__p">The <code>kolm</code> crate v0.1.0. ureq-sync transport, no async runtime required. Honest error envelope: no <code>is_success()</code> sugar hides a 4xx; raw status and body surface to the caller.</p>
-        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> cargo add kolm
-<span class="fr-cli__comment"># or in Cargo.toml: kolm = "0.1"</span></pre>
+        <p class="fr-spec-list__p">The <code>kolm</code> crate v0.2.0. ureq-sync transport, no async runtime required. Raw error envelope: no <code>is_success()</code> sugar hides a 4xx; raw status and body surface to the caller. Install from the git source today; crates.io publish in flight.</p>
+        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> cargo add kolm <span class="fr-cli__flag">--git</span> https://github.com/sneaky-hippo/kolmogorov-stack
+<span class="fr-cli__comment"># or in Cargo.toml: kolm = { git = "https://github.com/sneaky-hippo/kolmogorov-stack", branch = "main" }</span>
+<span class="fr-cli__comment"># crates.io pending: cargo add kolm</span></pre>
         <div class="fr-spec-list__specs" style="margin-top:10px"><span><strong>Toolchain</strong>rust stable</span><span><strong>Transport</strong>ureq sync</span><span><strong>Example</strong>examples/whoami.rs</span></div>
         <a href="https://github.com/sneaky-hippo/kolmogorov-stack/tree/main/sdk/rust" rel="noopener" class="fr-spec-list__cta">sdk/rust/ on GitHub</a>
       </li>
@@ -333,8 +339,8 @@
     <p class="fr-lede">Every kolm SDK starts the same way: read <code>KOLM_API_KEY</code> from the environment, hit <code>/v1/whoami</code>, print the authenticated tenant. If this works, every other route works.</p>
 
     <div class="sdk-code">
-      <div class="title">Node &middot; @kolm/sdk</div>
-<pre><span class="k">import</span> { Kolm } <span class="k">from</span> <span class="s">"@kolm/sdk"</span>;
+      <div class="title">Node &middot; @kolm/kolm-sdk</div>
+<pre><span class="k">import</span> { Kolm } <span class="k">from</span> <span class="s">"@kolm/kolm-sdk"</span>;
 <span class="k">const</span> client = <span class="k">new</span> Kolm({ apiKey: process.env.KOLM_API_KEY });
 <span class="k">const</span> me = <span class="k">await</span> client.whoami();
 console.log(me.tenant_id, me.plan);</pre>
@@ -349,7 +355,7 @@ print(me.tenant_id, me.plan)</pre>
     </div>
 
     <div class="sdk-code">
-      <div class="title">Rust &middot; kolm crate v0.1.0</div>
+      <div class="title">Rust &middot; kolm crate v0.2.0</div>
 <pre><span class="k">use</span> kolm::Client;
 <span class="k">let</span> c = Client::from_env()?;
 <span class="k">let</span> me = c.whoami()?;

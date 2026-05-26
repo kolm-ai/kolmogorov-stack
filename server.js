@@ -10,6 +10,7 @@ import { buildRouter } from './src/router.js';
 import { provisionTenant } from './src/auth.js';
 import { isProductionRuntime } from './src/env.js';
 import { init as initOtel, expressMiddleware as otelMiddleware } from './src/otel.js';
+import { initSentry } from './src/sentry-init.js';
 import { synthesize } from './src/synthesis.js';
 import { createConcept, publishVersion } from './src/registry.js';
 import { all } from './src/store.js';
@@ -439,6 +440,10 @@ async function bootSeedDemoConcepts(tenant) {
 }
 
 if (process.argv[1] && process.argv[1].endsWith('server.js')) {
+  // Opt-in crash reporting. No-op when SENTRY_DSN is unset OR @sentry/node
+  // is not installed in this deploy.
+  await initSentry();
+
   // Auto-provision the demo tenant.
   const demo = provisionTenant(process.env.DEFAULT_TENANT || 'demo');
 

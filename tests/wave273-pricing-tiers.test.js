@@ -101,11 +101,13 @@ test('W273 #8 - legacy Starter alias maps to Pro $49 with email support', () => 
   assert.match(block, /email/i, 'Starter tier must name email support');
 });
 
-test('W273 #9 - Team tier names $499, five seats, registry, approvals, audit log, and CI/CD', () => {
+test('W273 #9 - Team tier names $99, five seats, registry, approvals, audit log, and CI/CD', () => {
+  // V1-launch (2026-05-26): Team re-priced from $499 to $99 to make the
+  // 5-seat collaboration tier accessible. The $499 slot is now Business.
   const m = PRICING.match(/data-tier="team"[\s\S]{0,2500}/);
   assert.ok(m, 'team tier block must be findable');
   const block = m[0];
-  assert.match(block, /\$499\b/, 'Team tier must name $499');
+  assert.match(block, /\$99\b/, 'Team tier must name $99 (V1-launch ladder)');
   assert.match(block, /five-seat|\b5\b[\s\S]{0,80}seats?/i, 'Team tier must name five seats');
   assert.match(block, /private registry/i, 'Team tier must name private registry');
   assert.match(block, /approvals/i, 'Team tier must name approvals');
@@ -113,30 +115,38 @@ test('W273 #9 - Team tier names $499, five seats, registry, approvals, audit log
   assert.match(block, /CI\/CD/i, 'Team tier must name CI/CD');
 });
 
-test('W273 #10 - legacy Business alias maps to Enterprise custom with regulated controls', () => {
+test('W273 #10 - Business is a first-class self-serve $499 tier (V1-launch)', () => {
+  // V1-launch (2026-05-26): Business was promoted from a legacy "alias for
+  // Enterprise custom" to a first-class self-serve tier at $499/mo. It sits
+  // between Team ($99, 5 seats) and Enterprise ($1,499 sales-led, BAA + SAML).
+  // The slot is for scaled product teams past 5 seats but not yet in a
+  // procurement-led process.
   const m = PRICING.match(/data-tier="business"[\s\S]{0,2500}/);
   assert.ok(m, 'business tier block must be findable');
   const block = m[0];
-  assert.match(block, /maps to Enterprise custom/i, 'Business alias must explicitly map to Enterprise custom');
-  assert.match(block, /BAA/, 'Business alias must name BAA');
-  assert.match(block, /SAML\/SCIM|SAML[\s\S]{0,20}SCIM/i, 'Business alias must name SAML/SCIM');
-  assert.match(block, /SSO/, 'Business alias must name SSO');
-  assert.match(block, /customer-hosted bridge/i, 'Business alias must name customer-hosted bridge');
-  assert.match(block, /air-gap/i, 'Business alias must name air-gap');
-  assert.match(block, /architecture review/i, 'Business alias must name architecture review');
+  assert.match(block, /\$499\b/, 'Business tier must name $499 (V1-launch self-serve)');
+  assert.match(block, /25\s*million|25M/i, 'Business tier must name 25 million gateway calls');
+  assert.match(block, /20\s*seats/i, 'Business tier must name 20 seats');
+  assert.match(block, /private (artifact )?registry/i, 'Business tier must name private registry');
+  assert.match(block, /SSO|sso/, 'Business tier must name SSO');
+  assert.match(block, /audit/i, 'Business tier must name audit (log/exports)');
 });
 
-test('W273 #11 - Enterprise tier names Custom, unlimited, on-prem/air-gap, BAA, dedicated CSM', () => {
+test('W273 #11 - Enterprise tier names $1,499 sales-led, BYOC/air-gap/self-hosted, BAA, dedicated CSM (V1-launch)', () => {
+  // V1-launch (2026-05-26): Enterprise floor raised from "custom" to a
+  // published sales-led $1,499/mo starting price for procurement clarity. The
+  // hidden contract span (data-w273="enterprise-contract") still uses the word
+  // "custom" alongside the $1,499 floor for legacy SEO + procurement search.
   const m = PRICING.match(/data-tier="enterprise"[\s\S]{0,2500}/);
   assert.ok(m, 'enterprise tier block must be findable');
   const block = m[0];
-  assert.match(block, /Custom|custom/, 'Enterprise tier must name Custom pricing');
-  assert.match(block, /unlimited/i, 'Enterprise tier must name unlimited');
-  assert.match(block, /on-prem|air-gap|self-hosted/i,
-    'Enterprise tier must name on-prem or air-gap or self-hosted');
+  assert.match(block, /\$1,499|sales-led/i,
+    'Enterprise tier must name $1,499 sales-led floor (V1-launch)');
+  assert.match(block, /on-prem|air-gap|self-hosted|BYOC/i,
+    'Enterprise tier must name on-prem / air-gap / self-hosted / BYOC');
   assert.match(block, /BAA/, 'Enterprise tier must name BAA');
-  assert.match(block, /CSM|white[- ]glove/i,
-    'Enterprise tier must name CSM or white-glove onboarding');
+  assert.match(block, /CSM|white[- ]glove|named SRE/i,
+    'Enterprise tier must name CSM / named SRE / white-glove');
 });
 
 // =====================================================================

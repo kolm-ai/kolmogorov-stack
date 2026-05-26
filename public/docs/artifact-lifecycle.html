@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>Artifact lifecycle &mdash; append-only state machine &middot; kolm.ai</title>
+<meta name="description" content="Every .kolm artifact moves through a seven-state lifecycle with append-only history. Revoked artifacts are pull-blocked at the download endpoint.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Artifact lifecycle &middot; kolm.ai">
+<meta property="og:description" content="created -> signed -> deployed -> monitored -> superseded / revoked / archived. Append-only history with actor and reason.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/artifact-lifecycle">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Artifact lifecycle &middot; kolm.ai">
+<meta name="twitter:description" content="created -> signed -> deployed -> monitored -> superseded / revoked / archived. Append-only history.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/docs/artifact-lifecycle">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230,233,238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#0e7490;--accent-soft:rgba(14,116,144,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#0e7490;--accent-soft:rgba(14,116,144,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+td code{font-size:12px}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:14px 18px;margin:18px 0;border-radius:0 8px 8px 0;max-width:780px;color:var(--ink-mute);font-size:14.5px}
+.callout strong{color:var(--ink)}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/docs-shell.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/docs-shell.js"></script>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / <a href="/docs/govern-overview">govern</a> / artifact-lifecycle</div>
+<p class="eyebrow">Run &amp; Govern / Lifecycle</p>
+<h1>Created, signed, deployed, monitored, superseded, revoked, archived.</h1>
+<p class="lede">Every artifact moves through a small set of states that mirror the publish workflow of a signed <code>.kolm</code>. Transitions are append-only and recorded with actor, reason, and an optional evidence pointer. Revoked artifacts return <code>410 Gone</code> at the download endpoint and can never deploy again.</p>
+
+<h2 id="states">The seven states</h2>
+<table>
+  <thead><tr><th>State</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td><code>created</code></td><td>Bytes exist; not yet signed (mid-build).</td></tr>
+    <tr><td><code>signed</code></td><td>Receipt + signature attached; eligible to deploy.</td></tr>
+    <tr><td><code>deployed</code></td><td>Bound to a namespace and serving traffic.</td></tr>
+    <tr><td><code>monitored</code></td><td>Deployed AND drift/health monitoring is on.</td></tr>
+    <tr><td><code>superseded</code></td><td>Another artifact took its serving slot (<code>successor_id</code> set).</td></tr>
+    <tr><td><code>revoked</code></td><td>Withdrawn. Pulls return 410 Gone and can never deploy again.</td></tr>
+    <tr><td><code>archived</code></td><td>Terminal cold storage. Not serving, not eligible.</td></tr>
+  </tbody>
+</table>
+<p>An eighth label, <code>undeployed</code>, lives only in the transition graph as a transient when a namespace clears its artifact (<code>deployed -&gt; undeployed -&gt; deployed</code> or <code>-&gt; archived</code>).</p>
+
+<h2 id="transitions">Valid transitions</h2>
+<p>Anything not listed is rejected. The full table is <code>VALID_TRANSITIONS</code> in <code>src/artifact-lifecycle.js</code>:</p>
+<pre><code>created    -&gt; signed
+signed     -&gt; deployed, archived
+deployed   -&gt; monitored, superseded, revoked, undeployed
+undeployed -&gt; deployed, archived
+monitored  -&gt; deployed, superseded, revoked
+superseded -&gt; archived, revoked
+revoked    -&gt; archived
+archived   -&gt; (terminal)</code></pre>
+<p>Revoke is reachable from any non-terminal state via the dedicated path, but it is intentionally NOT in the casual transition table &mdash; callers route to it through <code>transition(artifact, 'revoked', { reason })</code> so a typo cannot accidentally destroy serving state.</p>
+
+<h2 id="history-record">The history record</h2>
+<p>Every <code>transition()</code> appends one row to <code>artifact.history</code>:</p>
+<pre><code>{
+  timestamp:    "2026-05-26T17:42:08.114Z",
+  from:         "signed",
+  to:           "deployed",
+  actor:        "tenant_f33c240034c5",      // or "system"
+  reason:       null,
+  evidence_id:  "rcpt_01KYC1ZVTGDCW3FX06JQSC",
+  successor_id: null                          // only on 'superseded'
+}</code></pre>
+<p>The record is persisted atomically to <code>data/artifacts/&lt;artifact_id&gt;/lifecycle.json</code> using write-temp + rename, the same pattern <code>store.js</code> uses for json tables.</p>
+
+<h2 id="rules">Hard rules</h2>
+<ul>
+  <li><code>actor</code> is required (tenant_id of the caller or the literal string <code>system</code>).</li>
+  <li>Revoking requires a non-empty <code>reason</code> &mdash; audit trail.</li>
+  <li>Superseding requires a non-empty <code>successor_id</code> so the dependency edge can be reconstructed.</li>
+  <li>Revoked artifacts are pull-blocked at the download endpoint via <code>canPull(artifact)</code>. The router checks this BEFORE streaming bytes.</li>
+</ul>
+
+<h2 id="cli">CLI</h2>
+<pre><code># Inspect current state + history.
+kolm lifecycle &lt;artifact_id&gt;
+
+# Move signed -&gt; deployed (binds to a namespace).
+kolm deploy &lt;artifact_id&gt; --namespace support
+
+# Move deployed -&gt; undeployed -&gt; deployed (a different artifact takes the slot).
+kolm undeploy &lt;artifact_id&gt;
+
+# Move deployed -&gt; superseded (atomic swap).
+kolm deploy &lt;successor_id&gt; --namespace support --supersedes &lt;artifact_id&gt;
+
+# Roll back to a prior deployment.
+kolm rollback --namespace support --to &lt;prior_artifact_id&gt;
+
+# Withdraw an artifact. Pulls return 410 Gone immediately.
+kolm revoke &lt;artifact_id&gt; --reason "key compromised"</code></pre>
+
+<h2 id="api">HTTP</h2>
+<pre><code>GET  /v1/lifecycle/:artifact_id
+# {
+#   "current_state": "deployed",
+#   "history": [ {timestamp, from, to, actor, reason, evidence_id}, ... ]
+# }
+
+POST /v1/lifecycle/:artifact_id/transition
+{ "to": "revoked", "reason": "key compromised", "evidence_id": "..." }
+
+GET  /v1/artifacts/:artifact_id/download
+# 410 Gone when the artifact is revoked.</code></pre>
+
+<div class="callout"><strong>Caveats.</strong> Lifecycle state is per-artifact, not per-namespace binding. A single <code>.kolm</code> can be deployed to several namespaces; <code>undeployed</code> only fires when the LAST namespace releases the slot.</div>
+
+<div class="related">
+  <a href="/docs/runtime-passport"><b>Runtime passport &rarr;</b><span>The capability fingerprint carried with the artifact.</span></a>
+  <a href="/docs/evidence-dag"><b>Evidence DAG &rarr;</b><span>The provenance graph behind a lifecycle event.</span></a>
+  <a href="/docs/assurance-case"><b>Assurance case &rarr;</b><span>Where lifecycle proof lands in a trust packet.</span></a>
+</div>
+
+</div></main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/gateway">Gateway</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/docs/gateway">Gateway docs</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

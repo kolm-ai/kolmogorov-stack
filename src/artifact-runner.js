@@ -761,5 +761,11 @@ export function inspectArtifact(artifactPath) {
     artifact_class: bundle.manifest.artifact_class || 'rule',
     artifact_class_breakdown: bundle.manifest.artifact_class_breakdown || null,
     license: bundle.manifest.license || null,
+    // R-1 — runtime passports surface. Pre-R-1 artifacts have no key (default []
+    // so callers branching on `.length` see "no targets probed" without a
+    // separate null check). Post-R-1 artifacts always carry the array.
+    runtime_passports: Array.isArray(bundle.manifest.runtime_passports)
+      ? bundle.manifest.runtime_passports : [],
+    runtime_passports_spec_version: bundle.manifest.runtime_passports_spec_version || null,
   };
 }

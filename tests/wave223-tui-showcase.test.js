@@ -81,7 +81,7 @@ test('W223 #6 - vercel.json wires /tui → /tui.html', () => {
 test('W223 #7 - sw.js cache slug at or beyond wave 223 (monotonic wave-floor, not equality)', () => {
   // Anti-pattern correction (W169 test #12 trap): assert >= 223, not == 223,
   // so subsequent waves bumping the cache don't regress this test.
-  const m = SW_JS.match(/const CACHE = 'kolm-v7-[^']+-wave(\d+)-/);
+  const m = SW_JS.match(/const CACHE = 'kolm-v\d+-[^']*?wave(\d+)/);
   assert.ok(m, 'sw.js CACHE must follow the wave-N slug pattern');
   const waveN = parseInt(m[1], 10);
   assert.ok(waveN >= 223, `sw.js wave-slug must be >= 223 (saw ${waveN})`);

@@ -95,10 +95,14 @@ test('WC01-4 each declared top-level dep is reachable from a source file', () =>
   // tests/**/*.js, audit-shots/**/*.mjs).
   const pkg = readPkg();
   const allDeps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
-  const names = Object.keys(allDeps);
+  // CLI-only devDependencies invoked via package.json scripts, not imported.
+  // Their reachability is enforced by their presence in scripts (verified separately).
+  const CLI_ONLY = new Set(['eslint', 'playwright', '@playwright/test']);
+  const names = Object.keys(allDeps).filter(n => !CLI_ONLY.has(n));
 
   const roots = [
     path.join(REPO_ROOT, 'server.js'),
+    path.join(REPO_ROOT, 'eslint.config.js'),
     path.join(REPO_ROOT, 'src'),
     path.join(REPO_ROOT, 'cli'),
     path.join(REPO_ROOT, 'scripts'),
@@ -130,13 +134,13 @@ test('WC01-4 each declared top-level dep is reachable from a source file', () =>
   const blob = haystacks.join('\n');
 
   for (const name of names) {
-    // Look for: from 'name', from 'name/subpath', require('name'),
-    // require('name/subpath'), and bare-import 'name' / 'name/subpath' (no `from`).
-    // Subpath imports matter for packages like `dotenv/config`.
+    // Match static and dynamic imports: from 'name', require('name'),
+    // bare-import 'name', and dynamic `import('name')` / `await import('name')`.
+    // Subpaths (dotenv/config) match too.
     const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const subpath = '(?:/[^\'"\\s]+)?';
     const re = new RegExp(
-      `(?:from\\s*['"]${escaped}${subpath}['"]|require\\(\\s*['"]${escaped}${subpath}['"]\\s*\\)|import\\s+['"]${escaped}${subpath}['"])`,
+      `(?:from\\s*['"]${escaped}${subpath}['"]|require\\(\\s*['"]${escaped}${subpath}['"]\\s*\\)|import\\s+['"]${escaped}${subpath}['"]|import\\(\\s*['"]${escaped}${subpath}['"]\\s*\\))`,
     );
     assert.ok(
       re.test(blob),

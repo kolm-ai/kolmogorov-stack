@@ -69,7 +69,7 @@ Five fields are mandatory: `job_id`, `task`, `recipes` (≥1), each recipe needs
 
 ---
 
-## Recipe object
+## Per-`recipes[]` entry
 
 Each entry in `recipes[]`:
 
@@ -201,7 +201,7 @@ and emits `ok: true` only when all four seals replay clean.
 
 ## Examples
 
-### Recipe-only artifact (no model)
+### Rule-only artifact (no model)
 
 ```json
 {

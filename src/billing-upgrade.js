@@ -23,16 +23,29 @@ import os from 'node:os';
 
 import { envSecret } from './env.js';
 
+// Wave4 stripe-fix: indie + business are now first-class self-serve plans.
+// Each plan picks up its KOLM_STRIPE_PRICE_<X> env for the on-the-fly
+// Checkout Session path (used when no STRIPE_PAYMENT_LINK_<X> is supplied
+// but STRIPE_SECRET_KEY + the price id are).
 const STRIPE_PRICE_ENVS = {
+  indie:      'KOLM_STRIPE_PRICE_INDIE',
   pro:        'KOLM_STRIPE_PRICE_PRO',
   team:       'KOLM_STRIPE_PRICE_TEAM',
   teams:      'KOLM_STRIPE_PRICE_TEAM',
+  business:   'KOLM_STRIPE_PRICE_BUSINESS',
   enterprise: 'KOLM_STRIPE_PRICE_ENT',
 };
+// LEGACY_STRIPE_PRICE_ENVS keeps pre-wave4 deploys working:
+// - KOLM_STRIPE_PRICE_STARTER (old $9 link) still feeds pro
+// - KOLM_STRIPE_PRICE_TEAMS   (old plural-spelled team link) feeds teams
+// - KOLM_STRIPE_PRICE_BUSINESS was previously aliased into enterprise; with
+//   business now first-class, it feeds business directly. Enterprise gets a
+//   fresh fallback chain (KOLM_STRIPE_PRICE_ENTERPRISE plural variant).
 const LEGACY_STRIPE_PRICE_ENVS = {
   pro: ['KOLM_STRIPE_PRICE_STARTER'],
   teams: ['KOLM_STRIPE_PRICE_TEAMS'],
-  enterprise: ['KOLM_STRIPE_PRICE_BUSINESS'],
+  business: ['KOLM_STRIPE_PRICE_BIZ'],
+  enterprise: ['KOLM_STRIPE_PRICE_ENTERPRISE'],
 };
 
 export function upgradeRequestsFile() {

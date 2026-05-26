@@ -27,6 +27,10 @@ const MEMORY_DIR = path.join(
 );
 const MEMORY_MD = path.join(MEMORY_DIR, 'MEMORY.md');
 const ARCHIVE_MD = path.join(MEMORY_DIR, 'ARCHIVE.md');
+// Project-local backfill for waves not captured in MEMORY.md (which is space-
+// constrained). Format is identical to MEMORY.md wave-link bullets so the same
+// parser handles both. Newer entries here win over older ARCHIVE.md entries.
+const PROJECT_CHANGELOG_DATA = path.join(ROOT, 'data', 'changelog-extra.md');
 
 const AUTO_BEGIN = '<!-- CHANGELOG_AUTO_BEGIN -->';
 const AUTO_END = '<!-- CHANGELOG_AUTO_END -->';
@@ -93,11 +97,13 @@ function detectTags(summary) {
 }
 
 // Parse one bullet line into { waveNum, slug, date, summary, label }.
-// Format: - [Kolm wave NNN <stuff>](project_kolm_waveNNN_<slug>_YYYY_MM_DD.md) <delim> <summary>
-// Multi-wave entries use "waves NNN-MMM" or "wave NNN_MMM"; we take the first
+// Two accepted label prefixes:
+//   - [Kolm wave NNN <stuff>](project_kolm_waveNNN_<slug>_YYYY_MM_DD.md) <delim> <summary>
+//   - [WNNN <stuff>](project_kolm_waveNNN_<slug>_YYYY_MM_DD.md) <delim> <summary>
+// Multi-wave entries use "waves NNN-MMM" or "W NNN-MMM"; we take the first
 // number for ordering and a label that preserves the range.
-const ENTRY_RE = /^- \[(Kolm wave[s]?[^\]]*)\]\(([^)]+)\)\s*(?:[-—–]|—|--)\s*(.*)$/u;
-const FILENAME_RE = /project_kolm_wave[s]?_?(\d+)(?:[_-](\d+))?[a-z_]*?_(\d{4}_\d{2}_\d{2})\.md$/i;
+const ENTRY_RE = /^- \[((?:Kolm wave[s]?|W\d+(?:[+\-]W?\d+)?(?:\+|\.\d+)?)[^\]]*)\]\(([^)]+)\)\s*(?:[-—–]|—|--)\s*(.*)$/u;
+const FILENAME_RE = /project_kolm_wave[s]?_?(\d+)(?:[_-](\d+))?[A-Za-z0-9_-]*?_(\d{4}_\d{2}_\d{2})\.md$/i;
 
 function parseLine(line) {
   const m = ENTRY_RE.exec(line);
@@ -115,7 +121,10 @@ function parseLine(line) {
     waveNum,
     waveNumEnd,
     waveLabel: makeWaveLabel(waveNum, waveNumEnd, label),
-    label: label.replace(/^Kolm waves?\s*[\d-]+\s*/i, '').trim() || `wave ${waveNum}`,
+    label: label
+      .replace(/^Kolm waves?\s*[\d-]+\s*/i, '')
+      .replace(/^W\d+(?:[+\-]W?\d+)?(?:\+|\.\d+)?\s*/i, '')
+      .trim() || `wave ${waveNum}`,
     slug: filename.replace(/\.md$/, ''),
     filename,
     date,
@@ -146,12 +155,19 @@ function readFileSafe(p) {
 
 function collectEntries() {
   const buckets = new Map(); // key: waveNum-waveNumEnd, value: entry
-  const sources = [readFileSafe(MEMORY_MD), readFileSafe(ARCHIVE_MD)];
+  // Order matters: MEMORY.md and the project backfill come before ARCHIVE.md so
+  // their summary text wins the first-occurrence dedupe.
+  const sources = [
+    readFileSafe(MEMORY_MD),
+    readFileSafe(PROJECT_CHANGELOG_DATA),
+    readFileSafe(ARCHIVE_MD),
+  ];
   for (const text of sources) {
     if (!text) continue;
     for (const raw of text.split(/\r?\n/)) {
       const line = raw.trim();
-      if (!line.startsWith('- [Kolm')) continue;
+      // Accept legacy "- [Kolm wave ...]" and current "- [WNNN ...]" prefixes.
+      if (!line.startsWith('- [Kolm') && !/^- \[W\d+/.test(line)) continue;
       const entry = parseLine(line);
       if (!entry) continue;
       const key = `${entry.waveNum}-${entry.waveNumEnd}`;

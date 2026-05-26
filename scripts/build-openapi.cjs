@@ -62,7 +62,9 @@ function publicRoutePath(p) {
 }
 
 function openapiPath(p) {
-  return publicRoutePath(p).replace(/:([a-zA-Z_][a-zA-Z0-9_]*)/g, '{$1}');
+  let s = publicRoutePath(p).replace(/:([a-zA-Z_][a-zA-Z0-9_]*)/g, '{$1}');
+  if (s.length > 1 && s.endsWith('/')) s = s.slice(0, -1);
+  return s;
 }
 
 function extractPathParams(p) {
@@ -377,6 +379,17 @@ for (const g of routes.groups || []) {
     }
     merged.paths[oapiPath][m] = buildOperation(route, tagLabel);
     added++;
+  }
+}
+
+// Backfill operationId on any curated path that does not have one. OpenAPI 3
+// does not require operationId but code-generators do; keep the spec fully
+// usable.
+for (const [oapiPath, methods] of Object.entries(merged.paths)) {
+  for (const [m, op] of Object.entries(methods)) {
+    if (!['get', 'post', 'put', 'patch', 'delete', 'options', 'head', 'trace'].includes(m)) continue;
+    if (!op || op.operationId) continue;
+    op.operationId = slugId(m, oapiPath.replace(/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/g, ':$1'));
   }
 }
 

@@ -82,7 +82,7 @@ function pageShell({ slug, family, title, description, eyebrow, h1, lede, sectio
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -655,7 +655,7 @@ const GATEWAY_PAGES = [
         paragraphs: [
           'The same image runs in Kubernetes with the published chart. The chart includes a StatefulSet for Postgres, a Deployment for the gateway (with HPA on request rate), and a Service of type ClusterIP. Pair with cert-manager for TLS and external-dns for DNS.',
         ],
-        code: `helm repo add kolm https://sneaky-hippo.github.io/kolmogorov-stack/charts\nhelm repo update\n\nhelm install gateway kolm/gateway \\\n  --namespace kolm --create-namespace \\\n  --set image.tag=latest \\\n  --set config.signingKeySecret=kolm-signing \\\n  --set ingress.host=gateway.internal.example.com \\\n  --set postgres.enabled=true \\\n  --set minio.enabled=true`,
+        code: `helm repo add kolm https://sneaky-hippo.github.io/kolm/charts\nhelm repo update\n\nhelm install gateway kolm/gateway \\\n  --namespace kolm --create-namespace \\\n  --set image.tag=latest \\\n  --set config.signingKeySecret=kolm-signing \\\n  --set ingress.host=gateway.internal.example.com \\\n  --set postgres.enabled=true \\\n  --set minio.enabled=true`,
       },
       {
         h2: 'Air-gapped install',
@@ -738,7 +738,7 @@ const GATEWAY_PAGES = [
       {
         h2: 'Where to file a bug',
         paragraphs: [
-          'Include the receipt CID (visible in <code>X-Kolm-Receipt-CID</code>) and the output of <code>kolm doctor --gateway --json</code>. Open an issue at <a href="https://github.com/sneaky-hippo/kolmogorov-stack/issues">github.com/sneaky-hippo/kolmogorov-stack/issues</a>.',
+          'Include the receipt CID (visible in <code>X-Kolm-Receipt-CID</code>) and the output of <code>kolm doctor --gateway --json</code>. Open an issue at <a href="https://github.com/sneaky-hippo/kolm/issues">github.com/sneaky-hippo/kolm/issues</a>.',
         ],
       },
     ],

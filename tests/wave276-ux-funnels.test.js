@@ -159,7 +159,7 @@ test('W276 vercel.json has all 5 onboard rewrites', () => {
 
 test('W276 sw.js cache slug is at or past wave276 (>=276)', () => {
   const sw = read(path.join(PUBLIC, 'sw.js'));
-  const m = sw.match(/const CACHE\s*=\s*'kolm-v\d+-\d{4}-\d{2}-\d{2}-wave(\d+)-/);
+  const m = sw.match(/const CACHE\s*=\s*'kolm-v\d+-\d{4}-\d{2}-\d{2}-[^']*?wave(\d+)/);
   assert.ok(m, 'sw.js CACHE must follow wave naming');
   const n = parseInt(m[1], 10);
   assert.ok(n >= 276, `expected sw.js wave >= 276, got ${n}`);

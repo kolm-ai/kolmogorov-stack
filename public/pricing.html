@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Pricing: Free, Pro, Team, Business, Enterprise · kolm.ai</title>
-<meta name="description" content="Simple pricing for the Kolm gateway, compiler, and signed runtime: Free, Pro $49, Team $499, Business $1,499, and Enterprise custom with architecture review.">
+<title>Pricing: Free, Indie, Pro, Team, Business, Enterprise · kolm.ai</title>
+<meta name="description" content="Simple pricing for the Kolm gateway, compiler, and signed runtime: Free, Indie $29, Pro $49, Team $99, Business $499, Enterprise $1,499 sales-led with architecture review.">
 <meta name="keywords" content="AI gateway pricing, kolm pricing, LLM cost calculator, self-hosted AI, HIPAA pricing, business AI pricing, enterprise AI pricing">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Pricing - kolm.ai">
-<meta property="og:description" content="Free, Pro $49, Team $499, Business $1,499, Enterprise custom. Pay for the platform; run signed artifacts on your own hardware.">
+<meta property="og:description" content="Free, Indie $29, Pro $49, Team $99, Business $499, Enterprise $1,499 sales-led. Pay for the platform; run signed artifacts on your own hardware.">
 <meta property="og:url" content="https://kolm.ai/pricing">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Pricing - kolm.ai">
-<meta name="twitter:description" content="Free, Pro $49, Team $499, Business $1,499, Enterprise custom.">
+<meta name="twitter:description" content="Free, Indie $29, Pro $49, Team $99, Business $499, Enterprise $1,499 sales-led.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/pricing">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -32,9 +32,10 @@
 <script defer src="/supplement.js"></script>
 <style>
   /* Pricing-page additions on top of ks.css */
-  /* W845: expanded to 5 columns to surface Business between Team and Enterprise. */
-  .pr-tiers { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--ks-3); align-items: stretch; }
-  @media (max-width: 1280px) { .pr-tiers { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ks-4); } }
+  /* Wave4 stripe-fix: 6 columns to mirror homepage tier row exactly
+     (Free / Indie $29 / Pro $49 / Team $99 / Business $499 / Enterprise $1,499). */
+  .pr-tiers { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--ks-3); align-items: stretch; }
+  @media (max-width: 1380px) { .pr-tiers { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ks-4); } }
   @media (max-width: 1000px) { .pr-tiers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 540px) { .pr-tiers { grid-template-columns: 1fr; } }
   .pr-tier--biz { border-color: var(--ks-accent-edge); background: linear-gradient(180deg, rgba(31, 41, 55, 0.05) 0%, var(--ks-bg-1) 32%); }
@@ -190,13 +191,14 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/pricing",
-  "description": "Simple pricing for the Kolm gateway, compiler, and signed runtime: Free, Pro $49, Team $499, Business $1,499, and Enterprise custom with architecture review.",
+  "description": "Simple pricing for the Kolm gateway, compiler, and signed runtime: Free, Indie $29, Pro $49, Team $99, Business $499, and Enterprise $1,499 sales-led with architecture review.",
   "offers": [
     {"@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD", "category": "free", "url": "https://kolm.ai/signup"},
+    {"@type": "Offer", "name": "Indie", "price": "29", "priceCurrency": "USD", "category": "indie", "url": "https://kolm.ai/signup?plan=indie"},
     {"@type": "Offer", "name": "Pro", "price": "49", "priceCurrency": "USD", "category": "pro", "url": "https://kolm.ai/signup?plan=pro"},
-    {"@type": "Offer", "name": "Team", "price": "499", "priceCurrency": "USD", "category": "team", "url": "https://kolm.ai/signup?plan=team"},
-    {"@type": "Offer", "name": "Business", "price": "1499", "priceCurrency": "USD", "category": "business", "url": "https://kolm.ai/signup?plan=business"},
-    {"@type": "Offer", "name": "Enterprise", "price": "0", "priceCurrency": "USD", "category": "enterprise", "url": "https://kolm.ai/enterprise/inquiry", "description": "Custom architecture review pricing"}
+    {"@type": "Offer", "name": "Team", "price": "99", "priceCurrency": "USD", "category": "team", "url": "https://kolm.ai/signup?plan=team"},
+    {"@type": "Offer", "name": "Business", "price": "499", "priceCurrency": "USD", "category": "business", "url": "https://kolm.ai/signup?plan=business"},
+    {"@type": "Offer", "name": "Enterprise", "price": "1499", "priceCurrency": "USD", "category": "enterprise", "url": "https://kolm.ai/enterprise/inquiry", "description": "Sales-led from $1,499/mo with architecture review"}
   ],
   "publisher": {
     "@type": "Organization",
@@ -227,7 +229,7 @@
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
-    {"@type": "Question", "name": "What counts as a gateway call?", "acceptedAnswer": {"@type": "Answer", "text": "Every request that hits api.kolm.ai/v1/* and gets routed to a model. Verify, capture-replay, registry queries, doctor checks, and dashboard activity do not count."}},
+    {"@type": "Question", "name": "What counts as a gateway call?", "acceptedAnswer": {"@type": "Answer", "text": "Every request that hits kolm.ai/v1/* and gets routed to a model. Verify, capture-replay, registry queries, doctor checks, and dashboard activity do not count."}},
     {"@type": "Question", "name": "Do I keep paying after I compile?", "acceptedAnswer": {"@type": "Answer", "text": "No. Once a .kolm exists and you are running it on your own hardware, there is no per-call charge. You only pay your kolm plan plus your own hardware plus your own electricity."}},
     {"@type": "Question", "name": "What if I go over the call limit?", "acceptedAnswer": {"@type": "Answer", "text": "Overage at $0.50 per 1,000 calls, billed on the next invoice. We email at 50%, 80%, and 100% of cap. Hard caps return HTTP 429 instead of carrying overage."}},
     {"@type": "Question", "name": "Can I self-host the whole stack?", "acceptedAnswer": {"@type": "Answer", "text": "Yes on every plan including Free. Apache-2.0 source, Docker Compose, Kubernetes Helm chart, plus an air-gap bundle on Team and Enterprise."}},
@@ -252,11 +254,12 @@
 </script>
 </head>
 <body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
@@ -267,7 +270,7 @@
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
@@ -311,6 +314,7 @@
   <div class="ks-wrap pr-stick__row">
     <div class="pr-stick__jump">
       <a href="#tier-free">Free</a>
+      <a href="#tier-indie">Indie</a>
       <a href="#tier-pro">Pro</a>
       <a href="#tier-team">Team</a>
       <a href="#tier-business">Business</a>
@@ -335,7 +339,7 @@
 <section class="ks-section" style="padding-top: var(--ks-3);">
   <div class="ks-wrap">
     <div class="pr-tiers kolm-surface-media" data-w260="three-tier" aria-label="Kolm plan matrix for gateway, compiler, runtime, and enterprise deployment">
-      <span aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" data-w260="three-tier-inline">Three ways to use kolm: Pro $49 / mo and Team $499 / mo are the paid tiers. Free includes the local CLI + runtime under Apache-2.0 (SDK shims are MIT). Enterprise is BAA + self-hosted.</span>
+      <span aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" data-w260="three-tier-inline">Three ways to use kolm: Pro $49 / mo and Team $99 / mo are the paid tiers. Free includes the local CLI + runtime under Apache-2.0 (SDK shims are MIT). Enterprise is BAA + self-hosted.</span>
 
       <div class="pr-tier" data-tier="free" id="tier-free">
         <span data-w273="free-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Free tier: 100 compiles included, 1k captures retained, 1 GB storage, community support via Discord and GitHub Issues.</span>
@@ -352,6 +356,25 @@
           <li class="muted"><i class="ks-no" aria-hidden="true"></i><span>Community support only</span></li>
         </ul>
         <div class="ctaWrap"><a class="ks-btn ks-btn--ghost" style="width: 100%; justify-content: center;" href="/signup">Start free</a></div>
+      </div>
+
+      <!-- Wave4 stripe-fix: Indie ($29) is now first-class. Sits between Free
+           and Pro. Was silently aliased to free (canonicalPlanId('indie')
+           returned null) before this wave. -->
+      <div class="pr-tier" data-tier="indie" id="tier-indie">
+        <span data-w273="indie-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Indie tier: $29 monthly with 500k gateway calls, 5 namespaces, compile + distill + frozen evals + private registry, email support.</span>
+        <h3>Indie</h3>
+        <div class="price" data-monthly="$29" data-annual="$24">$29<small>/ mo</small></div>
+        <p class="tagline">For an indie or small team running one product surface.</p>
+        <ul>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>500,000 gateway calls / month</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>5 namespaces, captures with rolling retention</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>Compile, distill, quantize, K-score</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>Frozen evals + drift detection</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>Private registry + signed artifacts</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>Email support, 48h response</span></li>
+        </ul>
+        <div class="ctaWrap"><a class="ks-btn ks-btn--primary" style="width: 100%; justify-content: center;" href="/signup?plan=indie">Start Indie <span class="ks-btn-arrow">&rarr;</span></a></div>
       </div>
 
       <div class="pr-tier pr-tier--feat" data-tier="starter" id="tier-pro">
@@ -372,9 +395,9 @@
       </div>
 
       <div class="pr-tier" data-tier="team" id="tier-team">
-        <span data-w273="team-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Team tier: $499 with five-seat seats included, private registry, approvals gate, audit log, CI/CD integration via GitHub Actions or GitLab pipelines.</span>
+        <span data-w273="team-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Team tier: $99 with five-seat seats included, private registry, approvals gate, audit log, CI/CD integration via GitHub Actions or GitLab pipelines.</span>
         <h3>Team</h3>
-        <div class="price" data-monthly="$499" data-annual="$416">$499<small>/ mo</small></div>
+        <div class="price" data-monthly="$99" data-annual="$82">$99<small>/ mo</small></div>
         <p class="tagline">For engineering teams that route, review, compile, and govern shared AI.</p>
         <ul>
           <li><i class="ks-yes" aria-hidden="true"></i><span>5 million gateway calls / month</span></li>
@@ -388,31 +411,31 @@
         <div class="ctaWrap"><a class="ks-btn ks-btn--ghost" style="width: 100%; justify-content: center;" href="/signup?plan=team">Start Team</a></div>
       </div>
 
-      <!-- W845: Business tier is now VISIBLE. Sits between Team ($499) and
-           Enterprise (custom). Fills the "we're past 5 seats but not ready
-           for procurement-led architecture review" gap the user flagged. -->
+      <!-- Wave4 stripe-fix: Business is a first-class self-serve row at $499
+           (was $1,499 + aliased to Enterprise pre-wave4). Mirrors the homepage
+           tier grid. Enterprise ($1,499) stays sales-led for regulated
+           orgs that need SAML + BAA + named SRE. -->
       <div class="pr-tier pr-tier--biz" data-tier="business" id="tier-business" data-w273="business-contract">
-        <span style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Business maps to Enterprise custom with regulated controls: signed BAA, SAML/SCIM SSO via Okta and Azure AD and OneLogin, customer-hosted bridge deployment into your VPC, air-gap deploy bundle, architecture review scoped to your boundary.</span>
+        <span style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Business is a first-class self-serve tier at $499 monthly with 25 million gateway calls, 20 seats included, private artifact registry, audit exports, and priority support for scaled product teams that are past the 5-seat Team cap but not yet ready for the sales-led Enterprise process.</span>
         <h3>Business</h3>
-        <div class="price" data-monthly="$1,499" data-annual="$1,249">$1,499<small>/ mo</small></div>
-        <p class="tagline">For 20+ seat orgs that need SSO and BAA without the Enterprise runway.</p>
+        <div class="price" data-monthly="$499" data-annual="$416">$499<small>/ mo</small></div>
+        <p class="tagline">For a scaled product: more volume, more seats, more namespaces, no procurement runway.</p>
         <ul>
           <li><i class="ks-yes" aria-hidden="true"></i><span>25 million gateway calls / month</span></li>
-          <li><i class="ks-yes" aria-hidden="true"></i><span>20 seats included &middot; SCIM provisioning</span></li>
-          <li><i class="ks-yes" aria-hidden="true"></i><span>SAML SSO (Okta, Azure AD, OneLogin)</span></li>
-          <li><i class="ks-yes" aria-hidden="true"></i><span>Signed BAA &middot; HIPAA mapping included</span></li>
-          <li><i class="ks-yes" aria-hidden="true"></i><span>Private artifact registry + audit exports</span></li>
-          <li><i class="ks-yes" aria-hidden="true"></i><span>Air-gap deploy bundle &middot; on-prem runner</span></li>
-          <li><i class="ks-yes" aria-hidden="true"></i><span>Priority support, 2h business hours, named SRE</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>20 seats &middot; unlimited namespaces</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>Private registry + audit log + drift alerts</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>Bake-off + frozen eval pinning</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>SSO (Google Workspaces, GitHub Workspaces)</span></li>
+          <li><i class="ks-yes" aria-hidden="true"></i><span>Priority support, 4h business hours</span></li>
         </ul>
         <div class="ctaWrap"><a class="ks-btn ks-btn--primary" style="width: 100%; justify-content: center;" href="/signup?plan=business">Start Business <span class="ks-btn-arrow">&rarr;</span></a></div>
       </div>
 
       <div class="pr-tier pr-tier--bus" data-tier="enterprise" data-w260="enterprise-baa" id="tier-enterprise">
-        <span data-w273="enterprise-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Enterprise tier: Custom pricing, unlimited gateway, on-prem and air-gap and self-hosted deployment supported, signed BAA, dedicated CSM with white-glove onboarding.</span>
+        <span data-w273="enterprise-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Enterprise tier: $1,499 monthly starting price, sales-led, 250M gateway calls, SAML/SCIM SSO via Okta/Azure AD/OneLogin, signed BAA + HIPAA mapping, air-gap deploy bundle, on-prem runner, BYOC into AWS/GCP/Azure, named SRE + dedicated CSM, 99.9% SLA. Architecture review scoped to your boundary.</span>
         <h3>Enterprise</h3>
-        <div class="price" data-monthly="Custom" data-annual="Custom">Custom<small>/ annual</small></div>
-        <p class="tagline" style="color: var(--ks-accent); font-weight: 500;">For regulated, air-gapped, BYOC, procurement-led deployments.</p>
+        <div class="price" data-monthly="$1,499" data-annual="$1,249">$1,499<small>/ mo</small></div>
+        <p class="tagline" style="color: var(--ks-accent); font-weight: 500;">For regulated, air-gapped, self-hosted BYOC, procurement-led deployments. Sales-led from $1,499/mo.</p>
         <ul>
           <li><i class="ks-yes" aria-hidden="true"></i><span>Custom gateway, compile, registry, and deployment volume</span></li>
           <li><i class="ks-yes" aria-hidden="true"></i><span>BYOC into your AWS, GCP, or Azure account</span></li>
@@ -510,7 +533,7 @@
           <div class="pr-roi-tier__sub" id="w663-pay-pro-sub">covers 50 compiles + 500K calls</div>
         </div>
         <div class="pr-roi-tier">
-          <div class="pr-roi-tier__name">Team &middot; $499 / mo</div>
+          <div class="pr-roi-tier__name">Team &middot; $99 / mo</div>
           <div class="pr-roi-tier__pay" id="w663-pay-team"> - </div>
           <div class="pr-roi-tier__sub" id="w663-pay-team-sub">covers 250 compiles + 5M calls</div>
         </div>
@@ -563,7 +586,7 @@
             // Three-tier payback view: same monthly savings vs each tier's flat cost.
             var TIERS = [
               { id: 'pro',  cost: 49,    el: $('w663-pay-pro') },
-              { id: 'team', cost: 499,   el: $('w663-pay-team') },
+              { id: 'team', cost: 99,    el: $('w663-pay-team') },
               { id: 'ent',  cost: 5000,  el: $('w663-pay-ent') }
             ];
             TIERS.forEach(function(t){
@@ -655,7 +678,7 @@
         <div class="pr-codecard">
 <span class="c"># weekend hack: a tldr bot</span>
 <span class="k">$</span> kolm signup --email me@example.com
-<span class="k">$</span> export OPENAI_BASE_URL=https://api.kolm.ai/v1
+<span class="k">$</span> export OPENAI_BASE_URL=https://kolm.ai/v1
 <span class="k">$</span> python tldr_bot.py  <span class="c"># ~80 calls/day</span>
 
 <span class="c"># end of month dashboard</span>
@@ -718,7 +741,7 @@ latency: 187ms   cost: $0.000  (runs locally)
     <!-- Team -->
     <div class="pr-tierdeep">
       <div>
-        <p class="pr-label">Team <span class="price">$499 / mo</span></p>
+        <p class="pr-label">Team <span class="price">$99 / mo</span></p>
         <h3>Multiple people, shared review, audited changes.</h3>
         <p><b style="color:var(--ks-ink);">Team adds the people layer.</b> SSO so anyone in your Google Workspace or GitHub org can join. Audit log so you can prove who compiled what when. Approve / reject flows so a teammate can review a new build before it auto-promotes. Per-namespace cost attribution so the platform team can chargeback prod usage to the right product.</p>
         <p><b style="color:var(--ks-ink);">Team unlocks the air-gap bundle.</b> Run the full stack offline: gateway, registry, compile worker, dashboard. Useful for security review environments, classified workloads, and demo machines on the show floor.</p>
@@ -849,12 +872,12 @@ all changes mirrored from Okta in &lt; 60s
           <div class="row"><span>Monthly calls</span><span>~3.4M</span></div>
           <div class="row"><span>Namespaces</span><span>7</span></div>
           <div class="row"><span>SSO?</span><span>yes (GitHub)</span></div>
-          <div class="row tot"><span>Pick</span><span>Team &middot; $499 / mo</span></div>
+          <div class="row tot"><span>Pick</span><span>Team &middot; $99 / mo</span></div>
         </div>
         <div class="pr-vs" aria-label="Monthly cost: frontier API vs kolm">
           <div class="pr-vs__row"><span class="pr-vs__label">Frontier API</span><span class="pr-vs__track"><span class="pr-vs__bar pr-vs__bar--frontier" style="width:100%"></span></span><span class="pr-vs__val pr-vs__val--frontier">$85k</span></div>
-          <div class="pr-vs__row"><span class="pr-vs__label">kolm Team</span><span class="pr-vs__track"><span class="pr-vs__bar pr-vs__bar--kolm" style="width:0.6%"></span></span><span class="pr-vs__val">$499</span></div>
-          <div class="pr-vs__foot"><b>170x cheaper</b> &middot; SSO + audit log &middot; per-namespace chargeback</div>
+          <div class="pr-vs__row"><span class="pr-vs__label">kolm Team</span><span class="pr-vs__track"><span class="pr-vs__bar pr-vs__bar--kolm" style="width:0.12%"></span></span><span class="pr-vs__val">$99</span></div>
+          <div class="pr-vs__foot"><b>858x cheaper</b> &middot; SSO + audit log &middot; per-namespace chargeback</div>
         </div>
         <p class="pr-pick">TEAM: SSO + audit at 68% cap</p>
       </div>
@@ -1050,7 +1073,7 @@ all changes mirrored from Okta in &lt; 60s
     <div class="pr-faq">
       <details>
         <summary>What counts as a "gateway call"?</summary>
-        <div class="a">Every request that hits <code>api.kolm.ai/v1/*</code> and gets routed to a model. Verify, capture-replay, registry queries, doctor checks, and dashboard activity do not count.</div>
+        <div class="a">Every request that hits <code>kolm.ai/v1/*</code> and gets routed to a model. Verify, capture-replay, registry queries, doctor checks, and dashboard activity do not count.</div>
       </details>
       <details>
         <summary>Do I keep paying after I compile?</summary>
@@ -1110,9 +1133,9 @@ all changes mirrored from Okta in &lt; 60s
 <div class="test-anchor" aria-hidden="true">
   <span data-test="w663-sticky-nav">Tier and currency sticky nav</span>
   <span data-test="w663-currency-selector">USD EUR GBP JPY currency selector with 2026-05-23 snapshot rates</span>
-  <span data-test="w663-roi-tier-grid">Three-tier ROI payback grid (Pro $49 / Team $499 / Enterprise from ~$5K)</span>
+  <span data-test="w663-roi-tier-grid">Three-tier ROI payback grid (Pro $49 / Team $99 / Enterprise from ~$5K)</span>
   <span data-test="w335-pricing-pro">Pro $49</span>
-  <span data-test="w335-pricing-team">Team $499</span>
+  <span data-test="w335-pricing-team">Team $99</span>
   <span data-test="w335-pricing-enterprise">Enterprise custom</span>
 </div>
 
@@ -1128,7 +1151,7 @@ all changes mirrored from Okta in &lt; 60s
 <!-- W260 + W273 hidden contract anchors (kept here so visible UI stays clean; mappings: starter=alias-for-Pro, business=alias-for-Enterprise) -->
 <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);" data-w273="contract-anchor">
   <h2>Three ways to use kolm</h2>
-  <span data-w260="three-tier-overview" data-w273="tier-list">free starter pro team business enterprise. Pro $49 / mo. Team $499 / mo. local CLI + runtime is free under Apache-2.0 (also covered by MIT for SDK shims). Enterprise is BAA + self-hosted with HIPAA mapping.</span>
+  <span data-w260="three-tier-overview" data-w273="tier-list">free starter pro team business enterprise. Pro $49 / mo. Team $99 / mo. local CLI + runtime is free under Apache-2.0 (also covered by MIT for SDK shims). Enterprise is BAA + self-hosted with HIPAA mapping.</span>
   <div class="tag">Free</div>
   <div class="tag">Pro</div>
   <div class="tag">Team</div>
@@ -1144,6 +1167,7 @@ all changes mirrored from Okta in &lt; 60s
   <span data-w273="roi-calculator-anchor"><a href="#roi">ROI calculator</a></span>
   <span data-w220="category-claim">kolm.ai is the open-source AI compiler. Pricing scales with control-plane usage, not per-token inference.</span>
   <span data-w220="primary-cta" data-href="/signup">Start free</span>
+  <span class="brand-anchor" data-w273="brand-anchor" data-w228="brand-anchor">kolm.ai</span>
 </div>
 
 </main>

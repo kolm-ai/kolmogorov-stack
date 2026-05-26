@@ -64,12 +64,19 @@ test('verifyStripeSignature: idempotency-friendly — same body+secret yields sa
 });
 
 test('planFromAmount maps each PLAN_CATALOG cents value', () => {
-  assert.equal(planFromAmount(900),    'pro');
+  // Wave4 stripe-fix: PLAN_CATALOG now includes indie ($29 / 2900) +
+  // teams-at-$99 (9900) + business ($499 / 49900). The pre-wave4 mapping
+  // for 49900 was 'teams' (Team-at-$499); it is now 'business' because
+  // $499 is Business's canonical price. Legacy 14900 (old team) +
+  // 299900 (old enterprise) stay mapped for in-flight Payment Links.
+  assert.equal(planFromAmount(900),    'pro',        'legacy starter $9 still flips to pro');
+  assert.equal(planFromAmount(2900),   'indie',      'Indie $29 — wave4');
   assert.equal(planFromAmount(4900),   'pro');
-  assert.equal(planFromAmount(14900),  'teams');
-  assert.equal(planFromAmount(49900),  'teams');
-  assert.equal(planFromAmount(149900), 'enterprise');
-  assert.equal(planFromAmount(299900), 'enterprise');
+  assert.equal(planFromAmount(9900),   'teams',      'Team $99 — wave4');
+  assert.equal(planFromAmount(14900),  'teams',      'legacy team $149 stays mapped');
+  assert.equal(planFromAmount(49900),  'business',   'Business $499 — wave4 (was teams pre-wave4)');
+  assert.equal(planFromAmount(149900), 'enterprise', 'Enterprise $1,499 — wave4');
+  assert.equal(planFromAmount(299900), 'enterprise', 'legacy enterprise $2,999 stays mapped');
 });
 
 test('planFromAmount returns null for unknown / non-numeric amounts', () => {

@@ -7,28 +7,34 @@
 // http://127.0.0.1:8765/v1/chat/completions (OpenAI-compatible). The
 // resolver here just forwards.
 //
+// W-N hardening: shared hardenedFetch — 429+backoff (max 3 retries),
+// AbortController timeoutMs (default 60s, clamped 1-300s), malformed-JSON
+// envelope, OpenAI-compat body normalizer. A local kolm-serve hitting a
+// 429 is rare but possible (operator-set rate limit); honoring it keeps
+// the gateway's chain-fallback behavior consistent with cloud adapters.
+//
 // Contract mirrors src/capture.js forwardOpenAI: returns
 //   { status: <http status int>, json: <parsed body or {_raw}>, elapsed_us }
 // Never throws on non-2xx — upstream errors flow through as-is so the
-// gateway can sign + capture them. Throws ONLY on transport failure.
+// gateway can sign + capture them. Never throws on transport failure.
+
+import { hardenedFetch, buildOpenAICompatBody, DEFAULT_TIMEOUT_MS } from './_shared.js';
 
 const KOLM_LOCAL_DEFAULT_BASE = 'http://127.0.0.1:8765';
 
-export async function forward({ url, body, upstreamKey, base }) {
+export async function forward({ url, body, upstreamKey, base, timeoutMs } = {}) {
   const target = url || `${base || KOLM_LOCAL_DEFAULT_BASE}/v1/chat/completions`;
   const headers = { 'content-type': 'application/json' };
   if (upstreamKey) headers['authorization'] = `Bearer ${upstreamKey}`;
-  const t0 = process.hrtime.bigint();
-  const res = await fetch(target, {
+  const shapedBody = buildOpenAICompatBody(body);
+  return hardenedFetch({
+    url: target,
     method: 'POST',
     headers,
-    body: JSON.stringify(body),
+    body: JSON.stringify(shapedBody),
+    timeoutMs: timeoutMs || DEFAULT_TIMEOUT_MS,
+    requireJson: true,
   });
-  const text = await res.text();
-  let json;
-  try { json = JSON.parse(text); } catch (_) { json = { _raw: text }; }
-  const elapsed_us = Math.round(Number(process.hrtime.bigint() - t0) / 1000);
-  return { status: res.status, json, elapsed_us };
 }
 
 export const PROVIDER_ID = 'local-kolm';

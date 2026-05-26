@@ -383,7 +383,7 @@ test('16. check #25 fail propagates to verdict=fail when corpus_sources carries 
 // ---------------------------------------------------------------------------
 test('17. sw.js CACHE bumped to a wave-floor >= 194 slug', () => {
   const sw = fs.readFileSync(SW, 'utf8');
-  const m = sw.match(/const CACHE = 'kolm-v\d+-\d{4}-\d{2}-\d{2}-wave(\d+)-[^']+'/);
+  const m = sw.match(/const CACHE = 'kolm-v\d+-\d{4}-\d{2}-\d{2}-[^']*?wave(\d+)/);
   assert.ok(m, 'sw.js must declare const CACHE = ... wave<N>-<slug> ...');
   const wave = parseInt(m[1], 10);
   assert.ok(wave >= 194,

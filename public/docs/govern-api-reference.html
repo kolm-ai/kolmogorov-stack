@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>Run &amp; Govern HTTP API reference &middot; kolm.ai</title>
+<meta name="description" content="The HTTP routes that drive the Run &amp; Govern surface: /v1/runtime, /v1/lifecycle, /v1/evidence, /v1/assurance, /v1/drift, /v1/cost.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Run &amp; Govern HTTP API reference &middot; kolm.ai">
+<meta property="og:description" content="REST routes for runtime, governance, and operations.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/docs/govern-api-reference">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Run &amp; Govern HTTP API reference &middot; kolm.ai">
+<meta name="twitter:description" content="REST routes for runtime, governance, and operations.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/docs/govern-api-reference">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Run & Govern HTTP API reference","description":"REST routes under /v1/runtime, /v1/lifecycle, /v1/evidence, /v1/assurance, /v1/drift, /v1/cost.","url":"https://kolm.ai/docs/govern-api-reference","datePublished":"2026-05-26","dateModified":"2026-05-26","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230,233,238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#0e7490;--accent-soft:rgba(14,116,144,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#0e7490;--accent-soft:rgba(14,116,144,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+table{width:100%;border-collapse:collapse;margin:14px 0 22px;font-size:13.5px;max-width:920px}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--ink);font-family:var(--mono);font-size:11.5px;letter-spacing:0.06em;text-transform:uppercase}
+td{color:var(--ink-mute)}
+.callout{margin:18px 0 22px;padding:16px 20px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 8px 8px 0;font-size:14px;line-height:1.6;color:var(--ink-mute);max-width:780px}
+.callout b{color:var(--ink);font-weight:500}
+.verb{display:inline-block;padding:1px 7px;border-radius:3px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;border:1px solid var(--accent-soft);color:var(--accent);background:transparent;margin-right:6px}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/docs-shell.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/docs-shell.js"></script>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / <a href="/docs/govern-overview">govern</a> / http api</div>
+<p class="eyebrow">Run &amp; Govern / Reference</p>
+<h1>HTTP API reference.</h1>
+<p class="lede">REST routes the Run &amp; Govern modules expose under <code>/v1/runtime</code>, <code>/v1/lifecycle</code>, <code>/v1/evidence</code>, <code>/v1/assurance</code>, <code>/v1/drift</code>, and <code>/v1/cost</code>. Every route is tenant-scoped via the API key on <code>Authorization: Bearer ks_...</code>. Every response is JSON with a top-level <code>{ok, version, ...}</code> envelope. Errors return non-2xx status with a structured <code>{ok: false, error, hint}</code> body.</p>
+
+<h2 id="auth">Authentication</h2>
+<pre><code>Authorization: Bearer ks_4b7bc3b...
+
+# Or via environment variable in client SDKs:
+KOLM_API_KEY=ks_4b7bc3b...
+KOLM_BASE_URL=https://kolm.ai     # default</code></pre>
+<p>Sign up at <code>/signup</code> to mint a key. Keys carry their tenant binding so cross-tenant queries are structurally impossible.</p>
+
+<h2 id="runtime">/v1/runtime</h2>
+<table>
+<thead><tr><th>Verb</th><th>Path</th><th>Returns</th></tr></thead>
+<tbody>
+<tr><td><span class="verb">GET</span></td><td><code>/v1/runtime/passport/:artifact</code></td><td>Array of <code>runtime_passport</code> rows attached to the artifact.</td></tr>
+<tr><td><span class="verb">POST</span></td><td><code>/v1/runtime/passport/:artifact/estimate</code></td><td>Stamps a <code>status:estimated</code> row from <code>{runtime, target_id, model_params, quant_bytes_per_param}</code>.</td></tr>
+<tr><td><span class="verb">POST</span></td><td><code>/v1/runtime/passport/:artifact/record</code></td><td>Stamps a <code>status:tested</code> row from a real measurement.</td></tr>
+<tr><td><span class="verb">POST</span></td><td><code>/v1/runtime/autodetect</code></td><td>Body: <code>{artifact_id, host_probe}</code>. Returns the runtime decision plus invocation arguments.</td></tr>
+<tr><td><span class="verb">POST</span></td><td><code>/v1/runtime/deploy</code></td><td>Body: <code>{artifact, target, runtime?, ...}</code>. Returns the rendered config (compose / k8s yaml / vllm json) or air-gap bundle metadata.</td></tr>
+</tbody>
+</table>
+
+<h2 id="lifecycle">/v1/lifecycle</h2>
+<table>
+<thead><tr><th>Verb</th><th>Path</th><th>Returns</th></tr></thead>
+<tbody>
+<tr><td><span class="verb">GET</span></td><td><code>/v1/lifecycle/:artifact</code></td><td><code>{state, history: [{from, to, ts, reason}]}</code>.</td></tr>
+<tr><td><span class="verb">POST</span></td><td><code>/v1/lifecycle/:artifact/transition</code></td><td>Body: <code>{to, reason?}</code>. 200 on valid; 409 on invalid transition with <code>{from, to, valid_next}</code>.</td></tr>
+<tr><td><span class="verb">GET</span></td><td><code>/v1/lifecycle/:artifact/history</code></td><td>Append-only array of transition records.</td></tr>
+</tbody>
+</table>
+
+<h2 id="evidence">/v1/evidence</h2>
+<table>
+<thead><tr><th>Verb</th><th>Path</th><th>Returns</th></tr></thead>
+<tbody>
+<tr><td><span class="verb">GET</span></td><td><code>/v1/evidence/:artifact</code></td><td>Full DAG <code>{spec, nodes, edges}</code>.</td></tr>
+<tr><td><span class="verb">GET</span></td><td><code>/v1/evidence/:artifact/trace/:node</code></td><td><code>{node, ancestors: [...], edges: [...]}</code>.</td></tr>
+<tr><td><span class="verb">GET</span></td><td><code>/v1/evidence/:artifact/descend/:node</code></td><td><code>{node, descendants: [...], edges: [...]}</code>.</td></tr>
+<tr><td><span class="verb">POST</span></td><td><code>/v1/evidence/:artifact/revoke</code></td><td>Body: <code>{node, reason?}</code>. Returns <code>{revoked, needs_review}</code>.</td></tr>
+<tr><td><span class="verb">POST</span></td><td><code>/v1/evidence/:artifact/add-node</code></td><td>Body: <code>{node, edges?}</code>. Validates and appends.</td></tr>
+<tr><td><span class="verb">GET</span></td><td><code>/v1/evidence/lookup/:node</code></td><td>Reverse index: <code>{artifact_id}</code> or 404.</td></tr>
+</tbody>
+</table>
+
+<h2 id="assurance">/v1/assurance</h2>
+<table>
+<thead><tr><th>Verb</th><th>Path</th><th>Returns</th></tr></thead>
+<tbody>
+<tr><td><span class="verb">POST</span></td><td><code>/v1/assurance/build</code></td><td>Body: <code>{artifact_id, workspace_id?}</code>. Returns full <code>kolm-assurance-case-1</code> envelope.</td></tr>
+<tr><td><span class="verb">POST</span></td><td><code>/v1/assurance/validate</code></td><td>Body: <code>{envelope}</code>. Returns <code>{ok, reasons}</code>.</td></tr>
+<tr><td><span class="verb">POST</span></td><td><code>/v1/assurance/render</code></td><td>Body: <code>{artifact_id, format: "pdf"|"json"}</code>. Returns <code>application/pdf</code> binary or JSON.</td></tr>
+</tbody>
+</table>
+
+<h2 id="drift">/v1/drift</h2>
+<table>
+<thead><tr><th>Verb</th><th>Path</th><th>Returns</th></tr></thead>
+<tbody>
+<tr><td><span class="verb">GET</span></td><td><code>/v1/drift?namespace=&lt;ns&gt;&amp;lookback_days=7&amp;baseline_days=30</code></td><td>The full drift envelope (signals, status, recommendation, details).</td></tr>
+<tr><td><span class="verb">POST</span></td><td><code>/v1/drift/enable</code></td><td>Body: <code>{namespace}</code>. Marks the namespace as monitored (required for the assurance case <code>_claimDriftMonitoring</code> to flip to <code>implemented</code>).</td></tr>
+<tr><td><span class="verb">POST</span></td><td><code>/v1/drift/disable</code></td><td>Body: <code>{namespace}</code>. Removes the namespace from active monitoring.</td></tr>
+<tr><td><span class="verb">GET</span></td><td><code>/v1/drift/namespaces</code></td><td>List of all enabled drift namespaces for the tenant.</td></tr>
+</tbody>
+</table>
+
+<h2 id="cost">/v1/cost</h2>
+<table>
+<thead><tr><th>Verb</th><th>Path</th><th>Returns</th></tr></thead>
+<tbody>
+<tr><td><span class="verb">GET</span></td><td><code>/v1/cost/displacement?namespace=&lt;ns&gt;&amp;period_days=30</code></td><td>Per-namespace cost displacement envelope.</td></tr>
+<tr><td><span class="verb">GET</span></td><td><code>/v1/cost/summary?namespace=&lt;ns&gt;</code></td><td>30-day roll-up: savings, cumulative savings, payback period.</td></tr>
+</tbody>
+</table>
+
+<h2 id="response">Response shape</h2>
+<p>Successful responses carry HTTP 200 and a JSON body with a top-level <code>ok: true</code>:</p>
+<pre><code>HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "ok": true,
+  "version": "r8-v1",
+  "tenant_id": "tenant_4d3d8db6c820",
+  "namespace": "support",
+  "savings_usd": 1678.25,
+  "ok_status": "computed"
+}</code></pre>
+<p>Errors carry a non-2xx status and a structured body. The <code>error</code> field is a stable enum the SDKs branch on; <code>hint</code> is human prose for the operator.</p>
+<pre><code>HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "ok": false,
+  "error": "invalid_period_days",
+  "hint": "period_days must be a positive number <= 3650",
+  "version": "r8-v1"
+}</code></pre>
+
+<h2 id="status-codes">HTTP status codes</h2>
+<table>
+<thead><tr><th>Status</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>200</code></td><td>OK.</td></tr>
+<tr><td><code>400</code></td><td>Bad input (missing required field, invalid value).</td></tr>
+<tr><td><code>401</code></td><td>Missing or invalid Authorization header.</td></tr>
+<tr><td><code>402</code></td><td>Plan does not include the requested feature (SSO, SAML, audit log export).</td></tr>
+<tr><td><code>404</code></td><td>Artifact, namespace, or evidence node does not exist.</td></tr>
+<tr><td><code>409</code></td><td>Invalid state transition (lifecycle) or DAG cycle (evidence).</td></tr>
+<tr><td><code>422</code></td><td>Validation failed (envelope shape, passport schema).</td></tr>
+<tr><td><code>429</code></td><td>Rate limit. Backoff and retry.</td></tr>
+<tr><td><code>503</code></td><td>Feature exists but is not yet implemented in this build (gated rollout).</td></tr>
+</tbody>
+</table>
+
+<h2 id="curl">curl examples</h2>
+<pre><code># Fetch the runtime passport for an artifact
+curl -H "Authorization: Bearer $KOLM_API_KEY" \
+  https://kolm.ai/v1/runtime/passport/qwen3-8b-support-q4km
+
+# Compute drift for a namespace
+curl -H "Authorization: Bearer $KOLM_API_KEY" \
+  "https://kolm.ai/v1/drift?namespace=support&lookback_days=7&baseline_days=30"
+
+# Build the assurance case
+curl -X POST -H "Authorization: Bearer $KOLM_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"artifact_id":"qwen3-8b-support-q4km"}' \
+  https://kolm.ai/v1/assurance/build</code></pre>
+
+<div class="callout"><b>Caveats.</b> The HTTP routes are 1:1 with the CLI verbs. If a verb is documented in the CLI reference but missing here, that route is gated behind a future plan tier and will return HTTP 503 with <code>{error: 'not_yet_implemented'}</code> for non-entitled keys. Track the changelog for promotion.</div>
+
+<h2 id="related">Related</h2>
+<div class="related">
+  <a href="/docs/govern-cli-reference"><b>CLI reference &rarr;</b><span>The verbs that call these routes.</span></a>
+  <a href="/docs/govern-faq"><b>Buyer FAQ &rarr;</b><span>The questions a risk team will ask.</span></a>
+  <a href="/docs/govern-overview"><b>Hub &rarr;</b><span>Back to the surface map.</span></a>
+</div>
+
+</div></main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/gateway">Gateway</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/docs/gateway">Gateway docs</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

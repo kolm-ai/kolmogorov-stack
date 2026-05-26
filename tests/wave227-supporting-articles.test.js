@@ -122,7 +122,7 @@ test('W227 #8 - 0 emoji in any supporting article prose (W210 hygiene)', () => {
 });
 
 test('W227 #9 - sw.js cache wave-floor >= 227', () => {
-  const m = SW.match(/const CACHE = 'kolm-v7-[^']+-wave(\d+)-/);
+  const m = SW.match(/const CACHE = 'kolm-v\d+-[^']*?wave(\d+)/);
   assert.ok(m, 'sw.js CACHE must follow wave-N slug pattern');
   const waveN = parseInt(m[1], 10);
   assert.ok(waveN >= 227, `sw.js wave-slug must be >= 227 (saw ${waveN})`);

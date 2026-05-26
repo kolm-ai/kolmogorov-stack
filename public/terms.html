@@ -87,12 +87,13 @@
 </script>
 </head>
 <body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <header class="ks-nav">
     <div class="ks-wrap ks-nav__row">
-      <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
       <nav class="ks-nav__links" aria-label="Primary">
         <a href="/wrapper">Wrapper</a>
         <a href="/studio">Studio</a>
@@ -289,6 +290,23 @@
         <dt>Registry</dt><dd>If you publish a receipt to the kolm registry, you grant us a worldwide, non-exclusive, royalty-free license to host the receipt CID so verifiers can resolve it. The receipt itself contains no weights and no completions.</dd>
         <dt>Verification</dt><dd>Anyone can verify a .kolm artifact you publish, with or without an account, using the open-source compiler. We do not gate verification.</dd>
       </dl>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="upstream-byok" data-lm6="7a-counsel-draft">
+  <div class="ks-wrap">
+    <h2>7A. Upstream model provider terms and BYOK</h2>
+    <p class="sub">How upstream provider terms (Anthropic, OpenAI, Google, and others) flow through to your use of the gateway and the Studio. This section is currently a counsel-review draft (per the 2026-05-26 legal audit at <a href="/legal/audit-2026-05-26.md" class="ks-accent">/legal/audit-2026-05-26.md</a>); the wording will be finalised by counsel prior to billed launch and may be replaced. The substance below is the operative position today.</p>
+    <div class="pact">
+      <h3>(a) Hosted gateway provider keys</h3>
+      <p>When the hosted gateway routes a request to a third-party model provider (Anthropic, OpenAI, Google, or any other hosted provider listed at <a href="/subprocessors" class="ks-accent">/subprocessors</a>) using kolm's own provider account or key, that route is subject to the upstream provider's terms as applied to kolm. Kolm reserves the right to block, throttle, or refuse any request that, in kolm's reasonable judgment, would violate the upstream provider's acceptable use policy, output-use restriction, or terms governing model training. This includes, without limitation, requests that appear directed at building a dataset for model training, fine-tuning, or distillation from a provider whose terms prohibit such use.</p>
+      <h3>(b) Bring-your-own-key (BYOK)</h3>
+      <p>Where you configure the gateway, the Studio, or any kolm surface to call an upstream model provider using a key, token, or credential issued to YOU by that provider (for example by setting <code>KOLM_TEACHER_SOURCE</code>, <code>ANTHROPIC_API_KEY</code>, <code>OPENAI_API_KEY</code>, <code>KOLM_DISTILL_TEACHER</code>, or any equivalent), you are the contracting party with that provider for the resulting request. You represent that your use, including any downstream training, fine-tuning, distillation, or redistribution of provider outputs, complies with that provider's then-current terms. Kolm acts solely as technical conduit and disclaims any liability for your compliance posture with the upstream provider.</p>
+      <h3>(c) Distillation and "competing model" clauses</h3>
+      <p>You acknowledge that some upstream provider terms (including, as of the effective date of these terms, the Anthropic Usage Policy and the OpenAI Terms of Use) restrict use of provider outputs to train or fine-tune a model that competes with the provider. You are solely responsible for evaluating whether your intended distillation, fine-tuning, or training use is permitted under the upstream terms in effect at the time of capture and at the time of training. Kolm publishes a teacher-source stamp on every <code>.kolm</code> artifact (see <a href="/legal/teacher-source-disclosure" class="ks-accent">/legal/teacher-source-disclosure</a>) and an open-weight teacher mode (see <a href="/legal/distillation-tos-clarity" class="ks-accent">/legal/distillation-tos-clarity</a>) as engineering aids; neither is a legal opinion or a safe harbor.</p>
+      <h3>(d) Indemnification flow-through</h3>
+      <p>Section 11 (Indemnification) shall be read to include, within your defense obligation to kolm, any third-party claim by an upstream model provider arising from your distillation, training, or downstream redistribution of that provider's outputs, except to the extent the claim arises from kolm's failure to honor your routing instruction or kolm's own breach of the upstream terms.</p>
     </div>
   </div>
 </section>

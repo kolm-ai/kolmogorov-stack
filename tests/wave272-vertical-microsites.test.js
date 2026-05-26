@@ -211,7 +211,7 @@ test('W272 #13 - existing v1 vertical pages were not clobbered', () => {
 
 test('W272 #14 - sw.js wave-floor is >= 272', () => {
   const sw = fs.readFileSync(path.join(PUBLIC, 'sw.js'), 'utf8');
-  const m = sw.match(/kolm-v7-2026-05-\d+-wave(\d+)-/);
+  const m = sw.match(/kolm-v\d+-2026-\d{2}-\d{2}-[^']*?wave(\d+)/);
   assert.ok(m, 'sw.js CACHE constant format mismatch');
   assert.ok(Number(m[1]) >= 272, `sw.js cache wave must be >= 272, got ${m[1]}`);
 });
@@ -234,6 +234,8 @@ test('W272 #17 - each page imports nav.js and has the kolm brand link', () => {
   for (const v of VERTICALS) {
     const html = readPage(v.slug);
     assert.match(html, /src="\/nav\.js"/, `${v.slug}: nav.js script missing`);
-    assert.match(html, /href="\/"\s+class="brand"/, `${v.slug}: kolm brand link missing`);
+    // W221+W849 nav consolidation: brand link class evolved from "brand" to
+    // "ks-nav__brand". Accept either.
+    assert.match(html, /href="\/"\s+class="(brand|ks-nav__brand)"/, `${v.slug}: kolm brand link missing`);
   }
 });

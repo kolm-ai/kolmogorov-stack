@@ -62,11 +62,12 @@ td code{font-size:12px}
 <script defer src="/docs-shell.js"></script>
 </head>
 <body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
@@ -86,14 +87,14 @@ td code{font-size:12px}
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / gateway-confidence-router</div>
 <p class="eyebrow">Wrapper / Gateway</p>
 <h1>Local first. Frontier on doubt. Capture the doubt.</h1>
-<p class="lede">The confidence router (introduced in W807) is the link between Wrapper and Studio. It runs your local <code>.kolm</code> artifact first, measures the response confidence, and falls back to a frontier provider only when the local model isn't sure. Every fallback is tagged <code>capture_eligible:true</code> — that's the row you want to add to the next distill.</p>
+<p class="lede">The confidence router (introduced in W807) is the link between Wrapper and Studio. It runs your local <code>.kolm</code> artifact first, measures the response confidence, and falls back to a frontier provider only when the local model isn't sure. Every fallback is tagged <code>capture_eligible:true</code> - that's the row you want to add to the next distill.</p>
 
 <h2 id="how-the-gate-decides">How the gate decides</h2>
 <p>Confidence is computed from three signals in priority order:</p>
 <ol>
-  <li><strong>Logit-derived</strong> — if the local engine exposes log-probabilities (vLLM, llama.cpp via <code>n_probs</code>), confidence = softmax entropy of the top-K tokens, normalised to [0, 1].</li>
-  <li><strong>Self-judge</strong> — if (1) isn't available, the local model is asked <code>"On a scale 0-1, how confident are you the previous answer is correct?"</code> with a 1-token max — fast and cheap.</li>
-  <li><strong>Verbal hedging</strong> — falls back to a keyword scan over the response (<code>"I'm not sure"</code>, <code>"I cannot"</code>, <code>"as an AI"</code>) returning a heuristic score.</li>
+  <li><strong>Logit-derived</strong> - if the local engine exposes log-probabilities (vLLM, llama.cpp via <code>n_probs</code>), confidence = softmax entropy of the top-K tokens, normalised to [0, 1].</li>
+  <li><strong>Self-judge</strong> - if (1) isn't available, the local model is asked <code>"On a scale 0-1, how confident are you the previous answer is correct?"</code> with a 1-token max - fast and cheap.</li>
+  <li><strong>Verbal hedging</strong> - falls back to a keyword scan over the response (<code>"I'm not sure"</code>, <code>"I cannot"</code>, <code>"as an AI"</code>) returning a heuristic score.</li>
 </ol>
 <p>If confidence &lt; threshold (default 0.55, configurable per namespace), the router records <code>fallback_reason: "low_confidence"</code> and re-dispatches to the next entry in the chain.</p>
 
@@ -117,7 +118,7 @@ kolm namespace config code \
   <li>Periodically <code>kolm captures list --status pending --fallback-only</code> to see the fallback queue.</li>
   <li><code>kolm captures approve --bulk-from approved.jsonl</code> to mark the good ones.</li>
   <li><code>kolm distill --namespace support --since-last-distill</code> to retrain the local artifact on the approved fallbacks.</li>
-  <li>Deploy the new artifact (<code>kolm namespace deploy support</code>) — local hits rise, fallback rate falls.</li>
+  <li>Deploy the new artifact (<code>kolm namespace deploy support</code>) - local hits rise, fallback rate falls.</li>
 </ol>
 <p>This is the loop. After a few iterations your local artifact serves the long tail of your traffic at $0 + ~1.24s, and frontier handles the genuinely-novel queries.</p>
 
@@ -133,7 +134,7 @@ kolm namespace config code \
   <div class="ks-wrap">
     <div class="ks-footer__grid">
       <div>
-        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
         <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
       </div>
       <div>

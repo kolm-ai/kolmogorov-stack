@@ -42,6 +42,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import crypto from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
@@ -1209,24 +1210,41 @@ export async function capturesStats(args) {
 }
 
 /**
- * kolm captures export [--namespace ns] [--out path] [--format jsonl|json]
+ * kolm captures export [--namespace ns] [--out path] [--format jsonl|json|parquet|hf]
  *                      [--limit N] [--since ISO]
  *
  * Streams pages of /v1/captures/list to a local file. Caveat: the server
  * returns redacted bodies — raw originals are NEVER exposed, even via this
  * verb. To get raw text you must run the gateway in detect_only mode and
  * read the local backend directly (JSONL/SQLite/Postgres).
+ *
+ * Formats:
+ *   jsonl   — one JSON row per line (single file)
+ *   json    — pretty-printed JSON array (single file)
+ *   parquet — single .parquet blob (requires parquetjs-lite). Schema derived
+ *             from the first row's known capture columns.
+ *   hf      — HuggingFace `datasets` on-disk format. --out is a DIRECTORY
+ *             containing dataset_info.json, state.json, and a single
+ *             data-00000-of-00001.arrow file (requires apache-arrow).
  */
 export async function capturesExport(args) {
   const base = _flag(args, 'base') || _envBase();
-  const out = _flag(args, 'out') || _flag(args, 'output') || ('captures-' + Date.now() + '.jsonl');
   const format = (_flag(args, 'format') || 'jsonl').toLowerCase();
+  const defaultExt = (format === 'parquet') ? '.parquet'
+                   : (format === 'hf')      ? ''
+                   : (format === 'json')    ? '.json'
+                                            : '.jsonl';
+  const out = _flag(args, 'out') || _flag(args, 'output') || ('captures-' + Date.now() + defaultExt);
   const ns = _flag(args, 'namespace') || _flag(args, 'ns');
   const limit = Number(_flag(args, 'limit') || '5000');
   const since = _flag(args, 'since');
   const key = _requireKey(_emit); if (!key) return;
 
-  const fd = fs.openSync(out, 'w');
+  // ── streaming path (jsonl writes per row; others buffer for a final write) ──
+  let fd = null;
+  if (format === 'jsonl' || format === 'json') {
+    fd = fs.openSync(out, 'w');
+  }
   let written = 0; let offset = 0; const pageSize = 200;
   const all = [];
   try {
@@ -1252,9 +1270,176 @@ export async function capturesExport(args) {
       fs.writeSync(fd, JSON.stringify(all, null, 2));
     }
   } finally {
-    fs.closeSync(fd);
+    if (fd !== null) fs.closeSync(fd);
   }
+
+  // ── parquet ────────────────────────────────────────────────────────────────
+  if (format === 'parquet') {
+    let pq;
+    try {
+      const mod = await import('parquetjs-lite');
+      // parquetjs-lite is CJS; ESM dynamic-import wraps it under .default
+      pq = mod && mod.ParquetSchema ? mod : mod.default;
+    } catch (_) {
+      process.stderr.write('parquet export requires parquetjs-lite: npm install parquetjs-lite\n');
+      _die({ ok: false, error: 'missing_dependency', dep: 'parquetjs-lite', hint: 'npm install parquetjs-lite', version: WRAPPER_CLI_VERSION }, 2);
+      return;
+    }
+    if (!all.length) {
+      // Honest empty case: write an empty parquet file with the canonical schema
+      // so downstream readers see schema + zero rows rather than nothing.
+      const emptySchema = new pq.ParquetSchema(_captureParquetFields());
+      const w = await pq.ParquetWriter.openFile(emptySchema, out);
+      await w.close();
+      _emit({ ok: true, written: 0, out, format, namespace: ns || null, version: WRAPPER_CLI_VERSION });
+      return;
+    }
+    const schema = new pq.ParquetSchema(_captureParquetFields(all[0]));
+    const w = await pq.ParquetWriter.openFile(schema, out);
+    try {
+      // batch via appendRow loop — parquetjs-lite buffers internally per page
+      for (const row of all) await w.appendRow(_captureRowToParquet(row));
+    } finally {
+      await w.close();
+    }
+    _emit({ ok: true, written, out, format, namespace: ns || null, version: WRAPPER_CLI_VERSION });
+    return;
+  }
+
+  // ── hf (HuggingFace `datasets`) ───────────────────────────────────────────
+  if (format === 'hf') {
+    let arrow;
+    try {
+      const mod = await import('apache-arrow');
+      // apache-arrow exports both as namespace + .default depending on build;
+      // tableFromArrays + RecordBatchFileReader live at the top-level in ESM.
+      arrow = mod && mod.tableFromArrays ? mod : mod.default;
+    } catch (_) {
+      process.stderr.write('hf export requires apache-arrow: npm install apache-arrow\n');
+      _die({ ok: false, error: 'missing_dependency', dep: 'apache-arrow', hint: 'npm install apache-arrow', version: WRAPPER_CLI_VERSION }, 2);
+      return;
+    }
+    fs.mkdirSync(out, { recursive: true });
+    const cols = _captureHfColumns();
+    const features = {};
+    for (const c of cols) features[c.name] = { dtype: c.hfDtype, _type: 'Value' };
+    const columnar = {};
+    for (const c of cols) columnar[c.name] = all.map((r) => _coerceForArrow(r[c.name], c.hfDtype));
+    const table = (all.length === 0)
+      ? arrow.tableFromArrays(Object.fromEntries(cols.map((c) => [c.name, []])))
+      : arrow.tableFromArrays(columnar);
+    const arrowPath = path.join(out, 'data-00000-of-00001.arrow');
+    const ipc = arrow.tableToIPC(table, 'file');
+    fs.writeFileSync(arrowPath, Buffer.from(ipc));
+    const arrowBytes = fs.statSync(arrowPath).size;
+    const fingerprint = _hfFingerprint(features, all.length, arrowBytes);
+    fs.writeFileSync(path.join(out, 'dataset_info.json'), JSON.stringify({
+      builder_name: 'kolm_captures',
+      config_name: 'default',
+      version: { version_str: '1.0.0', major: 1, minor: 0, patch: 0 },
+      features,
+      splits: { train: { name: 'train', num_bytes: arrowBytes, num_examples: all.length, dataset_name: 'kolm_captures' } },
+      download_size: 0,
+      dataset_size: arrowBytes,
+      size_in_bytes: arrowBytes,
+    }, null, 2));
+    fs.writeFileSync(path.join(out, 'state.json'), JSON.stringify({
+      _data_files: [{ filename: 'data-00000-of-00001.arrow' }],
+      _fingerprint: fingerprint,
+      _format_columns: null,
+      _format_kwargs: {},
+      _format_type: null,
+      _output_all_columns: false,
+      _split: 'train',
+    }, null, 2));
+    // Round-trip verify: read it back and confirm row count + first row match.
+    let verified = false; let verify_detail = null;
+    try {
+      const buf = fs.readFileSync(arrowPath);
+      const reader = arrow.RecordBatchFileReader.from(buf);
+      const back = new arrow.Table(reader.readAll());
+      verified = (back.numRows === all.length);
+      verify_detail = { rows_back: back.numRows };
+    } catch (e) {
+      verify_detail = { error: String(e && e.message || e) };
+    }
+    _emit({ ok: true, written, out, format, namespace: ns || null, files: ['dataset_info.json', 'data-00000-of-00001.arrow', 'state.json'], verified, verify_detail, version: WRAPPER_CLI_VERSION });
+    return;
+  }
+
   _emit({ ok: true, written, out, format, namespace: ns || null, version: WRAPPER_CLI_VERSION });
+}
+
+// Canonical capture columns surfaced to columnar exports. Keeping this in one
+// place so parquet + hf agree on shape even if the API row grows new fields.
+function _captureColumnSpec() {
+  return [
+    { name: 'id',                   parquet: 'UTF8',  hfDtype: 'string' },
+    { name: 'namespace',            parquet: 'UTF8',  hfDtype: 'string' },
+    { name: 'created_at',           parquet: 'UTF8',  hfDtype: 'string' },
+    { name: 'channel',              parquet: 'UTF8',  hfDtype: 'string' },
+    { name: 'status',               parquet: 'UTF8',  hfDtype: 'string' },
+    { name: 'role',                 parquet: 'UTF8',  hfDtype: 'string' },
+    { name: 'content',              parquet: 'UTF8',  hfDtype: 'string' },
+    { name: 'message_count',        parquet: 'INT64', hfDtype: 'int64'  },
+    { name: 'prev_chain_hash',      parquet: 'UTF8',  hfDtype: 'string' },
+    { name: 'chain_hash',           parquet: 'UTF8',  hfDtype: 'string' },
+    { name: 'pii_findings_count',   parquet: 'INT64', hfDtype: 'int64'  },
+    { name: 'risk_score',           parquet: 'DOUBLE', hfDtype: 'float64' },
+  ];
+}
+
+function _captureParquetFields() {
+  const fields = {};
+  for (const c of _captureColumnSpec()) {
+    fields[c.name] = { type: c.parquet, optional: true };
+  }
+  return fields;
+}
+
+function _captureRowToParquet(row) {
+  const out = {};
+  for (const c of _captureColumnSpec()) {
+    const v = row[c.name];
+    if (v === null || v === undefined) continue;
+    if (c.parquet === 'INT64') {
+      const n = Number(v);
+      // parquetjs-lite accepts a JS number for INT64 only if it's a safe int
+      out[c.name] = Number.isFinite(n) ? Math.trunc(n) : 0;
+    } else if (c.parquet === 'DOUBLE') {
+      const n = Number(v);
+      out[c.name] = Number.isFinite(n) ? n : 0;
+    } else if (c.parquet === 'UTF8') {
+      out[c.name] = typeof v === 'string' ? v : JSON.stringify(v);
+    } else {
+      out[c.name] = v;
+    }
+  }
+  return out;
+}
+
+function _captureHfColumns() { return _captureColumnSpec(); }
+
+function _coerceForArrow(v, dtype) {
+  if (v === null || v === undefined) {
+    if (dtype === 'string') return '';
+    if (dtype === 'int64')  return 0;
+    if (dtype === 'float64') return 0;
+    return null;
+  }
+  if (dtype === 'string') return typeof v === 'string' ? v : JSON.stringify(v);
+  if (dtype === 'int64')  { const n = Number(v); return Number.isFinite(n) ? Math.trunc(n) : 0; }
+  if (dtype === 'float64') { const n = Number(v); return Number.isFinite(n) ? n : 0; }
+  return v;
+}
+
+function _hfFingerprint(features, rowCount, byteCount) {
+  // HF's fingerprint is an opaque hex string; we derive a stable one from the
+  // schema + row/byte counts so re-exports of the same shape match.
+  const h = crypto.createHash('sha256');
+  h.update(JSON.stringify(features));
+  h.update('|' + rowCount + '|' + byteCount);
+  return h.digest('hex').slice(0, 16);
 }
 
 /**
@@ -1389,24 +1574,48 @@ export async function receiptsList(args) {
 }
 
 /**
- * kolm receipts export [--namespace ns] [--out path] [--format jsonl|json]
- *                      [--since ISO] [--limit N]
+ * kolm receipts export [--namespace ns] [--out path] [--format jsonl|json|csv]
+ *                      [--since ISO] [--limit N] [--route local|frontier]
  *
  * Page through /v1/receipts/list and dump each row to disk for offline
  * audit + signature reverification.
+ *
+ * Formats:
+ *   jsonl — one JSON receipt per line (single file)
+ *   json  — pretty-printed JSON array (single file)
+ *   csv   — kolm-audit-1 layout: 19 columns with CRLF row terminator (Excel
+ *           compat). Empty cells where the receipts/list summary endpoint
+ *           does not surface the field (e.g. signature_b64 requires the full
+ *           receipt blob from /v1/verify/:id).
+ *
+ * Filters:
+ *   --namespace  server-side (q.namespace)
+ *   --since ISO  server-side (q.since)
+ *   --route      client-side: matches row.route_decision exactly (local|frontier|other)
  */
 export async function receiptsExport(args) {
   const base = _flag(args, 'base') || _envBase();
-  const out = _flag(args, 'out') || ('receipts-' + Date.now() + '.jsonl');
   const format = (_flag(args, 'format') || 'jsonl').toLowerCase();
+  const defaultExt = (format === 'csv') ? '.csv' : (format === 'json') ? '.json' : '.jsonl';
+  const out = _flag(args, 'out') || ('receipts-' + Date.now() + defaultExt);
   const ns = _flag(args, 'namespace') || _flag(args, 'ns');
   const since = _flag(args, 'since');
+  const route = _flag(args, 'route');
   const limit = Number(_flag(args, 'limit') || '5000');
   const key = _requireKey(_emit); if (!key) return;
 
   const fd = fs.openSync(out, 'w');
   let written = 0; let offset = 0; const pageSize = 200;
   const all = [];
+  // kolm-audit-1 column order — keep aligned with /v1/verify/:id receipt shape.
+  const csvHeader = [
+    'schema_version', 'receipt_id', 'namespace_id', 'tenant_id', 'route_decision',
+    'provider', 'model', 'input_tokens', 'output_tokens', 'input_hash',
+    'output_hash', 'cost_usd', 'latency_ms', 'capture_eligible',
+    'signing_key_id', 'signature_alg', 'signature_b64', 'prev_chain_hash',
+    'created_at',
+  ];
+  if (format === 'csv') fs.writeSync(fd, csvHeader.map(_csvEscape).join(',') + '\r\n');
   try {
     while (written < limit) {
       const q = _qs({ namespace: ns, since, limit: Math.min(pageSize, limit - written), offset });
@@ -1415,7 +1624,10 @@ export async function receiptsExport(args) {
       const rows = (r.json && (r.json.receipts || r.json.rows || [])) || [];
       if (!rows.length) break;
       for (const row of rows) {
+        // client-side --route filter; matches summary's route_decision field.
+        if (route && String(row.route_decision || '').toLowerCase() !== route.toLowerCase()) continue;
         if (format === 'jsonl') fs.writeSync(fd, JSON.stringify(row) + '\n');
+        else if (format === 'csv') fs.writeSync(fd, _receiptCsvRow(csvHeader, row) + '\r\n');
         else all.push(row);
         written++;
         if (written >= limit) break;
@@ -1427,7 +1639,45 @@ export async function receiptsExport(args) {
   } finally {
     fs.closeSync(fd);
   }
-  _emit({ ok: true, written, out, format, namespace: ns || null, version: WRAPPER_CLI_VERSION });
+  _emit({ ok: true, written, out, format, namespace: ns || null, route: route || null, version: WRAPPER_CLI_VERSION });
+}
+
+// Tiny CSV writer — escapes per RFC 4180: wrap any cell containing comma,
+// quote, CR, or LF in double-quotes; double-double-quote any embedded quote.
+function _csvEscape(v) {
+  if (v === null || v === undefined) return '';
+  const s = String(v);
+  if (s === '') return '';
+  if (/[",\r\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
+function _receiptCsvRow(header, row) {
+  // Map summary fields onto kolm-audit-1 columns. The /v1/receipts/list page
+  // is a summary view, so signature_b64 / chain hashes / latency are empty
+  // unless the row happens to carry them (some backends do).
+  const lookup = {
+    schema_version:   row.schema_version || 'kolm-audit-1',
+    receipt_id:       row.receipt_id || '',
+    namespace_id:     row.namespace_id || row.namespace || '',
+    tenant_id:        row.tenant_id || row.tenant || '',
+    route_decision:   row.route_decision || '',
+    provider:         row.provider || '',
+    model:            row.model || '',
+    input_tokens:     row.input_tokens ?? '',
+    output_tokens:    row.output_tokens ?? '',
+    input_hash:       row.input_hash || '',
+    output_hash:      row.output_hash || '',
+    cost_usd:         row.cost_usd ?? '',
+    latency_ms:       row.latency_ms ?? '',
+    capture_eligible: (row.capture_eligible === true || row.capture_eligible === false) ? String(row.capture_eligible) : '',
+    signing_key_id:   row.signing_key_id || (row.signature_ed25519 && row.signature_ed25519.key_fingerprint) || '',
+    signature_alg:    row.signature_alg || (row.signature_ed25519 ? 'ed25519' : ''),
+    signature_b64:    row.signature_b64 || (row.signature_ed25519 && row.signature_ed25519.signature_b64) || '',
+    prev_chain_hash:  row.prev_chain_hash || '',
+    created_at:       row.created_at || row.timestamp || '',
+  };
+  return header.map((h) => _csvEscape(lookup[h])).join(',');
 }
 
 /**
@@ -1686,7 +1936,7 @@ export const CAPTURES_VERBS = Object.freeze({
   reject:     { fn: capturesReject,     help: 'mark capture rejected (discarded from training)' },
   quarantine: { fn: capturesQuarantine, help: 'hold capture for re-review without discarding' },
   stats:      { fn: capturesStats,      help: 'aggregate counts by namespace/provider/route' },
-  export:     { fn: capturesExport,     help: 'stream paginated captures to a local file (jsonl|json)' },
+  export:     { fn: capturesExport,     help: 'stream paginated captures to a local file (jsonl|json|parquet|hf)' },
   purge:      { fn: capturesPurge,      help: 'one-call forget (per-id) or namespace-wide with --confirm' },
   seed:       { fn: capturesSeed,       help: 'synthetic-seed N rows for benchmark/load tests (returns ids_file)' },
 });
@@ -1694,7 +1944,7 @@ export const CAPTURES_VERBS = Object.freeze({
 export const RECEIPTS_VERBS = Object.freeze({
   verify:       { fn: receiptsVerify,    help: 'verify a receipt online (GET /v1/verify/:id) or offline (--offline path)' },
   list:         { fn: receiptsList,      help: 'paginated receipt browser' },
-  export:       { fn: receiptsExport,    help: 'stream receipts to disk for offline audit' },
+  export:       { fn: receiptsExport,    help: 'stream receipts to disk for offline audit (jsonl|json|csv; filters: --namespace --since --route)' },
   stats:        { fn: receiptsStats,     help: 'aggregate by namespace/provider/route + cost totals' },
   'rotate-key': { fn: receiptsRotateKey, help: 'rotate Ed25519 signer + record overlap window for verifying older receipts' },
 });

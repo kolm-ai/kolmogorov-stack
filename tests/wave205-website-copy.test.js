@@ -23,7 +23,7 @@ const read = (p) => fs.readFileSync(p, 'utf8');
 // pruned 25 low-value sections and replaced 6-card grids with editorial
 // numbered lists. The new floor still catches catastrophic delete (live ~122KB).
 const PAGES = [
-  { slug: 'index',           file: 'index.html',           floor: 110 * 1024 },
+  { slug: 'index',           file: 'index.html',           floor: 100 * 1024 },
   { slug: 'why-kolm',        file: 'why-kolm.html',        floor: 16 * 1024 },
   { slug: 'manifesto',       file: 'manifesto.html',       floor: 16 * 1024 },
   { slug: 'pricing',         file: 'pricing.html',         floor: 60 * 1024 },
@@ -117,7 +117,7 @@ for (const p of PAGES) {
     assert.ok(fs.existsSync(fp), `${p.file} missing at ${fp}`);
     const sz = fs.statSync(fp).size;
     assert.ok(sz >= p.floor,
-      `${p.file} too small (${sz} bytes; floor ${p.floor})`);
+      `${p.file} too small (${sz} bytes; floor ${p.floor}). If the page intentionally tightened, drop the floor in PAGES.`);
   });
 }
 

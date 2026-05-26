@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Studio &middot; Distill wizard &middot; kolm.ai</title>
+<meta name="description" content="The Studio distill wizard. Pick a teacher council, pick a base student model, pick a recipe, kick the run. Same compiler that powers `kolm distill` on the CLI.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/studio/distill">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<style>
+  /* S-9 Studio distill wizard. Cool slate only. Mirrors compile.html step-rail
+     pattern. Pick teacher -> base -> recipe -> confirm. Real fetch to
+     /v1/distill/from-captures (preview + run). */
+
+  .dwiz-wrap { max-width: 980px; margin: 0 auto; padding: 0 var(--ks-pad-x); }
+  .dwiz-head { padding: var(--ks-12) 0 var(--ks-6); }
+  .dwiz-eyebrow { font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ks-ink-3); margin: 0 0 var(--ks-3); }
+  .dwiz-h1 { font-size: clamp(28px, 3.4vw, 40px); font-weight: 560; line-height: 1.08; letter-spacing: -0.022em; color: var(--ks-ink); margin: 0 0 var(--ks-3); text-wrap: balance; }
+  .dwiz-lede { font-size: 16px; line-height: 1.6; color: var(--ks-ink-2); max-width: 62ch; margin: 0; }
+  .dwiz-lede code { font-family: var(--ks-mono); font-size: 0.92em; padding: 1px 6px; border-radius: 5px; background: var(--ks-accent-soft); color: var(--ks-ink); }
+
+  .dwiz-rail { display: flex; gap: 0; margin: var(--ks-8) 0 var(--ks-6); border-top: 1px solid var(--ks-line-2); border-bottom: 1px solid var(--ks-line-2); }
+  .dwiz-rail__pip { flex: 1; padding: var(--ks-4) var(--ks-3); border-left: 1px solid var(--ks-line-2); display: flex; flex-direction: column; gap: 4px; cursor: pointer; background: transparent; border-top: 0; border-right: 0; border-bottom: 0; text-align: left; font: inherit; color: var(--ks-ink-3); transition: background 140ms ease, color 140ms ease; }
+  .dwiz-rail__pip:first-child { border-left: 0; }
+  .dwiz-rail__pip:hover { background: var(--ks-bg-2); color: var(--ks-ink-2); }
+  .dwiz-rail__pip[aria-current="true"] { background: var(--ks-bg-1); color: var(--ks-ink); }
+  .dwiz-rail__num { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .dwiz-rail__label { font-size: 14px; font-weight: 520; }
+  .dwiz-rail__val { font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-ink-3); margin-top: 2px; min-height: 14px; }
+  .dwiz-rail__pip[data-done="true"] .dwiz-rail__val { color: var(--ks-ink); }
+
+  .dwiz-step { padding: var(--ks-8) 0 var(--ks-12); }
+  .dwiz-step[hidden] { display: none; }
+  .dwiz-step__h { font-size: 22px; font-weight: 560; letter-spacing: -0.012em; color: var(--ks-ink); margin: 0 0 var(--ks-2); }
+  .dwiz-step__p { font-size: 14.5px; line-height: 1.6; color: var(--ks-ink-2); margin: 0 0 var(--ks-6); max-width: 62ch; }
+
+  .dwiz-row { display: flex; gap: var(--ks-3); flex-wrap: wrap; align-items: center; }
+  .dwiz-input { flex: 1 1 280px; min-width: 0; padding: 10px 14px; border: 1px solid var(--ks-line-3); border-radius: var(--ks-r-md); background: var(--ks-bg-1); color: var(--ks-ink); font: inherit; font-size: 14.5px; font-family: var(--ks-mono); }
+  .dwiz-input:focus { outline: 2px solid var(--ks-accent-edge); outline-offset: 1px; border-color: var(--ks-accent-edge); }
+
+  .dwiz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--ks-3); margin-top: var(--ks-4); }
+  .dwiz-opt { padding: var(--ks-4); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); background: var(--ks-bg-1); cursor: pointer; display: flex; flex-direction: column; gap: 6px; text-align: left; font: inherit; color: inherit; transition: border-color 140ms ease, background 140ms ease; }
+  .dwiz-opt:hover { border-color: var(--ks-accent-edge); background: var(--ks-bg-2); }
+  .dwiz-opt[aria-pressed="true"] { border-color: var(--ks-ink); background: var(--ks-bg-1); box-shadow: inset 0 0 0 1px var(--ks-ink); }
+  .dwiz-opt__name { font-size: 15px; font-weight: 560; color: var(--ks-ink); }
+  .dwiz-opt__sub { font-size: 12.5px; color: var(--ks-ink-3); font-family: var(--ks-mono); }
+  .dwiz-opt__note { font-size: 12px; color: var(--ks-ink-2); font-family: var(--ks-mono); margin-top: auto; }
+
+  .dwiz-multi { display: flex; gap: var(--ks-2); flex-wrap: wrap; margin-top: var(--ks-3); }
+  .dwiz-chip { padding: 5px 12px; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-pill); background: var(--ks-bg-1); color: var(--ks-ink-2); font-family: var(--ks-mono); font-size: 12px; cursor: pointer; transition: border-color 140ms ease, color 140ms ease; }
+  .dwiz-chip[aria-pressed="true"] { border-color: var(--ks-ink); color: var(--ks-ink); background: var(--ks-bg-2); }
+
+  .dwiz-quote { padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); margin-top: var(--ks-5); }
+  .dwiz-quote__row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--ks-line-1); font-size: 13.5px; font-family: var(--ks-mono); }
+  .dwiz-quote__row:last-child { border-bottom: 0; }
+  .dwiz-quote__row span:first-child { color: var(--ks-ink-3); letter-spacing: 0.04em; text-transform: uppercase; font-size: 11.5px; padding-top: 1px; }
+  .dwiz-quote__row span:last-child { color: var(--ks-ink); font-variant-numeric: tabular-nums; }
+
+  .dwiz-console { margin-top: var(--ks-5); padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 13px; line-height: 1.55; color: var(--ks-ink-2); max-height: 320px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
+  .dwiz-console:empty::before { content: 'output appears here once you confirm.'; color: var(--ks-ink-3); }
+
+  .dwiz-actions { display: flex; gap: var(--ks-3); margin-top: var(--ks-6); flex-wrap: wrap; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dwiz-rail__pip, .dwiz-opt, .dwiz-chip { transition: none !important; }
+  }
+</style>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio" aria-current="page">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main">
+
+<div class="dwiz-wrap">
+  <header class="dwiz-head">
+    <p class="dwiz-eyebrow">Studio &middot; distill wizard</p>
+    <h1 class="dwiz-h1">Distill a teacher into a student in four steps.</h1>
+    <p class="dwiz-lede">Pick a teacher council &mdash; one model or a mix of frontier APIs. Pick a base student to train against. Pick a recipe (support, code, extraction, legal&hellip;). Confirm the preview, kick the run. Same backend as <code>kolm distill</code>; this is the browser face.</p>
+  </header>
+
+  <div class="dwiz-rail" role="tablist" aria-label="Distill steps">
+    <button class="dwiz-rail__pip" id="pip-1" role="tab" aria-current="true" data-done="false" type="button">
+      <span class="dwiz-rail__num">01 &middot; teachers</span>
+      <span class="dwiz-rail__label">Teacher council</span>
+      <span class="dwiz-rail__val" id="pip-1-val">&mdash;</span>
+    </button>
+    <button class="dwiz-rail__pip" id="pip-2" role="tab" data-done="false" type="button">
+      <span class="dwiz-rail__num">02 &middot; student</span>
+      <span class="dwiz-rail__label">Base model</span>
+      <span class="dwiz-rail__val" id="pip-2-val">&mdash;</span>
+    </button>
+    <button class="dwiz-rail__pip" id="pip-3" role="tab" data-done="false" type="button">
+      <span class="dwiz-rail__num">03 &middot; recipe</span>
+      <span class="dwiz-rail__label">Distill recipe</span>
+      <span class="dwiz-rail__val" id="pip-3-val">&mdash;</span>
+    </button>
+    <button class="dwiz-rail__pip" id="pip-4" role="tab" data-done="false" type="button">
+      <span class="dwiz-rail__num">04 &middot; run</span>
+      <span class="dwiz-rail__label">Preview &amp; confirm</span>
+      <span class="dwiz-rail__val" id="pip-4-val">&mdash;</span>
+    </button>
+  </div>
+
+  <section class="dwiz-step" id="step-1" role="tabpanel" aria-labelledby="pip-1">
+    <h2 class="dwiz-step__h">Which teacher(s)?</h2>
+    <p class="dwiz-step__p">A council of multiple teachers reduces single-model bias. Each teacher generates labels on your capture set; the student trains on the consensus. Pick one to start; mix later. Frontier API costs are paid by the keys you provide via <a href="/account/api-keys">/account/api-keys</a>.</p>
+    <div class="dwiz-grid" id="teacher-grid">
+      <button class="dwiz-opt" type="button" data-teacher="claude-opus-4-7" aria-pressed="true">
+        <span class="dwiz-opt__name">Claude Opus 4.7</span>
+        <span class="dwiz-opt__sub">anthropic &middot; reasoning + safety</span>
+        <span class="dwiz-opt__note">strong on long-form tasks</span>
+      </button>
+      <button class="dwiz-opt" type="button" data-teacher="claude-haiku-4-5" aria-pressed="false">
+        <span class="dwiz-opt__name">Claude Haiku 4.5</span>
+        <span class="dwiz-opt__sub">anthropic &middot; fast + cheap</span>
+        <span class="dwiz-opt__note">good for bulk classification</span>
+      </button>
+      <button class="dwiz-opt" type="button" data-teacher="gpt-4o" aria-pressed="false">
+        <span class="dwiz-opt__name">GPT-4o</span>
+        <span class="dwiz-opt__sub">openai &middot; general</span>
+        <span class="dwiz-opt__note">strong on extraction + tool use</span>
+      </button>
+      <button class="dwiz-opt" type="button" data-teacher="gpt-5" aria-pressed="false">
+        <span class="dwiz-opt__name">GPT-5</span>
+        <span class="dwiz-opt__sub">openai &middot; reasoning</span>
+        <span class="dwiz-opt__note">deep reasoning council partner</span>
+      </button>
+      <button class="dwiz-opt" type="button" data-teacher="deepseek-v3" aria-pressed="false">
+        <span class="dwiz-opt__name">DeepSeek V3</span>
+        <span class="dwiz-opt__sub">deepseek &middot; code + math</span>
+        <span class="dwiz-opt__note">low-cost code teacher</span>
+      </button>
+      <button class="dwiz-opt" type="button" data-teacher="gemini-2.5-pro" aria-pressed="false">
+        <span class="dwiz-opt__name">Gemini 2.5 Pro</span>
+        <span class="dwiz-opt__sub">google &middot; judge</span>
+        <span class="dwiz-opt__note">different lineage &mdash; good judge</span>
+      </button>
+    </div>
+    <p class="dwiz-step__p" style="margin-top:var(--ks-5);font-size:13.5px;">Tip: a 3-teacher council (e.g. Claude Opus + GPT-4o + DeepSeek V3) plus Gemini as judge is the Trinity recipe &mdash; see <a href="/docs/teacher-council">teacher council docs</a>.</p>
+    <div class="dwiz-actions">
+      <button class="ks-btn ks-btn--primary ks-btn--md" id="t-next" type="button">Next &rarr;</button>
+    </div>
+  </section>
+
+  <section class="dwiz-step" id="step-2" role="tabpanel" aria-labelledby="pip-2" hidden>
+    <h2 class="dwiz-step__h">Which base student?</h2>
+    <p class="dwiz-step__p">The student is what gets trained. Smaller = faster, cheaper, lower ceiling. Default to <code>Qwen3-8B</code> if unsure &mdash; it is the 2026 baseline. See the <a href="/studio">Studio matrix</a> for VRAM and INT4 sizes.</p>
+    <div class="dwiz-grid" id="student-grid">
+      <button class="dwiz-opt" type="button" data-student="Qwen/Qwen2.5-0.5B-Instruct" aria-pressed="false">
+        <span class="dwiz-opt__name">Qwen2.5-0.5B</span>
+        <span class="dwiz-opt__sub">0.93 GB &rarr; 0.44 GB INT4</span>
+        <span class="dwiz-opt__note">tiniest &middot; classifiers</span>
+      </button>
+      <button class="dwiz-opt" type="button" data-student="Qwen/Qwen2.5-3B-Instruct" aria-pressed="false">
+        <span class="dwiz-opt__name">Qwen2.5-3B</span>
+        <span class="dwiz-opt__sub">5.8 GB &rarr; 1.9 GB INT4</span>
+        <span class="dwiz-opt__note">support + extraction</span>
+      </button>
+      <button class="dwiz-opt" type="button" data-student="Qwen/Qwen2.5-7B-Instruct" aria-pressed="false">
+        <span class="dwiz-opt__name">Qwen2.5-7B</span>
+        <span class="dwiz-opt__sub">14.2 GB &rarr; 5.2 GB INT4</span>
+        <span class="dwiz-opt__note">harder reasoning</span>
+      </button>
+      <button class="dwiz-opt" type="button" data-student="Qwen/Qwen3-8B" aria-pressed="true">
+        <span class="dwiz-opt__name">Qwen3-8B (default)</span>
+        <span class="dwiz-opt__sub">~16 GB &rarr; ~5.5 GB INT4</span>
+        <span class="dwiz-opt__note">2026 baseline</span>
+      </button>
+      <button class="dwiz-opt" type="button" data-student="meta-llama/Llama-3.1-8B-Instruct" aria-pressed="false">
+        <span class="dwiz-opt__name">Llama-3.1-8B</span>
+        <span class="dwiz-opt__sub">~16 GB &rarr; ~5.5 GB INT4</span>
+        <span class="dwiz-opt__note">meta lineage, llama.cpp first</span>
+      </button>
+    </div>
+    <div class="dwiz-actions">
+      <button class="ks-btn ks-btn--ghost ks-btn--md" id="s-back" type="button">&larr; Back</button>
+      <button class="ks-btn ks-btn--primary ks-btn--md" id="s-next" type="button">Next &rarr;</button>
+    </div>
+  </section>
+
+  <section class="dwiz-step" id="step-3" role="tabpanel" aria-labelledby="pip-3" hidden>
+    <h2 class="dwiz-step__h">Which recipe?</h2>
+    <p class="dwiz-step__p">Recipes bundle the task framing, loss function, LoRA targets, and K-Score floor. Pick the closest fit; full catalog at <a href="/studio/recipes">/studio/recipes</a>. Custom recipes live as <code>spec.toml</code> in your repo &mdash; see <a href="/docs/forge/spec-toml">spec.toml docs</a>.</p>
+    <div class="dwiz-grid" id="recipe-grid">
+      <button class="dwiz-opt" type="button" data-recipe="support" aria-pressed="true">
+        <span class="dwiz-opt__name">Support (default)</span>
+        <span class="dwiz-opt__sub">trinity-500 lineage</span>
+        <span class="dwiz-opt__note">k-score floor 0.85 &middot; SFT+DPO</span>
+      </button>
+      <button class="dwiz-opt" type="button" data-recipe="code" aria-pressed="false">
+        <span class="dwiz-opt__name">Code</span>
+        <span class="dwiz-opt__sub">deepseek-coder shape</span>
+        <span class="dwiz-opt__note">k-score floor 0.82 &middot; FIM aware</span>
+      </button>
+      <button class="dwiz-opt" type="button" data-recipe="extraction" aria-pressed="false">
+        <span class="dwiz-opt__name">Extraction</span>
+        <span class="dwiz-opt__sub">structured JSON output</span>
+        <span class="dwiz-opt__note">k-score floor 0.90 &middot; schema-constrained</span>
+      </button>
+      <button class="dwiz-opt" type="button" data-recipe="legal" aria-pressed="false">
+        <span class="dwiz-opt__name">Legal</span>
+        <span class="dwiz-opt__sub">contract Q&amp;A + clause id</span>
+        <span class="dwiz-opt__note">k-score floor 0.88 &middot; citation gate</span>
+      </button>
+      <button class="dwiz-opt" type="button" data-recipe="classify" aria-pressed="false">
+        <span class="dwiz-opt__name">Classify</span>
+        <span class="dwiz-opt__sub">single-label routing</span>
+        <span class="dwiz-opt__note">k-score floor 0.92 &middot; small student OK</span>
+      </button>
+      <button class="dwiz-opt" type="button" data-recipe="general" aria-pressed="false">
+        <span class="dwiz-opt__name">General SFT</span>
+        <span class="dwiz-opt__sub">no special framing</span>
+        <span class="dwiz-opt__note">k-score floor 0.80 &middot; baseline</span>
+      </button>
+    </div>
+    <div class="dwiz-row" style="margin-top:var(--ks-5);">
+      <input class="dwiz-input" type="text" id="ns-input" placeholder="namespace (e.g. support, extraction, inbox)" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="dwiz-actions">
+      <button class="ks-btn ks-btn--ghost ks-btn--md" id="r-back" type="button">&larr; Back</button>
+      <button class="ks-btn ks-btn--primary ks-btn--md" id="r-next" type="button">Next &rarr;</button>
+    </div>
+  </section>
+
+  <section class="dwiz-step" id="step-4" role="tabpanel" aria-labelledby="pip-4" hidden>
+    <h2 class="dwiz-step__h">Review the preview, then confirm.</h2>
+    <p class="dwiz-step__p">Preview reads from your captures and estimates the cost based on token counts and teacher pricing. The number is conservative. Once you confirm, the run lands in <a href="/studio/distill-status">/studio/distill-status</a>.</p>
+    <div class="dwiz-quote" id="quote">
+      <div class="dwiz-quote__row"><span>Namespace</span><span id="q-ns">&mdash;</span></div>
+      <div class="dwiz-quote__row"><span>Teachers</span><span id="q-teachers">&mdash;</span></div>
+      <div class="dwiz-quote__row"><span>Student</span><span id="q-student">&mdash;</span></div>
+      <div class="dwiz-quote__row"><span>Recipe</span><span id="q-recipe">&mdash;</span></div>
+      <div class="dwiz-quote__row"><span>Captures (est.)</span><span id="q-caps">&mdash;</span></div>
+      <div class="dwiz-quote__row"><span>Cost (est.)</span><span id="q-cost">&mdash;</span></div>
+      <div class="dwiz-quote__row"><span>K-Score floor</span><span id="q-floor">&mdash;</span></div>
+    </div>
+    <div class="dwiz-actions">
+      <button class="ks-btn ks-btn--ghost ks-btn--md" id="q-back" type="button">&larr; Back</button>
+      <button class="ks-btn ks-btn--ghost ks-btn--md" id="q-refresh" type="button">Refresh preview</button>
+      <button class="ks-btn ks-btn--primary ks-btn--md" id="q-confirm" type="button">Confirm &amp; run</button>
+      <a class="ks-btn ks-btn--link ks-btn--md" href="/studio/distill-status">View runs &rarr;</a>
+    </div>
+    <div class="dwiz-console" id="console" aria-live="polite" aria-atomic="false"></div>
+  </section>
+</div>
+
+</main>
+
+<footer style="border-top:1px solid var(--ks-line-2);padding:var(--ks-8) 0;margin-top:var(--ks-12);text-align:center;font-family:var(--ks-mono);font-size:12px;color:var(--ks-ink-3)">
+  <p style="margin:0">Studio &middot; distill &middot; <a href="/studio" style="color:var(--ks-ink-2);border-bottom:1px solid var(--ks-line-3)">hub</a> &middot; <a href="/docs/teacher-council" style="color:var(--ks-ink-2);border-bottom:1px solid var(--ks-line-3)">teacher council docs</a> &middot; <a href="/docs/progressive-distill" style="color:var(--ks-ink-2);border-bottom:1px solid var(--ks-line-3)">distill docs</a> &middot; CLI: <code style="color:var(--ks-ink)">kolm distill</code></p>
+</footer>
+
+<script>
+(function(){
+  var state = { teachers: ['claude-opus-4-7'], student: 'Qwen/Qwen3-8B', recipe: 'support', ns: '' };
+  var floors = { support: 0.85, code: 0.82, extraction: 0.90, legal: 0.88, classify: 0.92, general: 0.80 };
+
+  function showStep(n){
+    for (var i=1; i<=4; i++) {
+      var sec = document.getElementById('step-'+i);
+      if (sec) sec.hidden = (i !== n);
+      var pip = document.getElementById('pip-'+i);
+      if (pip) pip.setAttribute('aria-current', i === n ? 'true' : 'false');
+    }
+  }
+  function setDone(n, val){
+    var pip = document.getElementById('pip-'+n);
+    var sl = document.getElementById('pip-'+n+'-val');
+    if (pip) pip.setAttribute('data-done', val ? 'true' : 'false');
+    if (sl) sl.textContent = val || '—';
+  }
+
+  for (var i=1; i<=4; i++) (function(n){
+    var pip = document.getElementById('pip-'+n);
+    if (!pip) return;
+    pip.addEventListener('click', function(){
+      var ok = true;
+      if (n >= 2 && !state.teachers.length) ok = false;
+      if (n >= 3 && !state.student) ok = false;
+      if (n >= 4 && !state.recipe) ok = false;
+      if (ok) showStep(n);
+    });
+  })(i);
+
+  // Step 1 — teachers (multi-select)
+  var tgrid = document.getElementById('teacher-grid');
+  tgrid.addEventListener('click', function(e){
+    var btn = e.target.closest('.dwiz-opt');
+    if (!btn) return;
+    var id = btn.getAttribute('data-teacher');
+    var on = btn.getAttribute('aria-pressed') === 'true';
+    btn.setAttribute('aria-pressed', on ? 'false' : 'true');
+    if (on) state.teachers = state.teachers.filter(function(t){ return t !== id; });
+    else state.teachers.push(id);
+    setDone(1, state.teachers.length ? state.teachers.length + (state.teachers.length === 1 ? ' teacher' : ' teachers') : '');
+  });
+  setDone(1, '1 teacher');
+  document.getElementById('t-next').addEventListener('click', function(){
+    if (!state.teachers.length) { alert('pick at least one teacher.'); return; }
+    showStep(2);
+  });
+
+  // Step 2 — student
+  var sgrid = document.getElementById('student-grid');
+  function setStudentLabel(){
+    var btn = sgrid.querySelector('.dwiz-opt[aria-pressed="true"]');
+    setDone(2, btn ? (btn.querySelector('.dwiz-opt__name').textContent.replace(' (default)', '').trim()) : '');
+  }
+  setStudentLabel();
+  sgrid.addEventListener('click', function(e){
+    var btn = e.target.closest('.dwiz-opt');
+    if (!btn) return;
+    var all = sgrid.querySelectorAll('.dwiz-opt');
+    for (var i=0; i<all.length; i++) all[i].setAttribute('aria-pressed', 'false');
+    btn.setAttribute('aria-pressed', 'true');
+    state.student = btn.getAttribute('data-student');
+    setStudentLabel();
+  });
+  document.getElementById('s-back').addEventListener('click', function(){ showStep(1); });
+  document.getElementById('s-next').addEventListener('click', function(){ if (state.student) showStep(3); });
+
+  // Step 3 — recipe + namespace
+  var rgrid = document.getElementById('recipe-grid');
+  setDone(3, 'support');
+  rgrid.addEventListener('click', function(e){
+    var btn = e.target.closest('.dwiz-opt');
+    if (!btn) return;
+    var all = rgrid.querySelectorAll('.dwiz-opt');
+    for (var i=0; i<all.length; i++) all[i].setAttribute('aria-pressed', 'false');
+    btn.setAttribute('aria-pressed', 'true');
+    state.recipe = btn.getAttribute('data-recipe');
+    setDone(3, btn.querySelector('.dwiz-opt__name').textContent.replace(' (default)', '').trim());
+  });
+  document.getElementById('r-back').addEventListener('click', function(){ showStep(2); });
+  document.getElementById('r-next').addEventListener('click', function(){
+    var ns = (document.getElementById('ns-input').value || '').trim();
+    if (!ns) { document.getElementById('ns-input').focus(); alert('namespace required.'); return; }
+    if (!/^[a-z0-9][a-z0-9_.-]{0,63}$/i.test(ns)) { alert('namespace must be a-z, 0-9, dot, dash, underscore (max 64 chars).'); return; }
+    state.ns = ns;
+    showStep(4);
+    refreshQuote();
+  });
+
+  // Step 4 — preview + confirm
+  function setRow(id, v){ var el = document.getElementById(id); if (el) el.textContent = v == null ? '—' : v; }
+  function logLine(s){
+    var c = document.getElementById('console');
+    c.textContent += (c.textContent ? '\n' : '') + s;
+    c.scrollTop = c.scrollHeight;
+  }
+  function clearLog(){ document.getElementById('console').textContent = ''; }
+
+  function apiKey(){
+    try {
+      return localStorage.getItem('kolm-key') || localStorage.getItem('ks_api_key')
+          || localStorage.getItem('kolm_api_key') || localStorage.getItem('KOLM_API_KEY');
+    } catch (_) { return null; }
+  }
+  function kf(path, opts){
+    var headers = Object.assign({ accept: 'application/json' }, (opts && opts.headers) || {});
+    var key = apiKey();
+    if (key) headers['Authorization'] = 'Bearer ' + key;
+    return fetch(path, Object.assign({ credentials: 'include' }, opts || {}, { headers: headers }));
+  }
+
+  async function refreshQuote(){
+    setRow('q-ns', state.ns);
+    setRow('q-teachers', state.teachers.join(', '));
+    setRow('q-student', state.student);
+    setRow('q-recipe', state.recipe);
+    setRow('q-floor', String(floors[state.recipe] || 0.80));
+    setRow('q-caps', '…');
+    setRow('q-cost', '…');
+    setDone(4, 'previewing');
+    try {
+      var url = '/v1/distill/from-captures/preview?namespace=' + encodeURIComponent(state.ns);
+      var resp = await kf(url);
+      if (resp.ok) {
+        var body = await resp.json();
+        var caps = body.capture_count != null ? body.capture_count : (body.count || '—');
+        var cost = body.estimated_cost_usd != null ? '$' + Number(body.estimated_cost_usd).toFixed(2)
+                 : (body.cost_usd != null ? '$' + Number(body.cost_usd).toFixed(2) : '(varies)');
+        setRow('q-caps', caps);
+        setRow('q-cost', cost);
+        setDone(4, cost);
+      } else if (resp.status === 401 || resp.status === 403) {
+        setRow('q-caps', 'not signed in');
+        setRow('q-cost', 'sign in to preview');
+        setDone(4, 'auth needed');
+      } else {
+        var t = await resp.text();
+        setRow('q-caps', 'http ' + resp.status);
+        setRow('q-cost', '—');
+        setDone(4, 'preview error');
+      }
+    } catch (e) {
+      setRow('q-caps', 'fetch failed');
+      setRow('q-cost', '—');
+      setDone(4, 'error');
+    }
+  }
+
+  document.getElementById('q-back').addEventListener('click', function(){ showStep(3); });
+  document.getElementById('q-refresh').addEventListener('click', refreshQuote);
+
+  document.getElementById('q-confirm').addEventListener('click', async function(){
+    var btn = document.getElementById('q-confirm');
+    btn.disabled = true;
+    btn.textContent = 'dispatching…';
+    clearLog();
+    logLine('[distill] dispatching run');
+    logLine('[distill] namespace=' + state.ns);
+    logLine('[distill] teachers=' + state.teachers.join(','));
+    logLine('[distill] student=' + state.student);
+    logLine('[distill] recipe=' + state.recipe);
+    try {
+      var resp = await kf('/v1/distill/from-captures', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          namespace: state.ns,
+          teachers: state.teachers,
+          base_model: state.student,
+          recipe: state.recipe,
+          k_score_floor: floors[state.recipe] || 0.80,
+        }),
+      });
+      var body = await resp.json().catch(function(){ return {}; });
+      if (resp.ok) {
+        var rid = body.run_id || body.id || body.job_id || '(no id returned)';
+        logLine('[distill] dispatched');
+        logLine('  run_id: ' + rid);
+        logLine('');
+        logLine('track every run at /studio/distill-status (live polling)');
+        setDone(4, 'dispatched');
+      } else if (resp.status === 401 || resp.status === 403) {
+        logLine('[distill] not signed in. sign in or run from the CLI:');
+        logLine('  kolm distill --namespace ' + state.ns + ' --teachers ' + state.teachers.join(',') + ' --base ' + state.student + ' --recipe ' + state.recipe);
+      } else {
+        logLine('[distill] http ' + resp.status + ': ' + (body.error || body.reason || JSON.stringify(body)));
+        if (body.next_step) logLine('  next: ' + body.next_step);
+      }
+    } catch (e) {
+      logLine('[distill] fetch failed: ' + (e && e.message || e));
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Confirm & run';
+    }
+  });
+
+  showStep(1);
+})();
+</script>
+
+</body>
+</html>

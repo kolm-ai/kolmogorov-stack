@@ -6,14 +6,21 @@
 // accounts/fireworks/models/mixtral-8x22b-instruct,
 // accounts/fireworks/models/deepseek-r1, and many community-served weights.
 //
+// W-N hardening: shared hardenedFetch — 429+backoff (max 3 retries, exp
+// schedule 500/1500/4500 ms each capped by Retry-After), AbortController
+// timeoutMs (default 60s, clamped 1-300s), malformed-JSON envelope,
+// OpenAI-compat body normalizer.
+//
 // Contract mirrors src/capture.js forwardOpenAI: returns
 //   { status: <http status int>, json: <parsed body or {_raw}>, elapsed_us }
 // Never throws on non-2xx — upstream errors flow through as-is so the
-// gateway can sign + capture them. Throws ONLY on transport failure.
+// gateway can sign + capture them. Never throws on transport failure.
+
+import { hardenedFetch, buildOpenAICompatBody, DEFAULT_TIMEOUT_MS } from './_shared.js';
 
 const FIREWORKS_DEFAULT_BASE = 'https://api.fireworks.ai';
 
-export async function forward({ url, body, upstreamKey, base }) {
+export async function forward({ url, body, upstreamKey, base, timeoutMs } = {}) {
   if (!upstreamKey) {
     return {
       status: 401,
@@ -21,21 +28,19 @@ export async function forward({ url, body, upstreamKey, base }) {
     };
   }
   const target = url || `${base || FIREWORKS_DEFAULT_BASE}/inference/v1/chat/completions`;
-  const t0 = process.hrtime.bigint();
-  const res = await fetch(target, {
+  const shapedBody = buildOpenAICompatBody(body);
+  return hardenedFetch({
+    url: target,
     method: 'POST',
     headers: {
       'authorization': `Bearer ${upstreamKey}`,
       'content-type': 'application/json',
       'accept': 'application/json',
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify(shapedBody),
+    timeoutMs: timeoutMs || DEFAULT_TIMEOUT_MS,
+    requireJson: true,
   });
-  const text = await res.text();
-  let json;
-  try { json = JSON.parse(text); } catch (_) { json = { _raw: text }; }
-  const elapsed_us = Math.round(Number(process.hrtime.bigint() - t0) / 1000);
-  return { status: res.status, json, elapsed_us };
 }
 
 export const PROVIDER_ID = 'fireworks';

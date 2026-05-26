@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>Deploy: Docker Compose &middot; kolm.ai</title>
+<meta name="description" content="Generate a docker-compose.yml from a compiled .kolm artifact. Hand-rolled YAML with healthcheck, GPU reservation, and an optional NGINX TLS terminator block.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Deploy: Docker Compose &middot; kolm.ai">
+<meta property="og:description" content="Hand-rolled YAML with healthcheck, GPU reservation, and an optional NGINX TLS terminator block.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/deploy-docker-compose">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Deploy: Docker Compose &middot; kolm.ai">
+<meta name="twitter:description" content="Hand-rolled YAML with healthcheck, GPU reservation, and an optional NGINX TLS terminator block.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/docs/deploy-docker-compose">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230,233,238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#0e7490;--accent-soft:rgba(14,116,144,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#0e7490;--accent-soft:rgba(14,116,144,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+td code{font-size:12px}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:14px 18px;margin:18px 0;border-radius:0 8px 8px 0;max-width:780px;color:var(--ink-mute);font-size:14.5px}
+.callout strong{color:var(--ink)}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/docs-shell.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/docs-shell.js"></script>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / <a href="/docs/govern-overview">govern</a> / deploy-docker-compose</div>
+<p class="eyebrow">Run &amp; Govern / Docker Compose</p>
+<h1>One compose file, two runtime choices, one health endpoint.</h1>
+<p class="lede"><code>generateDockerCompose</code> in <code>src/deploy-generators.js</code> emits a deterministic docker-compose.yml for a compiled <code>.kolm</code> artifact. Pick vLLM or llama.cpp; the generator wires a healthcheck, mounts the model read-only, reserves an NVIDIA GPU, and ships a commented-out NGINX TLS terminator block you can flip on with two lines.</p>
+
+<h2 id="cli">CLI</h2>
+<pre><code># Emit to stdout.
+kolm deploy compose ./artifact.kolm --runtime vllm
+
+# Write to a file and the model bind directory.
+kolm deploy compose ./artifact.kolm --runtime llama.cpp --out ./deploy/
+
+# Custom port.
+kolm deploy compose ./artifact.kolm --runtime vllm --port 18080</code></pre>
+
+<h2 id="vllm-output">vLLM output (excerpt)</h2>
+<pre><code># kolm deploy &mdash; docker-compose (vllm)
+# artifact: support-7b-q4km
+# generator: r4-v1
+#
+# Place your model files under ./models/support-7b-q4km before `docker compose up`.
+# Container expects to find the model at /models/support-7b-q4km.
+
+services:
+  kolm-runtime:
+    image: vllm/vllm-openai:latest
+    container_name: kolm-support-7b-q4km
+    restart: unless-stopped
+    runtime: nvidia                 # remove if you do not have NVIDIA Container Toolkit
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      - HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN:-}
+      - VLLM_NO_USAGE_STATS=1
+    command:
+      - --model
+      - /models/support-7b-q4km
+      - --port
+      - "8000"
+      - --host
+      - "0.0.0.0"
+      - --served-model-name
+      - "support-7b-q4km"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models/support-7b-q4km:/models/support-7b-q4km:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s</code></pre>
+
+<h2 id="llamacpp-output">llama.cpp output (excerpt)</h2>
+<pre><code>services:
+  kolm-runtime:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    container_name: kolm-support-7b-q4km
+    restart: unless-stopped
+    command:
+      - "--model"
+      - "/models/support-7b-q4km"
+      - "--port"
+      - "8000"
+      - "--host"
+      - "0.0.0.0"
+      - "--alias"
+      - "support-7b-q4km"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models/support-7b-q4km:/models/support-7b-q4km:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s</code></pre>
+
+<h2 id="tls">Adding TLS</h2>
+<p>The generator ships a fully-commented NGINX block at the bottom of the compose file. Uncomment, fill in cert paths, and drop an <code>nginx.conf</code> that proxies to <code>http://kolm-runtime:&lt;port&gt;</code>:</p>
+<pre><code>  nginx-tls:
+    image: nginx:1.27-alpine
+    container_name: kolm-tls
+    restart: unless-stopped
+    depends_on:
+      kolm-runtime:
+        condition: service_healthy
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/ssl/kolm.pem:/etc/ssl/kolm.pem:ro
+      - /etc/ssl/kolm.key:/etc/ssl/kolm.key:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost/health >/dev/null || exit 1"]
+      interval: 30s</code></pre>
+
+<h2 id="defaults">Defaults</h2>
+<table>
+  <thead><tr><th>Field</th><th>Default</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>runtime</code></td><td><code>vllm</code></td><td>One of <code>vllm</code> or <code>llama.cpp</code>.</td></tr>
+    <tr><td><code>port</code></td><td><code>8000</code></td><td>The compose file maps host:container 1:1.</td></tr>
+    <tr><td><code>model_path</code></td><td><code>/models/&lt;safe_artifact&gt;</code></td><td>Inside-container mount path.</td></tr>
+    <tr><td><code>host bind</code></td><td><code>./models/&lt;safe_artifact&gt;</code></td><td>Relative to the compose-up cwd.</td></tr>
+    <tr><td><code>healthcheck</code></td><td>30s interval / 5s timeout / 5 retries</td><td>vLLM gets a longer 60s start period.</td></tr>
+    <tr><td><code>GPU</code></td><td>1 NVIDIA device reserved</td><td>Remove the <code>runtime: nvidia</code> line if you have no NVIDIA Container Toolkit.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="programmatic">Programmatic use</h2>
+<pre><code>import { generateDockerCompose } from 'kolmogorov-stack/src/deploy-generators.js';
+
+const yaml = generateDockerCompose({
+  artifact:   'support-7b-q4km',
+  runtime:    'vllm',
+  port:       8000,
+});
+fs.writeFileSync('./docker-compose.yml', yaml);</code></pre>
+
+<div class="callout"><strong>Limitations.</strong> The compose file does not pull the model from a registry. Place the artifact bytes under <code>./models/&lt;safe_artifact&gt;</code> before <code>docker compose up</code>. For an automated pull-on-boot init pattern, use the <a href="/docs/deploy-kubernetes">Kubernetes manifests</a> (they ship a Job that calls your registry).</div>
+
+<div class="related">
+  <a href="/docs/deploy-kubernetes"><b>Kubernetes &rarr;</b><span>Same shape, multi-doc YAML for cluster apply.</span></a>
+  <a href="/docs/deploy-vllm"><b>vLLM config &rarr;</b><span>JSON for <code>vllm serve --config-file</code>.</span></a>
+  <a href="/docs/deploy-airgap"><b>Air-gap bundle &rarr;</b><span>A real tar.gz with the runtime installer bundled.</span></a>
+</div>
+
+</div></main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/gateway">Gateway</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/docs/gateway">Gateway docs</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

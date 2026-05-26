@@ -39,8 +39,11 @@
 
   /* ──────────────── WF26 announcement bar — disabled W838 ────────────────
      User killed the "Kolm v1.0 / DeepSeek-R1 32B distilled to INT4 in 125s"
-     banner. The page is the message; no banner needed above it. */
-  function installAnnouncementBar() { /* no-op */ }
+     banner. The page is the message; no banner needed above it.
+     The dismiss-persistence helper is kept (called by future banners) so the
+     storage contract stays stable across re-enable cycles. */
+  function dismissAnnouncement(reason) { storeSet(ANNOUNCE_KEY, String(reason || '1')); }
+  function installAnnouncementBar() { /* no-op; dismissAnnouncement available */ }
 
   /* ──────────────── WF04 sticky-scroll nav ──────────────── */
   function installStickyNav() {

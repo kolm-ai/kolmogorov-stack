@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>Self-hosted deploy &mdash; every env var, every secret &middot; kolm.ai</title>
+<meta name="description" content="Full reference for self-hosted kolm gateway: every environment variable, every secret, every volume mount, every port. No managed-only knobs, no surprises after install.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Self-hosted deploy &mdash; every env var, every secret &middot; kolm.ai">
+<meta property="og:description" content="Full reference for self-hosted kolm gateway: every environment variable, every secret, every volume mount, every port.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/self-hosted-deploy-complete">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/docs/self-hosted-deploy-complete">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230,233,238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--accent-soft:rgba(17,17,17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px;max-width:780px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+td code{font-size:12px}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px;max-width:920px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / self-hosted-deploy-complete</div>
+<p class="eyebrow">Wrapper / Gateway</p>
+<h1>Self-hosted deploy reference.</h1>
+<p class="lede">Every environment variable, every secret, every port, every volume mount that the self-hosted gateway accepts. Copy the table, run the docker-compose or Helm install, and the gateway boots with no managed-only knobs hidden behind a paywall.</p>
+
+<h2 id="required-env">Required environment</h2>
+<table>
+  <thead><tr><th>Variable</th><th>Purpose</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td><code>KOLM_DATA_DIR</code></td><td>Where the receipt log, capture lake, and artifact store live. Must persist across restarts.</td><td><code>/var/lib/kolm</code></td></tr>
+    <tr><td><code>KOLM_LISTEN</code></td><td>Bind address for the gateway.</td><td><code>0.0.0.0:8080</code></td></tr>
+    <tr><td><code>KOLM_SIGNING_KEY</code></td><td>Ed25519 private key used to sign receipts and artifacts. Rotate via <code>kolm key rotate</code>.</td><td>file <code>/run/secrets/kolm-signing-key</code></td></tr>
+    <tr><td><code>KOLM_DATABASE_URL</code></td><td>Postgres or SQLite for tenant + key metadata.</td><td><code>postgres://kolm@db:5432/kolm</code></td></tr>
+  </tbody>
+</table>
+
+<h2 id="optional-env">Optional environment</h2>
+<table>
+  <thead><tr><th>Variable</th><th>Default</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>KOLM_LOG_LEVEL</code></td><td><code>info</code></td><td><code>debug</code>, <code>info</code>, <code>warn</code>, <code>error</code></td></tr>
+    <tr><td><code>KOLM_CAPTURE_PII_MODE</code></td><td><code>redact</code></td><td><code>off</code> | <code>redact</code> | <code>hash</code> | <code>vault</code></td></tr>
+    <tr><td><code>KOLM_RECEIPT_ANCHOR</code></td><td><code>none</code></td><td><code>none</code> | <code>s3</code> | <code>gcs</code> | <code>cosmos</code> | <code>filecoin</code></td></tr>
+    <tr><td><code>KOLM_RATE_LIMIT_RPS</code></td><td><code>100</code></td><td>Per tenant, per second. Burst is 4&times;.</td></tr>
+    <tr><td><code>KOLM_TEACHER_ROUTING</code></td><td><code>direct</code></td><td><code>direct</code>, <code>proxy</code>, <code>airgap</code></td></tr>
+    <tr><td><code>KOLM_TELEMETRY</code></td><td><code>off</code></td><td>Self-hosted defaults to off. Opt-in sends version + counter metrics, never payload bytes.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="secrets">Secrets (provider keys, optional)</h2>
+<p>Only set the providers you actually route to.</p>
+<pre><code>ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-proj-...
+GOOGLE_API_KEY=AIza...
+DEEPSEEK_API_KEY=sk-...
+COHERE_API_KEY=...
+MISTRAL_API_KEY=...</code></pre>
+
+<h2 id="ports-volumes">Ports and volumes</h2>
+<table>
+  <thead><tr><th>Port</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>8080</code></td><td>Gateway HTTP (set via <code>KOLM_LISTEN</code>)</td></tr>
+    <tr><td><code>8090</code></td><td>Prometheus <code>/metrics</code> (opt-in via <code>KOLM_METRICS_LISTEN</code>)</td></tr>
+    <tr><td><code>8091</code></td><td>Admin TUI socket (Unix domain by default)</td></tr>
+  </tbody>
+</table>
+<p>Volume mounts: <code>/var/lib/kolm</code> (data dir), <code>/run/secrets</code> (signing key + provider keys), <code>/etc/kolm/spec.toml</code> (compiled spec, read-only).</p>
+
+<h2 id="install">Install</h2>
+<pre><code># docker-compose
+# download from https://github.com/sneaky-hippo/kolmogorov-stack/releases/compose.yml &gt; compose.yml
+docker compose up -d
+
+# Helm
+helm repo add kolm https://kolm.ai/charts
+helm install kolm-gateway kolm/gateway \
+  --set signingKey=$(cat signing.key) \
+  --set database.url=postgres://...</code></pre>
+
+<h2 id="next">Next</h2>
+<div class="related">
+  <a href="/docs/gateway-byoc"><b>Air-gapped &rarr;</b><span>Bundle the install for fully offline networks.</span></a>
+  <a href="/docs/passport"><b>Passport &rarr;</b><span>What the gateway exposes about itself.</span></a>
+  <a href="/docs/procurement"><b>Procurement &rarr;</b><span>Pre-fill the SIG / CAIQ from this deployment.</span></a>
+</div>
+
+</div></main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/gateway">Gateway</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/docs/gateway">Gateway docs</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -5,6 +5,10 @@
 // just "did it emit JSON"), a hard wall-clock ceiling so the driver can
 // never hang, and per-gate progress so the user always knows where it is.
 //
+// --json mode contract (W526): emit exactly one machine-readable JSON line
+// on stdout summarizing every gate; route all progress chatter to stderr so
+// downstream consumers can JSON.parse stdout without stripping prelude.
+//
 // Gates, in order:
 //   1.  npm run lint:refs                (static-ref + href integrity + product-surface
 //                                         catalog vs api-routes.json contract)

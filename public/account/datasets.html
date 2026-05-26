@@ -63,11 +63,12 @@
     <link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
@@ -104,7 +105,7 @@
 <details id="upload-panel" style="margin:18px 0 24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px 16px">
 <summary style="cursor:pointer;font-size:14px;color:var(--ink);font-weight:600">Upload a JSONL corpus &darr;</summary>
 <p class="lede" style="margin:10px 0 8px;font-size:13px">
-  Drop a JSONL file (one <code>{"input": "...", "output": "..."}</code> per line) to bulk-import captures into the selected namespace. After ingest, click "Create from accepted labels" above. Max 200 rows per batch &mdash; larger files are chunked automatically.
+  Drop a JSONL file (one <code>{"input": "...", "output": "..."}</code> per line) to bulk-import captures into the selected namespace. After ingest, click "Create from accepted labels" above. Max 200 rows per batch - larger files are chunked automatically.
 </p>
 <div id="drop-zone" style="border:2px dashed var(--line-strong);border-radius:8px;padding:24px;text-align:center;color:var(--ink-mute);font-family:var(--mono);font-size:13px;cursor:pointer;transition:all 0.2s">
   drag a .jsonl file here, or click to pick &middot;
@@ -162,7 +163,7 @@ document.getElementById("btn-create").addEventListener("click",function(){
   window.kfetch("/v1/datasets",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({namespace:ns,name:name||null,source:"accepted_labels"})}).then(refresh).catch(function(e){alert("create failed: "+e.message);});
 });
 
-// W859 — bulk JSONL upload. Reads file client-side, splits into <=200-row
+// W859 - bulk JSONL upload. Reads file client-side, splits into <=200-row
 // batches, posts each to /v1/capture/log. No server-side upload route needed
 // because capture/log is the authoritative ingest path.
 (function(){
@@ -235,7 +236,7 @@ document.getElementById("btn-create").addEventListener("click",function(){
   <div class="ks-wrap">
     <div class="ks-footer__grid">
       <div>
-        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
         <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
       </div>
       <div>

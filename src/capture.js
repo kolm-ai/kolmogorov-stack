@@ -14,6 +14,16 @@
 // produced by distill ships to the customer; no copy is retained.
 
 import crypto from 'node:crypto';
+// W-N — shared fetch hardening: 429+backoff retries (max 3), AbortController
+// timeouts (default 60s, clamped 1-300s), malformed-JSON envelopes. Used by
+// forwardAnthropic / forwardOpenAI / forwardOpenRouter below alongside the
+// W-M Vercel teacher-chat proxy fallback (which is in this file).
+import {
+  hardenedFetch as _w_N_hardenedFetch,
+  buildOpenAICompatBody as _w_N_buildOpenAICompatBody,
+  buildAnthropicBody as _w_N_buildAnthropicBody,
+  DEFAULT_TIMEOUT_MS as _W_N_DEFAULT_TIMEOUT_MS,
+} from './providers/_shared.js';
 // W784 — Capture-processor plugin discovery. captureProcessorPlugins() returns
 // plugins of kind "capture-processor" so the gateway can fold third-party
 // transformers (e.g. domain-specific PII redactors) into the capture pipeline.
@@ -270,50 +280,53 @@ async function _proxyViaTeacherChat({ vendor, body, proxyBearer, proxyBase }) {
 // arrives in `x-upstream-api-key`; we use it and never log it. When no
 // key is configured AND a proxyBearer is provided, fall back to the
 // Vercel /v1/teacher/chat function which has the keys (see W-M above).
-export async function forwardAnthropic({ url, body, upstreamKey, anthropicVersion, proxyBearer, proxyBase }) {
+export async function forwardAnthropic({ url, body, upstreamKey, anthropicVersion, proxyBearer, proxyBase, timeoutMs }) {
   if (!upstreamKey) {
     if (proxyBearer) return _proxyViaTeacherChat({ vendor: 'anthropic', body, proxyBearer, proxyBase });
     return { status: 401, json: { error: { type: 'no_upstream_key', message: 'pass your Anthropic key in x-upstream-api-key' } } };
   }
-  const t0 = process.hrtime.bigint();
-  const res = await fetch(url, {
+  // W-N: normalize string `content` to content-block form per Anthropic
+  // Messages API docs ([{type:'text', text}]). Pass-through temperature,
+  // top_p, max_tokens, stop_sequences, tools, system. String `stop` maps
+  // to `stop_sequences` so OpenAI-style callers keep working.
+  const shapedBody = _w_N_buildAnthropicBody(body);
+  return _w_N_hardenedFetch({
+    url,
     method: 'POST',
     headers: {
       'x-api-key': upstreamKey,
       'anthropic-version': anthropicVersion || '2023-06-01',
       'content-type': 'application/json',
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify(shapedBody),
+    timeoutMs: timeoutMs || _W_N_DEFAULT_TIMEOUT_MS,
+    requireJson: true,
   });
-  const text = await res.text();
-  let json;
-  try { json = JSON.parse(text); } catch (_) { json = { _raw: text }; }
-  const elapsed_us = Math.round(Number(process.hrtime.bigint() - t0) / 1000);
-  return { status: res.status, json, elapsed_us };
 }
 
-export async function forwardOpenAI({ url, body, upstreamKey, proxyBearer, proxyBase }) {
+export async function forwardOpenAI({ url, body, upstreamKey, proxyBearer, proxyBase, timeoutMs }) {
   if (!upstreamKey) {
     if (proxyBearer) return _proxyViaTeacherChat({ vendor: 'openai', body, proxyBearer, proxyBase });
     return { status: 401, json: { error: { type: 'no_upstream_key', message: 'pass your OpenAI key in x-upstream-api-key' } } };
   }
-  const t0 = process.hrtime.bigint();
-  const res = await fetch(url, {
+  // W-N: pass-through temperature / top_p / stop / tools / response_format
+  // and map `max_tokens` -> `max_completion_tokens` for the o-series + gpt-5
+  // reasoning models. Other model families keep `max_tokens` unchanged.
+  const shapedBody = _w_N_buildOpenAICompatBody(body);
+  return _w_N_hardenedFetch({
+    url,
     method: 'POST',
     headers: {
       'authorization': `Bearer ${upstreamKey}`,
       'content-type': 'application/json',
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify(shapedBody),
+    timeoutMs: timeoutMs || _W_N_DEFAULT_TIMEOUT_MS,
+    requireJson: true,
   });
-  const text = await res.text();
-  let json;
-  try { json = JSON.parse(text); } catch (_) { json = { _raw: text }; }
-  const elapsed_us = Math.round(Number(process.hrtime.bigint() - t0) / 1000);
-  return { status: res.status, json, elapsed_us };
 }
 
-export async function forwardOpenRouter({ url, body, upstreamKey, referer = 'https://kolm.ai', title = 'kolm.ai', categories = '', proxyBearer, proxyBase }) {
+export async function forwardOpenRouter({ url, body, upstreamKey, referer = 'https://kolm.ai', title = 'kolm.ai', categories = '', proxyBearer, proxyBase, timeoutMs }) {
   if (!upstreamKey) {
     // OpenRouter isn't in the Vercel VENDOR_KEYS table, so the proxy
     // fallback routes through the openai vendor (compatible API shape).
@@ -322,7 +335,10 @@ export async function forwardOpenRouter({ url, body, upstreamKey, referer = 'htt
     if (proxyBearer) return _proxyViaTeacherChat({ vendor: 'openai', body, proxyBearer, proxyBase });
     return { status: 401, json: { error: { type: 'no_upstream_key', message: 'pass your OpenRouter key in x-upstream-api-key' } } };
   }
-  const t0 = process.hrtime.bigint();
+  // W-N: OpenRouter speaks OpenAI-compat. Same body normalizer fires here
+  // so max_tokens -> max_completion_tokens for the o-series, plus the
+  // standard temperature / top_p / stop / tools / response_format pass-through.
+  const shapedBody = _w_N_buildOpenAICompatBody(body);
   const headers = {
     'authorization': `Bearer ${upstreamKey}`,
     'content-type': 'application/json',
@@ -331,16 +347,14 @@ export async function forwardOpenRouter({ url, body, upstreamKey, referer = 'htt
   };
   if (title) headers['x-openrouter-title'] = title;
   if (categories) headers['x-openrouter-categories'] = categories;
-  const res = await fetch(url, {
+  return _w_N_hardenedFetch({
+    url,
     method: 'POST',
     headers,
-    body: JSON.stringify(body),
+    body: JSON.stringify(shapedBody),
+    timeoutMs: timeoutMs || _W_N_DEFAULT_TIMEOUT_MS,
+    requireJson: true,
   });
-  const text = await res.text();
-  let json;
-  try { json = JSON.parse(text); } catch (_) { json = { _raw: text }; }
-  const elapsed_us = Math.round(Number(process.hrtime.bigint() - t0) / 1000);
-  return { status: res.status, json, elapsed_us };
 }
 
 // Hash the prompt to detect duplicate captures (the customer hitting "send"

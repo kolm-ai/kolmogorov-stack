@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>REST API reference · kolm.ai</title>
-<meta name="description" content="The kolm REST surface. 355+ routes under /v1/* grouped by auth, capture, distill, compile, score, and verify. Honest envelope, x-kolm-api-key header, OpenAPI download.">
+<meta name="description" content="The kolm REST surface. 708 operations under /v1/* grouped by auth, capture, distill, compile, score, and verify. Honest envelope, x-kolm-api-key header, OpenAPI download.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="REST API reference &middot; kolm.ai">
@@ -100,7 +100,7 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/api",
-  "description": "The kolm REST surface. 355+ routes under /v1/* grouped by auth, capture, distill, compile, score, and verify. Honest envelope, x-kolm-api-key header, OpenAPI download.",
+  "description": "The kolm REST surface. 708 operations under /v1/* grouped by auth, capture, distill, compile, score, and verify. Honest envelope, x-kolm-api-key header, OpenAPI download.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -115,12 +115,13 @@
 </script>
 </head>
 <body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <header class="ks-nav">
     <div class="ks-wrap ks-nav__row">
-      <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
       <nav class="ks-nav__links" aria-label="Primary">
         <a href="/wrapper">Wrapper</a>
         <a href="/studio">Studio</a>
@@ -141,7 +142,7 @@
 <section class="api-hero">
   <div class="ks-wrap">
     <div class="eyebrow">REST API reference &middot; for developers, engineers, and security reviewers</div>
-    <h1>The kolm /v1 surface. <b>355+ routes, one honest envelope.</b></h1>
+    <h1>The kolm /v1 surface. <b>708 operations, one honest envelope.</b></h1>
     <p class="lede">Every CLI verb, every SDK method, every integration adapter resolves to a route under <code>/v1/*</code>. Auth is a single <code>x-kolm-api-key</code> header. Every response carries the shape <code>{ok, code, error, data}</code>; HTTP status is never lied about. This page is the index. Group cards below link to per-surface deep references and code samples.</p>
     <div class="cta-row">
       <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
@@ -209,7 +210,7 @@ curl https://kolm.ai/v1/whoami \
 <section class="api-section" id="groups">
   <div class="ks-wrap">
     <h2>Routes by surface</h2>
-    <p class="sub">355+ routes; the seven groups below cover the canonical surface a developer uses to ship a signed artifact. The full machine-readable index lives at <a href="/openapi.json" style="color:var(--ks-accent)">/openapi.json</a> and <a href="/api-routes.json" style="color:var(--ks-accent)">/api-routes.json</a>.</p>
+    <p class="sub">708 operations across 187 groups; the seven groups below cover the canonical surface a developer uses to ship a signed artifact. The full machine-readable index lives at <a href="/openapi.json" style="color:var(--ks-accent)">/openapi.json</a> and <a href="/api-routes.json" style="color:var(--ks-accent)">/api-routes.json</a>.</p>
     <div class="api-grid">
 
       <article class="api-group" id="auth">
@@ -801,7 +802,7 @@ curl -s https://kolm.ai/v1/verify/bafy2bzace...e8d0 | jq .data.k_score</pre>
 <section class="api-section" id="conventions">
   <div class="ks-wrap">
     <h2>Conventions across every route</h2>
-    <p class="sub">Pagination, idempotency, webhooks, request ids. Same shape across every group so a developer or integrator can write one HTTP wrapper and reuse it for all 355+ routes.</p>
+    <p class="sub">Pagination, idempotency, webhooks, request ids. Same shape across every group so a developer or integrator can write one HTTP wrapper and reuse it for all 708 operations.</p>
     <div class="api-grid">
       <div class="api-group">
         <div class="row"><span class="tag">pagination</span><span class="count">cursor</span></div>

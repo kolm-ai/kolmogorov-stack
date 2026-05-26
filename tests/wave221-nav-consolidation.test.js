@@ -190,7 +190,7 @@ test('W221 #10 - /product rewrite is wired in vercel.json', () => {
 test('W221 #11 - sw.js CACHE wave-floor >= 221', () => {
   // Wave-floor regex (NOT equality) so future cache bumps do not regress
   // this test — the W169 lock-in test trap Pablo flagged.
-  const m = SW.match(/const\s+CACHE\s*=\s*'kolm-v7-2026-05-\d+-wave(\d+)/);
+  const m = SW.match(/const\s+CACHE\s*=\s*'kolm-v\d+-2026-\d{2}-\d{2}-[^']*?wave(\d+)/);
   assert.ok(m, 'CACHE slug present');
   assert.ok(parseInt(m[1], 10) >= 221, 'CACHE wave >= 221 (got ' + m[1] + ')');
 });

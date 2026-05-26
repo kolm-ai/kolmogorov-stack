@@ -110,7 +110,7 @@ test('W218 #7 - cmdDoctor --detect-hw path wired with detectHardware()', () => {
 });
 
 test('W218 #8 - sw.js CACHE wave-floor >= 218', () => {
-  const m = SW_JS.match(/const\s+CACHE\s*=\s*'kolm-v7-2026-05-\d+-wave(\d+)/);
+  const m = SW_JS.match(/const\s+CACHE\s*=\s*'kolm-v\d+-2026-\d{2}-\d{2}-[^']*?wave(\d+)/);
   assert.ok(m, 'CACHE slug present');
   assert.ok(parseInt(m[1], 10) >= 218, 'CACHE wave >= 218 (got ' + m[1] + ')');
 });

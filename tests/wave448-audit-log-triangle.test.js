@@ -181,8 +181,9 @@ test('W448 #6 — TUI registers an audit-log view hitting the same route', () =>
   // View row.
   assert.ok(/id:\s*'audit-log',[^\n]*endpoint:\s*'\/v1\/account\/audit-log'/.test(cli),
     'TUI_VIEWS must include an audit-log row hitting /v1/account/audit-log');
-  // VIEW_ALIAS for command mode `:audit`.
-  assert.ok(/audit:\s*'audit-log'/.test(cli),
+  // VIEW_ALIAS for command mode `:audit`. The map keys are quoted post-W409i
+  // to satisfy no-dupe-keys lint, so allow both `audit:` and `'audit':` forms.
+  assert.ok(/['"]?audit['"]?:\s*['"]audit-log['"]/.test(cli),
     'VIEW_ALIAS must route `:audit` → audit-log view');
 });
 

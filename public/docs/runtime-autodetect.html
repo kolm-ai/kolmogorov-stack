@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>kolm serve auto-detect &mdash; runtime routing table &middot; kolm.ai</title>
+<meta name="description" content="Given a .kolm artifact + a hardware probe, kolm serve picks llama.cpp, vLLM, mlx, or ollama. Pure decision table with no I/O.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="kolm serve auto-detect &middot; kolm.ai">
+<meta property="og:description" content="The decision table that maps artifact format + host hardware to one of llama.cpp / vLLM / mlx / ollama.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/runtime-autodetect">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kolm serve auto-detect &middot; kolm.ai">
+<meta name="twitter:description" content="The decision table that maps artifact format + host hardware to one of llama.cpp / vLLM / mlx / ollama.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/docs/runtime-autodetect">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230,233,238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#0e7490;--accent-soft:rgba(14,116,144,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#0e7490;--accent-soft:rgba(14,116,144,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+td code{font-size:12px}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:14px 18px;margin:18px 0;border-radius:0 8px 8px 0;max-width:780px;color:var(--ink-mute);font-size:14.5px}
+.callout strong{color:var(--ink)}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/docs-shell.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/docs-shell.js"></script>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / <a href="/docs/govern-overview">govern</a> / runtime-autodetect</div>
+<p class="eyebrow">Run &amp; Govern / Serve auto-detect</p>
+<h1>Pick the runtime from the artifact shape and the host hardware.</h1>
+<p class="lede"><code>kolm serve artifact.kolm</code> reads the artifact file extension and a fresh hardware probe, then picks one of llama.cpp, vLLM, mlx, or ollama. The decision is a pure routing table in <code>src/serve-autodetect.js</code> &mdash; no I/O beyond the file suffix and the optional manifest, so the same inputs always produce the same spawn invocation.</p>
+
+<h2 id="priority">Detection priority</h2>
+<p>First match wins. The full ladder is implemented in <code>detectRuntime()</code>:</p>
+<table>
+  <thead><tr><th>#</th><th>Condition</th><th>Runtime</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><code>--runtime</code> override</td><td>caller-pinned, no auto-pick</td></tr>
+    <tr><td>2</td><td><code>.gguf</code> + <code>--runtime ollama</code></td><td>ollama (Modelfile + <code>ollama serve</code>)</td></tr>
+    <tr><td>3</td><td><code>.gguf</code> + CUDA GPU</td><td>llama.cpp with <code>-ngl &lt;layers&gt;</code></td></tr>
+    <tr><td>4</td><td><code>.gguf</code> + Apple Silicon</td><td>llama.cpp with <code>--metal</code></td></tr>
+    <tr><td>5</td><td><code>.gguf</code> + CPU only</td><td>llama.cpp CPU mode</td></tr>
+    <tr><td>6</td><td><code>.safetensors</code> + CUDA GPU</td><td>vLLM OpenAI-compat server</td></tr>
+    <tr><td>7</td><td><code>.safetensors</code> + Apple Silicon</td><td><code>mlx-lm.server</code></td></tr>
+    <tr><td>8</td><td><code>.mlx</code> + Apple Silicon</td><td><code>mlx-lm.server</code></td></tr>
+    <tr><td>9</td><td>anything else</td><td><code>unsupported</code> with a reason field</td></tr>
+  </tbody>
+</table>
+
+<h2 id="gpu-class">GPU class</h2>
+<p>The probe is reduced to three classes:</p>
+<ul>
+  <li><strong>cuda</strong> &mdash; NVIDIA or AMD with at least 4 GB VRAM. AMD groups with cuda for llama.cpp paths (HIP); vLLM coverage on ROCm is shakier.</li>
+  <li><strong>metal</strong> &mdash; Apple Silicon (any unified memory).</li>
+  <li><strong>cpu</strong> &mdash; no GPU or unknown vendor.</li>
+</ul>
+
+<h2 id="gpu-layers">GPU layer offload</h2>
+<p>For llama.cpp on a CUDA host, the <code>-ngl</code> flag tells the runtime how many transformer layers to push onto the GPU. <code>pickGpuLayers()</code> picks a conservative default per VRAM band:</p>
+<ul>
+  <li>VRAM &ge; 16 GB &mdash; <code>-ngl -1</code> (offload everything).</li>
+  <li>VRAM &ge; 8 GB &mdash; <code>-ngl 32</code> (partial offload).</li>
+  <li>VRAM &ge; 4 GB &mdash; <code>-ngl 20</code> (minimal offload).</li>
+  <li>VRAM &lt; 4 GB &mdash; <code>-ngl 0</code> (CPU only).</li>
+</ul>
+<p>Override with <code>--gpu-layers 60</code> at the CLI or pin <code>gpu_layers</code> in the artifact manifest. <code>auto</code> follows the table above.</p>
+
+<h2 id="spawn">The spawn invocation</h2>
+<p>The decision returns a <code>command: { bin, args }</code> tuple so callers can introspect (<code>--dry-run</code> prints it) without re-parsing. Examples:</p>
+<pre><code>// gguf + cuda + 24 GB VRAM
+{
+  bin: 'llama-server',
+  args: [
+    '--model', './artifact.gguf',
+    '--ctx-size', '4096',
+    '--host', '0.0.0.0',
+    '--port', '8788',
+    '-ngl', '-1'
+  ]
+}
+
+// safetensors + cuda
+{
+  bin: 'python',
+  args: [
+    '-m', 'vllm.entrypoints.openai.api_server',
+    '--model', './artifact-dir',
+    '--host', '0.0.0.0',
+    '--port', '8788',
+    '--max-model-len', '4096'
+  ]
+}</code></pre>
+
+<h2 id="dry-run">Dry run</h2>
+<pre><code>kolm serve ./artifact.kolm --dry-run
+# detected runtime: llama.cpp (gguf + cuda GPU (RTX 5090) -> llama.cpp with -ngl -1)
+# spawn: llama-server --model ./artifact.gguf --ctx-size 4096 --host 0.0.0.0 --port 8788 -ngl -1
+# health: http://0.0.0.0:8788/health</code></pre>
+
+<h2 id="overrides">Overrides</h2>
+<table>
+  <thead><tr><th>Flag</th><th>Effect</th></tr></thead>
+  <tbody>
+    <tr><td><code>--runtime &lt;name&gt;</code></td><td>Force one of <code>llama.cpp / vllm / mlx / ollama</code>. Bypasses auto-pick.</td></tr>
+    <tr><td><code>--port &lt;n&gt;</code></td><td>HTTP port. Default <code>8788</code>.</td></tr>
+    <tr><td><code>--host &lt;ip&gt;</code></td><td>Bind address. Default <code>0.0.0.0</code>.</td></tr>
+    <tr><td><code>--context-length &lt;n&gt;</code></td><td>Token window. Default <code>4096</code>.</td></tr>
+    <tr><td><code>--gpu-layers &lt;n|auto&gt;</code></td><td>llama.cpp <code>-ngl</code>. Default <code>auto</code>.</td></tr>
+    <tr><td><code>--dry-run</code></td><td>Print the runtime + command and exit without spawning.</td></tr>
+    <tr><td><code>--docker</code></td><td>Emit a docker-compose.yml instead of spawning. See <a href="/docs/deploy-docker-compose">Docker Compose</a>.</td></tr>
+    <tr><td><code>--k8s</code></td><td>Emit Kubernetes manifests instead of spawning. See <a href="/docs/deploy-kubernetes">Kubernetes</a>.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="metrics">/metrics + /health</h2>
+<p>The runtime exposes an OpenAI-compatible <code>/v1/chat/completions</code> natively. The metrics sidecar (<code>src/serve-metrics-sidecar.js</code>) runs on <code>port+1</code> and surfaces request count, p50 latency, and tok/s in Prometheus text exposition format, parsed from the runtime's stdout/stderr log lines.</p>
+<pre><code>curl http://localhost:8789/metrics
+# kolm_serve_request_count{runtime="llama.cpp"} 142
+# kolm_serve_latency_p50_ms{runtime="llama.cpp"} 28.4
+# kolm_serve_tok_s_p50{runtime="llama.cpp"} 41.2
+# kolm_serve_memory_mb{runtime="llama.cpp"} 5232</code></pre>
+
+<div class="callout"><strong>Constraints.</strong> The router never invents a runtime. <code>.safetensors</code> on a CPU-only host returns <code>unsupported</code> with the hint to install CUDA or quantize to GGUF first. <code>.mlx</code> on Linux returns <code>unsupported</code> because mlx-lm requires Apple Silicon.</div>
+
+<div class="related">
+  <a href="/docs/runtime-passport"><b>Runtime passport &rarr;</b><span>The per-target capability fingerprint that the auto-detector maps to.</span></a>
+  <a href="/docs/deploy-docker-compose"><b>Docker Compose &rarr;</b><span>Same decision, emitted as a compose file.</span></a>
+  <a href="/docs/govern-cli-reference"><b>CLI reference &rarr;</b><span>Every flag on <code>kolm serve</code>.</span></a>
+</div>
+
+</div></main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/gateway">Gateway</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/docs/gateway">Gateway docs</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

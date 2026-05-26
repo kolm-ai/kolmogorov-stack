@@ -216,7 +216,7 @@ test('W277 #18 — vercel.json has all 5 W277 rewrites', () => {
 
 test('W277 #19 — sw.js CACHE slug is at or past wave277 (wave floor)', () => {
   const sw = read(SW_JS);
-  const m = sw.match(/kolm-v7-2026-05-\d+-wave(\d+)-/);
+  const m = sw.match(/kolm-v\d+-2026-\d{2}-\d{2}-[^']*?wave(\d+)/);
   assert.ok(m, 'sw.js CACHE constant matches expected pattern');
   assert.ok(Number(m[1]) >= 277,
     `sw.js cache wave must be >= 277, got ${m[1]} (W169 lesson: use wave floor not equality)`);

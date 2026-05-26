@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+<title>kolm.ai blog</title>
+<link>https://kolm.ai/blog</link>
+<description>Receipts, distillation, the wrapper. Engineering notes from kolm.ai.</description>
+<language>en-us</language>
+<lastBuildDate>Tue, 26 May 2026 12:00:00 GMT</lastBuildDate>
+<atom:link href="https://kolm.ai/feed.xml" rel="self" type="application/rss+xml"/>
+<generator>kolm.ai static</generator>
+<item>
+<title>From frontier to local in five minutes: a minute-by-minute walkthrough</title>
+<link>https://kolm.ai/blog/2026-05-26-from-frontier-to-local-in-five-minutes</link>
+<guid isPermaLink="true">https://kolm.ai/blog/2026-05-26-from-frontier-to-local-in-five-minutes</guid>
+<pubDate>Tue, 26 May 2026 11:38:00 GMT</pubDate>
+<description>A live capture, distill, deploy run from kolm.ai. Minute zero install, minute one route 50 real turns through GPT-4o, minute two start a LoRA on the captured slice, minute three merge and quantize to 4.3 GB GGUF, minute four serve it locally, minute fi</description>
+</item>
+<item>
+<title>Receipts as compliance evidence: kolm-audit-1, Ed25519, and the four frameworks</title>
+<link>https://kolm.ai/blog/2026-05-26-receipts-as-compliance</link>
+<guid isPermaLink="true">https://kolm.ai/blog/2026-05-26-receipts-as-compliance</guid>
+<pubDate>Tue, 26 May 2026 11:35:00 GMT</pubDate>
+<description>Every kolm call writes a 19-field JSONL receipt signed by an Ed25519 keypair scoped to the tenant. This post walks the schema, shows a verified example, and maps each field to a control in SOC 2 CC6.1 CC7.2 PI1.1 C1.1, HIPAA 164.312, and EU AI Act Arti</description>
+</item>
+<item>
+<title>Trinity-500: distilling three frontier teachers into one 7B student</title>
+<link>https://kolm.ai/blog/2026-05-26-trinity-500-distill-story</link>
+<guid isPermaLink="true">https://kolm.ai/blog/2026-05-26-trinity-500-distill-story</guid>
+<pubDate>Tue, 26 May 2026 11:37:00 GMT</pubDate>
+<description>We trained Qwen2.5-7B on 410 council pairs from Claude 3.5 Sonnet, GPT-4o, and DeepSeek-R1-32B. LoRA r=16 alpha=32 dropout=0.05, 79.18 seconds on an RTX 5090. Benchmarked at n=57: asks-1Q 96.5 percent, judge-clarify 100 percent, judge-on-policy 100 perc</description>
+</item>
+<item>
+<title>The wrapper tax, decomposed: where 703 milliseconds went</title>
+<link>https://kolm.ai/blog/2026-05-26-the-wrapper-tax-decomposed</link>
+<guid isPermaLink="true">https://kolm.ai/blog/2026-05-26-the-wrapper-tax-decomposed</guid>
+<pubDate>Tue, 26 May 2026 11:27:00 GMT</pubDate>
+<description>We measured the kolm gateway against direct OpenAI on 10 paired prompts. The wrapper adds 703 ms of mean latency, 40 percent end-to-end. This post breaks that number down phase by phase: routing, fingerprinting, signing, write-ahead log, plus the Vercel</description>
+</item>
+<item>
+<title>Introducing kolm v1: Wrapper, Studio, Run and Govern</title>
+<link>https://kolm.ai/blog/2026-05-26-introducing-kolm-v1</link>
+<guid isPermaLink="true">https://kolm.ai/blog/2026-05-26-introducing-kolm-v1</guid>
+<pubDate>Tue, 26 May 2026 11:37:00 GMT</pubDate>
+<description>V1 ships three surfaces that share one disk format. The Wrapper routes calls and signs receipts. Studio captures those turns and distills local artifacts. Run and Govern deploys, monitors, and exports evidence. Three surfaces, one JSONL schema, one keyp</description>
+</item>
+</channel>
+</rss>

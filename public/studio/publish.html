@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Studio &middot; Publish to Hugging Face &middot; kolm.ai</title>
+<meta name="description" content="Publish a kolm artifact to Hugging Face. Auto-generate the README from the passport (K-Score, teachers, examples for transformers/vLLM/llama.cpp/Ollama), license, citation, and push.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/studio/publish">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<style>
+  /* S-9 Studio publish wizard. Cool slate only. Four steps: pick artifact,
+     pick org+repo, pick license, review card preview. The HF model-card
+     generator (S-3) lands the readme; this surface drives the wizard.
+     Push hits /v1/hf/publish once S-3 ships; until then, the page renders
+     the readme client-side and emits the CLI invocation. */
+
+  .pwiz-wrap { max-width: 980px; margin: 0 auto; padding: 0 var(--ks-pad-x); }
+  .pwiz-head { padding: var(--ks-12) 0 var(--ks-6); }
+  .pwiz-eyebrow { font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ks-ink-3); margin: 0 0 var(--ks-3); }
+  .pwiz-h1 { font-size: clamp(28px, 3.4vw, 40px); font-weight: 560; line-height: 1.08; letter-spacing: -0.022em; color: var(--ks-ink); margin: 0 0 var(--ks-3); text-wrap: balance; }
+  .pwiz-lede { font-size: 16px; line-height: 1.6; color: var(--ks-ink-2); max-width: 62ch; margin: 0; }
+  .pwiz-lede code { font-family: var(--ks-mono); font-size: 0.92em; padding: 1px 6px; border-radius: 5px; background: var(--ks-accent-soft); color: var(--ks-ink); }
+
+  .pwiz-rail { display: flex; gap: 0; margin: var(--ks-8) 0 var(--ks-6); border-top: 1px solid var(--ks-line-2); border-bottom: 1px solid var(--ks-line-2); }
+  .pwiz-rail__pip { flex: 1; padding: var(--ks-4) var(--ks-3); border-left: 1px solid var(--ks-line-2); display: flex; flex-direction: column; gap: 4px; cursor: pointer; background: transparent; border-top: 0; border-right: 0; border-bottom: 0; text-align: left; font: inherit; color: var(--ks-ink-3); transition: background 140ms ease, color 140ms ease; }
+  .pwiz-rail__pip:first-child { border-left: 0; }
+  .pwiz-rail__pip:hover { background: var(--ks-bg-2); color: var(--ks-ink-2); }
+  .pwiz-rail__pip[aria-current="true"] { background: var(--ks-bg-1); color: var(--ks-ink); }
+  .pwiz-rail__num { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .pwiz-rail__label { font-size: 14px; font-weight: 520; }
+  .pwiz-rail__val { font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-ink-3); margin-top: 2px; min-height: 14px; }
+  .pwiz-rail__pip[data-done="true"] .pwiz-rail__val { color: var(--ks-ink); }
+
+  .pwiz-step { padding: var(--ks-8) 0 var(--ks-12); }
+  .pwiz-step[hidden] { display: none; }
+  .pwiz-step__h { font-size: 22px; font-weight: 560; letter-spacing: -0.012em; color: var(--ks-ink); margin: 0 0 var(--ks-2); }
+  .pwiz-step__p { font-size: 14.5px; line-height: 1.6; color: var(--ks-ink-2); margin: 0 0 var(--ks-6); max-width: 62ch; }
+
+  .pwiz-row { display: flex; gap: var(--ks-3); flex-wrap: wrap; align-items: center; margin-top: var(--ks-3); }
+  .pwiz-input { flex: 1 1 260px; min-width: 0; padding: 10px 14px; border: 1px solid var(--ks-line-3); border-radius: var(--ks-r-md); background: var(--ks-bg-1); color: var(--ks-ink); font: inherit; font-size: 14.5px; font-family: var(--ks-mono); }
+  .pwiz-input:focus { outline: 2px solid var(--ks-accent-edge); outline-offset: 1px; border-color: var(--ks-accent-edge); }
+  .pwiz-label { display: block; font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ks-ink-3); margin: var(--ks-3) 0 4px; }
+
+  .pwiz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--ks-3); margin-top: var(--ks-3); }
+  .pwiz-opt { padding: var(--ks-4); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); background: var(--ks-bg-1); cursor: pointer; display: flex; flex-direction: column; gap: 6px; text-align: left; font: inherit; color: inherit; transition: border-color 140ms ease, background 140ms ease; }
+  .pwiz-opt:hover { border-color: var(--ks-accent-edge); background: var(--ks-bg-2); }
+  .pwiz-opt[aria-pressed="true"] { border-color: var(--ks-ink); box-shadow: inset 0 0 0 1px var(--ks-ink); }
+  .pwiz-opt__name { font-size: 15px; font-weight: 560; color: var(--ks-ink); }
+  .pwiz-opt__sub { font-size: 12.5px; color: var(--ks-ink-3); font-family: var(--ks-mono); }
+  .pwiz-opt__note { font-size: 12px; color: var(--ks-ink-2); }
+
+  .pwiz-preview { margin-top: var(--ks-5); padding: 0; background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); overflow: hidden; }
+  .pwiz-preview__head { padding: var(--ks-3) var(--ks-4); background: var(--ks-bg-2); border-bottom: 1px solid var(--ks-line-2); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-3); letter-spacing: 0.05em; text-transform: uppercase; display: flex; justify-content: space-between; }
+  .pwiz-preview__body { padding: var(--ks-4); font-family: var(--ks-mono); font-size: 13px; line-height: 1.6; color: var(--ks-ink); max-height: 460px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
+
+  .pwiz-console { margin-top: var(--ks-4); padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 13px; line-height: 1.55; color: var(--ks-ink-2); max-height: 320px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
+  .pwiz-console:empty::before { content: 'push output appears here.'; color: var(--ks-ink-3); }
+
+  .pwiz-actions { display: flex; gap: var(--ks-3); margin-top: var(--ks-6); flex-wrap: wrap; }
+
+  .pwiz-cav { margin-top: var(--ks-5); padding: var(--ks-4); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); background: var(--ks-bg-1); font-size: 13.5px; color: var(--ks-ink-2); line-height: 1.55; }
+  .pwiz-cav strong { color: var(--ks-ink); font-weight: 560; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pwiz-rail__pip, .pwiz-opt { transition: none !important; }
+  }
+</style>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio" aria-current="page">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main">
+
+<div class="pwiz-wrap">
+  <header class="pwiz-head">
+    <p class="pwiz-eyebrow">Studio &middot; publish to Hugging Face</p>
+    <h1 class="pwiz-h1">Publish your <code>.kolm</code> to Hugging Face.</h1>
+    <p class="pwiz-lede">Auto-generate the README from your passport &mdash; K-Score axes, teacher council, hardware footprint, runnable examples for transformers, vLLM, llama.cpp, Ollama, MLX. Push to your org. License + citation block included.</p>
+  </header>
+
+  <div class="pwiz-rail" role="tablist" aria-label="Publish steps">
+    <button class="pwiz-rail__pip" id="pip-1" role="tab" aria-current="true" data-done="false" type="button">
+      <span class="pwiz-rail__num">01 &middot; source</span>
+      <span class="pwiz-rail__label">Artifact</span>
+      <span class="pwiz-rail__val" id="pip-1-val">&mdash;</span>
+    </button>
+    <button class="pwiz-rail__pip" id="pip-2" role="tab" data-done="false" type="button">
+      <span class="pwiz-rail__num">02 &middot; target</span>
+      <span class="pwiz-rail__label">HF repo</span>
+      <span class="pwiz-rail__val" id="pip-2-val">&mdash;</span>
+    </button>
+    <button class="pwiz-rail__pip" id="pip-3" role="tab" data-done="false" type="button">
+      <span class="pwiz-rail__num">03 &middot; license</span>
+      <span class="pwiz-rail__label">License</span>
+      <span class="pwiz-rail__val" id="pip-3-val">&mdash;</span>
+    </button>
+    <button class="pwiz-rail__pip" id="pip-4" role="tab" data-done="false" type="button">
+      <span class="pwiz-rail__num">04 &middot; push</span>
+      <span class="pwiz-rail__label">Preview &amp; push</span>
+      <span class="pwiz-rail__val" id="pip-4-val">&mdash;</span>
+    </button>
+  </div>
+
+  <section class="pwiz-step" id="step-1" role="tabpanel" aria-labelledby="pip-1">
+    <h2 class="pwiz-step__h">Which artifact?</h2>
+    <p class="pwiz-step__p">Pass the artifact ID or path. The publisher reads the passport so the README cites real K-Score numbers, not placeholders.</p>
+    <div class="pwiz-row">
+      <input class="pwiz-input" type="text" id="art-input" placeholder="e.g. art_abc123 or ~/.kolm/artifacts/support-v3.kolm" autocomplete="off" spellcheck="false">
+      <button class="ks-btn ks-btn--primary ks-btn--md" id="a-next" type="button">Use this artifact &rarr;</button>
+    </div>
+  </section>
+
+  <section class="pwiz-step" id="step-2" role="tabpanel" aria-labelledby="pip-2" hidden>
+    <h2 class="pwiz-step__h">Where on Hugging Face?</h2>
+    <p class="pwiz-step__p">Repo path is <code>&lt;org&gt;/&lt;name&gt;</code>. Defaults to your account org if you leave it blank. The publisher creates the repo if it doesn't exist; existing repos get a new commit.</p>
+    <label class="pwiz-label">HF organization (or username)</label>
+    <input class="pwiz-input" type="text" id="hf-org" placeholder="e.g. kolm-ai" autocomplete="off" spellcheck="false" value="kolm-ai">
+    <label class="pwiz-label">Model name</label>
+    <input class="pwiz-input" type="text" id="hf-name" placeholder="e.g. trinity-support-7b" autocomplete="off" spellcheck="false">
+    <label class="pwiz-label">Visibility</label>
+    <div class="pwiz-grid" id="vis-grid">
+      <button class="pwiz-opt" type="button" data-vis="public" aria-pressed="true">
+        <span class="pwiz-opt__name">Public</span>
+        <span class="pwiz-opt__sub">indexed, discoverable</span>
+        <span class="pwiz-opt__note">free; anyone can <code>git clone</code>.</span>
+      </button>
+      <button class="pwiz-opt" type="button" data-vis="private" aria-pressed="false">
+        <span class="pwiz-opt__name">Private</span>
+        <span class="pwiz-opt__sub">team-only</span>
+        <span class="pwiz-opt__note">requires HF Pro / Enterprise.</span>
+      </button>
+      <button class="pwiz-opt" type="button" data-vis="gated" aria-pressed="false">
+        <span class="pwiz-opt__name">Gated</span>
+        <span class="pwiz-opt__sub">acceptable-use form</span>
+        <span class="pwiz-opt__note">public listing, gated download.</span>
+      </button>
+    </div>
+    <div class="pwiz-actions">
+      <button class="ks-btn ks-btn--ghost ks-btn--md" id="r-back" type="button">&larr; Back</button>
+      <button class="ks-btn ks-btn--primary ks-btn--md" id="r-next" type="button">Next &rarr;</button>
+    </div>
+  </section>
+
+  <section class="pwiz-step" id="step-3" role="tabpanel" aria-labelledby="pip-3" hidden>
+    <h2 class="pwiz-step__h">Which license?</h2>
+    <p class="pwiz-step__p">License inheritance matters: a student trained on a teacher's outputs inherits that teacher's terms unless your contract overrides. The publisher emits a <code>license_inheritance</code> note in the model card.</p>
+    <div class="pwiz-grid" id="lic-grid">
+      <button class="pwiz-opt" type="button" data-lic="apache-2.0" aria-pressed="true">
+        <span class="pwiz-opt__name">Apache-2.0</span>
+        <span class="pwiz-opt__sub">permissive, default</span>
+        <span class="pwiz-opt__note">commercial use OK.</span>
+      </button>
+      <button class="pwiz-opt" type="button" data-lic="mit" aria-pressed="false">
+        <span class="pwiz-opt__name">MIT</span>
+        <span class="pwiz-opt__sub">permissive</span>
+        <span class="pwiz-opt__note">simpler attribution.</span>
+      </button>
+      <button class="pwiz-opt" type="button" data-lic="llama3" aria-pressed="false">
+        <span class="pwiz-opt__name">Llama 3 community</span>
+        <span class="pwiz-opt__sub">Meta terms</span>
+        <span class="pwiz-opt__note">if base = Llama family.</span>
+      </button>
+      <button class="pwiz-opt" type="button" data-lic="qwen-research" aria-pressed="false">
+        <span class="pwiz-opt__name">Qwen Research</span>
+        <span class="pwiz-opt__sub">Alibaba terms</span>
+        <span class="pwiz-opt__note">if base = Qwen family, &le;100M MAU.</span>
+      </button>
+      <button class="pwiz-opt" type="button" data-lic="cc-by-nc-4.0" aria-pressed="false">
+        <span class="pwiz-opt__name">CC-BY-NC-4.0</span>
+        <span class="pwiz-opt__sub">non-commercial</span>
+        <span class="pwiz-opt__note">research-only.</span>
+      </button>
+      <button class="pwiz-opt" type="button" data-lic="other" aria-pressed="false">
+        <span class="pwiz-opt__name">Other / custom</span>
+        <span class="pwiz-opt__sub">paste in step 4</span>
+        <span class="pwiz-opt__note">writes <code>license: other</code>.</span>
+      </button>
+    </div>
+    <div class="pwiz-actions">
+      <button class="ks-btn ks-btn--ghost ks-btn--md" id="l-back" type="button">&larr; Back</button>
+      <button class="ks-btn ks-btn--primary ks-btn--md" id="l-next" type="button">Next &rarr;</button>
+    </div>
+  </section>
+
+  <section class="pwiz-step" id="step-4" role="tabpanel" aria-labelledby="pip-4" hidden>
+    <h2 class="pwiz-step__h">Preview the model card, then push.</h2>
+    <p class="pwiz-step__p">Preview is rendered from the passport you'll see at <code>kolm passport &lt;artifact&gt;</code>. Push writes the README, uploads the artifact, sets license + tags.</p>
+    <div class="pwiz-preview">
+      <div class="pwiz-preview__head"><span>README.md preview</span><span id="prev-repo">&mdash;</span></div>
+      <div class="pwiz-preview__body" id="prev-body">click <em>Regenerate preview</em> to render.</div>
+    </div>
+    <div class="pwiz-cav">
+      <strong>Limitations</strong>: the cloud push route (<code>POST /v1/hf/publish</code>) lands with S-3 / S-5. Until then, this wizard emits the local CLI invocation; <code>kolm publish</code> handles HF auth, repo create, file upload via <code>huggingface_hub</code>.
+    </div>
+    <div class="pwiz-actions">
+      <button class="ks-btn ks-btn--ghost ks-btn--md" id="p-back" type="button">&larr; Back</button>
+      <button class="ks-btn ks-btn--ghost ks-btn--md" id="p-prev" type="button">Regenerate preview</button>
+      <button class="ks-btn ks-btn--ghost ks-btn--md" id="p-copy" type="button">Copy README</button>
+      <button class="ks-btn ks-btn--primary ks-btn--md" id="p-push" type="button">Push to HF</button>
+      <a class="ks-btn ks-btn--link ks-btn--md" href="/studio/recipes">Recipes &rarr;</a>
+    </div>
+    <div class="pwiz-console" id="console" aria-live="polite" aria-atomic="false"></div>
+  </section>
+</div>
+
+</main>
+
+<footer style="border-top:1px solid var(--ks-line-2);padding:var(--ks-8) 0;margin-top:var(--ks-12);text-align:center;font-family:var(--ks-mono);font-size:12px;color:var(--ks-ink-3)">
+  <p style="margin:0">Studio &middot; publish &middot; <a href="/studio" style="color:var(--ks-ink-2);border-bottom:1px solid var(--ks-line-3)">hub</a> &middot; <a href="/docs/studio/artifacts" style="color:var(--ks-ink-2);border-bottom:1px solid var(--ks-line-3)">artifact docs</a> &middot; CLI: <code style="color:var(--ks-ink)">kolm publish</code></p>
+</footer>
+
+<script>
+(function(){
+  var state = { art: '', org: 'kolm-ai', name: '', vis: 'public', lic: 'apache-2.0', passport: null };
+
+  function showStep(n){
+    for (var i=1; i<=4; i++) {
+      var sec = document.getElementById('step-'+i);
+      if (sec) sec.hidden = (i !== n);
+      var pip = document.getElementById('pip-'+i);
+      if (pip) pip.setAttribute('aria-current', i === n ? 'true' : 'false');
+    }
+  }
+  function setDone(n, val){
+    var pip = document.getElementById('pip-'+n);
+    var sl = document.getElementById('pip-'+n+'-val');
+    if (pip) pip.setAttribute('data-done', val ? 'true' : 'false');
+    if (sl) sl.textContent = val || '—';
+  }
+  for (var i=1; i<=4; i++) (function(n){
+    var pip = document.getElementById('pip-'+n);
+    if (!pip) return;
+    pip.addEventListener('click', function(){
+      var ok = true;
+      if (n >= 2 && !state.art) ok = false;
+      if (n >= 3 && !(state.org && state.name)) ok = false;
+      if (n >= 4 && !state.lic) ok = false;
+      if (ok) showStep(n);
+    });
+  })(i);
+
+  // Step 1
+  document.getElementById('a-next').addEventListener('click', function(){
+    var v = (document.getElementById('art-input').value || '').trim();
+    if (!v) { document.getElementById('art-input').focus(); return; }
+    state.art = v;
+    setDone(1, v.length > 28 ? v.slice(0, 14) + '…' + v.slice(-10) : v);
+    showStep(2);
+  });
+
+  // Step 2
+  var vgrid = document.getElementById('vis-grid');
+  vgrid.addEventListener('click', function(e){
+    var btn = e.target.closest('.pwiz-opt');
+    if (!btn) return;
+    var all = vgrid.querySelectorAll('.pwiz-opt');
+    for (var i=0; i<all.length; i++) all[i].setAttribute('aria-pressed', 'false');
+    btn.setAttribute('aria-pressed', 'true');
+    state.vis = btn.getAttribute('data-vis');
+  });
+  document.getElementById('r-back').addEventListener('click', function(){ showStep(1); });
+  document.getElementById('r-next').addEventListener('click', function(){
+    state.org = (document.getElementById('hf-org').value || '').trim() || 'kolm-ai';
+    state.name = (document.getElementById('hf-name').value || '').trim();
+    if (!state.name) { document.getElementById('hf-name').focus(); alert('model name required.'); return; }
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,95}$/.test(state.name)) { alert('model name must be a-zA-Z0-9 . _ -, max 96 chars.'); return; }
+    setDone(2, state.org + '/' + state.name);
+    showStep(3);
+  });
+
+  // Step 3
+  var lgrid = document.getElementById('lic-grid');
+  setDone(3, 'apache-2.0');
+  lgrid.addEventListener('click', function(e){
+    var btn = e.target.closest('.pwiz-opt');
+    if (!btn) return;
+    var all = lgrid.querySelectorAll('.pwiz-opt');
+    for (var i=0; i<all.length; i++) all[i].setAttribute('aria-pressed', 'false');
+    btn.setAttribute('aria-pressed', 'true');
+    state.lic = btn.getAttribute('data-lic');
+    setDone(3, state.lic);
+  });
+  document.getElementById('l-back').addEventListener('click', function(){ showStep(2); });
+  document.getElementById('l-next').addEventListener('click', function(){
+    if (!state.lic) return;
+    showStep(4);
+    regen();
+  });
+
+  // Step 4 — preview + push
+  function logLine(s){
+    var c = document.getElementById('console');
+    c.textContent += (c.textContent ? '\n' : '') + s;
+    c.scrollTop = c.scrollHeight;
+  }
+  function clearLog(){ document.getElementById('console').textContent = ''; }
+
+  function apiKey(){
+    try {
+      return localStorage.getItem('kolm-key') || localStorage.getItem('ks_api_key')
+          || localStorage.getItem('kolm_api_key') || localStorage.getItem('KOLM_API_KEY');
+    } catch (_) { return null; }
+  }
+  function kf(path, opts){
+    var headers = Object.assign({ accept: 'application/json' }, (opts && opts.headers) || {});
+    var key = apiKey();
+    if (key) headers['Authorization'] = 'Bearer ' + key;
+    return fetch(path, Object.assign({ credentials: 'include' }, opts || {}, { headers: headers }));
+  }
+
+  async function loadPassport(){
+    try {
+      var r = await kf('/v1/artifacts/' + encodeURIComponent(state.art) + '/passport');
+      if (r.ok) {
+        state.passport = await r.json();
+        return state.passport;
+      }
+    } catch (_) {}
+    state.passport = null;
+    return null;
+  }
+
+  function renderReadme(p){
+    var kscore = (p && p.k_score) || '<see passport>';
+    var base = (p && p.base_model) || '<base>';
+    var teachers = (p && Array.isArray(p.teachers)) ? p.teachers.join(', ') : '<teachers>';
+    var task = (p && p.task) || (p && p.recipe) || 'general';
+    return [
+      '---',
+      'license: ' + state.lic,
+      'library_name: transformers',
+      'base_model: ' + base,
+      'tags:',
+      '  - kolm',
+      '  - distilled',
+      '  - ' + task,
+      'pipeline_tag: text-generation',
+      '---',
+      '',
+      '# ' + state.name,
+      '',
+      'A distilled model produced by [kolm](https://kolm.ai), the open-source compiler for AI workloads.',
+      '',
+      '## Provenance',
+      '',
+      '- **Base model:** `' + base + '`',
+      '- **Teacher council:** ' + teachers,
+      '- **Recipe:** ' + task,
+      '- **K-Score:** ' + kscore + ' (see `kolm verify`)',
+      '- **Source artifact:** `' + state.art + '`',
+      '',
+      '## Run it',
+      '',
+      '### transformers',
+      '',
+      '```python',
+      'from transformers import AutoModelForCausalLM, AutoTokenizer',
+      'm = AutoModelForCausalLM.from_pretrained("' + state.org + '/' + state.name + '")',
+      't = AutoTokenizer.from_pretrained("' + state.org + '/' + state.name + '")',
+      '```',
+      '',
+      '### vLLM',
+      '',
+      '```bash',
+      'vllm serve ' + state.org + '/' + state.name,
+      '```',
+      '',
+      '### llama.cpp / Ollama (GGUF)',
+      '',
+      '```bash',
+      'kolm export ' + state.art + ' --target gguf-q4km',
+      'ollama create ' + state.name + ' -f Modelfile',
+      'ollama run ' + state.name,
+      '```',
+      '',
+      '### Verify the artifact',
+      '',
+      '```bash',
+      'kolm verify --hf ' + state.org + '/' + state.name,
+      '```',
+      '',
+      '## Caveats',
+      '',
+      '- This model inherits the license of the teacher(s) it was distilled from. See provenance above.',
+      '- K-Score is measured on the holdout slice from the source captures; out-of-distribution behavior is not guaranteed.',
+      '- Compiled by `kolm` v1.0 (Apache-2.0). See <https://kolm.ai> for reproducibility.',
+      '',
+      '## Citation',
+      '',
+      '```',
+      '@misc{kolm-' + state.name + ',',
+      '  title = {' + state.name + '},',
+      '  author = {' + state.org + '},',
+      '  year = {2026},',
+      '  url = {https://huggingface.co/' + state.org + '/' + state.name + '}',
+      '}',
+      '```',
+    ].join('\n');
+  }
+
+  async function regen(){
+    document.getElementById('prev-repo').textContent = state.org + '/' + state.name;
+    document.getElementById('prev-body').textContent = 'loading passport…';
+    setDone(4, 'rendering');
+    var p = await loadPassport();
+    var md = renderReadme(p);
+    document.getElementById('prev-body').textContent = md;
+    setDone(4, 'preview ready');
+  }
+
+  document.getElementById('p-back').addEventListener('click', function(){ showStep(3); });
+  document.getElementById('p-prev').addEventListener('click', regen);
+
+  document.getElementById('p-copy').addEventListener('click', async function(){
+    var md = document.getElementById('prev-body').textContent || '';
+    try {
+      await navigator.clipboard.writeText(md);
+      logLine('README copied to clipboard.');
+    } catch (e) {
+      logLine('copy failed: ' + (e && e.message || e));
+    }
+  });
+
+  document.getElementById('p-push').addEventListener('click', async function(){
+    clearLog();
+    logLine('[publish] target=' + state.org + '/' + state.name);
+    logLine('[publish] license=' + state.lic + ' visibility=' + state.vis);
+    try {
+      var resp = await kf('/v1/hf/publish', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          artifact: state.art,
+          repo_id: state.org + '/' + state.name,
+          visibility: state.vis,
+          license: state.lic,
+        }),
+      });
+      if (resp.status === 404) {
+        logLine('[publish] cloud push route not yet shipped (waiting on S-3 HF model card + S-5 trinity publish).');
+        logLine('');
+        logLine('run locally instead:');
+        logLine('  kolm publish ' + state.art + ' --hf ' + state.org + '/' + state.name + ' --license ' + state.lic + ' --visibility ' + state.vis);
+        logLine('');
+        logLine('the CLI handles HF auth via $HF_TOKEN or `huggingface-cli login`.');
+        setDone(4, 'use CLI');
+        return;
+      }
+      var body = await resp.json().catch(function(){ return {}; });
+      if (resp.ok) {
+        logLine('[publish] pushed');
+        if (body.repo_url) logLine('  url: ' + body.repo_url);
+        if (body.commit_sha) logLine('  commit: ' + body.commit_sha);
+        setDone(4, 'pushed');
+      } else if (resp.status === 401 || resp.status === 403) {
+        logLine('[publish] not signed in. sign in or run locally:');
+        logLine('  kolm publish ' + state.art + ' --hf ' + state.org + '/' + state.name);
+      } else {
+        logLine('[publish] http ' + resp.status + ': ' + (body.error || JSON.stringify(body)));
+      }
+    } catch (e) {
+      logLine('[publish] fetch failed: ' + (e && e.message || e));
+      logLine('');
+      logLine('run locally:');
+      logLine('  kolm publish ' + state.art + ' --hf ' + state.org + '/' + state.name + ' --license ' + state.lic);
+    }
+  });
+
+  showStep(1);
+})();
+</script>
+
+</body>
+</html>

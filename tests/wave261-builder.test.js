@@ -216,7 +216,7 @@ test('W261 #9 - compile endpoint creates a real compile job and returns {job_id}
 });
 
 test('W261 #10 - sw.js CACHE wave-floor >= 261', () => {
-  const m = SW_JS.match(/const\s+CACHE\s*=\s*'kolm-v7-2026-05-\d+-wave(\d+)/);
+  const m = SW_JS.match(/const\s+CACHE\s*=\s*'kolm-v\d+-2026-\d{2}-\d{2}-[^']*?wave(\d+)/);
   assert.ok(m, 'CACHE slug present in sw.js');
   assert.ok(parseInt(m[1], 10) >= 261, 'CACHE wave >= 261 (got ' + m[1] + ')');
 });

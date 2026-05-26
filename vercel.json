@@ -154,11 +154,6 @@
       "permanent": true
     },
     {
-      "source": "/blog",
-      "destination": "/changelog",
-      "permanent": true
-    },
-    {
       "source": "/careers",
       "destination": "/manifesto",
       "permanent": true
@@ -245,6 +240,34 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/blog",
+      "destination": "/blog/index.html"
+    },
+    {
+      "source": "/feed.xml",
+      "destination": "/blog/feed.xml"
+    },
+    {
+      "source": "/blog/2026-05-26-introducing-kolm-v1",
+      "destination": "/blog/2026-05-26-introducing-kolm-v1.html"
+    },
+    {
+      "source": "/blog/2026-05-26-the-wrapper-tax-decomposed",
+      "destination": "/blog/2026-05-26-the-wrapper-tax-decomposed.html"
+    },
+    {
+      "source": "/blog/2026-05-26-trinity-500-distill-story",
+      "destination": "/blog/2026-05-26-trinity-500-distill-story.html"
+    },
+    {
+      "source": "/blog/2026-05-26-receipts-as-compliance",
+      "destination": "/blog/2026-05-26-receipts-as-compliance.html"
+    },
+    {
+      "source": "/blog/2026-05-26-from-frontier-to-local-in-five-minutes",
+      "destination": "/blog/2026-05-26-from-frontier-to-local-in-five-minutes.html"
+    },
     {
       "source": "/account/pipelines",
       "destination": "/account/pipelines/index.html"
@@ -513,6 +536,10 @@
     },
     {
       "source": "/status",
+      "destination": "/status.html"
+    },
+    {
+      "source": "/status/",
       "destination": "/status.html"
     },
     {
@@ -1438,6 +1465,126 @@
     {
       "source": "/docs/gateway-bench",
       "destination": "/docs/gateway-bench.html"
+    },
+    {
+      "source": "/docs/govern-overview",
+      "destination": "/docs/govern-overview.html"
+    },
+    {
+      "source": "/docs/runtime-passport",
+      "destination": "/docs/runtime-passport.html"
+    },
+    {
+      "source": "/docs/runtime-autodetect",
+      "destination": "/docs/runtime-autodetect.html"
+    },
+    {
+      "source": "/docs/artifact-lifecycle",
+      "destination": "/docs/artifact-lifecycle.html"
+    },
+    {
+      "source": "/docs/deploy-docker-compose",
+      "destination": "/docs/deploy-docker-compose.html"
+    },
+    {
+      "source": "/docs/deploy-kubernetes",
+      "destination": "/docs/deploy-kubernetes.html"
+    },
+    {
+      "source": "/docs/deploy-vllm",
+      "destination": "/docs/deploy-vllm.html"
+    },
+    {
+      "source": "/docs/deploy-airgap",
+      "destination": "/docs/deploy-airgap.html"
+    },
+    {
+      "source": "/docs/evidence-dag",
+      "destination": "/docs/evidence-dag.html"
+    },
+    {
+      "source": "/docs/assurance-case",
+      "destination": "/docs/assurance-case.html"
+    },
+    {
+      "source": "/docs/drift-detection",
+      "destination": "/docs/drift-detection.html"
+    },
+    {
+      "source": "/docs/cost-displacement",
+      "destination": "/docs/cost-displacement.html"
+    },
+    {
+      "source": "/docs/govern-cli-reference",
+      "destination": "/docs/govern-cli-reference.html"
+    },
+    {
+      "source": "/docs/govern-api-reference",
+      "destination": "/docs/govern-api-reference.html"
+    },
+    {
+      "source": "/docs/govern-faq",
+      "destination": "/docs/govern-faq.html"
+    },
+    {
+      "source": "/docs/studio-overview",
+      "destination": "/docs/studio-overview.html"
+    },
+    {
+      "source": "/docs/studio-distill",
+      "destination": "/docs/studio-distill.html"
+    },
+    {
+      "source": "/docs/studio-distill-recipes",
+      "destination": "/docs/studio-distill-recipes.html"
+    },
+    {
+      "source": "/docs/studio-teachers",
+      "destination": "/docs/studio-teachers.html"
+    },
+    {
+      "source": "/docs/studio-judges",
+      "destination": "/docs/studio-judges.html"
+    },
+    {
+      "source": "/docs/studio-compile",
+      "destination": "/docs/studio-compile.html"
+    },
+    {
+      "source": "/docs/studio-quantization",
+      "destination": "/docs/studio-quantization.html"
+    },
+    {
+      "source": "/docs/studio-export-gguf",
+      "destination": "/docs/studio-export-gguf.html"
+    },
+    {
+      "source": "/docs/studio-export-formats",
+      "destination": "/docs/studio-export-formats.html"
+    },
+    {
+      "source": "/docs/studio-publish-hf",
+      "destination": "/docs/studio-publish-hf.html"
+    },
+    {
+      "source": "/docs/studio-bench",
+      "destination": "/docs/studio-bench.html"
+    },
+    {
+      "source": "/docs/studio-moe",
+      "destination": "/docs/studio-moe.html"
+    },
+    {
+      "source": "/docs/studio-cli-reference",
+      "destination": "/docs/studio-cli-reference.html"
+    },
+    {
+      "source": "/docs/studio-api-reference",
+      "destination": "/docs/studio-api-reference.html"
+    },
+    {
+      "source": "/docs/studio-faq",
+      "destination": "/docs/studio-faq.html"
     },
     {
       "source": "/gateway",

@@ -24,7 +24,13 @@ function route(method, routePath) {
 }
 
 test('W507 #1 - OAuth routes mounted from src/oauth.js appear in api-routes.json', () => {
-  assert.deepEqual(ROUTES.sources, ['src/router.js', 'src/oauth.js']);
+  // build-api-ref now auto-discovers every src/*-routes.js wave module
+  // (W821..W835 and beyond) on top of the two core parsers. The contract
+  // is that BOTH core sources are present and ordered first, not that
+  // they are the only sources.
+  assert.equal(ROUTES.sources[0], 'src/router.js');
+  assert.equal(ROUTES.sources[1], 'src/oauth.js');
+  assert.ok(ROUTES.sources.length >= 2);
 
   for (const routePath of [
     '/v1/oauth/providers',

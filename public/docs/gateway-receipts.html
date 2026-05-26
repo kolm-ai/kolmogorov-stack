@@ -4,22 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
-<title>Gateway receipts — Ed25519, kolm-audit-1 schema &middot; kolm.ai</title>
+<title>Gateway receipts - Ed25519, kolm-audit-1 schema &middot; kolm.ai</title>
 <meta name="description" content="Every /v1/gateway/dispatch call is stamped with a 19-field kolm-audit-1 receipt signed with Ed25519. Verify online (/v1/verify/:id) or offline with the public key.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Gateway receipts — Ed25519, kolm-audit-1 schema &middot; kolm.ai">
+<meta property="og:title" content="Gateway receipts - Ed25519, kolm-audit-1 schema &middot; kolm.ai">
 <meta property="og:description" content="Every /v1/gateway/dispatch call is stamped with a 19-field kolm-audit-1 receipt signed with Ed25519. Verify online (/v1/verify/:id) or offline with the public key.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/gateway-receipts">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Gateway receipts — Ed25519, kolm-audit-1 schema &middot; kolm.ai">
+<meta name="twitter:title" content="Gateway receipts - Ed25519, kolm-audit-1 schema &middot; kolm.ai">
 <meta name="twitter:description" content="Every /v1/gateway/dispatch call is stamped with a 19-field kolm-audit-1 receipt signed with Ed25519. Verify online (/v1/verify/:id) or offline with the public key.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs/gateway-receipts">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Gateway receipts — Ed25519, kolm-audit-1 schema","description":"Every /v1/gateway/dispatch call is stamped with a 19-field kolm-audit-1 receipt signed with Ed25519. Verify online (/v1/verify/:id) or offline with the public key.","url":"https://kolm.ai/docs/gateway-receipts","datePublished":"2026-05-26","dateModified":"2026-05-26","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Gateway receipts - Ed25519, kolm-audit-1 schema","description":"Every /v1/gateway/dispatch call is stamped with a 19-field kolm-audit-1 receipt signed with Ed25519. Verify online (/v1/verify/:id) or offline with the public key.","url":"https://kolm.ai/docs/gateway-receipts","datePublished":"2026-05-26","dateModified":"2026-05-26","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <link rel="stylesheet" href="/design-tokens.css">
 <style>
 :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230,233,238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--accent-soft:rgba(17,17,17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
@@ -62,11 +62,12 @@ td code{font-size:12px}
 <script defer src="/docs-shell.js"></script>
 </head>
 <body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
@@ -86,7 +87,7 @@ td code{font-size:12px}
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / gateway-receipts</div>
 <p class="eyebrow">Wrapper / Gateway</p>
 <h1>Every call gets a receipt. Every receipt is signed.</h1>
-<p class="lede">The receipt is the proof. It records what was asked, what was returned (as hashes, not content), which provider answered, the routing decision, the capture decision, and the cost — then signs the whole envelope with Ed25519. Verify online or offline. Rotate the key without breaking old receipts (the public key is embedded in each signature block).</p>
+<p class="lede">The receipt is the proof. It records what was asked, what was returned (as hashes, not content), which provider answered, the routing decision, the capture decision, and the cost - then signs the whole envelope with Ed25519. Verify online or offline. Rotate the key without breaking old receipts (the public key is embedded in each signature block).</p>
 
 <h2 id="the-19-fields">The 19 fields</h2>
 <table>
@@ -96,7 +97,7 @@ td code{font-size:12px}
     <tr><td><code>receipt_id</code></td><td><code>rcpt_</code> + ULID. URL-safe primary key.</td></tr>
     <tr><td><code>timestamp</code></td><td>ISO-8601 UTC.</td></tr>
     <tr><td><code>namespace_id</code></td><td>Which gateway namespace handled the call (e.g. <code>default</code>, <code>support</code>, <code>code</code>).</td></tr>
-    <tr><td><code>route_decision</code></td><td><code>"frontier"</code> | <code>"local"</code> | <code>"fallback"</code> — what the confidence router picked.</td></tr>
+    <tr><td><code>route_decision</code></td><td><code>"frontier"</code> | <code>"local"</code> | <code>"fallback"</code> - what the confidence router picked.</td></tr>
     <tr><td><code>provider</code></td><td>Resolved adapter (<code>anthropic</code>, <code>openai</code>, <code>local-kolm</code>, ...).</td></tr>
     <tr><td><code>model</code></td><td>Resolved model name (after namespace + env mapping).</td></tr>
     <tr><td><code>artifact_id</code></td><td>If <code>local-kolm</code>: which <code>.kolm</code> artifact answered. Else <code>null</code>.</td></tr>
@@ -152,7 +153,7 @@ ls ~/.kolm/signing-keys/                          # signer history
   <div class="ks-wrap">
     <div class="ks-footer__grid">
       <div>
-        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
         <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
       </div>
       <div>

@@ -135,7 +135,7 @@ test('W220 #10 - index.html ships substantive content (W864: byte floor relaxed)
 });
 
 test('W220 #11 - sw.js CACHE wave-floor >= 220', () => {
-  const m = SW.match(/const\s+CACHE\s*=\s*'kolm-v7-2026-05-\d+-wave(\d+)/);
+  const m = SW.match(/const\s+CACHE\s*=\s*'kolm-v\d+-2026-\d{2}-\d{2}-[^']*?wave(\d+)/);
   assert.ok(m, 'CACHE slug present');
   assert.ok(parseInt(m[1], 10) >= 220, 'CACHE wave >= 220 (got ' + m[1] + ')');
 });

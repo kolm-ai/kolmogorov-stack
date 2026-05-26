@@ -4,22 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
-<title>Gateway — the wrapper around any LLM provider &middot; kolm.ai</title>
-<meta name="description" content="The kolm gateway sits in front of 11 LLM providers (OpenAI, Anthropic, Google, DeepSeek, Groq, Together, Fireworks, OpenRouter, local-vLLM, local-Ollama, local-kolm), signs an Ed25519 receipt on every call, captures the trace for replay, and routes locally-first via a confidence gate.">
+<title>Gateway - the wrapper around any LLM provider &middot; kolm.ai</title>
+<meta name="description" content="Drop-in wrapper for any LLM provider. 11 adapters, Ed25519-signed receipts, capture lake with PII redaction, local-first routing with frontier fallback. Three-line client install.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Gateway — the wrapper around any LLM provider &middot; kolm.ai">
+<meta property="og:title" content="Gateway - the wrapper around any LLM provider &middot; kolm.ai">
 <meta property="og:description" content="The kolm gateway sits in front of 11 LLM providers (OpenAI, Anthropic, Google, DeepSeek, Groq, Together, Fireworks, OpenRouter, local-vLLM, local-Ollama, local-kolm), signs an Ed25519 receipt on every call, captures the trace for replay, and routes locally-first via a confidence gate.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/gateway">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Gateway — the wrapper around any LLM provider &middot; kolm.ai">
+<meta name="twitter:title" content="Gateway - the wrapper around any LLM provider &middot; kolm.ai">
 <meta name="twitter:description" content="The kolm gateway sits in front of 11 LLM providers (OpenAI, Anthropic, Google, DeepSeek, Groq, Together, Fireworks, OpenRouter, local-vLLM, local-Ollama, local-kolm), signs an Ed25519 receipt on every call, captures the trace for replay, and routes locally-first via a confidence gate.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs/gateway">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Gateway — the wrapper around any LLM provider","description":"The kolm gateway sits in front of 11 LLM providers (OpenAI, Anthropic, Google, DeepSeek, Groq, Together, Fireworks, OpenRouter, local-vLLM, local-Ollama, local-kolm), signs an Ed25519 receipt on every call, captures the trace for replay, and routes locally-first via a confidence gate.","url":"https://kolm.ai/docs/gateway","datePublished":"2026-05-26","dateModified":"2026-05-26","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Gateway - the wrapper around any LLM provider","description":"The kolm gateway sits in front of 11 LLM providers (OpenAI, Anthropic, Google, DeepSeek, Groq, Together, Fireworks, OpenRouter, local-vLLM, local-Ollama, local-kolm), signs an Ed25519 receipt on every call, captures the trace for replay, and routes locally-first via a confidence gate.","url":"https://kolm.ai/docs/gateway","datePublished":"2026-05-26","dateModified":"2026-05-26","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <link rel="stylesheet" href="/design-tokens.css">
 <style>
 :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230,233,238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--accent-soft:rgba(17,17,17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
@@ -62,11 +62,12 @@ td code{font-size:12px}
 <script defer src="/docs-shell.js"></script>
 </head>
 <body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
@@ -89,7 +90,7 @@ td code{font-size:12px}
 <p class="lede">The kolm gateway is the receipt-signed, capture-on, locally-first proxy in front of every LLM you call. <code>POST /v1/gateway/dispatch</code> takes an OpenAI-shaped request, walks a namespace-configured routing chain (local artifact → frontier fallback), runs the response through a 4-mode PII redactor + 5-signal poison detector, signs a 19-field <code>kolm-audit-1</code> receipt with Ed25519, and stamps a capture row that can be approved into a training set.</p>
 
 <h2 id="what-the-gateway-adds-on-top-of-a-raw-provider-call">What the gateway adds on top of a raw provider call</h2>
-<p>The minimum surface to call a frontier LLM in production is a key, a URL, and a retry loop. The kolm gateway is the next layer up — what you'd otherwise build over six months as your wrapper grows. Every dispatch goes through these stages:</p>
+<p>The minimum surface to call a frontier LLM in production is a key, a URL, and a retry loop. The kolm gateway is the next layer up - what you'd otherwise build over six months as your wrapper grows. Every dispatch goes through these stages:</p>
 <table>
   <thead><tr><th>Stage</th><th>What it does</th><th>Code path</th></tr></thead>
   <tbody>
@@ -101,7 +102,7 @@ td code{font-size:12px}
     <tr><td>6. Lake write</td><td>Appends a capture row to the configured backend (JSONL / SQLite / Postgres / S3) with hash-chain integrity.</td><td><code>src/wrapper-cli.js:_capturesAppend</code></td></tr>
   </tbody>
 </table>
-<p>The first response byte ships ~3–8 ms after the upstream call returns (W-J.b <code>--report-latency</code> measurement). That overhead buys you receipts, captures, PII scrubbing, and namespace routing — every call, every namespace, every provider.</p>
+<p>The first response byte ships ~3–8 ms after the upstream call returns (W-J.b <code>--report-latency</code> measurement). That overhead buys you receipts, captures, PII scrubbing, and namespace routing - every call, every namespace, every provider.</p>
 
 <h2 id="minimal-example">Minimal example</h2>
 <pre><code>curl -X POST https://kolm.ai/v1/gateway/dispatch \
@@ -133,7 +134,7 @@ td code{font-size:12px}
   <div class="ks-wrap">
     <div class="ks-footer__grid">
       <div>
-        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
         <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
       </div>
       <div>

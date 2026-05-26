@@ -1,0 +1,98 @@
+{
+  "spec": "kolm-trinity-500-benchmark-1",
+  "ok": true,
+  "generated_at": "2026-05-26T03:37:00.938Z",
+  "note": "Canonical mirror of bench_summary from C:/Users/user/.kolm/distill-runs/trinity-500-2026-05-26/merged/benchmark-summary.json (also embedded in public/trinity-500/publication-manifest.json under bench_summary). Checked in so X04 claim verification can resolve every Trinity-500 marketing number against a stable on-disk source. The rows[] shape matches public/benchmarks/sota-quantize-matrix.json so the verifier can walk both with the same field/value match contract.",
+  "hardware": {
+    "gpu": "NVIDIA RTX 5090",
+    "vram_gb": 32,
+    "compute_capability": "12.0",
+    "cuda": "12.8",
+    "torch": "2.11.0+cu128",
+    "host_os": "Windows 11 Pro"
+  },
+  "method": {
+    "id": "council_distill_lora",
+    "scheme": "3-way teacher council (Claude 3.5 Sonnet + GPT-4o + DeepSeek-R1-32B) distilled to Qwen2.5-7B via LoRA r=16 alpha=32",
+    "training_pairs": 410,
+    "lora_seconds": 79.18,
+    "epochs": 1,
+    "batch_size": 1,
+    "max_length": 384,
+    "precision": "bf16"
+  },
+  "rows": [
+    {
+      "model": "trinity-500",
+      "base": "Qwen2.5-7B-Instruct",
+      "n": 57,
+      "asks_one_question_pct": 96.5,
+      "no_inventions_pct": 100.0,
+      "on_policy_pct": 96.5,
+      "all_three_pct": 96.5,
+      "judge_clarifies_pct": 100.0,
+      "judge_no_inventions_pct": 45.6,
+      "judge_on_policy_pct": 100.0,
+      "mean_latency_s": 1.24,
+      "mean_response_chars": 210,
+      "measured_on": "2026-05-26"
+    },
+    {
+      "model": "base-qwen2.5-7b",
+      "base": "Qwen2.5-7B-Instruct",
+      "n": 57,
+      "asks_one_question_pct": 84.2,
+      "no_inventions_pct": 100.0,
+      "on_policy_pct": 100.0,
+      "all_three_pct": 84.2,
+      "judge_clarifies_pct": 75.4,
+      "judge_no_inventions_pct": 19.3,
+      "judge_on_policy_pct": 77.2,
+      "mean_latency_s": 1.74,
+      "mean_response_chars": 375,
+      "measured_on": "2026-05-26"
+    },
+    {
+      "model": "claude-haiku-4-5",
+      "base": "Anthropic frontier",
+      "n": 57,
+      "asks_one_question_pct": 64.9,
+      "no_inventions_pct": 100.0,
+      "on_policy_pct": 100.0,
+      "all_three_pct": 64.9,
+      "judge_clarifies_pct": 78.9,
+      "judge_no_inventions_pct": 12.3,
+      "judge_on_policy_pct": 80.7,
+      "mean_latency_s": 2.72,
+      "mean_response_chars": 640,
+      "measured_on": "2026-05-26"
+    },
+    {
+      "model": "gpt-4o-mini",
+      "base": "OpenAI frontier",
+      "n": 57,
+      "asks_one_question_pct": 96.5,
+      "no_inventions_pct": 100.0,
+      "on_policy_pct": 98.2,
+      "all_three_pct": 96.5,
+      "judge_clarifies_pct": 91.2,
+      "judge_no_inventions_pct": 43.9,
+      "judge_on_policy_pct": 94.7,
+      "mean_latency_s": 1.74,
+      "mean_response_chars": 287,
+      "measured_on": "2026-05-26"
+    }
+  ],
+  "rubric": {
+    "asks_one_question": "Rule-based check: response contains exactly one '?' on the first line and no premature answer/action.",
+    "no_inventions": "Rule-based regex sweep for fabricated IDs, prices, or policy clauses against the system-prompt allowlist.",
+    "on_policy": "Rule-based check that the response does not violate the explicit refund/escalation rules in the system prompt.",
+    "judge_*": "LLM-as-judge (Gemini-2.5-Pro) re-grading the same axes with free-form rationale."
+  },
+  "verification_steps": [
+    "57-prompt holdout set drawn from the same support-chat distribution as the 410 training pairs; held out of training.",
+    "Each model called via the same /v1/teacher/chat path (provider differences abstracted) and graded by the same rubric.",
+    "Latency measured wall-clock client-side, mean of 57 calls.",
+    "Source benchmark JSON: trinity-500-2026-05-26/merged/benchmark-summary.json. Mirror also embedded in public/trinity-500/publication-manifest.json#bench_summary."
+  ]
+}

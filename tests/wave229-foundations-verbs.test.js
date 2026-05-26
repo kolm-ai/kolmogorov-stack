@@ -143,7 +143,7 @@ test('W229 #9 - dispatcher routes jobs/watch/sync/profile to cmd functions', () 
 });
 
 test('W229 #10 - sw.js wave-floor >= 229 (foundations verbs)', () => {
-  const m = SW.match(/const CACHE = 'kolm-v7-[^']+-wave(\d+)-/);
+  const m = SW.match(/const CACHE = 'kolm-v\d+-[^']*?wave(\d+)/);
   assert.ok(m, 'sw.js CACHE must follow wave-N slug pattern');
   const waveN = parseInt(m[1], 10);
   assert.ok(waveN >= 229, `sw.js wave-slug must be >= 229 (saw ${waveN})`);

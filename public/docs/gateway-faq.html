@@ -62,11 +62,12 @@ td code{font-size:12px}
 <script defer src="/docs-shell.js"></script>
 </head>
 <body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
@@ -89,7 +90,7 @@ td code{font-size:12px}
 <p class="lede">Quick answers to the questions we get most often. Cross-linked to the doc that goes deeper.</p>
 
 <h2 id="how-much-overhead-does-the-gateway-add">How much overhead does the gateway add?</h2>
-<p>~3–8 ms on top of the upstream call (W-J.b <code>--report-latency</code> measurement, p50). Most of the time is in PII regex + receipt signing; the lake write is async. The W887 benchmark on <code>kolm.ai</code> measures this against direct provider calls — see <a href="/docs/gateway-bench">gateway-bench</a> for the live numbers.</p>
+<p>~3–8 ms on top of the upstream call (W-J.b <code>--report-latency</code> measurement, p50). Most of the time is in PII regex + receipt signing; the lake write is async. The W887 benchmark on <code>kolm.ai</code> measures this against direct provider calls - see <a href="/docs/gateway-bench">gateway-bench</a> for the live numbers.</p>
 
 <h2 id="does-the-gateway-charge-per-call">Does the gateway charge per call?</h2>
 <p>The gateway itself is free. You're billed only for what the upstream provider charges (passed through, with a 0% markup at the Free tier; small markup on Pro/Business for hosted inference convenience). Local-routed calls (<code>local-kolm</code>, <code>local-vllm</code>, <code>local-ollama</code>) cost $0 in provider fees regardless of plan.</p>
@@ -104,10 +105,10 @@ td code{font-size:12px}
 <p>Self-hosted: <code>~/.kolm/signing-keys/&lt;namespace&gt;.pem</code> by default, or wherever <code>signing_key_path</code> in <code>gateway.toml</code> points. Compose: a named Docker volume. Helm: a Kubernetes secret. Rotate without breaking old receipts via <code>kolm receipts rotate-key</code>.</p>
 
 <h2 id="which-capture-lake-backend-should-i-use">Which capture lake backend should I use?</h2>
-<p>Dev: <code>jsonl</code>. Single-node prod: <code>sqlite</code>. Multi-node prod: <code>postgres</code>. Audit / cold storage: <code>s3</code>. You can also run two in parallel — e.g. <code>postgres</code> for live + <code>s3</code> for archive — via the <code>KOLM_CAPTURE_LAKE_SECONDARY</code> env.</p>
+<p>Dev: <code>jsonl</code>. Single-node prod: <code>sqlite</code>. Multi-node prod: <code>postgres</code>. Audit / cold storage: <code>s3</code>. You can also run two in parallel - e.g. <code>postgres</code> for live + <code>s3</code> for archive - via the <code>KOLM_CAPTURE_LAKE_SECONDARY</code> env.</p>
 
 <h2 id="can-i-send-a-request-that-bypasses-the-gateway-pipeline-entirely">Can I send a request that bypasses the gateway pipeline entirely?</h2>
-<p>Yes — <code>POST /v1/teacher/chat</code> is the no-wrapper proxy. Useful for benchmarking the wrapper overhead. It does NOT sign a receipt or write to the capture lake.</p>
+<p>Yes - <code>POST /v1/teacher/chat</code> is the no-wrapper proxy. Useful for benchmarking the wrapper overhead. It does NOT sign a receipt or write to the capture lake.</p>
 
 <div class="related">
   <a href="/docs/gateway-bench"><b>Benchmark &rarr;</b><span>Live latency + cost numbers.</span></a>
@@ -121,7 +122,7 @@ td code{font-size:12px}
   <div class="ks-wrap">
     <div class="ks-footer__grid">
       <div>
-        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
         <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
       </div>
       <div>

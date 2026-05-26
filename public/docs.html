@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Docs &middot; kolm.ai</title>
+<title>Docs · kolm.ai</title>
 <meta name="description" content="Documentation for the kolm AI compiler. Quickstart, CLI reference, SDKs, runtime, K-score, security, integrations, deployment patterns. Everything you need to ship a signed .kolm artifact into production.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
@@ -26,7 +26,7 @@
      - Cmd-K modal: paper bg + faint slate top-border, ESC closes.
      - Single-column body content max-width 760px, line-height 1.65.
      All colors use literal Warm Paper hex (#f3f5f7 paper, #111111 ink,
-     #1f2937 cool slate) — NEVER var(--ink-1) which is TEXT not surface
+     #1f2937 cool slate) - NEVER var(--ink-1) which is TEXT not surface
      (per W845-W846 lesson). */
   .docs-shell { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: clamp(24px, 4vw, 64px); max-width: 1280px; margin: 0 auto; padding: 32px clamp(20px, 4vw, 48px) 96px; }
   @media (max-width: 900px) { .docs-shell { grid-template-columns: 1fr; padding-top: 16px; } }
@@ -159,11 +159,12 @@
 <script defer src="/kolm-chat.js"></script>
 </head>
 <body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
@@ -387,7 +388,7 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
             </span>
             <h3>Receipts &amp; verify</h3>
-            <p>RS-1 receipt chain spec, the 24 verifier checks, Ed25519 signatures, public receipt lookup at <code>/v1/receipts/&hellip;</code>.</p>
+            <p>RS-1 receipt chain spec, the 24 verifier checks, Ed25519 signatures, dispatch via <code>/v1/run</code>, public lookup at <code>/v1/receipts/:hash/public</code>.</p>
           </a>
           <a href="/k-score" class="docs-card">
             <span class="icon" aria-hidden="true">

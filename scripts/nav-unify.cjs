@@ -24,7 +24,7 @@ const CANONICAL = [
   { href: '/studio',  label: 'Studio',  rel: '' },
   { href: '/pricing', label: 'Pricing', rel: '' },
   { href: '/docs',    label: 'Docs',    rel: '' },
-  { href: 'https://github.com/sneaky-hippo/kolmogorov-stack', label: 'GitHub', rel: ' rel="noopener"' },
+  { href: 'https://github.com/sneaky-hippo/kolm', label: 'GitHub', rel: ' rel="noopener"' },
 ];
 
 function aTag({ href, label, rel }) {

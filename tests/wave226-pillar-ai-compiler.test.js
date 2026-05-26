@@ -85,7 +85,7 @@ test('W226 #8 - sitemap.xml includes the pillar URL with priority >= 0.7', () =>
 });
 
 test('W226 #9 - sw.js cache slug wave-floor >= 226', () => {
-  const m = SW.match(/const CACHE = 'kolm-v7-[^']+-wave(\d+)-/);
+  const m = SW.match(/const CACHE = 'kolm-v\d+-[^']*?wave(\d+)/);
   assert.ok(m, 'sw.js CACHE must follow wave-N slug pattern');
   const waveN = parseInt(m[1], 10);
   assert.ok(waveN >= 226, `sw.js wave-slug must be >= 226 (saw ${waveN})`);

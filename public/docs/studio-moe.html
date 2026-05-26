@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>MoE &middot; Mixture-of-experts &middot; expert pinning &middot; kolm.ai</title>
+<meta name="description" content="How Studio handles mixture-of-experts models: topology detection, expert activation profiling, MoE-aware LoRA + quant policy, expert pinning, low-traffic expert pruning.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="MoE &middot; kolm.ai">
+<meta property="og:description" content="Mixture-of-experts: topology, pinning, quant policy, pruning.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/studio-moe">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MoE &middot; kolm.ai">
+<meta name="twitter:description" content="Mixture-of-experts in Studio.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/docs/studio-moe">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230,233,238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--accent-soft:rgba(17,17,17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#1d2d44;--accent-soft:rgba(29,45,68,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+td code{font-size:12px}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+.privacy-note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:14px 18px;margin:18px 0;border-radius:0 8px 8px 0;max-width:780px}
+.privacy-note strong{color:var(--ink)}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/docs-shell.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/docs-shell.js"></script>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / studio-moe</div>
+<p class="eyebrow">Studio / MoE</p>
+<h1>Mixture-of-experts is a different shape. Studio handles it.</h1>
+<p class="lede">MoE models (Mixtral, DeepSeek-V3, Qwen3-MoE, Llama-4-Maverick) replace the dense FFN with a router that picks top-K of N experts per token. Distilling, quantizing, and serving them needs MoE-aware code paths &mdash; treating them as dense costs you 4-8 K-Score and 2&times; the VRAM. The MoE pipeline lives in <code>src/moe.js</code> + <code>src/moe-support.js</code>.</p>
+
+<h2 id="detection">Detection</h2>
+<p>Studio detects MoE from <code>config.json</code> at inspect time. The fields the detector reads:</p>
+<ul>
+  <li><code>num_experts</code> or <code>n_routed_experts</code> &mdash; total experts per MoE layer.</li>
+  <li><code>num_experts_per_tok</code> or <code>n_active_experts</code> &mdash; top-K activated per token.</li>
+  <li><code>shared_expert_intermediate_size</code> &mdash; if present, model has a dense shared expert in parallel.</li>
+  <li><code>router_aux_loss_coef</code> &mdash; load-balance loss coefficient.</li>
+</ul>
+<pre><code>kolm inspect mistralai/Mixtral-8x7B-Instruct-v0.1 --json
+# {
+#   "architecture": "moe",
+#   "num_experts": 8,
+#   "num_experts_per_tok": 2,
+#   "total_params_b": 46.7,
+#   "active_params_b": 12.9,
+#   "shared_expert": false,
+#   ...
+# }</code></pre>
+
+<h2 id="lora-targeting">MoE-aware LoRA</h2>
+<p>For dense models, the LoRA target list is <code>q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj</code>. For MoE, that target list misses the expert-specific projections and over-targets the router. Studio's MoE-aware default targets:</p>
+<ul>
+  <li><strong>Attention</strong> &mdash; <code>q_proj, k_proj, v_proj, o_proj</code> (same as dense).</li>
+  <li><strong>Router</strong> &mdash; <em>not</em> targeted (the router is small and fragile; LoRA tends to break load balance).</li>
+  <li><strong>Per-expert</strong> &mdash; <code>experts.&lt;i&gt;.{w1, w2, w3}</code> or <code>experts.&lt;i&gt;.{gate_proj, up_proj, down_proj}</code> for top-N most-active experts.</li>
+  <li><strong>Shared expert</strong> (if present) &mdash; <code>shared_expert.{gate_proj, up_proj, down_proj}</code>.</li>
+</ul>
+<p>Set the active-expert threshold with <code>--moe-lora-top-pct 50</code> &mdash; target only experts that fire on at least 50% of training tokens. The default is 100% (every expert), but on Mixtral-8x7B-Instruct, two experts handle ~70% of code tokens; targeting only those cuts adapter size by ~75% with no quality loss on a code recipe.</p>
+
+<h2 id="quant-policy">MoE-aware quant policy</h2>
+<p>Uniformly quantizing an MoE model to Q4_K_M drops ~5 K-Score because the router and the gate projections are sensitive. Studio's <code>router-high</code> policy keeps routers + gate at Q6_K minimum while experts go to the requested bpw.</p>
+<table>
+<thead><tr><th>Layer class</th><th>Default policy</th></tr></thead>
+<tbody>
+<tr><td>Router (<code>gate</code>)</td><td>Q6_K minimum (never quantize below)</td></tr>
+<tr><td>Attention QKVO</td><td>Same as user bpw (Q4_K_M, etc.)</td></tr>
+<tr><td>Expert <code>w1</code> / <code>gate_proj</code></td><td>Same as user bpw</td></tr>
+<tr><td>Expert <code>w2</code> / <code>down_proj</code></td><td>Same as user bpw (most numerically sensitive)</td></tr>
+<tr><td>Expert <code>w3</code> / <code>up_proj</code></td><td>Same as user bpw</td></tr>
+<tr><td>Shared expert (if present)</td><td>One step higher than expert bpw</td></tr>
+</tbody>
+</table>
+<pre><code># Default: router-high
+kolm compile mixtral-distill.kolm --target gguf-q4km --output mixtral-distill-q4km.gguf
+
+# Override: uniform Q4 everywhere (smallest file)
+kolm compile mixtral-distill.kolm --target gguf-q4km --moe-policy uniform --output small.gguf
+
+# Override: router-very-high (Q8 routers)
+kolm compile mixtral-distill.kolm --target gguf-q4km --moe-policy router-very-high --output safe.gguf</code></pre>
+
+<h2 id="profiling">Expert activation profiling</h2>
+<p><code>kolm experts &lt;artifact&gt;</code> runs the eval set through the model and emits the activation distribution per expert per layer. Use this to spot dead experts (never fire), star experts (fire on &gt;50% of tokens in their domain), and load-balance pathologies.</p>
+<pre><code>kolm experts mixtral-distill.kolm --eval data/code-eval.jsonl --json
+# {
+#   "layer_0": { "expert_0": 0.143, "expert_1": 0.071, "expert_2": 0.024, "expert_3": 0.581, ... },
+#   "layer_1": { ... },
+#   ...
+#   "dead_experts": [],
+#   "star_experts": [{ "layer": 0, "expert": 3, "fire_rate": 0.581 }, ...]
+# }</code></pre>
+
+<h2 id="pruning">Pruning low-traffic experts</h2>
+<p>If an expert fires on &lt;1% of your domain's tokens, pruning it (replacing its weights with the mean of the other experts, or removing it from the router) saves 1/N of the expert VRAM with negligible quality impact. The pruner reports K-Score before-and-after; if &Delta;K-Score &gt; 0.3, the prune is rolled back.</p>
+<pre><code># Prune experts firing on &lt;0.5% of eval tokens
+kolm experts mixtral-distill.kolm --prune-below 0.005 --output mixtral-distill-pruned.kolm
+# wrote: pruned 2 experts (layer_0.expert_6, layer_15.expert_2), 1/4 VRAM saved, &Delta;K-Score = -0.04</code></pre>
+
+<h2 id="memory">MoE memory estimation</h2>
+<p>VRAM for an MoE model is the full parameter count, not the active parameter count &mdash; all experts need to be resident (CPU offload is possible but slow). The memory estimator accounts for this:</p>
+<table>
+<thead><tr><th>Model</th><th>Total params</th><th>Active params</th><th>VRAM at Q4_K_M (router-high)</th></tr></thead>
+<tbody>
+<tr><td>Mixtral-8x7B</td><td>46.7 B</td><td>12.9 B</td><td>~28 GB</td></tr>
+<tr><td>Mixtral-8x22B</td><td>141 B</td><td>39 B</td><td>~84 GB</td></tr>
+<tr><td>DeepSeek-V3</td><td>671 B</td><td>37 B</td><td>~420 GB (multi-GPU only)</td></tr>
+<tr><td>Qwen3-MoE-30B-A3B</td><td>30 B</td><td>3 B</td><td>~18 GB</td></tr>
+</tbody>
+</table>
+
+<div class="privacy-note">
+<strong>Caveats.</strong> Expert pinning (forcing specific experts active per call) is research-grade and not enabled by default; it usually breaks the model. Pruning is safer and almost always preferable. If you genuinely need a single-expert path (e.g., for compliance reasons), open an issue &mdash; the API is in <code>src/moe-support.js</code> but the validator currently warns.
+</div>
+
+<div class="related">
+  <a href="/docs/studio-quantization"><b>Quantization &rarr;</b><span>The general quant ladder.</span></a>
+  <a href="/docs/studio-distill"><b>Distill &rarr;</b><span>Distilling into an MoE student.</span></a>
+  <a href="/docs/studio-cli-reference"><b>CLI ref &rarr;</b><span><code>kolm experts</code> flag list.</span></a>
+</div>
+
+</div></main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/gateway">Gateway</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/docs/gateway">Gateway docs</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

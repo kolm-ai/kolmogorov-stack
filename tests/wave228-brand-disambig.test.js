@@ -101,7 +101,7 @@ test('W228 #5 - brand-disambig sweep is idempotent (re-run touches 0)', () => {
 });
 
 test('W228 #6 - sw.js cache wave-floor >= 228', () => {
-  const m = SW.match(/const CACHE = 'kolm-v7-[^']+-wave(\d+)-/);
+  const m = SW.match(/const CACHE = 'kolm-v\d+-[^']*?wave(\d+)/);
   assert.ok(m, 'sw.js CACHE must follow wave-N slug pattern');
   const waveN = parseInt(m[1], 10);
   assert.ok(waveN >= 228, `sw.js wave-slug must be >= 228 (saw ${waveN})`);

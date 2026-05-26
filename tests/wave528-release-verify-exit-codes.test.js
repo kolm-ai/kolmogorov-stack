@@ -22,8 +22,9 @@ const DRIVER = path.join(REPO, 'scripts', 'release-verify.cjs');
 const SRC = fs.readFileSync(DRIVER, 'utf8');
 
 const ALL_GATES = [
-  'lint:refs', 'openapi-sync', 'sdk-manifest', 'test', 'sdk-smoke',
-  'local-surfaces', 'doctor', 'whoami', 'verify-claims', 'billing-tiers',
+  'lint:refs', 'control-files', 'openapi-sync', 'claim-verify',
+  'sdk-manifest', 'test', 'sdk-smoke', 'local-surfaces',
+  'doctor', 'whoami', 'verify-claims', 'billing-tiers',
 ];
 
 test('W528 #1 — happy path exits 0 (or 1 if a real gate fails)', () => {

@@ -410,7 +410,7 @@ test('W409y #7 — Team tier has higher hosted_inference cap than Indie', async 
     assert.equal(tierForPlan('pro'), 'indie');
     assert.equal(tierForPlan('team'), 'team');
     assert.equal(tierForPlan('teams'), 'team');
-    assert.equal(tierForPlan('business'), 'team');
+    assert.equal(tierForPlan('business'), 'business'); // V1 launch: dedicated tier (was team alias)
     assert.equal(tierForPlan('enterprise'), 'enterprise');
     assert.equal(tierForPlan('free'), 'free');
     assert.equal(tierForPlan(null), 'free');

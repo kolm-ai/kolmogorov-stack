@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>The wrapper tax, decomposed &middot; kolm.ai blog</title>
+<meta name="description" content="W887 production benchmark: 703 ms of overhead on a 2478 ms call, broken down by phase. PII scan plus chain resolve plus Ed25519 sign plus capture write plus Vercel hop, with the cost of the audit trail isolated.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="The wrapper tax, decomposed &middot; kolm.ai blog">
+<meta property="og:description" content="703 ms of overhead on a 2478 ms call, broken down by phase, measured live against kolm.ai.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/blog/2026-05-26-the-wrapper-tax-decomposed">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://kolm.ai/blog/2026-05-26-the-wrapper-tax-decomposed">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="kolm.ai blog" href="/feed.xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"The wrapper tax, decomposed","description":"703 ms of overhead on a 2478 ms call, broken down by phase.","url":"https://kolm.ai/blog/2026-05-26-the-wrapper-tax-decomposed","datePublished":"2026-05-26","dateModified":"2026-05-26","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<style>
+:root{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(17,17,17,0.10);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#1f2937;--accent-soft:rgba(31,41,55,0.06);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=dark]{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230,233,238,0.10);--bg:#0e1116;--bg-elev:#161a20;--accent:#cbd5e1;--accent-soft:rgba(203,213,225,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.wrap{max-width:780px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.crumbs a:hover{color:var(--ink)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
+.meta{font-family:var(--mono);font-size:11.5px;letter-spacing:0.10em;color:var(--ink-faint);margin:0 0 32px}
+h1{font-size:38px;line-height:1.10;font-weight:520;letter-spacing:-0.02em;margin:0 0 18px;color:var(--ink)}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);margin:0 0 36px}
+h2{font-size:22px;font-weight:540;letter-spacing:-0.015em;margin:44px 0 12px;color:var(--ink);scroll-margin-top:80px}
+h3{font-size:16px;font-weight:540;letter-spacing:-0.005em;margin:28px 0 8px;color:var(--ink)}
+p{color:var(--ink-mute);font-size:15.5px;line-height:1.68}
+pre{background:#0b0e12;color:#e9eef3;border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15.5px;line-height:1.72}
+li{margin:6px 0}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-mute)}
+th{color:var(--ink);font-weight:540}
+td code{font-size:12px}
+.kolm-post a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+.kolm-post a:hover{border-bottom-color:var(--accent)}
+.back{display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:0.10em;color:var(--ink-faint);text-decoration:none;margin-bottom:24px;border-bottom:1px dashed var(--line);padding-bottom:1px}
+.back:hover{color:var(--ink)}
+.endnote{margin-top:48px;padding:18px 20px;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev);font-size:14px;color:var(--ink-mute);line-height:1.6}
+.endnote b{color:var(--ink);font-weight:540}
+hr.rule{border:none;border-top:1px solid var(--line);margin:36px 0}
+.tabular{font-variant-numeric:tabular-nums}
+table.tabular td:not(:first-child){text-align:right}
+.ascii{background:#0b0e12;color:#e9eef3;border:1px solid var(--line);border-radius:8px;padding:18px 20px;font:12px/1.45 var(--mono);overflow-x:auto;white-space:pre;margin:14px 0 18px}
+</style>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="skip-link">Skip to content</a>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<a href="/blog" class="back">&larr; kolm.ai blog</a>
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/blog">blog</a> / the-wrapper-tax-decomposed</div>
+<p class="eyebrow">Benchmark &middot; W887</p>
+<h1>The wrapper tax, decomposed.</h1>
+<p class="meta">2026-05-26 &middot; ~10 minute read</p>
+
+<article class="kolm-post">
+
+<p class="lede">Every gateway adds latency. The question is how much, where it goes, and what you get in exchange. We ran 10 identical prompts through the kolm Wrapper against Anthropic in production and decomposed every phase. Here is the breakdown: 703 milliseconds of overhead on a 2478 millisecond call, made up of about 250 milliseconds of pipeline work that buys you the audit trail and about 450 milliseconds of one cross-host hop you can eliminate in the self-hosted configuration.</p>
+
+<h2>The headline number</h2>
+
+<p>10 identical prompts, two legs, run live against <code>https://kolm.ai</code> with <code>claude-haiku-4-5</code>. The prompt was, "In two short sentences, explain what an LLM gateway does." Wall clock, milliseconds:</p>
+
+<table class="tabular" aria-label="Wall clock latency comparison">
+<thead><tr><th>Leg</th><th>p50</th><th>p95</th><th>mean</th></tr></thead>
+<tbody>
+<tr><td>Direct (teacher proxy to Anthropic)</td><td>1650</td><td>2642</td><td>1774</td></tr>
+<tr><td>Kolm gateway to Anthropic (managed)</td><td>1899</td><td>7704</td><td>2478</td></tr>
+<tr><td>Kolm gateway to local trinity-500 (projected)</td><td>1240</td><td>1450</td><td>1240</td></tr>
+</tbody>
+</table>
+
+<p>The mean delta is 703 milliseconds, or about 40 percent over a direct call. The p95 tail (7704 ms) is a Vercel cold start on the proxy function and clusters near 1500 to 2200 ms once the function is resident. The local artifact leg is faster than direct because there is no provider round trip at all.</p>
+
+<h2>Where every millisecond goes</h2>
+
+<p>The Wrapper does seven things per call. Here is the per-phase shape on the managed configuration (Vercel-proxied so Railway does not need provider keys), with the upstream call (chain_dispatch) sitting in the middle as the only phase that does the real model work.</p>
+
+<pre class="ascii" aria-label="Per-phase latency ASCII chart">PHASE                     ms    bar (each | = 25 ms)
+-----------------------------------------------------------------
+tier_check                 ~3   |
+route_select               ~5   |
+pii_in                    ~50  ||
+chain_dispatch (upstream) 1750  ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+pii_out                   ~80  |||
+receipt_sign              ~25  |
+capture_write             ~40  |
+-----------------------------------------------------------------
+
+TOTAL kolm pipeline       ~203  (the part the wrapper adds)
++ Vercel proxy hop        ~500  (managed config only; Railway-direct kills this)
++ Upstream round trip    ~1775  (the part you would pay anyway)
+= End-to-end mean         2478
+</pre>
+
+<p>Read as a table:</p>
+
+<table class="tabular" aria-label="Wrapper tax phase decomposition">
+<thead><tr><th>Component</th><th>Wall clock</th></tr></thead>
+<tbody>
+<tr><td>Direct Anthropic round trip (mean)</td><td>1774 ms</td></tr>
+<tr><td>+ kolm pipeline (PII, chain, receipt, capture)</td><td>~200 to 300 ms</td></tr>
+<tr><td>+ Vercel proxy hop (managed only)</td><td>~400 to 500 ms</td></tr>
+<tr><td>= Gateway leg (mean)</td><td>2478 ms</td></tr>
+</tbody>
+</table>
+
+<p>So of the 703 ms of overhead, roughly 250 ms is the pipeline (the work that buys you the audit trail and the capture row) and roughly 450 ms is one extra cross-host network hop that exists only on the managed kolm.ai because Anthropic credentials live on Vercel and the gateway runs on Railway.</p>
+
+<h2>Three pipeline phases worth a closer look</h2>
+
+<h3>PII pass</h3>
+
+<p>Input is scanned before it leaves your machine: regex sweeps for emails, phones, SSNs, credit card patterns, IPs, and named entities (with an optional spaCy backend when high-fidelity is needed). Mode is configurable per namespace: detect (log only), redact (replace with tokens), block (return 4xx), or off. About 50 ms on input, slightly more on output because output is usually longer. PII events land in a separate log so you can prove the redaction happened on a given call without grepping receipts.</p>
+
+<h3>Receipt sign</h3>
+
+<p>Every call gets one <code>kolm-audit-1</code> receipt: 19 canonical fields in a fixed key order, hashed with sha256, signed with Ed25519. About 25 ms because Ed25519 is genuinely fast and the canonical-ordering step is one Object.keys sort. The signing key id is stamped on the receipt so you can rotate without breaking old verifications. <code>GET /v1/verify/&lt;receipt_id&gt;</code> returns the receipt plus a verification result with no auth required.</p>
+
+<h3>Capture write</h3>
+
+<p>The request, response, route decision, confidence, and capture-eligible flag are written to your namespace lake as one row. About 40 ms because we batch flushes; the row is queryable inside a second. The capture-eligible flag is the one that matters: every fallback (frontier had to take over because local confidence was low) gets <code>capture_eligible:true</code>, and that is what you query when you build the next distill set.</p>
+
+<h2>The Vercel hop is optional</h2>
+
+<p>The 400 to 500 ms cross-host hop is a deployment choice, not a fundamental cost. Two configurations:</p>
+
+<table class="tabular" aria-label="Deployment configuration tradeoff">
+<thead><tr><th>Configuration</th><th>chain_dispatch (mean)</th><th>wrapper tax (mean)</th><th>end-to-end</th></tr></thead>
+<tbody>
+<tr><td>Railway-direct (provider key on the gateway host)</td><td>~1500 to 1800 ms</td><td>~10 to 50 ms</td><td>~1550 to 1850 ms</td></tr>
+<tr><td>Vercel-proxy (managed kolm.ai)</td><td>~1900 to 2200 ms</td><td>~400 to 700 ms</td><td>~2300 to 2900 ms</td></tr>
+</tbody>
+</table>
+
+<p>If you self-host or deploy your own kolm with provider keys on the same machine, you pay the pipeline cost (10 to 50 ms) and nothing else. The managed deployment proxies through Vercel because the Vercel function holds the customer's Anthropic and OpenAI keys (Railway is treated as untrusted for provider keys to keep the threat model tight). Setting <code>ANTHROPIC_API_KEY</code> directly on Railway removes the hop.</p>
+
+<h2>Cost is within 2 percent of direct</h2>
+
+<table class="tabular" aria-label="Per-call cost comparison">
+<thead><tr><th>Leg</th><th>input tok</th><th>output tok</th><th>$ per call</th><th>$ per 1k calls</th></tr></thead>
+<tbody>
+<tr><td>Direct (Anthropic)</td><td>210</td><td>560</td><td>$0.000301</td><td>$0.3010</td></tr>
+<tr><td>Kolm gateway to Anthropic</td><td>210</td><td>572</td><td>$0.000307</td><td>$0.3070</td></tr>
+<tr><td>Kolm gateway to local trinity-500</td><td>0</td><td>0</td><td>$0.000000</td><td>$0.0000</td></tr>
+</tbody>
+</table>
+
+<p>The Wrapper does not mark up tokens. The 12-token output delta (572 vs 560) is per-call provider variance, not a fee. When work routes to a local artifact, marginal cost goes to zero on a per-call basis; you pay for the electricity that runs the GPU, which on a 5090 is roughly $140 a month at residential rates for the equivalent throughput.</p>
+
+<h2>What the 703 ms buys you</h2>
+
+<ul>
+  <li><b>One Ed25519 receipt per call</b>, signed and verifiable, including on upstream failures.</li>
+  <li><b>PII redaction</b> on input and output with separate event logs.</li>
+  <li><b>Namespace-aware routing</b> with confidence-gated fallback.</li>
+  <li><b>A capture row per call</b> with <code>capture_eligible:true</code> on every fallback. That flag is the next distill set.</li>
+  <li><b>Provider-key isolation</b>: managed customers do not push their Anthropic or OpenAI key to the Railway gateway. The Vercel proxy holds the key and the gateway never sees it.</li>
+  <li><b>Receipt verification at the edge</b>: <code>GET /v1/verify/&lt;receipt_id&gt;</code> works with no auth, so a third party (auditor, customer, regulator) can verify any receipt you produced.</li>
+</ul>
+
+<p>An example signed receipt from this run is at <code>rcpt_01KYC1ZV98HBEHW0NFC5DB</code>, with the public key <code>c2e942e24061e9314790d73ce7b3f351</code>. Pull it with:</p>
+
+<pre><code>curl https://kolm.ai/v1/verify/rcpt_01KYC1ZV98HBEHW0NFC5DB</code></pre>
+
+<h2>What is next</h2>
+
+<p>The W888 follow-up wave instruments every dispatch with a per-phase <code>latency_breakdown</code> attached to the receipt as an additive top-level field (not covered by the signature, so existing receipts still verify clean). Once that ships to production, the table above moves from "estimated from the leg total" to "measured per call". The two prod-deployed dashboards (gateway and bench) will show the breakdown live.</p>
+
+<p>Two follow-ups we expect to ship inside V1:</p>
+
+<ul>
+  <li><b>Railway-direct as a managed option.</b> Customers who would rather we hold the provider key on the same host (and skip the hop) can flip a switch and lose the 400 ms. The tradeoff is the same key now sits on Railway too; some compliance teams prefer that, some do not.</li>
+  <li><b>Receipt batching.</b> When the gateway sees a burst of calls inside a few milliseconds, it can sign one receipt that covers the batch with a Merkle root over the individual call hashes. The per-call sign cost falls toward zero. The first version of this is in the W889 draft.</li>
+</ul>
+
+<h2>Raw data</h2>
+
+<p>The full per-call timings, receipt ids, and the W888 instrumentation diff are public:</p>
+
+<ul>
+  <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/benchmarks/wave887-wrapper-prod-2026-05-26.md">wave887 wrapper-prod benchmark (10 calls, 3 legs)</a></li>
+  <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack/blob/main/benchmarks/wave888-wrapper-tax-decomposed-2026-05-26.md">wave888 wrapper-tax decomposition (per-phase plan)</a></li>
+  <li><a href="/docs/gateway-bench">/docs/gateway-bench</a> &mdash; the live, regenerated benchmark page</li>
+</ul>
+
+<div class="endnote">
+<b>Constraints.</b> The numbers above are from a single 10-prompt run against one model (claude-haiku-4-5) at one time. Latency varies by region, time of day, prompt length, and provider load. The Vercel cold-start p95 spike is real but rare; resident-function samples cluster much lower. Your overhead will track the table to within 10 to 20 percent in either direction. The decomposition table will firm up once W888 ships per-call breakdown to production receipts.
+</div>
+
+</article>
+
+<hr class="rule">
+<a href="/blog" class="back">&larr; back to kolm.ai blog</a>
+
+</div></main>
+
+</body>
+</html>

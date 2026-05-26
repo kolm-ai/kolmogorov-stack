@@ -83,7 +83,7 @@ test('W410 #6 - integrations grid foot links to the hub page', () => {
 });
 
 test('W410 #7 - sw.js wave-floor >= 410', () => {
-  const m = SW.match(/const\s+CACHE\s*=\s*'kolm-v7-2026-05-\d+-wave(\d+)/);
+  const m = SW.match(/const\s+CACHE\s*=\s*'kolm-v\d+-2026-\d{2}-\d{2}-[^']*?wave(\d+)/);
   assert.ok(m, 'CACHE slug present');
   assert.ok(parseInt(m[1], 10) >= 410, 'CACHE wave >= 410 (got ' + m[1] + ')');
 });

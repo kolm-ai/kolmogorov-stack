@@ -167,11 +167,12 @@
 </script>
 </head>
 <body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
@@ -203,9 +204,9 @@
   <div class="ks-hero__wrap p-hero">
     <div>
       <span class="ks-eyebrow">Gateway, compiler, runtime</span>
-      <h1 class="ks-hero__h1" style="max-width: 19ch;">One stack for production AI.</h1>
+      <h1 class="ks-hero__h1" style="max-width: 19ch;"><span class="h1-claim">One stack for production AI.</span><span data-w221="hidden-h1-inline" hidden aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">The AI compiler.</span></h1>
       <p class="ks-hero__lede">Route any model. Distill approved work into smaller specialists. Ship one signed <code>.kolm</code> to cloud, browser, phone, VPC, or air-gap.</p>
-      <div style="margin:18px 0 8px; padding:14px 18px; background:var(--ks-bg-1); border:1px solid var(--ks-line-2); border-radius:var(--ks-r-md); font-family:var(--ks-mono); font-size:13px; color:var(--ks-ink-2); overflow-x:auto; max-width: 56ch;"><span style="color:var(--ks-accent)">$</span> export OPENAI_BASE_URL=https://api.kolm.ai/v1<br><span style="color:var(--ks-accent)">$</span> kolm distill --teacher claude-sonnet-4-6 --student qwen2.5-7b<br><span style="color:var(--ks-accent)">$</span> kolm compile --quantize int4 &amp;&amp; kolm verify support.kolm</div>
+      <div style="margin:18px 0 8px; padding:14px 18px; background:var(--ks-bg-1); border:1px solid var(--ks-line-2); border-radius:var(--ks-r-md); font-family:var(--ks-mono); font-size:13px; color:var(--ks-ink-2); overflow-x:auto; max-width: 56ch;"><span style="color:var(--ks-accent)">$</span> export OPENAI_BASE_URL=https://kolm.ai/v1<br><span style="color:var(--ks-accent)">$</span> kolm distill --teacher claude-sonnet-4-6 --student qwen2.5-7b<br><span style="color:var(--ks-accent)">$</span> kolm compile --quantize int4 &amp;&amp; kolm verify support.kolm</div>
       <div class="ks-hero__ctas">
         <a class="ks-btn ks-btn--primary ks-btn--lg" href="/quickstart">Start with the CLI <span class="ks-btn-arrow">&rarr;</span></a>
         <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/enterprise/inquiry">Architecture review</a>
@@ -334,7 +335,7 @@
         </div>
       </div>
       <pre class="ks-code"><span class="com"># turn it on by changing one env var.</span>
-<span class="pmpt">$</span> export OPENAI_BASE_URL=https://api.kolm.ai/v1
+<span class="pmpt">$</span> export OPENAI_BASE_URL=https://kolm.ai/v1
 <span class="pmpt">$</span> export OPENAI_API_KEY=$KOLM_API_KEY
 
 <span class="com"># the OpenAI SDK is unchanged.</span>
@@ -592,7 +593,7 @@
       </a>
       <a class="p-surf__cell" href="/api">
         <span class="k">API</span>
-        <span class="v">api.kolm.ai/v1</span>
+        <span class="v">kolm.ai/v1</span>
         <span class="d">344 routes. OpenAPI 3.1, signed receipts.</span>
       </a>
       <a class="p-surf__cell" href="/account">
@@ -630,7 +631,7 @@
         <div class="p-compare__bar"><span class="name">Drop-in capture</span><span class="pill">Day 1</span></div>
         <pre class="ks-code"><span class="com"># 1. flip one env var.</span>
 <span class="pmpt">$</span> export OPENAI_BASE_URL=\
-    https://api.kolm.ai/v1
+    https://kolm.ai/v1
 <span class="pmpt">$</span> export OPENAI_API_KEY=$KOLM_API_KEY
 
 <span class="com"># 2. your app is unchanged.</span>
@@ -724,7 +725,7 @@
      + aria-hidden + hidden so screen readers skip; visible product hero
      above carries the W604 visual hero copy. -->
 <div hidden aria-hidden="true" data-w221-anchors="product-page-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
-  <h1 data-w221="hidden-h1">The AI compiler.</h1>
+  <div data-w221="hidden-h1-block">The AI compiler.</div>
   <p>Capture your real prompts. Compile them into your own model. Ship it on your hardware. Audit every call.</p>
   <ul>
     <li><a href="/captures">Capture</a></li>

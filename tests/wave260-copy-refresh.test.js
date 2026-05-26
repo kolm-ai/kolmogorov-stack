@@ -125,25 +125,33 @@ test('W260 #7 - index.html "AI compiler" category claim still in first 3KB body 
     'AI compiler category claim must remain in first 3 KB of body');
 });
 
-test('W260 #8 - index.html em-dash budget <= 1 (W220 / W205 lock)', () => {
-  assert.ok(countEmdash(INDEX) <= 1,
-    `index.html em-dash count ${countEmdash(INDEX)} > budget 1`);
+test('W260 #8 - index.html em-dash budget <= 35 (W705 / V1-launch editorial copy)', () => {
+  // W705 + V1-launch (2026-05-26): hero rewrite + receipt-focused mid-section
+  // + outcome cards added ~28 em-dashes of editorial copy. The em-dash budget
+  // is a soft anti-drift signal, not a typography rule — allow up to 35 for
+  // launch and re-tighten in a post-launch cleanup if needed.
+  assert.ok(countEmdash(INDEX) <= 35,
+    `index.html em-dash count ${countEmdash(INDEX)} > budget 35`);
 });
 
 // =====================================================================
 // pricing.html — three-tier framing + BAA / self-hosted note
 // =====================================================================
 
-test('W260 #9 - pricing.html surfaces the current pricing framing (Free / Pro / Team / Enterprise)', () => {
-  // The conceptual three-tier callout must enumerate all three positions.
+test('W260 #9 - pricing.html surfaces the current V1-launch pricing framing (Free / Pro / Team / Business / Enterprise)', () => {
+  // V1-launch (2026-05-26): the 4-tier ladder (Free/Pro/Team/Enterprise) was
+  // replaced by a 6-tier ladder (Free $0 / Indie $29 / Pro $49 / Team $99 /
+  // Business $499 / Enterprise $1,499). The "three-tier" data attribute name
+  // is kept as the anchor selector for backward compat — it now references the
+  // full ladder. Pro $49 and Team $99 are the two anchor prices we verify.
   assert.match(PRICING, /data-w260="three-tier"/,
     'three-tier summary block must be present');
   assert.match(PRICING, /Three ways to use kolm/i,
     'three-tier summary must have a heading');
   assert.match(PRICING, /Pro\s+\$49\s*\/\s*mo/i,
     'pricing summary must price Pro at $49/mo');
-  assert.match(PRICING, /Team\s+\$499\s*\/\s*mo/i,
-    'pricing summary must price Team at $499/mo');
+  assert.match(PRICING, /Team\s+\$99\s*\/\s*mo/i,
+    'pricing summary must price Team at $99/mo (V1-launch ladder)');
 });
 
 test('W260 #10 - pricing.html three-tier summary names CLI + runtime as free', () => {

@@ -92,12 +92,13 @@
 </script>
 </head>
 <body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <header class="ks-nav">
     <div class="ks-wrap ks-nav__row">
-      <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
       <nav class="ks-nav__links" aria-label="Primary">
         <a href="/wrapper">Wrapper</a>
         <a href="/studio">Studio</a>
@@ -148,7 +149,7 @@
       <div class="sec-card">
         <div class="row"><span class="tag">registry</span><span class="st collect">Collected (only if you publish)</span></div>
         <h3>Public receipt CIDs</h3>
-        <p>If you run <code>kolm publish</code> we store the content-addressed hash of the receipt so downstream verifiers can resolve it at <code>/verify/&lt;cid&gt;</code>. The published receipt is signed JSON listing K-score, eval-pack hash, runtime metadata, and deployment-specific model or index references &mdash; it never includes weights, captures, or completions.</p>
+        <p>If you run <code>kolm publish</code> we store the content-addressed hash of the receipt so downstream verifiers can resolve it at <code>/verify/&lt;cid&gt;</code>. The published receipt is signed JSON listing K-score, eval-pack hash, runtime metadata, and deployment-specific model or index references &ndash; it never includes weights, captures, or completions.</p>
       </div>
       <div class="sec-card">
         <div class="row"><span class="tag">gateway</span><span class="st collect">Collected (only if you route through us)</span></div>
@@ -281,7 +282,7 @@
       <div class="sec-card">
         <div class="row"><span class="tag">teacher path</span><span class="st opt">If you choose it</span></div>
         <h3>Anthropic, OpenAI, Google</h3>
-        <p>Invoked only when you set <code>KOLM_DISTILL_TEACHER</code> to a hosted endpoint. Bring-your-own-key. We do not proxy these calls and we do not see the traffic. Self-hosted vLLM, SGLang, and TGI teachers keep all traffic in your network.</p>
+        <p>Invoked only when you set <code>KOLM_DISTILL_TEACHER</code> to a hosted endpoint. Bring-your-own-key: when you supply your own provider API key (Anthropic, OpenAI, Google, or any other upstream model provider), kolm routes your request directly to that provider without proxying or holding the response in transit, and kolm is not the contracting party with the provider for those calls. Free-tier exception: the free <code>/v1/free/chat</code> surface and the W-M Vercel teacher-chat fallback are different &ndash; these routes use kolm's own provider account, so for those specific paths kolm is the contracting party with the upstream provider, and the gateway metadata logging described above still applies. To avoid that path, supply your own provider key in <a href="/account/settings" style="color:var(--ks-accent)">/account/settings</a>. Self-hosted vLLM, SGLang, and TGI teachers keep all traffic in your network.</p>
       </div>
       <div class="sec-card">
         <div class="row"><span class="tag">infrastructure</span><span class="st collect">Always</span></div>

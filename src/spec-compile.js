@@ -569,6 +569,63 @@ export async function compileSpec(spec, opts = {}) {
     };
   }
 
+  // R-1 — Runtime passport synthesis. After ExportForge produces target files
+  // (.gguf / .onnx / .mlpackage / etc.), we want every manifest to carry one
+  // runtime_passports[] row per exported target so a buyer can read "what
+  // runtime serves this, what precision, what memory" straight off the
+  // manifest. The spec-compile path here always populates with status='estimated'
+  // because the in-process build does NOT load the exported bytes into a live
+  // runtime (that would need llama.cpp / vLLM / MLX on the build host). A
+  // separate probe path (apps/export/probe.py) can later overwrite an estimated
+  // row with a 'tested' row via recordTestedPassport. The build-time row is
+  // the floor — every artifact ships with SOMETHING in runtime_passports[] so
+  // the inspect UI never has to special-case "no rows".
+  let runtimePassports = null;
+  if (exportProvenance && Array.isArray(exportProvenance.targets) && exportProvenance.targets.length > 0) {
+    const { estimatePassport } = await import('./runtime-passport.js');
+    // Format → (runtime, precision-fallback, fallback-target) lookup. The
+    // recommended fallback is the next-most-portable runtime — llama.cpp is
+    // the universal fallback because it ships on every host with a CPU.
+    const FORMAT_RUNTIME = {
+      gguf:        { runtime: 'llama.cpp',    fallback: null },
+      onnx:        { runtime: 'transformers', fallback: 'gguf-q4_k_m-llama.cpp' },
+      mlx:         { runtime: 'mlx',          fallback: 'gguf-q4_k_m-llama.cpp' },
+      coreml:      { runtime: 'mlx',          fallback: 'gguf-q4_k_m-llama.cpp' },
+      tensorrt:    { runtime: 'tensorrt-llm', fallback: 'gguf-q4_k_m-llama.cpp' },
+      safetensors: { runtime: 'transformers', fallback: 'gguf-q4_k_m-llama.cpp' },
+      executorch:  { runtime: 'transformers', fallback: 'gguf-q4_k_m-llama.cpp' },
+    };
+    // The total_params_b hint comes from training_stats when the distill
+    // pipeline recorded it; null means estimatePassport drops to 'unsupported'
+    // for that row (memory_mb cannot be derived), which is the right surface
+    // signal — a buyer sees "estimate unavailable" instead of a fabricated
+    // memory number.
+    const paramsB = (trainingStatsForBuild && typeof trainingStatsForBuild.total_params_b === 'number')
+      ? trainingStatsForBuild.total_params_b : null;
+    runtimePassports = [];
+    for (const t of exportProvenance.targets) {
+      const fr = FORMAT_RUNTIME[String(t.format).toLowerCase()];
+      if (!fr) continue;  // unknown format → skip rather than fabricate a row
+      const precision = (t.quantization || (t.format === 'gguf' ? 'q4_k_m' : 'fp16')).toLowerCase();
+      const target_id = `${t.format}-${precision}-${fr.runtime}`;
+      try {
+        const passport = estimatePassport({
+          target_id,
+          runtime: fr.runtime,
+          runtime_version: t.runtime_min_version || 'unknown',
+          precision,
+          params_b: paramsB,
+          fallback: fr.fallback,
+        });
+        runtimePassports.push(passport);
+      } catch {
+        // estimatePassport throws on bad shape — drop the row rather than
+        // poison the whole manifest. The export still ships; the row is just
+        // absent from runtime_passports[].
+      }
+    }
+  }
+
   // Wave 147 — MoE composition provenance. When the caller points at an
   // apps/trainer/moe_run.py output dir, the bridge reads the manifest
   // (kolm_moe:true marker required), recomputes router + per-expert
@@ -904,6 +961,10 @@ export async function compileSpec(spec, opts = {}) {
     drift_report: driftReportBlock,
     attestation_report: attestationReportObj,
     allow_below_gate: opts.allow_below_gate === true || opts.allowBelowGate === true,
+    // R-1 — runtime passports. Always passed (even null) so the manifest
+    // either carries the field (when ExportForge produced targets) or
+    // remains byte-identical to pre-R-1 artifacts when no exports happened.
+    runtime_passports: runtimePassports,
   });
 
   // W350 — once buildAndZip has produced an artifact, any post-build failure

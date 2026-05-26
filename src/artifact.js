@@ -39,6 +39,25 @@ import { cidFromManifestHashes } from './cid.js';
 import { buildArtifactCredential } from './provenance.js';
 import { validateCapability, validateLineage } from './artifact-lineage.js';
 import { validateExportBlock, EXPORT_SPEC_VERSION } from './export-provenance.js';
+// R-1 — Runtime passport. Per (runtime, target_id) capability fingerprint
+// rides inside the manifest as `runtime_passports: []`. Empty array when no
+// export targets were probed; otherwise one row per format that ExportForge
+// produced (status='tested' if a real probe ran, 'estimated' if the row was
+// synthesized at compile time, 'unsupported' for incompatible combinations).
+// validatePassports throws on schema violations so a hand-rolled bad row is
+// caught at build time, not at first /v1/inspect call.
+import { validatePassports as validateRuntimePassports, RUNTIME_PASSPORT_SCHEMA_VERSION } from './runtime-passport.js';
+// R-5 — Evidence DAG. The provenance graph that explains where the artifact's
+// inputs (captures, evals, teacher rollouts, signature events, policy gates,
+// rights checks) came from. Validated at build time so a malformed or cyclic
+// graph is caught before the receipt is signed. NOT bound into
+// artifact_hash_input — same operational-fingerprint pattern as
+// runtime_passports (R-1): a tenant can legitimately re-walk the graph and
+// emit a new derived_from edge after an eval re-run without invalidating the
+// receipt chain. The artifact's actual bytes (recipes, weights, evals) are
+// anchored in artifact_hash; the DAG explains where those bytes came from but
+// does not gain authority over them.
+import { validateDagInput as validateEvidenceDagInput, toJSON as evidenceDagToJSON, buildDag as buildEvidenceDag, EVIDENCE_DAG_SCHEMA_VERSION } from './evidence-dag.js';
 import { validateMoeBlock, MOE_SPEC_VERSION } from './moe-provenance.js';
 import { validatePretokenizeBlock, PRETOKENIZE_SPEC_VERSION } from './pretokenize-provenance.js';
 import { validateExternalHoldoutBlock, EXTERNAL_HOLDOUT_SPEC_VERSION } from './external-holdout.js';
@@ -317,7 +336,7 @@ function normalizeLicense(license) {
   };
 }
 
-export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, output_schema, guardrails, parent_cid, region }) {
+export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, output_schema, guardrails, parent_cid, region, runtime_passports, evidence_dag }) {
   const secret = requireSignSecret();
   // W252 — K-score ship gate is load-bearing. If a K-score is supplied AND
   // it says ships=false, the builder must refuse unless the caller explicitly
@@ -361,6 +380,49 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   let export_block = null;
   if (exportInput) {
     export_block = validateExportBlock(exportInput);
+  }
+  // R-1 — runtime_passports. Always an array; empty when no targets were
+  // exported. Each entry is one (runtime, target_id) capability fingerprint
+  // produced by ExportForge after every format export. Validation runs at
+  // build time so a malformed row (unknown runtime, missing measurement on a
+  // status='tested' row) is caught here, before the receipt is signed. NOT
+  // bound into artifact_hash_input below: the passport is an OPERATIONAL
+  // fingerprint, not provenance — a tenant who re-probes the same artifact
+  // on a different host can update the array without breaking the receipt
+  // chain. The export_block already binds the bytes of every target file
+  // into artifact_hash, so the passport never has authority over the bytes.
+  let _runtime_passports_canon = [];
+  if (runtime_passports != null) {
+    if (!Array.isArray(runtime_passports)) {
+      throw new Error('runtime_passports must be array');
+    }
+    const v = validateRuntimePassports(runtime_passports);
+    if (!v.ok) {
+      throw new Error(`runtime_passports[${v.index}] invalid: ${v.reason}`);
+    }
+    _runtime_passports_canon = runtime_passports.slice();
+  }
+  // R-5 — evidence_dag. The provenance graph that explains where the
+  // artifact's upstream inputs (captures, evals, teacher rollouts,
+  // signature events, policy gates, rights checks) came from. Validated
+  // here so a hand-rolled malformed graph (unknown kind, cycle, missing
+  // endpoint) is caught at build time, not at first /v1/evidence/* call.
+  // NOT bound into artifact_hash_input below: the DAG is OPERATIONAL
+  // fingerprint, not provenance over bytes — a tenant who re-walks the
+  // graph (e.g. to add a new validated_by edge after an eval re-run) can
+  // update the field without breaking the receipt chain. The artifact's
+  // actual bytes (recipes, weights, evals) are anchored in artifact_hash;
+  // the DAG explains where those bytes came from but does not gain
+  // authority over them. Conditional spread (per W460 byte-stability law)
+  // keeps pre-R5 artifacts byte-identical when rebuilt without an
+  // evidence_dag argument.
+  let _evidence_dag_canon = null;
+  if (evidence_dag != null) {
+    const v = validateEvidenceDagInput(evidence_dag);
+    if (!v.ok) {
+      throw new Error(`evidence_dag invalid: ${v.reason}`);
+    }
+    _evidence_dag_canon = evidenceDagToJSON(buildEvidenceDag(evidence_dag));
   }
   // Wave 147 — moe block. Same pattern as export: src/moe-provenance.js
   // bridge builds + validates; we re-validate here so a hand-rolled block
@@ -1090,6 +1152,29 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     capability: capability_block,
     lineage: lineage_block,
     export: export_block,
+    // R-1 — runtime passports. Conditional spread per the W460 byte-
+    // stability law: when the caller did not pass a runtime_passports
+    // argument the key is OMITTED from the manifest entirely so pre-R-1
+    // artifacts rebuilt without the field remain byte-identical to their
+    // original manifest_hash + cid. When the caller did pass [] (an
+    // explicit "no targets probed" signal) the key is present with an
+    // empty array. Schema version stamp lets verifiers detect spec
+    // migrations.
+    ...(runtime_passports != null ? {
+      runtime_passports: _runtime_passports_canon,
+      runtime_passports_spec_version: RUNTIME_PASSPORT_SCHEMA_VERSION,
+    } : {}),
+    // R-5 — evidence DAG. Conditional spread per the W460 byte-stability
+    // law: when the caller did not pass an evidence_dag argument the key
+    // is OMITTED from the manifest entirely so pre-R-5 artifacts rebuilt
+    // without the field remain byte-identical to their original
+    // manifest_hash + cid. When the caller did pass one (including an
+    // empty {nodes:[],edges:[]}) the key is present + the spec version
+    // stamp lets verifiers detect spec migrations.
+    ...(_evidence_dag_canon != null ? {
+      evidence_dag: _evidence_dag_canon,
+      evidence_dag_spec_version: EVIDENCE_DAG_SCHEMA_VERSION,
+    } : {}),
     moe: moe_block,
     pretokenize: pretokenize_block,
     external_holdout_provenance: external_holdout_block,
@@ -1811,7 +1896,7 @@ export function packageArtifact({ job_id, payload, outPath }) {
 // with the size-aware K-score patched into the manifest. The double-zip is
 // cheap (≤10ms for 5KB artifacts) and keeps the K-score honest — the size
 // axis includes the K-score bytes themselves.
-export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, outPath: outPathOverride, judge_id, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails, parent_cid, region }) {
+export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, outPath: outPathOverride, judge_id, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails, parent_cid, region, runtime_passports }) {
   requireSignSecret();
   // W457b (build-honors-out) — when an explicit outPath is supplied, write
   // the .kolm directly at the user-requested filename. Otherwise fall back
@@ -1846,7 +1931,7 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
     confidential_compute = await verifyAttestation(kind, attestation_report);
   }
 
-  const sharedBlocks = { capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails, parent_cid, region };
+  const sharedBlocks = { capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails, parent_cid, region, runtime_passports };
 
   // W350 — temp-file cleanup registry. The two-pass build writes a probe zip
   // to measure its size before the K-score is embedded; on success the probe

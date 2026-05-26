@@ -4,22 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
-<title>Gateway deploy — Docker, compose, k8s, BYOC &middot; kolm.ai</title>
+<title>Gateway deploy - Docker, compose, k8s, BYOC &middot; kolm.ai</title>
 <meta name="description" content="Three first-class deploy targets: Docker Compose (single-host), Helm chart (k8s), and BYOC (your own cloud) bundle. Every target ships the same image with provider keys mounted from secrets.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Gateway deploy — Docker, compose, k8s, BYOC &middot; kolm.ai">
+<meta property="og:title" content="Gateway deploy - Docker, compose, k8s, BYOC &middot; kolm.ai">
 <meta property="og:description" content="Three first-class deploy targets: Docker Compose (single-host), Helm chart (k8s), and BYOC (your own cloud) bundle. Every target ships the same image with provider keys mounted from secrets.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/gateway-deploy">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Gateway deploy — Docker, compose, k8s, BYOC &middot; kolm.ai">
+<meta name="twitter:title" content="Gateway deploy - Docker, compose, k8s, BYOC &middot; kolm.ai">
 <meta name="twitter:description" content="Three first-class deploy targets: Docker Compose (single-host), Helm chart (k8s), and BYOC (your own cloud) bundle. Every target ships the same image with provider keys mounted from secrets.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs/gateway-deploy">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Gateway deploy — Docker, compose, k8s, BYOC","description":"Three first-class deploy targets: Docker Compose (single-host), Helm chart (k8s), and BYOC (your own cloud) bundle. Every target ships the same image with provider keys mounted from secrets.","url":"https://kolm.ai/docs/gateway-deploy","datePublished":"2026-05-26","dateModified":"2026-05-26","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Gateway deploy - Docker, compose, k8s, BYOC","description":"Three first-class deploy targets: Docker Compose (single-host), Helm chart (k8s), and BYOC (your own cloud) bundle. Every target ships the same image with provider keys mounted from secrets.","url":"https://kolm.ai/docs/gateway-deploy","datePublished":"2026-05-26","dateModified":"2026-05-26","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <link rel="stylesheet" href="/design-tokens.css">
 <style>
 :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230,233,238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--accent-soft:rgba(17,17,17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
@@ -62,11 +62,12 @@ td code{font-size:12px}
 <script defer src="/docs-shell.js"></script>
 </head>
 <body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
@@ -107,7 +108,7 @@ helm install gateway kolm/gateway \
 <p>The chart provisions the deployment, service, secret, and an optional Postgres sidecar. Ed25519 signing key is auto-generated on first install; rotate with <code>helm upgrade ... --set signingKey.rotate=true</code>.</p>
 
 <h2 id="byoc-bring-your-own-cloud">BYOC (bring your own cloud)</h2>
-<p>For air-gapped / regulated deployments. <code>kolm bundle airgap</code> produces a tarball with the image, the Helm chart, the migrations, and a deploy checklist. See <a href="/docs/gateway-byoc">gateway-byoc</a>.</p>
+<p>For air-gapped / regulated deployments. <code>kolm artifact airgap</code> produces a tarball with the image, the Helm chart, the migrations, and a deploy checklist. See <a href="/docs/gateway-byoc">gateway-byoc</a>.</p>
 
 <div class="related">
   <a href="/docs/gateway-compose"><b>Docker Compose &rarr;</b><span>Single-host deploy walkthrough.</span></a>
@@ -121,7 +122,7 @@ helm install gateway kolm/gateway \
   <div class="ks-wrap">
     <div class="ks-footer__grid">
       <div>
-        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
         <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
       </div>
       <div>

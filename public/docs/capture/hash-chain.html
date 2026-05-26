@@ -40,11 +40,12 @@
 </style>
 </head>
 <body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
@@ -84,7 +85,7 @@ row_hash  = HMAC-SHA256(tenant_key, prev_hash || row_bytes)
 # Storage
 row.prev_hash = previous_row.row_hash   # or genesis for the first row
 row.row_hash  = row_hash</pre>
-    <h2>Why HMAC, not plain SHA</h2>
+    <h2>Why a keyed chain, not plain SHA</h2>
     <p>Plain SHA-256 is content-addressed: anyone with the row bytes can recompute the hash. HMAC-SHA256 binds the hash to the tenant key &mdash; an attacker who tampers with rows and recomputes plain hashes cannot do so for HMAC without the key. The hash chain is therefore both tamper-evident and tamper-resistant against an attacker who can write but cannot read the key file.</p>
     <p>The same key is used for the receipt Ed25519 signature in a different role; see <a href="/docs/receipts/signing">signing</a>. Compromise of one compromises the other.</p>
     <h2>Canonical serialization</h2>

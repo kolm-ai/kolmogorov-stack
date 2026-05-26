@@ -58,7 +58,10 @@ test('W256 #6 - cli/kolm.js dispatches kolm migrate / wrap / import', () => {
   const cli = readSrc('cli/kolm.js');
   assert.match(cli, /case 'migrate':\s+await withErrorContext\('migrate'/);
   assert.match(cli, /case 'wrap':\s+await withErrorContext\('wrap'/);
-  assert.match(cli, /case 'import':\s*\n\s*case 'import-chat'/);
+  // W740 split `import` into a branching block (cmdW740Import for inspect/wrap/doctor,
+  // cmdImportChat for legacy chat-log path). `import-chat` is the explicit alias case.
+  assert.match(cli, /case 'import':\s*\{[\s\S]{0,400}cmdImportChat/);
+  assert.match(cli, /case 'import-chat':/);
 });
 
 test('W256 #7 - cli/kolm.js dispatches --gate-cve-policy / --k-min / --gate-stability', () => {

@@ -278,8 +278,8 @@ test('W271 #24 - hero section is marked data-w271="hero" for downstream lockup',
 // =====================================================================
 
 test('W271 #25 - sw.js CACHE slug bumped to wave-floor >= 271', () => {
-  const m = SW.match(/const\s+CACHE\s*=\s*'kolm-v7-2026-05-\d+-wave(\d+)-([a-z0-9-]+)'/);
-  assert.ok(m, 'CACHE slug must follow kolm-v7-YYYY-MM-DD-waveN-slug pattern');
+  const m = SW.match(/const\s+CACHE\s*=\s*'kolm-v\d+-2026-\d{2}-\d{2}-[^']*?wave(\d+)/);
+  assert.ok(m, 'CACHE slug must follow kolm-vN-YYYY-MM-DD-...-waveN pattern');
   const waveN = parseInt(m[1], 10);
   assert.ok(waveN >= 271, `sw.js wave-slug must be >= 271 (saw ${waveN})`);
 });

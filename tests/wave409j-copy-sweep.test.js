@@ -40,6 +40,7 @@ const HMAC_EXEMPT = new Set([
   'public/docs/rs-1.md',
   'public/docs/receipt-v0.1.json',
   'public/docs/webhooks.html',
+  'public/docs/cli/hmac.html',
   'public/docs/glossary.html',
   'public/docs/i18n/de.html',
   'public/docs/i18n/es.html',

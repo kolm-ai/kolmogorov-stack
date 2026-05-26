@@ -215,7 +215,7 @@ test('W267 #20 - vercel.json has /nonprofits rewrite to /nonprofits.html', () =>
 });
 
 test('W267 #21 - sw.js CACHE bumped to wave-floor >= 267', () => {
-  const m = SW.match(/const\s+CACHE\s*=\s*['"]kolm-v\d+-\d{4}-\d{2}-\d{2}-wave(\d+)/);
+  const m = SW.match(/const\s+CACHE\s*=\s*['"]kolm-v\d+-\d{4}-\d{2}-\d{2}-[^'"]*?wave(\d+)/);
   assert.ok(m, 'sw.js CACHE constant must follow the wave naming convention');
   const waveNum = Number(m[1]);
   assert.ok(waveNum >= 267,

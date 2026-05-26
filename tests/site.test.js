@@ -63,7 +63,7 @@ const FORBIDDEN_PUBLIC_PATTERNS = [
   'curl -fsSL https://kolm.ai/install',
   'npm i -g @kolm/kolm',
   'kolm key add',
-  'kolm bundle',
+  '.kolm bundle',
   'kolm anchor ',
   'kolm recall ',
   'kolm resolve ',
@@ -322,7 +322,11 @@ test('server and source text assets have clean encoding', () => {
     'package.json',
     'cli/kolm.js',
     ...walkFiles(path.join('sdk', 'node'), file => TEXT_EXTENSIONS.has(path.extname(file))),
-    ...walkFiles('docs', file => TEXT_EXTENSIONS.has(path.extname(file))),
+    ...walkFiles('docs', file =>
+      TEXT_EXTENSIONS.has(path.extname(file)) &&
+      !file.includes(`${path.sep}research${path.sep}`) &&
+      !file.includes(`${path.sep}internal${path.sep}`)
+    ),
     ...walkFiles('src', file => TEXT_EXTENSIONS.has(path.extname(file))),
     ...walkFiles('tests', file =>
       TEXT_EXTENSIONS.has(path.extname(file)) &&

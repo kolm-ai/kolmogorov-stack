@@ -15,12 +15,15 @@ const SECRET = process.env.STRIPE_SECRET_KEY;
 const DOMAIN = process.env.KOLM_DOMAIN || 'https://kolm.ai';
 if (!SECRET) { console.error('STRIPE_SECRET_KEY required'); process.exit(2); }
 
+// Wave-4 canonical price ladder. Mirrors PLAN_CATALOG in src/router.js
+// (lines 2127-2153). The `free` tier ($0) intentionally has no Stripe
+// Product/Price/PaymentLink — provisioned-by-default in the gateway, not
+// purchased through Stripe.
 const TIERS = [
-  { id: 'starter',    label: 'Starter',    cents:    900 },
-  { id: 'pro',        label: 'Pro',        cents:   4900 },
-  { id: 'teams',      label: 'Teams',      cents:  14900 },
-  { id: 'business',   label: 'Business',   cents: 149900 },
-  { id: 'enterprise', label: 'Enterprise', cents: 299900 },
+  { id: 'indie',      label: 'Indie',      cents:   2900 },
+  { id: 'teams',      label: 'Teams',      cents:   9900 },
+  { id: 'business',   label: 'Business',   cents:  49900 },
+  { id: 'enterprise', label: 'Enterprise', cents: 149900 },
 ];
 
 async function stripe(method, path, body) {

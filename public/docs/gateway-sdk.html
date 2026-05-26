@@ -4,22 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
-<title>Gateway SDK — JS, Python, others &middot; kolm.ai</title>
+<title>Gateway SDK - JS, Python, others &middot; kolm.ai</title>
 <meta name="description" content="Thin wrappers around /v1/gateway/dispatch in @kolm-ai/sdk (Node), kolm (Python), kolm-mcp (MCP), kolm-vscode, plus C and Rust SDKs.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Gateway SDK — JS, Python, others &middot; kolm.ai">
+<meta property="og:title" content="Gateway SDK - JS, Python, others &middot; kolm.ai">
 <meta property="og:description" content="Thin wrappers around /v1/gateway/dispatch in @kolm-ai/sdk (Node), kolm (Python), kolm-mcp (MCP), kolm-vscode, plus C and Rust SDKs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/gateway-sdk">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Gateway SDK — JS, Python, others &middot; kolm.ai">
+<meta name="twitter:title" content="Gateway SDK - JS, Python, others &middot; kolm.ai">
 <meta name="twitter:description" content="Thin wrappers around /v1/gateway/dispatch in @kolm-ai/sdk (Node), kolm (Python), kolm-mcp (MCP), kolm-vscode, plus C and Rust SDKs.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs/gateway-sdk">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Gateway SDK — JS, Python, others","description":"Thin wrappers around /v1/gateway/dispatch in @kolm-ai/sdk (Node), kolm (Python), kolm-mcp (MCP), kolm-vscode, plus C and Rust SDKs.","url":"https://kolm.ai/docs/gateway-sdk","datePublished":"2026-05-26","dateModified":"2026-05-26","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Gateway SDK - JS, Python, others","description":"Thin wrappers around /v1/gateway/dispatch in @kolm-ai/sdk (Node), kolm (Python), kolm-mcp (MCP), kolm-vscode, plus C and Rust SDKs.","url":"https://kolm.ai/docs/gateway-sdk","datePublished":"2026-05-26","dateModified":"2026-05-26","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <link rel="stylesheet" href="/design-tokens.css">
 <style>
 :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230,233,238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--accent-soft:rgba(17,17,17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
@@ -62,11 +62,12 @@ td code{font-size:12px}
 <script defer src="/docs-shell.js"></script>
 </head>
 <body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
@@ -106,7 +107,7 @@ console.log(res.kolm_receipt.receipt_id);
 await Kolm.verifyReceipt(res.kolm_receipt); // -&gt; { ok: true, signed_by: 'current_key' }</code></pre>
 
 <h2 id="python">Python</h2>
-<pre><code>pip install kolm
+<pre><code>pip install git+https://github.com/sneaky-hippo/kolmogorov-stack@main#subdirectory=sdk/python
 
 from kolm import Kolm
 k = Kolm(api_key=os.environ['KOLM_API_KEY'])
@@ -122,7 +123,7 @@ print(res['kolm_receipt']['receipt_id'])</code></pre>
 <table>
   <thead><tr><th>SDK</th><th>Install</th><th>Use case</th></tr></thead>
   <tbody>
-    <tr><td><code>kolm-mcp</code></td><td><code>npm i -g kolm-mcp</code></td><td>MCP server exposing the gateway as a tool.</td></tr>
+    <tr><td><code>kolm-mcp</code></td><td><code>npm i -g github:sneaky-hippo/kolm-stack</code> (bundled)</td><td>MCP server exposing the gateway as a tool.</td></tr>
     <tr><td><code>kolm-vscode</code></td><td>VS Code Marketplace</td><td>Inline gateway calls + receipt view.</td></tr>
     <tr><td><code>sdk/c/</code></td><td><code>#include "kolm.h"</code></td><td>Embedded C / CLI integrators. Single-header, libcurl-backed.</td></tr>
     <tr><td><code>sdk/rust/</code></td><td><code>cargo add kolm</code></td><td>Sync Rust. <code>ureq</code>-backed, no async runtime.</td></tr>
@@ -141,7 +142,7 @@ print(res['kolm_receipt']['receipt_id'])</code></pre>
   <div class="ks-wrap">
     <div class="ks-footer__grid">
       <div>
-        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
         <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
       </div>
       <div>

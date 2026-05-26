@@ -160,7 +160,7 @@ test('W216 #12 - captures.html has Replay drawer wired', () => {
 });
 
 test('W216 #13 - sw.js CACHE wave-floor >= 216', () => {
-  const m = SW_JS.match(/const\s+CACHE\s*=\s*'kolm-v7-2026-05-\d+-wave(\d+)/);
+  const m = SW_JS.match(/const\s+CACHE\s*=\s*'kolm-v\d+-2026-\d{2}-\d{2}-[^']*?wave(\d+)/);
   assert.ok(m, 'CACHE slug present');
   assert.ok(parseInt(m[1], 10) >= 216, 'CACHE wave >= 216 (got ' + m[1] + ')');
 });

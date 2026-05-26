@@ -101,12 +101,13 @@
 </script>
 </head>
 <body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <header class="ks-nav">
     <div class="ks-wrap ks-nav__row">
-      <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
       <nav class="ks-nav__links" aria-label="Primary">
         <a href="/wrapper">Wrapper</a>
         <a href="/studio">Studio</a>
@@ -719,20 +720,20 @@
     <p>Docker is the container runtime; there is no published Kolm Docker image yet. Use the <a href="/integrations/docker-compose">Docker Compose</a> recipe or build the image yourself from <code>github:sneaky-hippo/kolm-stack</code>.</p>
   </div>
   <div class="ig" id="langchain-js">
-    <h3>LangChain (JS)</h3><span class="stat">source install</span>
-    <p>Install from the source path: <code>npm install ./packages/langchain-kolm</code>. Receipts surface via invokeWithReceipt. The package is not on the npm registry yet, so the source install is the honest channel.</p>
+    <h3>LangChain (JS) &middot; <code>@kolm/langchain</code></h3><span class="stat">source install</span>
+    <p>Package name: <code>@kolm/langchain</code>. Install from source today: <code>npm install ./packages/langchain-kolm</code>. Receipts surface via invokeWithReceipt. The package is not on the npm registry yet, so the source install is the documented channel.</p>
   </div>
   <div class="ig" id="langchain-py">
-    <h3>LangChain (Python)</h3><span class="stat">source install</span>
-    <p>Install from the source path: <code>pip install ./packages/python-langchain-kolm[langchain]</code>. Receipts surface via invoke_with_receipt.</p>
+    <h3>LangChain (Python) &middot; <code>kolm-langchain</code></h3><span class="stat">source install</span>
+    <p>Package name: <code>kolm-langchain</code> (the Python sibling of <code>@kolm/langchain</code>). Install from the source path: <code>pip install ./packages/python-langchain-kolm[langchain]</code>. Receipts surface via invoke_with_receipt.</p>
   </div>
   <div class="ig" id="llamaindex-js">
-    <h3>LlamaIndex (JS)</h3><span class="stat">source install</span>
-    <p>Install from the source path: <code>npm install ./packages/llamaindex-kolm</code>. Receipts surface via invokeWithReceipt.</p>
+    <h3>LlamaIndex (JS) &middot; <code>@kolm/llamaindex</code></h3><span class="stat">source install</span>
+    <p>Package name: <code>@kolm/llamaindex</code>. Install from source today: <code>npm install ./packages/llamaindex-kolm</code>. Receipts surface via invokeWithReceipt.</p>
   </div>
   <div class="ig" id="llamaindex-py">
-    <h3>LlamaIndex (Python)</h3><span class="stat">source install</span>
-    <p>Install from the source path: <code>pip install ./packages/python-llamaindex-kolm[llamaindex]</code>. Receipts surface via invoke_with_receipt.</p>
+    <h3>LlamaIndex (Python) &middot; <code>kolm-llamaindex</code></h3><span class="stat">source install</span>
+    <p>Package name: <code>kolm-llamaindex</code> (the Python sibling of <code>@kolm/llamaindex</code>). Install from the source path: <code>pip install ./packages/python-llamaindex-kolm[llamaindex]</code>. Receipts surface via invoke_with_receipt.</p>
   </div>
   <div class="ig" id="zapier">
     <div class="ig-body">

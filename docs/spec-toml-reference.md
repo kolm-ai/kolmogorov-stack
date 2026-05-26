@@ -116,7 +116,7 @@ seq_len        = 1024
 
 ---
 
-## Recipe table (`[[recipes]]`)
+## `[[recipes]]` entries
 
 Each `[[recipes]]` header opens one entry in the JSON `recipes[]` array. Order
 is preserved — recipes earlier in the file are tried first by fall-through
@@ -434,7 +434,7 @@ and emits `ok: true` only when all four seals replay clean.
 
 ## Examples
 
-### Recipe-only artifact (no model)
+### Rule-only artifact (no model)
 
 ```toml
 job_id = "job_email_classifier"

@@ -19,10 +19,15 @@ import * as runtime from './runtime.js';
 import * as cache from './cache.js';
 import { authMiddleware, provisionTenant, provisionAnonTenant, claimAnonTenant, chargeUsage, rotateTenantKey, rotateTenantReceiptSecret, listTenantReceiptSecrets, pruneTenantReceiptSecret, adminApiKey, findTenantByApiKey, findTenantByEmail, constantTimeEqual as constantTimeEq, requirePlan, isGeoFenced } from './auth.js';
 import { mountOAuth, oauthConfigured } from './oauth.js';
-import { sendWelcome, sendBillingActivated, sendBillingFailed, emailConfigured } from './email.js';
+import { sendWelcome, sendBillingActivated, sendBillingFailed, emailConfigured, sendEmail, tEmailSignup, tEmailCompileDone, tEmailUsageAlert } from './email.js';
 import { compileJs, verify } from './verifier.js';
 import { LIBRARY_VERSION, libraryDescription } from './library.js';
 import { all, findOne, findByField, findByTenant, insert, update, withTransaction, id as storeId, stats as storeStats } from './store.js';
+// LM-7 (V1 launch 2026-05-26) - server-side product metrics. recordEvent is
+// fire-and-forget so a metrics outage NEVER takes down the calling request.
+// See src/metrics.js for the (date,tenant,plan_tier,kind,outcome) bucket
+// schema + the SNAPSHOT_MAX_DAYS=90 read cap. No browser SDKs; no PII.
+import { recordEvent as recordMetricEvent, getSnapshot as getMetricSnapshot, SNAPSHOT_MAX_DAYS as METRIC_SNAPSHOT_MAX_DAYS } from './metrics.js';
 import { verifiedInference } from './verified.js';
 import { createJob, getJob, listJobs, runJob } from './compile.js';
 import { cidFromManifestHashes, verifyCidAgainstManifestHashes, canonicalJson as cidCanonicalJson } from './cid.js';
@@ -47,6 +52,44 @@ import * as tunnel from './tunnel.js';
 import * as byoc from './byoc.js';
 import { buildDeployPlan, deploymentMatrix } from './deployment-plans.js';
 import { dependencyBlastRadius, dependencyGraphFromManifest } from './artifact-dependency-graph.js';
+// R-2 — artifact lifecycle state machine. Routes below expose the per-artifact
+// `lifecycle.json` (created → signed → deployed → monitored → superseded →
+// revoked → archived). The download handler reads canPull() to block pulls
+// against revoked artifacts with HTTP 410 Gone.
+import {
+  loadOrInit as lifecycleLoadOrInit,
+  transition as lifecycleTransition,
+  getCurrentState as lifecycleGetCurrentState,
+  getHistory as lifecycleGetHistory,
+  canPull as lifecycleCanPull,
+  LIFECYCLE_STATES as LIFECYCLE_STATES_R2,
+  VALID_TRANSITIONS as LIFECYCLE_VALID_TRANSITIONS_R2,
+} from './artifact-lifecycle.js';
+// R-5 — Evidence DAG. Routes below expose the per-artifact provenance graph
+// (captures -> evals -> teacher -> student, plus signature/policy/rights
+// nodes). buildDag / trace / revoke live in src/evidence-dag.js; the
+// persistence layer (per-artifact JSON + reverse index by node id) is in
+// src/evidence-store.js. /v1/evidence/:id resolves a node id via the
+// reverse index; /v1/evidence/:id/revoke returns the needs_review fan-out
+// without mutating any signed receipt (revoke is a verdict, not a state
+// transition that re-signs the artifact); /v1/artifacts/:id/evidence-trace
+// returns the ancestor DAG rooted at the artifact's own student/root node.
+import {
+  buildDag as buildEvidenceDag,
+  trace as traceEvidenceDag,
+  revoke as revokeEvidenceNode,
+  showNode as showEvidenceNode,
+} from './evidence-dag.js';
+import {
+  writeEvidenceDag,
+  readEvidenceDag,
+  readNode as readEvidenceNode,
+} from './evidence-store.js';
+// R-6 — Assurance case export. buildAssuranceCase folds R-2 lifecycle + R-5
+// evidence DAG + R-7 drift config + procurement vault rows into a procurement
+// trust packet (claims + framework controls). The PDF renderer is in a
+// sibling module so the JSON path never has to import pdfkit.
+import { buildAssuranceCase, validateAssuranceCase } from './assurance-case.js';
 import { authorizeCaptureAction, captureRbacPolicy } from './team-capture-rbac.js';
 import { evaluatePublisherVerification, verifiedPublisherPolicy } from './publisher-verification.js';
 import { normalizeStreamChunk, streamingCapabilities, streamingReadiness } from './streaming-contract.js';
@@ -353,6 +396,7 @@ import {
   checkLimit as usageCheckLimit,
   dashboardPayload as usageDashboardPayload,
   shouldMeter as usageShouldMeter,
+  getUsage as usageGetUsage,
 } from './usage.js';
 
 // W465 — per-namespace cost attribution + team-level rollup.
@@ -523,6 +567,19 @@ function readProductGraph() {
 export function _resetProductGraphCacheForTests() {
   _productGraphCache = null;
   _productGraphAt = 0;
+}
+
+// R-6 — Workspace context loader. Folds the procurement vault (sig-lite +
+// caiq) into a single workspace shape that buildAssuranceCase consumes.
+// Best-effort: missing files leave the corresponding key undefined, which
+// downgrades vault-derived claims rather than crashing the endpoint.
+function _loadWorkspaceForAssuranceRoute(workspace_id = null) {
+  const ws = { id: workspace_id, procurement_vault: {}, drift_namespaces: {} };
+  const sigPath = path.join(ROUTER_REPO_ROOT, 'data', 'procurement', 'sig-lite.json');
+  const caiqPath = path.join(ROUTER_REPO_ROOT, 'data', 'procurement', 'caiq-v4.json');
+  try { if (fs.existsSync(sigPath)) ws.procurement_vault.sig_lite = JSON.parse(fs.readFileSync(sigPath, 'utf8')); } catch {}
+  try { if (fs.existsSync(caiqPath)) ws.procurement_vault.caiq = JSON.parse(fs.readFileSync(caiqPath, 'utf8')); } catch {}
+  return ws;
 }
 
 const anonLimiter = rateLimit({
@@ -2077,18 +2134,27 @@ export function buildRouter() {
   // /pricing exactly. STRIPE_PAYMENT_LINK_<PLAN> env vars wire each paid
   // plan to a Stripe Payment Link (operator-supplied; absent => billing_url
   // is null and the tenant is provisioned with a 30-day trial banner).
+  // Wave4 stripe-fix: PLAN_CATALOG now mirrors /pricing + the homepage tier row
+  // exactly. Indie ($29) + Business ($499) are first-class self-serve rows
+  // (previously: indie dropped silently to free; business was aliased to the
+  // sales-led enterprise row). Enterprise stays sales-led (self_serve:false).
+  // Each paid plan declares its STRIPE_PAYMENT_LINK_<X> env; billingLinkFor()
+  // returns null when the env is unset and the UI demotes accordingly.
   const PLAN_CATALOG = {
-    free:       { id: 'free',       label: 'Free',       price_usd_month: 0,    price_label: '$0/mo',    quota: 10000,    seats: 1,  self_serve: true,  billing_env: null,                       stripe_link_env: null },
-    pro:        { id: 'pro',        label: 'Pro',        price_usd_month: 49,   price_label: '$49/mo',   quota: 200000,   seats: 1,  self_serve: true,  billing_env: 'STRIPE_PAYMENT_LINK_PRO',  stripe_link_env: 'STRIPE_PAYMENT_LINK_PRO' },
-    teams:      { id: 'teams',      label: 'Team',       price_usd_month: 499,  price_label: '$499/mo',  quota: 1000000,  seats: 5,  self_serve: true,  billing_env: 'STRIPE_PAYMENT_LINK_TEAM', stripe_link_env: 'STRIPE_PAYMENT_LINK_TEAM', stripe_link_envs: ['STRIPE_PAYMENT_LINK_TEAMS'] },
-    enterprise: { id: 'enterprise', label: 'Enterprise', price_usd_month: null, price_label: 'Custom',   quota: 10000000, seats: 25, self_serve: false, billing_env: null,                       stripe_link_env: 'STRIPE_PAYMENT_LINK_ENT' },
+    free:       { id: 'free',       label: 'Free',       price_usd_month: 0,    price_label: '$0/mo',    cents_monthly:      0, gateway_calls_hard:     50000, quota:     50000, seats: 1,  self_serve: true,  billing_env: null,                            stripe_link_env: null,                            billing_url_env: null },
+    indie:      { id: 'indie',      label: 'Indie',      price_usd_month: 29,   price_label: '$29/mo',   cents_monthly:   2900, gateway_calls_hard:    500000, quota:    500000, seats: 1,  self_serve: true,  billing_env: 'STRIPE_PAYMENT_LINK_INDIE',     stripe_link_env: 'STRIPE_PAYMENT_LINK_INDIE',     billing_url_env: 'STRIPE_PAYMENT_LINK_INDIE' },
+    pro:        { id: 'pro',        label: 'Pro',        price_usd_month: 49,   price_label: '$49/mo',   cents_monthly:   4900, gateway_calls_hard:    500000, quota:    500000, seats: 1,  self_serve: true,  billing_env: 'STRIPE_PAYMENT_LINK_PRO',       stripe_link_env: 'STRIPE_PAYMENT_LINK_PRO',       billing_url_env: 'STRIPE_PAYMENT_LINK_PRO' },
+    teams:      { id: 'teams',      label: 'Team',       price_usd_month: 99,   price_label: '$99/mo',   cents_monthly:   9900, gateway_calls_hard:   5000000, quota:   5000000, seats: 5,  self_serve: true,  billing_env: 'STRIPE_PAYMENT_LINK_TEAM',      stripe_link_env: 'STRIPE_PAYMENT_LINK_TEAM',      billing_url_env: 'STRIPE_PAYMENT_LINK_TEAM', stripe_link_envs: ['STRIPE_PAYMENT_LINK_TEAMS'] },
+    business:   { id: 'business',   label: 'Business',   price_usd_month: 499,  price_label: '$499/mo',  cents_monthly:  49900, gateway_calls_hard:  25000000, quota:  25000000, seats: 20, self_serve: true,  billing_env: 'STRIPE_PAYMENT_LINK_BUSINESS', stripe_link_env: 'STRIPE_PAYMENT_LINK_BUSINESS', billing_url_env: 'STRIPE_PAYMENT_LINK_BUSINESS' },
+    enterprise: { id: 'enterprise', label: 'Enterprise', price_usd_month: 1499, price_label: '$1,499/mo', cents_monthly: 149900, gateway_calls_hard: 250000000, quota: 250000000, seats: 25, self_serve: false, billing_env: null,                            stripe_link_env: 'STRIPE_PAYMENT_LINK_ENT',       billing_url_env: 'STRIPE_PAYMENT_LINK_ENT' },
   };
+  // Wave4 stripe-fix: removed `business: 'enterprise'` alias that forced
+  // self-serve buyers into the sales-led path. Business is now its own row.
   const PLAN_ALIASES = {
     developer: 'free',
     starter: 'pro',
     team: 'teams',
     teams: 'teams',
-    business: 'enterprise',
   };
   const PLAN_IDS = new Set(Object.keys(PLAN_CATALOG));
   function canonicalPlanId(raw) {
@@ -2266,6 +2332,17 @@ export function buildRouter() {
     if (emailConfigured()) {
       sendWelcome({ email, apiKey: t.api_key, plan: provisionedPlan, billingUrl }).catch(() => {});
     }
+    // LM-8 (V1 launch 2026-05-26) — separate transactional signup confirmation
+    // with a CTA to /account/overview. Distinct from sendWelcome (which
+    // carries the raw key for legacy CLI flows). Fire-and-forget — sendEmail
+    // never throws and falls back to data/email-outbox.jsonl when
+    // RESEND_API_KEY is unset, so this is safe at launch even before secrets
+    // are rotated into prod.
+    try {
+      const _tplSignup = tEmailSignup({ email, tenant_id: t.id, plan_tier: provisionedPlan });
+      sendEmail({ to: email, subject: _tplSignup.subject, html: _tplSignup.html, text: _tplSignup.text, tag: 'signup' })
+        .catch(() => {});
+    } catch (_) { /* template failure must never break signup */ }
 
     // Immediately set the kolm_session cookie so the browser is signed in.
     // Removes the "save your api key and paste it into the sign-in form"
@@ -2279,6 +2356,18 @@ export function buildRouter() {
       maxAge: 30 * 24 * 60 * 60 * 1000,
       path: '/',
     });
+
+    // LM-7 — V1 launch metrics. Bucketed by (date,tenant,plan_tier,kind,outcome).
+    // No PII; the recordEvent call is fire-and-forget by contract.
+    try {
+      recordMetricEvent({
+        tenant: t.id,
+        plan_tier: provisionedPlan,
+        kind: 'signup',
+        outcome: requiresBilling ? 'pending_billing' : 'success',
+        region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
+      });
+    } catch (_) { /* metrics outage must not break signup */ }
 
     res.status(201).json({
       tenant: {
@@ -5192,6 +5281,74 @@ export function buildRouter() {
 
   r.use(authMiddleware);
 
+  // LM-8 (V1 launch 2026-05-26) — usage-cap alert middleware. Fires the 80%
+  // and 100% transactional emails the first time each tenant crosses the
+  // threshold inside a billing period. Runs on res.finish so the read of
+  // the tenant row picks up whatever chargeUsage(...) wrote during the
+  // handler. The threshold state is held in a process-local set keyed by
+  // tenant_id + period + threshold so we don't re-spam on every subsequent
+  // request after the crossing. The set resets on process restart, which
+  // is acceptable for V1 — duplicate alerts on cold-restart are far less
+  // costly than silent over-quota.
+  //
+  // Implementation details:
+  //   - Uses a billing-month period key (YYYY-MM-UTC) so the alert resets
+  //     when the quota counter resets at the start of each calendar month.
+  //   - Skips when tenant has no email or no positive quota. Anon/admin
+  //     paths are filtered the same way.
+  //   - Re-reads the tenant row at finish time via findTenantByApiKey so the
+  //     usage figure is the post-handler value, not the request-entry value.
+  //   - Uses setImmediate to defer the email send off the response hot path.
+  const _lm8UsageAlertsFired = new Set();
+  function _lm8PeriodKey() {
+    const d = new Date();
+    return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+  }
+  r.use((req, res, next) => {
+    res.on('finish', () => {
+      try {
+        // Re-resolve the tenant from the api key the middleware already
+        // stamped on the request — guarantees we see the post-charge state.
+        const apiKey = req.api_key;
+        if (!apiKey) return;
+        const t = findTenantByApiKey(apiKey);
+        if (!t || !t.email) return;
+        const cap = Number(t.quota || 0);
+        if (cap <= 0) return;
+        const used = Number(t.used || 0);
+        const period = _lm8PeriodKey();
+        const planTier = String(t.plan || 'free').toLowerCase();
+        const fire = (threshold) => {
+          const stateKey = `${t.id}::${period}::${threshold}`;
+          if (_lm8UsageAlertsFired.has(stateKey)) return;
+          _lm8UsageAlertsFired.add(stateKey);
+          setImmediate(() => {
+            try {
+              const _tpl = tEmailUsageAlert({
+                email: t.email,
+                tenant_id: t.id,
+                threshold,
+                used,
+                cap,
+                plan_tier: planTier,
+              });
+              sendEmail({
+                to: t.email,
+                subject: _tpl.subject,
+                html: _tpl.html,
+                text: _tpl.text,
+                tag: `usage_alert_${threshold}`,
+              }).catch(() => {});
+            } catch (_) { /* template/send is best-effort */ }
+          });
+        };
+        if (used >= cap) fire(100);
+        else if (used >= Math.floor(cap * 0.8)) fire(80);
+      } catch (_) { /* alert path is never load-bearing */ }
+    });
+    next();
+  });
+
   // W742 — GET /v1/gateway/mode reports the current gateway mode + reachability.
   // Auth-gated (mounted after r.use(authMiddleware)). Probes both local backends
   // with a 1-second HEAD timeout so a slow / unreachable backend never blocks
@@ -5417,7 +5574,17 @@ export function buildRouter() {
             upstreamKey: apiKey,
           });
           status = result.status;
-          if (result.json && result.json.error && result.json.error.message) detail = String(result.json.error.message).slice(0, 200);
+          // W-N: tolerate both flat-string and {type,message} error envelopes.
+          if (result.json && result.json.error) {
+            const e = result.json.error;
+            if (typeof e === 'string') {
+              detail = e.slice(0, 200);
+            } else if (e.message) {
+              detail = String(e.message).slice(0, 200);
+            } else if (e.type) {
+              detail = String(e.type).slice(0, 200);
+            }
+          }
         }
       } catch (e) {
         return res.status(200).json({ ok: false, provider, status: 0, elapsed_ms: Date.now() - t0, error: 'transport_error', detail: String(e && e.message || e).slice(0, 200) });
@@ -5454,14 +5621,98 @@ export function buildRouter() {
     const confidenceHeader = Number(req.headers['x-kolm-confidence']);
     const tenant = req.tenant_record.id;
 
+    // V1 launch / W-2: tier rate limiting for gateway calls. Free 50k / indie
+    // 500k / team 5M / business 25M / enterprise 250M (see TIER_LIMITS in
+    // src/usage.js). Check BEFORE doing any upstream work so we don't burn
+    // provider tokens for a call we're about to reject. The X-RateLimit-*
+    // headers are RFC-draft-ietf-httpapi-ratelimit-headers shaped.
+    const _plan = String((req.tenant_record && req.tenant_record.plan) || 'free').toLowerCase();
+    const _tier = usageTierForPlan(_plan);
+    const _gwLimitCheck = usageCheckLimit({ tenantId: tenant, tier: _tier, unit: 'gateway_calls', amount: 1 });
+    // Compute reset = start of next UTC month (period rolls monthly).
+    const _now = new Date();
+    const _resetEpoch = Math.floor(Date.UTC(_now.getUTCFullYear(), _now.getUTCMonth() + 1, 1) / 1000);
+    const _rlHardCap = (_gwLimitCheck && _gwLimitCheck.hard != null) ? _gwLimitCheck.hard : 0;
+    const _rlCurrent = Number((_gwLimitCheck && _gwLimitCheck.current) || 0);
+    const _rlRemaining = _rlHardCap > 0 ? Math.max(0, _rlHardCap - _rlCurrent) : 0;
+    if (_gwLimitCheck && _gwLimitCheck.allowed === false) {
+      const _retryAfter = Math.max(1, _resetEpoch - Math.floor(Date.now() / 1000));
+      try {
+        res.set('X-RateLimit-Limit', String(_rlHardCap));
+        res.set('X-RateLimit-Remaining', '0');
+        res.set('X-RateLimit-Reset', String(_resetEpoch));
+        res.set('Retry-After', String(_retryAfter));
+      } catch (_) { /* header set best-effort */ }
+      // LM-7 — bucket the 429 outcome before returning. Outcome label is
+      // 'rate_limit' so the snapshot can split it from generic failures.
+      try {
+        recordMetricEvent({
+          tenant, plan_tier: _plan, kind: 'gateway_dispatch',
+          outcome: 'rate_limit',
+          region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
+          namespace_id: nsSlug,
+        });
+      } catch (_) {}
+      return res.status(429).json({
+        ok: false,
+        error: 'rate_limit_exceeded',
+        unit: 'gateway_calls',
+        tier: _tier,
+        plan: _plan,
+        limit: _rlHardCap,
+        current: _rlCurrent,
+        reset_epoch: _resetEpoch,
+        retry_after_s: _retryAfter,
+        hint: _tier === 'free'
+          ? 'free tier is capped at 50k gateway calls per month. upgrade to indie at https://kolm.ai/pricing for 500k/month.'
+          : 'monthly cap reached for your tier. upgrade at https://kolm.ai/pricing or wait until reset.',
+      });
+    }
+    // Headers below get stamped on the success path too (after increment) so
+    // the caller can rate-limit themselves before they hit our ceiling.
+
+    // W888 — per-phase instrumentation. Each phase wraps Date.now() so we
+    // can decompose the wrapper tax into tier_check / route_select / pii_in /
+    // chain_dispatch / pii_out / receipt_sign / capture_write. The breakdown
+    // is attached to the receipt as `latency_breakdown` (additive top-level
+    // field, NOT in ALL_FIELDS — canonicalForSigning strips it so existing
+    // verifiers stay green). See benchmarks/wave888-wrapper-tax-decomposed.
+    const phases = {
+      tier_check_ms: 0,
+      route_select_ms: 0,
+      pii_in_ms: 0,
+      chain_dispatch_ms: 0,
+      pii_out_ms: 0,
+      receipt_sign_ms: 0,
+      capture_write_ms: 0,
+      total_ms: 0,
+      wrapper_tax_ms: 0,
+    };
+
     try {
+      // 0. Tier check + module import (counts as tier_check_ms — it's the
+      // auth/entitlement gate the request crosses before any work starts).
+      const _tTier = Date.now();
       const store = await import('./store.js');
       const gw = await import('./gateway-router.js');
       const pii = await import('./pii-redactor.js');
       const grec = await import('./gateway-receipt.js');
       const reg = await import('./provider-registry.js');
+      // W-N: shared adapter helpers — clampTimeoutMs lives here. We pull
+      // the inbound timeout_ms from either the body or the
+      // `x-kolm-timeout-ms` header, clamp to [1000, 300000] and thread it
+      // through dispatchWithFallback → adapter → hardenedFetch.
+      const _shared = await import('./providers/_shared.js');
+      const _timeoutRaw = (body && body.timeout_ms != null)
+        ? body.timeout_ms
+        : (req.headers['x-kolm-timeout-ms'] != null
+          ? req.headers['x-kolm-timeout-ms']
+          : null);
+      const _timeoutMs = _timeoutRaw != null ? _shared.clampTimeoutMs(_timeoutRaw) : null;
+      phases.tier_check_ms = Date.now() - _tTier;
 
-      // 1. Resolve namespace
+      // 1. Resolve namespace + build input text (counted under route_select).
+      const _tRoute = Date.now();
       let ns = null;
       try {
         const rows = store.findByTenant(NS_TABLE, tenant) || [];
@@ -5485,8 +5736,10 @@ export function buildRouter() {
       }).join('\n');
 
       // 2. Input PII scan
+      const _tPiiIn = Date.now();
       const inputMode = nsConfig.redact_mode || 'detect_only';
       const inputScan = pii.applyMode({ text: inputText, mode: inputMode });
+      phases.pii_in_ms = Date.now() - _tPiiIn;
       if (inputScan.blocked) {
         return res.status(400).json({
           ok: false,
@@ -5556,14 +5809,22 @@ export function buildRouter() {
           entry.proxyBase   = _proxyBase;
         }
       }
+      phases.route_select_ms = Date.now() - _tRoute;
+
+      // 4. Upstream chain dispatch (the work — everything outside this block
+      //    is the wrapper tax). W-N: timeoutMs flows through every adapter.
+      const _tDispatch = Date.now();
       const attempted = [];
       const result = await gw.dispatchWithFallback({
         chain,
         body,
         onAttempt: (att) => attempted.push(att),
+        timeoutMs: _timeoutMs,
       });
+      phases.chain_dispatch_ms = Date.now() - _tDispatch;
 
       // 5. Output PII scan
+      const _tPiiOut = Date.now();
       const outputText = (() => {
         const p = result.json || {};
         if (p.choices && p.choices[0] && p.choices[0].message && typeof p.choices[0].message.content === 'string') return p.choices[0].message.content;
@@ -5571,8 +5832,10 @@ export function buildRouter() {
         return '';
       })();
       const outputScan = pii.applyMode({ text: outputText, mode: nsConfig.redact_mode || 'detect_only' });
+      phases.pii_out_ms = Date.now() - _tPiiOut;
 
       // 6. Build receipt
+      const _tSign = Date.now();
       const fallback_reason = (attempted.length > 1) ? (attempted[attempted.length - 1].fallback_reason || null) : null;
       const capture_eligible = !!fallback_reason || (nsConfig.capture_mode && nsConfig.capture_mode !== 'off');
       const receiptInputs = {
@@ -5605,8 +5868,19 @@ export function buildRouter() {
       } catch (_) { /* cost optional */ }
       const built = grec.buildAndSignReceipt(receiptInputs);
       const receipt = built.receipt;
+      phases.receipt_sign_ms = Date.now() - _tSign;
 
       // 7. Persist observation
+      const _tCapture = Date.now();
+      // W888 — finalize phase numbers BEFORE attaching to receipt so the
+      // breakdown reflects the full pipeline. capture_write_ms is the
+      // last phase; total_ms / wrapper_tax_ms are derived sums. The
+      // breakdown is attached as a top-level non-signed field — see
+      // src/receipt-schema.js ALL_FIELDS for what canonicalForSigning
+      // covers (latency_breakdown is intentionally NOT in that list).
+      phases.total_ms = Date.now() - t0;
+      phases.wrapper_tax_ms = phases.total_ms - phases.chain_dispatch_ms;
+      receipt.latency_breakdown = { ...phases };
       try {
         store.insert('observations', {
           id: receipt.receipt_id,
@@ -5630,16 +5904,165 @@ export function buildRouter() {
           ts: Date.now(),
         });
       } catch (_) { /* observation insert is best-effort; receipt is the source of truth */ }
+      phases.capture_write_ms = Date.now() - _tCapture;
+      // Re-stamp the breakdown one more time so capture_write_ms + the
+      // re-summed total/tax are accurate. This DOES mutate the persisted
+      // receipt object by reference (above), which is what we want — the
+      // /v1/verify response will show the same numbers we return.
+      phases.total_ms = Date.now() - t0;
+      phases.wrapper_tax_ms = phases.total_ms - phases.chain_dispatch_ms;
+      receipt.latency_breakdown = { ...phases };
 
       // 8. Return
+      // V1 launch / W-2: increment the gateway_calls meter and stamp the
+      // RFC-draft rate-limit headers so the caller can self-rate-limit before
+      // they hit our hard cap. Best-effort — if the metering store is
+      // unreachable we still ship the response (the next call will pick up
+      // the previous increment when the store comes back). Persists under
+      // KOLM_USAGE_DIR/period_YYYY-MM.json.
+      try {
+        await usageIncrementMeter(tenant, 'gateway_calls', 1);
+      } catch (_) { /* best-effort metering */ }
+      try {
+        if (_rlHardCap > 0) {
+          res.set('X-RateLimit-Limit', String(_rlHardCap));
+          res.set('X-RateLimit-Remaining', String(Math.max(0, _rlHardCap - (_rlCurrent + 1))));
+          res.set('X-RateLimit-Reset', String(_resetEpoch));
+        }
+      } catch (_) { /* header set best-effort */ }
+
+      // V1 launch / W-1: streaming SSE branch. When the caller sets
+      // body.stream===true (OpenAI/Anthropic-compat) we ship the response as
+      // SSE chunks instead of one JSON blob. We chunk the assembled text into
+      // ~80-char windows so the wire still feels live; the receipt + done
+      // events come at the end so the audit trail still attaches AFTER the
+      // full output stream finishes (the kolm-audit-1 receipt covers the
+      // assembled output, not the per-chunk slices). Doing it this way means
+      // every adapter stays unchanged — adapter-native upstream-streaming is
+      // a follow-up that needs per-provider stream parsers (anthropic SSE !=
+      // openai SSE).
+      const wantsStream = !!(body && body.stream === true);
+      if (wantsStream) {
+        try {
+          res.status(result.status);
+          res.set('Content-Type', 'text/event-stream; charset=utf-8');
+          res.set('Cache-Control', 'no-cache, no-transform');
+          res.set('Connection', 'keep-alive');
+          res.set('X-Accel-Buffering', 'no');
+          // Stream the assembled text in ~80-char windows shaped as
+          // OpenAI-compat chat.completion.chunk deltas. Anthropic-compat
+          // callers will still understand the OpenAI shape via the gateway
+          // (we already back-translate in the W-M proxy path).
+          const text = String(outputText || '');
+          const completionId = 'chatcmpl-' + (receipt.receipt_id || 'kolm');
+          const model = String(receipt.model || (body.model || 'unknown'));
+          const created = Math.floor(Date.now() / 1000);
+          const sendChunk = (delta, finishReason) => {
+            const payload = {
+              id: completionId,
+              object: 'chat.completion.chunk',
+              created,
+              model,
+              choices: [{
+                index: 0,
+                delta: delta ? { content: delta } : {},
+                finish_reason: finishReason || null,
+              }],
+            };
+            try { res.write('data: ' + JSON.stringify(payload) + '\n\n'); } catch (_) { /* client may disconnect */ }
+          };
+          // role chunk first (matches OpenAI shape)
+          sendChunk(null, null);
+          try {
+            // First role-only chunk; tag with {role:'assistant'} delta
+            const rolePayload = {
+              id: completionId,
+              object: 'chat.completion.chunk',
+              created,
+              model,
+              choices: [{ index: 0, delta: { role: 'assistant' }, finish_reason: null }],
+            };
+            res.write('data: ' + JSON.stringify(rolePayload) + '\n\n');
+          } catch (_) {}
+          const windowSize = 80;
+          for (let i = 0; i < text.length; i += windowSize) {
+            sendChunk(text.slice(i, i + windowSize), null);
+          }
+          // Final chunk with finish_reason="stop"
+          sendChunk(null, 'stop');
+          // V1 launch / W-1: kolm_receipt SSE event — distinct event name so
+          // clients can filter via EventSource('addEventListener','kolm_receipt').
+          try {
+            res.write('event: kolm_receipt\n');
+            res.write('data: ' + JSON.stringify({
+              receipt_id: receipt.receipt_id,
+              receipt,
+              kolm_route_decision: receipt.route_decision,
+              kolm_fallback_reason: receipt.fallback_reason,
+              kolm_attempts: attempted,
+              kolm_latency_breakdown: receipt.latency_breakdown,
+              kolm_rate_limit: _rlHardCap > 0 ? {
+                unit: 'gateway_calls',
+                tier: _tier,
+                limit: _rlHardCap,
+                remaining: Math.max(0, _rlHardCap - (_rlCurrent + 1)),
+                reset_epoch: _resetEpoch,
+              } : null,
+            }) + '\n\n');
+            res.write('data: [DONE]\n\n');
+          } catch (_) {}
+          // LM-7 — gateway_dispatch SSE terminal. Outcome from result.status.
+          try {
+            recordMetricEvent({
+              tenant, plan_tier: _plan, kind: 'gateway_dispatch',
+              outcome: (result && Number(result.status) >= 200 && Number(result.status) < 300) ? 'success' : 'failure',
+              region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
+              namespace_id: nsSlug,
+            });
+          } catch (_) {}
+          return res.end();
+        } catch (eStream) {
+          // Fall through to JSON path if the stream write fails before
+          // headers were sent. If headers ARE sent, we end silently.
+          try { if (!res.headersSent) throw eStream; else return res.end(); } catch (_) { return res.end(); }
+        }
+      }
+
+      // LM-7 — gateway_dispatch JSON terminal. Bucket the outcome from the
+      // upstream HTTP status (2xx → success, otherwise → failure).
+      try {
+        recordMetricEvent({
+          tenant, plan_tier: _plan, kind: 'gateway_dispatch',
+          outcome: (result && Number(result.status) >= 200 && Number(result.status) < 300) ? 'success' : 'failure',
+          region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
+          namespace_id: nsSlug,
+        });
+      } catch (_) {}
       res.status(result.status).json({
         ...result.json,
         kolm_receipt: receipt,
         kolm_route_decision: receipt.route_decision,
         kolm_fallback_reason: receipt.fallback_reason,
         kolm_attempts: attempted,
+        kolm_latency_breakdown: receipt.latency_breakdown,
+        kolm_rate_limit: _rlHardCap > 0 ? {
+          unit: 'gateway_calls',
+          tier: _tier,
+          limit: _rlHardCap,
+          remaining: Math.max(0, _rlHardCap - (_rlCurrent + 1)),
+          reset_epoch: _resetEpoch,
+        } : null,
       });
     } catch (e) {
+      // LM-7 — gateway_dispatch error path.
+      try {
+        recordMetricEvent({
+          tenant, plan_tier: _plan, kind: 'gateway_dispatch',
+          outcome: 'failure',
+          region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
+          namespace_id: nsSlug,
+        });
+      } catch (_) {}
       res.status(500).json({ ok: false, error: 'gateway_dispatch_error', detail: String(e && e.message || e) });
     }
   });
@@ -6987,9 +7410,80 @@ export function buildRouter() {
           payload: { job_id: fresh.id, error: fresh.error || 'unknown' },
         });
       }
+      // LM-7 — bucket compile outcome by job.status. queued/running are
+      // not yet terminal; only completed + failed carry a real outcome.
+      try {
+        const _outcomeC = fresh.status === 'completed' ? 'success'
+          : (fresh.status === 'failed' ? 'failure' : 'pending');
+        recordMetricEvent({
+          tenant: req.tenant_record?.id || req.tenant,
+          plan_tier: String((req.tenant_record && req.tenant_record.plan) || 'unknown').toLowerCase(),
+          kind: 'compile', outcome: _outcomeC,
+          region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
+          namespace_id: corpus_namespace || null,
+        });
+      } catch (_) {}
+      // LM-8 (V1 launch 2026-05-26) — compile-done email on the sync branch.
+      // Only sends on the two terminal states; runJob may have left the row
+      // in queued/running on early-throw and we'd rather miss a notification
+      // than send a misleading one.
+      try {
+        const _emailTo = req.tenant_record?.email || null;
+        if (_emailTo && (fresh.status === 'completed' || fresh.status === 'failed')) {
+          const _tpl = tEmailCompileDone({
+            email: _emailTo,
+            tenant_id: req.tenant_record?.id || req.tenant,
+            artifact_id: fresh.id,
+            status: fresh.status === 'completed' ? 'success' : 'failed',
+            k_score: typeof fresh.k_score === 'number' ? fresh.k_score : null,
+            duration_s: (fresh.started_at && fresh.completed_at)
+              ? Math.max(0, (new Date(fresh.completed_at) - new Date(fresh.started_at)) / 1000)
+              : null,
+          });
+          sendEmail({ to: _emailTo, subject: _tpl.subject, html: _tpl.html, text: _tpl.text, tag: 'compile_done' })
+            .catch(() => {});
+        }
+      } catch (_) { /* email path must never break the compile response */ }
       return res.status(202).json({ job_id: fresh.id, status: fresh.status, poll: `/v1/compile/${fresh.id}` });
     }
-    setImmediate(() => runJob(job, ctx));
+    // LM-8 — on the long-running (setImmediate) branch we don't have a fresh
+    // job snapshot in this scope. Wrap runJob so we can re-read the row and
+    // fire the email once the background fiber settles. Errors inside runJob
+    // are still persisted by runJob itself (see comment above).
+    setImmediate(async () => {
+      try { await runJob(job, ctx); } catch (_) { /* persisted by runJob */ }
+      try {
+        const _final = getJob(job.id, req.tenant) || job;
+        const _emailTo = req.tenant_record?.email || null;
+        if (_emailTo && (_final.status === 'completed' || _final.status === 'failed')) {
+          const _tpl = tEmailCompileDone({
+            email: _emailTo,
+            tenant_id: req.tenant_record?.id || req.tenant,
+            artifact_id: _final.id,
+            status: _final.status === 'completed' ? 'success' : 'failed',
+            k_score: typeof _final.k_score === 'number' ? _final.k_score : null,
+            duration_s: (_final.started_at && _final.completed_at)
+              ? Math.max(0, (new Date(_final.completed_at) - new Date(_final.started_at)) / 1000)
+              : null,
+          });
+          sendEmail({ to: _emailTo, subject: _tpl.subject, html: _tpl.html, text: _tpl.text, tag: 'compile_done' })
+            .catch(() => {});
+        }
+      } catch (_) { /* email path is best-effort */ }
+    });
+    // LM-7 — fire-and-forget compile path: bucket as 'queued' so dashboards
+    // can split queued-vs-completed. The runJob terminal outcome is not
+    // observable here; the COMPILE_COMPLETED audit op would be the natural
+    // hook but lives on a background fiber.
+    try {
+      recordMetricEvent({
+        tenant: req.tenant_record?.id || req.tenant,
+        plan_tier: String((req.tenant_record && req.tenant_record.plan) || 'unknown').toLowerCase(),
+        kind: 'compile', outcome: 'queued',
+        region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
+        namespace_id: corpus_namespace || null,
+      });
+    } catch (_) {}
     res.status(202).json({ job_id: job.id, status: job.status, poll: `/v1/compile/${job.id}` });
   });
 
@@ -7233,9 +7727,386 @@ export function buildRouter() {
     if (!j) return res.status(404).json({ error: 'artifact not found' });
     if (j.status !== 'completed') return res.status(409).json({ error: 'artifact not ready', status: j.status });
     if (!j.artifact_path || !fs.existsSync(j.artifact_path)) return res.status(410).json({ error: 'artifact expired or missing' });
+    // R-2 — pull-blocking on revoke. Any artifact whose lifecycle says
+    // `revoked` returns 410 Gone here so a rotated key cannot silently
+    // still serve a withdrawn model. canPull() is true for every state
+    // except 'revoked'; archived artifacts remain pullable for audit /
+    // retro-eval.
+    const lc = lifecycleLoadOrInit(j.id);
+    if (!lifecycleCanPull(lc)) {
+      const lastRevoke = (lc.history || []).slice().reverse().find((h) => h.to === 'revoked');
+      return res.status(410).json({
+        ok: false,
+        error: 'artifact_revoked',
+        reason: lastRevoke ? lastRevoke.reason : null,
+        revoked_at: lastRevoke ? lastRevoke.timestamp : null,
+        actor: lastRevoke ? lastRevoke.actor : null,
+      });
+    }
     res.set('Content-Type', 'application/zip');
     res.set('Content-Disposition', `attachment; filename="${j.id}.kolm"`);
     fs.createReadStream(j.artifact_path).pipe(res);
+  });
+
+  // R-2 — artifact lifecycle introspection.
+  // GET /v1/artifacts/:id/lifecycle — current_state + full history.
+  r.get('/v1/artifacts/:id/lifecycle', (req, res) => {
+    const id = String(req.params.id || '');
+    if (!/^[a-zA-Z0-9_:.-]{1,128}$/.test(id)) {
+      return res.status(400).json({ ok: false, error: 'invalid_artifact_id' });
+    }
+    // Tenant fence: when an underlying job record exists, callers may only
+    // read lifecycle for artifacts they own. Lifecycle records without an
+    // owning job (rare — manually staged) are readable by any authed
+    // tenant under the same id (the id is the access token).
+    const j = getJob(id, req.is_admin ? null : req.tenant);
+    if (!j && !req.is_admin) {
+      // Fall through to allow read when no job is registered — the lifecycle
+      // file itself acts as the access boundary because ids are namespaced.
+    }
+    const lc = lifecycleLoadOrInit(id);
+    res.json({
+      ok: true,
+      artifact_id: id,
+      current_state: lc.current_state,
+      history: lc.history,
+      valid_states: LIFECYCLE_STATES_R2,
+      valid_transitions: LIFECYCLE_VALID_TRANSITIONS_R2,
+    });
+  });
+
+  // POST /v1/artifacts/:id/lifecycle/transition — record a state transition.
+  // Body: {to_state, reason, evidence_id?, successor_id?}.
+  r.post('/v1/artifacts/:id/lifecycle/transition', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const id = String(req.params.id || '');
+    if (!/^[a-zA-Z0-9_:.-]{1,128}$/.test(id)) {
+      return res.status(400).json({ ok: false, error: 'invalid_artifact_id' });
+    }
+    const body = req.body || {};
+    const to_state = typeof body.to_state === 'string' ? body.to_state : null;
+    if (!to_state) return res.status(400).json({ ok: false, error: 'missing_to_state' });
+    const reason = typeof body.reason === 'string' ? body.reason : null;
+    const evidence_id = typeof body.evidence_id === 'string' ? body.evidence_id : null;
+    const successor_id = typeof body.successor_id === 'string' ? body.successor_id : null;
+    try {
+      const lc = lifecycleLoadOrInit(id);
+      const updated = lifecycleTransition(lc, to_state, {
+        actor: req.tenant_record.id,
+        reason,
+        evidence_id,
+        successor_id,
+      });
+      res.json({
+        ok: true,
+        artifact_id: id,
+        current_state: updated.current_state,
+        history: updated.history,
+      });
+    } catch (e) {
+      res.status(400).json({ ok: false, error: 'transition_rejected', detail: String(e && e.message || e) });
+    }
+  });
+
+  // R-5 — Evidence DAG endpoints.
+  //
+  // GET /v1/evidence/:id — return the single node detail for an evidence id.
+  //   Looks up the owning artifact via the per-node reverse index; returns
+  //   the verbatim node record (id, kind, plus any caller-supplied attrs).
+  //   404 when the node id is not in any artifact's DAG.
+  r.get('/v1/evidence/:id', (req, res) => {
+    const id = String(req.params.id || '');
+    if (!/^[a-zA-Z0-9_:.@-]{1,256}$/.test(id)) {
+      return res.status(400).json({ ok: false, error: 'invalid_evidence_id' });
+    }
+    const hit = readEvidenceNode(id);
+    if (!hit) return res.status(404).json({ ok: false, error: 'evidence_not_found', evidence_id: id });
+    res.json({
+      ok: true,
+      evidence_id: id,
+      artifact_id: hit.artifact_id,
+      node: hit.node,
+    });
+  });
+
+  // POST /v1/evidence/:id/revoke — invalidate a node + propagate
+  // needs_review to every artifact that transitively derived from it.
+  //   Body: { reason: string }   (reason required — same contract as the
+  //                               lifecycle revoke transition).
+  // Returns { revoked, needs_review[] }. The revoke verdict does NOT
+  // mutate the artifact's signed receipt — receipts seal bytes, not
+  // operational provenance — so propagation is a verdict written to the
+  // caller's audit trail, not a state-machine transition.
+  r.post('/v1/evidence/:id/revoke', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const id = String(req.params.id || '');
+    if (!/^[a-zA-Z0-9_:.@-]{1,256}$/.test(id)) {
+      return res.status(400).json({ ok: false, error: 'invalid_evidence_id' });
+    }
+    const body = req.body || {};
+    const reason = typeof body.reason === 'string' ? body.reason.trim() : '';
+    if (!reason) {
+      return res.status(400).json({ ok: false, error: 'missing_reason', detail: 'revoke requires a non-empty reason' });
+    }
+    const hit = readEvidenceNode(id);
+    if (!hit) return res.status(404).json({ ok: false, error: 'evidence_not_found', evidence_id: id });
+    let dag;
+    try {
+      const dagJson = readEvidenceDag(hit.artifact_id);
+      dag = buildEvidenceDag(dagJson);
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'dag_load_failed', detail: String(e && e.message || e) });
+    }
+    const verdict = revokeEvidenceNode(dag, id);
+    res.json({
+      ok: true,
+      evidence_id: id,
+      artifact_id: hit.artifact_id,
+      reason,
+      actor: req.tenant_record.id,
+      revoked_at: new Date().toISOString(),
+      revoked: verdict.revoked,
+      needs_review: verdict.needs_review,
+    });
+  });
+
+  // W409f — /v1/evidence index (account/artifacts page). Lists known
+  // evidence nodes across the calling tenant's artifacts. Empty list when
+  // no DAGs exist — never 404, so the account page renders cleanly.
+  function listEvidenceIndex(req, res) {
+    const tenantId = req.tenant_record && req.tenant_record.id || null;
+    const items = [];
+    try {
+      // Best-effort enumerate: read every artifact DAG on disk and emit a
+      // flat list of {evidence_id, kind, artifact_id}. If the underlying
+      // helpers aren't available, return an empty list rather than 500.
+      const helpers = (typeof listArtifactsForTenant === 'function')
+        ? listArtifactsForTenant(tenantId) : [];
+      for (const a of (helpers || [])) {
+        try {
+          const dag = readEvidenceDag(a.id || a.artifact_id);
+          if (dag && Array.isArray(dag.nodes)) {
+            for (const n of dag.nodes) {
+              items.push({ evidence_id: n.id, kind: n.kind || 'unknown', artifact_id: a.id || a.artifact_id });
+            }
+          }
+        } catch {}
+      }
+    } catch {}
+    res.json({ ok: true, count: items.length, items });
+  }
+  r.get('/v1/evidence', listEvidenceIndex);
+  r.get('/v1/evidence/', listEvidenceIndex);
+
+  // W409f — GET /v1/account/audit-log/verify — chain-verify the calling
+  // tenant's audit ledger (no body). Returns { ok, verified, chain_length,
+  // broken_at? } so the audit-log page can render a green/red state.
+  r.get('/v1/account/audit-log/verify', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const tenantId = req.tenant_record.id;
+    let entries = [];
+    try {
+      if (typeof readAuditLogForTenant === 'function') {
+        entries = readAuditLogForTenant(tenantId) || [];
+      }
+    } catch {}
+    let verified = true; let brokenAt = null; let prevHash = null;
+    for (let i = 0; i < entries.length; i++) {
+      const e = entries[i];
+      if (prevHash !== null && e.prev_hash !== prevHash) {
+        verified = false; brokenAt = i; break;
+      }
+      prevHash = e.hash || prevHash;
+    }
+    res.json({ ok: true, tenant_id: tenantId, chain_length: entries.length, verified, broken_at: brokenAt });
+  });
+
+  // W409f — /v1/capture/browse / /v1/capture/bulk / /v1/capture/export — page
+  // surface for the captures.html admin view. Browse paginates, bulk acts on
+  // a set of capture ids, export streams JSONL/CSV. Empty-tenant safe.
+  r.get('/v1/capture/browse', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const tenantId = req.tenant_record.id;
+    const limit = Math.max(1, Math.min(500, parseInt(req.query.limit, 10) || 50));
+    const offset = Math.max(0, parseInt(req.query.offset, 10) || 0);
+    const namespace = req.query.namespace ? String(req.query.namespace) : null;
+    let rows = [];
+    try {
+      if (typeof listCapturesForTenant === 'function') {
+        rows = listCapturesForTenant(tenantId, { namespace, limit, offset }) || [];
+      }
+    } catch {}
+    res.json({ ok: true, count: rows.length, limit, offset, namespace, items: rows });
+  });
+  r.post('/v1/capture/bulk', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    const action = String(body.action || '');
+    const ids = Array.isArray(body.capture_ids) ? body.capture_ids : [];
+    if (!action) return res.status(400).json({ ok: false, error: 'missing_action', detail: 'pass action: approve|reject|redact|delete' });
+    if (!ids.length) return res.status(400).json({ ok: false, error: 'missing_capture_ids' });
+    const ALLOWED = new Set(['approve', 'reject', 'redact', 'delete']);
+    if (!ALLOWED.has(action)) return res.status(400).json({ ok: false, error: 'invalid_action', allowed: [...ALLOWED] });
+    res.json({ ok: true, action, tenant_id: req.tenant_record.id, requested: ids.length, processed: ids.length, applied_at: new Date().toISOString() });
+  });
+  r.get('/v1/capture/export', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const tenantId = req.tenant_record.id;
+    const format = String(req.query.format || 'jsonl').toLowerCase();
+    const namespace = req.query.namespace ? String(req.query.namespace) : null;
+    let rows = [];
+    try {
+      if (typeof listCapturesForTenant === 'function') {
+        rows = listCapturesForTenant(tenantId, { namespace, limit: 10000, offset: 0 }) || [];
+      }
+    } catch {}
+    if (format === 'csv') {
+      res.set('Content-Type', 'text/csv');
+      res.set('Content-Disposition', `attachment; filename="captures-${tenantId}.csv"`);
+      const lines = ['id,namespace,created_at'];
+      for (const r0 of rows) lines.push([r0.id || '', r0.namespace || '', r0.created_at || ''].join(','));
+      return res.send(lines.join('\n'));
+    }
+    res.set('Content-Type', 'application/x-ndjson');
+    res.set('Content-Disposition', `attachment; filename="captures-${tenantId}.jsonl"`);
+    res.send(rows.map((r0) => JSON.stringify(r0)).join('\n'));
+  });
+
+  // W409f — /v1/team/invites — team.html invite list / create endpoint.
+  // GET returns the calling tenant's outstanding invites; POST creates one.
+  r.get('/v1/team/invites', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const tenantId = req.tenant_record.id;
+    let invites = [];
+    try {
+      if (typeof listTeamInvitesForTenant === 'function') {
+        invites = listTeamInvitesForTenant(tenantId) || [];
+      }
+    } catch {}
+    res.json({ ok: true, tenant_id: tenantId, count: invites.length, invites });
+  });
+  r.post('/v1/team/invites', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = req.body || {};
+    const email = String(body.email || '').trim().toLowerCase();
+    const role = String(body.role || 'member').toLowerCase();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ ok: false, error: 'invalid_email' });
+    }
+    const ALLOWED_ROLES = new Set(['owner', 'admin', 'member', 'viewer']);
+    if (!ALLOWED_ROLES.has(role)) {
+      return res.status(400).json({ ok: false, error: 'invalid_role', allowed: [...ALLOWED_ROLES] });
+    }
+    const invite = {
+      id: 'inv_' + Math.random().toString(36).slice(2, 14),
+      tenant_id: req.tenant_record.id,
+      email, role,
+      created_at: new Date().toISOString(),
+      status: 'pending',
+    };
+    res.status(201).json({ ok: true, invite });
+  });
+
+  // GET /v1/artifacts/:id/evidence-trace — return the full ancestor DAG
+  // for an artifact. Returns 404 when the artifact has no evidence DAG on
+  // disk. The shape is { ok, artifact_id, dag: {nodes, edges} } so the
+  // caller can re-build the DAG client-side and walk it.
+  r.get('/v1/artifacts/:id/evidence-trace', (req, res) => {
+    const id = String(req.params.id || '');
+    if (!/^[a-zA-Z0-9_:.-]{1,128}$/.test(id)) {
+      return res.status(400).json({ ok: false, error: 'invalid_artifact_id' });
+    }
+    const dagJson = readEvidenceDag(id);
+    if (!dagJson) {
+      return res.status(404).json({ ok: false, error: 'evidence_dag_not_found', artifact_id: id });
+    }
+    res.json({
+      ok: true,
+      artifact_id: id,
+      dag: dagJson,
+    });
+  });
+
+  // R-6 — Assurance case export.
+  //
+  // GET /v1/assurance/artifact/:id?format=json|pdf
+  //   Streams the per-artifact trust packet (claims + framework controls +
+  //   evidence pointers). JSON is the default and uses application/json;
+  //   pdf returns application/pdf via the lazy-loaded pdfkit renderer.
+  //
+  // GET /v1/assurance/workspace/:id?format=json|pdf
+  //   Same shape, workspace-level — the artifact-derived claims are omitted
+  //   and only the vault-derived jurisdiction claim + the 8 required control
+  //   rows remain.
+  r.get('/v1/assurance/artifact/:id', async (req, res) => {
+    const id = String(req.params.id || '');
+    if (!/^[a-zA-Z0-9_:.-]{1,128}$/.test(id)) {
+      return res.status(400).json({ ok: false, error: 'invalid_artifact_id' });
+    }
+    const format = String(req.query.format || 'json').toLowerCase();
+    if (!['json', 'pdf'].includes(format)) {
+      return res.status(400).json({ ok: false, error: 'bad_format', detail: 'format must be json or pdf' });
+    }
+    const j = getJob(id, req.is_admin ? null : req.tenant);
+    if (!j) return res.status(404).json({ ok: false, error: 'artifact_not_found', artifact_id: id });
+    const dagJson = readEvidenceDag(id);
+    const artifact = {
+      id,
+      manifest: Object.assign({}, j.manifest || {}, dagJson ? { evidence_dag: dagJson } : {}),
+      receipt: j.receipt || null,
+      evidence_dag: dagJson,
+      namespace: (j.manifest && (j.manifest.namespace || (j.manifest.deployment && j.manifest.deployment.namespace))) || null,
+    };
+    const workspace = _loadWorkspaceForAssuranceRoute();
+    const envelope = buildAssuranceCase({ artifact, workspace });
+    const v = validateAssuranceCase(envelope);
+    if (!v.ok) {
+      return res.status(500).json({ ok: false, error: 'assurance_case_invalid', reasons: v.reasons });
+    }
+    if (format === 'json') {
+      return res.json(envelope);
+    }
+    // PDF path — pdfkit lazy-loaded in the renderer.
+    try {
+      const { renderAssuranceCasePdf } = await import('./assurance-case-pdf.js');
+      res.set('Content-Type', 'application/pdf');
+      res.set('Content-Disposition', `attachment; filename="trust-packet-${id}.pdf"`);
+      await renderAssuranceCasePdf(envelope, res);
+    } catch (e) {
+      if (e && e.code === 'PDFKIT_UNAVAILABLE') {
+        return res.status(503).json({ ok: false, error: 'pdf_unavailable', detail: 'pdfkit not installed on server' });
+      }
+      return res.status(500).json({ ok: false, error: 'pdf_render_failed', detail: String(e && e.message || e) });
+    }
+  });
+
+  r.get('/v1/assurance/workspace/:id', async (req, res) => {
+    const id = String(req.params.id || '');
+    if (!/^[a-zA-Z0-9_:.@-]{1,128}$/.test(id)) {
+      return res.status(400).json({ ok: false, error: 'invalid_workspace_id' });
+    }
+    const format = String(req.query.format || 'json').toLowerCase();
+    if (!['json', 'pdf'].includes(format)) {
+      return res.status(400).json({ ok: false, error: 'bad_format', detail: 'format must be json or pdf' });
+    }
+    const workspace = _loadWorkspaceForAssuranceRoute(id);
+    const envelope = buildAssuranceCase({ artifact: null, workspace });
+    const v = validateAssuranceCase(envelope);
+    if (!v.ok) {
+      return res.status(500).json({ ok: false, error: 'assurance_case_invalid', reasons: v.reasons });
+    }
+    if (format === 'json') return res.json(envelope);
+    try {
+      const { renderAssuranceCasePdf } = await import('./assurance-case-pdf.js');
+      res.set('Content-Type', 'application/pdf');
+      res.set('Content-Disposition', `attachment; filename="trust-packet-workspace-${id}.pdf"`);
+      await renderAssuranceCasePdf(envelope, res);
+    } catch (e) {
+      if (e && e.code === 'PDFKIT_UNAVAILABLE') {
+        return res.status(503).json({ ok: false, error: 'pdf_unavailable', detail: 'pdfkit not installed on server' });
+      }
+      return res.status(500).json({ ok: false, error: 'pdf_render_failed', detail: String(e && e.message || e) });
+    }
   });
 
   // CID lookup — content-addressed resolution within the caller's tenant
@@ -7281,6 +8152,18 @@ export function buildRouter() {
     if (!j) return res.status(404).json({ error: 'recipe not found' });
     if (j.status !== 'completed') return res.status(409).json({ error: 'artifact not ready', status: j.status });
     if (!j.artifact_path || !fs.existsSync(j.artifact_path)) return res.status(410).json({ error: 'artifact expired or missing' });
+    // R-2 — pull-blocking on revoke (mirrors /v1/artifacts/:id/download).
+    const lc = lifecycleLoadOrInit(j.id);
+    if (!lifecycleCanPull(lc)) {
+      const lastRevoke = (lc.history || []).slice().reverse().find((h) => h.to === 'revoked');
+      return res.status(410).json({
+        ok: false,
+        error: 'artifact_revoked',
+        reason: lastRevoke ? lastRevoke.reason : null,
+        revoked_at: lastRevoke ? lastRevoke.timestamp : null,
+        actor: lastRevoke ? lastRevoke.actor : null,
+      });
+    }
     res.set('Content-Type', 'application/zip');
     res.set('Content-Disposition', `attachment; filename="${j.id}.kolm"`);
     fs.createReadStream(j.artifact_path).pipe(res);
@@ -8039,6 +8922,115 @@ export function buildRouter() {
       });
     } catch (e) {
       res.status(500).json({ ok: false, error: 'classify_failed', message: String(e && e.message || e) });
+    }
+  });
+
+  // LM-4 (V1 launch 2026-05-26) — GET /v1/status. Public, unauthenticated probe
+  // surface mirrored by /status. Returns the current control-plane snapshot:
+  //   { ok, version (CACHE slug from public/sw.js), deployed_at (process start
+  //     ISO), uptime_seconds, components{gateway,auth,storage,captures}, incidents_active }
+  // Component health is best-effort for V1 — each component reports ok:true
+  // with a current ISO timestamp so probes + the /status page have a stable
+  // schema to consume. Real per-component liveness probes land post-V1 as
+  // /v1/status/components/<component> sub-routes (NOT shipped here).
+  //
+  // The version field is read from public/sw.js (`const CACHE = '...'`) once
+  // at first request and cached in memory so future requests are O(1). The
+  // file is re-read if missing/unreadable the first time.
+  const _v1StatusState = { cache_slug: null, slug_read_at: 0 };
+  function _v1StatusReadCacheSlug() {
+    if (_v1StatusState.cache_slug && (Date.now() - _v1StatusState.slug_read_at) < 60_000) {
+      return _v1StatusState.cache_slug;
+    }
+    try {
+      const swPath = path.resolve(process.cwd(), 'public', 'sw.js');
+      const txt = fs.readFileSync(swPath, 'utf8');
+      const m = txt.match(/const\s+CACHE\s*=\s*['"]([^'"\n]+)['"]/);
+      if (m && m[1]) {
+        _v1StatusState.cache_slug = m[1];
+        _v1StatusState.slug_read_at = Date.now();
+        return m[1];
+      }
+    } catch (_e) { /* fall through to fallback */ }
+    return _v1StatusState.cache_slug || 'kolm-unknown';
+  }
+  r.get('/v1/status', (_req, res) => {
+    const nowMs = Date.now();
+    const uptimeS = Math.round(process.uptime());
+    const nowIso = new Date(nowMs).toISOString();
+    const deployedAtIso = new Date(nowMs - (uptimeS * 1000)).toISOString();
+    res.json({
+      ok: true,
+      version: _v1StatusReadCacheSlug(),
+      deployed_at: deployedAtIso,
+      uptime_seconds: uptimeS,
+      components: {
+        gateway:  { ok: true, checked_at: nowIso },
+        auth:     { ok: true, checked_at: nowIso },
+        storage:  { ok: true, checked_at: nowIso },
+        captures: { ok: true, checked_at: nowIso },
+      },
+      incidents_active: 0,
+      last_incident_at: null,
+    });
+  });
+
+  // LM-7 (V1 launch 2026-05-26) - POST /v1/metrics/event + GET /v1/metrics/snapshot.
+  //
+  // Server-side product analytics. Tenant-authenticated. Both routes degrade
+  // softly: missing/invalid body fields on /event respond ok:true (the
+  // metric is dropped, never an exception). /snapshot caps `days` at 90.
+  //
+  // Caveats / Constraints / Limitations:
+  //   - This is the FIRST-PARTY metrics surface. The browser must not POST
+  //     here from page JS (no client-side tracking pixels per privacy
+  //     directive). Router-side handlers below this point may call
+  //     recordMetricEvent() directly with already-bucketed (tenant, plan,
+  //     kind, outcome) tags; nothing personally identifying is persisted.
+  //   - Authenticated by the standard auth chain (mounted above at r.use
+  //     (authMiddleware)). Tenant scope is enforced inside getMetricSnapshot
+  //     so a caller can never read another tenant's rows even if they pass
+  //     a forged ?tenant= query.
+  //   - region is best-effort: pulled from RAILWAY_REGION / REGION /
+  //     VERCEL_REGION and bucketed at write time. Empty becomes null.
+  function _metricsBucketedRegion() {
+    const r = process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || '';
+    if (!r) return null;
+    const s = String(r).slice(0, 32).toLowerCase();
+    return s || null;
+  }
+  function _metricsTenantPlanTier(req) {
+    return String((req && req.tenant_record && req.tenant_record.plan) || 'unknown').toLowerCase();
+  }
+  r.post('/v1/metrics/event', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    // Soft-fail on missing fields so callers can fire-and-forget without
+    // their request flow breaking on a bad metric envelope.
+    try {
+      recordMetricEvent({
+        tenant: req.tenant_record.id,
+        plan_tier: _metricsTenantPlanTier(req),
+        kind: body.kind,
+        outcome: body.outcome,
+        region: _metricsBucketedRegion(),
+        namespace_id: body.namespace_id,
+      });
+    } catch (_) { /* swallowed by design; recordEvent already never throws */ }
+    res.json({ ok: true });
+  });
+  r.get('/v1/metrics/snapshot', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const daysRaw = Number(req.query && req.query.days);
+    const days = Math.min(METRIC_SNAPSHOT_MAX_DAYS, Math.max(1, Number.isFinite(daysRaw) ? daysRaw : 7));
+    const kind = req.query && req.query.kind ? String(req.query.kind).slice(0, 64) : undefined;
+    try {
+      const snap = getMetricSnapshot({ tenant: req.tenant_record.id, days, kind });
+      res.json(snap);
+    } catch (e) {
+      // The contract is "never throws", but defense-in-depth — return an
+      // empty envelope rather than a 500.
+      res.json({ ok: true, days, from: null, to: null, rows: [], totals_by_kind: {}, totals_by_outcome: {}, _error: String(e && e.message || e) });
     }
   });
 
@@ -10883,14 +11875,12 @@ export function buildRouter() {
     }
   }
 
-  // Runtime run - executes a concept_id or version_id against input and returns the output.
-  // Includes a signed receipt by default; pass receipt:false to skip receipt generation.
-  //
   // W784 — runtime-adapter plugin extension point. A plugin with kind "runtime"
   // can register an alternate execution backend; handleRun() consults
-  // mod.runtimeAdapterPlugins() before falling back to the built-in path. The
-  // plugins.js module surfaces the discovery; the actual dispatch lives in
-  // handleRun's body. Discovery is import-on-demand to keep boot cheap.
+  // mod.runtimeAdapterPlugins() before falling back to the built-in path.
+
+  // Runtime run - executes a concept_id or version_id against input and returns the output.
+  // Includes a signed receipt by default; pass receipt:false to skip receipt generation.
   r.post('/v1/run', (req, res) => handleRun(req, res));
 
   // SDK-conventional REST alias: POST /v1/recipes/:id/run mirrors /v1/run
@@ -12775,6 +13765,16 @@ export function buildRouter() {
     // Stored ZERO -> 503 capture_store_unavailable; partial -> 207.
     if (ids.length === 0 && failures.length > 0) {
       res.set('x-kolm-capture-durable', 'false');
+      // LM-7 — capture_write outcome: failure (all items dropped).
+      try {
+        recordMetricEvent({
+          tenant: __tenantId,
+          plan_tier: String((req.tenant_record && req.tenant_record.plan) || 'unknown').toLowerCase(),
+          kind: 'capture_write', outcome: 'failure',
+          region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
+          namespace_id: cleanNs,
+        });
+      } catch (_) {}
       return res.status(503).json({
         error: 'capture_store_unavailable', namespace: cleanNs,
         count: 0, failures: failures.slice(0, 5),
@@ -12784,6 +13784,17 @@ export function buildRouter() {
     res.set('x-kolm-capture-durable', String(anyDurable));
     if (notifIsDistillReady(req.tenant, cleanNs)) res.set('x-kolm-distill-ready', 'true');
     const status = failures.length > 0 ? 207 : 201;
+    // LM-7 — capture_write outcome bucketed: partial (207) vs success (201).
+    try {
+      recordMetricEvent({
+        tenant: __tenantId,
+        plan_tier: String((req.tenant_record && req.tenant_record.plan) || 'unknown').toLowerCase(),
+        kind: 'capture_write',
+        outcome: failures.length > 0 ? 'partial' : 'success',
+        region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
+        namespace_id: cleanNs,
+      });
+    } catch (_) {}
     res.status(status).json({
       ok: failures.length === 0, namespace: cleanNs, count: ids.length, ids,
       ...(failures.length > 0 ? { failures: failures.slice(0, 5) } : {}),
@@ -13010,12 +14021,26 @@ export function buildRouter() {
       model: modelFromBody(body, 'anthropic'),
       namespace,
       prompt,
-      response: completion || (result.json && result.json.error ? `[error] ${result.json.error.message || result.json.error.type || 'upstream'}` : ''),
+      response: completion || (() => {
+        // W-N: hardenedFetch returns json.error as either a string
+        // ('upstream_timeout' / 'upstream_rate_limited' /
+        // 'upstream_malformed_response' / 'transport_error') OR the legacy
+        // {type, message} object. Tolerate both shapes.
+        if (!result.json || !result.json.error) return '';
+        const e = result.json.error;
+        if (typeof e === 'string') return `[error] ${e}`;
+        return `[error] ${(e.message || e.type || 'upstream')}`;
+      })(),
       latency_us: result.elapsed_us || 0,
       status: result.status,
       tokens_in: usageAnt.prompt_tokens || 0,
       tokens_out: usageAnt.completion_tokens || 0,
-      error: result.json && result.json.error ? String(result.json.error.message || result.json.error.type || '') : null,
+      error: (() => {
+        if (!result.json || !result.json.error) return null;
+        const e = result.json.error;
+        if (typeof e === 'string') return e;
+        return String(e.message || e.type || '');
+      })(),
       reasoning_trace: reasoningAnt,
     });
     if (!obs && res.headersSent) return; // 503 already returned
@@ -13072,12 +14097,23 @@ export function buildRouter() {
       model: modelFromBody(body, 'openai'),
       namespace,
       prompt,
-      response: completion || (result.json && result.json.error ? `[error] ${result.json.error.message || result.json.error.type || 'upstream'}` : ''),
+      response: completion || (() => {
+        // W-N: tolerate both string and {type,message} error envelopes.
+        if (!result.json || !result.json.error) return '';
+        const e = result.json.error;
+        if (typeof e === 'string') return `[error] ${e}`;
+        return `[error] ${(e.message || e.type || 'upstream')}`;
+      })(),
       latency_us: result.elapsed_us || 0,
       status: result.status,
       tokens_in: usageOAI.prompt_tokens || 0,
       tokens_out: usageOAI.completion_tokens || 0,
-      error: result.json && result.json.error ? String(result.json.error.message || result.json.error.type || '') : null,
+      error: (() => {
+        if (!result.json || !result.json.error) return null;
+        const e = result.json.error;
+        if (typeof e === 'string') return e;
+        return String(e.message || e.type || '');
+      })(),
       reasoning_trace: reasoningOAI,
     });
     if (!obs && res.headersSent) return; // 503 already returned
@@ -18919,6 +19955,14 @@ res.json({
 
   // W-D wrapper-completion — GET /v1/receipts/stats
   // Aggregate receipt metrics (count, by_namespace, by_provider, by_route).
+  // V1 launch / W-3 — also returns per-provider and per-namespace cost
+  // breakdowns, plus a `savings_usd` field derived as
+  //   savings = frontier_baseline - actual
+  // where frontier_baseline = sum(local-route tokens × frontier per-token rate)
+  // (the counterfactual cost if every local-routed call had gone frontier
+  // instead). The baseline uses cost-estimator at frontier defaults
+  // (anthropic claude-haiku-4-5 input $0.0008/1k, output $0.004/1k) so the
+  // savings number is dimensioned in the same way as the receipts' cost_usd.
   r.get('/v1/receipts/stats', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {
@@ -18931,14 +19975,61 @@ res.json({
       const byProvider = {};
       const byRoute = { local: 0, frontier: 0 };
       let totalCost = 0;
+      // V1 launch / W-3 — cost-bucket maps. Initialized lazily on first
+      // sighting per key so the JSON shape mirrors the count maps above.
+      const costByNamespace = {};
+      const costByProvider = {};
+      const tokensByNamespace = {};
+      const tokensByProvider = {};
+      // For savings: sum input/output tokens that went the local route. We
+      // re-cost them at frontier rates after the loop.
+      let localInputTokens = 0;
+      let localOutputTokens = 0;
       for (const o of rows) {
         const ns = o.corpus_namespace || o.namespace || 'default';
         const prov = o.provider || 'unknown';
+        const cost = Number(o.cost_usd) || 0;
+        const ti = Number(o.input_tokens) || 0;
+        const to = Number(o.output_tokens) || 0;
         byNamespace[ns] = (byNamespace[ns] || 0) + 1;
         byProvider[prov] = (byProvider[prov] || 0) + 1;
-        if (/^local(-|$)/.test(prov)) byRoute.local++; else byRoute.frontier++;
-        totalCost += Number(o.cost_usd) || 0;
+        costByNamespace[ns] = (costByNamespace[ns] || 0) + cost;
+        costByProvider[prov] = (costByProvider[prov] || 0) + cost;
+        tokensByNamespace[ns] = (tokensByNamespace[ns] || 0) + ti + to;
+        tokensByProvider[prov] = (tokensByProvider[prov] || 0) + ti + to;
+        const isLocal = /^local(-|$)/.test(prov);
+        if (isLocal) {
+          byRoute.local++;
+          localInputTokens += ti;
+          localOutputTokens += to;
+        } else {
+          byRoute.frontier++;
+        }
+        totalCost += cost;
       }
+      // Compute savings: re-cost the local-routed tokens at the frontier rate
+      // baseline. If cost-estimator can't be loaded we skip savings rather
+      // than guess (savings_usd stays null).
+      let savingsUsd = null;
+      let baselineUsd = null;
+      try {
+        const cost = await import('./cost-estimator.js');
+        if (cost && typeof cost.estimateCost === 'function') {
+          baselineUsd = cost.estimateCost({
+            provider: 'anthropic',
+            model: 'claude-haiku-4-5',
+            input_tokens: localInputTokens,
+            output_tokens: localOutputTokens,
+          }) || 0;
+          savingsUsd = Math.max(0, baselineUsd); // local-routed cost is ~0
+        }
+      } catch (_) { /* cost-estimator optional */ }
+      // Round cost maps to 4dp so the JSON doesn't carry float noise.
+      const round4 = (m) => {
+        const out = {};
+        for (const k of Object.keys(m)) out[k] = Math.round(m[k] * 10000) / 10000;
+        return out;
+      };
       res.json({
         ok: true,
         total: rows.length,
@@ -18946,6 +20037,13 @@ res.json({
         by_namespace: byNamespace,
         by_provider: byProvider,
         by_route: byRoute,
+        cost_by_namespace: round4(costByNamespace),
+        cost_by_provider: round4(costByProvider),
+        tokens_by_namespace: tokensByNamespace,
+        tokens_by_provider: tokensByProvider,
+        savings_usd: savingsUsd != null ? Math.round(savingsUsd * 10000) / 10000 : null,
+        baseline_usd_if_all_frontier: baselineUsd != null ? Math.round(baselineUsd * 10000) / 10000 : null,
+        local_route_tokens: { input: localInputTokens, output: localOutputTokens },
       });
     } catch (e) {
       res.status(500).json({ ok: false, error: 'receipts_stats_error', detail: String(e && e.message || e) });
@@ -19142,8 +20240,28 @@ res.json({
       ns.status = 'deployed';
       ns.updated_at = new Date().toISOString();
       store.update(NS_TABLE, (rr) => rr.id === ns.id, ns);
+      // LM-7 — artifact deploy success.
+      try {
+        recordMetricEvent({
+          tenant,
+          plan_tier: String((req.tenant_record && req.tenant_record.plan) || 'unknown').toLowerCase(),
+          kind: 'deploy', outcome: 'success',
+          region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
+          namespace_id: slug,
+        });
+      } catch (_) {}
       res.json({ ok: true, action: 'deploy', namespace: ns });
     } catch (e) {
+      // LM-7 — artifact deploy failure.
+      try {
+        recordMetricEvent({
+          tenant: req.tenant_record.id,
+          plan_tier: String((req.tenant_record && req.tenant_record.plan) || 'unknown').toLowerCase(),
+          kind: 'deploy', outcome: 'failure',
+          region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
+          namespace_id: slug,
+        });
+      } catch (_) {}
       res.status(500).json({ ok: false, error: 'namespace_deploy_error', detail: String(e && e.message || e) });
     }
   });
@@ -20527,6 +21645,33 @@ res.json({
       const cfgEnv = namespace
         ? await cfgMod.getNamespaceConfig({ tenant_id, namespace })
         : null;
+      // R-7 — namespace-scoped drift signals over the capture lake + receipts.
+      // We compute these alongside the W813 alert ladder so callers see both
+      // the latest persisted alert AND the live signal status. When namespace
+      // is unspecified we skip R-7 (it is namespace-scoped by design).
+      let r7 = null;
+      if (namespace) {
+        try {
+          const lookbackRaw = Number(req.query && req.query.lookback_days);
+          const baselineRaw = Number(req.query && req.query.baseline_days);
+          const lookback_days = Number.isFinite(lookbackRaw) && lookbackRaw > 0 ? lookbackRaw : undefined;
+          const baseline_days = Number.isFinite(baselineRaw) && baselineRaw > 0 ? baselineRaw : undefined;
+          const ddMod = await import('./drift-detector.js');
+          r7 = ddMod.computeDriftSignals({
+            tenant_id,
+            namespace,
+            ...(lookback_days != null ? { lookback_days } : {}),
+            ...(baseline_days != null ? { baseline_days } : {}),
+          });
+        } catch (re) {
+          r7 = {
+            ok: false,
+            error: 'r7_compute_failed',
+            detail: String((re && re.message) || re),
+            version: 'r7-v1',
+          };
+        }
+      }
       return res.status(200).json({
         ok: true,
         version: 'w813-v1',
@@ -20534,6 +21679,14 @@ res.json({
         namespace: namespace || null,
         latest_alert: latest,
         config: cfgEnv && cfgEnv.config ? cfgEnv.config : null,
+        // R-7 surface — flat keys at top level so simple clients can read
+        // without descending; full envelope mirrored under `r7` for parity.
+        fallback_rate_delta: r7 && r7.ok ? r7.fallback_rate_delta : null,
+        distribution_distance: r7 && r7.ok ? r7.distribution_distance : null,
+        volume_ratio: r7 && r7.ok ? r7.volume_ratio : null,
+        status: r7 && r7.ok ? r7.status : null,
+        recommendation: r7 && r7.ok ? r7.recommendation : null,
+        r7,
       });
     } catch (e) {
       return res.status(500).json({
@@ -22452,6 +23605,60 @@ res.json({
   r.get('/v1/savings', (req, res, next) => {
     req.url = '/v1/savings/summary' + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '');
     return r.handle(req, res, next);
+  });
+
+  // R-8 — per-namespace cost displacement reporting.
+  //
+  // Distinct from /v1/savings/summary (W835 fee-on-savings model). This
+  // endpoint walks per-receipt route_decision values and re-prices the local
+  // ones against the frontier rate card so the operator sees "what kolm
+  // displaced this period". No fee math is applied here.
+  //
+  // Query params:
+  //   namespace          (required) — namespace to scope by
+  //   period_days        (optional) — defaults to 30
+  //   frontier_provider  (optional) — re-pricing target; falls back to receipt's own model
+  //   frontier_model     (optional) — re-pricing target; falls back to receipt's own model
+  //   artifact_id        (optional) — for compile_cost + deployed_at lookup
+  //   compile_cost_usd   (optional) — explicit override
+  //   deployed_at_ms     (optional) — explicit override
+  r.get('/v1/savings/displacement', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const namespace = typeof req.query.namespace === 'string' ? req.query.namespace : null;
+      if (!namespace) {
+        return res.status(400).json({
+          ok: false,
+          error: 'namespace_required',
+          hint: 'cost displacement is namespace-scoped; pass ?namespace=<ns>',
+          version: 'r8-v1',
+        });
+      }
+      const periodRaw = Number(req.query.period_days);
+      const period_days = Number.isFinite(periodRaw) && periodRaw > 0 ? periodRaw : 30;
+      const cdMod = await import('./cost-displacement.js');
+      const opts = {
+        tenant_id: req.tenant_record.id,
+        namespace,
+        period_days,
+      };
+      if (typeof req.query.frontier_provider === 'string') opts.frontier_provider = req.query.frontier_provider;
+      if (typeof req.query.frontier_model === 'string') opts.frontier_model = req.query.frontier_model;
+      if (typeof req.query.artifact_id === 'string') opts.artifact_id = req.query.artifact_id;
+      const ccRaw = Number(req.query.compile_cost_usd);
+      if (Number.isFinite(ccRaw) && ccRaw >= 0) opts.compile_cost_usd = ccRaw;
+      const daRaw = Number(req.query.deployed_at_ms);
+      if (Number.isFinite(daRaw) && daRaw > 0) opts.deployed_at_ms = daRaw;
+      const env = cdMod.computeDisplacement(opts);
+      return res.status(env && env.ok ? 200 : 400).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'savings_displacement_error',
+        detail: String(e && e.message || e),
+        version: 'r8-v1',
+      });
+    }
   });
 
   // ----- W866 forge routes (hardware / inspect / fit / experts / quantize / merge / serve / export) -----

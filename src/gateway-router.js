@@ -50,9 +50,11 @@ import {
 // --------------------------------------------------------------------------
 
 const _LEGACY_ADAPTERS = {
-  anthropic:  ({ url, body, upstreamKey, proxyBearer, proxyBase }) => forwardAnthropic({ url, body, upstreamKey, proxyBearer, proxyBase }),
-  openai:     ({ url, body, upstreamKey, proxyBearer, proxyBase }) => forwardOpenAI({ url, body, upstreamKey, proxyBearer, proxyBase }),
-  openrouter: ({ url, body, upstreamKey, proxyBearer, proxyBase }) => forwardOpenRouter({ url, body, upstreamKey, proxyBearer, proxyBase }),
+  // W-N: thread timeoutMs into the legacy forwarders so the dispatch
+  // handler's clamped timeout flows all the way to fetch's AbortController.
+  anthropic:  ({ url, body, upstreamKey, proxyBearer, proxyBase, timeoutMs }) => forwardAnthropic({ url, body, upstreamKey, proxyBearer, proxyBase, timeoutMs }),
+  openai:     ({ url, body, upstreamKey, proxyBearer, proxyBase, timeoutMs }) => forwardOpenAI({ url, body, upstreamKey, proxyBearer, proxyBase, timeoutMs }),
+  openrouter: ({ url, body, upstreamKey, proxyBearer, proxyBase, timeoutMs }) => forwardOpenRouter({ url, body, upstreamKey, proxyBearer, proxyBase, timeoutMs }),
 };
 
 async function _getForward(providerId) {
@@ -106,6 +108,7 @@ export async function dispatchToProvider({
   fallback_reason = null,
   proxyBearer = null,
   proxyBase = null,
+  timeoutMs = null,
 } = {}) {
   const fwd = await _getForward(provider);
   if (!fwd) {
@@ -129,7 +132,7 @@ export async function dispatchToProvider({
   const t0 = process.hrtime.bigint();
   let raw;
   try {
-    raw = await fwd({ url: target, body, upstreamKey, proxyBearer, proxyBase });
+    raw = await fwd({ url: target, body, upstreamKey, proxyBearer, proxyBase, timeoutMs });
   } catch (e) {
     const elapsed_us = Math.round(Number(process.hrtime.bigint() - t0) / 1000);
     return {
@@ -170,17 +173,33 @@ export async function dispatchToProvider({
 // spec (timeout / 429 / 5xx → fallback chain).
 // --------------------------------------------------------------------------
 
-const _FALLBACK_REASON_BY_STATUS = (status) => {
+// W-N: derive the fallback reason from the envelope status + json error
+// type. We MUST stay within the receipt-schema fallback_reason enum
+// (low_confidence | class_mismatch | upstream_timeout | upstream_429 |
+// upstream_5xx | poison_detected | null) — see src/receipt-schema.js.
+// The new W-N envelopes (upstream_rate_limited / upstream_malformed_response
+// / transport_error) all map back to one of those three upstream_* values.
+const _FALLBACK_REASON_BY_RESULT = (result) => {
+  const status = result && result.status;
+  // 429 — schema label is 'upstream_429' regardless of whether the
+  // adapter exhausted retries (W-N) or the upstream returned 429 directly.
   if (status === 429) return 'upstream_429';
+  // 5xx — covers both raw upstream 5xx and W-N synthetic 502
+  // (upstream_malformed_response). Schema label is 'upstream_5xx'.
   if (status >= 500 && status < 600) return 'upstream_5xx';
+  // status:0 — W-N AbortController timeout OR transport error. Both
+  // collapse to the schema label 'upstream_timeout'. The precise reason
+  // is preserved in attempts[].json.error for debugging.
   if (status === 0) return 'upstream_timeout';
   return null;
 };
+// Back-compat alias for callers that only had the status integer to work with.
+const _FALLBACK_REASON_BY_STATUS = (status) => _FALLBACK_REASON_BY_RESULT({ status });
 
 export function shouldFallback(result) {
   if (!result || typeof result !== 'object') return false;
   if (result.ok === true) return false;
-  return _FALLBACK_REASON_BY_STATUS(result.status) !== null;
+  return _FALLBACK_REASON_BY_RESULT(result) !== null;
 }
 
 // --------------------------------------------------------------------------
@@ -208,6 +227,7 @@ export async function dispatchWithFallback({
   chain,
   body,
   onAttempt = null,
+  timeoutMs = null,
 } = {}) {
   if (!Array.isArray(chain) || chain.length === 0) {
     return {
@@ -237,6 +257,8 @@ export async function dispatchWithFallback({
       fallback_reason: i === 0 ? null : lastReason,
       proxyBearer:    entry.proxyBearer || null,
       proxyBase:      entry.proxyBase   || null,
+      // W-N: per-entry override wins; outer chain timeoutMs is the default.
+      timeoutMs:      entry.timeoutMs || timeoutMs || null,
     });
     if (typeof onAttempt === 'function') {
       try { onAttempt(result); } catch (_) { /* never break the chain on callback error */ }
@@ -244,7 +266,7 @@ export async function dispatchWithFallback({
     lastResult = result;
     if (result.ok) return result;
     if (!shouldFallback(result)) return result;
-    lastReason = _FALLBACK_REASON_BY_STATUS(result.status) || 'unknown';
+    lastReason = _FALLBACK_REASON_BY_RESULT(result) || 'unknown';
   }
   return lastResult;
 }

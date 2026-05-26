@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
+<title>Governance &middot; Account &middot; kolm.ai</title>
+<meta name="description" content="Governance hub for kolm artifacts: runtime passports, evidence DAG, assurance cases, drift signals, cost displacement, and the artifact lifecycle.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/account/governance">
+<meta property="og:title" content="Governance &middot; Account &middot; kolm.ai" />
+<meta property="og:description" content="Governance hub for kolm artifacts: runtime passports, evidence DAG, assurance cases, drift signals, cost displacement, and the artifact lifecycle." />
+<meta property="og:image" content="https://kolm.ai/brand-hero.png" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://kolm.ai/account/governance" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+.acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
+#account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
+#account-sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin:0 0 10px}
+#account-sidebar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:var(--ink-mute);text-decoration:none;font-family:var(--mono);font-size:12.5px}
+#account-sidebar a:hover{background:var(--bg-elev);color:var(--ink)}
+#account-sidebar a[aria-current=page]{background:var(--bg-elev);color:var(--accent);border-left:2px solid var(--accent);padding-left:8px}
+.acct-content h1{margin:0 0 4px;font-size:28px;letter-spacing:0}
+.acct-content h2{font-size:16px;margin:22px 0 10px}
+.acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#e6e9ee);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.kpanel{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
+.kpanel h2{margin:0 0 12px;font-size:15px}
+.kpanel .pdesc{color:var(--ink-mute);font-size:13px;margin:0 0 12px}
+.tile-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.tile{display:block;padding:18px;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev);text-decoration:none;color:var(--ink);transition:border-color 0.15s}
+.tile:hover{border-color:var(--accent)}
+.tile .label{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin-bottom:8px;display:block}
+.tile b{display:block;font-size:16px;font-weight:600;color:var(--ink);margin-bottom:6px}
+.tile small{display:block;color:var(--ink-mute);font-size:12.5px;line-height:1.5}
+.tile .meta{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:10px}
+.empty{background:var(--bg-card);border:1px dashed var(--line);border-radius:8px;padding:18px;color:var(--ink-mute);font-size:13.5px;line-height:1.6}
+.empty code{background:var(--bg-elev);padding:2px 6px;border-radius:3px;font-size:12.5px;color:var(--accent)}
+.btn{display:inline-block;padding:6px 12px;border-radius:5px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
+.pill.ok{color:var(--good)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}.pill.mute{color:var(--ink-faint)}
+@media (max-width:980px){.tile-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.tile-grid{grid-template-columns:1fr}}
+</style>
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/nav.js"></script>
+</head>
+<body class="kolm-account-surface ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<main id="main">
+<div class="acct-shell">
+<nav id="account-sidebar" aria-label="Account sections">
+  <h2>Governance</h2>
+  <ul>
+    <li><a href="/account/governance" aria-current="page">Hub</a></li>
+    <li><a href="/account/governance/passport">Runtime passport</a></li>
+    <li><a href="/account/governance/evidence">Evidence DAG</a></li>
+    <li><a href="/account/governance/assurance">Assurance case</a></li>
+    <li><a href="/account/governance/drift">Drift signals</a></li>
+    <li><a href="/account/governance/cost">Cost displacement</a></li>
+    <li><a href="/account/governance/lifecycle">Artifact lifecycle</a></li>
+  </ul>
+  <h2 style="margin-top:18px">Account</h2>
+  <ul>
+    <li><a href="/account/overview">Overview</a></li>
+    <li><a href="/account/artifacts">Artifacts</a></li>
+    <li><a href="/account/serve">Serve</a></li>
+    <li><a href="/account/audit-log">Audit log</a></li>
+  </ul>
+</nav>
+<section class="acct-content">
+<h1>Governance.</h1>
+<p class="lede">Every signed <code>.kolm</code> ships with the evidence to prove what it is, what it was trained on, what it runs on, and what it costs. This hub is the index.</p>
+
+<section class="kpanel">
+  <h2>Six surfaces, one artifact</h2>
+  <p class="pdesc">Each tile reads from a route on the same artifact id. Empty states are real: if you have not deployed an artifact yet, the surface will say so and link to the relevant CLI.</p>
+  <div class="tile-grid">
+    <a class="tile" href="/account/governance/passport">
+      <span class="label">R-1</span>
+      <b>Runtime passport</b>
+      <small>Per-target latency, memory, throughput, and quality delta vs the FP16 baseline. Tested, estimated, or unsupported.</small>
+      <div class="meta">GET /v1/passport/:id</div>
+    </a>
+    <a class="tile" href="/account/governance/evidence">
+      <span class="label">R-5</span>
+      <b>Evidence DAG</b>
+      <small>Capture, eval, teacher, student, runtime, signature, policy, rights nodes plus the edges that bind them.</small>
+      <div class="meta">GET /v1/evidence/:id</div>
+    </a>
+    <a class="tile" href="/account/governance/assurance">
+      <span class="label">R-6</span>
+      <b>Assurance case</b>
+      <small>Claims and framework controls with evidence pointers, exportable as JSON or PDF for compliance review.</small>
+      <div class="meta">GET /v1/assurance/artifact/:id</div>
+    </a>
+    <a class="tile" href="/account/governance/drift">
+      <span class="label">R-7</span>
+      <b>Drift signals</b>
+      <small>Fallback rate, distribution distance, and volume ratio over a 2&sigma; warn / 3&sigma; alert ladder per namespace.</small>
+      <div class="meta">GET /v1/drift/status</div>
+    </a>
+    <a class="tile" href="/account/governance/cost">
+      <span class="label">R-8</span>
+      <b>Cost displacement</b>
+      <small>Per-namespace frontier baseline vs actual, monthly + cumulative savings, payback period.</small>
+      <div class="meta">GET /v1/savings/displacement</div>
+    </a>
+    <a class="tile" href="/account/governance/lifecycle">
+      <span class="label">R-2</span>
+      <b>Artifact lifecycle</b>
+      <small>State browser across created, signed, deployed, monitored, superseded, revoked, archived.</small>
+      <div class="meta">GET /v1/artifacts/:id/lifecycle</div>
+    </a>
+  </div>
+</section>
+
+<section class="kpanel">
+  <h2>How this is wired</h2>
+  <p class="pdesc">All six surfaces read the same underlying record. There is no separate governance database; the artifact <em>is</em> the governance record.</p>
+  <ul style="margin:0;padding-left:18px;color:var(--ink-mute);font-size:13.5px;line-height:1.7">
+    <li>The runtime passport and evidence DAG are persisted inside the <code>.kolm</code> manifest at compile time.</li>
+    <li>Lifecycle transitions land in <code>data/artifacts/&lt;id&gt;/lifecycle.json</code> and are recorded with actor + reason + optional evidence id.</li>
+    <li>Drift signals are computed from the capture lake plus receipt route decisions for the namespace.</li>
+    <li>Cost displacement repeats the same receipt scan against the frozen rate card for the period.</li>
+    <li>The assurance case stitches all of the above into one signed envelope you can hand to an auditor.</li>
+  </ul>
+</section>
+
+<section class="kpanel">
+  <h2>Docs</h2>
+  <p class="pdesc">Each governance surface has a matching long-form doc with the schema, the CLI verbs, and the failure modes.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:8px">
+    <a class="btn" href="/docs/govern/lifecycle">Lifecycle</a>
+    <a class="btn" href="/docs/govern/drift">Drift</a>
+    <a class="btn" href="/docs/govern/evidence">Evidence</a>
+    <a class="btn" href="/docs/govern/assurance">Assurance</a>
+    <a class="btn" href="/docs/govern/receipts">Receipts</a>
+    <a class="btn" href="/docs/govern/compliance">Compliance</a>
+    <a class="btn" href="/docs/run/overview">Run overview</a>
+  </div>
+</section>
+
+<section class="kpanel">
+  <h2>CLI parity</h2>
+  <p class="pdesc">Every surface in this hub has a CLI verb that returns the same JSON envelope.</p>
+  <div class="empty">
+    <code>kolm inspect &lt;artifact&gt; --runtime-passport --json</code><br>
+    <code>kolm evidence trace &lt;artifact&gt;</code><br>
+    <code>kolm assurance export --artifact &lt;id&gt; --format pdf</code><br>
+    <code>kolm drift status --namespace support</code><br>
+    <code>kolm savings --namespace support --period 30</code><br>
+    <code>kolm lifecycle &lt;artifact&gt;</code>
+  </div>
+</section>
+
+<p style="margin-top:24px;font-size:12.5px;color:var(--ink-mute)"><a href="/account/overview" style="color:var(--ink-mute)">&larr; Back to account overview</a></p>
+</section>
+</div>
+</main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+<div hidden data-w221-anchors="account" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training loop</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Run</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+</div>
+</body>
+</html>

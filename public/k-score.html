@@ -148,12 +148,13 @@
 </script>
 </head>
 <body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <header class="ks-nav">
     <div class="ks-wrap ks-nav__row">
-      <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
       <nav class="ks-nav__links" aria-label="Primary">
         <a href="/wrapper">Wrapper</a>
         <a href="/studio">Studio</a>
@@ -762,16 +763,16 @@ kolm receipt cm-claims-v4.kolm --json | jq <span class="s">'.k_score, .axes, .ve
   <section>
     <h2>K-score v2 axes (R, F, T, E, Z)</h2>
     <ul>
-      <li><strong>Robustness</strong> &mdash; R-axis: holdout-set accuracy as a measure of model stability under distribution shift.</li>
-      <li><strong>Fairness</strong> &mdash; F-axis: subgroup-minimum accuracy as a measure of equitable performance across protected attributes.</li>
-      <li><strong>Teacher fidelity</strong> &mdash; T-axis: replay equality against the teacher's responses on the same prompts.</li>
-      <li><strong>Energy</strong> &mdash; E-axis: joules-per-call measured via NVML or RAPL for energy efficiency tracking.</li>
-      <li><strong>Drift</strong> &mdash; Z-axis: eval-set drift between the recipe-time and run-time distributions.</li>
+      <li><strong>Robustness</strong> &ndash; R-axis: holdout-set accuracy as a measure of model stability under distribution shift.</li>
+      <li><strong>Fairness</strong> &ndash; F-axis: subgroup-minimum accuracy as a measure of equitable performance across protected attributes.</li>
+      <li><strong>Teacher fidelity</strong> &ndash; T-axis: replay equality against the teacher's responses on the same prompts.</li>
+      <li><strong>Energy</strong> &ndash; E-axis: joules-per-call measured via NVML or RAPL for energy efficiency tracking.</li>
+      <li><strong>Drift</strong> &ndash; Z-axis: eval-set drift between the recipe-time and run-time distributions.</li>
     </ul>
   </section>
   <section>
     <h2>kolm-bench v1 bench callout</h2>
-    <p>The kolm-bench v1 frozen suite is 30 cases across 4 classes (classification, extraction, generation, code). The reference scorer ships a composite mean of approximately 0.95. The bench feeds the public <a href="/kscore-leaderboard">/kscore-leaderboard</a> with the top-N artifacts; the bench page lives at <a href="/kscore-bench">/kscore-bench</a>.</p>
+    <p>The kolm-bench v1 frozen suite is 30 cases across 4 classes (classification, extraction, generation, code). The reference scorer ships a composite mean of approximately 0.95. <code>kolm bench artifact.kolm &gt; bench-receipt.json</code> writes a signed local receipt; the bench feeds the public <a href="/kscore-leaderboard">/kscore-leaderboard</a> via reviewed <code>bench-receipt.json</code> submissions, and the bench page lives at <a href="/kscore-bench">/kscore-bench</a>.</p>
   </section>
 </div>
 </body>

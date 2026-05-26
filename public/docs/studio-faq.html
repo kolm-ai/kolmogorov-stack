@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>Studio FAQ &middot; common questions &middot; kolm.ai</title>
+<meta name="description" content="Frequently asked questions about Studio: hardware needs, teacher costs, quant format selection, license terms, MoE handling, resumability, and reproducibility.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Studio FAQ &middot; kolm.ai">
+<meta property="og:description" content="Questions before your first compile.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/studio-faq">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Studio FAQ &middot; kolm.ai">
+<meta name="twitter:description" content="Questions before your first compile.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/docs/studio-faq">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230,233,238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--accent-soft:rgba(17,17,17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#1d2d44;--accent-soft:rgba(29,45,68,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+.faq{border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);padding:18px 22px;margin:14px 0;max-width:880px}
+.faq h3{margin:0 0 8px;color:var(--ink);font-size:17px;font-weight:500;letter-spacing:-0.01em}
+.faq p{margin:6px 0;color:var(--ink-mute);font-size:14.5px}
+.faq p:last-child{margin-bottom:0}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+.privacy-note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:14px 18px;margin:18px 0;border-radius:0 8px 8px 0;max-width:780px}
+.privacy-note strong{color:var(--ink)}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/docs-shell.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/docs-shell.js"></script>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / studio-faq</div>
+<p class="eyebrow">Studio / FAQ</p>
+<h1>Studio FAQ.</h1>
+<p class="lede">Questions people actually ask before their first <code>kolm distill</code> or <code>kolm compile</code>. If yours isn't here, open a GitHub discussion or ping the team in chat &mdash; we add answers as patterns emerge.</p>
+
+<div class="faq">
+<h3>1. What hardware do I actually need?</h3>
+<p>For a 7B distill, an RTX 4090 / 5090 with 24&ndash;32&nbsp;GB VRAM finishes a 410-pair Trinity-style run in 80&ndash;120 seconds. A 13B fits on the same hardware with bf16 + gradient checkpointing + bs=1. A 32B distill wants 48&nbsp;GB+ (RTX 6000 Ada, A6000, H100) or Modal/RunPod. For compile-only (no fine-tune), CPU works for any size that fits in RAM &mdash; it's just slow. A Mac with 64&nbsp;GB unified memory can do up to 30B distill on the MLX backend.</p>
+<p>Run <code>kolm hardware probe</code> to get a list of recipes your machine will actually finish.</p>
+</div>
+
+<div class="faq">
+<h3>2. How much does a Trinity-style distill cost in teacher API fees?</h3>
+<p>The Trinity-500 reference run (410 pairs, three teachers, weighted council) cost <strong>$0.31 per 1000 tokens</strong> through hosted Claude Haiku + GPT-4o-mini + DeepSeek V3 &mdash; roughly $14&ndash;$22 for a complete 410-pair pull, depending on average prompt length. Self-hosted teachers (DeepSeek-R1 via a local stdlib server) cost zero in API fees and trade about 2&times; the wall-clock time.</p>
+<p>Pass <code>--budget 5</code> on <code>kolm distill</code> to hard-cap spend; the job fails before exceeding it.</p>
+</div>
+
+<div class="faq">
+<h3>3. Which quant format should I pick?</h3>
+<p>Defaults that almost never go wrong: <strong>GGUF Q4_K_M</strong> for general use on consumer GPUs, <strong>GGUF Q5_K_M</strong> when you have an extra 1&ndash;2&nbsp;GB to spend and want a quality hedge, <strong>GGUF Q8_0</strong> for evaluation baselines. For vLLM/SGLang serving: <strong>AWQ</strong> on Ampere/Ada, <strong>FP8</strong> on Hopper, <strong>NVFP4</strong> on Blackwell. For Apple Silicon: <strong>MLX 4-bit</strong>. The <a href="/docs/studio-export-formats">export formats decision table</a> walks through the trade-offs.</p>
+</div>
+
+<div class="faq">
+<h3>4. Can I distill a model whose license forbids derivative works?</h3>
+<p>You can run the bytes through Studio &mdash; we don't lock that down &mdash; but Studio writes the source license into the artifact passport and the auto-generated model card. If the source license forbids derivative works (some "research-only" licenses do), the published artifact inherits that restriction. Studio flags this at <code>kolm compile</code> time with a warning. Pass <code>--license-override</code> only if your legal team has cleared it; the override is recorded in the receipt.</p>
+</div>
+
+<div class="faq">
+<h3>5. How does Studio handle MoE models like Mixtral or DeepSeek-V3?</h3>
+<p>Native. The compiler enumerates experts per layer, runs activation tracing on a calibration set, and lets you set per-expert quant policy (typically router-high + experts-aggressive) and prune low-traffic experts. See <a href="/docs/studio-moe">MoE compilation</a>. The 671B DeepSeek-V3 has been compiled and exported to GGUF on a single H200 node; on consumer hardware you'll need 200&nbsp;GB+ unified memory or a multi-GPU split.</p>
+</div>
+
+<div class="faq">
+<h3>6. Is a run reproducible bit-for-bit?</h3>
+<p>Yes, if you pin everything. Studio records the random seed, base model SHA, teacher model versions, dataset hash, CUDA/cuDNN version, and the kolm version into the receipt. Re-running with the same <code>--seed</code> on the same hardware reproduces the artifact's SHA-256 to the byte. Different hardware (e.g., 5090 vs H100) can produce different floating-point rounding; we surface this as a "reproducibility class" in the passport: <code>same-host-same-bytes</code>, <code>same-arch-same-bytes</code>, or <code>cross-arch-numerical</code>.</p>
+</div>
+
+<div class="faq">
+<h3>7. What happens if my distill crashes at step 800 of 1000?</h3>
+<p>Studio checkpoints every <code>--ckpt-every</code> steps (default 100) to <code>~/.kolm/runs/&lt;job_id&gt;/checkpoints/</code>. Re-run with <code>kolm distill --resume &lt;job_id&gt;</code> to pick up from the last checkpoint. The teacher cache is also persisted &mdash; you don't pay twice for the same teacher completions on resume.</p>
+</div>
+
+<div class="faq">
+<h3>8. Can I use my own teacher instead of Claude/GPT/DeepSeek?</h3>
+<p>Any OpenAI-compatible HTTP endpoint works as a teacher &mdash; including your own vLLM, SGLang, llama.cpp, or kolm-served model. Register it with <code>kolm teachers add --name my-teacher --url http://127.0.0.1:8765 --weight 1.0</code>. See <a href="/docs/studio-teachers">Teacher providers</a>. Self-hosted teachers are how the team distilled the Trinity-7B reference model: a local INT4 DeepSeek-R1 32B served by Python <code>http.server</code> on a 5090, no provider fees.</p>
+</div>
+
+<div class="faq">
+<h3>9. Why is the judge a different model lineage from the teachers?</h3>
+<p>If Claude grades a student trained on Claude, the grade is biased high &mdash; same prior, same blind spots. We use Gemini as the default judge because it's a fully separate lineage from Claude/GPT/DeepSeek. The judge sees pairs blind (no labels of which model produced which response) and scores against an explicit rubric. See <a href="/docs/studio-judges">Judges</a>. You can swap the judge with <code>--judge model-name</code>; the receipt records whichever judge was used.</p>
+</div>
+
+<div class="faq">
+<h3>10. Where does my data go during a distill run?</h3>
+<p>Local-first by default. Prompts and teacher completions are written only to <code>~/.kolm/runs/&lt;job_id&gt;/</code>. Nothing is uploaded to kolm.ai unless you explicitly pass <code>--telemetry on</code> or publish the artifact. The teacher HTTP calls themselves go to whichever provider you configured (Anthropic, OpenAI, etc.) under your API key. Self-hosted teachers keep everything on your machine end to end. The Enterprise tier adds a BYOC option where even the orchestration runs in your VPC.</p>
+</div>
+
+<div class="privacy-note">
+<strong>Caveats.</strong> Cost numbers above reflect 2026-Q2 provider pricing for the Trinity reference recipe and will drift as providers reprice. Always check <code>kolm distill --dry-run --json</code> for a current estimate before running.
+</div>
+
+<h2 id="related">Related</h2>
+<div class="related">
+  <a href="/docs/studio-overview"><b>Studio overview</b><span>The bigger picture</span></a>
+  <a href="/docs/studio-distill"><b>Distillation</b><span>How the teacher loop works</span></a>
+  <a href="/docs/studio-cli-reference"><b>CLI reference</b><span>Every verb, every flag</span></a>
+</div>
+
+</div></main>
+
+<footer style="border-top:1px solid var(--line);background:var(--bg-elev);padding:48px 0;margin-top:64px">
+  <div class="wrap" style="display:grid;grid-template-columns:repeat(4,1fr);gap:32px">
+    <div><b style="color:var(--ink)">kolm.ai</b><p style="font-size:13px;color:var(--ink-faint);margin-top:8px">The open-source AI compiler.</p></div>
+    <div><b style="font-size:13px;color:var(--ink)">Product</b><ul style="list-style:none;padding:0;margin:8px 0 0;font-size:13.5px"><li><a href="/wrapper" style="color:var(--ink-mute);text-decoration:none">Wrapper</a></li><li><a href="/studio" style="color:var(--ink-mute);text-decoration:none">Studio</a></li><li><a href="/pricing" style="color:var(--ink-mute);text-decoration:none">Pricing</a></li></ul></div>
+    <div><b style="font-size:13px;color:var(--ink)">Docs</b><ul style="list-style:none;padding:0;margin:8px 0 0;font-size:13.5px"><li><a href="/docs" style="color:var(--ink-mute);text-decoration:none">All docs</a></li><li><a href="/docs/studio-overview" style="color:var(--ink-mute);text-decoration:none">Studio overview</a></li><li><a href="/docs/studio-cli-reference" style="color:var(--ink-mute);text-decoration:none">CLI reference</a></li></ul></div>
+    <div><b style="font-size:13px;color:var(--ink)">Company</b><ul style="list-style:none;padding:0;margin:8px 0 0;font-size:13.5px"><li><a href="/about" style="color:var(--ink-mute);text-decoration:none">About</a></li><li><a href="/legal" style="color:var(--ink-mute);text-decoration:none">Legal</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" style="color:var(--ink-mute);text-decoration:none">GitHub</a></li></ul></div>
+  </div>
+</footer>
+
+</body>
+</html>

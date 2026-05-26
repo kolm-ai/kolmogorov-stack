@@ -132,7 +132,7 @@ test('W225 #10 - sitemap, OG, and SEO-sweep scripts all exist and are runnable',
 });
 
 test('W225 #11 - sw.js cache slug at or beyond wave 225', () => {
-  const m = SW.match(/const CACHE = 'kolm-v7-[^']+-wave(\d+)-/);
+  const m = SW.match(/const CACHE = 'kolm-v\d+-[^']*?wave(\d+)/);
   assert.ok(m, 'sw.js CACHE must follow the wave-N slug pattern');
   const waveN = parseInt(m[1], 10);
   assert.ok(waveN >= 225, `sw.js wave-slug must be >= 225 (saw ${waveN})`);

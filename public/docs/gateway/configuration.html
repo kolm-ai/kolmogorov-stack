@@ -40,11 +40,12 @@
 </style>
 </head>
 <body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
@@ -76,7 +77,7 @@
     <p>The CLI looks for <code>gateway.toml</code> in three places, first match wins: <code>$KOLM_GATEWAY_CONFIG</code>, <code>./gateway.toml</code> in the working directory, then <code>~/.kolm/gateway.toml</code>. The hosted <code>kolm.ai</code> endpoint ships with a managed default; this file matters when you self-host.</p>
     <h2>Complete example</h2>
     <p>Every section is documented below. Required sections: <code>[server]</code>, <code>[signing]</code>, at least one <code>[[provider]]</code>, and at least one <code>[[namespace]]</code>.</p>
-    <pre># gateway.toml — production self-host example
+    <pre># gateway.toml - production self-host example
 
 [server]
 bind             = "0.0.0.0:8080"

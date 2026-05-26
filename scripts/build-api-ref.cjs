@@ -18,10 +18,31 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
-const ROUTE_SOURCES = [
+
+// Core route files always parsed.
+const CORE_ROUTE_FILES = [
   { label: 'src/router.js', file: path.join(ROOT, 'src', 'router.js') },
   { label: 'src/oauth.js', file: path.join(ROOT, 'src', 'oauth.js') },
 ];
+
+// Auto-discover every src/*-routes.js wave module (W821..W835 and beyond).
+// router.js imports each via registerXxxRoutes(app) so they ship as real
+// production routes and must appear in the API reference + OpenAPI spec.
+const WAVE_MODULE_FILES = (() => {
+  const out = [];
+  try {
+    const entries = fs.readdirSync(path.join(ROOT, 'src'));
+    for (const name of entries) {
+      if (!/-routes\.js$/.test(name)) continue;
+      out.push({ label: 'src/' + name, file: path.join(ROOT, 'src', name) });
+    }
+  } catch (_) {}
+  return out;
+})();
+
+const ROUTE_SOURCES = [...CORE_ROUTE_FILES, ...WAVE_MODULE_FILES.filter(
+  (m) => !CORE_ROUTE_FILES.some((c) => c.file === m.file)
+)];
 const OUT_HTML = path.join(ROOT, 'public', 'docs', 'api.html');
 const OUT_JSON = path.join(ROOT, 'public', 'docs', 'api-routes.json');
 
@@ -42,18 +63,20 @@ function extractRoutes(source, sourceLabel) {
 
   // Regex for r.<method>('<path>', ...) — path must be a single-quoted or
   // double-quoted string literal that starts with /. Template-literal and
-  // identifier paths are handled separately.
-  const literalRe = /^\s*(?:r|router)\.(get|post|put|delete|patch)\s*\(\s*(['"])(\/[^'"]*?)\2/;
+  // identifier paths are handled separately. Binding names: r, router, app
+  // (wave-module register functions take `app` as their parameter; core
+  // router uses `r`). Core route binding regex: (?:r|router)\.<method>.
+  const literalRe = /^\s*(?:r|router|app)\.(get|post|put|delete|patch|all)\s*\(\s*(['"])(\/[^'"]*?)\2/;
 
   // Regex route literals for drop-in provider bases such as:
   //   r.post(/^\/v1\/capture\/anthropic(?:\/.*)?$/, ...)
   // These accept SDK-appended suffixes at runtime, but the public contract is
   // the stable base path documented in API refs and OpenAPI.
-  const regexLiteralRe = /^\s*(?:r|router)\.(get|post|put|delete|patch)\s*\(\s*\/\^((?:\\\/[^\\/(]+)+)(?:\(\?:\\\/\.\*\)\?)?\$\/,/;
+  const regexLiteralRe = /^\s*(?:r|router|app)\.(get|post|put|delete|patch|all)\s*\(\s*\/\^((?:\\\/[^\\/(]+)+)(?:\(\?:\\\/\.\*\)\?)?\$\/,/;
 
   // The one for-loop expansion: `for (const p of [...]) { r.post(p, ...) }`
   // We capture the array literal and emit one route per element.
-  const variableRe = /^\s*(?:r|router)\.(get|post|put|delete|patch)\s*\(\s*([a-zA-Z_$][a-zA-Z0-9_$]*)\s*,/;
+  const variableRe = /^\s*(?:r|router|app)\.(get|post|put|delete|patch|all)\s*\(\s*([a-zA-Z_$][a-zA-Z0-9_$]*)\s*,/;
 
   const unparseable = [];
 
@@ -158,14 +181,19 @@ function isDecorativeComment(c) {
 }
 
 function findEnclosingArrayLoop(lines, routeLineIdx, ident) {
-  // Walk up looking for `for (const <ident> of [ ... ])`. Allow the array
-  // literal to span the same line. We accept single-quoted string elements.
-  for (let j = routeLineIdx - 1; j >= Math.max(0, routeLineIdx - 8); j--) {
+  // Walk up looking for `for (const <ident> of [ ... ])`. The array literal may
+  // be on the same line or span multiple lines (look-back window up to 24
+  // lines). We accept single- or double-quoted string elements.
+  const SINGLE_LINE = new RegExp(
+    'for\\s*\\(\\s*const\\s+' + ident + '\\s+of\\s*\\[([^\\]]+)\\]'
+  );
+  const MULTI_LINE_OPEN = new RegExp(
+    'for\\s*\\(\\s*const\\s+' + ident + '\\s+of\\s*\\[\\s*$'
+  );
+  for (let j = routeLineIdx - 1; j >= Math.max(0, routeLineIdx - 24); j--) {
     const candidate = lines[j];
-    const re = new RegExp(
-      'for\\s*\\(\\s*const\\s+' + ident + '\\s+of\\s*\\[([^\\]]+)\\]'
-    );
-    const hit = candidate.match(re);
+    // Same-line form.
+    const hit = candidate.match(SINGLE_LINE);
     if (hit) {
       const elems = [];
       const inner = hit[1];
@@ -173,6 +201,22 @@ function findEnclosingArrayLoop(lines, routeLineIdx, ident) {
       let m;
       while ((m = elemRe.exec(inner)) !== null) {
         elems.push(m[2]);
+      }
+      return { startLine: j, paths: elems };
+    }
+    // Multi-line form: opening `for (const X of [` on one line, closing `]`
+    // on a later line, route call site after the closing bracket.
+    if (MULTI_LINE_OPEN.test(candidate)) {
+      const elems = [];
+      const elemRe = /(['"])(\/[^'"]+?)\1/g;
+      for (let k = j + 1; k < routeLineIdx; k++) {
+        const inner = lines[k];
+        let m;
+        elemRe.lastIndex = 0;
+        while ((m = elemRe.exec(inner)) !== null) {
+          elems.push(m[2]);
+        }
+        if (/^\s*\]\s*\)/.test(inner)) break; // closing bracket reached
       }
       return { startLine: j, paths: elems };
     }

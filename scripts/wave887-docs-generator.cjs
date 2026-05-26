@@ -92,7 +92,7 @@ td code{font-size:12px}
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -133,7 +133,7 @@ ${relatedHtml}
       </div>
       <div>
         <h4>Company</h4>
-        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolm" rel="noopener">GitHub</a></li></ul>
       </div>
     </div>
     <div class="ks-footer__bottom">
@@ -576,8 +576,8 @@ curl -X POST https://kolm.ai/v1/gateway/dispatch/support ...</code></pre>`,
       {
         h2: 'Single-host (Docker Compose)',
         html: `<p>Fastest path. <code>docker compose up</code> brings up the gateway, Postgres for the capture lake, and Caddy for TLS.</p>
-<pre><code>git clone https://github.com/sneaky-hippo/kolmogorov-stack
-cd kolmogorov-stack/deploy/compose
+<pre><code>git clone https://github.com/sneaky-hippo/kolm
+cd kolm/deploy/compose
 cp .env.example .env                 # fill ANTHROPIC_API_KEY etc.
 docker compose up -d
 curl http://localhost:3000/health</code></pre>
@@ -1152,7 +1152,7 @@ pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -1170,7 +1170,7 @@ pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:
   <div class="cta">
     <a class="btn-primary" href="/signup">Get a key &rarr;</a>
     <a class="btn-ghost" href="/docs/gateway">Read the docs</a>
-    <a class="btn-ghost" href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a>
+    <a class="btn-ghost" href="https://github.com/sneaky-hippo/kolm" rel="noopener">GitHub</a>
   </div>
 </header>
 
@@ -1262,7 +1262,7 @@ curl https://kolm.ai/v1/verify/&lt;receipt_id&gt;</code></pre>
       </div>
       <div>
         <h4>Company</h4>
-        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolm" rel="noopener">GitHub</a></li></ul>
       </div>
     </div>
     <div class="ks-footer__bottom">

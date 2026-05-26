@@ -225,7 +225,7 @@ test('W263 #16 vercel.json has rewrites for /marketplace and every per-slug page
 
 test('W263 #17 sw.js CACHE slug wave-floor is >= 263', () => {
   const sw = read(path.join(PUBLIC, 'sw.js'));
-  const m = sw.match(/const CACHE = 'kolm-v\d+-\d{4}-\d{2}-\d{2}-wave(\d+)-/);
+  const m = sw.match(/const CACHE = 'kolm-v\d+-\d{4}-\d{2}-\d{2}-[^']*?wave(\d+)/);
   assert.ok(m, 'sw.js CACHE slug must follow wave naming');
   const n = parseInt(m[1], 10);
   assert.ok(n >= 263, `expected wave >= 263, got ${n}`);

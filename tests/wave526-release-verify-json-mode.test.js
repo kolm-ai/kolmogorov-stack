@@ -90,8 +90,9 @@ test('W526 #8 — running with --skip on every gate yields one parseable JSON li
   // under a second and exercises the actual stdout serialization path. If
   // ANY gate leaks a console.log through, the JSON.parse below throws.
   const allGates = [
-    'lint:refs', 'openapi-sync', 'sdk-manifest', 'test', 'sdk-smoke',
-    'local-surfaces', 'doctor', 'whoami', 'verify-claims', 'billing-tiers',
+    'lint:refs', 'control-files', 'openapi-sync', 'claim-verify',
+    'sdk-manifest', 'test', 'sdk-smoke', 'local-surfaces',
+    'doctor', 'whoami', 'verify-claims', 'billing-tiers',
   ];
   const r = spawnSync(process.execPath, [DRIVER, '--json', '--skip=' + allGates.join(',')], {
     cwd: REPO,
@@ -111,7 +112,7 @@ test('W526 #8 — running with --skip on every gate yields one parseable JSON li
     assert.equal(g.ok, true, `skipped gate ${g.gate} reports ok:true (skip is not a failure)`);
   }
   const gateNames = parsed.gates.map((g) => g.gate).sort();
-  assert.deepEqual(gateNames, [...allGates].sort(), 'gates[] must enumerate all 10 advertised gates by name');
+  assert.deepEqual(gateNames, [...allGates].sort(), 'gates[] must enumerate all advertised gates by name');
 });
 
 test('W526 #9 — --json mode does not leak progress() to stdout', () => {

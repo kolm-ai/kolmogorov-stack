@@ -239,7 +239,7 @@ test('W215 #14 - sw.js push handler + CACHE bump', () => {
   assert.match(SW_JS, /showNotification/, 'showNotification invoked');
   assert.match(SW_JS, /notificationclick/, 'click handler routes to /captures');
   // CACHE slug bumped to wave215.
-  const m = SW_JS.match(/const\s+CACHE\s*=\s*'kolm-v7-2026-05-\d+-wave(\d+)/);
+  const m = SW_JS.match(/const\s+CACHE\s*=\s*'kolm-v\d+-2026-\d{2}-\d{2}-[^']*?wave(\d+)/);
   assert.ok(m, 'CACHE slug present');
   assert.ok(parseInt(m[1], 10) >= 215, 'CACHE wave >= 215');
 });

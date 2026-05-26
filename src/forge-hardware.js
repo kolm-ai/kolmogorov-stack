@@ -27,6 +27,11 @@
 
 import { spawnSync } from 'node:child_process';
 import os from 'node:os';
+import {
+  estimateKvCacheBytes as _estimateKvCacheBytes,
+  estimateShardKvCacheBytes as _estimateShardKvCacheBytes,
+  maxContextAtVram as _maxContextAtVram,
+} from './kv-cache-shard.js';
 
 export const HARDWARE_VERSION = 'forge-hardware-v1';
 
@@ -276,4 +281,57 @@ export function modelFitGrid() {
     const tight = estVram > vram * 0.7 && estVram <= vram * 0.85;
     return { params_b: b, est_vram_gb: estVram, fits, tight };
   });
+}
+
+/**
+ * KV cache footprint in bytes for one decode-only context length.
+ *
+ * Delegates to src/kv-cache-shard.js so the math stays in one place and
+ * the test suite (tests/wrapper-shard.test.js) pins exactly one
+ * implementation. `useShard=false` returns the default FP16 ceiling that
+ * memory-fit planners have used since W866; `useShard=true` returns the
+ * Shard-compressed ceiling and is what the "with Shard" column in the
+ * dry-run fit table reports.
+ *
+ * modelConfig requires {num_hidden_layers, num_key_value_heads, head_dim}.
+ * Pre-GQA architectures should set num_key_value_heads=num_attention_heads.
+ *
+ * @param {{num_hidden_layers:number,num_key_value_heads:number,head_dim:number}} modelConfig
+ * @param {number} contextLength
+ * @param {boolean} [useShard=false]
+ * @returns {number} bytes
+ */
+export function kvCacheSize(modelConfig, contextLength, useShard = false) {
+  if (!modelConfig || typeof modelConfig !== 'object') {
+    throw new TypeError('modelConfig must be {num_hidden_layers, num_key_value_heads, head_dim}');
+  }
+  const { num_hidden_layers, num_key_value_heads, head_dim } = modelConfig;
+  const args = { num_hidden_layers, num_key_value_heads, head_dim, context_length: contextLength };
+  return useShard ? _estimateShardKvCacheBytes(args) : _estimateKvCacheBytes(args);
+}
+
+/**
+ * "How long a context fits in this VRAM budget?" for both KV cache modes.
+ * Surfaces in the dry-run fit table so the buyer sees the unlock.
+ *
+ * @param {{num_hidden_layers:number,num_key_value_heads:number,head_dim:number}} modelConfig
+ * @param {number} vramBytesForKv  bytes of VRAM allocated to the KV cache
+ * @returns {{default_max_ctx:number, shard_max_ctx:number, shard_unlock_x:number}}
+ */
+export function maxContextBothModes(modelConfig, vramBytesForKv) {
+  if (!modelConfig || typeof modelConfig !== 'object') {
+    throw new TypeError('modelConfig must be {num_hidden_layers, num_key_value_heads, head_dim}');
+  }
+  const defaultMax = _maxContextAtVram({
+    vram_bytes_for_kv: vramBytesForKv,
+    model_arch: modelConfig,
+    use_shard: false,
+  });
+  const shardMax = _maxContextAtVram({
+    vram_bytes_for_kv: vramBytesForKv,
+    model_arch: modelConfig,
+    use_shard: true,
+  });
+  const unlock = defaultMax > 0 ? Math.round((shardMax / defaultMax) * 100) / 100 : 0;
+  return { default_max_ctx: defaultMax, shard_max_ctx: shardMax, shard_unlock_x: unlock };
 }

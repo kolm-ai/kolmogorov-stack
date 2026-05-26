@@ -81,13 +81,15 @@
   "dependencies": {
     "@anthropic-ai/sdk": "0.32.1",
     "adm-zip": "0.5.17",
+    "apache-arrow": "21.1.0",
     "archiver": "7.0.1",
     "compression": "1.8.1",
     "cookie-parser": "1.4.7",
     "dotenv": "16.6.1",
     "express": "4.22.1",
     "express-rate-limit": "7.5.1",
-    "helmet": "8.1.0"
+    "helmet": "8.1.0",
+    "parquetjs-lite": "0.8.7"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -108,8 +110,8 @@
   ],
   "devDependencies": {
     "@playwright/test": "1.60.0",
-    "eslint": "^9.39.4",
-    "globals": "^17.6.0",
+    "eslint": "9.39.4",
+    "globals": "17.6.0",
     "playwright": "1.60.0"
   }
 }

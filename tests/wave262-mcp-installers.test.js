@@ -89,9 +89,18 @@ for (const harness of HARNESSES) {
 
   test(`W262 page - ${harness} page uses kolm.ai dark theme tokens + light-theme switch`, () => {
     const html = fs.readFileSync(path.join(INSTALL_DIR, `${harness}.html`), 'utf8');
-    assert.ok(html.includes('--ink:#ece7dc'), 'must include the dark-theme ink token');
+    // Wave-floor: accept either W262 warm-paper tokens (#ece7dc / #10b981) or the
+    // post-W850 cool-slate tokens (#e6e9ee / #111111). Both are valid dark-theme
+    // surfaces; the contract is "page has dark tokens + light-theme switch."
+    assert.ok(
+      html.includes('--ink:#ece7dc') || html.includes('--ink:#e6e9ee'),
+      'must include the dark-theme ink token (warm paper or cool slate)',
+    );
     assert.ok(html.includes('--bg:#0b0d10'), 'must include the dark-theme bg token');
-    assert.ok(html.includes('--accent:#10b981'), 'must include the kolm accent token');
+    assert.ok(
+      html.includes('--accent:#10b981') || html.includes('--accent:#111111') || html.includes('--accent:#111'),
+      'must include the kolm accent token (mint or cool-slate black)',
+    );
     assert.ok(html.includes("data-theme='light'") || html.includes('data-theme="light"'),
       'must include the light-theme switch IIFE');
   });
@@ -305,7 +314,7 @@ test('W262 wiring - public/sw.js CACHE constant bumped to >= wave262', () => {
   // this test. We assert the cache string has the canonical kolm-v7- prefix
   // and that the wave segment is a number >= 262.
   const sw = fs.readFileSync(SW, 'utf8');
-  const m = sw.match(/const CACHE = 'kolm-v7-[0-9-]+-wave(\d+)-/);
+  const m = sw.match(/const CACHE = 'kolm-v\d+-[^']*?wave(\d+)/);
   assert.ok(m, 'sw.js must have the canonical CACHE constant');
   const wave = Number(m[1]);
   assert.ok(wave >= 262, `sw.js CACHE wave must be >= 262 (got ${wave})`);

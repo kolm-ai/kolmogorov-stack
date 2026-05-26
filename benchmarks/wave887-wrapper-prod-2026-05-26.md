@@ -65,12 +65,12 @@ calls) when work routes to the distilled artifact.
 
 ## Receipt verification live in prod
 
-`GET https://kolm.ai/v1/verify/rcpt_01KYC1ZVTGDCW3FX06JQSC` returns the signed
+`GET https://kolm.ai/v1/verify/rcpt_01KYC1ZV98HBEHW0NFC5DB` returns the signed
 receipt + verification result:
 
 ```
 { "ok": true,
-  "receipt_id": "rcpt_01KYC1ZVTGDCW3FX06JQSC",
+  "receipt_id": "rcpt_01KYC1ZV98HBEHW0NFC5DB",
   "receipt": {
     "schema": "kolm-audit-1",
     "namespace_id": "default",

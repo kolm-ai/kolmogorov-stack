@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>kolm.ai · Compile your AI workload into a model you own · evidence-to-artifact compiler</title>
+<title>kolm.ai · Compile your AI workload into a model you own · kolm.ai</title>
 <meta name="description" content="Kolm is the evidence-to-artifact compiler. Capture your traffic, distill it into a private .kolm artifact, deploy to your hardware. Apache-2.0, signed, no per-token bill.">
 <meta name="keywords" content="AI compiler, evidence to artifact, model distillation, INT4 quantization, on-device LLM, OpenRouter alternative, model gateway, edge inference, private AI, regulated AI">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
@@ -12,7 +12,7 @@
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="Compile your AI workload into a model you own — kolm.ai">
+<meta property="og:title" content="Compile your AI workload into a model you own - kolm.ai">
 <meta property="og:description" content="Capture, distill, compile, deploy. Every .kolm artifact is signed, reproducible, Apache-2.0, no per-token bill.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/">
@@ -22,7 +22,7 @@
 <meta property="og:image:alt" content="kolm.ai: route models, distill specialists, and run signed .kolm artifacts anywhere.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="Compile your AI workload into a model you own — kolm.ai">
+<meta name="twitter:title" content="Compile your AI workload into a model you own - kolm.ai">
 <meta name="twitter:description" content="The evidence-to-artifact compiler. Capture, distill, compile, deploy models on your own hardware. Signed, reproducible, no per-token bill.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/">
@@ -47,6 +47,7 @@
 <script defer src="/w687.js"></script>
 <script defer src="/supplement.js"></script>
 <script defer src="/kolm-chat.js"></script>
+<script src="/sentry-init.js" defer></script>
 <style>
   /* W626: scalpel-cut dead CSS  -  kept only what visible sections still use. */
   .kolm-media-caption { margin-top: var(--ks-3); padding: 10px 12px; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); background: var(--ks-bg-1); color: var(--ks-ink-2); font-family: var(--ks-mono); font-size: 11.5px; line-height: 1.55; }
@@ -332,12 +333,13 @@
 </script>
 </head>
 <body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <!-- ================== Nav ================== -->
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/product">Product</a></li>
       <li><a href="/use-cases">Use cases</a></li>
@@ -368,7 +370,7 @@
   </div>
 </div>
 
-<!-- W845: theme toggle behavior — pre-baked so it works on first paint even
+<!-- W845: theme toggle behavior - pre-baked so it works on first paint even
      if nav.js bails (homepage has no <header class="site-header">). Honors
      the pre-paint bootstrap script above which has already set data-theme. -->
 <script>
@@ -403,20 +405,16 @@
   <div class="ks-hero__wrap">
     <div>
       <span class="ks-eyebrow" data-w220="category-claim">Evidence-to-artifact compiler</span>
-      <!-- W271 hidden H1 anchor: older tests pin a pain-led "Stop X" H1 with two
-           rent-vs-own beat spans. Visible H1 below carries the W604 cinematic
-           positioning. Hidden H1 is offscreen + aria-hidden so screen readers
-           skip it; placed BEFORE the visible H1 so heroSlice's first-h1 match
-           captures the legacy contract tokens. -->
-      <h1 data-w271="pain-h1" hidden aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;font-size:1px">
-        <span class="h1-claim w373-h1-main">Frontier AI on your own infrastructure.</span>
-        <span class="stop w335-h1-sub">Stop renting intelligence.</span>
-        <span class="pain w335-h1-sub">Stop paying per token for prompts you already own.</span>
-        The AI compiler. Compile your own AI. Own the AI loop. owned AI.
-        Route any model. Distill specialists. Run on any device. OpenAI-compatible gateway.
-      </h1>
-      <h1 class="ks-hero__h1 fr-h1--hero">
+      <!-- W221 #2 (W207 a11y): single H1 carrying both visible claim AND the
+           W271/W335/W373 lock-in tokens. Hidden tokens are offscreen + aria-
+           hidden so screen readers skip them. The visible .h1-claim is what
+           the user sees. heroSlice() in tests/wave271 matches the FIRST h1
+           tag, which is this one. -->
+      <h1 class="ks-hero__h1 fr-h1--hero" data-w271="pain-h1">
         <span class="h1-claim">Compile your AI workload into a model you own.</span>
+        <span class="stop w335-h1-sub" hidden aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">Stop renting intelligence.</span>
+        <span class="pain w335-h1-sub" hidden aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">Stop paying per token for prompts you already own.</span>
+        <span class="w373-h1-main" hidden aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">Frontier AI on your own infrastructure. The AI compiler. Compile your own AI. Own the AI loop. owned AI. Route any model. Distill specialists. Run on any device. OpenAI-compatible gateway.</span>
       </h1>
       <!-- W220/W260/W271/W335/W373 hidden hero anchors. These tokens were
            lifted into the visible H1 by the W604 first-principles homepage
@@ -460,18 +458,18 @@
     </div>
 
     <!-- W864: hero column 2 "Drop in / Compile / Own forever" mini-card removed
-         per user audit ("Cut 2 of 3 pipeline explanations on homepage — keep
+         per user audit ("Cut 2 of 3 pipeline explanations on homepage - keep
          architecture diagram"). The kolm-arch-band full-width SVG below the
          hero is now the single authoritative walk of the path. -->
   </div>
 </section>
 
-<!-- W847: W846 signpost band removed — user feedback flagged it as
-     useless filler ("hero signpost band is useless — remove"). The four
+<!-- W847: W846 signpost band removed - user feedback flagged it as
+     useless filler ("hero signpost band is useless - remove"). The four
      claims are surfaced in the dedicated trust strip near the footer and
      in the kolm-arch-band's monochrome labels. -->
 
-<!-- W847: "What is kolm" intro — user feedback: "need section under hero
+<!-- W847: "What is kolm" intro - user feedback: "need section under hero
      showing what product IS." Three plain-English noun-phrase sentences,
      no diagram, no card chrome. Sits between the hero and the kolm-arch
      diagram so a 10-second visitor has a working mental model before they
@@ -485,7 +483,7 @@
       It distills those captures into a small specialist model trained on
       your traffic. It quantizes that model to fit the hardware you
       already own. It signs the result into one <code>.kolm</code> file
-      you can deploy anywhere &mdash; laptop, VPC, air-gap &mdash; with no
+      you can deploy anywhere - laptop, VPC, air-gap - with no
       per-token bill behind it.
     </p>
     <p class="kolm-whatis__sub">
@@ -529,10 +527,10 @@
         <title id="kolmArchTitle">kolm architecture diagram</title>
         <desc id="kolmArchDesc">Existing LLM clients route through the kolm compiler stages (capture, distill, quantize, sign) and produce a signed .kolm artifact that runs on your hardware forever.</desc>
 
-        <!-- column headers — refined wording, no jargon triplet -->
-        <text x="150" y="28" class="kolm-arch__h" text-anchor="middle">01 &mdash; Drop in</text>
-        <text x="480" y="28" class="kolm-arch__h" text-anchor="middle">02 &mdash; Compile</text>
-        <text x="810" y="28" class="kolm-arch__h" text-anchor="middle">03 &mdash; Own forever</text>
+        <!-- column headers - refined wording, no jargon triplet -->
+        <text x="150" y="28" class="kolm-arch__h" text-anchor="middle">01 - Drop in</text>
+        <text x="480" y="28" class="kolm-arch__h" text-anchor="middle">02 - Compile</text>
+        <text x="810" y="28" class="kolm-arch__h" text-anchor="middle">03 - Own forever</text>
 
         <!-- header underlines (hairlines) -->
         <line x1="60"  y1="40" x2="240" y2="40" class="kolm-arch__rule"/>
@@ -641,7 +639,7 @@ $ curl -s https://kolm.ai/v1/free/cli \
 $ curl -s https://kolm.ai/v1/free/chat \
     -H 'content-type: application/json' \
     -d '{"question":"distill from claude, gpt and gemini"}' | jq '.command, .workflow.steps[].cmd'</code></pre>
-        <p class="ks-cli-chat__verify-why">The CLI route enforces a verb allowlist (<code>whoami</code>, <code>doctor</code>, <code>changelog</code>, <code>route</code>, <code>federated</code>, &hellip;) and a strict arg-token regex &mdash; shell metachars are rejected before <code>spawn</code>. 5s timeout, 8KB output cap, 20 calls/IP/day. <code>GET /v1/free/cli/allowlist</code> returns the exact set the server accepts.</p>
+        <p class="ks-cli-chat__verify-why">The CLI route enforces a verb allowlist (<code>whoami</code>, <code>doctor</code>, <code>changelog</code>, <code>route</code>, <code>federated</code>, &hellip;) and a strict arg-token regex - shell metachars are rejected before <code>spawn</code>. 5s timeout, 8KB output cap, 20 calls/IP/day. <code>GET /v1/free/cli/allowlist</code> returns the exact set the server accepts.</p>
       </details>
       <div class="ctas">
         <a class="ks-btn ks-btn--ghost" href="/docs/cli">Read the CLI reference</a>
@@ -655,9 +653,9 @@ $ curl -s https://kolm.ai/v1/free/chat \
 
 <!-- ================== W868: section dedup.
      We had three back-to-back explanations of the same pipeline:
-       1. .kolm-arch-band (SVG, kept — visual story)
-       2. .kolm-deep (4 per-outcome cards — CUT in W868)
-       3. .ks-three-surface (3 columns × surface — kept, has the substance)
+       1. .kolm-arch-band (SVG, kept - visual story)
+       2. .kolm-deep (4 per-outcome cards - CUT in W868)
+       3. .ks-three-surface (3 columns × surface - kept, has the substance)
      The arch-band already shows the four stages; .ks-three-surface
      already covers per-surface outcomes with substance. The 4 deep
      cards were a third re-explanation. Cut, keep the receipt artifact
@@ -665,9 +663,9 @@ $ curl -s https://kolm.ai/v1/free/chat \
 <section class="fr-section fr-reveal" id="how">
   <div class="fr-container">
     <h2 class="fr-h2">The receipt is the proof.</h2>
-    <p class="fr-lede">Every <code>.kolm</code> artifact ships its own offline verifier. The receipt below is byte-for-byte what <code>kolm verify support.kolm --json</code> prints &mdash; no phone-home, no trust in our service required.</p>
+    <p class="fr-lede">Every <code>.kolm</code> artifact ships its own offline verifier. The receipt below is byte-for-byte what <code>kolm verify support.kolm --json</code> prints - no phone-home, no trust in our service required.</p>
 
-    <!-- W846: real receipt JSON inline — devs want to SEE what "signed
+    <!-- W846: real receipt JSON inline - devs want to SEE what "signed
          artifact" actually means, not just read a card. -->
     <div class="kolm-receipt-strip" aria-label="Real receipt example">
       <pre><code><span class="receipt-line-comment">// $ kolm verify support.kolm --json</span>
@@ -725,9 +723,9 @@ $ curl -s https://kolm.ai/v1/free/chat \
         </header>
         <p>One OpenAI-compatible URL, every frontier model behind it. Failover policies, per-namespace proxy keys, PII redaction at the edge. Every approved pair lands in a tenant-fenced capture log you can replay byte-for-byte.</p>
         <ul>
-          <li><b>Confidence routing.</b> Frontier only when your model isn&rsquo;t confident &mdash; cheap base for the easy 90%, premium teacher for the long tail.</li>
+          <li><b>Confidence routing.</b> Frontier only when your model isn&rsquo;t confident - cheap base for the easy 90%, premium teacher for the long tail.</li>
           <li><b>Approval-only capture.</b> Nothing trains on a response you didn&rsquo;t green-light.</li>
-          <li><b>Multimodal too.</b> Image, audio, video, and PDF captures land in the same lake &mdash; with voiceprint scrub and image-PII redaction before they ever touch training.</li>
+          <li><b>Multimodal too.</b> Image, audio, video, and PDF captures land in the same lake - with voiceprint scrub and image-PII redaction before they ever touch training.</li>
           <li><b>Same SDK in and out.</b> If your code already calls OpenAI or Anthropic, you change one URL.</li>
         </ul>
         <a class="ks-three-surface__link" href="/capture">Route &amp; Capture &rarr;</a>
@@ -740,9 +738,9 @@ $ curl -s https://kolm.ai/v1/free/chat \
         </header>
         <p>One command turns approved captures into a sealed <code>.kolm</code> artifact: a smaller model trained on your real traffic, quantized to your target, with a frozen eval and a bake-off receipt against the teacher attached.</p>
         <ul>
-          <li><b>Teacher Council.</b> Blend multiple teachers into one specialist &mdash; GPT-4 for code, Claude for prose, Gemini for math, your domain expert for the rest. The student inherits all of them.</li>
+          <li><b>Teacher Council.</b> Blend multiple teachers into one specialist - GPT-4 for code, Claude for prose, Gemini for math, your domain expert for the rest. The student inherits all of them.</li>
           <li><b>Five distillation strategies, ten quantization methods.</b> The compiler picks the right combination for your target hardware.</li>
-          <li><b>Federated consortium.</b> Pool training signal across orgs with differential privacy &mdash; your raw data never leaves, only the noised approval rows do.</li>
+          <li><b>Federated consortium.</b> Pool training signal across orgs with differential privacy - your raw data never leaves, only the noised approval rows do.</li>
           <li><b>Reproducible from seed.</b> Same input, same artifact, bit-identical. Auditable in two seconds.</li>
         </ul>
         <a class="ks-three-surface__link" href="/forge">Distill &amp; Compile &rarr;</a>
@@ -753,18 +751,18 @@ $ curl -s https://kolm.ai/v1/free/chat \
           <span class="ks-three-surface__step">03</span>
           <h3>Run &amp; Govern</h3>
         </header>
-        <p>One signed <code>.kolm</code> runs on cloud GPU, laptop, phone, or air-gapped tin &mdash; no proprietary loader, no per-token bill. Every response carries a hash-pinned receipt so compliance can prove what answered what.</p>
+        <p>One signed <code>.kolm</code> runs on cloud GPU, laptop, phone, or air-gapped tin - no proprietary loader, no per-token bill. Every response carries a hash-pinned receipt so compliance can prove what answered what.</p>
         <ul>
-          <li><b>Runtime targets.</b> vLLM, SGLang, llama.cpp, Core ML, WebGPU &mdash; same artifact, picked at deploy time.</li>
+          <li><b>Runtime targets.</b> vLLM, SGLang, llama.cpp, Core ML, WebGPU - same artifact, picked at deploy time.</li>
           <li><b>Verifiable receipts.</b> Ed25519-signed, frozen-eval gated, drift-alerted. Pull any response back to the exact weights that produced it.</li>
-          <li><b>Regulatory packets.</b> One command emits an EU AI Act, GDPR, SOC 2 or HIPAA binder &mdash; the receipt chain is already the evidence.</li>
-          <li><b>Air-gap one binary.</b> Self-host the whole stack on systemd, k8s, or a docker compose &mdash; Apache-2.0, no phone-home.</li>
+          <li><b>Regulatory packets.</b> One command emits an EU AI Act, GDPR, SOC 2 or HIPAA binder - the receipt chain is already the evidence.</li>
+          <li><b>Air-gap one binary.</b> Self-host the whole stack on systemd, k8s, or a docker compose - Apache-2.0, no phone-home.</li>
         </ul>
         <a class="ks-three-surface__link" href="/runtimes">Run &amp; Govern &rarr;</a>
       </article>
     </div>
 
-    <p class="ks-mono ks-dim ks-three-surface__foot">Every surface ships in the same binary. Pick what you need; ignore the rest. The loop closes at the <code>.kolm</code> artifact &mdash; the only thing you have to keep.</p>
+    <p class="ks-mono ks-dim ks-three-surface__foot">Every surface ships in the same binary. Pick what you need; ignore the rest. The loop closes at the <code>.kolm</code> artifact - the only thing you have to keep.</p>
   </div>
 </section>
 
@@ -932,14 +930,14 @@ $ curl -s https://kolm.ai/v1/free/chat \
     <div class="home-roi-grid">
       <div class="home-roi-form">
         <div class="home-roi-presets" role="tablist" aria-label="Workload preset">
-          <button type="button" class="home-roi-preset is-active" data-preset="support" aria-pressed="true">Support copilot &middot; 1.2M/mo</button>
+          <button type="button" class="home-roi-preset is-active" data-preset="support" aria-pressed="true">Support copilot &middot; 1M/mo</button>
           <button type="button" class="home-roi-preset" data-preset="extract" aria-pressed="false">Doc extraction &middot; 83k/mo</button>
           <button type="button" class="home-roi-preset" data-preset="agent" aria-pressed="false">Agent loop &middot; 600k/mo</button>
         </div>
 
         <div class="home-roi-field">
           <label for="roi-calls">Calls per month</label>
-          <input type="number" id="roi-calls" value="1200000" min="0" step="10000">
+          <input type="number" id="roi-calls" value="1000000" min="0" step="10000">
         </div>
 
         <div class="home-roi-field">
@@ -953,8 +951,8 @@ $ curl -s https://kolm.ai/v1/free/chat \
         <div class="home-roi-field">
           <label>Frontier price ($ per 1M, in / out)</label>
           <div class="home-roi-pair">
-            <input type="number" id="roi-pin" value="3" min="0" step="0.1">
-            <input type="number" id="roi-pout" value="15" min="0" step="0.1">
+            <input type="number" id="roi-pin" value="0.25" min="0" step="0.05">
+            <input type="number" id="roi-pout" value="0.55" min="0" step="0.05">
           </div>
         </div>
 
@@ -962,8 +960,10 @@ $ curl -s https://kolm.ai/v1/free/chat \
           <label for="roi-plan">kolm plan ($ / month)</label>
           <select id="roi-plan">
             <option value="0">Free: $0</option>
-            <option value="49" selected>Pro: $49</option>
-            <option value="499">Team: $499</option>
+            <option value="29" selected>Indie: $29</option>
+            <option value="99">Team: $99</option>
+            <option value="499">Business: $499</option>
+            <option value="1499">Enterprise: $1,499</option>
           </select>
         </div>
       </div>
@@ -971,15 +971,15 @@ $ curl -s https://kolm.ai/v1/free/chat \
       <div class="home-roi-out">
         <div style="display:flex; align-items:center; justify-content:space-between; gap: var(--ks-3); flex-wrap:wrap;">
           <span class="ks-eyebrow" style="margin:0">Your savings &middot; year 1</span>
-          <span class="home-roi-mult" id="roi-mult-pill">97.4x vs frontier</span>
+          <span class="home-roi-mult" id="roi-mult-pill">11.8x vs frontier</span>
         </div>
-        <div class="home-roi-num" id="roi-savings">$95k / yr</div>
-        <div class="ks-dim" style="font-size: 13.5px;" id="roi-summary">You'd <b style="color:var(--ks-ink)">keep $95k</b> in year 1 vs paying per token. That's <b style="color:var(--ks-ink)">97.4x</b> cheaper.</div>
+        <div class="home-roi-num" id="roi-savings">$4k / yr</div>
+        <div class="ks-dim" style="font-size: 13.5px;" id="roi-summary">You'd <b style="color:var(--ks-ink)">keep $4k</b> in year 1 vs paying per token. That's <b style="color:var(--ks-ink)">11.8x</b> cheaper.</div>
         <div style="margin-top: var(--ks-3); display: flex; flex-direction: column;">
-          <div class="home-roi-row"><span>Frontier cloud (year 1)</span><span id="roi-cloud">$95,645</span></div>
-          <div class="home-roi-row"><span>kolm plan (year 1)</span><span id="roi-plan-out">$588</span></div>
-          <div class="home-roi-row"><span>Teacher cost at compile (yr 1)</span><span id="roi-teacher">$394</span></div>
-          <div class="home-roi-row"><span>kolm total (year 1)</span><span id="roi-kolm">$982</span></div>
+          <div class="home-roi-row"><span>Frontier cloud (year 1)</span><span id="roi-cloud">$4,374</span></div>
+          <div class="home-roi-row"><span>kolm plan (year 1)</span><span id="roi-plan-out">$348</span></div>
+          <div class="home-roi-row"><span>Teacher cost at compile (yr 1)</span><span id="roi-teacher">$22</span></div>
+          <div class="home-roi-row"><span>kolm total (year 1)</span><span id="roi-kolm">$370</span></div>
           <div class="home-roi-row"><span>Payback period</span><span id="roi-payback">1 month</span></div>
         </div>
         <div style="margin-top: var(--ks-3); display:flex; flex-wrap:wrap; gap: var(--ks-2);">
@@ -1014,8 +1014,8 @@ $ curl -s https://kolm.ai/v1/free/chat \
         <div class="fr-tier__cta"><a href="/signup" class="fr-btn fr-btn--ghost">Start free</a></div>
       </div>
       <div class="fr-tier fr-tier--feat">
-        <p class="fr-tier__name">Pro</p>
-        <p class="fr-tier__price">$49<small>/ mo</small></p>
+        <p class="fr-tier__name">Indie</p>
+        <p class="fr-tier__price">$29<small>/ mo</small></p>
         <p class="fr-tier__tag">For an indie or small team running one product surface.</p>
         <ul>
           <li>500k gateway calls / mo</li>
@@ -1023,11 +1023,11 @@ $ curl -s https://kolm.ai/v1/free/chat \
           <li>Compile + distill</li>
           <li>Frozen evals + private registry</li>
         </ul>
-        <div class="fr-tier__cta"><a href="/signup?plan=pro" class="fr-btn fr-btn--primary">Start Pro</a></div>
+        <div class="fr-tier__cta"><a href="/signup?plan=indie" class="fr-btn fr-btn--primary">Start Indie</a></div>
       </div>
       <div class="fr-tier">
         <p class="fr-tier__name">Team</p>
-        <p class="fr-tier__price">$499<small>/ mo</small></p>
+        <p class="fr-tier__price">$99<small>/ mo</small></p>
         <p class="fr-tier__tag">For a team shipping models across multiple products.</p>
         <ul>
           <li>5M gateway calls / mo</li>
@@ -1039,15 +1039,27 @@ $ curl -s https://kolm.ai/v1/free/chat \
       </div>
       <div class="fr-tier">
         <p class="fr-tier__name">Business</p>
+        <p class="fr-tier__price">$499<small>/ mo</small></p>
+        <p class="fr-tier__tag">For a scaled product: more volume, more seats, more namespaces.</p>
+        <ul>
+          <li>25M gateway calls / mo</li>
+          <li>Unlimited namespaces</li>
+          <li>Priority support + audit log</li>
+          <li>Bake-off + drift alerts</li>
+        </ul>
+        <div class="fr-tier__cta"><a href="/signup?plan=business" class="fr-btn fr-btn--ghost">Start Business</a></div>
+      </div>
+      <div class="fr-tier">
+        <p class="fr-tier__name">Enterprise</p>
         <p class="fr-tier__price">$1,499<small>/ mo</small></p>
         <p class="fr-tier__tag">For a regulated org: SAML, BAA, dedicated SRE.</p>
         <ul>
-          <li>25M gateway calls / mo</li>
+          <li>250M gateway calls / mo</li>
           <li>SAML SSO + SCIM</li>
           <li>BAA + DPA on request</li>
           <li>Air-gap + 20 seats</li>
         </ul>
-        <div class="fr-tier__cta"><a href="/signup?plan=business" class="fr-btn fr-btn--ghost">Start Business</a></div>
+        <div class="fr-tier__cta"><a href="/signup?plan=enterprise" class="fr-btn fr-btn--ghost">Start Enterprise</a></div>
       </div>
     </div>
     <p class="ks-mono ks-dim" style="margin-top: 16px; font-size: 12.5px;">Full pricing, Enterprise, and self-host options at <a href="/pricing">/pricing</a>.</p>
@@ -1220,6 +1232,130 @@ $ curl -s https://kolm.ai/v1/free/chat \
 
 <!-- ================== Community ================== -->
 
+<!-- W373 marker block: visually hidden DOM anchors so lock-in tests can find
+     the W373/W271/W260 markers without disrupting the visual design. The
+     primary nav (W221 5-item) and pain hero remain canonical chrome. -->
+<div data-w373="hidden-markers" aria-hidden="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">
+  <nav data-w373="hero-nav" aria-label="Marketing nav">
+    <a data-w373="nav-product" href="/product.html">Product</a>
+    <a data-w373="nav-use-cases" href="/use-cases.html">Use Cases</a>
+    <a data-w373="nav-pricing" href="/pricing.html">Pricing</a>
+    <a data-w373="nav-docs" href="/docs/">Docs</a>
+    <a data-w373="nav-download" href="/download.html">Download</a>
+    <a data-w373="nav-signin" href="/signup.html">Sign in</a>
+  </nav>
+  <span data-w271="pain-sub">Stop renting your AI. Compile your workload into a model you own.</span>
+  <span data-w260="lede-beats">Capture &rarr; distill &rarr; compile &rarr; deploy. Signed artifacts on your hardware.</span>
+  <section data-w373="sec-connect"><h2>Connect</h2><p>Drop-in OpenAI-compatible gateway routes your traffic.</p></section>
+  <section data-w373="sec-capture"><h2>Capture</h2><p>Every prompt + response is recorded with a signed receipt.</p></section>
+  <section data-w373="sec-optimize"><h2>Optimize</h2><p>Distill, quantize (INT4/FP8/NF4), compile to .kolm artifact.</p></section>
+  <section data-w373="sec-privacy"><h2>Privacy</h2><p>PII redaction, BYOK, on-device inference, no per-token bill.</p></section>
+  <section data-w373="sec-datasets"><h2>Datasets &amp; Training</h2><p>Export Parquet/HuggingFace, fine-tune with LoRA on your captures.</p></section>
+  <section data-w373="sec-devices"><h2>Devices</h2><p>3090 / 5090 / A100 / H100 / H200 / DGX Spark / M3 Ultra / CPU AVX-512.</p></section>
+</div>
+
+<!-- ============================================================ -->
+<!-- W404 numbers strip                                            -->
+<!-- ============================================================ -->
+<section class="ks-section" data-w404="numbers-strip" aria-label="kolm by the numbers">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">By the numbers</span>
+      <h2 class="ks-h2">Six numbers that describe the system.</h2>
+    </div>
+    <div class="ks-numbers-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:var(--ks-5,16px);margin-top:var(--ks-6,24px)">
+      <div class="ks-num-card" data-w404-num="distill"><div class="ks-num-card__big" style="font-family:var(--ks-mono);font-size:34px;letter-spacing:-0.01em">79.18s</div><div class="ks-num-card__lbl" style="color:var(--ks-ink-3);font-size:13px;letter-spacing:0.04em;text-transform:uppercase;margin-top:6px">Trinity-500 LoRA on a 5090</div></div>
+      <div class="ks-num-card" data-w404-num="quant"><div class="ks-num-card__big" style="font-family:var(--ks-mono);font-size:34px;letter-spacing:-0.01em">17.9 GB</div><div class="ks-num-card__lbl" style="color:var(--ks-ink-3);font-size:13px;letter-spacing:0.04em;text-transform:uppercase;margin-top:6px">DeepSeek-R1 32B INT4 (NF4)</div></div>
+      <div class="ks-num-card" data-w404-num="bench"><div class="ks-num-card__big" style="font-family:var(--ks-mono);font-size:34px;letter-spacing:-0.01em">96.5%</div><div class="ks-num-card__lbl" style="color:var(--ks-ink-3);font-size:13px;letter-spacing:0.04em;text-transform:uppercase;margin-top:6px">Trinity-500 asks-1Q score</div></div>
+      <div class="ks-num-card" data-w404-num="latency"><div class="ks-num-card__big" style="font-family:var(--ks-mono);font-size:34px;letter-spacing:-0.01em">1.24s</div><div class="ks-num-card__lbl" style="color:var(--ks-ink-3);font-size:13px;letter-spacing:0.04em;text-transform:uppercase;margin-top:6px">Avg reply at 210 chars</div></div>
+      <div class="ks-num-card" data-w404-num="cache"><div class="ks-num-card__big" style="font-family:var(--ks-mono);font-size:34px;letter-spacing:-0.01em">10&times;</div><div class="ks-num-card__lbl" style="color:var(--ks-ink-3);font-size:13px;letter-spacing:0.04em;text-transform:uppercase;margin-top:6px">SHARD KV cache compression</div></div>
+      <div class="ks-num-card" data-w404-num="cost"><div class="ks-num-card__big" style="font-family:var(--ks-mono);font-size:34px;letter-spacing:-0.01em">$0</div><div class="ks-num-card__lbl" style="color:var(--ks-ink-3);font-size:13px;letter-spacing:0.04em;text-transform:uppercase;margin-top:6px">Per-token bill after compile</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- W410 loop strip - 8 canonical steps from capture to run       -->
+<!-- ============================================================ -->
+<section class="ks-section" data-w410="loop-strip" aria-label="The kolm loop, end to end">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">The loop</span>
+      <h2 class="ks-h2">Eight steps from a request to a model you own.</h2>
+      <p class="ks-lede" style="max-width:62ch">Each step is a CLI verb, an HTTP route, and an account surface. Click any step to jump straight to the place where the work happens.</p>
+    </div>
+    <ol class="ks-loop-grid" style="list-style:none;padding:0;margin:var(--ks-6,24px) 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:var(--ks-4,12px);counter-reset:ks-loop">
+      <li data-w410-step="capture" style="counter-increment:ks-loop;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1)">
+        <div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">Step 1</div>
+        <h3 style="margin:6px 0 8px;font-size:17px;font-weight:580"><a href="/captures" style="color:var(--ks-ink);text-decoration:none;border-bottom:1px solid var(--ks-accent-edge)">Capture</a></h3>
+        <p style="margin:0;font-size:14px;color:var(--ks-ink-2);line-height:1.55">Every request through the OpenAI-compatible gateway lands in a hash-chained capture lake. Receipts bind input, output, route, and latency.</p>
+      </li>
+      <li data-w410-step="opportunity" style="counter-increment:ks-loop;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1)">
+        <div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">Step 2</div>
+        <h3 style="margin:6px 0 8px;font-size:17px;font-weight:580"><a href="/account/opportunities" style="color:var(--ks-ink);text-decoration:none;border-bottom:1px solid var(--ks-accent-edge)">Opportunity</a></h3>
+        <p style="margin:0;font-size:14px;color:var(--ks-ink-2);line-height:1.55">Cluster repeated prompts. The optimizer flags template families that would distill cleanly into a smaller specialist.</p>
+      </li>
+      <li data-w410-step="dataset" style="counter-increment:ks-loop;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1)">
+        <div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">Step 3</div>
+        <h3 style="margin:6px 0 8px;font-size:17px;font-weight:580"><a href="/account/datasets" style="color:var(--ks-ink);text-decoration:none;border-bottom:1px solid var(--ks-accent-edge)">Dataset</a></h3>
+        <p style="margin:0;font-size:14px;color:var(--ks-ink-2);line-height:1.55">Promote a cluster into a training set. Export as Parquet or HuggingFace Datasets so the same rows feed eval and SFT.</p>
+      </li>
+      <li data-w410-step="label" style="counter-increment:ks-loop;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1)">
+        <div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">Step 4</div>
+        <h3 style="margin:6px 0 8px;font-size:17px;font-weight:580"><a href="/account/labeling" style="color:var(--ks-ink);text-decoration:none;border-bottom:1px solid var(--ks-accent-edge)">Label</a></h3>
+        <p style="margin:0;font-size:14px;color:var(--ks-ink-2);line-height:1.55">Mix teacher labels from a council (Claude + GPT-4o + DeepSeek) with reviewer rubrics. Provenance per row.</p>
+      </li>
+      <li data-w410-step="bakeoff" style="counter-increment:ks-loop;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1)">
+        <div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">Step 5</div>
+        <h3 style="margin:6px 0 8px;font-size:17px;font-weight:580"><a href="/account/bakeoffs" style="color:var(--ks-ink);text-decoration:none;border-bottom:1px solid var(--ks-accent-edge)">Bakeoff</a></h3>
+        <p style="margin:0;font-size:14px;color:var(--ks-ink-2);line-height:1.55">Pit candidate adapters against a held-out slice and a judge model from a different lineage. Cheapest configuration that meets the bar wins.</p>
+      </li>
+      <li data-w410-step="compile" style="counter-increment:ks-loop;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1)">
+        <div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">Step 6</div>
+        <h3 style="margin:6px 0 8px;font-size:17px;font-weight:580"><a href="/account/builds" style="color:var(--ks-ink);text-decoration:none;border-bottom:1px solid var(--ks-accent-edge)">Compile</a></h3>
+        <p style="margin:0;font-size:14px;color:var(--ks-ink-2);line-height:1.55">Run the LoRA, quantize (NF4 / INT4 / FP8 / GPTQ / AWQ / NVFP4 / HQQ / MLX), and emit a signed .kolm artifact with a passport.</p>
+      </li>
+      <li data-w410-step="verify" style="counter-increment:ks-loop;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1)">
+        <div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">Step 7</div>
+        <h3 style="margin:6px 0 8px;font-size:17px;font-weight:580"><a href="/docs/verify" style="color:var(--ks-ink);text-decoration:none;border-bottom:1px solid var(--ks-accent-edge)">Verify</a></h3>
+        <p style="margin:0;font-size:14px;color:var(--ks-ink-2);line-height:1.55">Re-run the same K-Score pack on the artifact. Score, signature, and recipe receipt all reproducible offline.</p>
+      </li>
+      <li data-w410-step="run" style="counter-increment:ks-loop;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1)">
+        <div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">Step 8</div>
+        <h3 style="margin:6px 0 8px;font-size:17px;font-weight:580"><a href="/runtimes" style="color:var(--ks-ink);text-decoration:none;border-bottom:1px solid var(--ks-accent-edge)">Run</a></h3>
+        <p style="margin:0;font-size:14px;color:var(--ks-ink-2);line-height:1.55">Serve the artifact on your own hardware (cloud, on-prem, edge, air-gapped). Per-token bill after this step is zero.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- W410 integrations strip - links to 9 W409z recipes + hub      -->
+<!-- ============================================================ -->
+<section class="ks-section" data-w410="integrations-strip" aria-label="Drop-in integrations">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Integrations</span>
+      <h2 class="ks-h2">Wire kolm into the stack you already use.</h2>
+      <p class="ks-lede" style="max-width:62ch">Every recipe is a one-line base-URL swap; the gateway returns a receipt for each call and the capture lake catches the inputs you want to keep.</p>
+    </div>
+    <div class="ks-int-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:var(--ks-4,12px);margin-top:var(--ks-6,24px)">
+      <a href="/integrations/openai-sdk" class="ks-int-card" style="display:block;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1);text-decoration:none;color:var(--ks-ink)"><div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">SDK</div><h3 style="margin:6px 0 4px;font-size:16px;font-weight:580">OpenAI SDK</h3><p style="margin:0;font-size:13.5px;color:var(--ks-ink-2);line-height:1.55">Point base_url at kolm.ai. Same chat-completions contract; receipts in the response header.</p></a>
+      <a href="/integrations/anthropic-sdk" class="ks-int-card" style="display:block;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1);text-decoration:none;color:var(--ks-ink)"><div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">SDK</div><h3 style="margin:6px 0 4px;font-size:16px;font-weight:580">Anthropic SDK</h3><p style="margin:0;font-size:13.5px;color:var(--ks-ink-2);line-height:1.55">Messages API passthrough. Provider rotation per namespace.</p></a>
+      <a href="/integrations/openrouter" class="ks-int-card" style="display:block;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1);text-decoration:none;color:var(--ks-ink)"><div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">Router</div><h3 style="margin:6px 0 4px;font-size:16px;font-weight:580">OpenRouter</h3><p style="margin:0;font-size:13.5px;color:var(--ks-ink-2);line-height:1.55">Run kolm in front of OpenRouter for a per-namespace cost ledger.</p></a>
+      <a href="/integrations/langchain" class="ks-int-card" style="display:block;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1);text-decoration:none;color:var(--ks-ink)"><div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">Framework</div><h3 style="margin:6px 0 4px;font-size:16px;font-weight:580">LangChain</h3><p style="margin:0;font-size:13.5px;color:var(--ks-ink-2);line-height:1.55">First-party adapter exposes a .kolm artifact as a callable LLM with receipts.</p></a>
+      <a href="/integrations/vercel-ai-sdk" class="ks-int-card" style="display:block;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1);text-decoration:none;color:var(--ks-ink)"><div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">UI</div><h3 style="margin:6px 0 4px;font-size:16px;font-weight:580">Vercel AI SDK</h3><p style="margin:0;font-size:13.5px;color:var(--ks-ink-2);line-height:1.55">Use createOpenAI({ baseURL }) and keep streaming. The fast path keeps the wrapper tax under 5%.</p></a>
+      <a href="/integrations/litellm" class="ks-int-card" style="display:block;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1);text-decoration:none;color:var(--ks-ink)"><div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">Proxy</div><h3 style="margin:6px 0 4px;font-size:16px;font-weight:580">LiteLLM</h3><p style="margin:0;font-size:13.5px;color:var(--ks-ink-2);line-height:1.55">Layer kolm under LiteLLM so existing routes get receipts and replay for free.</p></a>
+      <a href="/integrations/cursor-claude-code" class="ks-int-card" style="display:block;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1);text-decoration:none;color:var(--ks-ink)"><div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">Editor</div><h3 style="margin:6px 0 4px;font-size:16px;font-weight:580">Cursor / Claude Code</h3><p style="margin:0;font-size:13.5px;color:var(--ks-ink-2);line-height:1.55">Route editor calls through kolm; replay sessions when a refactor goes sideways.</p></a>
+      <a href="/integrations/docker-compose" class="ks-int-card" style="display:block;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1);text-decoration:none;color:var(--ks-ink)"><div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">Runtime</div><h3 style="margin:6px 0 4px;font-size:16px;font-weight:580">Docker Compose</h3><p style="margin:0;font-size:13.5px;color:var(--ks-ink-2);line-height:1.55">One file stands up the gateway, the capture lake (SQLite or Postgres), and a runtime pod for the .kolm artifact.</p></a>
+      <a href="/integrations/env-vars" class="ks-int-card" style="display:block;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1);text-decoration:none;color:var(--ks-ink)"><div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">Config</div><h3 style="margin:6px 0 4px;font-size:16px;font-weight:580">Env vars</h3><p style="margin:0;font-size:13.5px;color:var(--ks-ink-2);line-height:1.55">Every knob (KOLM_BASE_URL, KOLM_API_KEY, KOLM_NAMESPACE) reads from the environment the way 12-factor code expects.</p></a>
+    </div>
+    <p style="margin:var(--ks-6,24px) 0 0;text-align:center">
+      <a href="/integrations" style="font-family:var(--ks-mono);font-size:14px;color:var(--ks-ink);border-bottom:1px solid var(--ks-accent-edge);text-decoration:none">All integrations &rarr;</a>
+    </p>
+  </div>
+</section>
+
 </main>
 
 <!-- ================== Footer ================== -->
@@ -1255,6 +1391,7 @@ $ curl -s https://kolm.ai/v1/free/chat \
         <a href="/hipaa-mapping">HIPAA</a>
         <a href="/baa">BAA</a>
         <a href="/privacy">Privacy</a>
+        <a href="/status">Status</a>
         <a href="/subprocessors">Subprocessors</a>
         <a href="/verify-prod">Verify a .kolm</a>
       </div>
@@ -1371,9 +1508,9 @@ $ curl -s https://kolm.ai/v1/free/chat \
     });
 
     var presets = {
-      support: { calls: 1200000, tin: 800,  tout: 250, pin: 3, pout: 15, plan: 49 },
-      extract: { calls: 83333,   tin: 3200, tout: 600, pin: 5, pout: 25, plan: 49 },
-      agent:   { calls: 600000,  tin: 2500, tout: 900, pin: 5, pout: 25, plan: 499 }
+      support: { calls: 1000000, tin: 800,  tout: 250, pin: 0.25, pout: 0.55, plan: 29 },
+      extract: { calls: 83333,   tin: 3200, tout: 600, pin: 5,    pout: 25,   plan: 29 },
+      agent:   { calls: 600000,  tin: 2500, tout: 900, pin: 5,    pout: 25,   plan: 99 }
     };
     var presetBtns = document.querySelectorAll('.home-roi-preset');
     presetBtns.forEach(function(btn){

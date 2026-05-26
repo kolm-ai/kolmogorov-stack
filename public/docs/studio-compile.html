@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>Compile &middot; The Studio compile wizard &middot; kolm.ai</title>
+<meta name="description" content="The compile wizard takes a distilled adapter + base + tokenizer + chat template + spec.toml + passport and produces a single signed .kolm artifact ready for any runtime.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Compile &middot; kolm.ai">
+<meta property="og:description" content="From adapter to signed .kolm artifact in one step.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/studio-compile">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Compile &middot; kolm.ai">
+<meta name="twitter:description" content="From adapter to signed .kolm artifact.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/docs/studio-compile">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230,233,238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--accent-soft:rgba(17,17,17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#1d2d44;--accent-soft:rgba(29,45,68,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+td code{font-size:12px}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+.privacy-note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:14px 18px;margin:18px 0;border-radius:0 8px 8px 0;max-width:780px}
+.privacy-note strong{color:var(--ink)}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/docs-shell.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/docs-shell.js"></script>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / studio-compile</div>
+<p class="eyebrow">Studio / Compile</p>
+<h1>One file. Every runtime. Signed at the bottom.</h1>
+<p class="lede">The compile wizard takes the adapter your distill run produced, merges it into the base, packs the tokenizer + chat template + spec.toml + passport + receipt chain, optionally quantizes, and seals the whole thing with an Ed25519 signature. The result is a single <code>.kolm</code> file you can ship to any of seven runtimes &mdash; or first export to GGUF, EXL2, GPTQ, AWQ, FP8, NVFP4, MLX.</p>
+
+<h2 id="what-is-a-kolm">What's inside a .kolm file</h2>
+<p>A <code>.kolm</code> is a zip with a strict layout (see <a href="/spec/kolm-format-v1">spec/kolm-format-v1</a>).</p>
+<pre><code>my-artifact.kolm/
+&boxvr;&boxh; manifest.json          # name, base, method, sizes, hashes
+&boxvr;&boxh; weights/                # safetensors shards (merged base+adapter)
+&boxvr;&boxh; tokenizer/              # tokenizer.json + special tokens
+&boxvr;&boxh; chat-template.jinja     # chat template (Jinja2)
+&boxvr;&boxh; spec.toml               # the recipe that built this artifact
+&boxvr;&boxh; passport.json           # provenance + K-Score
+&boxvr;&boxh; receipts/               # ordered chain of receipts
+&boxv;   &boxvr;&boxh; 001-distill.json
+&boxv;   &boxvr;&boxh; 002-eval.json
+&boxv;   &boxur;&boxh; 003-compile.json
+&boxvr;&boxh; signature.ed25519       # signs everything above
+&boxur;&boxh; verify.py               # 30-line self-verifier (no kolm CLI needed)</code></pre>
+
+<h2 id="the-stages">The compile wizard stages</h2>
+<ol>
+  <li><strong>Validate</strong> &mdash; check adapter exists, base is locally cached, spec.toml parses, all referenced teachers/judge versions resolvable.</li>
+  <li><strong>Merge</strong> &mdash; <code>peft</code> merges the LoRA adapter into the base; output is safetensors shards in fp16.</li>
+  <li><strong>Tokenizer + template</strong> &mdash; copy + canonicalize tokenizer.json, render chat-template.jinja from the recipe.</li>
+  <li><strong>Passport</strong> &mdash; build passport.json from the receipt chain: model card, K-Score per axis, training cost, teacher council, hardware fingerprint, runtime memory estimate.</li>
+  <li><strong>Quantize</strong> (optional) &mdash; if <code>--target gguf-q4km</code> (or any quant target) is set, the merged fp16 is handed to the matching exporter. See <a href="/docs/studio-quantization">studio-quantization</a>.</li>
+  <li><strong>Sign</strong> &mdash; canonical-JSON the manifest + passport + receipts, sign with the keypair from <code>~/.kolm/keys</code>. Public key is embedded in the manifest.</li>
+  <li><strong>Verify</strong> &mdash; the compile driver immediately re-runs verify on the produced file. If sign &ne; verify, the file is deleted before write.</li>
+</ol>
+
+<h2 id="cli">CLI</h2>
+<pre><code># Compile the canonical recipe with default target (fp16 .kolm)
+kolm compile --recipe support-trinity-500 --output trinity-support.kolm
+
+# Compile + export to GGUF Q4_K_M in one step
+kolm compile --recipe support-trinity-500 --target gguf-q4km --output trinity-support-q4km.gguf
+
+# Compile from an existing adapter directory
+kolm compile --adapter runs/trinity-support-v3/adapter --base Qwen/Qwen2.5-7B-Instruct \
+             --spec trinity-support-500.toml --output trinity-support-v3.kolm
+
+# Just re-verify an existing artifact
+kolm verify trinity-support.kolm
+
+# Inspect without unpacking
+kolm inspect trinity-support.kolm --json</code></pre>
+
+<h2 id="targets">Supported compile targets</h2>
+<table>
+<thead><tr><th>Target</th><th>Output</th><th>Where it runs</th></tr></thead>
+<tbody>
+<tr><td><code>kolm</code> (default)</td><td>fp16 .kolm</td><td>Anywhere with the kolm runtime adapter.</td></tr>
+<tr><td><code>gguf-q2km..q8</code></td><td>.gguf</td><td>llama.cpp, Ollama, LM Studio, kolm runtime.</td></tr>
+<tr><td><code>exl2-3.0..8.0bpw</code></td><td>EXL2 dir</td><td>ExLlamaV2 (best single-GPU throughput).</td></tr>
+<tr><td><code>gptq-{3,4,8}bit</code></td><td>GPTQ dir</td><td>vLLM, AutoGPTQ.</td></tr>
+<tr><td><code>awq-4bit</code></td><td>AWQ dir</td><td>vLLM, AutoAWQ.</td></tr>
+<tr><td><code>fp8</code></td><td>FP8 safetensors</td><td>Hopper (H100/H200) + TensorRT-LLM, vLLM.</td></tr>
+<tr><td><code>nvfp4</code></td><td>NVFP4 safetensors</td><td>Blackwell (B100/B200/RTX 5090) + TensorRT-LLM.</td></tr>
+<tr><td><code>hqq-{2,3,4,8}bit</code></td><td>HQQ safetensors</td><td>HuggingFace + HQQ runtime (calibration-free).</td></tr>
+<tr><td><code>mlx-{2,3,4,8}bit</code></td><td>MLX dir</td><td>Apple Silicon native (mlx-lm).</td></tr>
+</tbody>
+</table>
+<p>See <a href="/docs/studio-export-formats">studio-export-formats</a> for help picking.</p>
+
+<div class="privacy-note">
+<strong>Caveats.</strong> Compile is RAM-bound, not VRAM-bound &mdash; the merge step holds the full fp16 base in CPU RAM (e.g., 14 GB for a 7B). The wizard prints the RAM forecast in the validate stage; abort early if you don't have it. Use <code>--low-ram-merge</code> to merge per-shard at the cost of ~2&times; wall time.
+</div>
+
+<h2 id="implementation">Implementation</h2>
+<p>The compile driver lives in <code>src/compile-spec.js</code>. Each stage is a function that takes the previous stage's output and emits a receipt. The export backends live in <code>src/export-gguf.js</code>, <code>src/export-ollama.js</code>, plus the S-6 modules <code>src/export-{exl2,gptq,awq,fp8,nvfp4,hqq,mlx}.js</code>. The signing logic lives in <code>src/sigstore-attest.js</code>.</p>
+
+<div class="related">
+  <a href="/docs/studio-quantization"><b>Quantization &rarr;</b><span>How each quant target works under the hood.</span></a>
+  <a href="/docs/studio-export-gguf"><b>Export &middot; GGUF &rarr;</b><span>The most common compile target.</span></a>
+  <a href="/spec/kolm-format-v1"><b>.kolm format &rarr;</b><span>The on-disk spec.</span></a>
+</div>
+
+</div></main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/gateway">Gateway</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/docs/gateway">Gateway docs</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -355,9 +355,11 @@ test('W264 #11 — workers/compile-server kit files exist + no new npm deps', ()
   }
   // Root package.json must not have grown any dependency for W264.
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
-  // baseline from before W264 (locked by prior waves)
-  const expected_deps = ['@anthropic-ai/sdk', 'adm-zip', 'archiver', 'compression',
-    'cookie-parser', 'dotenv', 'express', 'express-rate-limit', 'helmet'];
+  // baseline from before W264 (locked by prior waves).
+  // W-4 (Parquet / HuggingFace export, 2026-05-26) added apache-arrow as a
+  // real load-bearing dep for the capture-export wrapper - not a W264 regression.
+  const expected_deps = ['@anthropic-ai/sdk', 'adm-zip', 'apache-arrow', 'archiver', 'compression',
+    'cookie-parser', 'dotenv', 'express', 'express-rate-limit', 'helmet', 'parquetjs-lite'];
   const actual_deps = Object.keys(pkg.dependencies || {}).sort();
   for (const d of actual_deps) {
     assert.ok(expected_deps.includes(d), `unexpected new runtime dep introduced by W264: ${d}`);
@@ -370,7 +372,7 @@ test('W264 #12 — vercel.json + sw.js wired to W264 surface', () => {
     r.source === '/enterprise/self-hosted' && /self-hosted\.html$/.test(r.destination));
   assert.ok(has, 'vercel rewrite for /enterprise/self-hosted present');
   const sw = fs.readFileSync(path.join(ROOT, 'public', 'sw.js'), 'utf8');
-  const m = sw.match(/kolm-v7-2026-05-\d+-wave(\d+)-/);
+  const m = sw.match(/kolm-v\d+-2026-\d{2}-\d{2}-[^']*?wave(\d+)/);
   assert.ok(m, 'sw.js CACHE constant matches expected pattern');
   assert.ok(Number(m[1]) >= 264, `sw.js cache wave must be >= 264, got ${m[1]}`);
 });

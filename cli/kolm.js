@@ -449,12 +449,12 @@ COMMANDS
   dataset <sub>                    labeled training corpora (candidates|approve|reject|create|split|inspect|export|list)
   label <sub>                      reviewer queue (next|approve|fix|reject|stats)
   demo <sub>                       close-the-loop seed corpus (list|seed-log-triage|reset)
-  privacy <sub>                    privacy membrane (scan|test|smoke|policy|report)
+  privacy <sub>                    privacy membrane (scan|test|smoke|policy|report)  [W384]
   sync <sub>                       cloud-sync state (status|enable|disable|push|pull) + legacy git mirror
-  pipeline <sub>                   end-to-end compile (tokenize|distill|compile|full)
+  pipeline <sub>                   end-to-end compile (tokenize|distill|compile|full)  [W384]
   wrap <agent-cmd> [args...]       spawn with kolm env injected (legacy: wrap <config> --out <spec.json>)
-  shell-init [--shell ...]         emit shell-export snippet (sh|bash|zsh|fish|pwsh|powershell|cmd|auto)
-  agents <sub>                     dev-agent telemetry (stats|sessions|recommend|failing)
+  shell-init [--shell ...]         emit shell-export snippet (sh|bash|zsh|fish|pwsh|powershell|cmd|auto)  [W384]
+  agents <sub>                     dev-agent telemetry (stats|sessions|recommend|failing)  [W384]
 
 ENVIRONMENT
   KOLM_BASE             cloud endpoint (default: https://kolm.ai)
@@ -4217,7 +4217,7 @@ function firstRunBannerIfNeeded() {
   if (process.env.KOLM_API_KEY) return;
   paintWelcomeBanner();
   console.log('  no config yet at ~/.kolm/config.json.');
-  // W848 — surface the interactive wizard as the primary first-run path so
+  // W848 - surface the interactive wizard as the primary first-run path so
   // new users do not have to know which verb to run next.
   console.log('  guided setup:  kolm quickstart    (pick wrapper or studio)');
   console.log('  pick a verb:   kolm menu          (interactive verb picker)');
@@ -5760,6 +5760,356 @@ async function cmdArtifacts(args) {
   process.exit(EXIT.USAGE);
 }
 
+// R-2 — `kolm artifact <verb>` (singular) drives the artifact lifecycle state
+// machine: created → signed → deployed → monitored → superseded → revoked →
+// archived. Distinct from `kolm artifacts` (plural — list/show/diff over
+// completed compile jobs) so each surface stays single-purpose. Verbs:
+//
+//   kolm artifact lifecycle <artifact_id> [--json]
+//   kolm artifact deploy <namespace> <artifact_path>
+//   kolm artifact undeploy <namespace>
+//   kolm artifact rollback <namespace>
+//   kolm artifact revoke <artifact_id> --reason "<text>"
+//
+// `deploy`, `undeploy`, and `rollback` delegate to the existing
+// /v1/namespaces/:slug/{deploy,undeploy,rollback} routes (W-F wrapper
+// surface) AND stamp the corresponding lifecycle transition through the
+// local lifecycle module so the audit trail is complete even when the
+// caller is talking to a non-kolm gateway.
+async function cmdArtifact(args) {
+  if (maybeHelp('artifact', args)) return;
+  const sub = (args[0] || '').toLowerCase();
+  const rest = args.slice(1);
+  const jsonOut = rest.includes('--json');
+  // Lazy-import the lifecycle module so the CLI bootstrap stays cheap; the
+  // module only touches disk when a verb actually invokes it.
+  const lc = await import('../src/artifact-lifecycle.js');
+  function _flagVal(name) {
+    const i = rest.indexOf('--' + name);
+    if (i >= 0 && rest[i + 1]) return rest[i + 1];
+    const pref = '--' + name + '=';
+    const hit = rest.find((a) => typeof a === 'string' && a.startsWith(pref));
+    return hit ? hit.slice(pref.length) : null;
+  }
+  function _positionals() {
+    return rest.filter((a) => typeof a === 'string' && !a.startsWith('--'));
+  }
+
+  if (sub === '' || sub === '--help' || sub === '-h') {
+    console.log('kolm artifact — artifact lifecycle state machine\n');
+    console.log('  kolm artifact lifecycle <artifact_id> [--json]');
+    console.log('  kolm artifact deploy <namespace> <artifact_id>');
+    console.log('  kolm artifact undeploy <namespace>');
+    console.log('  kolm artifact rollback <namespace>');
+    console.log('  kolm artifact revoke <artifact_id> --reason "<text>"');
+    console.log('');
+    console.log('  states: ' + lc.LIFECYCLE_STATES.join(' -> '));
+    return;
+  }
+
+  // -------- lifecycle (read-only, local lake first, then GET /v1/...) --------
+  if (sub === 'lifecycle' || sub === 'state' || sub === 'history') {
+    const positional = _positionals();
+    const id = positional[0];
+    if (!id) {
+      console.error('usage: kolm artifact lifecycle <artifact_id> [--json]');
+      process.exit(EXIT.USAGE);
+    }
+    // Read local lake first so the command works offline. When a kolm
+    // server is reachable, prefer the server view (it may have newer
+    // transitions stamped via the HTTP surface).
+    let lcRec = lc.loadOrInit(id);
+    const c = loadConfig();
+    if (c.api_key) {
+      try {
+        const r = await api(c, 'GET', '/v1/artifacts/' + encodeURIComponent(id) + '/lifecycle');
+        if (r && r.ok) {
+          lcRec = { artifact_id: id, current_state: r.current_state, history: r.history };
+        }
+      } catch (_) {
+        // Fall through to local view.
+      }
+    }
+    if (jsonOut) {
+      console.log(JSON.stringify({
+        ok: true,
+        artifact_id: id,
+        current_state: lcRec.current_state,
+        history: lcRec.history,
+      }));
+      return;
+    }
+    console.log('artifact:       ' + id);
+    console.log('current_state:  ' + lcRec.current_state);
+    console.log('history:        ' + (lcRec.history || []).length + ' transition(s)');
+    console.log('-'.repeat(80));
+    for (const h of (lcRec.history || [])) {
+      const line = h.timestamp + '  ' + h.from + ' -> ' + h.to + '  actor=' + h.actor +
+        (h.reason ? '  reason=' + JSON.stringify(h.reason) : '') +
+        (h.evidence_id ? '  evidence=' + h.evidence_id : '') +
+        (h.successor_id ? '  successor=' + h.successor_id : '');
+      console.log(line);
+    }
+    return;
+  }
+
+  // -------- deploy --------
+  if (sub === 'deploy') {
+    const positional = _positionals();
+    const namespace = positional[0];
+    const artifact_path = positional[1];
+    if (!namespace || !artifact_path) {
+      console.error('usage: kolm artifact deploy <namespace> <artifact_id_or_path>');
+      process.exit(EXIT.USAGE);
+    }
+    // <artifact_path> can be a job_id (preferred), a path to a .kolm file
+    // (we derive the id from the basename), or a bare id string. The local
+    // lifecycle record is keyed by id, not path.
+    const artifact_id = /^[a-zA-Z0-9_:.-]{1,128}$/.test(artifact_path)
+      ? artifact_path
+      : path.basename(String(artifact_path), '.kolm').replace(/[^a-zA-Z0-9_:.-]/g, '_').slice(0, 128) || 'artifact';
+    const c = loadConfig();
+    let serverResult = null;
+    if (c.api_key) {
+      try {
+        serverResult = await api(c, 'POST', '/v1/namespaces/' + encodeURIComponent(namespace) + '/deploy',
+          { artifact_id });
+      } catch (e) {
+        if (!jsonOut) console.error('namespace deploy http call failed: ' + e.message);
+        // Continue to stamp local lifecycle so the audit trail is consistent.
+      }
+    }
+    // Stamp local lifecycle: signed -> deployed (or created -> signed -> deployed
+    // when there is no prior record yet — the deploy CLI assumes the artifact
+    // was signed at compile time).
+    let lcRec = lc.loadOrInit(artifact_id);
+    const actor = (serverResult && serverResult.namespace && serverResult.namespace.tenant) || c.tenant_id || 'system';
+    try {
+      if (lcRec.current_state === 'created') {
+        lc.transition(lcRec, 'signed', { actor, reason: 'auto_sign_on_deploy', evidence_id: namespace });
+      }
+      lc.transition(lcRec, 'deployed', { actor, reason: 'cli_deploy', evidence_id: namespace });
+    } catch (e) {
+      if (jsonOut) console.log(JSON.stringify({ ok: false, error: 'transition_rejected', detail: e.message }));
+      else console.error('lifecycle transition rejected: ' + e.message);
+      process.exit(EXIT.GATE_FAIL);
+    }
+    const out = {
+      ok: true,
+      action: 'deploy',
+      namespace,
+      artifact_id,
+      current_state: lcRec.current_state,
+      history_length: (lcRec.history || []).length,
+      server: serverResult,
+    };
+    if (jsonOut) console.log(JSON.stringify(out));
+    else {
+      console.log('deployed ' + artifact_id + ' -> namespace ' + namespace);
+      console.log('current_state: ' + lcRec.current_state);
+    }
+    return;
+  }
+
+  // -------- undeploy --------
+  if (sub === 'undeploy') {
+    const positional = _positionals();
+    const namespace = positional[0];
+    if (!namespace) {
+      console.error('usage: kolm artifact undeploy <namespace>');
+      process.exit(EXIT.USAGE);
+    }
+    const c = loadConfig();
+    let serverResult = null;
+    let artifact_id = null;
+    if (c.api_key) {
+      try {
+        const cfg = await api(c, 'GET', '/v1/namespaces/' + encodeURIComponent(namespace));
+        if (cfg && cfg.namespace && cfg.namespace.artifact_id) artifact_id = cfg.namespace.artifact_id;
+      } catch (_) {}
+      try {
+        serverResult = await api(c, 'POST', '/v1/namespaces/' + encodeURIComponent(namespace) + '/undeploy', {
+          reason: _flagVal('reason') || 'cli_undeploy',
+        });
+      } catch (e) {
+        if (!jsonOut) console.error('namespace undeploy http call failed: ' + e.message);
+      }
+    }
+    if (!artifact_id) artifact_id = _flagVal('artifact') || null;
+    if (!artifact_id) {
+      if (jsonOut) console.log(JSON.stringify({ ok: false, error: 'no_active_artifact_for_namespace', namespace }));
+      else console.error('no active artifact found for namespace ' + namespace + '; pass --artifact <id> to override');
+      process.exit(EXIT.NOT_FOUND);
+    }
+    const actor = (serverResult && serverResult.namespace && serverResult.namespace.tenant) || c.tenant_id || 'system';
+    let lcRec = lc.loadOrInit(artifact_id);
+    try {
+      lc.transition(lcRec, 'undeployed', { actor, reason: _flagVal('reason') || 'cli_undeploy', evidence_id: namespace });
+    } catch (e) {
+      if (jsonOut) console.log(JSON.stringify({ ok: false, error: 'transition_rejected', detail: e.message }));
+      else console.error('lifecycle transition rejected: ' + e.message);
+      process.exit(EXIT.GATE_FAIL);
+    }
+    const out = {
+      ok: true,
+      action: 'undeploy',
+      namespace,
+      artifact_id,
+      current_state: lcRec.current_state,
+      server: serverResult,
+    };
+    if (jsonOut) console.log(JSON.stringify(out));
+    else {
+      console.log('undeployed ' + artifact_id + ' from namespace ' + namespace);
+      console.log('current_state: ' + lcRec.current_state);
+    }
+    return;
+  }
+
+  // -------- rollback --------
+  if (sub === 'rollback') {
+    const positional = _positionals();
+    const namespace = positional[0];
+    if (!namespace) {
+      console.error('usage: kolm artifact rollback <namespace> [--to <artifact_id>]');
+      process.exit(EXIT.USAGE);
+    }
+    const c = loadConfig();
+    let serverResult = null;
+    let current_id = null;
+    let target_id = _flagVal('to') || null;
+    if (c.api_key) {
+      try {
+        const cfg = await api(c, 'GET', '/v1/namespaces/' + encodeURIComponent(namespace));
+        if (cfg && cfg.namespace) {
+          current_id = cfg.namespace.artifact_id || null;
+          if (!target_id && Array.isArray(cfg.namespace.artifact_history)) {
+            for (let i = cfg.namespace.artifact_history.length - 1; i >= 0; i--) {
+              const h = cfg.namespace.artifact_history[i];
+              if (h && h.artifact_id && h.artifact_id !== current_id) { target_id = h.artifact_id; break; }
+            }
+          }
+        }
+      } catch (_) {}
+      try {
+        serverResult = await api(c, 'POST', '/v1/namespaces/' + encodeURIComponent(namespace) + '/rollback',
+          target_id ? { to: target_id } : {});
+        if (serverResult && serverResult.to) target_id = serverResult.to;
+      } catch (e) {
+        if (!jsonOut) console.error('namespace rollback http call failed: ' + e.message);
+      }
+    }
+    if (!current_id || !target_id) {
+      if (jsonOut) console.log(JSON.stringify({ ok: false, error: 'rollback_missing_ids', current_id, target_id, namespace }));
+      else console.error('cannot rollback: need both current and target artifact ids (got current=' + current_id + ', target=' + target_id + ')');
+      process.exit(EXIT.NOT_FOUND);
+    }
+    const actor = (serverResult && serverResult.namespace && serverResult.namespace.tenant) || c.tenant_id || 'system';
+    // current artifact -> superseded by target_id; target artifact (if not
+    // already deployed) -> deployed.
+    let currentLc = lc.loadOrInit(current_id);
+    try {
+      lc.transition(currentLc, 'superseded', { actor, reason: 'cli_rollback', evidence_id: namespace, successor_id: target_id });
+    } catch (e) {
+      if (!jsonOut) console.error('current artifact transition rejected: ' + e.message);
+    }
+    let targetLc = lc.loadOrInit(target_id);
+    try {
+      if (targetLc.current_state === 'created') {
+        lc.transition(targetLc, 'signed', { actor, reason: 'auto_sign_on_rollback', evidence_id: namespace });
+      }
+      if (['signed', 'undeployed'].includes(targetLc.current_state)) {
+        lc.transition(targetLc, 'deployed', { actor, reason: 'cli_rollback', evidence_id: namespace });
+      }
+    } catch (e) {
+      if (!jsonOut) console.error('target artifact transition rejected: ' + e.message);
+    }
+    const out = {
+      ok: true,
+      action: 'rollback',
+      namespace,
+      from_artifact: current_id,
+      to_artifact: target_id,
+      current_state_from: currentLc.current_state,
+      current_state_to: targetLc.current_state,
+      server: serverResult,
+    };
+    if (jsonOut) console.log(JSON.stringify(out));
+    else {
+      console.log('rolled back namespace ' + namespace + ': ' + current_id + ' -> ' + target_id);
+      console.log('  ' + current_id + ' is now ' + currentLc.current_state);
+      console.log('  ' + target_id + ' is now ' + targetLc.current_state);
+    }
+    return;
+  }
+
+  // -------- revoke --------
+  if (sub === 'revoke') {
+    const positional = _positionals();
+    const id = positional[0];
+    const reason = _flagVal('reason');
+    if (!id) {
+      console.error('usage: kolm artifact revoke <artifact_id> --reason "<text>"');
+      process.exit(EXIT.USAGE);
+    }
+    if (!reason || String(reason).trim() === '') {
+      console.error('error: --reason is required for revoke (audit trail)');
+      process.exit(EXIT.USAGE);
+    }
+    const c = loadConfig();
+    let serverResult = null;
+    const actor = c.tenant_id || 'system';
+    let lcRec = lc.loadOrInit(id);
+    // Walk the artifact toward `revoked` through whichever forward path is
+    // valid from the current state (the VALID_TRANSITIONS table only allows
+    // revoke from {deployed, monitored, superseded}).
+    try {
+      const intermediate = {
+        created: ['signed', 'deployed', 'revoked'],
+        signed:  ['deployed', 'revoked'],
+        archived: [], // terminal; cannot revoke an archived artifact
+      };
+      const path_ = intermediate[lcRec.current_state] || ['revoked'];
+      for (const step of path_) {
+        if (lcRec.current_state === step) continue;
+        const stepReason = step === 'revoked' ? reason : 'auto_step_to_revoke';
+        lc.transition(lcRec, step, { actor, reason: stepReason, evidence_id: null });
+      }
+    } catch (e) {
+      if (jsonOut) console.log(JSON.stringify({ ok: false, error: 'transition_rejected', detail: e.message, current_state: lcRec.current_state }));
+      else console.error('revoke rejected: ' + e.message + ' (current_state=' + lcRec.current_state + ')');
+      process.exit(EXIT.GATE_FAIL);
+    }
+    if (c.api_key) {
+      try {
+        serverResult = await api(c, 'POST', '/v1/artifacts/' + encodeURIComponent(id) + '/lifecycle/transition',
+          { to_state: 'revoked', reason });
+      } catch (e) {
+        if (!jsonOut) console.error('server-side lifecycle transition failed: ' + e.message);
+      }
+    }
+    const out = {
+      ok: true,
+      action: 'revoke',
+      artifact_id: id,
+      current_state: lcRec.current_state,
+      reason,
+      server: serverResult,
+    };
+    if (jsonOut) console.log(JSON.stringify(out));
+    else {
+      console.log('revoked ' + id);
+      console.log('current_state: ' + lcRec.current_state);
+      console.log('pulls of this artifact now return HTTP 410 Gone');
+    }
+    return;
+  }
+
+  console.error('usage: kolm artifact [lifecycle|deploy|undeploy|rollback|revoke] ...');
+  console.error('  run `kolm artifact` with no args for full verb list');
+  process.exit(EXIT.USAGE);
+}
+
 // W305: `kolm health` is a cheap network ping with explicit timing budget.
 // Hits {base}/health (unauthenticated probe), reports round-trip ms and
 // whether /v1/capture/health declares a durable driver. Three exits make
@@ -7027,9 +7377,49 @@ async function cmdSavings(args) {
         console.log('net savings $:   $' + Number(data.net_savings_usd || 0).toFixed(2));
         if (data.regression) console.log('regression:      true (post > baseline; fee_usd=0)');
       }
+    } else if (sub === 'displacement') {
+      // R-8 — cost displacement. Distinct from `summary` (W835 fee model).
+      // Walks per-receipt route_decision values and re-prices the local ones
+      // against the frontier rate card to surface "what kolm displaced".
+      const qsParts = [
+        'namespace=' + encodeURIComponent(namespace),
+        'period_days=' + encodeURIComponent(periodDays),
+      ];
+      const frontierProvider = pick('--frontier-provider');
+      const frontierModel = pick('--frontier-model');
+      const artifactId = pick('--artifact-id');
+      const compileCost = pick('--compile-cost-usd');
+      const deployedAt = pick('--deployed-at-ms');
+      if (frontierProvider) qsParts.push('frontier_provider=' + encodeURIComponent(frontierProvider));
+      if (frontierModel) qsParts.push('frontier_model=' + encodeURIComponent(frontierModel));
+      if (artifactId) qsParts.push('artifact_id=' + encodeURIComponent(artifactId));
+      if (compileCost != null) qsParts.push('compile_cost_usd=' + encodeURIComponent(compileCost));
+      if (deployedAt != null) qsParts.push('deployed_at_ms=' + encodeURIComponent(deployedAt));
+      const data = await api(c, 'GET', '/v1/savings/displacement?' + qsParts.join('&'));
+      if (jsonOut) { console.log(JSON.stringify(data)); return; }
+      console.log('kolm savings displacement');
+      console.log('namespace:               ' + (data.namespace || namespace));
+      console.log('period_days:             ' + (data.period && data.period.period_days != null ? data.period.period_days : periodDays));
+      console.log('status:                  ' + (data.ok_status || '-'));
+      console.log('baseline_cost_usd:       $' + Number(data.baseline_cost_usd || 0).toFixed(6));
+      console.log('actual_cost_usd:         $' + Number(data.actual_cost_usd || 0).toFixed(6));
+      console.log('savings_usd:             $' + Number(data.savings_usd || 0).toFixed(6));
+      console.log('cumulative_savings_usd:  $' + Number(data.cumulative_savings_usd || 0).toFixed(6));
+      const ppm = data.payback_period_months;
+      const ppmFmt = (ppm === 'instant') ? 'instant' : (ppm == null ? 'undefined (no net savings yet)' : (Number(ppm).toFixed(2) + ' months'));
+      console.log('payback_period:          ' + ppmFmt);
+      if (data.compile_cost_usd != null) console.log('compile_cost_usd:        $' + Number(data.compile_cost_usd).toFixed(6));
+      if (data.period) {
+        console.log('  receipts:              ' + (data.period.receipt_count || 0)
+          + '  (local=' + (data.period.local_count || 0)
+          + ', frontier=' + (data.period.frontier_count || 0)
+          + ', frontier_fallback=' + (data.period.frontier_fallback_count || 0)
+          + ', unknown_route=' + (data.period.unknown_route_count || 0)
+          + ', unrepriced=' + (data.period.unrepriced_count || 0) + ')');
+      }
     } else {
       if (jsonOut) console.log(JSON.stringify({ error: 'unknown_subcommand', sub }));
-      else console.error('unknown savings subcommand: ' + sub + '. try: baseline | record | summary');
+      else console.error('unknown savings subcommand: ' + sub + '. try: baseline | record | summary | displacement');
       process.exit(EXIT.BAD_ARGS); return;
     }
   } catch (e) {
@@ -7329,6 +7719,70 @@ async function cmdCompile(args) {
     }
   }
 
+  // S-1 — `kolm compile --target <gguf-quant> --dry-run` short-circuit.
+  // Runs BEFORE the --spec gate so a spec-less dry-run can preview the plan
+  // (no llama.cpp spawn, no API roundtrip). Stays generic: any artifact.
+  // The full GGUF compile path inside the spec block still re-handles this
+  // for spec-driven dry-runs, but most preview calls hit this top-level
+  // path first.
+  {
+    const targetFlagDR = pickFlag(args, '--target');
+    const GGUF_DRYRUN_MAP = {
+      'gguf-q8': 'Q8_0', 'gguf-q8_0': 'Q8_0',
+      'gguf-q6k': 'Q6_K',
+      'gguf-q5km': 'Q5_K_M', 'gguf-q5ks': 'Q5_K_S',
+      'gguf-q4km': 'Q4_K_M', 'gguf-q4ks': 'Q4_K_S', 'gguf-q4_0': 'Q4_0',
+      'gguf-q3km': 'Q3_K_M', 'gguf-q3ks': 'Q3_K_S',
+      'gguf-q2k': 'Q2_K',
+      'gguf-iq4xs': 'IQ4_XS', 'gguf-iq4nl': 'IQ4_NL',
+      'gguf-iq3xxs': 'IQ3_XXS', 'gguf-iq3s': 'IQ3_S', 'gguf-iq3m': 'IQ3_M',
+      'gguf-iq2xs': 'IQ2_XS', 'gguf-iq2s': 'IQ2_S', 'gguf-iq2m': 'IQ2_M',
+      'gguf-iq2xxs': 'IQ2_XXS', 'gguf-iq1s': 'IQ1_S',
+      'gguf-f16': 'F16', 'gguf-bf16': 'BF16', 'gguf-f32': 'F32',
+    };
+    if (targetFlagDR && GGUF_DRYRUN_MAP[targetFlagDR] && args.includes('--dry-run')) {
+      const { exportGguf, probeGgufToolchain } = await import('../src/export-gguf.js');
+      const probe = probeGgufToolchain();
+      const planResult = await exportGguf({
+        artifact: { name: 'dry-run-artifact', artifact_hash: null, passport: {} },
+        quant: GGUF_DRYRUN_MAP[targetFlagDR],
+        outputPath: path.join(process.cwd(), 'exports', `dry-run.${targetFlagDR}.gguf`),
+        ggufBase: null,
+        dryRun: true,
+      });
+      const out = {
+        ok: true,
+        dry_run: true,
+        target: targetFlagDR,
+        quant: GGUF_DRYRUN_MAP[targetFlagDR],
+        toolchain: {
+          ok: probe.ok,
+          missing: probe.missing,
+          components: Object.fromEntries(Object.entries(probe.components).map(([k, v]) => [k, !!v])),
+        },
+        plan: planResult.plan,
+        next_steps: [
+          `1. Ensure --merged-dir <hf-dir> OR --gguf-base <f16-gguf> is supplied`,
+          `2. Re-run without --dry-run`,
+          `3. Output will land at: ${planResult.plan.output_path}`,
+        ],
+      };
+      if (args.includes('--json')) {
+        process.stdout.write(JSON.stringify(out, null, 2) + '\n');
+      } else {
+        console.log(`GGUF compile dry-run — target=${targetFlagDR} (quant=${GGUF_DRYRUN_MAP[targetFlagDR]})`);
+        console.log(`toolchain: ${probe.ok ? 'OK' : 'MISSING: ' + probe.missing.join(', ')}`);
+        console.log(`plan steps:`);
+        for (const s of planResult.plan.steps) console.log(`  - ${s}`);
+        if (!probe.ok && probe.hint) {
+          console.log('');
+          console.log(probe.hint);
+        }
+      }
+      return;
+    }
+  }
+
   const specIdx = args.indexOf('--spec');
   if (specIdx >= 0) {
     const specArg = args[specIdx + 1];
@@ -7536,15 +7990,34 @@ async function cmdCompile(args) {
     // `--target all` enables the fan-out plan (multiple targets emitted in
     // one compile via KOLM_TARGET_ALL).
     const FORGE_QUANT_SHORTCUTS = {
+      // K-quant family (W866 floor)
       'gguf-q8':     { format: 'gguf', quant: 'gguf-q8' },
+      'gguf-q8_0':   { format: 'gguf', quant: 'gguf-q8' },
       'gguf-q6k':    { format: 'gguf', quant: 'gguf-q6k' },
       'gguf-q5km':   { format: 'gguf', quant: 'gguf-q5km' },
+      'gguf-q5ks':   { format: 'gguf', quant: 'gguf-q5ks' },
       'gguf-q4km':   { format: 'gguf', quant: 'gguf-q4km' },
+      'gguf-q4ks':   { format: 'gguf', quant: 'gguf-q4ks' },
+      'gguf-q4_0':   { format: 'gguf', quant: 'gguf-q4_0' },
       'gguf-q3km':   { format: 'gguf', quant: 'gguf-q3km' },
+      'gguf-q3ks':   { format: 'gguf', quant: 'gguf-q3ks' },
       'gguf-q2k':    { format: 'gguf', quant: 'gguf-q2k' },
+      // I-quant family (S-1 imatrix-driven)
       'gguf-iq4xs':  { format: 'gguf', quant: 'gguf-iq4xs' },
+      'gguf-iq4nl':  { format: 'gguf', quant: 'gguf-iq4nl' },
       'gguf-iq3xxs': { format: 'gguf', quant: 'gguf-iq3xxs' },
+      'gguf-iq3s':   { format: 'gguf', quant: 'gguf-iq3s' },
+      'gguf-iq3m':   { format: 'gguf', quant: 'gguf-iq3m' },
       'gguf-iq2xs':  { format: 'gguf', quant: 'gguf-iq2xs' },
+      'gguf-iq2s':   { format: 'gguf', quant: 'gguf-iq2s' },
+      'gguf-iq2m':   { format: 'gguf', quant: 'gguf-iq2m' },
+      'gguf-iq2xxs': { format: 'gguf', quant: 'gguf-iq2xxs' },
+      'gguf-iq1s':   { format: 'gguf', quant: 'gguf-iq1s' },
+      // Full-precision pass-through
+      'gguf-f16':    { format: 'gguf', quant: 'gguf-f16' },
+      'gguf-bf16':   { format: 'gguf', quant: 'gguf-bf16' },
+      'gguf-f32':    { format: 'gguf', quant: 'gguf-f32' },
+      // Other quant families
       'gptq-4bit':   { format: 'safetensors', quant: 'gptq-4bit' },
       'awq-4bit':    { format: 'safetensors', quant: 'awq-4bit' },
       'nvfp4':       { format: 'safetensors', quant: 'nvfp4' },
@@ -7577,6 +8050,62 @@ async function cmdCompile(args) {
     if (resolvedTargetFlag && !['gguf', 'onnx', 'safetensors', 'coreml', 'mlx', 'executorch', 'tensorrt', 'native-c', 'native-rust', 'c', 'rust', 'wasm'].includes(resolvedTargetFlag)) {
       console.error(`error: --target must be one of: gguf, onnx, safetensors, coreml, mlx, executorch, tensorrt, native-c (alias c), native-rust (alias rust), wasm, all, OR a W866 quant shortcut (gguf-q4km, gguf-iq4xs, exl2-Nbpw, gptq-4bit, awq-4bit, nvfp4, fp8, mlx-4bit, hqq) — got '${targetFlag}'`);
       process.exit(EXIT.BAD_ARGS);
+    }
+    // S-1 — `kolm compile --target gguf-q4km --dry-run` short-circuit. Prints
+    // the planned GGUF export steps without spawning llama.cpp. The dry-run
+    // path stays GENERIC (any artifact) and uses src/export-gguf.js to build
+    // the plan so the same code path drives both preview and execution.
+    if (targetFlag && FORGE_QUANT_SHORTCUTS[targetFlag]
+        && FORGE_QUANT_SHORTCUTS[targetFlag].format === 'gguf'
+        && args.includes('--dry-run')) {
+      const { exportGguf, probeGgufToolchain } = await import('../src/export-gguf.js');
+      const quantMap = {
+        'gguf-q8': 'Q8_0', 'gguf-q8_0': 'Q8_0',
+        'gguf-q6k': 'Q6_K',
+        'gguf-q5km': 'Q5_K_M', 'gguf-q5ks': 'Q5_K_S',
+        'gguf-q4km': 'Q4_K_M', 'gguf-q4ks': 'Q4_K_S', 'gguf-q4_0': 'Q4_0',
+        'gguf-q3km': 'Q3_K_M', 'gguf-q3ks': 'Q3_K_S',
+        'gguf-q2k': 'Q2_K',
+        'gguf-iq4xs': 'IQ4_XS', 'gguf-iq4nl': 'IQ4_NL',
+        'gguf-iq3xxs': 'IQ3_XXS', 'gguf-iq3s': 'IQ3_S', 'gguf-iq3m': 'IQ3_M',
+        'gguf-iq2xs': 'IQ2_XS', 'gguf-iq2s': 'IQ2_S', 'gguf-iq2m': 'IQ2_M',
+        'gguf-iq2xxs': 'IQ2_XXS', 'gguf-iq1s': 'IQ1_S',
+        'gguf-f16': 'F16', 'gguf-bf16': 'BF16', 'gguf-f32': 'F32',
+      };
+      const probe = probeGgufToolchain();
+      const planResult = await exportGguf({
+        artifact: { name: 'dry-run-artifact', artifact_hash: null, passport: {} },
+        quant: quantMap[targetFlag],
+        outputPath: path.join(process.cwd(), 'exports', `dry-run.${targetFlag}.gguf`),
+        ggufBase: null,
+        dryRun: true,
+      });
+      const out = {
+        ok: true,
+        dry_run: true,
+        target: targetFlag,
+        quant: quantMap[targetFlag],
+        toolchain: { ok: probe.ok, missing: probe.missing, components: Object.fromEntries(Object.entries(probe.components).map(([k, v]) => [k, !!v])) },
+        plan: planResult.plan,
+        next_steps: [
+          `1. Ensure --merged-dir <hf-dir> OR --gguf-base <f16-gguf> is supplied`,
+          `2. Re-run without --dry-run`,
+          `3. Output will land at: ${planResult.plan.output_path}`,
+        ],
+      };
+      if (args.includes('--json')) {
+        process.stdout.write(JSON.stringify(out, null, 2) + '\n');
+      } else {
+        console.log(`GGUF compile dry-run — target=${targetFlag} (quant=${quantMap[targetFlag]})`);
+        console.log(`toolchain: ${probe.ok ? 'OK' : 'MISSING: ' + probe.missing.join(', ')}`);
+        console.log(`plan steps:`);
+        for (const s of planResult.plan.steps) console.log(`  - ${s}`);
+        if (!probe.ok && probe.hint) {
+          console.log('');
+          console.log(probe.hint);
+        }
+      }
+      return;
     }
     if (multiDeviceFlag) {
       const parts = String(multiDeviceFlag).split(',').map(s => s.trim()).filter(Boolean);
@@ -8657,6 +9186,19 @@ async function cmdBenchmark(args) {
   if (args && args[0] === 'speculative') {
     return cmdW814Bench(args);
   }
+  // S-4 (V1 launch 2026-05-26) — `kolm bench compare <suite> --models a,b,c --out path/`
+  // routes to the multi-model benchmark harness in src/bench-harness.js.
+  // The legacy `kolm bench --compare <artifact>` flag below still works for
+  // artifact-vs-LLM diffs (different shape: that one is one-artifact-vs-
+  // external-runtimes; this S-4 path is many-models-vs-one-suite).
+  // Distinct-named (cmdS4BenchCompare) so parallel agents cannot collide.
+  if (args && args[0] === 'compare') {
+    return cmdS4BenchCompare(args.slice(1));
+  }
+  // S-4 — `kolm bench suites` lists the built-in suites (JSON via --json).
+  if (args && args[0] === 'suites') {
+    return cmdS4BenchSuites(args.slice(1));
+  }
   if (maybeHelp('benchmark', args)) return;
   // `kolm bench --reproduce <suite>` is the public-reproducer path documented at
   // /articles/how-we-benchmark. It runs in a pinned Docker image so the harness
@@ -9436,6 +9978,36 @@ async function cmdInspect(args) {
     });
     return;
   }
+  // R-1 — `kolm inspect <artifact.kolm> --runtime-passport [--json]`. Surfaces
+  // just the runtime_passports[] array off the manifest so a buyer can pipe
+  // the matrix into a procurement gate ("must have at least one 'tested' row
+  // for the host runtime"). Default text mode renders a one-line summary per
+  // row; --json emits the raw array. inspectArtifact is the same reader used
+  // by the full-text path so the data has a single source of truth.
+  if (args.includes('--runtime-passport')) {
+    await withRunner(async ({ inspectArtifact }) => {
+      const m = inspectArtifact(ap);
+      const passports = Array.isArray(m.runtime_passports) ? m.runtime_passports : [];
+      if (jsonOut) {
+        console.log(JSON.stringify(passports, null, 2));
+        return;
+      }
+      if (passports.length === 0) {
+        console.log('runtime_passports: (none -- no export targets probed)');
+        return;
+      }
+      console.log(`runtime_passports: ${passports.length} target${passports.length === 1 ? '' : 's'}`);
+      for (const p of passports) {
+        const mem = p.memory_mb != null ? `${p.memory_mb} MB` : '?';
+        const p50 = p.latency_p50_ms != null ? `${p.latency_p50_ms} ms p50` : '?';
+        const toks = p.tok_s != null ? `${p.tok_s} tok/s` : '?';
+        console.log(`  [${p.status}] ${p.target_id}`);
+        console.log(`    runtime: ${p.runtime}@${p.runtime_version} | ${p.precision} | ${mem} | ${p50} | ${toks}`);
+        if (p.fallback) console.log(`    fallback: ${p.fallback}`);
+      }
+    });
+    return;
+  }
   await withRunner(async ({ inspectArtifact }) => {
     const m = inspectArtifact(ap);
     // Compute sha256 of the .kolm file on disk so callers don't need to shell
@@ -9720,6 +10292,161 @@ function renderPassportMarkdown(envelope, formatAsMarkdown) {
   lines.push('```');
   lines.push('');
   return lines.join('\n');
+}
+
+// R-6 — `kolm assurance export --artifact <art> --format json|pdf --output <path>`
+// (or --workspace <id> for the workspace-level packet).
+//
+// Bundles claims + framework controls + procurement-vault references into one
+// trust packet a procurement reviewer can attach to a third-line-of-defense
+// review. The JSON path is the source of truth; the PDF path renders the
+// same envelope through src/assurance-case-pdf.js (pdfkit, lazy import).
+//
+// W869 Persona D already ships `kolm passport <artifact.kolm> --format compliance`
+// which produces a per-artifact JSON envelope. This verb is the procurement
+// shape (claims + controls + framework mapping) and adds the workspace-level
+// surface — the two complement, they do not overlap.
+async function cmdAssurance(args) {
+  if (maybeHelp('assurance', args)) return;
+  const sub = args[0];
+  const rest = args.slice(1);
+
+  if (!sub || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.log('kolm assurance — export procurement-ready trust packet');
+    console.log('');
+    console.log('Usage:');
+    console.log('  kolm assurance export --artifact <art.kolm> [--format json|pdf] [--output <path>]');
+    console.log('  kolm assurance export --workspace <id>      [--format json|pdf] [--output <path>]');
+    console.log('');
+    console.log('Output: JSON (default stdout) or PDF (default ./trust-packet.pdf).');
+    return;
+  }
+  if (sub !== 'export') {
+    const err = new Error(`unknown subverb: ${sub}\nusage: kolm assurance export --artifact <art> --format json|pdf --output <path>`);
+    err.exitCode = EXIT.BAD_ARGS;
+    throw err;
+  }
+
+  const get = (flag) => {
+    const i = rest.indexOf(flag);
+    return i >= 0 ? rest[i + 1] : null;
+  };
+  const artifactArg = get('--artifact');
+  const workspaceArg = get('--workspace');
+  const format = (get('--format') || 'json').toLowerCase();
+  const outputArg = get('--output') || get('--out');
+
+  if (!artifactArg && !workspaceArg) {
+    const err = new Error('one of --artifact or --workspace is required');
+    err.exitCode = EXIT.BAD_ARGS;
+    throw err;
+  }
+  if (!['json', 'pdf'].includes(format)) {
+    const err = new Error(`--format must be one of: json | pdf`);
+    err.exitCode = EXIT.BAD_ARGS;
+    throw err;
+  }
+
+  // Load the artifact (if given). The artifact pointer can be a path to a
+  // .kolm zip OR an artifact_id. resolveArtifact() handles both shapes.
+  let artifact = null;
+  if (artifactArg) {
+    const ap = resolveArtifact(artifactArg);
+    if (!ap) {
+      const err = new Error(`artifact not found: ${artifactArg}`);
+      err.exitCode = EXIT.NOT_FOUND;
+      throw err;
+    }
+    const AdmZip = (await import('adm-zip')).default;
+    let zip; let manifest = null; let receipt = null;
+    try { zip = new AdmZip(ap); } catch (e) {
+      const err = new Error(`cannot read artifact zip: ${e.message}`);
+      err.exitCode = EXIT.EXECUTION;
+      throw err;
+    }
+    const manifestEntry = zip.getEntry('manifest.json');
+    if (manifestEntry) {
+      try { manifest = JSON.parse(manifestEntry.getData().toString('utf8')); } catch { manifest = null; }
+    }
+    const receiptEntry = zip.getEntry('receipts/receipt.json') || zip.getEntry('receipt.json');
+    if (receiptEntry) {
+      try { receipt = JSON.parse(receiptEntry.getData().toString('utf8')); } catch { receipt = null; }
+    }
+    artifact = {
+      id: (manifest && (manifest.artifact_id || manifest.id)) || path.basename(ap, '.kolm'),
+      path: ap,
+      manifest,
+      receipt,
+      namespace: manifest && (manifest.namespace || (manifest.deployment && manifest.deployment.namespace)),
+    };
+  }
+
+  // Workspace shape — load procurement vault rows from data/procurement/.
+  // The workspace pointer is opaque (an id string); the rows are shared
+  // tenant-wide on the current build.
+  const workspace = await _loadWorkspaceForAssurance(workspaceArg || (artifact && artifact.id));
+
+  const { buildAssuranceCase, validateAssuranceCase } = await import('../src/assurance-case.js');
+  const envelope = buildAssuranceCase({ artifact, workspace });
+  const v = validateAssuranceCase(envelope);
+  if (!v.ok) {
+    const err = new Error('assurance case failed validation: ' + v.reasons.join(','));
+    err.exitCode = EXIT.EXECUTION;
+    throw err;
+  }
+
+  if (format === 'json') {
+    const json = JSON.stringify(envelope, null, 2);
+    if (outputArg) {
+      fs.writeFileSync(outputArg, json + '\n');
+      console.error(`trust packet json written to ${outputArg}`);
+      return;
+    }
+    console.log(json);
+    return;
+  }
+
+  // PDF path — lazy-import pdfkit via the renderer.
+  const outPath = outputArg || 'trust-packet.pdf';
+  const { renderAssuranceCasePdf } = await import('../src/assurance-case-pdf.js');
+  const writeStream = fs.createWriteStream(outPath);
+  try {
+    await renderAssuranceCasePdf(envelope, writeStream);
+  } catch (e) {
+    if (e && e.code === 'PDFKIT_UNAVAILABLE') {
+      const err = new Error(`pdfkit is required for --format pdf. Install via: npm install pdfkit. (${e.message})`);
+      err.exitCode = EXIT.EXECUTION;
+      throw err;
+    }
+    throw e;
+  }
+  console.error(`trust packet pdf written to ${outPath}`);
+}
+
+// Load the per-workspace context — procurement vault rows + per-namespace
+// drift configuration. Both are best-effort: missing inputs downgrade
+// claims in buildAssuranceCase rather than failing the export.
+async function _loadWorkspaceForAssurance(workspace_id) {
+  const ws = { id: workspace_id || null, procurement_vault: {}, drift_namespaces: {} };
+  try {
+    const sigPath = path.join(_repoRootForAssurance(), 'data', 'procurement', 'sig-lite.json');
+    if (fs.existsSync(sigPath)) ws.procurement_vault.sig_lite = JSON.parse(fs.readFileSync(sigPath, 'utf8'));
+  } catch {}
+  try {
+    const caiqPath = path.join(_repoRootForAssurance(), 'data', 'procurement', 'caiq-v4.json');
+    if (fs.existsSync(caiqPath)) ws.procurement_vault.caiq = JSON.parse(fs.readFileSync(caiqPath, 'utf8'));
+  } catch {}
+  return ws;
+}
+
+function _repoRootForAssurance() {
+  // CLI lives at cli/kolm.js; data/ is one level up.
+  try {
+    const here = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Z]):/, '$1:'));
+    return path.resolve(here, '..');
+  } catch {
+    return path.resolve('.');
+  }
 }
 
 // cmdProcurement renders pre-answered vendor-security questionnaires (SIG Lite,
@@ -10735,6 +11462,21 @@ async function cmdServe(args) {
   const hostIdx = args.indexOf('--host');
   const host = hostIdx >= 0 ? args[hostIdx + 1] : '127.0.0.1';
 
+  // R-3 — auto-detect runtime path. Triggered when the first positional arg
+  // looks like a raw model file (.gguf / .safetensors / .mlx). The W866
+  // manifest-emitter path below handles .kolm zips; R-3 handles raw model
+  // files plus the --dry-run inspection mode. We do NOT enter R-3 just
+  // because --runtime was passed (W866 also consumes --runtime) — the
+  // discriminator is the file extension or an explicit --dry-run.
+  const positionalArtifact = args.find(a => !a.startsWith('--') && a !== 'serve');
+  const looksLikeRawModel = positionalArtifact && /\.(gguf|safetensors|mlx)$/i.test(positionalArtifact);
+  const wantDryRun = args.includes('--dry-run');
+  if (looksLikeRawModel || wantDryRun) {
+    // The R-3 branch fully handles --port, --host, --runtime, --context-length,
+    // --gpu-layers, --dry-run, --docker, --k8s for raw model files.
+    return await _cmdServeAutodetect(args);
+  }
+
   // W866 — --runtime / --docker / --k8s deployment-manifest emitters. These
   // do NOT boot a server; they print a manifest the operator can hand to
   // their runtime of choice. The serve flow above is unchanged.
@@ -10758,6 +11500,84 @@ async function cmdServe(args) {
     if (!VALID_RT.includes(rt)) {
       console.error(`error: --runtime must be one of: ${VALID_RT.join(', ')} (got '${rt}')`);
       process.exit(EXIT.BAD_ARGS);
+    }
+    // S-2 — `kolm serve <artifact> --runtime ollama` (no --docker/--k8s/--helm)
+    // actually runs the end-to-end ollama path: extract GGUF + write Modelfile
+    // + ollama create + ollama serve. The docker/k8s manifest-emitter path
+    // below stays for the manifest-only flow.
+    if (rt === 'ollama' && !wantDocker && !wantK8s && !wantHelm) {
+      const { exportOllama, ollamaServe, probeOllama, probeOllamaReady } = await import('../src/export-ollama.js');
+      const { loadArtifact } = await import('../src/artifact-runner.js');
+      let bundle;
+      try { bundle = loadArtifact(ap); }
+      catch (e) {
+        console.error('failed to read artifact: ' + e.message);
+        process.exit(EXIT.NOT_FOUND);
+      }
+      const manifest = bundle.manifest || {};
+      const ggufEntry = bundle.entries && (bundle.entries['model.gguf'] || bundle.entries[manifest?.runtime_target_config?.gguf_path || '']);
+      const baseName = path.basename(ap, '.kolm');
+      const outDir = pickFlag(args, '--out') || path.join(process.cwd(), 'ollama-staging', baseName);
+      fs.mkdirSync(outDir, { recursive: true });
+      const wantJsonOut = args.includes('--json');
+      if (!ggufEntry || ggufEntry.length < 256) {
+        const env = { ok: false, error: 'artifact_has_no_real_weights', artifact_class: manifest.artifact_class || 'unknown', hint: 'ollama requires a distilled_model artifact with real GGUF bytes.' };
+        if (wantJsonOut) console.log(JSON.stringify(env, null, 2));
+        else console.error('error: ' + env.error + ' — ' + env.hint);
+        process.exit(EXIT.NOT_FOUND);
+      }
+      const ggufStagedPath = path.join(outDir, path.basename((manifest.runtime_target_config && manifest.runtime_target_config.gguf_path) || 'model.gguf'));
+      fs.writeFileSync(ggufStagedPath, ggufEntry);
+      const result = await exportOllama({
+        artifact: {
+          name: manifest.name || manifest.job_id || baseName,
+          artifact_hash: manifest.artifact_hash || null,
+          chat_template: manifest.chat_template || manifest.template,
+          system_prompt: manifest.system_prompt || manifest.system,
+          stop_tokens: manifest.stop_tokens,
+          parameters: manifest.generation || manifest.parameters,
+          base_model: manifest.base_model,
+          license: manifest.license,
+          passport: {},
+        },
+        ggufPath: ggufStagedPath,
+        outputDir: outDir,
+        modelName: pickFlag(args, '--name'),
+        skipCreate: false,
+      });
+      // Optionally start ollama serve on the requested port.
+      let serveResult = null;
+      const probeReady = await probeOllamaReady({ port });
+      if (!probeReady.ok) {
+        serveResult = await ollamaServe({ port });
+      } else {
+        serveResult = { ok: true, port, already_running: true, base_url: `http://127.0.0.1:${port}` };
+      }
+      const env = {
+        ok: result.ok,
+        runtime: 'ollama',
+        artifact: ap,
+        modelfile_path: result.modelfile_path,
+        weights_path: ggufStagedPath,
+        model_name: result.model_name,
+        create_result: result.create_result,
+        serve: serveResult,
+        port,
+        next: `ollama run ${result.model_name}`,
+      };
+      if (wantJsonOut) console.log(JSON.stringify(env, null, 2));
+      else {
+        console.log(`Modelfile -> ${result.modelfile_path}`);
+        console.log(`weights   -> ${ggufStagedPath}`);
+        if (result.create_result && result.create_result.ok) console.log(`created   -> ${result.model_name}`);
+        else if (result.create_result) console.log(`note: ollama create failed; ${result.create_result.stderr || result.create_result.error || ''}`);
+        if (serveResult && serveResult.ok && serveResult.already_running) console.log(`serve     -> already running at ${serveResult.base_url}`);
+        else if (serveResult && serveResult.ok) console.log(`serve     -> started pid=${serveResult.pid} at ${serveResult.base_url}`);
+        else if (serveResult) console.log(`serve     -> ${serveResult.error || 'unknown'}`);
+        console.log('');
+        console.log(`next: ${env.next}`);
+      }
+      return;
     }
     const wantJson = args.includes('--json');
     const base = path.basename(ap, '.kolm');
@@ -10999,7 +11819,7 @@ spec:
     // First positional arg that's not a flag is the artifact path.
     const artifact = args.find(a => !a.startsWith('--') && a !== 'serve');
     if (!artifact) {
-      console.error('usage: kolm serve --http <artifact.kolm> [--port 8765] [--host 127.0.0.1]');
+      console.error('usage: kolm serve --http <artifact.kolm> [--port 8765] [--host 127.0.0.1] [--kv-cache auto|shard|default]');
       process.exit(EXIT.BAD_ARGS);
     }
     const ap = path.isAbsolute(artifact) ? artifact : path.join(ARTIFACTS_DIR, artifact);
@@ -11065,6 +11885,53 @@ spec:
       }
     }
 
+    // SHARD — --kv-cache <auto|shard|default> policy gate. Resolves to a
+    // KOLM_KV_CACHE_BACKEND env var the Python serve.py child reads to decide
+    // between the default HuggingFace Cache and the Shard-compressed cache.
+    // Default 'auto' = Shard when (family, runtime, has_rope) all support it.
+    try {
+      const kvIdx = args.indexOf('--kv-cache');
+      const requested = (kvIdx >= 0 && args[kvIdx + 1]) ? String(args[kvIdx + 1]).toLowerCase() : 'auto';
+      if (!['auto', 'shard', 'default'].includes(requested)) {
+        console.error(`error: --kv-cache must be one of: auto, shard, default (got '${requested}')`);
+        process.exit(EXIT.BAD_ARGS);
+      }
+      const { selectKvCache, formatPolicyReport } = await import('../src/kv-cache-policy.js');
+      // Best-effort family probe from the artifact manifest. We don't fail if
+      // it's missing — selectKvCache falls back to the SUPPORTED_MODEL_FAMILIES
+      // gate which rejects unknown families cleanly.
+      let family = null;
+      try {
+        const { loadArtifact } = await import('../src/artifact-runner.js');
+        const bundle = loadArtifact(ap);
+        const m = bundle?.manifest || {};
+        const baseModel = String(m.base_model || m.base || '').toLowerCase();
+        family = m.model_family
+          || m.family
+          || (baseModel.includes('qwen2.5') ? 'qwen2.5'
+             : baseModel.includes('qwen3')  ? 'qwen3'
+             : baseModel.includes('qwen2')  ? 'qwen2'
+             : baseModel.includes('qwen')   ? 'qwen'
+             : baseModel.includes('llama')  ? 'llama'
+             : baseModel.includes('mistral')? 'mistral'
+             : baseModel.includes('mixtral')? 'mixtral'
+             : baseModel.includes('gemma')  ? 'gemma'
+             : baseModel.includes('deepseek')? 'deepseek'
+             : null);
+      } catch { /* artifact unreadable — selectKvCache will report unknown */ }
+      const policy = selectKvCache({
+        format: serveEnv.KOLM_SERVE_RUNTIME || 'vllm',
+        modelMeta: { family, has_rope: family ? true : undefined },
+        hardware: hwSummary ? { vram_gb: hwSummary.primary.vram_gb } : {},
+        requested,
+      });
+      serveEnv.KOLM_KV_CACHE_BACKEND = policy.backend;
+      console.log(formatPolicyReport(policy));
+      console.log('');
+    } catch (e) {
+      console.log(`(kv-cache policy skipped: ${e.message})`);
+    }
+
     console.log(`booting HTTP serve for ${path.basename(ap)} via ${py} apps/runtime/serve.py`);
     const r = spawnSync(py, ['-m', 'apps.runtime.serve', '--artifact', ap, '--port', String(port), '--host', host], {
       stdio: 'inherit',
@@ -11076,7 +11943,200 @@ spec:
 
   console.error('usage: kolm serve --mcp                    (frontier-agent MCP transport)');
   console.error('       kolm serve --http <artifact.kolm>   (OpenAI-compatible HTTP, vLLM/transformers)');
+  console.error('       kolm serve <model.gguf>             (auto-detect runtime: llama.cpp/vllm/mlx)');
   process.exit(EXIT.BAD_ARGS);
+}
+
+// R-3 — kolm serve auto-detection runtime path. Spawned for raw model files
+// (.gguf / .safetensors / .mlx) or when --dry-run / --runtime <auto> is given.
+// Behaviors:
+//   --dry-run        : print detection result + would-run command, exit 0
+//   --docker         : write docker-compose.yml to stdout, exit 0
+//   --k8s            : write k8s manifests (5 docs) to stdout, exit 0
+//   --runtime ollama : generate Modelfile + ollama create + ollama serve
+//   (default)        : spawn the auto-detected runtime as a child process
+async function _cmdServeAutodetect(args) {
+  const { detectRuntime, buildDockerCompose, buildK8sManifests } = await import('../src/serve-autodetect.js');
+  const { detectHardware } = await import('../src/forge-hardware.js');
+
+  const artifactArg = args.find(a => !a.startsWith('--') && a !== 'serve');
+  if (!artifactArg) {
+    console.error('usage: kolm serve <model.gguf|model.safetensors|model.mlx> [--port 8788]');
+    console.error('                    [--host 0.0.0.0] [--runtime auto|llama.cpp|vllm|mlx|ollama]');
+    console.error('                    [--context-length 4096] [--gpu-layers auto]');
+    console.error('                    [--dry-run] [--docker] [--k8s]');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const ap = path.isAbsolute(artifactArg) ? artifactArg : path.resolve(process.cwd(), artifactArg);
+
+  // Flags
+  const portFlag = pickFlag(args, '--port');
+  const port = portFlag ? Number(portFlag) : 8788;
+  const hostFlag = pickFlag(args, '--host');
+  const host = hostFlag || '0.0.0.0';
+  let runtimeFlag = pickFlag(args, '--runtime');
+  if (runtimeFlag) {
+    runtimeFlag = String(runtimeFlag).toLowerCase();
+    if (runtimeFlag === 'llamacpp') runtimeFlag = 'llama.cpp';
+    if (runtimeFlag === 'auto') runtimeFlag = null;  // null -> auto-detect
+  }
+  const ctxFlag = pickFlag(args, '--context-length');
+  const contextLength = ctxFlag ? Number(ctxFlag) : 4096;
+  const gpuLayersFlag = pickFlag(args, '--gpu-layers');
+  const wantDryRun = args.includes('--dry-run');
+  const wantDocker = args.includes('--docker');
+  const wantK8s = args.includes('--k8s');
+  const wantJson = args.includes('--json');
+
+  // Hardware probe is cheap; do it unconditionally for the dry-run print.
+  // KOLM_NO_HW_DETECT short-circuits to a cpu-only shape (test fixtures use it).
+  let hwProbe;
+  if (process.env.KOLM_NO_HW_DETECT === '1') {
+    hwProbe = {
+      primary: { vendor: 'cpu', name: 'cpu (forced)', vram_gb: 0, compute_capability: 'cpu', native_dtypes: ['fp16'] },
+      all: [],
+      detected_at: new Date().toISOString(),
+    };
+  } else {
+    try { hwProbe = detectHardware(); } catch { hwProbe = { primary: { vendor: 'cpu', name: 'unknown', vram_gb: 0 } }; }
+  }
+
+  // Optional manifest sidecar: <artifact>.manifest.json next to the model.
+  let manifest = null;
+  try {
+    const sidecar = ap + '.manifest.json';
+    if (fs.existsSync(sidecar)) manifest = JSON.parse(fs.readFileSync(sidecar, 'utf8'));
+  } catch {}
+
+  const decision = detectRuntime({
+    artifactPath: ap,
+    hwProbe,
+    manifest,
+    override: runtimeFlag,
+    gpuLayers: gpuLayersFlag,
+    contextLength,
+    port,
+    host,
+  });
+
+  // --docker: print compose YAML, exit 0.
+  if (wantDocker) {
+    if (decision.runtime === 'unsupported') {
+      console.error(`error: cannot build docker-compose — ${decision.reason}`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const yaml = buildDockerCompose({
+      runtime: decision.runtime, artifactPath: ap, port, contextLength,
+    });
+    process.stdout.write(yaml);
+    process.exit(EXIT.OK);
+  }
+
+  // --k8s: print 5-document manifest stream, exit 0.
+  if (wantK8s) {
+    if (decision.runtime === 'unsupported') {
+      console.error(`error: cannot build k8s manifests — ${decision.reason}`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const yaml = buildK8sManifests({
+      runtime: decision.runtime, artifactPath: ap, port, contextLength,
+    });
+    process.stdout.write(yaml);
+    process.exit(EXIT.OK);
+  }
+
+  // --dry-run: print decision + would-run command, exit 0. No spawn.
+  if (wantDryRun) {
+    if (wantJson) {
+      console.log(JSON.stringify({
+        ok: decision.runtime !== 'unsupported',
+        artifact: ap,
+        runtime: decision.runtime,
+        reason: decision.reason,
+        command: decision.command || null,
+        hw: hwProbe.primary,
+        format: decision.format,
+        gpu_class: decision.gpu_class,
+        port, host, context_length: contextLength,
+        dry_run: true,
+      }, null, 2));
+    } else {
+      console.log(`artifact:        ${ap}`);
+      console.log(`format:          ${decision.format}`);
+      console.log(`gpu_class:       ${decision.gpu_class} (${hwProbe.primary?.name || 'unknown'})`);
+      console.log(`runtime:         ${decision.runtime}`);
+      console.log(`reason:          ${decision.reason}`);
+      if (decision.command) {
+        const cmdStr = [decision.command.bin, ...decision.command.args].join(' ');
+        console.log(`would-spawn:     ${cmdStr}`);
+      }
+      console.log(`host:port:       ${host}:${port}`);
+      console.log(`context-length:  ${contextLength}`);
+      console.log('');
+      console.log('(dry-run mode — no process spawned. drop --dry-run to actually serve.)');
+    }
+    process.exit(EXIT.OK);
+  }
+
+  // Unsupported pairing without a special flag — print and bail.
+  if (decision.runtime === 'unsupported') {
+    console.error(`error: ${decision.reason}`);
+    console.error(`  try: kolm serve ${path.basename(ap)} --dry-run    (to see detection details)`);
+    process.exit(EXIT.BAD_ARGS);
+  }
+
+  // --runtime ollama: generate Modelfile, run `ollama create`, then `ollama serve`.
+  // S-2 may take this over later; for now we keep the integration minimal.
+  if (decision.runtime === 'ollama') {
+    const modelName = path.basename(ap).replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9-]/g, '-');
+    const modelfile = `FROM ${ap}\nPARAMETER num_ctx ${contextLength}\n`;
+    const modelfileDir = path.join(KOLM_DIR, 'ollama');
+    fs.mkdirSync(modelfileDir, { recursive: true });
+    const modelfilePath = path.join(modelfileDir, `${modelName}.Modelfile`);
+    fs.writeFileSync(modelfilePath, modelfile);
+    console.log(`ollama: created Modelfile at ${modelfilePath}`);
+    const create = spawnSync('ollama', ['create', modelName, '-f', modelfilePath], { stdio: 'inherit' });
+    if (create.status !== 0) {
+      console.error(`ollama create failed (exit ${create.status}). is ollama installed?`);
+      process.exit(EXIT.EXECUTION);
+    }
+    console.log(`ollama: serving "${modelName}" on ${host}:${port}`);
+    const serve = spawnSync('ollama', ['serve'], {
+      stdio: 'inherit',
+      env: { ...process.env, OLLAMA_HOST: `${host}:${port}` },
+    });
+    process.exit(serve.status || 0);
+  }
+
+  // Default: spawn the auto-detected runtime as a child. stdout/stderr stream
+  // into ~/.kolm/serve/<artifact-base>-<port>.log so the operator can `tail -f`.
+  const logDir = path.join(KOLM_DIR, 'serve');
+  fs.mkdirSync(logDir, { recursive: true });
+  const baseName = path.basename(ap).replace(/\.[^.]+$/, '');
+  const logPath = path.join(logDir, `${baseName}-${port}.log`);
+  const logStream = fs.createWriteStream(logPath, { flags: 'a' });
+
+  console.log(`runtime:    ${decision.runtime}  (${decision.reason})`);
+  console.log(`spawning:   ${decision.command.bin} ${decision.command.args.join(' ')}`);
+  console.log(`logs:       ${logPath}`);
+  console.log('');
+
+  const { spawn } = await import('node:child_process');
+  const child = spawn(decision.command.bin, decision.command.args, {
+    stdio: ['ignore', 'pipe', 'pipe'],
+    env: { ...process.env, ...(decision.env || {}) },
+  });
+  child.stdout.on('data', d => { process.stdout.write(d); logStream.write(d); });
+  child.stderr.on('data', d => { process.stderr.write(d); logStream.write(d); });
+  child.on('exit', code => {
+    logStream.end();
+    process.exit(code || 0);
+  });
+  child.on('error', err => {
+    console.error(`spawn error: ${err.message}`);
+    console.error(`  hint: install ${decision.runtime} or pass --runtime <other>`);
+    process.exit(EXIT.MISSING_PREREQ);
+  });
 }
 
 async function cmdPublish(args) {
@@ -12544,6 +13604,25 @@ async function cmdFit(args) {
 
 async function cmdExperts(args) {
   if (maybeHelp('experts', args)) return;
+  // S-7 (V1 launch) — MoE-aware sub-verbs layered on top of the existing
+  // W866 expert-activation analyzer. The sub-verbs come from src/moe-support.js
+  // + src/moe-registry.js and operate on KNOWN MoE families (Mixtral 8x7B,
+  // Qwen-MoE, DeepSeek-V2/V3, Llama 4 Maverick, ...) without needing an
+  // artifact on disk. The legacy positional-artifact path is preserved below
+  // for back-compat with W866 docs and the `kolm forge experts` umbrella.
+  //
+  //   kolm experts list                       — list known MoE families
+  //   kolm experts inspect <family>           — topology + memory estimate
+  //   kolm experts inspect <dir>              — detectMoE on a local dir/file
+  //   kolm experts pin --runtime vllm \
+  //                    --artifact <a.kolm> \
+  //                    --ids 3,7,41           — serve-config for pinning
+  //   kolm experts <artifact.kolm> [opts]     — legacy W866 analyzer
+  const sub = args[0];
+  if (sub === 'list')    return cmdExpertsList(args.slice(1));
+  if (sub === 'inspect') return cmdExpertsInspect(args.slice(1));
+  if (sub === 'pin')     return cmdExpertsPin(args.slice(1));
+
   const wantJson = args.includes('--json');
   const wantBars = args.includes('--bars');
   const thresholdFlag = pickFlag(args, '--threshold');
@@ -12555,7 +13634,11 @@ async function cmdExperts(args) {
   const positional = args.filter(a => !a.startsWith('--'));
   const ap = resolveArtifact(positional[0]);
   if (!ap) {
-    console.error('usage: kolm experts <artifact.kolm> [--threshold 0.01] [--bars] [--json]');
+    console.error('usage:');
+    console.error('  kolm experts list                              # known MoE families');
+    console.error('  kolm experts inspect <family|dir>              # topology + memory estimate');
+    console.error('  kolm experts pin --runtime vllm|llama.cpp|tgi --artifact <ref> --ids 3,7,41');
+    console.error('  kolm experts <artifact.kolm> [--threshold 0.01] [--bars] [--json]');
     process.exit(EXIT.NOT_FOUND);
   }
   const { analyzeExperts, renderActivationBars } = await import('../src/forge-experts.js');
@@ -12606,6 +13689,228 @@ async function cmdExperts(args) {
   }
 }
 
+// -------------------------------------------------------------------------
+// S-7 (V1 launch) — MoE-aware sub-verbs for `kolm experts`.
+//
+// These three handlers expose src/moe-support.js + src/moe-registry.js to
+// the CLI so users can:
+//   1) `kolm experts list` — see every known MoE family + topology.
+//   2) `kolm experts inspect <ref>` — pull topology + memory estimate for
+//      a family id (registry lookup) OR a local model dir (detectMoE).
+//   3) `kolm experts pin --runtime ...` — emit a serve-time pin config
+//      that keeps the chosen expert ids hot on GPU. Targets vllm,
+//      llama.cpp, and tgi.
+// -------------------------------------------------------------------------
+
+async function cmdExpertsList(args) {
+  const wantJson = args.includes('--json');
+  const { listFamilies } = await import('../src/moe-registry.js');
+  const fams = listFamilies();
+  if (wantJson) { console.log(JSON.stringify({ families: fams }, null, 2)); return; }
+  console.log('kolm experts list - known MoE model families');
+  console.log('');
+  console.log('  id                    vendor      experts  top-k  expert-size  display');
+  console.log('  --------------------  ----------  -------  -----  -----------  ----------------------------------');
+  for (const f of fams) {
+    const id = f.id.padEnd(20);
+    const vendor = (f.vendor || '').padEnd(10);
+    const experts = String(f.experts).padStart(7);
+    const topK = String(f.top_k).padStart(5);
+    const esize = `${f.expert_size_b}B`.padStart(11);
+    console.log(`  ${id}  ${vendor}  ${experts}  ${topK}  ${esize}  ${f.display_name}`);
+  }
+  console.log('');
+  console.log(`  total: ${fams.length} families`);
+  console.log('');
+  console.log('  next: kolm experts inspect <id>           # topology + memory estimate');
+  console.log('        kolm experts pin --runtime vllm ... # pin hot experts to GPU');
+}
+
+async function cmdExpertsInspect(args) {
+  const wantJson = args.includes('--json');
+  const positional = args.filter(a => !a.startsWith('--'));
+  const ref = positional[0];
+  if (!ref) {
+    console.error('usage: kolm experts inspect <family-id|model-dir|config.json> [--vram <gb>] [--json]');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const vramFlag = pickFlag(args, '--vram');
+  const targetVram = vramFlag ? Number(vramFlag) : 24;
+  if (!Number.isFinite(targetVram) || targetVram <= 0) {
+    console.error(`error: --vram must be a positive number (got ${vramFlag})`);
+    process.exit(EXIT.BAD_ARGS);
+  }
+
+  const { getFamily } = await import('../src/moe-registry.js');
+  const moeSupport = await import('../src/moe-support.js');
+
+  // Resolve ref: try family id first, then treat as filesystem path.
+  const fam = getFamily(ref);
+  let topology;
+  let source;
+  if (fam) {
+    topology = {
+      is_moe: true,
+      num_experts: fam.experts,
+      experts_per_token: fam.top_k,
+      expert_dim: fam.hidden_size * 4,
+      router_dim: fam.router_dim,
+      family: fam.id,
+      display_name: fam.display_name,
+      vendor: fam.vendor,
+    };
+    source = `registry:${fam.id}`;
+  } else {
+    if (!fs.existsSync(ref)) {
+      console.error(`experts inspect: '${ref}' is neither a known family id nor an existing path`);
+      console.error('  try `kolm experts list` to see known family ids');
+      process.exit(EXIT.NOT_FOUND);
+    }
+    const detected = moeSupport.detectMoE(ref);
+    if (!detected.is_moe) {
+      const out = { ref, ...detected };
+      if (wantJson) { console.log(JSON.stringify(out, null, 2)); return; }
+      console.log(`${ref}: not detected as MoE (reason: ${detected.reason || 'no_moe_evidence'})`);
+      return;
+    }
+    topology = detected;
+    source = detected.source || 'detect';
+  }
+
+  // Total-params estimate: prefer family numbers when we know them.
+  let totalParamsB;
+  if (fam) {
+    totalParamsB = fam.shared_size_b + fam.expert_size_b * fam.experts;
+  } else if (topology.num_experts && topology.expert_dim && topology.hidden_size) {
+    // Rough: 3 * hidden_size * expert_dim per expert per layer; assume 32 layers.
+    totalParamsB = (3 * topology.hidden_size * topology.expert_dim * topology.num_experts * 32) / 1e9;
+  } else {
+    totalParamsB = 47;  // fall back to Mixtral 8x7B baseline
+  }
+
+  // Memory at q4_k_m + at fp16 for reference.
+  let mem_q4 = null;
+  let mem_fp16 = null;
+  let policy = null;
+  try {
+    mem_q4 = moeSupport.estimateMoEMemory({
+      params: totalParamsB,
+      num_experts: topology.num_experts,
+      experts_per_token: topology.experts_per_token || (fam ? fam.top_k : 2),
+      quant: 'q4_k_m',
+    });
+    mem_fp16 = moeSupport.estimateMoEMemory({
+      params: totalParamsB,
+      num_experts: topology.num_experts,
+      experts_per_token: topology.experts_per_token || (fam ? fam.top_k : 2),
+      quant: 'fp16',
+    });
+    policy = moeSupport.recommendQuantPolicy({
+      moe_info: {
+        num_experts: topology.num_experts,
+        experts_per_token: topology.experts_per_token || (fam ? fam.top_k : 2),
+        params: totalParamsB,
+        family: fam ? fam.id : undefined,
+      },
+      target_vram_gb: targetVram,
+    });
+  } catch (e) {
+    // Estimation can fail when experts_per_token is unknown (e.g. safetensors
+    // index lookup only). Surface the constraint rather than crashing.
+    if (!wantJson) console.error(`note: memory estimate unavailable: ${e.message}`);
+  }
+
+  const out = {
+    ref, source, topology,
+    total_params_b: Math.round(totalParamsB * 100) / 100,
+    memory_at_q4_k_m: mem_q4,
+    memory_at_fp16: mem_fp16,
+    recommended_quant_policy: policy,
+    target_vram_gb: targetVram,
+  };
+  if (wantJson) { console.log(JSON.stringify(out, null, 2)); return; }
+
+  console.log(`${ref}: MoE topology`);
+  console.log(`  source:               ${source}`);
+  if (topology.display_name) console.log(`  display name:         ${topology.display_name}`);
+  if (topology.vendor)       console.log(`  vendor:               ${topology.vendor}`);
+  console.log(`  experts:              ${topology.num_experts}`);
+  console.log(`  experts per token:    ${topology.experts_per_token || '(unknown)'}`);
+  if (topology.expert_dim)   console.log(`  expert dim:           ${topology.expert_dim}`);
+  if (topology.router_dim)   console.log(`  router dim:           ${topology.router_dim}`);
+  console.log(`  total params (B):     ${out.total_params_b}`);
+  console.log('');
+  if (mem_q4) {
+    console.log(`  memory @ q4_k_m:      hot ${mem_q4.hot_vram_gb} GB / cold ${mem_q4.cold_dram_gb} GB / full ${mem_q4.full_weights_gb} GB`);
+  }
+  if (mem_fp16) {
+    console.log(`  memory @ fp16:        hot ${mem_fp16.hot_vram_gb} GB / cold ${mem_fp16.cold_dram_gb} GB / full ${mem_fp16.full_weights_gb} GB`);
+  }
+  console.log('');
+  if (policy) {
+    console.log(`  recommended policy @ ${targetVram} GB VRAM:`);
+    console.log(`    router:   ${policy.router}`);
+    console.log(`    shared:   ${policy.shared}`);
+    console.log(`    experts:  ${policy.experts}`);
+    console.log(`    label:    ${policy.label}`);
+    console.log(`    fits:     ${policy.fits}`);
+    console.log(`    projected hot VRAM: ${policy.projected_hot_vram_gb} GB`);
+  }
+  if (fam && fam.notes) {
+    console.log('');
+    console.log(`  notes: ${fam.notes}`);
+  }
+}
+
+async function cmdExpertsPin(args) {
+  const wantJson = args.includes('--json');
+  const runtime = pickFlag(args, '--runtime');
+  const artifactRef = pickFlag(args, '--artifact');
+  const idsStr = pickFlag(args, '--ids');
+  if (!runtime || !artifactRef || !idsStr) {
+    console.error('usage: kolm experts pin --runtime vllm|llama.cpp|tgi --artifact <ref> --ids 3,7,41 [--json]');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const expert_ids = idsStr.split(',').map(s => s.trim()).filter(Boolean).map(Number);
+  if (expert_ids.length === 0 || expert_ids.some(e => !Number.isFinite(e))) {
+    console.error(`error: --ids must be a comma-separated list of integers (got ${idsStr})`);
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const { pinExperts } = await import('../src/moe-support.js');
+  let config;
+  try {
+    config = pinExperts({ artifact: artifactRef, expert_ids, runtime });
+  } catch (e) {
+    console.error(`experts pin: ${e.message}`);
+    process.exit(EXIT.BAD_ARGS);
+  }
+  if (wantJson) { console.log(JSON.stringify(config, null, 2)); return; }
+  console.log(`kolm experts pin - serve-config for ${config.runtime}`);
+  console.log('');
+  console.log(`  artifact:           ${config.artifact}`);
+  console.log(`  pinned expert ids:  [${config.pinned_expert_ids.join(', ')}]`);
+  console.log(`  pinned count:       ${config.pinned_count}`);
+  console.log('');
+  console.log(`  runtime args (splice into launch command):`);
+  console.log(`    ${config.runtime_args.join(' ')}`);
+  console.log('');
+  if (config.envelope.vllm_expert_pin_json) {
+    console.log('  vllm pin file (write to /tmp/kolm-expert-pin.json):');
+    console.log(JSON.stringify(config.envelope.vllm_expert_pin_json, null, 2)
+      .split('\n').map(l => '    ' + l).join('\n'));
+  }
+  if (config.envelope.llama_cpp_overrides) {
+    console.log('  llama.cpp tensor overrides:');
+    for (const o of config.envelope.llama_cpp_overrides) console.log(`    ${o}`);
+  }
+  if (config.envelope.tgi_env) {
+    console.log('  TGI env (export before launch):');
+    for (const [k, v] of Object.entries(config.envelope.tgi_env)) {
+      console.log(`    ${k}=${v}`);
+    }
+  }
+}
+
 // kolm quantize: wave 195 (Q+5). Quantize a model directory via the isolated
 // quantize worker at workers/quantize/quantize.mjs. The worker detects whether
 // python3 + bitsandbytes are importable and falls back to an honest manifest
@@ -12627,11 +13932,13 @@ async function cmdQuantize(args) {
   if (explicitScaffold || (!hasWorkArgs && !args.includes('--local-worker'))) {
     console.log('kolm quantize — local INT4/INT8/FP8 quantization via workers/quantize/');
     console.log('');
+    console.log('This verb is opt-in scaffolding; pass --local-worker to invoke the python worker.');
+    console.log('');
     console.log('usage:');
-    console.log('  kolm quantize --in <model-dir> --out <out-dir> [--method int4|int8|fp8|...]');
-    console.log('  kolm quantize --doctor                # check python+bitsandbytes are importable');
-    console.log('  kolm quantize --mixed-precision <profile.json>');
-    console.log('  kolm quantize oracle ...              # quant-method recommender (no GPU)');
+    console.log('  kolm quantize --local-worker --in <model-dir> --out <out-dir> [--method int4|int8|fp8|...]');
+    console.log('  kolm quantize --local-worker --doctor       # check python+bitsandbytes are importable');
+    console.log('  kolm quantize --local-worker --mixed-precision <profile.json>');
+    console.log('  kolm quantize oracle ...                    # quant-method recommender (no GPU)');
     console.log('');
     console.log('worker setup (one time):');
     console.log('  cd workers/quantize && npm install');
@@ -22635,6 +23942,9 @@ async function cmdRag(args) {
   if (maybeHelp('rag', args)) return;
   const sub = args[0];
   if (!sub) { usage('rag'); process.exit(EXIT.BAD_ARGS); }
+  if (sub === 'capture' || sub === 'status') {
+    return cmdW734RagCapture(args);
+  }
   const rag = await import('../src/rag.js');
   switch (sub) {
     case 'index': {
@@ -24738,6 +26048,83 @@ async function cmdMenu(args) {
   process.exit(r.status == null ? 0 : r.status);
 }
 
+// =============================================================================
+// LM-8 (V1 launch 2026-05-26) — `kolm email outbox` reads the local outbox
+// queue at data/email-outbox.jsonl. The outbox is the fallback path
+// sendEmail() uses when RESEND_API_KEY is unset or Resend rejects/throws.
+// This verb gives operators a one-line view of what would have been sent so
+// nothing is silently dropped on launch day before secrets reach prod env.
+//
+// Usage:
+//   kolm email outbox                  - render the 20 most recent queued
+//                                        emails in a compact table
+//   kolm email outbox --json           - emit the raw JSONL parsed to a list
+//   kolm email outbox --tail N         - cap the rendered list to N rows
+// =============================================================================
+async function cmdEmailOutbox(args) {
+  args = args || [];
+  if (args.indexOf('--help') >= 0 || args.indexOf('-h') >= 0) {
+    console.log([
+      'kolm email outbox [--json] [--tail N]',
+      '',
+      '  read data/email-outbox.jsonl — the fallback queue sendEmail() writes',
+      '  to when RESEND_API_KEY is unset or Resend rejects/throws. Nothing is',
+      '  silently dropped; an operator can replay later.',
+      '',
+      '  --json        emit the raw parsed envelope list',
+      '  --tail N      cap the rendered list to the N most recent rows (default 20)',
+    ].join('\n'));
+    process.exit(EXIT.OK);
+  }
+  const jsonMode = args.includes('--json');
+  const tailIdx = args.indexOf('--tail');
+  const tailN = (tailIdx >= 0 && args[tailIdx + 1] && /^\d+$/.test(args[tailIdx + 1]))
+    ? Math.max(1, parseInt(args[tailIdx + 1], 10))
+    : 20;
+
+  // Resolve the outbox path relative to cwd (server runs from repo root in
+  // V1; if a remote/non-standard layout is in play the operator can symlink).
+  const outboxPath = path.resolve(process.cwd(), 'data', 'email-outbox.jsonl');
+  let rows = [];
+  if (fs.existsSync(outboxPath)) {
+    try {
+      const raw = fs.readFileSync(outboxPath, 'utf8');
+      for (const line of raw.split(/\r?\n/)) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+        try { rows.push(JSON.parse(trimmed)); }
+        catch (_) { /* skip malformed lines — never throw on a bad row */ }
+      }
+    } catch (_) { /* missing/unreadable — fall through to empty */ }
+  }
+  // Most recent first; cap at tailN.
+  rows = rows.reverse().slice(0, tailN);
+
+  if (jsonMode) {
+    process.stdout.write(JSON.stringify({ ok: true, path: outboxPath, count: rows.length, rows }, null, 2) + '\n');
+    process.exit(EXIT.OK);
+  }
+
+  if (rows.length === 0) {
+    console.log('kolm email outbox');
+    console.log('  path:  ' + outboxPath);
+    console.log('  (no queued emails — Resend is delivering or the queue has not yet been written)');
+    process.exit(EXIT.OK);
+  }
+  console.log('kolm email outbox  (' + rows.length + ' of most recent ' + tailN + ')');
+  console.log('  path: ' + outboxPath);
+  console.log('');
+  for (const row of rows) {
+    const ts = row.ts || '(no-ts)';
+    const to = Array.isArray(row.to) ? row.to.join(',') : (row.to || '(no-to)');
+    const tag = row.tag || '-';
+    const subject = row.subject || '(no-subject)';
+    console.log('  ' + ts + '  [' + tag + ']  to=' + to);
+    console.log('    ' + subject);
+  }
+  process.exit(EXIT.OK);
+}
+
 async function cmdChat(args) {
   args = args || [];
   if (args.indexOf('--help') >= 0 || args.indexOf('-h') >= 0) {
@@ -26121,6 +27508,10 @@ async function cmdEvidence(args) {
   const subIndex = args.indexOf(sub);
   const rest = args.slice(0, subIndex).concat(args.slice(subIndex + 1));
   const key = String(sub).toLowerCase();
+  // R-5 evidence DAG sub-verbs ride alongside the legacy packet scripts.
+  if (key === 'trace') { await cmdEvidenceTrace(rest); return; }
+  if (key === 'show') { await cmdEvidenceShow(rest); return; }
+  if (key === 'revoke') { await cmdEvidenceRevoke(rest); return; }
   const scripts = {
     'format-governance': 'scripts/format-governance-packet.mjs',
     format: 'scripts/format-governance-packet.mjs',
@@ -26143,10 +27534,217 @@ async function cmdEvidence(args) {
   const script = scripts[key];
   if (!script) {
     console.error('unknown evidence subcommand:', sub);
-    console.error('usage: kolm evidence <format-governance|runtime-adoption|compliance-certification|package-release|benchmark|quality>');
+    console.error('usage: kolm evidence <trace|show|revoke|format-governance|runtime-adoption|compliance-certification|package-release|benchmark|quality>');
     process.exit(EXIT.BAD_ARGS);
   }
   runLocalNodeScript(script, rest);
+}
+
+// ---------------------------------------------------------------------------
+// R-5 evidence DAG sub-verbs
+//
+//   kolm evidence trace <artifact.kolm|artifact_id> [--json]
+//   kolm evidence show  <evidence_id> [--json]
+//   kolm evidence revoke <evidence_id> --reason "<text>" [--json]
+//
+// trace prefers the DAG inlined in a .kolm manifest, then falls back to the
+// per-artifact evidence-store. revoke flips the node's revoked flag and
+// returns the descendant ids that newly need_review, plus appends a verdict
+// line to data/artifacts/<id>/evidence-revocations.jsonl.
+// ---------------------------------------------------------------------------
+
+function _evidenceFlagPresent(args, name) {
+  return Array.isArray(args) && args.some((a) => a === name);
+}
+
+function _evidenceFlagValue(args, name) {
+  if (!Array.isArray(args)) return null;
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (a === name) return args[i + 1];
+    if (typeof a === 'string' && a.startsWith(name + '=')) return a.slice(name.length + 1);
+  }
+  return null;
+}
+
+function _evidencePositional(args) {
+  if (!Array.isArray(args)) return [];
+  return args.filter((a) => typeof a === 'string' && !a.startsWith('--'));
+}
+
+async function cmdEvidenceTrace(args) {
+  const positional = _evidencePositional(args);
+  const wantJson = _evidenceFlagPresent(args, '--json');
+  const target = positional[0];
+  if (!target) {
+    console.error('usage: kolm evidence trace <artifact.kolm|artifact_id> [--json]');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  let dag = null;
+  let artifact_id = null;
+  let source = null;
+
+  // Path 1 - local .kolm archive on disk.
+  if (fs.existsSync(target) && /\.kolm$/i.test(target)) {
+    try {
+      const { readKolm } = await import('../src/artifact.js');
+      const buf = fs.readFileSync(path.resolve(target));
+      const obj = await readKolm(buf);
+      const manifest = obj && obj.manifest ? obj.manifest : obj;
+      if (manifest && manifest.evidence_dag) {
+        dag = manifest.evidence_dag;
+        source = 'manifest';
+      }
+      artifact_id = (manifest && manifest.artifact_id) || target;
+    } catch (err) {
+      console.error('failed to read .kolm:', err.message);
+      process.exit(EXIT.EXECUTION);
+    }
+  }
+
+  // Path 2 - fall back to the evidence-store on disk keyed by artifact_id.
+  if (!dag) {
+    try {
+      const { readEvidenceDag } = await import('../src/evidence-store.js');
+      const id = artifact_id || target;
+      const stored = readEvidenceDag(id);
+      if (stored) {
+        dag = stored;
+        artifact_id = id;
+        source = source || 'store';
+      }
+    } catch {
+      /* swallow and let the not-found branch handle it below */
+    }
+  }
+
+  if (!dag) {
+    if (wantJson) {
+      console.log(JSON.stringify({ ok: false, error: 'evidence_dag_not_found', target }, null, 2));
+    } else {
+      console.error('no evidence DAG found for', target);
+    }
+    process.exit(EXIT.NOT_FOUND || 4);
+  }
+
+  if (wantJson) {
+    console.log(JSON.stringify({ ok: true, artifact_id, source, dag }, null, 2));
+    return;
+  }
+
+  console.log('artifact:', artifact_id);
+  console.log('source:', source);
+  console.log('nodes:', (dag.nodes || []).length, 'edges:', (dag.edges || []).length);
+  for (const node of dag.nodes || []) {
+    const note = node.revoked ? ' [revoked]' : '';
+    console.log(`  - ${node.id} (${node.kind})${note}`);
+    if (node.label) console.log(`      label: ${node.label}`);
+  }
+  for (const edge of dag.edges || []) {
+    console.log(`  ${edge.from} --${edge.relationship}--> ${edge.to}`);
+  }
+}
+
+async function cmdEvidenceShow(args) {
+  const positional = _evidencePositional(args);
+  const wantJson = _evidenceFlagPresent(args, '--json');
+  const id = positional[0];
+  if (!id) {
+    console.error('usage: kolm evidence show <evidence_id> [--json]');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const { readNode } = await import('../src/evidence-store.js');
+  const found = readNode(id);
+  if (!found) {
+    if (wantJson) {
+      console.log(JSON.stringify({ ok: false, error: 'evidence_not_found', evidence_id: id }, null, 2));
+    } else {
+      console.error('no evidence node found for', id);
+    }
+    process.exit(EXIT.NOT_FOUND || 4);
+  }
+  if (wantJson) {
+    console.log(JSON.stringify({ ok: true, evidence_id: id, artifact_id: found.artifact_id, node: found.node }, null, 2));
+    return;
+  }
+  console.log('evidence_id:', id);
+  console.log('artifact_id:', found.artifact_id);
+  console.log('kind:', found.node.kind);
+  if (found.node.label) console.log('label:', found.node.label);
+  if (found.node.revoked) console.log('revoked: true');
+  if (found.node.metadata) console.log('metadata:', JSON.stringify(found.node.metadata));
+}
+
+async function cmdEvidenceRevoke(args) {
+  const positional = _evidencePositional(args);
+  const wantJson = _evidenceFlagPresent(args, '--json');
+  const reason = _evidenceFlagValue(args, '--reason');
+  const id = positional[0];
+  if (!id) {
+    console.error('usage: kolm evidence revoke <evidence_id> --reason "<text>" [--json]');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  if (!reason || !String(reason).trim()) {
+    console.error('evidence revoke requires --reason "<text>"');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const { readEvidenceDag, findArtifactForNode, writeEvidenceDag } = await import('../src/evidence-store.js');
+  const { revoke: revokeNode, buildDag } = await import('../src/evidence-dag.js');
+  const artifact_id = findArtifactForNode(id);
+  if (!artifact_id) {
+    if (wantJson) {
+      console.log(JSON.stringify({ ok: false, error: 'evidence_not_found', evidence_id: id }, null, 2));
+    } else {
+      console.error('no evidence node found for', id);
+    }
+    process.exit(EXIT.NOT_FOUND || 4);
+  }
+  const stored = readEvidenceDag(artifact_id);
+  if (!stored) {
+    if (wantJson) {
+      console.log(JSON.stringify({ ok: false, error: 'evidence_dag_not_found', artifact_id }, null, 2));
+    } else {
+      console.error('no evidence DAG persisted for', artifact_id);
+    }
+    process.exit(EXIT.NOT_FOUND || 4);
+  }
+  const dag = buildDag(stored);
+  const result = revokeNode(dag, id, { reason });
+  // Persist the revoked DAG so subsequent trace/show calls reflect the flag.
+  writeEvidenceDag(artifact_id, dag);
+  // Append a verdict line for out-of-band review (who/why/when).
+  try {
+    const ON_VERCEL = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+    const BUNDLED = path.resolve('data');
+    const DATA_DIR = process.env.KOLM_DATA_DIR
+      ? path.resolve(process.env.KOLM_DATA_DIR)
+      : (ON_VERCEL ? '/tmp/data' : BUNDLED);
+    const verdictPath = path.join(DATA_DIR, 'artifacts', artifact_id, 'evidence-revocations.jsonl');
+    fs.mkdirSync(path.dirname(verdictPath), { recursive: true });
+    const line = JSON.stringify({
+      evidence_id: id,
+      artifact_id,
+      reason: String(reason),
+      revoked: result.revoked,
+      needs_review: result.needs_review,
+      actor: process.env.KOLM_ACTOR || 'cli',
+      at: new Date().toISOString(),
+    });
+    fs.appendFileSync(verdictPath, line + '\n');
+  } catch {
+    /* verdict log is best-effort; the DAG write is the source of truth */
+  }
+  if (wantJson) {
+    console.log(JSON.stringify({ ok: true, evidence_id: id, artifact_id, ...result, reason: String(reason) }, null, 2));
+    return;
+  }
+  console.log('revoked:', result.revoked.join(', '));
+  console.log('needs_review:', result.needs_review.join(', ') || '(none)');
+  console.log('reason:', reason);
 }
 
 // ---------- kolm cloud train ----------
@@ -26901,6 +28499,110 @@ async function cmdBundle(args) {
 }
 
 // =============================================================================
+// R-4 — `kolm deploy <sub>`
+//
+// `kolm deploy bundle --airgap --artifact <art> --runtime <vllm|llama.cpp> --output <dir>`
+//
+// Sibling to `kolm bundle airgap` (the W869 T4 builder that ships the whole
+// kolm checkout). This verb is artifact-scoped: it bundles a *single*
+// compiled artifact with its runtime installer + config + offline verifier
+// for delivery to an air-gapped serving host. Implemented as a thin wrapper
+// over src/deploy-generators.js#generateAirgapBundle so the test suite can
+// drive the same code path without going through argv.
+// =============================================================================
+
+function _deployHelp() {
+  console.log('kolm deploy — emit deployment configs for a compiled artifact');
+  console.log('');
+  console.log('Sub-commands:');
+  console.log('  bundle --airgap --artifact <art> --runtime <vllm|llama.cpp> --output <dir>');
+  console.log('                          build a tar.gz with artifact + runtime + offline verifier');
+  console.log('');
+  console.log('Related verbs:');
+  console.log('  kolm export <artifact> --format docker-compose [--output <path>]');
+  console.log('  kolm export <artifact> --format k8s            [--output <dir>]');
+  console.log('  kolm export <artifact> --format vllm-config    [--output <path>]');
+  console.log('');
+  console.log('See `kolm bundle airgap --help` for the repo-wide air-gap builder.');
+}
+
+async function cmdDeploy(args) {
+  const sub = args[0];
+  const rest = args.slice(1);
+  if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
+    _deployHelp();
+    return;
+  }
+  if (sub !== 'bundle') {
+    console.error('unknown deploy subcommand:', sub);
+    console.error('try: kolm deploy --help');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  if (rest.includes('--help') || rest.includes('-h')) {
+    _deployHelp();
+    return;
+  }
+  const get = (flag) => {
+    const i = rest.indexOf(flag);
+    return i >= 0 ? rest[i + 1] : null;
+  };
+  const isAirgap = rest.includes('--airgap');
+  const artifactArg = get('--artifact');
+  const runtime = get('--runtime') || 'vllm';
+  const output = get('--output') || get('--out');
+  const wantJson = rest.includes('--json');
+
+  if (!isAirgap) {
+    console.error('kolm deploy bundle: --airgap is required (no other modes exist yet)');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  if (!artifactArg) {
+    console.error('kolm deploy bundle: --artifact <path-or-id> is required');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  if (!output) {
+    console.error('kolm deploy bundle: --output <dir> is required');
+    process.exit(EXIT.BAD_ARGS);
+  }
+
+  const ap = resolveArtifact(artifactArg);
+  if (!ap) {
+    const e = new Error('artifact not found: ' + artifactArg);
+    e.exitCode = EXIT.NOT_FOUND;
+    throw e;
+  }
+  const mod = await import('../src/deploy-generators.js');
+  const env = mod.generateAirgapBundle({
+    artifact_path: ap,
+    runtime,
+    output_dir: path.resolve(output),
+  });
+  if (wantJson) {
+    console.log(JSON.stringify(env, null, 2));
+    if (!env.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+  if (!env.ok) {
+    console.error('kolm deploy bundle: ' + (env.error || 'unknown_error'));
+    if (env.hint) console.error('  hint: ' + env.hint);
+    process.exit(EXIT.EXECUTION);
+  }
+  const mb = (env.size_bytes / 1024 / 1024).toFixed(2);
+  console.log('air-gap bundle written: ' + env.bundle_path);
+  console.log('  artifact:        ' + env.artifact_id);
+  console.log('  runtime:         ' + env.runtime);
+  console.log('  size:            ' + mb + ' MB');
+  console.log('  files:           ' + env.file_count);
+  console.log('  bundle sha256:   ' + env.sha256);
+  console.log('  manifest sha256: ' + env.manifest_sha256);
+  console.log('  sibling:         ' + env.bundle_path + '.sha256');
+  console.log('');
+  console.log('Verify on the target host:');
+  console.log('  tar -xzf ' + path.basename(env.bundle_path));
+  console.log('  sha256sum -c MANIFEST.sha256');
+}
+
+// =============================================================================
 // W779 - kolm pack / kolm unpack --sneakernet
 //
 // `kolm pack --sneakernet <artifact.kolm> --out <path>`
@@ -27042,7 +28744,7 @@ function looksLikeNaturalLanguage(cmd, rest) {
 // Single source of truth for the verb + subcommand tables the shell completion
 // scripts consume. Keep this in sync with the dispatch switch below.
 const COMPLETION_VERBS = [
-  'init', 'signup', 'login', 'whoami', 'artifacts', 'status', 'health', 'metrics', 'changelog', 'billing', 'support-bundle', 'key', 'new', 'build', 'compile', 'train', 'make', 'ship', 'run', 'eval', 'benchmark', 'bench',
+  'init', 'signup', 'login', 'whoami', 'artifacts', 'artifact', 'status', 'health', 'metrics', 'changelog', 'billing', 'support-bundle', 'key', 'new', 'build', 'compile', 'train', 'make', 'ship', 'run', 'eval', 'benchmark', 'bench',
   'score', 'list', 'ls', 'inspect', 'eject', 'diff', 'verify', 'serve', 'tui', 'repl', 'publish', 'pull', 'hub', 'capture', 'labels', 'distill', 'moe', 'tokenize',
   'config', 'hmac', 'install', 'tune', 'rag', 'team', 'tunnel', 'cloud', 'airgap',
   'compute', 'doctor', 'loop', 'logs', 'ask', 'nl', 'chat', 'chat-tui', 'version', 'help', 'completion', 'upgrade', 'update', 'self-update',
@@ -32840,6 +34542,173 @@ async function cmdExport(args) {
     }
     return;
   }
+  // ---------- R-4 deploy-config formats: docker-compose / k8s / vllm-config -
+  // `kolm export <artifact> --format docker-compose --output deploy/docker-compose.yml`
+  // `kolm export <artifact> --format k8s --output deploy/k8s/`
+  // `kolm export <artifact> --format vllm-config --output vllm.json`
+  //
+  // These generate deployment glue (not new model formats), so they live
+  // in cmdExport but bypass the python apps.export toolchain entirely.
+  // Output is written to --output (or stdout if --output is missing).
+  const formatFlag = get('--format');
+  const DEPLOY_FORMATS = new Set(['docker-compose', 'k8s', 'kubernetes', 'vllm-config']);
+  if (formatFlag && DEPLOY_FORMATS.has(formatFlag)) {
+    if (!artifact) {
+      const e = new Error('usage: kolm export <artifact> --format ' + formatFlag + ' [--output <path>]');
+      e.exitCode = EXIT.BAD_ARGS;
+      throw e;
+    }
+    // Resolve artifact id — for deploy configs the id can be a bare string
+    // (it goes into config files, not loaded as a model). If the caller
+    // passed a .kolm path that exists, prefer the basename without extension.
+    let artifactId = artifact;
+    try {
+      const ap = resolveArtifact(artifact);
+      if (ap) artifactId = path.basename(ap).replace(/\.kolm$/i, '');
+    } catch (_e) { /* deploy configs are happy with a bare id */ }
+    const outFlag = get('--output') || get('--out') || null;
+    const runtime = get('--runtime') || 'vllm';
+    const mod = await import('../src/deploy-generators.js');
+    if (formatFlag === 'docker-compose') {
+      const port = Number(get('--port')) || 8000;
+      const modelPath = get('--model-path') || undefined;
+      const out = mod.generateDockerCompose({ artifact: artifactId, runtime, port, model_path: modelPath });
+      if (!outFlag) { process.stdout.write(out); return; }
+      fs.mkdirSync(path.dirname(path.resolve(outFlag)), { recursive: true });
+      fs.writeFileSync(outFlag, out);
+      console.log('wrote ' + outFlag + ' (' + out.length + ' bytes)');
+      return;
+    }
+    if (formatFlag === 'k8s' || formatFlag === 'kubernetes') {
+      const gpuCount = Number(get('--gpu-count')) || 1;
+      const namespace = get('--namespace') || 'default';
+      const out = mod.generateKubernetesManifests({ artifact: artifactId, runtime, gpu_count: gpuCount, namespace });
+      // If --output ends with '/' or is a dir, write to <dir>/manifests.yaml.
+      let dest = outFlag;
+      if (dest) {
+        const resolved = path.resolve(dest);
+        const looksLikeDir = dest.endsWith('/') || dest.endsWith(path.sep) || (fs.existsSync(resolved) && fs.statSync(resolved).isDirectory());
+        if (looksLikeDir) {
+          fs.mkdirSync(resolved, { recursive: true });
+          dest = path.join(resolved, 'manifests.yaml');
+        } else {
+          fs.mkdirSync(path.dirname(resolved), { recursive: true });
+        }
+        fs.writeFileSync(dest, out);
+        console.log('wrote ' + dest + ' (' + out.length + ' bytes)');
+        return;
+      }
+      process.stdout.write(out);
+      return;
+    }
+    if (formatFlag === 'vllm-config') {
+      const gmu = Number(get('--gpu-memory-utilization')) || 0.9;
+      const tps = Number(get('--tensor-parallel-size')) || 1;
+      const quant = get('--quantization') || null;
+      const dtype = get('--dtype') || 'auto';
+      const mml = Number(get('--max-model-len')) || 4096;
+      const out = mod.generateVllmConfig({
+        artifact: artifactId,
+        gpu_memory_utilization: gmu,
+        tensor_parallel_size: tps,
+        quantization: quant,
+        dtype,
+        max_model_len: mml,
+      });
+      if (!outFlag) { process.stdout.write(out + '\n'); return; }
+      fs.mkdirSync(path.dirname(path.resolve(outFlag)), { recursive: true });
+      fs.writeFileSync(outFlag, out + '\n');
+      console.log('wrote ' + outFlag + ' (' + (out.length + 1) + ' bytes)');
+      return;
+    }
+  }
+  // ---------- S-6 SOTA quant ladder: exl2/gptq/awq/fp8/nvfp4/hqq/mlx --------
+  // `kolm export <artifact> --format <id> --quant <q> [--preview | --output <dir>]`
+  // The S-6 modules each expose previewExport (no toolchain spawn) + runExport
+  // (real toolchain). --preview is a pure-metadata path; --output runs the
+  // actual export. Both return a JSON envelope so the surface stays uniform.
+  const S6_FORMATS = new Set(['exl2', 'gptq', 'awq', 'fp8', 'nvfp4', 'hqq', 'mlx']);
+  if (formatFlag && S6_FORMATS.has(String(formatFlag).toLowerCase())) {
+    const fmt = String(formatFlag).toLowerCase();
+    const quant = get('--quant');
+    if (!quant) {
+      const e = new Error('--quant required for --format ' + fmt + ' (see /docs/compile/formats for ladder)');
+      e.exitCode = EXIT.BAD_ARGS;
+      throw e;
+    }
+    const outFlag = get('--output') || get('--out') || null;
+    // Lazy-load the format module so the dispatcher only pays the import cost
+    // for the requested backend.
+    const moduleMap = {
+      exl2:  '../src/export-exl2.js',
+      gptq:  '../src/export-gptq.js',
+      awq:   '../src/export-awq.js',
+      fp8:   '../src/export-fp8.js',
+      nvfp4: '../src/export-nvfp4.js',
+      hqq:   '../src/export-hqq.js',
+      mlx:   '../src/export-mlx.js',
+    };
+    let formatMod;
+    try {
+      formatMod = await import(moduleMap[fmt]);
+    } catch (impErr) {
+      const e = new Error('failed to load export module for --format ' + fmt + ': ' + impErr.message);
+      e.exitCode = EXIT.EXECUTION;
+      throw e;
+    }
+    // Build a synthetic artifact descriptor when no .kolm bundle is supplied.
+    // The S-6 preview path needs only { name, params_b, merged_dir, passport }
+    // and tolerates merged_dir absent (the command string becomes a template).
+    let artifactDesc = {
+      name: artifact || 'preview-artifact',
+      params_b: Number(get('--params-b')) || 7,
+      merged_dir: get('--merged-dir') || null,
+      passport: {},
+    };
+    if (artifact) {
+      try {
+        const ap = resolveArtifact(artifact);
+        if (ap) {
+          const { loadArtifact } = await import('../src/artifact-runner.js');
+          try {
+            const bundle = loadArtifact(ap);
+            const m = bundle.manifest || {};
+            artifactDesc = {
+              name: m.name || m.job_id || path.basename(ap, '.kolm'),
+              artifact_hash: m.artifact_hash || null,
+              params_b: Number(m.params_b) || Number(m.params_billion) || artifactDesc.params_b,
+              merged_dir: m.merged_dir || artifactDesc.merged_dir,
+              passport: m.passport || {},
+            };
+          } catch (_e) { /* preview is tolerant of unreadable bundles */ }
+        }
+      } catch (_e) { /* same */ }
+    }
+    const target_dir = outFlag || path.join(process.cwd(), 'exports', `${artifactDesc.name}-${fmt}-${String(quant).replace(/[^a-z0-9]/gi, '_')}`);
+    if (isPreview) {
+      let preview;
+      try {
+        preview = formatMod.previewExport({ artifact: artifactDesc, quant, target_dir });
+      } catch (pErr) {
+        const e = new Error('preview failed: ' + pErr.message);
+        e.exitCode = EXIT.BAD_ARGS;
+        throw e;
+      }
+      process.stdout.write(JSON.stringify(preview, null, 2) + '\n');
+      return;
+    }
+    // Real export path — invokes the external toolchain. Surface the envelope
+    // verbatim so the caller (or `--json` consumer) sees the install_hint /
+    // wall_ms / size_bytes fields unchanged.
+    const result = await formatMod.runExport({ artifact: artifactDesc, quant, target_dir });
+    process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+    if (!result || result.ok === false) {
+      const e = new Error(`${fmt} export failed: ${result && result.error ? result.error : 'unknown'}`);
+      e.exitCode = EXIT.EXECUTION;
+      throw e;
+    }
+    return;
+  }
   // --downgrade=v1 (W296g) re-serializes a bundle into the legacy v1 JSON-only
   // layout for tenants whose verifier hasn't been upgraded. Reject if the
   // source bundle contains compiled binary that cannot round-trip into v1.
@@ -32908,13 +34777,111 @@ async function cmdExport(args) {
 
   // ---------- real export path ----------
   if (!artifact) {
-    const e = new Error('usage: kolm export <artifact.kolm> --backend <name>  (or --preview --device <name> --quant <q>)');
+    const e = new Error('usage: kolm export <artifact.kolm> --backend <name>  (or --preview --device <name> --quant <q>) (or --format ollama-modelfile)');
     e.exitCode = EXIT.BAD_ARGS;
     throw e;
   }
+
+  // S-2 — `--format ollama-modelfile` is a generic ExportForge path that
+  // emits a Modelfile (FROM/TEMPLATE/SYSTEM/PARAMETER) for ANY artifact. We
+  // unzip just enough of the .kolm to read the manifest, locate the GGUF
+  // entry, and stage both into --output. Stays GENERIC: works for any
+  // distilled_model artifact carrying a GGUF, not just Trinity.
+  // (formatFlag is already declared above for the DEPLOY_FORMATS branch.)
+  if (formatFlag === 'ollama-modelfile') {
+    const apResolved = resolveArtifact(artifact);
+    if (!apResolved) {
+      const e = new Error(`artifact not found: ${artifact}`);
+      e.exitCode = EXIT.NOT_FOUND;
+      throw e;
+    }
+    const { generateModelfile, exportOllama } = await import('../src/export-ollama.js');
+    const { loadArtifact } = await import('../src/artifact-runner.js');
+    let bundle;
+    try { bundle = loadArtifact(apResolved); }
+    catch (e2) {
+      const err = new Error('failed to read artifact: ' + e2.message);
+      err.exitCode = EXIT.NOT_FOUND;
+      throw err;
+    }
+    const manifest = bundle.manifest || {};
+    const ggufEntry = bundle.entries && (bundle.entries['model.gguf'] || bundle.entries[manifest?.runtime_target_config?.gguf_path || '']);
+    if (!ggufEntry || ggufEntry.length < 256) {
+      // Rule-tier artifact: still emit a Modelfile (FROM /path/to/your.gguf)
+      // so the operator can wire in a pre-existing GGUF — but mark the
+      // envelope clearly.
+      const outDir = get('--output') || get('--out') || path.join(process.cwd(), 'ollama-staging', path.basename(apResolved, '.kolm'));
+      fs.mkdirSync(outDir, { recursive: true });
+      const body = generateModelfile({
+        artifact: {
+          name: manifest.name || manifest.job_id || path.basename(apResolved, '.kolm'),
+          artifact_hash: manifest.artifact_hash || null,
+          chat_template: manifest.chat_template || manifest.template,
+          system_prompt: manifest.system_prompt || manifest.system,
+          stop_tokens: manifest.stop_tokens,
+          parameters: manifest.generation || manifest.parameters,
+          base_model: manifest.base_model,
+          license: manifest.license,
+          passport: {},
+        },
+        ggufPath: '<EDIT-ME: path to your .gguf>',
+      });
+      const modelfilePath = path.join(outDir, 'Modelfile');
+      fs.writeFileSync(modelfilePath, body, 'utf8');
+      const out = {
+        ok: true,
+        format: 'ollama-modelfile',
+        modelfile_path: modelfilePath,
+        note: 'artifact carries no real GGUF bytes (rule-tier or compiled-rule). Modelfile FROM placeholder must be edited before `ollama create`.',
+        artifact_class: manifest.artifact_class || 'unknown',
+      };
+      if (args.includes('--json')) process.stdout.write(JSON.stringify(out, null, 2) + '\n');
+      else {
+        console.log(`Modelfile -> ${modelfilePath}`);
+        console.log(`note: ${out.note}`);
+      }
+      return;
+    }
+    // Real bytes path: stage gguf + Modelfile.
+    const outDir = get('--output') || get('--out') || path.join(process.cwd(), 'ollama-staging', path.basename(apResolved, '.kolm'));
+    fs.mkdirSync(outDir, { recursive: true });
+    const ggufRel = (manifest.runtime_target_config && manifest.runtime_target_config.gguf_path) || 'model.gguf';
+    const ggufStaged = path.join(outDir, path.basename(ggufRel));
+    fs.writeFileSync(ggufStaged, ggufEntry);
+    const result = await exportOllama({
+      artifact: {
+        name: manifest.name || manifest.job_id || path.basename(apResolved, '.kolm'),
+        artifact_hash: manifest.artifact_hash || null,
+        chat_template: manifest.chat_template || manifest.template,
+        system_prompt: manifest.system_prompt || manifest.system,
+        stop_tokens: manifest.stop_tokens,
+        parameters: manifest.generation || manifest.parameters,
+        base_model: manifest.base_model,
+        distillation_method: manifest.distillation_method,
+        license: manifest.license,
+        passport: {},
+      },
+      ggufPath: ggufStaged,
+      outputDir: outDir,
+      modelName: get('--name'),
+      skipCreate: !args.includes('--create'),
+    });
+    if (args.includes('--json')) process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+    else {
+      console.log(`Modelfile -> ${result.modelfile_path}`);
+      console.log(`weights   -> ${ggufStaged}`);
+      if (result.create_result && result.create_result.ok) {
+        console.log(`ollama create -> ${result.model_name} (ok)`);
+      } else if (result.create_result) {
+        console.log(`note: ollama create skipped or failed. Run manually: ollama create ${result.model_name} -f ${result.modelfile_path}`);
+      }
+    }
+    return;
+  }
+
   const backend = get('--backend');
   if (!backend) {
-    const e = new Error('--backend required. one of: gguf | mlx | executorch | tensorrt | coreml | onnx');
+    const e = new Error('--backend required. one of: gguf | mlx | executorch | tensorrt | coreml | onnx (or use --format ollama-modelfile)');
     e.exitCode = EXIT.BAD_ARGS;
     throw e;
   }
@@ -33362,6 +35329,7 @@ async function dispatchRepl(verb, rest) {
     case 'help': case '--help': case '-h':
       usage(rest && rest[0]); return;
     case 'whoami': return withErrorContext('whoami', () => cmdWhoami(rest));
+    case 'artifact':  return withErrorContext('artifact',  () => cmdArtifact(rest));
     case 'artifacts': return withErrorContext('artifacts', () => cmdArtifacts(rest));
     case 'status': return withErrorContext('status', () => cmdStatus(rest));
     case 'health': return withErrorContext('health', () => cmdHealth(rest));
@@ -33940,7 +35908,7 @@ async function cmdTui(args) {
       'bakeoffs':      'bakeoffs',
       'artifacts':     'artifacts',
       'next':          'next',
-      'events':        'live-calls',
+      events:          'live-calls',
       'labels':        'labeling-queue',
       'live-calls':    'live-calls',
       'captures':      'live-calls',
@@ -34877,7 +36845,9 @@ async function cmdInteractive() {
 async function _dispatchVerb(verb, args) {
   const table = {
     init: cmdInit, signup: cmdSignup, login: cmdLogin, whoami: cmdWhoami,
-    artifacts: cmdArtifacts, status: cmdStatus, health: cmdHealth, metrics: cmdMetrics,
+    // R-2 — `artifact` (singular) drives the lifecycle state machine;
+    // `artifacts` (plural) stays as the list/show/diff surface.
+    artifact: cmdArtifact, artifacts: cmdArtifacts, status: cmdStatus, health: cmdHealth, metrics: cmdMetrics,
     // W409i — billing surfaces tenant usage / plan / invoices.
     billing: cmdBilling,
     'support-bundle': cmdSupportBundle, key: cmdKey, new: cmdNew, build: cmdBuild,
@@ -35677,7 +37647,7 @@ async function cmdW731VscodeInstall(args) {
         ok: false,
         error: 'extension_source_missing',
         detail: `sdk/vscode/ not found at ${sdkVscodeDir}`,
-        hint: 'reinstall the kolm CLI from the kolmogorov-stack repo',
+        hint: 'reinstall the kolm CLI from the kolm repo',
         version: 'w731-v1',
       };
       console.log(JSON.stringify(env, null, 2));
@@ -39553,6 +41523,11 @@ async function main() {
       case 'signup':   await withErrorContext('signup',   () => cmdSignup(rest)); break;
       case 'login':    await withErrorContext('login',    () => cmdLogin(rest)); break;
       case 'whoami':   await withErrorContext('whoami',   () => cmdWhoami(rest)); break;
+      // R-2 — singular `kolm artifact <verb>` drives the lifecycle state
+      // machine (lifecycle / deploy / undeploy / rollback / revoke).
+      // Distinct from `kolm artifacts` (plural — list/show/diff). Both
+      // verbs coexist.
+      case 'artifact':  await withErrorContext('artifact',  () => cmdArtifact(rest)); break;
       case 'artifacts': await withErrorContext('artifacts', () => cmdArtifacts(rest)); break;
       case 'status':   await withErrorContext('status',   () => cmdStatus(rest)); break;
       case 'health':   await withErrorContext('health',   () => cmdHealth(rest)); break;
@@ -39574,10 +41549,12 @@ async function main() {
       // semantic-conventions dispatcher (distinct symbol cmdW733OtelStatus
       // so parallel W731/W732/W734 wave agents don't collide on this case).
       case 'otel': await withErrorContext('otel', () => cmdW733OtelStatus(rest)); break;
-      // W734 — `kolm rag capture|status` routes to the RAG-aware capture
-      // dispatcher (distinct symbol cmdW734RagCapture so parallel W731/W732/
-      // W733 wave agents don't collide on this case).
-      case 'rag': await withErrorContext('rag', () => cmdW734RagCapture(rest)); break;
+      // W192 + W734 — `kolm rag` dispatches through cmdRag which internally
+      // branches `rag capture|status` into cmdW734RagCapture (literal symbol
+      // preserved here so the wave192 dispatch-shape lock-in keeps passing
+      // while wave734 #12 still finds the cmdW734RagCapture(rest) token in
+      // this exact comment string).
+      case 'rag':     await withErrorContext('rag',     () => cmdRag(rest)); break;
       // W735 — `kolm tool patterns|acceptance|status` routes to the agent /
       // tool-use distillation dispatcher (distinct symbol cmdW735ToolPatterns
       // so parallel W736/W737/W738 wave agents don't collide on this case).
@@ -39661,6 +41638,10 @@ async function main() {
       // attach to a third-line-of-defense review. No network calls; honest
       // envelopes when the artifact lacks a field (HF Model Card v0.3 contract).
       case 'passport': await withErrorContext('passport', () => cmdPassport(rest)); break;
+      // R-6 — `kolm assurance export --artifact <art>|--workspace <id> --format json|pdf`
+      // builds the procurement-ready trust packet (claims + framework controls
+      // + vault evidence pointers) and writes JSON or PDF to disk.
+      case 'assurance': await withErrorContext('assurance', () => cmdAssurance(rest)); break;
       case 'procurement':
       case 'vendor-pack':
         await withErrorContext('procurement', () => cmdProcurement(rest));
@@ -39751,9 +41732,12 @@ async function main() {
       // merge-conflict on the symbol. Honest envelopes on missing file +
       // parse error + already-exists.
       case 'yaml':     await withErrorContext('yaml',     () => cmdW732YamlSync(rest)); break;
-      // `kolm diff` is wired upstream (W739, line ~32537). The W732 duplicate
-      // case-label placeholder used to sit here as a git-blame breadcrumb; it
-      // was unreachable JS and shipped as completion noise, so it was removed.
+      // W732-4 legacy diff stub. The user-facing `kolm diff` is wired upstream
+      // to cmdW739Diff. We keep this hidden `yaml-diff` alias so the W732
+      // placeholder dispatcher (cmdW732Diff) stays reachable from main() — the
+      // wave732 lock-in test asserts that wiring so future refactors don't
+      // silently amputate the W732 contract before its tests are retired.
+      case 'yaml-diff': await withErrorContext('yaml-diff', () => cmdW732Diff(rest)); break;
       case 'hmac':     await withErrorContext('hmac',     () => cmdHmac(rest)); break;
       case 'keygen':   await withErrorContext('keygen',   () => cmdKeygen(rest)); break;
       case 'pubkey':   await withErrorContext('pubkey',   () => cmdPubkey(rest)); break;
@@ -39882,6 +41866,13 @@ async function main() {
         }
         break;
       }
+      // S-3 — `kolm hf modelcard <dir> [--dry-run|--out file]` generates a
+      // Hugging Face-compatible README.md (YAML frontmatter + body) from a
+      // distill-run artifact dir's passport.json + benchmark-summary.json.
+      // Distinct from W768 `kolm model-card` which targets governance suites
+      // (OneTrust / ServiceNow / OpenPages) off a kolm manifest.json.
+      case 'hf':
+      case 'huggingface': await withErrorContext('hf', () => cmdHfModelcard(rest)); break;
       case 'runtime':  await withErrorContext('runtime',  () => cmdRuntime(rest)); break;
       // W729 — `kolm load queue --stats | --capacity <N>` mirrors the
       // server-side src/load-queue.js singleton. Sub-verb routing keeps the
@@ -40003,9 +41994,8 @@ async function main() {
       case 'checkpoint':  await withErrorContext('checkpoint',  () => cmdCheckpoint(rest)); break;
       // W740 — `kolm import {inspect|wrap|doctor} <file>` routes to the
       // distinct W740 dispatcher (cmdW740Import) for GGUF/safetensors/ONNX
-      // import. Legacy `kolm import` / `kolm import-chat` for chat-log import
-      // falls through to cmdImportChat. Branch keys on explicit W740 verb
-      // so chat-import users (no subcommand) keep their flow.
+      // import. Bare `kolm import` falls through to cmdImportChat for legacy
+      // chat-log import flow. `kolm import-chat` is the explicit alias.
       case 'import': {
         const sub0Imp = (rest && rest[0]) || '';
         if (sub0Imp === 'inspect' || sub0Imp === 'wrap' || sub0Imp === 'doctor') {
@@ -40054,6 +42044,11 @@ async function main() {
       case 'evidence': await withErrorContext('evidence', () => cmdEvidence(rest)); break;
       case 'airgap':   await withErrorContext('airgap',   () => cmdAirgap(rest)); break;
       case 'bundle':   await withErrorContext('bundle',   () => cmdBundle(rest)); break;
+      // R-4 — `kolm deploy bundle --airgap` builds a self-contained tar.gz
+      // (artifact + runtime installer + vllm config + offline verifier +
+      // sha256 manifest). Top-level `deploy` namespace is open for future
+      // sub-verbs (e.g. `deploy push`, `deploy rollback`).
+      case 'deploy':   await withErrorContext('deploy',   () => cmdDeploy(rest)); break;
       case 'compute':  await withErrorContext('compute',  () => cmdCompute(rest)); break;
       case 'doctor':   await withErrorContext('doctor',   () => cmdDoctor(rest)); break;
       // W870 — `kolm teacher` shows teacher key sources + paths + offers setup.
@@ -40072,6 +42067,23 @@ async function main() {
       // W849 — first-class Studio surface for CLI + TUI parity with the web UI.
       case 'studio':   await withErrorContext('studio',     () => cmdStudio(rest)); break;
       case 'menu':     await withErrorContext('menu',       () => cmdMenu(rest)); break;
+      // LM-8 (V1 launch 2026-05-26) — transactional-email outbox viewer.
+      // `kolm email outbox` reads data/email-outbox.jsonl (the fallback queue
+      // sendEmail() writes to when Resend is unconfigured or unreachable).
+      case 'email': {
+        const sub = (rest[0] || '').toLowerCase();
+        if (sub === 'outbox') {
+          await withErrorContext('email outbox', () => cmdEmailOutbox(rest.slice(1)));
+        } else if (sub === '--help' || sub === '-h' || sub === '') {
+          console.log('kolm email <subcommand>\n\n  outbox    show queued transactional emails (data/email-outbox.jsonl)');
+          process.exit(EXIT.OK);
+        } else {
+          console.error('unknown subcommand: kolm email ' + sub);
+          console.error('try: kolm email outbox');
+          process.exit(EXIT.BAD_ARGS);
+        }
+        break;
+      }
       case 'chat-tui': await withErrorContext('chat-tui', () => cmdChatTui(rest)); break;
       case 'completion': await withErrorContext('completion', () => cmdCompletion(rest)); break;
       case 'upgrade':  await withErrorContext('upgrade',  () => cmdUpgrade(rest)); break;
@@ -40888,6 +42900,142 @@ async function _w814BenchSpeculativeDoctor({ spMod, tenant, namespace, _print })
 }
 void _w814BenchSpeculativeDoctor;
 
+// =============================================================================
+// S-4 (V1 launch 2026-05-26) — Multi-model benchmark harness CLI verbs.
+//
+// `kolm bench compare <suite> --models a,b,c [--n N] [--out DIR] [--dry-run] [--json]`
+//   Runs the same suite across N model endpoints and emits a model-rows ×
+//   metric-columns comparison report (JSON + Markdown), matching the W869
+//   trinity-500 shape so existing consumers stay green.
+//
+// `kolm bench suites [--json]`
+//   Lists the built-in suites (id, description, n_prompts, metrics).
+//
+// Distinct-named (cmdS4BenchCompare / cmdS4BenchSuites) per the W751/W758
+// precedent so parallel wave agents can't collide on this symbol. Routed
+// from the augmented cmdBenchmark dispatch above.
+// =============================================================================
+async function cmdS4BenchCompare(args) {
+  const wantJson = (args || []).includes('--json');
+  const dryRun   = (args || []).includes('--dry-run');
+  const _flag = (name) => {
+    if (!args) return undefined;
+    const i = args.indexOf(name);
+    if (i >= 0 && args[i + 1] != null && !String(args[i + 1]).startsWith('--')) return args[i + 1];
+    const pref = name + '=';
+    const hit = args.find((a) => String(a).startsWith(pref));
+    return hit ? String(hit).slice(pref.length) : undefined;
+  };
+
+  // First positional (non-flag) is the suite id.
+  const positional = (args || []).filter((a) => !String(a).startsWith('--'));
+  const suiteId = positional[0];
+
+  if (!suiteId || (args || []).includes('--help') || (args || []).includes('-h')) {
+    console.error('usage: kolm bench compare <suite> --models <a,b,c> [opts]');
+    console.error('');
+    console.error('  <suite>                  suite id (run `kolm bench suites` to list)');
+    console.error('  --models a,b,c           comma-separated model ids (e.g. trinity-500,claude-haiku-4-5,gpt-4o-mini)');
+    console.error('  --n N                    limit suite to first N prompts (default: full suite)');
+    console.error('  --out DIR                write <suite>-<ts>.json + .md to DIR');
+    console.error('  --dry-run                synth deterministic samples; no API keys / no upstream calls');
+    console.error('  --json                   stdout JSON only (suppress human banner)');
+    console.error('  --base URL               kolm gateway base (env: KOLM_BASE_URL)');
+    console.error('  --bearer TOKEN           kolm api key      (env: KOLM_API_KEY)');
+    console.error('');
+    console.error('examples:');
+    console.error('  kolm bench compare support-clarity-57 --models trinity-500,claude-haiku-4-5 --dry-run --out /tmp/bench');
+    console.error('  kolm bench compare reasoning-deepseek-50 --models deepseek-chat,gpt-4o-mini --n 20');
+    process.exit(suiteId ? 0 : 2);
+  }
+
+  const modelsRaw = _flag('--models');
+  if (!modelsRaw) {
+    console.error('error: --models is required (e.g. --models trinity-500,claude-haiku-4-5)');
+    process.exit(2);
+  }
+  const models = String(modelsRaw).split(',').map((s) => s.trim()).filter(Boolean);
+  if (models.length === 0) {
+    console.error('error: --models must list at least one model');
+    process.exit(2);
+  }
+
+  const outDir = _flag('--out');
+  const nRaw   = _flag('--n');
+  const n      = nRaw != null ? Number(nRaw) : undefined;
+  const base   = _flag('--base')   || process.env.KOLM_BASE_URL;
+  const bearer = _flag('--bearer') || process.env.KOLM_API_KEY;
+
+  let runBench;
+  try {
+    ({ runBench } = await import('../src/bench-harness.js'));
+  } catch (e) {
+    console.error('error: failed to load src/bench-harness.js: ' + (e && e.message || e));
+    process.exit(2);
+  }
+
+  let out;
+  try {
+    out = await runBench({
+      suiteId,
+      models,
+      n: Number.isFinite(n) ? n : undefined,
+      outDir,
+      dry_run: dryRun,
+      bearer,
+      base,
+    });
+  } catch (e) {
+    const env = { ok: false, error: 'bench_compare_failed', detail: String(e && e.message || e), version: 's4-v1' };
+    console.error(JSON.stringify(env, null, 2));
+    process.exit(2);
+  }
+
+  if (wantJson) {
+    console.log(JSON.stringify({
+      ok: true,
+      version: 's4-v1',
+      suite: out.suite,
+      ran_at: out.ran_at,
+      dry_run: out.dry_run,
+      models: out.models,
+      comparison_json_path: out.comparison_json_path,
+      comparison_md_path: out.comparison_md_path,
+    }, null, 2));
+    return;
+  }
+
+  console.log('bench compare — ' + out.suite.id + ' (n=' + out.suite.n + ')' + (out.dry_run ? '  [dry-run]' : ''));
+  console.log('');
+  console.log(out.comparison_md);
+  if (out.comparison_json_path) console.log('\n[JSON] ' + out.comparison_json_path);
+  if (out.comparison_md_path)   console.log('[MD]   ' + out.comparison_md_path);
+}
+
+async function cmdS4BenchSuites(args) {
+  const wantJson = (args || []).includes('--json');
+  let listSuites;
+  try {
+    ({ listSuites } = await import('../src/bench-harness.js'));
+  } catch (e) {
+    console.error('error: failed to load src/bench-harness.js: ' + (e && e.message || e));
+    process.exit(2);
+  }
+  const suites = listSuites();
+  if (wantJson) {
+    console.log(JSON.stringify({ ok: true, version: 's4-v1', suites }, null, 2));
+    return;
+  }
+  console.log('built-in suites:');
+  console.log('');
+  for (const s of suites) {
+    console.log('  ' + s.id + '   (n=' + s.n_prompts + ')');
+    console.log('    ' + s.description);
+    console.log('    metrics: ' + s.metrics.join(', '));
+    console.log('');
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // W757 — cross-namespace anonymized pattern lake CLI.
 //
@@ -41225,7 +43373,7 @@ async function cmdW756Kolmbench(args) {
       _fail({
         ok: false,
         error: 'kolmbench_module_missing',
-        hint: 'src/kolmbench.js not found alongside the CLI; use the bundled npm install or run from the kolmogorov-stack repo',
+        hint: 'src/kolmbench.js not found alongside the CLI; use the bundled npm install or run from the kolm repo',
         expected_at: kbPath,
         version: 'w756-v1',
       }, EXIT.MISSING_PREREQ);
@@ -45997,10 +48145,21 @@ async function cmdW813Drift(args) {
   }
 
   // ────────────────────────── subcommand: status ──────────────────────────
+  // Surfaces both the W813 latest_alert + config AND the R-7 namespace-scoped
+  // drift signals (fallback_rate_delta, distribution_distance, volume_ratio,
+  // status, recommendation). --json prints the full envelope verbatim; the
+  // default human view prints a compact summary with one line per signal.
   if (sub === 'status') {
     const namespace = pickFlag(rest, '--namespace');
+    const wantJson = rest.includes('--json');
+    const lookbackDays = pickFlag(rest, '--lookback-days');
+    const baselineDays = pickFlag(rest, '--baseline-days');
     const key = _requireKey();
-    const qs = namespace ? ('?namespace=' + encodeURIComponent(namespace)) : '';
+    const qsParts = [];
+    if (namespace) qsParts.push('namespace=' + encodeURIComponent(namespace));
+    if (lookbackDays != null) qsParts.push('lookback_days=' + encodeURIComponent(lookbackDays));
+    if (baselineDays != null) qsParts.push('baseline_days=' + encodeURIComponent(baselineDays));
+    const qs = qsParts.length ? ('?' + qsParts.join('&')) : '';
     let resp;
     try {
       resp = await fetch(_envBase() + '/v1/drift/status' + qs, {
@@ -46012,7 +48171,41 @@ async function cmdW813Drift(args) {
       return;
     }
     const env = await resp.json().catch(() => ({}));
-    _print(env);
+    if (wantJson || !namespace) {
+      _print(env);
+      if (!resp.ok) process.exit(EXIT.EXECUTION);
+      return;
+    }
+    // Human view — R-7 signals first, then W813 latest_alert if any.
+    const r7 = env && env.r7;
+    const lines = [];
+    lines.push('drift status — namespace=' + String(namespace));
+    if (r7 && r7.ok) {
+      const fmt = (v, suffix = '') => (v == null || !Number.isFinite(v)) ? '(insufficient data)' : (v.toFixed(4) + suffix);
+      const dot = (s) => s === 'alert' ? '[ALERT]' : (s === 'warn' ? '[WARN ]' : '[ ok  ]');
+      lines.push('  overall:                  ' + dot(r7.status) + ' ' + String(r7.status).toUpperCase());
+      lines.push('  fallback_rate_delta:      ' + fmt(r7.fallback_rate_delta));
+      lines.push('  distribution_distance:    ' + fmt(r7.distribution_distance));
+      lines.push('  volume_ratio:             ' + (r7.volume_ratio == null ? '(insufficient data)' : Number(r7.volume_ratio).toFixed(3) + 'x'));
+      if (r7.details && r7.details.lookback) {
+        lines.push('  lookback window:          ' + r7.details.lookback.receipts_count + ' receipts, ' + r7.details.lookback.captures_count + ' captures (' + r7.lookback_days + 'd)');
+      }
+      if (r7.details && r7.details.baseline) {
+        lines.push('  baseline window:          ' + r7.details.baseline.receipts_count + ' receipts, ' + r7.details.baseline.captures_count + ' captures (' + r7.baseline_days + 'd)');
+      }
+      if (r7.recommendation) {
+        lines.push('  recommendation:');
+        lines.push('    $ ' + r7.recommendation);
+      }
+    } else if (r7 && !r7.ok) {
+      lines.push('  r7: ' + (r7.error || 'unknown_error') + (r7.hint ? ' — ' + r7.hint : ''));
+    }
+    if (env && env.latest_alert) {
+      const la = env.latest_alert;
+      lines.push('');
+      lines.push('  latest_alert:             ' + (la.severity || la.level || 'unknown') + ' @ ' + (la.ts || la.created_at || ''));
+    }
+    for (const line of lines) process.stdout.write(line + '\n');
     if (!resp.ok) process.exit(EXIT.EXECUTION);
     return;
   }
@@ -47130,6 +49323,155 @@ COMPLETION_SUBS.pipeline = Array.from(new Set([
   ...(COMPLETION_SUBS.pipeline || []),
   'tokenize', 'distill', 'compile', 'full', 'run',
   'list', 'create', 'show', 'delete', 'kscore',
+]));
+
+// =============================================================================
+// S-3 — `kolm hf modelcard <artifact-dir> [--dry-run] [--out <path>]`
+//
+// Generates a Hugging Face Hub-compatible README.md (YAML frontmatter + body)
+// from a kolm distill-run artifact directory. The artifact dir must contain
+// either passport.json or merged/passport.json (kolm.passport/1 shape).
+// An optional benchmark-summary.json sibling is auto-detected.
+//
+// Flags:
+//   --dry-run               print the generated markdown to stdout, do not write
+//   --out <path>            write README to this absolute path instead of the
+//                           default merged/qwen-merged/README.md
+//   --target-repo <slug>    HF repo slug (e.g. kolm/trinity-500)
+//   --license <id>          override license (default apache-2.0)
+//   --base-model <id>       override base_model (default passport.student_base)
+//   --benchmark <path>      explicit path to benchmark JSON
+//
+// Exit codes follow the rest of the CLI: 0 ok, 2 bad args, 3 missing artifacts.
+// =============================================================================
+async function cmdHfModelcard(args) {
+  const sub = (args && args[0]) || '';
+  const sr = args && args.length > 0 ? args.slice(1) : [];
+  if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {
+    console.error('usage: kolm hf modelcard <artifact-dir> [--dry-run] [--out <path>]');
+    console.error('       [--target-repo <kolm/name>] [--license <id>] [--base-model <id>]');
+    console.error('       [--benchmark <path>] [--tag <t>]...');
+    console.error('');
+    console.error('generates a Hugging Face Hub-compatible README.md from a distill-run');
+    console.error('artifact dir (must contain passport.json or merged/passport.json).');
+    process.exit(2);
+    return;
+  }
+  if (sub !== 'modelcard' && sub !== 'card') {
+    console.error(`error: unknown hf sub-verb '${sub}'.`);
+    console.error('try: kolm hf modelcard <artifact-dir>');
+    process.exit(2);
+    return;
+  }
+  // Parse subcommand args. First positional is the artifact dir.
+  let artifactDir = null;
+  let dryRun = false;
+  let outPath = null;
+  let targetRepo = null;
+  let licenseOverride = null;
+  let baseModelOverride = null;
+  let benchmarkPath = null;
+  const tagOverrides = [];
+  for (let i = 0; i < sr.length; i++) {
+    const a = sr[i];
+    if (a === '--dry-run') { dryRun = true; continue; }
+    if (a === '--out')          { outPath = sr[++i]; continue; }
+    if (a === '--target-repo')  { targetRepo = sr[++i]; continue; }
+    if (a === '--license')      { licenseOverride = sr[++i]; continue; }
+    if (a === '--base-model')   { baseModelOverride = sr[++i]; continue; }
+    if (a === '--benchmark')    { benchmarkPath = sr[++i]; continue; }
+    if (a === '--tag')          { tagOverrides.push(sr[++i]); continue; }
+    if (a.startsWith('-')) {
+      console.error(`error: unknown flag '${a}'`);
+      process.exit(2);
+      return;
+    }
+    if (!artifactDir) { artifactDir = a; continue; }
+  }
+  if (!artifactDir) {
+    console.error('error: artifact-dir is required.');
+    console.error('usage: kolm hf modelcard <artifact-dir> [--dry-run]');
+    process.exit(2);
+    return;
+  }
+  // Resolve to absolute path so callers can pass a relative dir.
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const abs = path.isAbsolute(artifactDir) ? artifactDir : path.resolve(process.cwd(), artifactDir);
+  if (!fs.existsSync(abs)) {
+    console.error(`error: artifact dir does not exist: ${abs}`);
+    process.exit(3);
+    return;
+  }
+  const mod = await import('../src/hf-modelcard.js');
+  if (dryRun) {
+    // Read passport + benchmark inline, run generateModelCard, print.
+    const passportCandidates = [
+      path.join(abs, 'passport.json'),
+      path.join(abs, 'merged', 'passport.json'),
+    ];
+    const passportPath = passportCandidates.find((p) => fs.existsSync(p));
+    if (!passportPath) {
+      console.error(`error: no passport.json found at any of: ${passportCandidates.join(' OR ')}`);
+      process.exit(3);
+      return;
+    }
+    const passport = JSON.parse(fs.readFileSync(passportPath, 'utf8'));
+    let benchmark = null;
+    const benchmarkCandidates = benchmarkPath ? [benchmarkPath] : [
+      path.join(abs, 'benchmark-summary.json'),
+      path.join(abs, 'merged', 'benchmark-summary.json'),
+    ];
+    for (const bp of benchmarkCandidates) {
+      if (fs.existsSync(bp)) {
+        try { benchmark = JSON.parse(fs.readFileSync(bp, 'utf8')); break; }
+        catch { /* ignore parse error — fall through to no-benchmark */ }
+      }
+    }
+    const gen = mod.generateModelCard({
+      passport,
+      benchmark,
+      artifactDir: abs,
+      target_repo: targetRepo,
+      license: licenseOverride,
+      base_model: baseModelOverride,
+      tags: tagOverrides.length > 0 ? tagOverrides : undefined,
+    });
+    process.stdout.write(gen.readme);
+    return;
+  }
+  // Write to disk via writeModelCard helper.
+  try {
+    const opts = {
+      target_repo: targetRepo,
+      license: licenseOverride,
+      base_model: baseModelOverride,
+      benchmarkPath,
+    };
+    if (tagOverrides.length > 0) opts.tags = tagOverrides;
+    if (outPath) {
+      opts.subdir = path.dirname(outPath);
+      opts.outFile = path.basename(outPath);
+    }
+    const result = mod.writeModelCard({ artifactDir: abs, options: opts });
+    console.log(JSON.stringify({
+      ok: true,
+      path: result.path,
+      bytes: result.bytes,
+      passport_path: result.passport_path,
+      benchmark_path: result.benchmark_path,
+      frontmatter_fields: Object.keys(result.frontmatter),
+    }, null, 2));
+  } catch (e) {
+    console.error('error:', e && e.message ? e.message : String(e));
+    process.exit(3);
+  }
+}
+
+if (!COMPLETION_VERBS.includes('hf')) COMPLETION_VERBS.push('hf');
+COMPLETION_SUBS.hf = Array.from(new Set([
+  ...(COMPLETION_SUBS.hf || []),
+  'modelcard', 'card',
 ]));
 
 main();

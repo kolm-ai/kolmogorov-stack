@@ -39,7 +39,9 @@ test('W268 each JS adapter has a valid package.json', () => {
   for (const a of ADAPTERS.filter((x) => x.kind === 'js')) {
     const pkg = JSON.parse(read(path.join(PKGS, a.dir, 'package.json')));
     assert.equal(pkg.name, a.name, `${a.dir}: expected name ${a.name}`);
-    assert.equal(pkg.version, '0.1.0', `${a.dir}: expected version 0.1.0`);
+    assert.match(pkg.version, /^\d+\.\d+\.\d+$/, `${a.dir}: version must be semver`);
+    const rootVersion = JSON.parse(read(path.join(ROOT, 'package.json'))).version;
+    assert.equal(pkg.version, rootVersion, `${a.dir}: version must match root package.json (${rootVersion})`);
     assert.equal(pkg.type, 'module', `${a.dir}: must be ESM`);
     assert.equal(pkg.main, './index.js', `${a.dir}: main must be ./index.js`);
     assert.ok(pkg.peerDependencies, `${a.dir}: must declare peerDependencies`);
@@ -66,7 +68,9 @@ test('W268 each Python adapter has a pyproject.toml with python >=3.10', () => {
   for (const a of ADAPTERS.filter((x) => x.kind === 'py')) {
     const toml = read(path.join(PKGS, a.dir, 'pyproject.toml'));
     assert.match(toml, new RegExp(`name\\s*=\\s*"${a.name}"`), `${a.dir} name must be ${a.name}`);
-    assert.match(toml, /version\s*=\s*"0\.1\.0"/, `${a.dir} version must be 0.1.0`);
+    const rootVersion = JSON.parse(read(path.join(ROOT, 'package.json'))).version;
+    assert.match(toml, new RegExp(`version\\s*=\\s*"${rootVersion.replace(/\./g, '\\.')}"`),
+      `${a.dir} version must match root package.json (${rootVersion})`);
     assert.match(toml, /requires-python\s*=\s*">=3\.10"/, `${a.dir} must require python >=3.10`);
     // Empty dependencies array (langchain/llamaindex are optional).
     assert.match(toml, /^dependencies\s*=\s*\[\]\s*$/m, `${a.dir} must have empty runtime deps`);
@@ -169,7 +173,7 @@ test('W268 vercel.json has /integrations rewrite to /integrations.html', () => {
 
 test('W268 sw.js cache slug bumped to wave268 (>=268)', () => {
   const sw = read(path.join(PUBLIC, 'sw.js'));
-  const m = sw.match(/const CACHE\s*=\s*'kolm-v\d+-\d{4}-\d{2}-\d{2}-wave(\d+)-/);
+  const m = sw.match(/const CACHE\s*=\s*'kolm-v\d+-\d{4}-\d{2}-\d{2}-[^']*?wave(\d+)/);
   assert.ok(m, 'sw.js CACHE must follow wave naming');
   const n = parseInt(m[1], 10);
   assert.ok(n >= 268, `expected wave >= 268, got ${n}`);

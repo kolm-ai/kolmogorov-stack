@@ -88,11 +88,12 @@
 <script defer src="/kolm-chat.js"></script>
 </head>
 <body class="kolm-account-surface ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
@@ -163,7 +164,7 @@
 </section>
 <section class="kpanel" data-compile-ready aria-label="Compile readiness">
   <h2>Compile readiness</h2>
-  <p class="pdesc">Captures with shared structure can be compiled into a signed <code>.kolm</code> specialist. Pick the path that matches your hardware — local for a GPU you own, cloud when there isn't one, browser for the smallest experiments.</p>
+  <p class="pdesc">Captures with shared structure can be compiled into a signed <code>.kolm</code> specialist. Pick the path that matches your hardware - local for a GPU you own, cloud when there isn't one, browser for the smallest experiments.</p>
   <div id="compile-ready-signals" class="readiness-row" aria-busy="true">
     <span class="readiness-token"><b>...</b> scanning namespaces</span>
   </div>
@@ -208,6 +209,53 @@
   <div class="kpanel"><div class="skel" style="width:140px"></div><div class="skel" style="width:280px;margin-top:6px"></div></div>
   <div class="kpanel"><div class="skel" style="width:140px"></div><div class="skel" style="width:280px;margin-top:6px"></div></div>
 </div>
+<section class="kpanel" data-r8="cost-displacement" aria-label="Cost displacement">
+  <h2>Cost displacement (last 30 days)</h2>
+  <p class="pdesc">What kolm displaced this period vs the counterfactual where every routed call went to a frontier provider. Computed per-receipt from <code>route_decision</code> + the frozen rate card. No fee math applied here - this is the raw operator view.</p>
+  <div class="toolbar" style="margin-bottom:12px">
+    <label style="display:flex;gap:6px;align-items:center;font-size:12px;color:var(--ink-mute)">namespace
+      <input id="r8-ns" type="text" value="default" style="min-width:160px">
+    </label>
+    <label style="display:flex;gap:6px;align-items:center;font-size:12px;color:var(--ink-mute)">period (days)
+      <input id="r8-period" type="number" value="30" min="1" max="3650" style="width:80px">
+    </label>
+    <button class="btn" type="button" id="r8-refresh">Refresh</button>
+  </div>
+  <div class="metric-grid" id="r8-grid" data-counter-count="4" style="grid-template-columns:repeat(4,1fr);margin-bottom:10px" aria-busy="true">
+    <div class="metric-card"><div class="label">Baseline (frontier-only)</div><div class="value" id="r8-baseline">--</div><div class="delta" id="r8-baseline-d">counterfactual</div></div>
+    <div class="metric-card"><div class="label">Actual</div><div class="value" id="r8-actual">--</div><div class="delta" id="r8-actual-d">billed</div></div>
+    <div class="metric-card"><div class="label">Savings (period)</div><div class="value" id="r8-savings">--</div><div class="delta" id="r8-savings-d">baseline - actual</div></div>
+    <div class="metric-card"><div class="label">Cumulative savings</div><div class="value" id="r8-cum">--</div><div class="delta" id="r8-cum-d">since deploy</div></div>
+  </div>
+  <div id="r8-rule" style="font-size:12.5px;color:var(--ink-mute);line-height:1.5">
+    <div>payback period: <span id="r8-payback" style="font-family:var(--mono);color:var(--ink)">--</span></div>
+    <div id="r8-counts" style="margin-top:4px"></div>
+    <div id="r8-status" style="margin-top:4px"></div>
+  </div>
+</section>
+<section class="kpanel" data-r7="drift-indicators" aria-label="Drift indicators">
+  <h2>Namespace drift signals</h2>
+  <p class="pdesc">Three signals per namespace: fallback-rate delta, distribution distance, and volume ratio. Statuses derive from a 2&#963;/3&#963; ladder over baseline variance. Use <code>kolm drift status --namespace &lt;ns&gt;</code> for the same data in the CLI.</p>
+  <div id="r7-list" aria-busy="true">
+    <div class="kpanel" style="margin:0"><div class="skel" style="width:160px"></div><div class="skel" style="width:260px;margin-top:6px"></div></div>
+  </div>
+</section>
+<style>
+/* R-7 / R-8 status indicators. Colors map to design-tokens.css; intentionally
+   no oranges/beiges/browns per the W850 visual redline. */
+.r7-card{display:grid;grid-template-columns:18px minmax(180px,1fr) repeat(3,minmax(140px,1fr));gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--bg-elev);margin-bottom:8px;font-size:12.5px}
+.r7-card:last-child{margin-bottom:0}
+.r7-card .ns{font-family:var(--mono);font-size:13px;color:var(--ink);font-weight:600;word-break:break-all}
+.r7-card .sig{font-family:var(--mono);font-size:11.5px;color:var(--ink-mute)}
+.r7-card .sig b{display:block;font-size:12.5px;color:var(--ink);font-weight:500;margin-top:2px}
+.r7-card .reco{grid-column:1/-1;font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);padding:6px 8px;background:var(--bg-card);border:1px dashed var(--line);border-radius:4px;margin-top:6px;overflow-wrap:anywhere}
+.r7-card .reco b{color:var(--ink)}
+.dot{width:10px;height:10px;border-radius:999px;display:inline-block;background:var(--ink-faint);box-shadow:0 0 0 2px transparent}
+.dot.ok{background:var(--good)}
+.dot.warn{background:var(--warn)}
+.dot.alert{background:var(--bad)}
+@media (max-width:880px){.r7-card{grid-template-columns:18px 1fr 1fr;grid-auto-rows:auto}.r7-card .ns{grid-column:2/-1}}
+</style>
 <div id="empty-state" class="empty" hidden data-empty-state>
   <strong>No captured AI calls yet.</strong> Set <code>OPENAI_BASE_URL=http://127.0.0.1:8787/v1</code> (or point at <code>https://kolm.ai/v1/capture/openai</code>) and your first call lands here. See <a href="/account/connectors">Connectors</a>.
 </div>
@@ -351,7 +399,7 @@ Promise.allSettled([
     "</div>";
   }).join("");
 });
-// W869 Persona A.6 + B.6 — compile readiness panel.
+// W869 Persona A.6 + B.6 - compile readiness panel.
 // Reads hardware (GPU presence) + repeated-workflows (compile-ready namespaces).
 // Toggles "Compile locally" CTA when a local GPU is present, always shows
 // the cloud and Colab CTAs so the no-GPU path is never a dead end.
@@ -380,7 +428,7 @@ Promise.allSettled([
     if(hasGpu){
       tokens.push('<span class="readiness-token"><b>'+window.kesc(String(vram))+' GB</b> local GPU detected ('+window.kesc(primary.vendor||"gpu")+')</span>');
     } else {
-      tokens.push('<span class="readiness-token" data-open="true"><b>no</b> local GPU detected — use cloud or Colab</span>');
+      tokens.push('<span class="readiness-token" data-open="true"><b>no</b> local GPU detected - use cloud or Colab</span>');
     }
     if(topNs){
       tokens.push('<span class="readiness-token"><b>top</b> '+window.kesc(String(topCount))+' calls match <code style="font-size:11px">'+window.kesc(String(topNs).slice(0,42))+'</code></span>');
@@ -402,13 +450,110 @@ Promise.allSettled([
     if(colabBtn) colabBtn.hidden=false;
   });
 })();
+/* R-8 cost displacement fetcher */
+(function(){
+  var nsInput=document.getElementById("r8-ns");
+  var periodInput=document.getElementById("r8-period");
+  var refreshBtn=document.getElementById("r8-refresh");
+  var grid=document.getElementById("r8-grid");
+  if(!nsInput||!periodInput||!grid)return;
+  function fmtUsd(v){if(v==null||!isFinite(v))return "--";return "$"+Number(v).toFixed(2);}
+  function fmtPayback(v){if(v==="instant")return "instant (no compile cost)";if(v==null)return "undefined (no net savings yet)";if(!isFinite(Number(v)))return "--";return Number(v).toFixed(2)+" months";}
+  function paint(env){
+    grid.removeAttribute("aria-busy");
+    var ok=env&&env.ok;
+    document.getElementById("r8-baseline").textContent=ok?fmtUsd(env.baseline_cost_usd):"--";
+    document.getElementById("r8-actual").textContent=ok?fmtUsd(env.actual_cost_usd):"--";
+    document.getElementById("r8-savings").textContent=ok?fmtUsd(env.savings_usd):"--";
+    document.getElementById("r8-cum").textContent=ok?fmtUsd(env.cumulative_savings_usd):"--";
+    document.getElementById("r8-payback").textContent=ok?fmtPayback(env.payback_period_months):"--";
+    var counts=document.getElementById("r8-counts");
+    var status=document.getElementById("r8-status");
+    if(ok&&env.period){
+      var p=env.period;
+      counts.innerHTML="receipts: <b style=\"font-family:var(--mono);color:var(--ink)\">"+window.knum(p.receipt_count)+"</b> "+
+        "(local <b style=\"font-family:var(--mono);color:var(--ink)\">"+window.knum(p.local_count)+"</b>, "+
+        "frontier <b style=\"font-family:var(--mono);color:var(--ink)\">"+window.knum(p.frontier_count)+"</b>, "+
+        "fallback <b style=\"font-family:var(--mono);color:var(--ink)\">"+window.knum(p.frontier_fallback_count)+"</b>, "+
+        "unknown <b style=\"font-family:var(--mono);color:var(--ink)\">"+window.knum(p.unknown_route_count||0)+"</b>, "+
+        "unrepriced <b style=\"font-family:var(--mono);color:var(--ink)\">"+window.knum(p.unrepriced_count||0)+"</b>)";
+    } else { counts.textContent=""; }
+    status.textContent=ok?("status: "+(env.ok_status||"computed")):("error: "+(env&&(env.error||env.detail))||"unknown_error");
+  }
+  function load(){
+    var ns=encodeURIComponent(nsInput.value||"default");
+    var pd=encodeURIComponent(periodInput.value||"30");
+    grid.setAttribute("aria-busy","true");
+    window.kfetch("/v1/savings/displacement?namespace="+ns+"&period_days="+pd).then(paint).catch(function(e){
+      paint({ok:false,error:String((e&&e.message)||"request_failed")});
+    });
+  }
+  refreshBtn.addEventListener("click",load);
+  nsInput.addEventListener("change",load);
+  periodInput.addEventListener("change",load);
+  load();
+})();
+/* R-7 drift indicators - one card per namespace with three signals. */
+(function(){
+  var list=document.getElementById("r7-list");
+  if(!list)return;
+  function dotClass(s){return s==="alert"?"alert":(s==="warn"?"warn":"ok");}
+  function fmt(v,suffix){if(v==null||!isFinite(v))return "(insufficient data)";return Number(v).toFixed(4)+(suffix||"");}
+  function ratio(v){if(v==null||!isFinite(v))return "(insufficient data)";return Number(v).toFixed(3)+"x";}
+  function paintCard(ns,env){
+    var ok=env&&env.ok;
+    var status=ok?env.status:"ok";
+    var dc=dotClass(status);
+    var html="<div class=\"r7-card\" data-ns=\""+window.kesc(ns)+"\">"+
+      "<span class=\"dot "+dc+"\" aria-label=\""+window.kesc(status)+"\"></span>"+
+      "<span class=\"ns\">"+window.kesc(ns)+"</span>"+
+      "<span class=\"sig\">fallback_rate_delta<b>"+window.kesc(ok?fmt(env.fallback_rate_delta):"--")+"</b></span>"+
+      "<span class=\"sig\">distribution_distance<b>"+window.kesc(ok?fmt(env.distribution_distance):"--")+"</b></span>"+
+      "<span class=\"sig\">volume_ratio<b>"+window.kesc(ok?ratio(env.volume_ratio):"--")+"</b></span>";
+    if(ok&&env.recommendation){
+      html+="<div class=\"reco\"><b>recommended:</b> <code>"+window.kesc(env.recommendation)+"</code></div>";
+    }
+    html+="</div>";
+    return html;
+  }
+  function discoverNamespaces(){
+    return window.kfetch("/v1/datasets?limit=200").then(function(env){
+      var out={}; var rows=(env&&(env.datasets||env.data||env))||[];
+      if(Array.isArray(rows)){
+        for(var i=0;i<rows.length;i++){
+          var n=rows[i]&&(rows[i].namespace||rows[i].corpus_namespace);
+          if(n)out[n]=1;
+        }
+      }
+      return Object.keys(out);
+    }).catch(function(){return [];});
+  }
+  discoverNamespaces().then(function(namespaces){
+    if(!namespaces.length)namespaces=["default"];
+    return Promise.all(namespaces.slice(0,12).map(function(ns){
+      return window.kfetch("/v1/drift/status?namespace="+encodeURIComponent(ns)).then(function(env){
+        return {ns:ns,env:env};
+      }).catch(function(e){return {ns:ns,env:{ok:false,error:String((e&&e.message)||e)}};});
+    }));
+  }).then(function(results){
+    list.removeAttribute("aria-busy");
+    if(!results.length){
+      list.innerHTML="<div class=\"empty\" data-empty-state>No namespaces detected yet. Capture traffic to populate.</div>";
+      return;
+    }
+    list.innerHTML=results.map(function(r){return paintCard(r.ns,r.env);}).join("");
+  }).catch(function(e){
+    list.removeAttribute("aria-busy");
+    list.innerHTML="<div class=\"empty\" data-empty-state>Drift signals unavailable: "+window.kesc(String((e&&e.message)||e))+"</div>";
+  });
+})();
 </script>
 
 <footer class="ks-footer">
   <div class="ks-wrap">
     <div class="ks-footer__grid">
       <div>
-        <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
         <p class="ks-footer__tagline">Route models. Distill specialists. Run anywhere.</p>
       </div>
       <div>

@@ -476,7 +476,7 @@ test('W737 #12 — /docs/marketplace/publish.html exists with revenue split sect
     'platform',                         // platform label
     'Reviews and ratings',              // reviews section
     'Transfer learning',                // W737-4 section
-    'NOT YET WIRED',                    // honest scaffold note
+    'PAYOUT PIPE PENDING',              // scaffold marker (W538 #2 rephrasing — was "NOT YET WIRED")
     '/docs/marketplace/publish',        // self-canonical URL anchor
   ]) {
     assert.ok(html.includes(needle),

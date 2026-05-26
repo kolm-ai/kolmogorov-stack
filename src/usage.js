@@ -49,6 +49,7 @@ export const BILLING_UNITS = Object.freeze([
   'builds',
   'distillation_jobs',
   'hosted_inference',     // measured in tokens (prompt+completion)
+  'gateway_calls',        // V1 launch / W-2: per-call count for /v1/gateway/dispatch
   'team_seats',
   'artifact_signing',
   'private_registry_artifacts',
@@ -67,8 +68,15 @@ export const BILLING_UNITS = Object.freeze([
 //   enterprise     : effectively unlimited (very large numbers vs null) so
 //                    the dashboard can still render % used.
 // ---------------------------------------------------------------------------
+// V1 launch / W-2: hard ladder for `gateway_calls` per /v1/gateway/dispatch
+// invocation. Free is the public anon/local-only floor; the 50k/500k/5M/25M
+// ramp follows the same shape the website's pricing page advertises. The
+// dispatch handler enforces `hard` and emits soft-warn via a header. Soft is
+// at 90% of hard (10% grace buffer per the launch plan).
 export const TIER_LIMITS = Object.freeze({
-  free: {},
+  free: {
+    gateway_calls:           { soft: 45_000,    hard: 50_000 },
+  },
   indie: {
     captured_events:         { soft: 80_000,   hard: 100_000 },
     stored_events:           { soft: 80_000,   hard: 100_000 },
@@ -76,6 +84,7 @@ export const TIER_LIMITS = Object.freeze({
     builds:                  { soft: 40,       hard: 50 },
     distillation_jobs:       { soft: 8,        hard: 10 },
     hosted_inference:        { soft: 800_000,  hard: 1_000_000 },
+    gateway_calls:           { soft: 450_000,  hard: 500_000 },
     team_seats:              { soft: 1,        hard: 1 },
     artifact_signing:        { soft: 80,       hard: 100 },
     private_registry_artifacts: { soft: 8,     hard: 10 },
@@ -88,10 +97,24 @@ export const TIER_LIMITS = Object.freeze({
     builds:                  { soft: 400,      hard: 500 },
     distillation_jobs:       { soft: 80,       hard: 100 },
     hosted_inference:        { soft: 8_000_000, hard: 10_000_000 },
+    gateway_calls:           { soft: 4_500_000, hard: 5_000_000 },
     team_seats:              { soft: 10,       hard: 25 },
     artifact_signing:        { soft: 800,      hard: 1_000 },
     private_registry_artifacts: { soft: 80,    hard: 100 },
     enterprise_sync_volume:  { soft: 800_000_000, hard: 1_000_000_000 },
+  },
+  business: {
+    captured_events:         { soft: 4_000_000, hard: 5_000_000 },
+    stored_events:           { soft: 4_000_000, hard: 5_000_000 },
+    optimization_runs:       { soft: 4_000,    hard: 5_000 },
+    builds:                  { soft: 2_000,    hard: 2_500 },
+    distillation_jobs:       { soft: 400,      hard: 500 },
+    hosted_inference:        { soft: 40_000_000, hard: 50_000_000 },
+    gateway_calls:           { soft: 22_500_000, hard: 25_000_000 },
+    team_seats:              { soft: 50,       hard: 100 },
+    artifact_signing:        { soft: 4_000,    hard: 5_000 },
+    private_registry_artifacts: { soft: 400,   hard: 500 },
+    enterprise_sync_volume:  { soft: 4_000_000_000, hard: 5_000_000_000 },
   },
   enterprise: {
     captured_events:         { soft: 80_000_000, hard: 100_000_000 },
@@ -100,6 +123,7 @@ export const TIER_LIMITS = Object.freeze({
     builds:                  { soft: 40_000,    hard: 50_000 },
     distillation_jobs:       { soft: 8_000,     hard: 10_000 },
     hosted_inference:        { soft: 800_000_000, hard: 1_000_000_000 },
+    gateway_calls:           { soft: 225_000_000, hard: 250_000_000 },
     team_seats:              { soft: 500,       hard: 1_000 },
     artifact_signing:        { soft: 80_000,    hard: 100_000 },
     private_registry_artifacts: { soft: 8_000,  hard: 10_000 },
@@ -117,7 +141,7 @@ export function tierForPlan(plan) {
   if (p === 'indie' || p === 'starter') return 'indie';
   if (p === 'pro') return 'indie';                 // pro shares indie caps
   if (p === 'team' || p === 'teams') return 'team';
-  if (p === 'business') return 'team';             // business shares team caps with higher seats
+  if (p === 'business') return 'business';         // V1 launch / W-2: dedicated tier (was alias)
   if (p === 'enterprise') return 'enterprise';
   return 'free'; // unknown → fail closed (no metering = no overage either)
 }

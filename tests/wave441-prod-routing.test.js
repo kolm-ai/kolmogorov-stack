@@ -72,8 +72,9 @@ test('W441 #6 — referenced static destinations must actually exist on disk', (
 });
 
 test('W441 #7 — only safe helper functions remain in api/', () => {
-  // The two allowed function files are scoped (r2 + cf-config), not full app wraps.
-  const allowed = new Set(['r2.js', 'cf-config.js']);
+  // Scoped helpers only — r2 + cf-config (existing), teacher-chat (W887 W-M proxy fallback).
+  // Adding broader functions risks catching shared route prefixes; these are leaf paths.
+  const allowed = new Set(['r2.js', 'cf-config.js', 'teacher-chat.js']);
   const present = fs.readdirSync(apiDir).filter((f) => f.endsWith('.js'));
   for (const f of present) {
     assert.ok(allowed.has(f),

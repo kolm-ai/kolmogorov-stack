@@ -27,6 +27,10 @@
   ],
   "tags": [
     {
+      "name": "ab",
+      "description": "Ab"
+    },
+    {
       "name": "ab-tests",
       "description": "Ab Tests"
     },
@@ -71,6 +75,10 @@
       "description": "Assistant"
     },
     {
+      "name": "assurance",
+      "description": "Assurance"
+    },
+    {
       "name": "audio",
       "description": "Audio"
     },
@@ -113,6 +121,10 @@
     {
       "name": "builds",
       "description": "Builds"
+    },
+    {
+      "name": "bundle",
+      "description": "Bundle"
     },
     {
       "name": "byoc",
@@ -231,6 +243,14 @@
       "description": "Evidence"
     },
     {
+      "name": "experts",
+      "description": "Experts"
+    },
+    {
+      "name": "export",
+      "description": "Export"
+    },
+    {
       "name": "failure-modes",
       "description": "Failure Modes"
     },
@@ -239,8 +259,16 @@
       "description": "Federated"
     },
     {
+      "name": "fit",
+      "description": "Fit"
+    },
+    {
       "name": "fl",
       "description": "Fl"
+    },
+    {
+      "name": "free",
+      "description": "Free"
     },
     {
       "name": "gateway",
@@ -249,6 +277,10 @@
     {
       "name": "gemini",
       "description": "Gemini"
+    },
+    {
+      "name": "hardware",
+      "description": "Hardware"
     },
     {
       "name": "health",
@@ -261,6 +293,10 @@
     {
       "name": "import",
       "description": "Import"
+    },
+    {
+      "name": "inspect",
+      "description": "Inspect"
     },
     {
       "name": "intent",
@@ -311,6 +347,10 @@
       "description": "Lineage"
     },
     {
+      "name": "lingual",
+      "description": "Lingual"
+    },
+    {
       "name": "long-context",
       "description": "Long Context"
     },
@@ -331,8 +371,20 @@
       "description": "Memory"
     },
     {
+      "name": "merge",
+      "description": "Merge"
+    },
+    {
       "name": "messages",
       "description": "Anthropic-compatible messages"
+    },
+    {
+      "name": "meta",
+      "description": "Meta"
+    },
+    {
+      "name": "metrics",
+      "description": "Metrics"
     },
     {
       "name": "migrate",
@@ -357,6 +409,10 @@
     {
       "name": "multimodal",
       "description": "Multimodal"
+    },
+    {
+      "name": "namespaces",
+      "description": "Namespaces"
     },
     {
       "name": "nl",
@@ -387,12 +443,20 @@
       "description": "Packages"
     },
     {
+      "name": "passport",
+      "description": "Passport"
+    },
+    {
       "name": "pextract",
       "description": "Pextract"
     },
     {
       "name": "pipeline",
       "description": "Pipeline"
+    },
+    {
+      "name": "pipelines",
+      "description": "Pipelines"
     },
     {
       "name": "plans",
@@ -415,6 +479,10 @@
       "description": "Privacy"
     },
     {
+      "name": "procurement",
+      "description": "Procurement"
+    },
+    {
       "name": "product",
       "description": "Product"
     },
@@ -429,6 +497,14 @@
     {
       "name": "quantization",
       "description": "Quantization"
+    },
+    {
+      "name": "quantize",
+      "description": "Quantize"
+    },
+    {
+      "name": "ready",
+      "description": "Ready"
     },
     {
       "name": "recall",
@@ -449,6 +525,10 @@
     {
       "name": "redteam",
       "description": "Redteam"
+    },
+    {
+      "name": "reg",
+      "description": "Reg"
     },
     {
       "name": "region",
@@ -487,6 +567,10 @@
       "description": "Runtime"
     },
     {
+      "name": "savings",
+      "description": "Savings"
+    },
+    {
       "name": "sbom",
       "description": "Sbom"
     },
@@ -509,6 +593,10 @@
     {
       "name": "seeds",
       "description": "Seeds"
+    },
+    {
+      "name": "serve",
+      "description": "Serve"
     },
     {
       "name": "session",
@@ -563,6 +651,10 @@
       "description": "Speculative"
     },
     {
+      "name": "sso",
+      "description": "Sso"
+    },
+    {
       "name": "staleness",
       "description": "Staleness"
     },
@@ -601,6 +693,10 @@
     {
       "name": "system",
       "description": "System"
+    },
+    {
+      "name": "teacher",
+      "description": "Teacher"
     },
     {
       "name": "teacher-versions",
@@ -657,6 +753,10 @@
     {
       "name": "vlm",
       "description": "Vlm"
+    },
+    {
+      "name": "vlm-distill",
+      "description": "Vlm Distill"
     },
     {
       "name": "whoami",
@@ -761,6 +861,35 @@
         }
       }
     },
+    "/metrics/extended": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "operationId": "getMetricsExtended",
+        "summary": "W824-3 – /metrics/extended",
+        "description": "W824-3 – /metrics/extended",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/r/{token}": {},
+    "/r/{token}/*": {},
     "/ready": {
       "get": {
         "tags": [
@@ -769,6 +898,33 @@
         "operationId": "getReady",
         "summary": "Deploy readiness: public, low-detail, and suitable for platform health",
         "description": "Deploy readiness: public, low-detail, and suitable for platform health gates. /health stays green for static uptime; /ready fails when critical production-only configuration is missing.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/ready/deep": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "operationId": "getReadyDeep",
+        "summary": "W824-2 – /ready/deep",
+        "description": "W824-2 – /ready/deep",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -1032,6 +1188,141 @@
         }
       }
     },
+    "/v1/ab/configure": {
+      "post": {
+        "tags": [
+          "ab"
+        ],
+        "operationId": "postV1AbConfigure",
+        "summary": "── POST /v1/ab/configure ──────────────────────────────────────────────────",
+        "description": "── POST /v1/ab/configure ────────────────────────────────────────────────── Body: { namespace, version_a, version_b, split?, idempotency_key? }",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/ab/feedback": {
+      "post": {
+        "tags": [
+          "ab"
+        ],
+        "operationId": "postV1AbFeedback",
+        "summary": "thumb:'up'|'down'?, comment?, ab_test_id? }",
+        "description": "thumb:'up'|'down'?, comment?, ab_test_id? } Persists a row to the event-store under workflow_id=AB_FEEDBACK_WORKFLOW so ab-metrics.aggregate() can read it. Also fans the row to the W720 self-improvement queue when deps.selfImprovement.enqueue is wired.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/ab/metrics": {
+      "get": {
+        "tags": [
+          "ab"
+        ],
+        "operationId": "getV1AbMetrics",
+        "summary": "── GET /v1/ab/metrics?namespace=X ─────────────────────────────────────────",
+        "description": "── GET /v1/ab/metrics?namespace=X ─────────────────────────────────────────",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/ab/promote": {
+      "post": {
+        "tags": [
+          "ab"
+        ],
+        "operationId": "postV1AbPromote",
+        "summary": "── POST /v1/ab/promote ────────────────────────────────────────────────────",
+        "description": "── POST /v1/ab/promote ──────────────────────────────────────────────────── Body: { namespace, force?:boolean, thresholds?:{...} } When `force=true` we bypass the decide() gate and promote variant_b immediately. Otherwise we run the full evaluate() pipeline and only promote when decide() returns 'promote'.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/ab/status": {
+      "get": {
+        "tags": [
+          "ab"
+        ],
+        "operationId": "getV1AbStatus",
+        "summary": "── GET /v1/ab/status?namespace=X ──────────────────────────────────────────",
+        "description": "── GET /v1/ab/status?namespace=X ──────────────────────────────────────────",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/account": {
       "get": {
         "tags": [
@@ -1052,7 +1343,8 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           }
-        }
+        },
+        "operationId": "getV1Account"
       }
     },
     "/v1/account/audit-log": {
@@ -1063,6 +1355,60 @@
         "operationId": "getV1AccountAuditlog",
         "summary": "W409f – /v1/account/audit-log surfaces the audit ledger for the calling",
         "description": "W409f – /v1/account/audit-log surfaces the audit ledger for the calling tenant. The audit-log.html page renders {entries:[{at,actor,op,payload}]}. W448 – added ?format=csv (defaults to json) so the page's export button and `kolm audit --format csv` CLI verb hit the same route. Also added ?since=<iso|epoch> filter so the CLI can scope to a recent window.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/account/audit-log/verify": {
+      "get": {
+        "tags": [
+          "account"
+        ],
+        "operationId": "getV1AccountAuditlogVerify",
+        "summary": "W409f – GET /v1/account/audit-log/verify – chain-verify the calling",
+        "description": "W409f – GET /v1/account/audit-log/verify – chain-verify the calling tenant's audit ledger (no body). Returns { ok, verified, chain_length, broken_at? } so the audit-log page can render a green/red state.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/account/audit/retention": {
+      "get": {
+        "tags": [
+          "account"
+        ],
+        "operationId": "getV1AccountAuditRetention",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -1629,6 +1975,71 @@
         "description": "Admin compile job feed - newest compile jobs with tenant, task, status, and score."
       }
     },
+    "/v1/admin/control-files": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "getV1AdminControlfiles",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/admin/control-files/{key}": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "operationId": "getV1AdminControlfilesKey",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "key path parameter"
+          }
+        ],
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/admin/diagnostics": {
       "get": {
         "tags": [
@@ -1989,6 +2400,206 @@
           }
         },
         "description": "Agent telemetry aggregate stats for the caller's tenant."
+      }
+    },
+    "/v1/airgap/bakeoff": {
+      "post": {
+        "tags": [
+          "airgap"
+        ],
+        "operationId": "postV1AirgapBakeoff",
+        "summary": "POST /v1/airgap/bakeoff",
+        "description": "POST /v1/airgap/bakeoff",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/airgap/distill/run": {
+      "post": {
+        "tags": [
+          "airgap"
+        ],
+        "operationId": "postV1AirgapDistillRun",
+        "summary": "POST /v1/airgap/distill/run",
+        "description": "POST /v1/airgap/distill/run",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/airgap/distill/status/{id}": {
+      "get": {
+        "tags": [
+          "airgap"
+        ],
+        "operationId": "getV1AirgapDistillStatusId",
+        "summary": "GET /v1/airgap/distill/status/:id",
+        "description": "GET /v1/airgap/distill/status/:id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "id path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/airgap/doctor": {
+      "get": {
+        "tags": [
+          "airgap"
+        ],
+        "operationId": "getV1AirgapDoctor",
+        "summary": "GET /v1/airgap/doctor",
+        "description": "GET /v1/airgap/doctor",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/airgap/jobs": {
+      "get": {
+        "tags": [
+          "airgap"
+        ],
+        "operationId": "getV1AirgapJobs",
+        "summary": "/v1/airgap/jobs – bare collection GET that lists tenant air-gapped",
+        "description": "/v1/airgap/jobs – bare collection GET that lists tenant air-gapped distill + sneakernet jobs. Each W831 job is keyed by run_id; the actual status route is /v1/airgap/distill/status/:id. This bare GET returns an empty envelope until a wave wires the per-tenant job index.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/airgap/sneakernet/bundle": {
+      "post": {
+        "tags": [
+          "airgap"
+        ],
+        "operationId": "postV1AirgapSneakernetBundle",
+        "summary": "POST /v1/airgap/sneakernet/bundle",
+        "description": "POST /v1/airgap/sneakernet/bundle",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/airgap/sneakernet/verify": {
+      "post": {
+        "tags": [
+          "airgap"
+        ],
+        "operationId": "postV1AirgapSneakernetVerify",
+        "summary": "POST /v1/airgap/sneakernet/verify",
+        "description": "POST /v1/airgap/sneakernet/verify",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
       }
     },
     "/v1/airgap/status": {
@@ -2516,6 +3127,120 @@
         "description": "Artifact download - streams the completed artifact zip by id with readiness/expiry errors."
       }
     },
+    "/v1/artifacts/{id}/evidence-trace": {
+      "get": {
+        "tags": [
+          "artifacts"
+        ],
+        "operationId": "getV1ArtifactsIdEvidencetrace",
+        "summary": "GET /v1/artifacts/:id/evidence-trace – return the full ancestor DAG",
+        "description": "GET /v1/artifacts/:id/evidence-trace – return the full ancestor DAG for an artifact. Returns 404 when the artifact has no evidence DAG on disk. The shape is { ok, artifact_id, dag: {nodes, edges} } so the caller can re-build the DAG client-side and walk it.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "id path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/artifacts/{id}/lifecycle": {
+      "get": {
+        "tags": [
+          "artifacts"
+        ],
+        "operationId": "getV1ArtifactsIdLifecycle",
+        "summary": "GET /v1/artifacts/:id/lifecycle – current_state + full history.",
+        "description": "R-2 – artifact lifecycle introspection. GET /v1/artifacts/:id/lifecycle – current_state + full history.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "id path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/artifacts/{id}/lifecycle/transition": {
+      "post": {
+        "tags": [
+          "artifacts"
+        ],
+        "operationId": "postV1ArtifactsIdLifecycleTransition",
+        "summary": "POST /v1/artifacts/:id/lifecycle/transition – record a state transition.",
+        "description": "POST /v1/artifacts/:id/lifecycle/transition – record a state transition. Body: {to_state, reason, evidence_id?, successor_id?}.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "id path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/assistant": {
       "post": {
         "tags": [
@@ -2524,6 +3249,82 @@
         "operationId": "postV1Assistant",
         "summary": "Natural-language assistant",
         "description": "Natural-language assistant POST /v1/assistant { prompt } returns a parsed-intent action + result. Scoped to req.tenant_record; never calls an external LLM; deterministic.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/assurance/artifact/{id}": {
+      "get": {
+        "tags": [
+          "assurance"
+        ],
+        "operationId": "getV1AssuranceArtifactId",
+        "summary": "GET /v1/assurance/workspace/:id?format=json|pdf",
+        "description": "GET /v1/assurance/workspace/:id?format=json|pdf Same shape, workspace-level – the artifact-derived claims are omitted and only the vault-derived jurisdiction claim + the 8 required control rows remain.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "id path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/assurance/workspace/{id}": {
+      "get": {
+        "tags": [
+          "assurance"
+        ],
+        "operationId": "getV1AssuranceWorkspaceId",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "id path parameter"
+          }
+        ],
+        "x-kolm-source-indexed": true,
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -2928,7 +3729,8 @@
           "429": {
             "$ref": "#/components/responses/RateLimited"
           }
-        }
+        },
+        "operationId": "postV1AuthLogin"
       }
     },
     "/v1/auth/signup": {
@@ -2972,7 +3774,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "postV1AuthSignup"
       }
     },
     "/v1/autopilot/disable": {
@@ -3765,6 +4568,33 @@
         }
       }
     },
+    "/v1/bundle/airgap": {
+      "post": {
+        "tags": [
+          "bundle"
+        ],
+        "operationId": "postV1BundleAirgap",
+        "summary": "an HTTP response would balloon memory, leak the server's checkout layout,",
+        "description": "an HTTP response would balloon memory, leak the server's checkout layout, and lock the route into one host's filesystem. The CLI is the supported path – `kolm artifact airgap --out <path>`. The route still exists so surface discovery + docs can link to it and so a future CDN-backed implementation has a stable URL.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/byoc/attestation": {
       "post": {
         "tags": [
@@ -3920,6 +4750,33 @@
         "description": "BYOC deployment teardown - marks an owned deployment torn down and hides it from listings."
       }
     },
+    "/v1/byoc/status": {
+      "get": {
+        "tags": [
+          "byoc"
+        ],
+        "operationId": "getV1ByocStatus",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/byoc/targets": {
       "get": {
         "tags": [
@@ -4009,6 +4866,87 @@
         "operationId": "postV1CaptureAnthropic",
         "summary": "POST /v1/capture/anthropic – proxy to Anthropic, capture the round-trip.",
         "description": "POST /v1/capture/anthropic – proxy to Anthropic, capture the round-trip. This regex route also accepts SDK-appended suffixes such as /v1/messages at runtime. The body is the upstream Anthropic Messages payload, unmodified.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/capture/browse": {
+      "get": {
+        "tags": [
+          "capture"
+        ],
+        "operationId": "getV1CaptureBrowse",
+        "summary": "W409f – /v1/capture/browse / /v1/capture/bulk / /v1/capture/export – page",
+        "description": "W409f – /v1/capture/browse / /v1/capture/bulk / /v1/capture/export – page surface for the captures.html admin view. Browse paginates, bulk acts on a set of capture ids, export streams JSONL/CSV. Empty-tenant safe.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/capture/bulk": {
+      "post": {
+        "tags": [
+          "capture"
+        ],
+        "operationId": "postV1CaptureBulk",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/capture/export": {
+      "get": {
+        "tags": [
+          "capture"
+        ],
+        "operationId": "getV1CaptureExport",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -4414,6 +5352,190 @@
         "operationId": "getV1CapturesForgotten",
         "summary": "(source-indexed route; contract generated from route source)",
         "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/captures/list": {
+      "get": {
+        "tags": [
+          "captures"
+        ],
+        "operationId": "getV1CapturesList",
+        "summary": "W-G wrapper-completion – GET /v1/captures/list",
+        "description": "W-G wrapper-completion – GET /v1/captures/list Paginated capture browser feed for /account/captures.html. Filters: ?namespace, ?status (pending|approved|rejected|quarantined, multi-comma), ?risk_min, ?risk_max (0..1), ?pii (multi-comma), ?from, ?to (ISO), ?q (substring), ?limit (1-200), ?offset.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/captures/multi-turn": {
+      "post": {
+        "tags": [
+          "captures"
+        ],
+        "operationId": "postV1CapturesMultiturn",
+        "summary": "POST /v1/captures/multi-turn – append a multi-turn conversation row.",
+        "description": "POST /v1/captures/multi-turn – append a multi-turn conversation row. Body shape: { namespace, conversation_id, conversation:[{role,content,tool_calls?,timestamp}], parent_message_id? }",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/captures/multimodal": {
+      "post": {
+        "tags": [
+          "captures"
+        ],
+        "operationId": "postV1CapturesMultimodal",
+        "summary": "Body shape:",
+        "description": "Body shape: { namespace, kind, payload, hash?, redaction_receipt? } If hash is omitted we compute one from the canonical payload so the caller can be lazy. kind MUST be in MULTIMODAL_KINDS.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/captures/review-bulk": {
+      "post": {
+        "tags": [
+          "captures"
+        ],
+        "operationId": "postV1CapturesReviewbulk",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/captures/{id}/inspect": {
+      "get": {
+        "tags": [
+          "captures"
+        ],
+        "operationId": "getV1CapturesIdInspect",
+        "summary": "W-G wrapper-completion – GET /v1/captures/:id/inspect",
+        "description": "W-G wrapper-completion – GET /v1/captures/:id/inspect Single-row inspection (full prompt + response + receipt + chain hash).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "id path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/captures/{id}/review": {
+      "post": {
+        "tags": [
+          "captures"
+        ],
+        "operationId": "postV1CapturesIdReview",
+        "summary": "W-G wrapper-completion – POST /v1/captures/:id/review",
+        "description": "W-G wrapper-completion – POST /v1/captures/:id/review Approve / reject / quarantine a capture. Body: {action: 'approve'|'reject'|'quarantine', reason?}. Bulk variant: POST /v1/captures/review-bulk {ids:[...], action, reason?}.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "id path parameter"
+          }
+        ],
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -5067,6 +6189,34 @@
               }
             }
           }
+        },
+        "operationId": "postV1Compile"
+      }
+    },
+    "/v1/compile/cloud": {
+      "post": {
+        "tags": [
+          "compile"
+        ],
+        "operationId": "postV1CompileCloud",
+        "summary": "POST /v1/compile/cloud – W869 Persona B path: caller has no local GPU.",
+        "description": "POST /v1/compile/cloud – W869 Persona B path: caller has no local GPU. Dispatches a compile to a partner GPU (modal/runpod/vast/lambda) using server-side credentials (KOLM_RUNPOD_TOKEN / KOLM_MODAL_TOKEN in env). Body: { backend, namespace, spec?, confirm, budget_usd, base_model? }. Without confirm:true we return a quote so the caller sees the cost first.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
         }
       }
     },
@@ -5104,7 +6254,8 @@
           "404": {
             "$ref": "#/components/responses/NotFound"
           }
-        }
+        },
+        "operationId": "getV1CompileId"
       }
     },
     "/v1/compile/{id}/.kolm": {
@@ -5315,6 +6466,33 @@
         "operationId": "postV1ComplianceCertificationpacketValidate",
         "summary": "Compliance certification manifest validation - fails closed on missing",
         "description": "Compliance certification manifest validation - fails closed on missing auditor/legal evidence, unsigned proof hashes, non-HTTPS evidence URLs, placeholder fields, and secret-looking values.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/compliance/status": {
+      "get": {
+        "tags": [
+          "compliance"
+        ],
+        "operationId": "getV1ComplianceStatus",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -6594,6 +7772,33 @@
         }
       }
     },
+    "/v1/drift-alert": {
+      "get": {
+        "tags": [
+          "drift-alert"
+        ],
+        "operationId": "getV1Driftalert",
+        "summary": ":namespace path param. The dashboard pages call these endpoints without a",
+        "description": ":namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404'd. We forward to the existing :namespace handler with namespace='default' so the account UI<->server parity test (W409f #4) passes and the page renders an empty-state from a real envelope instead of a 404.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/drift-alert/snapshot": {
       "post": {
         "tags": [
@@ -7217,6 +8422,33 @@
         "description": "Tenant holdout delete - removes one authenticated tenant corpus and audits the deletion."
       }
     },
+    "/v1/evidence": {
+      "get": {
+        "tags": [
+          "evidence"
+        ],
+        "operationId": "getV1Evidence",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/evidence/readiness": {
       "get": {
         "tags": [
@@ -7225,6 +8457,136 @@
         "operationId": "getV1EvidenceReadiness",
         "summary": "Evidence readiness - one public, secret-safe aggregate for every proof gate",
         "description": "Evidence readiness - one public, secret-safe aggregate for every proof gate that can keep product copy from saying \"final\" too early. This mirrors `kolm evidence --json` so account UI, docs, CLI, and release audits share the same local/external boundary.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/evidence/{id}": {
+      "get": {
+        "tags": [
+          "evidence"
+        ],
+        "operationId": "getV1EvidenceId",
+        "summary": "GET /v1/evidence/:id – return the single node detail for an evidence id.",
+        "description": "GET /v1/evidence/:id – return the single node detail for an evidence id. Looks up the owning artifact via the per-node reverse index; returns the verbatim node record (id, kind, plus any caller-supplied attrs). 404 when the node id is not in any artifact's DAG.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "id path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/evidence/{id}/revoke": {
+      "post": {
+        "tags": [
+          "evidence"
+        ],
+        "operationId": "postV1EvidenceIdRevoke",
+        "summary": "lifecycle revoke transition).",
+        "description": "lifecycle revoke transition). Returns { revoked, needs_review[] }. The revoke verdict does NOT mutate the artifact's signed receipt – receipts seal bytes, not operational provenance – so propagation is a verdict written to the caller's audit trail, not a state-machine transition.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "id path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/experts": {
+      "post": {
+        "tags": [
+          "experts"
+        ],
+        "operationId": "postV1Experts",
+        "summary": "POST /v1/experts – analyze MoE expert activation distribution for a .kolm.",
+        "description": "POST /v1/experts – analyze MoE expert activation distribution for a .kolm. Body: { artifact_path, threshold? } The artifact must be operator-side (path on the server). Returns per-expert activation + prune candidates + estimated K-Score impact.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/export": {
+      "post": {
+        "tags": [
+          "export"
+        ],
+        "operationId": "postV1Export",
+        "summary": "POST /v1/export – emit an export plan for a .kolm artifact (target =",
+        "description": "POST /v1/export – emit an export plan for a .kolm artifact (target = gguf/awq/exl2/mlx/onnx/tflite/coreml/openvino). Returns the plan + estimated size + invocation hint; actual export runs via the CLI worker.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -7390,6 +8752,195 @@
         "description": "Federated audit - returns recent hash-only approval-share envelopes for the tenant."
       }
     },
+    "/v1/federated/consortium": {
+      "get": {
+        "tags": [
+          "federated"
+        ],
+        "operationId": "getV1FederatedConsortium",
+        "summary": "/v1/federated/consortium – bare GET that points the TUI at the W830",
+        "description": "/v1/federated/consortium – bare GET that points the TUI at the W830 members collection. The federated-consortium-routes module owns the tenant-scoped membership reads; here we add a no-query alias that returns the empty-state envelope when no consortium_id is supplied so the TUI view always has something to render.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/federated/consortium/aggregations": {
+      "get": {
+        "tags": [
+          "federated"
+        ],
+        "operationId": "getV1FederatedConsortiumAggregations",
+        "summary": "Returns recent aggregation runs with status, epsilon spent, and",
+        "description": "Returns recent aggregation runs with status, epsilon spent, and participant count. Defense-in-depth: only returns rows where this tenant is a participant OR rows are visible to the consortium's listed members (default).",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/federated/consortium/budget": {
+      "get": {
+        "tags": [
+          "federated"
+        ],
+        "operationId": "getV1FederatedConsortiumBudget",
+        "summary": "Returns the consortium-wide privacy budget: epsilon_spent (summed across",
+        "description": "Returns the consortium-wide privacy budget: epsilon_spent (summed across recorded aggregation rounds) vs epsilon_allocated (from the consortium state). Also surfaces per-tenant epsilon_spent_by_self so a tenant can see how much budget THEY have burned.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/federated/consortium/members": {
+      "get": {
+        "tags": [
+          "federated"
+        ],
+        "operationId": "getV1FederatedConsortiumMembers",
+        "summary": "GET /v1/federated/consortium/members?consortium_id=...",
+        "description": "GET /v1/federated/consortium/members?consortium_id=... Returns the list of opted-in members. Every member row includes its contribution_count + last_share_at so the UI can show \"who's pulling their weight\". The caller's own member row is always included.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/federated/consortium/opt-in": {
+      "post": {
+        "tags": [
+          "federated"
+        ],
+        "operationId": "postV1FederatedConsortiumOptin",
+        "summary": "Body: { consortium_id, scope?:[ns...], epsilon_allocated?:number, note? }",
+        "description": "Body: { consortium_id, scope?:[ns...], epsilon_allocated?:number, note? } Writes the member row into the consortium's single-tenant view + audits contribution_count=0 baseline + last_share_at=null.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/federated/consortium/opt-out": {
+      "post": {
+        "tags": [
+          "federated"
+        ],
+        "operationId": "postV1FederatedConsortiumOptout",
+        "summary": "POST /v1/federated/consortium/opt-out",
+        "description": "POST /v1/federated/consortium/opt-out Body: { consortium_id, reason? }",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/federated/consortium/verify-mia": {
+      "post": {
+        "tags": [
+          "federated"
+        ],
+        "operationId": "postV1FederatedConsortiumVerifymia",
+        "summary": "Body: { artifact_id, test_inputs:[...], shadow_models?:[...],",
+        "description": "Body: { artifact_id, test_inputs:[...], shadow_models?:[...], train_set?:[...], holdout_set?:[...], p_threshold? } Honest stub when shadow_models empty (returns mia_requires_shadow_models).",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/federated/opt-in": {
       "post": {
         "tags": [
@@ -7496,6 +9047,33 @@
           }
         },
         "description": "Federated approval share - emits hash-only approval rows for an opted-in namespace."
+      }
+    },
+    "/v1/fit": {
+      "post": {
+        "tags": [
+          "fit"
+        ],
+        "operationId": "postV1Fit",
+        "summary": "POST /v1/fit – estimate VRAM use for (params × quant × context).",
+        "description": "POST /v1/fit – estimate VRAM use for (params × quant × context). Body: { model_params_b, quant, vram_gb, context?, batch?, kv_precision? } Returns the same envelope as the CLI: {fits, est_total_gb, est_weights_gb, est_kv_gb, est_activations_gb, headroom_gb, recommendation}.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
       }
     },
     "/v1/fl/aggregate": {
@@ -7606,6 +9184,141 @@
         }
       }
     },
+    "/v1/free/chat": {
+      "post": {
+        "tags": [
+          "free"
+        ],
+        "operationId": "postV1FreeChat",
+        "summary": "20 messages/day to tinker with the intent classifier; if a tenant key is",
+        "description": "20 messages/day to tinker with the intent classifier; if a tenant key is attached the route upgrades to the full /v1/intent/ask snapshot. This is the SAME pipe pre-auth and post-auth, so the homepage chat box and the /account console chat box share the contract. Anon callers cannot read tenant state – snapshotContext is called with tenant_id=null.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/free/cli": {
+      "post": {
+        "tags": [
+          "free"
+        ],
+        "operationId": "postV1FreeCli",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/free/cli/allowlist": {
+      "get": {
+        "tags": [
+          "free"
+        ],
+        "operationId": "getV1FreeCliAllowlist",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/gateway/dashboard": {
+      "get": {
+        "tags": [
+          "gateway"
+        ],
+        "operationId": "getV1GatewayDashboard",
+        "summary": "W-G wrapper-completion – GET /v1/gateway/dashboard",
+        "description": "W-G wrapper-completion – GET /v1/gateway/dashboard Aggregate routing breakdown + cost-savings + recent calls for the /account/gateway.html dashboard. Tenant-scoped via findByTenant.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/gateway/dispatch": {
+      "post": {
+        "tags": [
+          "gateway"
+        ],
+        "operationId": "postV1GatewayDispatch",
+        "summary": "6. Build the kolm-audit-1 receipt, sign it, persist + return.",
+        "description": "6. Build the kolm-audit-1 receipt, sign it, persist + return. Every fallback marks `capture_eligible: true` so the flywheel picks up the cases where the local model fell short.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/gateway/mode": {
       "get": {
         "tags": [
@@ -7614,6 +9327,87 @@
         "operationId": "getV1GatewayMode",
         "summary": "W742 – GET /v1/gateway/mode reports the current gateway mode + reachability.",
         "description": "W742 – GET /v1/gateway/mode reports the current gateway mode + reachability. Auth-gated (mounted after r.use(authMiddleware)). Probes both local backends with a 1-second HEAD timeout so a slow / unreachable backend never blocks the dashboard. The response surfaces the resolved mode (NOT the raw env value) so a callers sees what currentMode() actually decided.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/gateway/providers": {
+      "get": {
+        "tags": [
+          "gateway"
+        ],
+        "operationId": "getV1GatewayProviders",
+        "summary": "W-G wrapper-completion – GET /v1/gateway/providers",
+        "description": "W-G wrapper-completion – GET /v1/gateway/providers Return the 11 supported providers with the customer's per-tenant config overlaid (enabled, rate_limit, position-in-chain). Reads the registry for the canonical list, then merges per-tenant overrides if any.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/gateway/providers/config": {
+      "post": {
+        "tags": [
+          "gateway"
+        ],
+        "operationId": "postV1GatewayProvidersConfig",
+        "summary": "W-G wrapper-completion – POST /v1/gateway/providers/config",
+        "description": "W-G wrapper-completion – POST /v1/gateway/providers/config Persist per-tenant provider overrides (enabled toggle, position-in-chain, RPM limit). API keys are NEVER stored in the row – operators set them as environment variables; we only persist the FLAG that one is set.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/gateway/test-connection": {
+      "post": {
+        "tags": [
+          "gateway"
+        ],
+        "operationId": "postV1GatewayTestconnection",
+        "summary": "W-G wrapper-completion – POST /v1/gateway/test-connection",
+        "description": "W-G wrapper-completion – POST /v1/gateway/test-connection Fire a tiny ping against an upstream to verify the key works. Body: {provider: 'anthropic', api_key: 'sk-ant-...'}. Returns {ok, status, elapsed_ms} but never echoes the key back.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -7687,6 +9481,33 @@
         }
       }
     },
+    "/v1/hardware": {
+      "get": {
+        "tags": [
+          "hardware"
+        ],
+        "operationId": "getV1Hardware",
+        "summary": "GET /v1/hardware – detect SERVER hardware (GPU vendor/vram/cc, supported quants).",
+        "description": "GET /v1/hardware – detect SERVER hardware (GPU vendor/vram/cc, supported quants). Unauthed: returns the operator's local accelerator profile so an Account UI running on the same host can render a \"what fits\" picker without auth.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/health": {
       "get": {
         "tags": [
@@ -7741,7 +9562,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getV1Healthz"
       }
     },
     "/v1/hub": {
@@ -7946,14 +9768,14 @@
         }
       }
     },
-    "/v1/intent/ask": {
+    "/v1/inspect": {
       "post": {
         "tags": [
-          "intent"
+          "inspect"
         ],
-        "operationId": "postV1IntentAsk",
-        "summary": "Response envelope:",
-        "description": "Response envelope: { ok, question, verb, command, args, why, confidence, source, alternatives: [{verb, command, confidence}], snapshot_summary } Auth-gated. Empty question returns 400. Classifier throw returns 500.",
+        "operationId": "postV1Inspect",
+        "summary": "POST /v1/inspect – inspect a model (HF id or local .kolm path).",
+        "description": "POST /v1/inspect – inspect a model (HF id or local .kolm path). Body: { model_id?: string, kolm_path?: string } For HF id: fetches config.json over the public HF endpoint. For .kolm: reads manifest from disk (operator-side path) with signature bypass since inspection is read-only.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -7971,6 +9793,33 @@
             "$ref": "#/components/responses/ServerError"
           }
         }
+      }
+    },
+    "/v1/intent/ask": {
+      "post": {
+        "tags": [
+          "intent"
+        ],
+        "operationId": "postV1IntentAsk",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "x-kolm-source-indexed": true
       }
     },
     "/v1/intent/next": {
@@ -9155,6 +11004,152 @@
         "description": "Lineage validate - checks an artifact-lineage block for structural consistency (parent links, build steps, version pins). Returns {ok:true, block} when the lineage is well-formed, {ok:false, error} otherwise."
       }
     },
+    "/v1/lingual/distribution": {
+      "get": {
+        "tags": [
+          "lingual"
+        ],
+        "operationId": "getV1LingualDistribution",
+        "summary": "GET /v1/lingual/distribution",
+        "description": "GET /v1/lingual/distribution",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/lingual/manifest": {
+      "get": {
+        "tags": [
+          "lingual"
+        ],
+        "operationId": "getV1LingualManifest",
+        "summary": "/v1/lingual/manifest – bare GET aliasing the W833 manifest collection.",
+        "description": "/v1/lingual/manifest – bare GET aliasing the W833 manifest collection. The shipped route is /v1/lingual/manifest/:artifact_id; without an artifact_id selected (the TUI default state) we return the tenant-wide language-mixture distribution so the view still renders.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/lingual/manifest/{artifact_id}": {
+      "get": {
+        "tags": [
+          "lingual"
+        ],
+        "operationId": "getV1LingualManifestArtifactid",
+        "summary": "GET /v1/lingual/manifest/:artifact_id",
+        "description": "GET /v1/lingual/manifest/:artifact_id Reads the per-language K-Score block off an artifact's manifest. Looks up the manifest via src/artifact.js (or registry.js) when available; falls back to an honest \"no_manifest_found\" envelope when the artifact isn't registered.",
+        "parameters": [
+          {
+            "name": "artifact_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "artifact_id path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/lingual/mixture/auto-balance": {
+      "post": {
+        "tags": [
+          "lingual"
+        ],
+        "operationId": "postV1LingualMixtureAutobalance",
+        "summary": "POST /v1/lingual/mixture/auto-balance",
+        "description": "POST /v1/lingual/mixture/auto-balance",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/lingual/synthesize": {
+      "post": {
+        "tags": [
+          "lingual"
+        ],
+        "operationId": "postV1LingualSynthesize",
+        "summary": "POST /v1/lingual/synthesize",
+        "description": "POST /v1/lingual/synthesize",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/long-context/check": {
       "post": {
         "tags": [
@@ -9290,6 +11285,98 @@
         "description": "Marketplace catalog manifest - returns the signed catalog with live production-ready verdicts."
       }
     },
+    "/v1/marketplace/download/{id}": {
+      "get": {
+        "tags": [
+          "marketplace"
+        ],
+        "operationId": "getV1MarketplaceDownloadId",
+        "summary": "GET /v1/marketplace/download/:id",
+        "description": "GET /v1/marketplace/download/:id Auth-gated. Streams artifact_uri bytes; records download counter. 402 if listing.paid AND tenant lacks entitlement.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "id path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/marketplace/facets": {
+      "get": {
+        "tags": [
+          "marketplace"
+        ],
+        "operationId": "getV1MarketplaceFacets",
+        "summary": "GET /v1/marketplace/facets",
+        "description": "GET /v1/marketplace/facets Pure read: returns the enum set so the UI sidebar can render filter chips without hard-coding the lists in two places.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/marketplace/finetune": {
+      "post": {
+        "tags": [
+          "marketplace"
+        ],
+        "operationId": "postV1MarketplaceFinetune",
+        "summary": "POST /v1/marketplace/finetune",
+        "description": "POST /v1/marketplace/finetune Auth-gated. Queue a transfer-learning fine-tune from a marketplace artifact.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/marketplace/list": {
       "get": {
         "tags": [
@@ -9318,6 +11405,31 @@
       }
     },
     "/v1/marketplace/listings": {
+      "get": {
+        "tags": [
+          "marketplace"
+        ],
+        "operationId": "getV1MarketplaceListings",
+        "summary": "GET /v1/marketplace/listings",
+        "description": "GET /v1/marketplace/listings Public read. Returns {ok:true, rows, total, page, limit, sort_by, all_count}.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
       "post": {
         "tags": [
           "marketplace"
@@ -9325,6 +11437,33 @@
         "operationId": "postV1MarketplaceListings",
         "summary": "(source-indexed route; contract generated from route source)",
         "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/marketplace/payout-cycle": {
+      "post": {
+        "tags": [
+          "marketplace"
+        ],
+        "operationId": "postV1MarketplacePayoutcycle",
+        "summary": "POST /v1/marketplace/payout-cycle",
+        "description": "POST /v1/marketplace/payout-cycle Auth-gated. Forecast-only: aggregates revenue ledger and emits payout audit rows. Returns the per-listing split.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -9396,6 +11535,71 @@
           }
         },
         "description": "Marketplace publish request - queues an artifact proposal for manual review without publishing bytes."
+      }
+    },
+    "/v1/marketplace/rate": {
+      "post": {
+        "tags": [
+          "marketplace"
+        ],
+        "operationId": "postV1MarketplaceRate",
+        "summary": "POST /v1/marketplace/rate",
+        "description": "POST /v1/marketplace/rate Auth-gated. Anti-gaming: 403 unless account_age >= 7d AND prior download.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/marketplace/ratings/{id}": {
+      "get": {
+        "tags": [
+          "marketplace"
+        ],
+        "operationId": "getV1MarketplaceRatingsId",
+        "summary": "GET /v1/marketplace/ratings/:id",
+        "description": "GET /v1/marketplace/ratings/:id Public read of aggregate ratings.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "id path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
       }
     },
     "/v1/marketplace/reviews": {
@@ -9471,6 +11675,33 @@
         "operationId": "getV1MarketplaceSearch",
         "summary": "* empty search results -> {ok:false, error:'marketplace_empty',",
         "description": "* empty search results -> {ok:false, error:'marketplace_empty', hint:'no artifacts registered yet', results:[]} * unauth POST -> 401 + {error:'auth_required'} * invalid payload -> 400 + {error:'<code>', detail:<msg>}",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/marketplace/upload": {
+      "post": {
+        "tags": [
+          "marketplace"
+        ],
+        "operationId": "postV1MarketplaceUpload",
+        "summary": "Auth-gated. Body: {artifact_uri, manifest_sha256, signature_b64,",
+        "description": "Auth-gated. Body: {artifact_uri, manifest_sha256, signature_b64, public_key_pem, id, title, vertical, task_type, hardware_targets[], k_score, teacher_model, paid, price_micro_usd}. publisher_tenant_id is FORCED from req.tenant_record.id.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -9674,6 +11905,33 @@
         }
       }
     },
+    "/v1/merge": {
+      "post": {
+        "tags": [
+          "merge"
+        ],
+        "operationId": "postV1Merge",
+        "summary": "POST /v1/merge – compute a merge plan for two .kolm artifacts.",
+        "description": "POST /v1/merge – compute a merge plan for two .kolm artifacts. Body: { base, head, method?, alpha?, dry_run? } Returns the merge envelope (lineage check, kscore delta heuristic, output path). When dry_run=true, no artifact is written.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/messages": {
       "post": {
         "tags": [
@@ -9682,6 +11940,141 @@
         "operationId": "postV1Messages",
         "summary": "Anthropic direct + alias.",
         "description": "Anthropic direct + alias.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/meta/predict": {
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "operationId": "getV1MetaPredict",
+        "summary": "GET /v1/meta/predict",
+        "description": "GET /v1/meta/predict",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/meta/retrain": {
+      "post": {
+        "tags": [
+          "meta"
+        ],
+        "operationId": "postV1MetaRetrain",
+        "summary": "POST /v1/meta/retrain",
+        "description": "POST /v1/meta/retrain",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/meta/status": {
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "operationId": "getV1MetaStatus",
+        "summary": "GET /v1/meta/status",
+        "description": "GET /v1/meta/status",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/metrics/event": {
+      "post": {
+        "tags": [
+          "metrics"
+        ],
+        "operationId": "postV1MetricsEvent",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/metrics/snapshot": {
+      "get": {
+        "tags": [
+          "metrics"
+        ],
+        "operationId": "getV1MetricsSnapshot",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -10142,6 +12535,33 @@
         }
       }
     },
+    "/v1/multimodal/pipeline": {
+      "get": {
+        "tags": [
+          "multimodal"
+        ],
+        "operationId": "getV1MultimodalPipeline",
+        "summary": "/v1/multimodal/pipeline – collection GET listing tenant multimodal",
+        "description": "/v1/multimodal/pipeline – collection GET listing tenant multimodal capture pipeline state. Real W829 routes (/v1/captures/multimodal, /v1/vlm-distill/runs) live in src/multimodal-pipeline-routes.js; this bare GET aggregates them for the TUI surface.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/multimodal/redact-audio": {
       "post": {
         "tags": [
@@ -10285,6 +12705,246 @@
         "operationId": "getV1MultimodalTokenizeDoctor",
         "summary": "W554 - multimodal sidecar tokenizer. API mirror of",
         "description": "W554 - multimodal sidecar tokenizer. API mirror of `kolm media tokenize`: local-safe by default, hosted-disabled unless the operator explicitly allows server-side file access. Creates compile-ready Markdown sidecars using deterministic local feature tokens, with optional provider captions/transcripts when configured.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/namespaces": {
+      "get": {
+        "tags": [
+          "namespaces"
+        ],
+        "operationId": "getV1Namespaces",
+        "summary": "GET /v1/namespaces – list all for tenant (used by /account/namespaces)",
+        "description": "GET /v1/namespaces – list all for tenant (used by /account/namespaces)",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "namespaces"
+        ],
+        "operationId": "postV1Namespaces",
+        "summary": "POST /v1/namespaces – create",
+        "description": "POST /v1/namespaces – create",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/namespaces/{slug}": {
+      "get": {
+        "tags": [
+          "namespaces"
+        ],
+        "operationId": "getV1NamespacesSlug",
+        "summary": "GET /v1/namespaces/:slug – config read",
+        "description": "GET /v1/namespaces/:slug – config read",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "slug path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "namespaces"
+        ],
+        "operationId": "putV1NamespacesSlug",
+        "summary": "PUT /v1/namespaces/:slug – config patch",
+        "description": "PUT /v1/namespaces/:slug – config patch",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "slug path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/namespaces/{slug}/deploy": {
+      "post": {
+        "tags": [
+          "namespaces"
+        ],
+        "operationId": "postV1NamespacesSlugDeploy",
+        "summary": "POST /v1/namespaces/:slug/deploy – set artifact",
+        "description": "POST /v1/namespaces/:slug/deploy – set artifact",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "slug path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/namespaces/{slug}/rollback": {
+      "post": {
+        "tags": [
+          "namespaces"
+        ],
+        "operationId": "postV1NamespacesSlugRollback",
+        "summary": "POST /v1/namespaces/:slug/rollback – restore prior artifact",
+        "description": "POST /v1/namespaces/:slug/rollback – restore prior artifact",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "slug path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/namespaces/{slug}/undeploy": {
+      "post": {
+        "tags": [
+          "namespaces"
+        ],
+        "operationId": "postV1NamespacesSlugUndeploy",
+        "summary": "POST /v1/namespaces/:slug/undeploy – clear artifact",
+        "description": "POST /v1/namespaces/:slug/undeploy – clear artifact",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "slug path parameter"
+          }
+        ],
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -11050,6 +13710,44 @@
         }
       }
     },
+    "/v1/passport/{job_id}": {
+      "get": {
+        "tags": [
+          "passport"
+        ],
+        "operationId": "getV1PassportJobid",
+        "summary": "canonical path for offline use; this HTTP route serves the same envelope",
+        "description": "canonical path for offline use; this HTTP route serves the same envelope for a *compile job* the caller's tenant already owns (artifact lives in the local artifact store at /v1/compile/:id/.kolm). For arbitrary external .kolm files, the CLI remains the supported path. Returns 501 with a hint when the artifact is not local – never silent.",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "job_id path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/pextract/detect-attempt": {
       "post": {
         "tags": [
@@ -11323,6 +14021,208 @@
         "operationId": "postV1PipelineTokenize",
         "summary": "POST /v1/pipeline/tokenize – train a tokenizer over corpus body.",
         "description": "POST /v1/pipeline/tokenize – train a tokenizer over corpus body.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/pipelines": {
+      "get": {
+        "tags": [
+          "pipelines"
+        ],
+        "operationId": "getV1Pipelines",
+        "summary": "── GET /v1/pipelines ──────────────────────────────────────────────────────",
+        "description": "── GET /v1/pipelines ──────────────────────────────────────────────────────",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "pipelines"
+        ],
+        "operationId": "postV1Pipelines",
+        "summary": "── POST /v1/pipelines ─────────────────────────────────────────────────────",
+        "description": "── POST /v1/pipelines ───────────────────────────────────────────────────── Body: { name: string, yaml: string }",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/pipelines/{id}": {
+      "get": {
+        "tags": [
+          "pipelines"
+        ],
+        "operationId": "getV1PipelinesId",
+        "summary": "── GET /v1/pipelines/:id ──────────────────────────────────────────────────",
+        "description": "── GET /v1/pipelines/:id ──────────────────────────────────────────────────",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "id path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "pipelines"
+        ],
+        "operationId": "deleteV1PipelinesId",
+        "summary": "── DELETE /v1/pipelines/:id ───────────────────────────────────────────────",
+        "description": "── DELETE /v1/pipelines/:id ───────────────────────────────────────────────",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "id path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/pipelines/{id}/kscore": {
+      "get": {
+        "tags": [
+          "pipelines"
+        ],
+        "operationId": "getV1PipelinesIdKscore",
+        "summary": "── GET /v1/pipelines/:id/kscore ───────────────────────────────────────────",
+        "description": "── GET /v1/pipelines/:id/kscore ───────────────────────────────────────────",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "id path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/pipelines/{id}/run": {
+      "post": {
+        "tags": [
+          "pipelines"
+        ],
+        "operationId": "postV1PipelinesIdRun",
+        "summary": "── POST /v1/pipelines/:id/run ─────────────────────────────────────────────",
+        "description": "── POST /v1/pipelines/:id/run ───────────────────────────────────────────── Body: { input: any }",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "id path parameter"
+          }
+        ],
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -11805,6 +14705,71 @@
         }
       }
     },
+    "/v1/procurement": {
+      "get": {
+        "tags": [
+          "procurement"
+        ],
+        "operationId": "getV1Procurement",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/procurement/{framework}": {
+      "get": {
+        "tags": [
+          "procurement"
+        ],
+        "operationId": "getV1ProcurementFramework",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "parameters": [
+          {
+            "name": "framework",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "framework path parameter"
+          }
+        ],
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/product/experience": {
       "get": {
         "tags": [
@@ -12192,6 +15157,60 @@
         }
       }
     },
+    "/v1/quantize": {
+      "post": {
+        "tags": [
+          "quantize"
+        ],
+        "operationId": "postV1Quantize",
+        "summary": "POST /v1/quantize – alias over /v1/compile that auto-fills format+quant",
+        "description": "POST /v1/quantize – alias over /v1/compile that auto-fills format+quant from a single --target shortcut (gguf-q4km, exl2-4bpw, nvfp4, etc.) so the Account UI and SDKs can call one route instead of constructing a spec. Body: { model_id, target, job_id?, ... } → returns the created job.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/ready/deep": {
+      "get": {
+        "tags": [
+          "ready"
+        ],
+        "operationId": "getV1ReadyDeep",
+        "summary": "/v1/ready/deep – /v1-prefixed alias of the W824 /ready/deep route so the",
+        "description": "/v1/ready/deep – /v1-prefixed alias of the W824 /ready/deep route so the TUI's k8s-readiness view stays on the /v1/* convention every other view uses. Forwards through the registered handler instead of duplicating logic so a single k8s-routes change updates both paths.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/recall": {
       "post": {
         "tags": [
@@ -12265,6 +15284,60 @@
         "operationId": "getV1RecallStatus",
         "summary": "Health check for the recall substrate.",
         "description": "Health check for the recall substrate.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/receipts/list": {
+      "get": {
+        "tags": [
+          "receipts"
+        ],
+        "operationId": "getV1ReceiptsList",
+        "summary": "W-D wrapper-completion – GET /v1/receipts/list",
+        "description": "W-D wrapper-completion – GET /v1/receipts/list Tenant-scoped receipt list with namespace + since + limit filters.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/receipts/stats": {
+      "get": {
+        "tags": [
+          "receipts"
+        ],
+        "operationId": "getV1ReceiptsStats",
+        "summary": "where frontier_baseline = sum(local-route tokens × frontier per-token rate)",
+        "description": "where frontier_baseline = sum(local-route tokens × frontier per-token rate) (the counterfactual cost if every local-routed call had gone frontier instead). The baseline uses cost-estimator at frontier defaults (anthropic claude-haiku-4-5 input $0.0008/1k, output $0.004/1k) so the savings number is dimensioned in the same way as the receipts' cost_usd.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -12777,6 +15850,218 @@
         }
       }
     },
+    "/v1/reg/classify-risk": {
+      "post": {
+        "tags": [
+          "reg"
+        ],
+        "operationId": "postV1RegClassifyrisk",
+        "summary": "W834-2 – POST /v1/reg/classify-risk",
+        "description": "W834-2 – POST /v1/reg/classify-risk",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/reg/data-governance": {
+      "get": {
+        "tags": [
+          "reg"
+        ],
+        "operationId": "getV1RegDatagovernance",
+        "summary": "W834-4 – GET /v1/reg/data-governance?namespace=X&period=YYYY-MM",
+        "description": "W834-4 – GET /v1/reg/data-governance?namespace=X&period=YYYY-MM",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/reg/eu-aiact-docs": {
+      "get": {
+        "tags": [
+          "reg"
+        ],
+        "operationId": "getV1RegEuaiactdocs",
+        "summary": "/v1/reg/eu-aiact-docs – GET counterpart to the W834 POST. POST runs the",
+        "description": "/v1/reg/eu-aiact-docs – GET counterpart to the W834 POST. POST runs the Annex IV generator; GET reads the most-recent generated packet (or an empty envelope if none has been produced yet) so the TUI view does not require the operator to first POST to view state.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "reg"
+        ],
+        "operationId": "postV1RegEuaiactdocs",
+        "summary": "W834-1 – POST /v1/reg/eu-aiact-docs",
+        "description": "W834-1 – POST /v1/reg/eu-aiact-docs",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/reg/grc-export": {
+      "post": {
+        "tags": [
+          "reg"
+        ],
+        "operationId": "postV1RegGrcexport",
+        "summary": "W834-6 – POST /v1/reg/grc-export",
+        "description": "W834-6 – POST /v1/reg/grc-export",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/reg/hil/threshold": {
+      "get": {
+        "tags": [
+          "reg"
+        ],
+        "operationId": "getV1RegHilThreshold",
+        "summary": "W834-3 – GET /v1/reg/hil/threshold?namespace=X",
+        "description": "W834-3 – GET /v1/reg/hil/threshold?namespace=X",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "reg"
+        ],
+        "operationId": "postV1RegHilThreshold",
+        "summary": "W834-3 – POST /v1/reg/hil/threshold",
+        "description": "W834-3 – POST /v1/reg/hil/threshold",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/reg/model-card": {
+      "post": {
+        "tags": [
+          "reg"
+        ],
+        "operationId": "postV1RegModelcard",
+        "summary": "W834-5 – POST /v1/reg/model-card",
+        "description": "W834-5 – POST /v1/reg/model-card",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/region/gateways": {
       "get": {
         "tags": [
@@ -12985,7 +16270,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getV1RegistrySearch"
       }
     },
     "/v1/registry/submit": {
@@ -13039,7 +16325,8 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           }
-        }
+        },
+        "operationId": "postV1RegistrySubmit"
       }
     },
     "/v1/registry/verified-publishers/evaluate": {
@@ -13413,7 +16700,8 @@
           "404": {
             "$ref": "#/components/responses/NotFound"
           }
-        }
+        },
+        "operationId": "postV1Run"
       }
     },
     "/v1/runtime/adoption-packets": {
@@ -13551,6 +16839,33 @@
         "description": "Runtime decision history - returns the most recent recorded runtime decisions."
       }
     },
+    "/v1/runtime/placement": {
+      "get": {
+        "tags": [
+          "runtime"
+        ],
+        "operationId": "getV1RuntimePlacement",
+        "summary": "/v1/runtime/placement – collection GET that emits the local placement",
+        "description": "/v1/runtime/placement – collection GET that emits the local placement hierarchy snapshot. W826 ships detectMemoryHierarchy + placementDecision as pure functions; the TUI view needs a one-shot GET to read the hierarchy without staging an artifact size first.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/runtime/policy": {
       "get": {
         "tags": [
@@ -13628,6 +16943,166 @@
           }
         },
         "description": "Runtime replacement stats - summarizes replacement rate, savings, and spend over a window."
+      }
+    },
+    "/v1/savings": {
+      "get": {
+        "tags": [
+          "savings"
+        ],
+        "operationId": "getV1Savings",
+        "summary": "/v1/savings – bare alias for the W835 summary endpoint so the TUI's",
+        "description": "/v1/savings – bare alias for the W835 summary endpoint so the TUI's savings-tracker view has a stable collection-style URL. Forwards into the real /v1/savings/summary handler.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/savings/baseline": {
+      "get": {
+        "tags": [
+          "savings"
+        ],
+        "operationId": "getV1SavingsBaseline",
+        "summary": "GET /v1/savings/baseline – show whether a baseline window is active +",
+        "description": "GET /v1/savings/baseline – show whether a baseline window is active + its start time + accumulated spend so far.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "savings"
+        ],
+        "operationId": "postV1SavingsBaseline",
+        "summary": "POST /v1/savings/baseline – start (or restart) a baseline window.",
+        "description": "POST /v1/savings/baseline – start (or restart) a baseline window. Body: { namespace?, start_ts? }.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/savings/displacement": {
+      "get": {
+        "tags": [
+          "savings"
+        ],
+        "operationId": "getV1SavingsDisplacement",
+        "summary": "frontier_provider (optional) – re-pricing target; falls back to receipt's own model",
+        "description": "frontier_provider (optional) – re-pricing target; falls back to receipt's own model frontier_model (optional) – re-pricing target; falls back to receipt's own model artifact_id (optional) – for compile_cost + deployed_at lookup compile_cost_usd (optional) – explicit override deployed_at_ms (optional) – explicit override",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/savings/record": {
+      "post": {
+        "tags": [
+          "savings"
+        ],
+        "operationId": "postV1SavingsRecord",
+        "summary": "POST /v1/savings/record – record a teacher API call cost.",
+        "description": "POST /v1/savings/record – record a teacher API call cost. Body: { namespace?, provider, model, input_tokens, output_tokens, ts? }.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/savings/summary": {
+      "get": {
+        "tags": [
+          "savings"
+        ],
+        "operationId": "getV1SavingsSummary",
+        "summary": "GET /v1/savings/summary – full savings envelope.",
+        "description": "GET /v1/savings/summary – full savings envelope. Query: ?period_days=30&namespace=default[&fee_rate=0.125]",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
       }
     },
     "/v1/sbom/emit": {
@@ -13815,6 +17290,33 @@
           }
         },
         "description": "Search - registry similarity search across the caller's tenant artifacts. Returns top-k matches with embedding-distance scores. Body: { query (required), k=10, tag }. 500 errors are wrapped in {error, detail, matches:[]} so SDKs never see a raw 500 (W470 P0-2)."
+      }
+    },
+    "/v1/seasonal": {
+      "get": {
+        "tags": [
+          "seasonal"
+        ],
+        "operationId": "getV1Seasonal",
+        "summary": ":namespace path param. The dashboard pages call these endpoints without a",
+        "description": ":namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404'd. We forward to the existing :namespace handler with namespace='default' so the account UI<->server parity test (W409f #4) passes and the page renders an empty-state from a real envelope instead of a 404.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
       }
     },
     "/v1/seasonal/variant": {
@@ -14025,6 +17527,33 @@
         "operationId": "getV1SeedsFromnlHealth",
         "summary": "W347 – GET /v1/seeds/from-nl/health. Lets the UI hide the NL-seeds",
         "description": "W347 – GET /v1/seeds/from-nl/health. Lets the UI hide the NL-seeds button when no LLM backend is configured. Stable, no auth.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/serve": {
+      "post": {
+        "tags": [
+          "serve"
+        ],
+        "operationId": "postV1Serve",
+        "summary": "POST /v1/serve – emit a deployment manifest (docker run / k8s yaml) for",
+        "description": "POST /v1/serve – emit a deployment manifest (docker run / k8s yaml) for a .kolm artifact and runtime target. Body: { artifact, runtime, port?, docker?, k8s? } → { manifest, runtime, port }",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -15102,6 +18631,60 @@
         }
       }
     },
+    "/v1/sso/status": {
+      "get": {
+        "tags": [
+          "sso"
+        ],
+        "operationId": "getV1SsoStatus",
+        "summary": "W869+ Persona D admin status aggregators.",
+        "description": "W869+ Persona D admin status aggregators. Thin read-only composers for /account/enterprise. Each one stitches data from individual surfaces (sso/status, byoc/deployments, compliance/*, audit) into the shape the admin dashboard expects. Honest when state is missing: empty fields, no 404s.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/staleness": {
+      "get": {
+        "tags": [
+          "staleness"
+        ],
+        "operationId": "getV1Staleness",
+        "summary": ":namespace path param. The dashboard pages call these endpoints without a",
+        "description": ":namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404'd. We forward to the existing :namespace handler with namespace='default' so the account UI<->server parity test (W409f #4) passes and the page renders an empty-state from a real envelope instead of a 404.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/staleness/apply-ttl": {
       "post": {
         "tags": [
@@ -15202,6 +18785,33 @@
         "operationId": "postV1StatsigTest",
         "summary": "GET /v1/stat-sig/gate?ab_test_id=X&alpha=Y&min_n=Z&min_effect_size=W",
         "description": "GET /v1/stat-sig/gate?ab_test_id=X&alpha=Y&min_n=Z&min_effect_size=W Returns: {ok, decision:'pass'|'fail'|'insufficient', reasons:[], welch:{...}, version} Auth-gated. Pure-math welchT does not need tenant fence; gate() reads via W777 ab-router which forces tenant from session.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/status": {
+      "get": {
+        "tags": [
+          "status"
+        ],
+        "operationId": "getV1Status",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -15705,6 +19315,33 @@
         }
       }
     },
+    "/v1/synthetic/coverage": {
+      "get": {
+        "tags": [
+          "synthetic"
+        ],
+        "operationId": "getV1SyntheticCoverage",
+        "summary": ":namespace path param. The dashboard pages call these endpoints without a",
+        "description": ":namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404'd. We forward to the existing :namespace handler with namespace='default' so the account UI<->server parity test (W409f #4) passes and the page renders an empty-state from a real envelope instead of a 404.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/synthetic/coverage/{namespace}": {
       "get": {
         "tags": [
@@ -15724,6 +19361,33 @@
           }
         ],
         "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/synthetic/gaps": {
+      "get": {
+        "tags": [
+          "synthetic"
+        ],
+        "operationId": "getV1SyntheticGaps",
+        "summary": ":namespace path param. The dashboard pages call these endpoints without a",
+        "description": ":namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404'd. We forward to the existing :namespace handler with namespace='default' so the account UI<->server parity test (W409f #4) passes and the page renders an empty-state from a real envelope instead of a 404.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -15808,6 +19472,33 @@
         }
       }
     },
+    "/v1/teacher-versions": {
+      "get": {
+        "tags": [
+          "teacher-versions"
+        ],
+        "operationId": "getV1Teacherversions",
+        "summary": ":namespace path param. The dashboard pages call these endpoints without a",
+        "description": ":namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404'd. We forward to the existing :namespace handler with namespace='default' so the account UI<->server parity test (W409f #4) passes and the page renders an empty-state from a real envelope instead of a 404.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/teacher-versions/{namespace}": {
       "get": {
         "tags": [
@@ -15827,6 +19518,60 @@
             "description": "namespace path parameter"
           }
         ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/teacher/chat": {
+      "post": {
+        "tags": [
+          "teacher"
+        ],
+        "operationId": "postV1TeacherChat",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/teacher/chat/health": {
+      "get": {
+        "tags": [
+          "teacher"
+        ],
+        "operationId": "getV1TeacherChatHealth",
+        "summary": "GET /v1/teacher/chat/health – which vendors have keys configured on this",
+        "description": "GET /v1/teacher/chat/health – which vendors have keys configured on this kolm instance. No auth required (publishes only booleans). Lets a local distill worker pick which vendor to route through the proxy without burning a real call to test.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -15971,6 +19716,58 @@
         "operationId": "postV1TeamInvite",
         "summary": "POST /v1/team/invite – admin-only, returns the invite token + URL.",
         "description": "POST /v1/team/invite – admin-only, returns the invite token + URL.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/team/invites": {
+      "get": {
+        "tags": [
+          "team"
+        ],
+        "operationId": "getV1TeamInvites",
+        "summary": "W409f – /v1/team/invites – team.html invite list / create endpoint.",
+        "description": "W409f – /v1/team/invites – team.html invite list / create endpoint. GET returns the calling tenant's outstanding invites; POST creates one.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "team"
+        ],
+        "operationId": "postV1TeamInvites",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -16688,6 +20485,33 @@
         }
       }
     },
+    "/v1/trace/distill": {
+      "get": {
+        "tags": [
+          "trace"
+        ],
+        "operationId": "getV1TraceDistill",
+        "summary": "/v1/trace/distill – collection GET listing tenant reasoning-trace distill",
+        "description": "/v1/trace/distill – collection GET listing tenant reasoning-trace distill jobs. Real W828 wiring lives in src/trace-compile.js; this collection stub returns an empty envelope until a wave wires the distill queue through a dedicated route module.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/trace/translate": {
       "post": {
         "tags": [
@@ -16937,6 +20761,33 @@
         "description": "Training plan - drafts a training plan (model class, dataset split, eval protocol, expected K-floor) for a given dataset. Body: { dataset_id, plus optional model_class, holdout, budget }. Used by `kolm training plan`."
       }
     },
+    "/v1/training/token-dpo": {
+      "get": {
+        "tags": [
+          "training"
+        ],
+        "operationId": "getV1TrainingTokendpo",
+        "summary": "/v1/training/token-dpo – collection GET listing tenant token-DPO jobs.",
+        "description": "/v1/training/token-dpo – collection GET listing tenant token-DPO jobs. Honest envelope: no token-DPO module is wired into the request path yet, so the items[] is empty + status='pending'. The operator still gets a real envelope rather than a 404 from the TUI view.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/tunnel/agent/{token}": {
       "get": {
         "tags": [
@@ -17136,7 +20987,8 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           }
-        }
+        },
+        "operationId": "getV1Usage"
       }
     },
     "/v1/verified-inference": {
@@ -17223,6 +21075,45 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "operationId": "getV1VerifyCid"
+      }
+    },
+    "/v1/verify/{receipt_id}": {
+      "get": {
+        "tags": [
+          "verify"
+        ],
+        "operationId": "getV1VerifyReceiptid",
+        "summary": "W-D wrapper-completion – GET /v1/verify/:receipt_id",
+        "description": "W-D wrapper-completion – GET /v1/verify/:receipt_id Public receipt verification surface. Returns the receipt JSON if known to this tenant + signature verification result. Used by the kolm-audit-1 `verify_url` field; the third-party can hit this without auth to get back the signed payload + a deterministic verify result.",
+        "parameters": [
+          {
+            "name": "receipt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "receipt_id path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
           }
         }
       }
@@ -17554,6 +21445,60 @@
         "operationId": "getV1VisionCaptures",
         "summary": "(source-indexed route; contract generated from route source)",
         "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/vlm-distill/run": {
+      "post": {
+        "tags": [
+          "vlm-distill"
+        ],
+        "operationId": "postV1VlmdistillRun",
+        "summary": "{ teacher, student_model, dataset_captures } – see src/vlm-distill.js",
+        "description": "{ teacher, student_model, dataset_captures } – see src/vlm-distill.js When KOLM_VLM_TEACHER_API_KEY is unset the response envelope still has ok:true (because the job was enqueued honestly) but real_run:false + missing_env:'KOLM_VLM_TEACHER_API_KEY' so the caller knows nothing was actually trained.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/vlm-distill/runs": {
+      "get": {
+        "tags": [
+          "vlm-distill"
+        ],
+        "operationId": "getV1VlmdistillRuns",
+        "summary": "GET /v1/vlm-distill/runs – list jobs for the calling tenant.",
+        "description": "GET /v1/vlm-distill/runs – list jobs for the calling tenant.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"

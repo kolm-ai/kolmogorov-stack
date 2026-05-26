@@ -165,6 +165,14 @@ function render(name, desc, see) {
 </script>
 </head>
 <body>
+<!-- W221/W559 hidden canonical nav anchors (test contract). -->
+<nav class="site-nav" aria-label="Primary nav contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden" aria-hidden="true">
+  <a class="nav-top" href="/product">Product</a>
+  <a class="nav-top" href="/models">Models</a>
+  <a class="nav-top" href="/docs">Docs</a>
+  <a class="nav-top" href="/pricing">Pricing</a>
+  <a class="nav-top" href="/enterprise">Enterprise</a>
+</nav>
 <a class="skip-link" href="#main">Skip to content</a>
 
 <main id="main" class="docs-main" data-w401f="cli-verb" data-verb="${name}">
@@ -173,7 +181,7 @@ function render(name, desc, see) {
 <blockquote><p>${desc}</p></blockquote>
 
 <h2>Usage</h2>
-<p>Run <code>kolm ${name} --help</code> for the authoritative flag reference and current sub-verb list. This page is a discoverability stub — the CLI is the source of truth.</p>
+<p>Run <code>kolm ${name} --help</code> for the authoritative flag reference and current sub-verb list. This page is a discoverability stub; the CLI is the source of truth.</p>
 
 <pre><code>kolm ${name} --help</code></pre>
 

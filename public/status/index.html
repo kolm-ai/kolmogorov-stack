@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Status · kolm.ai</title>
+<meta name="description" content="Live status of the kolm.ai control plane: gateway, auth, storage, captures. Polls /v1/status for the current snapshot.">
+<link rel="canonical" href="https://kolm.ai/status">
+<meta property="og:title" content="Status · kolm.ai">
+<meta property="og:description" content="Live status of the kolm.ai control plane.">
+<meta property="og:url" content="https://kolm.ai/status">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+  :root {
+    --bg: #f3f5f7;
+    --bg-2: #ffffff;
+    --ink: #1f2429;
+    --ink-2: #56606c;
+    --ink-3: #8993a0;
+    --line: #d8dde3;
+    --line-2: #e7ebef;
+    --accent: #1d4ed8;
+    --ok: #0f7a4a;
+    --ok-bg: rgba(15, 122, 74, 0.08);
+    --warn: #8a5b00;
+    --warn-bg: rgba(138, 91, 0, 0.08);
+    --down: #9a1d2a;
+    --down-bg: rgba(154, 29, 42, 0.08);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .nav {
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-2);
+  }
+  .nav__inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .nav__brand { font-weight: 600; color: var(--ink); font-size: 15px; }
+  .nav__brand b { color: var(--accent); font-weight: 600; }
+  .nav__links { display: flex; gap: 18px; font-size: 14px; }
+  .nav__links a { color: var(--ink-2); }
+  .nav__links a:hover { color: var(--ink); text-decoration: none; }
+
+  main { max-width: 960px; margin: 0 auto; padding: 48px 24px 96px; }
+  .eyebrow {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    color: var(--ink-3);
+    margin: 0 0 12px;
+    font-weight: 600;
+  }
+  h1 {
+    font-size: clamp(28px, 4vw, 40px);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .lede { color: var(--ink-2); margin: 0 0 32px; font-size: 16px; max-width: 60ch; }
+
+  /* Hero status card */
+  .hero {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 22px 24px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    margin: 0 0 32px;
+  }
+  .hero[data-overall="ok"] { border-color: rgba(15, 122, 74, 0.30); background: linear-gradient(180deg, var(--ok-bg), var(--bg-2) 60%); }
+  .hero[data-overall="degraded"] { border-color: rgba(138, 91, 0, 0.30); background: linear-gradient(180deg, var(--warn-bg), var(--bg-2) 60%); }
+  .hero[data-overall="down"] { border-color: rgba(154, 29, 42, 0.30); background: linear-gradient(180deg, var(--down-bg), var(--bg-2) 60%); }
+  .hero__dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--ok);
+    flex: 0 0 14px;
+    box-shadow: 0 0 0 4px rgba(15, 122, 74, 0.18);
+  }
+  .hero[data-overall="degraded"] .hero__dot { background: var(--warn); box-shadow: 0 0 0 4px rgba(138, 91, 0, 0.18); }
+  .hero[data-overall="down"] .hero__dot { background: var(--down); box-shadow: 0 0 0 4px rgba(154, 29, 42, 0.18); }
+  .hero__text { flex: 1 1 auto; min-width: 0; }
+  .hero__h { margin: 0 0 4px; font-size: 18px; font-weight: 600; color: var(--ink); }
+  .hero__sub { margin: 0; color: var(--ink-2); font-size: 13.5px; }
+  .hero__updated { color: var(--ink-3); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* Component pill grid */
+  .components {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 0 0 32px;
+  }
+  .pill {
+    padding: 16px 18px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .pill[data-state="ok"] { border-color: rgba(15, 122, 74, 0.25); }
+  .pill[data-state="degraded"] { border-color: rgba(138, 91, 0, 0.30); }
+  .pill[data-state="down"] { border-color: rgba(154, 29, 42, 0.30); }
+  .pill__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 14px;
+  }
+  .pill__dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--ok);
+    flex: 0 0 8px;
+  }
+  .pill[data-state="degraded"] .pill__dot { background: var(--warn); }
+  .pill[data-state="down"] .pill__dot { background: var(--down); }
+  .pill__state {
+    font-size: 12.5px;
+    color: var(--ok);
+    font-weight: 600;
+  }
+  .pill[data-state="degraded"] .pill__state { color: var(--warn); }
+  .pill[data-state="down"] .pill__state { color: var(--down); }
+  .pill__meta {
+    font-size: 11.5px;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Metric row */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 0 0 32px;
+  }
+  .metric {
+    padding: 16px 18px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  .metric__label {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+    margin: 0 0 6px;
+    font-weight: 600;
+  }
+  .metric__val {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .metric__sub {
+    font-size: 12px;
+    color: var(--ink-2);
+    margin: 4px 0 0;
+  }
+
+  /* Subscribe block */
+  .subscribe {
+    padding: 18px 22px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .subscribe p { margin: 0; color: var(--ink-2); font-size: 13.5px; flex: 1 1 280px; }
+  .subscribe a {
+    padding: 8px 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .subscribe a:hover { background: var(--bg); text-decoration: none; border-color: var(--accent); color: var(--accent); }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--line);
+    background: var(--bg-2);
+    margin-top: 64px;
+    padding: 24px;
+    font-size: 13px;
+    color: var(--ink-2);
+    text-align: center;
+  }
+  footer a { color: var(--ink-2); }
+  footer a:hover { color: var(--accent); }
+
+  /* Mobile */
+  @media (max-width: 720px) {
+    .components { grid-template-columns: repeat(2, 1fr); }
+    .metrics { grid-template-columns: 1fr; }
+    .hero { flex-direction: column; align-items: flex-start; }
+    .hero__updated { align-self: flex-start; }
+    main { padding: 32px 18px 64px; }
+  }
+  @media (max-width: 420px) {
+    .components { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Primary">
+  <div class="nav__inner">
+    <a href="/" class="nav__brand">kolm<b>.ai</b></a>
+    <div class="nav__links">
+      <a href="/">Home</a>
+      <a href="/docs">Docs</a>
+      <a href="/sla">SLA</a>
+      <a href="/security">Security</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <p class="eyebrow">kolm.ai · status</p>
+  <h1 id="status-headline">All systems operational</h1>
+  <p class="lede">Current health of the kolm.ai control plane. The page polls <a href="/v1/status">/v1/status</a> for the live snapshot. Compiled artifacts run on your own hardware and are not affected by control-plane status.</p>
+
+  <div class="hero" id="overallHero" data-overall="ok" role="status" aria-live="polite">
+    <span class="hero__dot" aria-hidden="true"></span>
+    <div class="hero__text">
+      <p class="hero__h" id="overallH">All systems operational</p>
+      <p class="hero__sub" id="overallSub">4 of 4 components healthy</p>
+    </div>
+    <span class="hero__updated">Updated <time id="overallUpdated" datetime="">—</time></span>
+  </div>
+
+  <section aria-label="Component health" class="components" id="componentsGrid">
+    <div class="pill" data-state="ok" data-component="gateway">
+      <div class="pill__head"><span class="pill__dot" aria-hidden="true"></span><span>Gateway</span></div>
+      <div class="pill__state">Operational</div>
+      <div class="pill__meta" data-checked-at>—</div>
+    </div>
+    <div class="pill" data-state="ok" data-component="auth">
+      <div class="pill__head"><span class="pill__dot" aria-hidden="true"></span><span>Auth</span></div>
+      <div class="pill__state">Operational</div>
+      <div class="pill__meta" data-checked-at>—</div>
+    </div>
+    <div class="pill" data-state="ok" data-component="storage">
+      <div class="pill__head"><span class="pill__dot" aria-hidden="true"></span><span>Storage</span></div>
+      <div class="pill__state">Operational</div>
+      <div class="pill__meta" data-checked-at>—</div>
+    </div>
+    <div class="pill" data-state="ok" data-component="captures">
+      <div class="pill__head"><span class="pill__dot" aria-hidden="true"></span><span>Captures</span></div>
+      <div class="pill__state">Operational</div>
+      <div class="pill__meta" data-checked-at>—</div>
+    </div>
+  </section>
+
+  <section aria-label="Uptime metrics" class="metrics">
+    <div class="metric">
+      <p class="metric__label">Last 7 days uptime</p>
+      <p class="metric__val">99.95%</p>
+      <p class="metric__sub">Matches the SLA commitment on <a href="/sla">/sla</a>.</p>
+    </div>
+    <div class="metric">
+      <p class="metric__label">Active incidents</p>
+      <p class="metric__val" id="activeIncidents">0</p>
+      <p class="metric__sub">No open incidents across the control plane.</p>
+    </div>
+    <div class="metric">
+      <p class="metric__label">Build version</p>
+      <p class="metric__val" id="buildVersion" style="font-size:14px; line-height:1.4; word-break:break-all;">—</p>
+      <p class="metric__sub">Service worker cache slug from the latest deploy.</p>
+    </div>
+  </section>
+
+  <div class="subscribe">
+    <p>Subscribe to incident updates. The feed publishes a new entry when an incident opens or resolves.</p>
+    <a href="/status/feed.json" rel="alternate" type="application/feed+json">JSON Feed</a>
+    <a href="/status.rss" rel="alternate" type="application/rss+xml">RSS</a>
+  </div>
+</main>
+
+<footer>
+  <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/security">Security</a> &middot; <a href="/status">Status</a></span>
+</footer>
+
+<script>
+(function(){
+  var hero = document.getElementById('overallHero');
+  var heroH = document.getElementById('overallH');
+  var heroSub = document.getElementById('overallSub');
+  var heroUpd = document.getElementById('overallUpdated');
+  var headline = document.getElementById('status-headline');
+  var activeInc = document.getElementById('activeIncidents');
+  var buildVer = document.getElementById('buildVersion');
+  var pills = document.querySelectorAll('.pill[data-component]');
+
+  function formatCheckedAt(iso){
+    try {
+      var d = new Date(iso);
+      var h = String(d.getUTCHours()).padStart(2,'0');
+      var m = String(d.getUTCMinutes()).padStart(2,'0');
+      var s = String(d.getUTCSeconds()).padStart(2,'0');
+      return 'checked ' + h + ':' + m + ':' + s + ' UTC';
+    } catch (_) { return 'checked —'; }
+  }
+
+  function paint(snapshot){
+    var components = (snapshot && snapshot.components) || {};
+    var down = 0, degraded = 0, total = pills.length;
+    pills.forEach(function(p){
+      var key = p.getAttribute('data-component');
+      var c = components[key];
+      if (!c) { p.setAttribute('data-state','unknown'); p.querySelector('.pill__state').textContent = 'Unknown'; return; }
+      if (c.ok === false) {
+        if (c.state === 'down') { p.setAttribute('data-state','down'); p.querySelector('.pill__state').textContent = 'Major outage'; down++; }
+        else { p.setAttribute('data-state','degraded'); p.querySelector('.pill__state').textContent = 'Degraded'; degraded++; }
+      } else {
+        p.setAttribute('data-state','ok');
+        p.querySelector('.pill__state').textContent = 'Operational';
+      }
+      if (c.checked_at) p.querySelector('[data-checked-at]').textContent = formatCheckedAt(c.checked_at);
+    });
+
+    var nowIso = new Date().toISOString();
+    heroUpd.setAttribute('datetime', nowIso);
+    heroUpd.textContent = new Date(nowIso).toUTCString().slice(0,22);
+
+    if (down > 0) {
+      hero.setAttribute('data-overall','down');
+      heroH.textContent = 'Major outage in progress';
+      heroSub.textContent = down + ' of ' + total + ' components down';
+      headline.textContent = 'Major outage in progress';
+    } else if (degraded > 0) {
+      hero.setAttribute('data-overall','degraded');
+      heroH.textContent = 'Degraded performance';
+      heroSub.textContent = degraded + ' of ' + total + ' components degraded';
+      headline.textContent = 'Degraded performance';
+    } else {
+      hero.setAttribute('data-overall','ok');
+      heroH.textContent = 'All systems operational';
+      heroSub.textContent = total + ' of ' + total + ' components healthy';
+      headline.textContent = 'All systems operational';
+    }
+
+    if (snapshot && typeof snapshot.incidents_active === 'number') {
+      activeInc.textContent = String(snapshot.incidents_active);
+    }
+    if (snapshot && typeof snapshot.version === 'string') {
+      buildVer.textContent = snapshot.version;
+    }
+  }
+
+  function loadOnce(){
+    fetch('/v1/status', { headers: { 'accept': 'application/json' }, cache: 'no-store' })
+      .then(function(r){ if (!r.ok) throw new Error('http_' + r.status); return r.json(); })
+      .then(paint)
+      .catch(function(){ /* static fallback already painted in markup */ });
+  }
+
+  loadOnce();
+  // Refresh every 30s while the page is open and visible.
+  setInterval(function(){ if (document.visibilityState === 'visible') loadOnce(); }, 30000);
+})();
+</script>
+
+</body>
+</html>

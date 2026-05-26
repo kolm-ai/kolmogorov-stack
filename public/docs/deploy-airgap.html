@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>Air-gap bundle &middot; Run &amp; Govern &middot; kolm.ai</title>
+<meta name="description" content="generateAirgapBundle writes a real tar.gz with the artifact, runtime installer, offline kolm-audit-1 verifier, and a sha256 manifest.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Air-gap bundle &middot; kolm.ai">
+<meta property="og:description" content="A real tar.gz with artifact, runtime installer, offline verifier, sha256 manifest.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/docs/deploy-airgap">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Air-gap bundle &middot; kolm.ai">
+<meta name="twitter:description" content="A real tar.gz with artifact, runtime installer, offline verifier, sha256 manifest.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/docs/deploy-airgap">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Air-gap bundle","description":"Real tar.gz for offline deployment with bundled receipt verifier.","url":"https://kolm.ai/docs/deploy-airgap","datePublished":"2026-05-26","dateModified":"2026-05-26","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230,233,238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#0e7490;--accent-soft:rgba(14,116,144,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#0e7490;--accent-soft:rgba(14,116,144,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+table{width:100%;border-collapse:collapse;margin:14px 0 22px;font-size:13.5px;max-width:920px}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--ink);font-family:var(--mono);font-size:11.5px;letter-spacing:0.06em;text-transform:uppercase}
+td{color:var(--ink-mute)}
+.callout{margin:18px 0 22px;padding:16px 20px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 8px 8px 0;font-size:14px;line-height:1.6;color:var(--ink-mute);max-width:780px}
+.callout b{color:var(--ink);font-weight:500}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/docs-shell.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/docs-shell.js"></script>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / <a href="/docs/govern-overview">govern</a> / deploy / airgap</div>
+<p class="eyebrow">Run &amp; Govern / Deploy</p>
+<h1>Air-gap deployment bundle.</h1>
+<p class="lede"><code>generateAirgapBundle</code> from <code>src/deploy-generators.js</code> writes a real tar.gz to disk. The bundle contains the artifact byte-for-byte, a runtime installer that reads from a local wheelhouse, an offline <code>kolm-audit-1</code> receipt verifier, and a sha256 manifest covering every entry. Tar headers are USTAR-formatted and deterministic so the same inputs always produce a byte-identical tarball &mdash; useful for repro builds and supply-chain attestation.</p>
+
+<h2 id="invocation">Invocation</h2>
+<pre><code>import { generateAirgapBundle } from './src/deploy-generators.js';
+
+const result = generateAirgapBundle({
+  artifact_path: '/tmp/qwen3-8b-support-q4km.kolm',
+  runtime: 'vllm',                // 'vllm' or 'llama.cpp'
+  output_dir: '/tmp/dist',
+});
+
+// { ok: true,
+//   bundle_path: '/tmp/dist/kolm-airgap-qwen3-8b-support-q4km-2026-05-26T11-25-30-123Z.tar.gz',
+//   manifest_sha256: 'a3b1...',
+//   sha256: 'd91f...',
+//   size_bytes: 3812944822,
+//   file_count: 9,
+//   artifact_id: 'qwen3-8b-support-q4km',
+//   runtime: 'vllm',
+//   created_at: '2026-05-26T11:25:30.123Z',
+//   version: 'r4-v1' }</code></pre>
+
+<h2 id="layout">Bundle layout</h2>
+<pre><code>/artifact.kolm           - the artifact (copy of input)
+/runtime/install.cjs      - installs the chosen runtime from local wheelhouse
+/runtime/wheels/.keep    - drop offline pip wheels here BEFORE bundling (vllm only)
+/runtime/bin/.keep       - drop llama-server binary here BEFORE bundling (llama.cpp only)
+/config/vllm.json        - vLLM config pointing at /opt/kolm/artifact.kolm
+/config/llama-cpp.cmd    - llama-server startup command
+/verify.cjs              - offline kolm-audit-1 receipt verifier
+/MANIFEST.sha256         - sha256 of every file in this bundle
+/README.md               - offline-install instructions</code></pre>
+
+<h2 id="install">Install on the air-gapped host</h2>
+<pre><code>tar -xzf kolm-airgap-qwen3-8b-support-q4km-*.tar.gz -C /opt/kolm
+cd /opt/kolm
+bash runtime/install.cjs
+
+# vLLM is now installed from the local wheelhouse. Start the server.
+vllm serve --config-file config/vllm.json</code></pre>
+
+<h2 id="verify">Verify the bundle is intact</h2>
+<p>Two complementary checks. The first is a transport-integrity check (did the bytes survive the USB / mirror / WORM media?). The second is a receipt-chain check (does this receipt match the bundled artifact under the local secret?).</p>
+<pre><code># Per-file sha256 check
+sha256sum -c MANIFEST.sha256
+
+# Replayable kolm-audit-1 receipt verification
+node verify.cjs path/to/receipt.json --manifest ./MANIFEST.sha256 --secret $KOLM_ARTIFACT_SECRET
+# Exit 0 on {ok: true}, exit 1 otherwise</code></pre>
+
+<h2 id="verifier">The bundled verifier</h2>
+<p><code>verify.cjs</code> is a minimal CommonJS file that depends only on Node's built-ins (<code>crypto</code>, <code>fs</code>, <code>path</code>). It checks a <code>kolm-audit-1</code> envelope's HMAC signature against the local secret and, when invoked with <code>--manifest</code>, additionally walks the manifest to verify every payload file's sha256 still matches.</p>
+<pre><code>node verify.cjs receipt.json --secret $KOLM_ARTIFACT_SECRET
+{
+  "ok": true,
+  "cid": "rcpt_01KYC1ZVTGDCW3FX06JQSC"
+}
+
+# A tampered file makes the manifest check fail loudly:
+node verify.cjs receipt.json --secret $SECRET --manifest ./MANIFEST.sha256
+{
+  "ok": false,
+  "cid": "rcpt_01KYC1ZVTGDCW3FX06JQSC",
+  "manifest": {
+    "ok": false, "files_ok": 7, "files_bad": 1,
+    "bad_files": [{"path": "artifact.kolm", "expected": "a3b1...", "got": "9d2e..."}]
+  }
+}</code></pre>
+
+<h2 id="return">Return value</h2>
+<table>
+<thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>ok</code></td><td>boolean</td><td>True on a successful bundle write. False with <code>error</code> + <code>hint</code> on recoverable input problems.</td></tr>
+<tr><td><code>bundle_path</code></td><td>string</td><td>Absolute path to the written <code>.tar.gz</code> file.</td></tr>
+<tr><td><code>manifest_sha256</code></td><td>string</td><td>sha256 of the <code>MANIFEST.sha256</code> body (the manifest covers payload files; this hash covers the manifest itself).</td></tr>
+<tr><td><code>sha256</code></td><td>string</td><td>sha256 of the gzipped tarball itself. Also written to a sibling <code>.sha256</code> file next to the bundle.</td></tr>
+<tr><td><code>size_bytes</code></td><td>integer</td><td>Compressed bundle size on disk.</td></tr>
+<tr><td><code>file_count</code></td><td>integer</td><td>Number of entries inside the tarball (including the README and the manifest itself).</td></tr>
+</tbody>
+</table>
+
+<h2 id="prep">Preparing the wheelhouse / binary</h2>
+<p>Two of the bundle's directories are empty placeholders on first emit. You fill them on an internet-connected workstation before re-bundling for transport.</p>
+<p><strong>vLLM (wheelhouse):</strong></p>
+<pre><code># On a connected workstation, build the offline wheel cache.
+pip wheel vllm -w /path/to/bundle/runtime/wheels/
+
+# Then re-run generateAirgapBundle so the wheels land inside the tarball.</code></pre>
+<p><strong>llama.cpp (binary):</strong></p>
+<pre><code># On a connected workstation, build llama.cpp.
+git clone https://github.com/ggml-org/llama.cpp.git && cd llama.cpp
+make -j llama-server
+cp llama-server /path/to/bundle/runtime/bin/llama-server
+
+# Re-run generateAirgapBundle.</code></pre>
+
+<div class="callout"><b>Caveats.</b> The bundle does NOT carry TLS certificates (supply via your reverse proxy), Secrets (inject via your secrets manager), or the base model weights (point your runtime config at your local model cache). The README at <code>/opt/kolm/README.md</code> lists what is not in the bundle so an operator does not discover it on the air-gapped host.</div>
+
+<div class="callout"><b>Determinism.</b> Tar headers fix uid / gid / checksum to deterministic values. The same inputs produce a byte-identical tarball across runs, so the sibling <code>.sha256</code> file is stable across builds when the inputs are stable. The bundle's <code>mtime</code> field uses the current wall clock; pass an explicit clock via the test seam if you need bit-for-bit reproducibility across hours.</div>
+
+<h2 id="related">Related</h2>
+<div class="related">
+  <a href="/docs/runtime-passport"><b>Runtime passport &rarr;</b><span>The capacity row that travels with the artifact.</span></a>
+  <a href="/docs/deploy-vllm"><b>vLLM config &rarr;</b><span>The same config the bundle drops into <code>/config/vllm.json</code>.</span></a>
+  <a href="/docs/gateway-receipts"><b>kolm-audit-1 receipts &rarr;</b><span>What the bundled verifier checks against.</span></a>
+</div>
+
+</div></main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/gateway">Gateway</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/docs/gateway">Gateway docs</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

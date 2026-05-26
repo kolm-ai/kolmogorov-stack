@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Studio &middot; Export wizard &middot; kolm.ai</title>
+<meta name="description" content="Export a .kolm artifact to the runtime your stack expects: GGUF (llama.cpp / Ollama), AWQ / EXL2 (vLLM, exllamav2), MLX (Apple), ONNX / CoreML / TFLite, OpenVINO. Quote first, kick the run.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/studio/export">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<style>
+  /* S-9 Studio export wizard. Cool slate only. Three steps: pick artifact,
+     pick target format, review plan. Hits /v1/export (planner). Heavy lift
+     runs locally via `kolm export`. */
+
+  .xwiz-wrap { max-width: 980px; margin: 0 auto; padding: 0 var(--ks-pad-x); }
+  .xwiz-head { padding: var(--ks-12) 0 var(--ks-6); }
+  .xwiz-eyebrow { font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ks-ink-3); margin: 0 0 var(--ks-3); }
+  .xwiz-h1 { font-size: clamp(28px, 3.4vw, 40px); font-weight: 560; line-height: 1.08; letter-spacing: -0.022em; color: var(--ks-ink); margin: 0 0 var(--ks-3); text-wrap: balance; }
+  .xwiz-lede { font-size: 16px; line-height: 1.6; color: var(--ks-ink-2); max-width: 62ch; margin: 0; }
+  .xwiz-lede code { font-family: var(--ks-mono); font-size: 0.92em; padding: 1px 6px; border-radius: 5px; background: var(--ks-accent-soft); color: var(--ks-ink); }
+
+  .xwiz-rail { display: flex; gap: 0; margin: var(--ks-8) 0 var(--ks-6); border-top: 1px solid var(--ks-line-2); border-bottom: 1px solid var(--ks-line-2); }
+  .xwiz-rail__pip { flex: 1; padding: var(--ks-4) var(--ks-3); border-left: 1px solid var(--ks-line-2); display: flex; flex-direction: column; gap: 4px; cursor: pointer; background: transparent; border-top: 0; border-right: 0; border-bottom: 0; text-align: left; font: inherit; color: var(--ks-ink-3); transition: background 140ms ease, color 140ms ease; }
+  .xwiz-rail__pip:first-child { border-left: 0; }
+  .xwiz-rail__pip:hover { background: var(--ks-bg-2); color: var(--ks-ink-2); }
+  .xwiz-rail__pip[aria-current="true"] { background: var(--ks-bg-1); color: var(--ks-ink); }
+  .xwiz-rail__num { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .xwiz-rail__label { font-size: 14px; font-weight: 520; }
+  .xwiz-rail__val { font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-ink-3); margin-top: 2px; min-height: 14px; }
+  .xwiz-rail__pip[data-done="true"] .xwiz-rail__val { color: var(--ks-ink); }
+
+  .xwiz-step { padding: var(--ks-8) 0 var(--ks-12); }
+  .xwiz-step[hidden] { display: none; }
+  .xwiz-step__h { font-size: 22px; font-weight: 560; letter-spacing: -0.012em; color: var(--ks-ink); margin: 0 0 var(--ks-2); }
+  .xwiz-step__p { font-size: 14.5px; line-height: 1.6; color: var(--ks-ink-2); margin: 0 0 var(--ks-6); max-width: 62ch; }
+
+  .xwiz-row { display: flex; gap: var(--ks-3); flex-wrap: wrap; align-items: center; }
+  .xwiz-input { flex: 1 1 280px; min-width: 0; padding: 10px 14px; border: 1px solid var(--ks-line-3); border-radius: var(--ks-r-md); background: var(--ks-bg-1); color: var(--ks-ink); font: inherit; font-size: 14.5px; font-family: var(--ks-mono); }
+  .xwiz-input:focus { outline: 2px solid var(--ks-accent-edge); outline-offset: 1px; border-color: var(--ks-accent-edge); }
+
+  .xwiz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: var(--ks-3); margin-top: var(--ks-4); }
+  .xwiz-opt { padding: var(--ks-4); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); background: var(--ks-bg-1); cursor: pointer; display: flex; flex-direction: column; gap: 6px; text-align: left; font: inherit; color: inherit; transition: border-color 140ms ease, background 140ms ease; }
+  .xwiz-opt:hover { border-color: var(--ks-accent-edge); background: var(--ks-bg-2); }
+  .xwiz-opt[aria-pressed="true"] { border-color: var(--ks-ink); background: var(--ks-bg-1); box-shadow: inset 0 0 0 1px var(--ks-ink); }
+  .xwiz-opt__name { font-size: 15px; font-weight: 560; color: var(--ks-ink); }
+  .xwiz-opt__sub { font-size: 12.5px; color: var(--ks-ink-3); font-family: var(--ks-mono); }
+  .xwiz-opt__note { font-size: 12px; color: var(--ks-ink-2); font-family: var(--ks-mono); margin-top: auto; }
+
+  .xwiz-quote { padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); margin-top: var(--ks-5); }
+  .xwiz-quote__row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--ks-line-1); font-size: 13.5px; font-family: var(--ks-mono); }
+  .xwiz-quote__row:last-child { border-bottom: 0; }
+  .xwiz-quote__row span:first-child { color: var(--ks-ink-3); letter-spacing: 0.04em; text-transform: uppercase; font-size: 11.5px; padding-top: 1px; }
+  .xwiz-quote__row span:last-child { color: var(--ks-ink); font-variant-numeric: tabular-nums; word-break: break-all; text-align: right; }
+
+  .xwiz-console { margin-top: var(--ks-5); padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 13px; line-height: 1.55; color: var(--ks-ink-2); max-height: 320px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
+  .xwiz-console:empty::before { content: 'plan output appears here once you confirm.'; color: var(--ks-ink-3); }
+
+  .xwiz-actions { display: flex; gap: var(--ks-3); margin-top: var(--ks-6); flex-wrap: wrap; }
+
+  .xwiz-cav { margin-top: var(--ks-5); padding: var(--ks-4); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); background: var(--ks-bg-1); font-size: 13.5px; color: var(--ks-ink-2); line-height: 1.55; }
+  .xwiz-cav strong { color: var(--ks-ink); font-weight: 560; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xwiz-rail__pip, .xwiz-opt { transition: none !important; }
+  }
+</style>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio" aria-current="page">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main">
+
+<div class="xwiz-wrap">
+  <header class="xwiz-head">
+    <p class="xwiz-eyebrow">Studio &middot; export wizard</p>
+    <h1 class="xwiz-h1">Export your <code>.kolm</code> to any runtime format.</h1>
+    <p class="xwiz-lede">Pick an artifact, pick the runtime your serving stack expects. GGUF for llama.cpp + Ollama. AWQ + EXL2 for vLLM + exllamav2. MLX for Apple silicon. ONNX / CoreML / TFLite / OpenVINO for embedded.</p>
+  </header>
+
+  <div class="xwiz-rail" role="tablist" aria-label="Export steps">
+    <button class="xwiz-rail__pip" id="pip-1" role="tab" aria-current="true" data-done="false" type="button">
+      <span class="xwiz-rail__num">01 &middot; source</span>
+      <span class="xwiz-rail__label">Artifact</span>
+      <span class="xwiz-rail__val" id="pip-1-val">&mdash;</span>
+    </button>
+    <button class="xwiz-rail__pip" id="pip-2" role="tab" data-done="false" type="button">
+      <span class="xwiz-rail__num">02 &middot; target</span>
+      <span class="xwiz-rail__label">Format</span>
+      <span class="xwiz-rail__val" id="pip-2-val">&mdash;</span>
+    </button>
+    <button class="xwiz-rail__pip" id="pip-3" role="tab" data-done="false" type="button">
+      <span class="xwiz-rail__num">03 &middot; review</span>
+      <span class="xwiz-rail__label">Plan</span>
+      <span class="xwiz-rail__val" id="pip-3-val">&mdash;</span>
+    </button>
+  </div>
+
+  <section class="xwiz-step" id="step-1" role="tabpanel" aria-labelledby="pip-1">
+    <h2 class="xwiz-step__h">Which artifact?</h2>
+    <p class="xwiz-step__p">Pass the artifact ID or path you want to export. Find IDs in <a href="/account/artifacts">/account/artifacts</a> or with <code>kolm artifacts list</code>. Local paths must already exist on this machine.</p>
+    <div class="xwiz-row">
+      <input class="xwiz-input" type="text" id="art-input" placeholder="e.g. art_abc123 or ~/.kolm/artifacts/support-v3.kolm" autocomplete="off" spellcheck="false">
+      <button class="ks-btn ks-btn--primary ks-btn--md" id="a-next" type="button">Use this artifact &rarr;</button>
+    </div>
+    <p class="xwiz-step__p" style="margin-top:var(--ks-3);font-size:13px;">No artifacts yet? <a href="/studio/compile">Compile one first</a>.</p>
+  </section>
+
+  <section class="xwiz-step" id="step-2" role="tabpanel" aria-labelledby="pip-2" hidden>
+    <h2 class="xwiz-step__h">Which target format?</h2>
+    <p class="xwiz-step__p">Pick the runtime you'll serve from. Multiple targets are fine &mdash; rerun the wizard for each, or use <code>kolm export &lt;artifact&gt; --target gguf,awq,mlx</code>.</p>
+    <div class="xwiz-grid" id="fmt-grid">
+      <button class="xwiz-opt" type="button" data-fmt="gguf" aria-pressed="true">
+        <span class="xwiz-opt__name">GGUF</span>
+        <span class="xwiz-opt__sub">llama.cpp + Ollama</span>
+        <span class="xwiz-opt__note">~0.56 bpp Q4_K_M default</span>
+      </button>
+      <button class="xwiz-opt" type="button" data-fmt="awq" aria-pressed="false">
+        <span class="xwiz-opt__name">AWQ</span>
+        <span class="xwiz-opt__sub">vLLM, autoawq</span>
+        <span class="xwiz-opt__note">~0.56 bpp 4-bit weight</span>
+      </button>
+      <button class="xwiz-opt" type="button" data-fmt="exl2" aria-pressed="false">
+        <span class="xwiz-opt__name">EXL2</span>
+        <span class="xwiz-opt__sub">exllamav2</span>
+        <span class="xwiz-opt__note">~0.50 bpp 4.0bpw default</span>
+      </button>
+      <button class="xwiz-opt" type="button" data-fmt="mlx" aria-pressed="false">
+        <span class="xwiz-opt__name">MLX</span>
+        <span class="xwiz-opt__sub">apple silicon</span>
+        <span class="xwiz-opt__note">~0.55 bpp 4-bit</span>
+      </button>
+      <button class="xwiz-opt" type="button" data-fmt="onnx" aria-pressed="false">
+        <span class="xwiz-opt__name">ONNX</span>
+        <span class="xwiz-opt__sub">cross-runtime</span>
+        <span class="xwiz-opt__note">~2.0 bpp fp16</span>
+      </button>
+      <button class="xwiz-opt" type="button" data-fmt="coreml" aria-pressed="false">
+        <span class="xwiz-opt__name">CoreML</span>
+        <span class="xwiz-opt__sub">apple devices</span>
+        <span class="xwiz-opt__note">~2.0 bpp fp16</span>
+      </button>
+      <button class="xwiz-opt" type="button" data-fmt="tflite" aria-pressed="false">
+        <span class="xwiz-opt__name">TFLite</span>
+        <span class="xwiz-opt__sub">android, edge</span>
+        <span class="xwiz-opt__note">~1.0 bpp int8</span>
+      </button>
+      <button class="xwiz-opt" type="button" data-fmt="openvino" aria-pressed="false">
+        <span class="xwiz-opt__name">OpenVINO</span>
+        <span class="xwiz-opt__sub">intel CPU/iGPU/NPU</span>
+        <span class="xwiz-opt__note">~2.0 bpp fp16</span>
+      </button>
+    </div>
+    <div class="xwiz-actions">
+      <button class="ks-btn ks-btn--ghost ks-btn--md" id="f-back" type="button">&larr; Back</button>
+      <button class="ks-btn ks-btn--primary ks-btn--md" id="f-next" type="button">Next &rarr;</button>
+    </div>
+  </section>
+
+  <section class="xwiz-step" id="step-3" role="tabpanel" aria-labelledby="pip-3" hidden>
+    <h2 class="xwiz-step__h">Review the export plan, then confirm.</h2>
+    <p class="xwiz-step__p">The planner reports estimated output size + the local command to run. <strong>Caveat:</strong> the actual export executes locally via <code>kolm export</code> (heavy compute, often GPU-bound). The wizard only writes the plan today.</p>
+    <div class="xwiz-quote" id="quote">
+      <div class="xwiz-quote__row"><span>Artifact</span><span id="q-art">&mdash;</span></div>
+      <div class="xwiz-quote__row"><span>Target</span><span id="q-fmt">&mdash;</span></div>
+      <div class="xwiz-quote__row"><span>Base model</span><span id="q-base">&mdash;</span></div>
+      <div class="xwiz-quote__row"><span>Output size (est.)</span><span id="q-size">&mdash;</span></div>
+      <div class="xwiz-quote__row"><span>Local command</span><span id="q-cmd">&mdash;</span></div>
+    </div>
+    <div class="xwiz-cav">
+      <strong>Limitations</strong>: GGUF runs llama.cpp&rsquo;s <code>convert-hf-to-gguf.py</code> + <code>llama-quantize</code> &mdash; needs llama.cpp on PATH. AWQ needs <code>autoawq</code>. EXL2 needs <code>exllamav2</code>. MLX needs an Apple-silicon Mac. The planner reports the deps; the local <code>kolm export</code> verb runs them.
+    </div>
+    <div class="xwiz-actions">
+      <button class="ks-btn ks-btn--ghost ks-btn--md" id="q-back" type="button">&larr; Back</button>
+      <button class="ks-btn ks-btn--ghost ks-btn--md" id="q-refresh" type="button">Refresh plan</button>
+      <button class="ks-btn ks-btn--primary ks-btn--md" id="q-confirm" type="button">Get plan</button>
+      <a class="ks-btn ks-btn--link ks-btn--md" href="/studio/export-status">View exports &rarr;</a>
+    </div>
+    <div class="xwiz-console" id="console" aria-live="polite" aria-atomic="false"></div>
+  </section>
+</div>
+
+</main>
+
+<footer style="border-top:1px solid var(--ks-line-2);padding:var(--ks-8) 0;margin-top:var(--ks-12);text-align:center;font-family:var(--ks-mono);font-size:12px;color:var(--ks-ink-3)">
+  <p style="margin:0">Studio &middot; export &middot; <a href="/studio" style="color:var(--ks-ink-2);border-bottom:1px solid var(--ks-line-3)">hub</a> &middot; <a href="/docs/compile/formats" style="color:var(--ks-ink-2);border-bottom:1px solid var(--ks-line-3)">format reference</a> &middot; <a href="/docs/compile/gguf" style="color:var(--ks-ink-2);border-bottom:1px solid var(--ks-line-3)">GGUF deep-dive</a> &middot; CLI: <code style="color:var(--ks-ink)">kolm export</code></p>
+</footer>
+
+<script>
+(function(){
+  var state = { art: '', fmt: 'gguf' };
+
+  function showStep(n){
+    for (var i=1; i<=3; i++) {
+      var sec = document.getElementById('step-'+i);
+      if (sec) sec.hidden = (i !== n);
+      var pip = document.getElementById('pip-'+i);
+      if (pip) pip.setAttribute('aria-current', i === n ? 'true' : 'false');
+    }
+  }
+  function setDone(n, val){
+    var pip = document.getElementById('pip-'+n);
+    var sl = document.getElementById('pip-'+n+'-val');
+    if (pip) pip.setAttribute('data-done', val ? 'true' : 'false');
+    if (sl) sl.textContent = val || '—';
+  }
+  for (var i=1; i<=3; i++) (function(n){
+    var pip = document.getElementById('pip-'+n);
+    if (!pip) return;
+    pip.addEventListener('click', function(){
+      var ok = true;
+      if (n >= 2 && !state.art) ok = false;
+      if (n >= 3 && !state.fmt) ok = false;
+      if (ok) showStep(n);
+    });
+  })(i);
+
+  // Step 1
+  document.getElementById('a-next').addEventListener('click', function(){
+    var v = (document.getElementById('art-input').value || '').trim();
+    if (!v) { document.getElementById('art-input').focus(); return; }
+    state.art = v;
+    setDone(1, v.length > 28 ? v.slice(0, 14) + '…' + v.slice(-10) : v);
+    showStep(2);
+  });
+  document.getElementById('art-input').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('a-next').click(); }
+  });
+
+  // Step 2
+  var fgrid = document.getElementById('fmt-grid');
+  setDone(2, 'GGUF');
+  fgrid.addEventListener('click', function(e){
+    var btn = e.target.closest('.xwiz-opt');
+    if (!btn) return;
+    var all = fgrid.querySelectorAll('.xwiz-opt');
+    for (var i=0; i<all.length; i++) all[i].setAttribute('aria-pressed', 'false');
+    btn.setAttribute('aria-pressed', 'true');
+    state.fmt = btn.getAttribute('data-fmt');
+    setDone(2, btn.querySelector('.xwiz-opt__name').textContent);
+  });
+  document.getElementById('f-back').addEventListener('click', function(){ showStep(1); });
+  document.getElementById('f-next').addEventListener('click', function(){ if (state.fmt) { showStep(3); refreshPlan(); } });
+
+  // Step 3
+  function setRow(id, v){ var el = document.getElementById(id); if (el) el.textContent = v == null ? '—' : v; }
+  function logLine(s){
+    var c = document.getElementById('console');
+    c.textContent += (c.textContent ? '\n' : '') + s;
+    c.scrollTop = c.scrollHeight;
+  }
+  function clearLog(){ document.getElementById('console').textContent = ''; }
+
+  function apiKey(){
+    try {
+      return localStorage.getItem('kolm-key') || localStorage.getItem('ks_api_key')
+          || localStorage.getItem('kolm_api_key') || localStorage.getItem('KOLM_API_KEY');
+    } catch (_) { return null; }
+  }
+  function kf(path, opts){
+    var headers = Object.assign({ accept: 'application/json' }, (opts && opts.headers) || {});
+    var key = apiKey();
+    if (key) headers['Authorization'] = 'Bearer ' + key;
+    return fetch(path, Object.assign({ credentials: 'include' }, opts || {}, { headers: headers }));
+  }
+
+  async function refreshPlan(){
+    setRow('q-art', state.art);
+    setRow('q-fmt', state.fmt);
+    setRow('q-base', '…');
+    setRow('q-size', '…');
+    setRow('q-cmd', '…');
+    setDone(3, 'planning');
+    try {
+      var resp = await kf('/v1/export', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ artifact: state.art, target: state.fmt }),
+      });
+      var body = await resp.json().catch(function(){ return {}; });
+      if (resp.ok && body.ok) {
+        setRow('q-base', body.base_model || '(unknown)');
+        setRow('q-size', body.est_output_gb != null ? body.est_output_gb + ' GB' : '—');
+        setRow('q-cmd', body.hint || ('kolm export ' + state.art + ' --target ' + state.fmt));
+        setDone(3, (body.est_output_gb != null ? body.est_output_gb + ' GB' : 'planned'));
+      } else if (resp.status === 401 || resp.status === 403) {
+        setRow('q-base', 'auth required');
+        setRow('q-size', '—');
+        setRow('q-cmd', '—');
+        setDone(3, 'auth needed');
+      } else {
+        setRow('q-base', '—');
+        setRow('q-size', '—');
+        setRow('q-cmd', body.error || ('http ' + resp.status));
+        setDone(3, 'error');
+      }
+    } catch (e) {
+      setRow('q-cmd', 'fetch failed: ' + (e && e.message || e));
+      setDone(3, 'error');
+    }
+  }
+
+  document.getElementById('q-back').addEventListener('click', function(){ showStep(2); });
+  document.getElementById('q-refresh').addEventListener('click', refreshPlan);
+
+  document.getElementById('q-confirm').addEventListener('click', async function(){
+    clearLog();
+    logLine('[export] generating plan');
+    logLine('[export] artifact=' + state.art);
+    logLine('[export] target=' + state.fmt);
+    await refreshPlan();
+    logLine('');
+    logLine('plan ready. run locally:');
+    logLine('  kolm export ' + state.art + ' --target ' + state.fmt);
+    logLine('');
+    logLine('add --output ./out.gguf to control the path; add --quant Q5_K_M for GGUF quant override.');
+    logLine('see /docs/compile/formats for the full flag set.');
+  });
+
+  showStep(1);
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>Studio &middot; Distill, compile, export, publish &middot; kolm.ai</title>
+<meta name="description" content="Studio is the Forge half of kolm: distill a frontier model into a smaller student, compile it to your hardware, export to any runtime, and publish the artifact. Every step emits a signed receipt.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Studio &middot; Distill, compile, export, publish &middot; kolm.ai">
+<meta property="og:description" content="The Forge half of kolm: distill, compile, export, publish. Receipts on every step.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/docs/studio-overview">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Studio &middot; kolm.ai">
+<meta name="twitter:description" content="Distill, compile, export, publish. Receipts on every step.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/docs/studio-overview">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Studio overview","description":"The Forge half of kolm: distill, compile, export, publish.","url":"https://kolm.ai/docs/studio-overview","datePublished":"2026-05-26","dateModified":"2026-05-26","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230,233,238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--accent-soft:rgba(17,17,17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#1d2d44;--accent-soft:rgba(29,45,68,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
+h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
+p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
+li{margin:4px 0}
+table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink);font-weight:500}
+td code{font-size:12px}
+.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:820px){.related{grid-template-columns:1fr}}
+.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+.related a:hover{border-color:var(--accent-soft)}
+.related b{font-size:14px;color:var(--ink);font-weight:500}
+.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+.privacy-note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:14px 18px;margin:18px 0;border-radius:0 8px 8px 0;max-width:780px}
+.privacy-note strong{color:var(--ink)}
+.hub-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:18px 0 8px}
+@media(max-width:820px){.hub-grid{grid-template-columns:1fr}}
+.hub-grid a{display:block;padding:18px 20px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit}
+.hub-grid a:hover{border-color:var(--accent-soft)}
+.hub-grid b{display:block;font-size:14.5px;color:var(--ink);font-weight:500;margin-bottom:6px}
+.hub-grid span{display:block;font-size:13px;color:var(--ink-mute);line-height:1.5}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/docs-shell.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/docs-shell.js"></script>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / studio</div>
+<p class="eyebrow">Studio / Hub</p>
+<h1>Distill. Compile. Export. Publish.</h1>
+<p class="lede">Studio is the Forge half of kolm. You bring captured traffic (or a hand-built recipe), pick a teacher council, distill into a smaller student, compile the student to your hardware, export it to any runtime &mdash; GGUF, EXL2, GPTQ, AWQ, FP8, NVFP4, MLX &mdash; and publish the artifact. Every step emits a signed receipt and writes a row to the artifact passport.</p>
+
+<h2 id="four-stages">The four Studio stages</h2>
+<p>Studio is a pipeline. Each stage produces an artifact the next stage consumes. None of them require leaving your machine.</p>
+<ol>
+  <li><strong>Distill</strong> &mdash; teacher generates labelled responses, student learns via LoRA / QLoRA / DistiLLM-2 contrastive loss. See <a href="/docs/studio-distill">studio-distill</a>.</li>
+  <li><strong>Compile</strong> &mdash; bake the student + tokenizer + chat template + spec.toml into a single <code>.kolm</code> file. See <a href="/docs/studio-compile">studio-compile</a>.</li>
+  <li><strong>Export</strong> &mdash; emit the artifact in the runtime your deployment target speaks. See <a href="/docs/studio-export-formats">studio-export-formats</a>.</li>
+  <li><strong>Publish</strong> &mdash; push to HuggingFace, the kolm registry, or a private S3/R2 bucket. See <a href="/docs/studio-publish-hf">studio-publish-hf</a>.</li>
+</ol>
+
+<h2 id="map">Map of the docs</h2>
+<div class="hub-grid">
+  <a href="/docs/studio-distill"><b>Distill &rarr;</b><span>Teacher &rarr; student loop, loss shape, training budget, hardware fit.</span></a>
+  <a href="/docs/studio-distill-recipes"><b>Recipes &rarr;</b><span>spec.toml format + the built-in recipes (support, code, intake, classify, redact).</span></a>
+  <a href="/docs/studio-teachers"><b>Teachers &rarr;</b><span>Anthropic, OpenAI, Google, DeepSeek, vLLM, llama.cpp local &mdash; how to add custom.</span></a>
+  <a href="/docs/studio-judges"><b>Judges &rarr;</b><span>The judge pattern &mdash; when to pick a separate-lineage judge to keep the eval trustworthy.</span></a>
+  <a href="/docs/studio-compile"><b>Compile &rarr;</b><span>The wizard architecture &mdash; what each step actually runs.</span></a>
+  <a href="/docs/studio-quantization"><b>Quantization &rarr;</b><span>The quant ladder: GGUF Q2..Q8, EXL2 bpw, GPTQ groups, AWQ, FP8, NVFP4, HQQ, MLX.</span></a>
+  <a href="/docs/studio-export-gguf"><b>Export &middot; GGUF &rarr;</b><span>llama.cpp pipeline, imatrix, split-file, quantize commands.</span></a>
+  <a href="/docs/studio-export-formats"><b>Format picker &rarr;</b><span>GGUF vs EXL2 vs GPTQ vs AWQ vs FP8 vs MLX &mdash; pick by deployment target.</span></a>
+  <a href="/docs/studio-publish-hf"><b>Publish to HuggingFace &rarr;</b><span>HF model card + repo layout + the <code>kolm publish hf</code> verb.</span></a>
+  <a href="/docs/studio-bench"><b>Benchmark &rarr;</b><span>Multi-model compare on the same eval set &mdash; <code>kolm bench</code>.</span></a>
+  <a href="/docs/studio-moe"><b>MoE &rarr;</b><span>Mixture-of-experts: topology, expert pinning, quant policy, pruning.</span></a>
+  <a href="/docs/studio-cli-reference"><b>CLI reference &rarr;</b><span>distill / compile / export / publish / experts &mdash; every flag.</span></a>
+  <a href="/docs/studio-api-reference"><b>HTTP API &rarr;</b><span>Routes Studio uses: <code>/v1/distill/*</code>, <code>/v1/compile/*</code>, <code>/v1/export/*</code>.</span></a>
+  <a href="/docs/studio-faq"><b>FAQ &rarr;</b><span>The 10 questions everyone asks before their first compile.</span></a>
+</div>
+
+<h2 id="the-flywheel">How Studio plugs into Wrapper</h2>
+<p>The product loop closes when Studio consumes the captures Wrapper produced. The <a href="/docs/gateway-confidence-router">confidence router</a> tags every fallback <code>capture_eligible:true</code>; you review and approve them in <a href="/account/captured">/account/captured</a>; a new <code>kolm distill --namespace &lt;ns&gt; --since-last-distill</code> reads the approved rows and trains a new student. Deploy the new <code>.kolm</code>, and the next batch of traffic answers locally &mdash; the fallback rate falls.</p>
+
+<div class="privacy-note">
+<strong>Caveats.</strong> Studio is local-first. The CLI runs distill jobs on your GPU; the cloud option (<a href="/docs/cloud-sync">cloud-sync</a>) routes through Modal or RunPod under your account, never ours. No model weights leave the box unless you call <code>kolm publish</code>.
+</div>
+
+<h2 id="start-here">Start here</h2>
+<pre><code># 1. Make sure you have a kolm key + a GPU
+kolm doctor
+
+# 2. Inspect a model you want to distill
+kolm inspect deepseek-ai/DeepSeek-R1-Distill-Qwen-32B --json
+
+# 3. Run the canonical Trinity recipe end-to-end
+kolm distill --recipe support-trinity-500 --teacher claude-haiku-4-5 --output trinity-support.kolm
+
+# 4. Compile + export to GGUF Q4_K_M for a 5090
+kolm compile trinity-support.kolm --target gguf-q4km --output trinity-support-q4km.gguf
+
+# 5. Benchmark
+kolm bench --models trinity-support-q4km.gguf,qwen-7b-base,claude-haiku-4-5 --eval holdout.jsonl</code></pre>
+
+<div class="related">
+  <a href="/docs/studio-distill"><b>Distill &rarr;</b><span>The teacher &rarr; student loop in detail.</span></a>
+  <a href="/docs/studio-compile"><b>Compile &rarr;</b><span>How the compile wizard works.</span></a>
+  <a href="/docs/studio-faq"><b>FAQ &rarr;</b><span>10 Q&A before your first compile.</span></a>
+</div>
+
+</div></main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/gateway">Gateway</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/docs/gateway">Gateway docs</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
