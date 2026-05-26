@@ -50,9 +50,9 @@ import {
 // --------------------------------------------------------------------------
 
 const _LEGACY_ADAPTERS = {
-  anthropic:  ({ url, body, upstreamKey }) => forwardAnthropic({ url, body, upstreamKey }),
-  openai:     ({ url, body, upstreamKey }) => forwardOpenAI({ url, body, upstreamKey }),
-  openrouter: ({ url, body, upstreamKey }) => forwardOpenRouter({ url, body, upstreamKey }),
+  anthropic:  ({ url, body, upstreamKey, proxyBearer, proxyBase }) => forwardAnthropic({ url, body, upstreamKey, proxyBearer, proxyBase }),
+  openai:     ({ url, body, upstreamKey, proxyBearer, proxyBase }) => forwardOpenAI({ url, body, upstreamKey, proxyBearer, proxyBase }),
+  openrouter: ({ url, body, upstreamKey, proxyBearer, proxyBase }) => forwardOpenRouter({ url, body, upstreamKey, proxyBearer, proxyBase }),
 };
 
 async function _getForward(providerId) {
@@ -104,6 +104,8 @@ export async function dispatchToProvider({
   route_decision = 'frontier',
   attempt = 1,
   fallback_reason = null,
+  proxyBearer = null,
+  proxyBase = null,
 } = {}) {
   const fwd = await _getForward(provider);
   if (!fwd) {
@@ -127,7 +129,7 @@ export async function dispatchToProvider({
   const t0 = process.hrtime.bigint();
   let raw;
   try {
-    raw = await fwd({ url: target, body, upstreamKey });
+    raw = await fwd({ url: target, body, upstreamKey, proxyBearer, proxyBase });
   } catch (e) {
     const elapsed_us = Math.round(Number(process.hrtime.bigint() - t0) / 1000);
     return {
@@ -233,6 +235,8 @@ export async function dispatchWithFallback({
       route_decision: entry.route_decision || 'frontier',
       attempt:        i + 1,
       fallback_reason: i === 0 ? null : lastReason,
+      proxyBearer:    entry.proxyBearer || null,
+      proxyBase:      entry.proxyBase   || null,
     });
     if (typeof onAttempt === 'function') {
       try { onAttempt(result); } catch (_) { /* never break the chain on callback error */ }

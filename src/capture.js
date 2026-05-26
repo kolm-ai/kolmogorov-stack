@@ -114,10 +114,165 @@ export function modelFromBody(body, provider) {
   return '';
 }
 
+// --------------------------------------------------------------------------
+// Vercel teacher-chat fallback
+//
+// W-M wave / wrapper-completion. The Railway service that hosts /v1/* does
+// NOT see Vercel env vars — vendor API keys (ANTHROPIC_API_KEY, OPENAI_*,
+// GOOGLE_*, XAI_*) live on the kolm.ai Vercel deployment because that's where
+// /v1/teacher/chat already runs and accepts a kolm bearer. When the gateway
+// dispatch path lands on Railway and finds NO local provider key, it should
+// transparently proxy upstream calls through Vercel's /v1/teacher/chat
+// instead of returning no_upstream_key. The user's gateway request already
+// carries a valid kolm bearer; we re-use it as the proxy bearer.
+//
+// This helper is called by forwardAnthropic / forwardOpenAI / forwardOpenRouter
+// when upstreamKey is null but proxyBearer is set. It speaks the teacher-chat
+// request/response shape and back-translates to the vendor's native envelope
+// so the gateway's downstream code (output PII scan, receipt cost estimator,
+// observation insert) keeps working with no changes.
+//
+// Returns the same {status, json, elapsed_us} shape as a native forward call.
+// --------------------------------------------------------------------------
+
+function _resolveProxyBase(explicit) {
+  if (explicit && typeof explicit === 'string') return explicit.replace(/\/+$/, '');
+  const fromEnv = process.env.KOLM_BASE_URL
+    || process.env.KOLM_PROXY_BASE
+    || process.env.KOLM_VERCEL_BASE;
+  if (fromEnv && typeof fromEnv === 'string') return fromEnv.replace(/\/+$/, '');
+  return 'https://kolm.ai';
+}
+
+function _extractMessages(body) {
+  if (Array.isArray(body && body.messages) && body.messages.length > 0) {
+    return body.messages.map((m) => {
+      const role = String(m.role || 'user').slice(0, 16);
+      const c = typeof m.content === 'string'
+        ? m.content
+        : Array.isArray(m.content)
+          ? m.content.map((x) => (x && (x.text || x.content)) || '').join('\n')
+          : '';
+      return { role, content: String(c).slice(0, 16000) };
+    });
+  }
+  if (typeof (body && body.input) === 'string' && body.input) {
+    return [{ role: 'user', content: body.input.slice(0, 16000) }];
+  }
+  return [];
+}
+
+async function _proxyViaTeacherChat({ vendor, body, proxyBearer, proxyBase }) {
+  const base = _resolveProxyBase(proxyBase);
+  const url = base + '/v1/teacher/chat';
+  const messages = _extractMessages(body);
+  const proxyBody = {
+    vendor,
+    model:      String((body && body.model) || ''),
+    messages,
+    system:     typeof (body && body.system) === 'string' ? body.system : '',
+    max_tokens: Number((body && body.max_tokens) || 1024),
+  };
+  const t0 = process.hrtime.bigint();
+  let res;
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'authorization': 'Bearer ' + proxyBearer,
+        'content-type':  'application/json',
+        'x-kolm-via':    'gateway-dispatch-proxy',
+      },
+      body: JSON.stringify(proxyBody),
+    });
+  } catch (e) {
+    const elapsed_us = Math.round(Number(process.hrtime.bigint() - t0) / 1000);
+    return {
+      status: 0,
+      json: { error: { type: 'proxy_transport_error', message: String(e && e.message || e) } },
+      elapsed_us,
+      kolm_proxy: { path: 'vercel-teacher-chat', base, ok: false },
+    };
+  }
+  const text = await res.text();
+  let json;
+  try { json = JSON.parse(text); } catch (_) { json = { _raw: text }; }
+  const elapsed_us = Math.round(Number(process.hrtime.bigint() - t0) / 1000);
+
+  // On success, normalize to the vendor's native envelope so downstream
+  // readers (gateway-receipt cost estimator, output PII scan) find the
+  // shape they already understand.
+  if (res.ok && json && json.ok) {
+    const txt = (json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content) || '';
+    const usage = json.usage || {};
+    if (vendor === 'anthropic') {
+      return {
+        status: 200,
+        json: {
+          id:   json.upstream_id || ('msg_proxy_' + Date.now().toString(36)),
+          type: 'message',
+          role: 'assistant',
+          model: json.model,
+          content: [{ type: 'text', text: txt }],
+          // Also keep OpenAI-compat keys so the dispatch output-text
+          // extractor (which checks choices[0].message.content FIRST) hits
+          // immediately without traversing content[].
+          choices: json.choices,
+          usage: {
+            // Native Anthropic keys for the receipt reader's primary lookup.
+            input_tokens:  usage.input_tokens  || usage.prompt_tokens     || 0,
+            output_tokens: usage.output_tokens || usage.completion_tokens || 0,
+            // Pass through char counts too — useful for debugging.
+            input_chars:   usage.input_chars   || 0,
+            output_chars: usage.output_chars   || 0,
+          },
+          kolm_proxy: { path: 'vercel-teacher-chat', base, key_source: json.proxy_key_source || null },
+        },
+        elapsed_us,
+      };
+    }
+    // openai / openrouter — already openai-compat.
+    return {
+      status: 200,
+      json: {
+        ...json,
+        usage: {
+          prompt_tokens:     usage.prompt_tokens     || usage.input_tokens   || 0,
+          completion_tokens: usage.completion_tokens || usage.output_tokens  || 0,
+          total_tokens:      usage.total_tokens      || ((usage.prompt_tokens || 0) + (usage.completion_tokens || 0)),
+          input_chars:       usage.input_chars       || 0,
+          output_chars:      usage.output_chars      || 0,
+        },
+        kolm_proxy: { path: 'vercel-teacher-chat', base, key_source: json.proxy_key_source || null },
+      },
+      elapsed_us,
+    };
+  }
+
+  // Failure path — surface the proxy's status so shouldFallback() in
+  // gateway-router can advance the chain (503 from the Vercel side when
+  // its keys are missing too is 5xx, which IS fallback-eligible).
+  return {
+    status: res.status || 502,
+    json: {
+      error: {
+        type: (json && json.error) || 'proxy_upstream_error',
+        message: (json && json.detail) || (json && json._raw) || ('teacher-chat returned ' + res.status),
+        proxy_status: res.status,
+      },
+    },
+    elapsed_us,
+    kolm_proxy: { path: 'vercel-teacher-chat', base, ok: false },
+  };
+}
+
 // Forward to the upstream provider. The customer's own provider key
-// arrives in `x-upstream-api-key`; we use it and never log it.
-export async function forwardAnthropic({ url, body, upstreamKey, anthropicVersion }) {
+// arrives in `x-upstream-api-key`; we use it and never log it. When no
+// key is configured AND a proxyBearer is provided, fall back to the
+// Vercel /v1/teacher/chat function which has the keys (see W-M above).
+export async function forwardAnthropic({ url, body, upstreamKey, anthropicVersion, proxyBearer, proxyBase }) {
   if (!upstreamKey) {
+    if (proxyBearer) return _proxyViaTeacherChat({ vendor: 'anthropic', body, proxyBearer, proxyBase });
     return { status: 401, json: { error: { type: 'no_upstream_key', message: 'pass your Anthropic key in x-upstream-api-key' } } };
   }
   const t0 = process.hrtime.bigint();
@@ -137,8 +292,9 @@ export async function forwardAnthropic({ url, body, upstreamKey, anthropicVersio
   return { status: res.status, json, elapsed_us };
 }
 
-export async function forwardOpenAI({ url, body, upstreamKey }) {
+export async function forwardOpenAI({ url, body, upstreamKey, proxyBearer, proxyBase }) {
   if (!upstreamKey) {
+    if (proxyBearer) return _proxyViaTeacherChat({ vendor: 'openai', body, proxyBearer, proxyBase });
     return { status: 401, json: { error: { type: 'no_upstream_key', message: 'pass your OpenAI key in x-upstream-api-key' } } };
   }
   const t0 = process.hrtime.bigint();
@@ -157,8 +313,13 @@ export async function forwardOpenAI({ url, body, upstreamKey }) {
   return { status: res.status, json, elapsed_us };
 }
 
-export async function forwardOpenRouter({ url, body, upstreamKey, referer = 'https://kolm.ai', title = 'kolm.ai', categories = '' }) {
+export async function forwardOpenRouter({ url, body, upstreamKey, referer = 'https://kolm.ai', title = 'kolm.ai', categories = '', proxyBearer, proxyBase }) {
   if (!upstreamKey) {
+    // OpenRouter isn't in the Vercel VENDOR_KEYS table, so the proxy
+    // fallback routes through the openai vendor (compatible API shape).
+    // If the Vercel side has no openai key either, the proxy returns
+    // 503 and the gateway falls back to the next chain entry.
+    if (proxyBearer) return _proxyViaTeacherChat({ vendor: 'openai', body, proxyBearer, proxyBase });
     return { status: 401, json: { error: { type: 'no_upstream_key', message: 'pass your OpenRouter key in x-upstream-api-key' } } };
   }
   const t0 = process.hrtime.bigint();

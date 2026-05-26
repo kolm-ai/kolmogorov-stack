@@ -5534,8 +5534,27 @@ export function buildRouter() {
         fireworks:  _firstEnv(['FIREWORKS_API_KEY', 'fireworks_api_key', 'FIREWORKS_KEY', 'fireworks_key']),
         deepseek:   _firstEnv(['DEEPSEEK_API_KEY', 'deepseek_api_key', 'DEEPSEEK_KEY', 'deepseek_key']),
       };
+      // W-M wave / Vercel teacher-chat proxy fallback. When this Railway
+      // service has no upstream key locally, the legacy adapters
+      // (anthropic/openai/openrouter) will proxy through kolm.ai's
+      // /v1/teacher/chat Vercel function — which DOES have the keys —
+      // using the original kolm bearer that arrived with this dispatch
+      // request. Pull the bearer off authorization header and attach it
+      // to every chain entry so a per-provider fallback works through
+      // the chain (e.g. primary anthropic missing → proxy → still fails
+      // → fall back to openai → proxy again).
+      const _authHdr = String(req.headers.authorization || '');
+      const _bm = _authHdr.match(/^Bearer\s+(\S+)$/i);
+      const _proxyBearer = _bm ? _bm[1] : (req.headers['x-api-key'] || null);
+      const _proxyBase = process.env.KOLM_BASE_URL
+        || process.env.KOLM_PROXY_BASE
+        || 'https://kolm.ai';
       for (const entry of chain) {
         entry.upstreamKey = upstreamKeys[entry.provider] || null;
+        if (!entry.upstreamKey && _proxyBearer) {
+          entry.proxyBearer = _proxyBearer;
+          entry.proxyBase   = _proxyBase;
+        }
       }
       const attempted = [];
       const result = await gw.dispatchWithFallback({

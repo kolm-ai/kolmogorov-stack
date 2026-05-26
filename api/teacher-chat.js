@@ -76,7 +76,11 @@ async function relayAnthropic({ key, model, system, messages, maxTokens }) {
   }
   const j = await r.json();
   const block = (j.content || []).find(b => b && b.type === 'text');
-  return { ok: true, text: block ? block.text : '' };
+  // Anthropic returns usage = {input_tokens, output_tokens}; preserve so the
+  // Railway gateway's cost_usd estimate is non-zero when the proxy is in
+  // play. Without this the receipt would always show 0 tokens for the
+  // Vercel-fallback path.
+  return { ok: true, text: block ? block.text : '', usage: j.usage || {}, upstream_id: j.id || null };
 }
 
 async function relayOpenAILike({ url, key, model, system, messages, maxTokens }) {
@@ -92,7 +96,8 @@ async function relayOpenAILike({ url, key, model, system, messages, maxTokens })
   }
   const j = await r.json();
   const text = (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || '';
-  return { ok: true, text };
+  // OpenAI returns usage = {prompt_tokens, completion_tokens, total_tokens}.
+  return { ok: true, text, usage: j.usage || {}, upstream_id: j.id || null };
 }
 
 async function relayGoogle({ key, model, system, messages, maxTokens }) {
@@ -117,7 +122,16 @@ async function relayGoogle({ key, model, system, messages, maxTokens }) {
   }
   const j = await r.json();
   const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
-  return { ok: true, text: parts.map(p => p.text || '').join('') };
+  // Google returns usageMetadata = {promptTokenCount, candidatesTokenCount,
+  // totalTokenCount}; normalize to the OpenAI-compat shape the gateway
+  // receipt reader looks for so cost math works for all 4 vendors.
+  const um = j.usageMetadata || {};
+  const usage = {
+    prompt_tokens:     um.promptTokenCount || 0,
+    completion_tokens: um.candidatesTokenCount || 0,
+    total_tokens:      um.totalTokenCount || 0,
+  };
+  return { ok: true, text: parts.map(p => p.text || '').join(''), usage };
 }
 
 export default async function handler(req, res) {
@@ -218,7 +232,15 @@ export default async function handler(req, res) {
     ok: true,
     vendor, model,
     choices: [{ message: { role: 'assistant', content: result.text } }],
-    usage: { input_chars: totalChars + system.length, output_chars: result.text.length },
+    usage: {
+      // Merge upstream token counts (when present) with always-known char
+      // counts. Token counts feed the receipt's cost_usd estimate;
+      // char counts are the no-key-required floor.
+      ...(result.usage || {}),
+      input_chars:  totalChars + system.length,
+      output_chars: result.text.length,
+    },
+    upstream_id: result.upstream_id || null,
     proxy_key_source: hit.var,
     tenant: a.tenant,
     served_by: 'vercel-function',
