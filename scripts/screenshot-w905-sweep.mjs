@@ -145,10 +145,11 @@ for (const [route, slug] of ROUTES) {
 await browser.close();
 
 // Build contact sheet
-const files = readdirSync(OUT).filter(f => f.endsWith('.png')).sort();
+const files = readdirSync(OUT).filter(f => f.endsWith('.png') && f.includes('__')).sort();
 const byRoute = new Map();
 for (const f of files) {
   const [slug, bpFile] = f.split('__');
+  if (!bpFile) continue;
   const bp = bpFile.replace('.png', '');
   if (!byRoute.has(slug)) byRoute.set(slug, {});
   byRoute.get(slug)[bp] = f;

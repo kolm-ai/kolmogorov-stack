@@ -89,12 +89,15 @@ export function spinner(label, opts = {}) {
   const useColor = supportsColor(stream);
   const useUnicode = supportsUnicode();
   const isTty = !!(stream && stream.isTTY);
+  // W910-F3.8 — KOLM_NO_PROGRESS=1 strips all animation so test suites get
+  // deterministic output without burning CPU on the spinner loop.
+  const noProgress = !!(process.env.KOLM_NO_PROGRESS);
   const frames = useUnicode ? SPINNER_FRAMES_UNICODE : SPINNER_FRAMES_ASCII;
   let i = 0;
   let timer = null;
   let stopped = false;
 
-  if (isTty && !opts.silent) {
+  if (isTty && !opts.silent && !noProgress) {
     stream.write('\r' + frames[0] + ' ' + label);
     timer = setInterval(() => {
       i = (i + 1) % frames.length;

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
+<title>Compare versions &middot; Artifact &middot; kolm.ai</title>
+<meta name="description" content="Side-by-side compare of two .kolm artifact versions: K-Score, dataset delta, eval verdicts, weights diff, file size, deploy targets.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/account/artifacts/diff">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+.acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
+#account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
+#account-sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin:0 0 10px}
+#account-sidebar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:var(--ink-mute);text-decoration:none;font-family:var(--mono);font-size:12.5px}
+#account-sidebar a:hover{background:var(--bg-elev);color:var(--ink)}
+#account-sidebar a[aria-current=page]{background:var(--bg-elev);color:var(--accent);border-left:2px solid var(--accent);padding-left:8px}
+.acct-content h1{margin:0 0 4px;font-size:26px;letter-spacing:0;font-weight:500}
+.acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
+.kpanel{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
+.diff-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:880px){.diff-grid{grid-template-columns:1fr}.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}}
+.diff-col{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:14px}
+.diff-col h3{margin:0 0 10px;font-size:13px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em;font-family:var(--mono)}
+.diff-col .row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:13px;border-bottom:1px solid var(--line)}
+.diff-col .row:last-child{border-bottom:0}
+.diff-col .row .k{color:var(--ink-mute)}
+.diff-col .row b{font-family:var(--mono);font-size:12.5px;color:var(--ink)}
+.delta{display:inline-block;padding:1px 8px;border-radius:999px;font-family:var(--mono);font-size:11px;border:1px solid currentColor;color:var(--ink-mute)}
+.delta[data-dir="up"]{color:#1f2937}
+.delta[data-dir="down"]{color:#525a64}
+.delta[data-dir="flat"]{color:var(--ink-faint)}
+.btn{display:inline-block;padding:6px 12px;border-radius:5px;border:1px solid var(--line-strong,#56606c);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#0b0d10}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/nav.js"></script>
+</head>
+<body class="kolm-account-surface ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list"><li><a href="/wrapper">Wrapper</a></li><li><a href="/studio">Studio</a></li><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li></ul>
+    <div class="ks-nav__right"><a href="/signup?intent=login" class="ks-nav__signin">Sign in</a><a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started</a></div>
+  </nav>
+</div>
+
+<main id="main">
+<div class="acct-shell">
+<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/create-model">Create a model</a></li><li><a href="/account/artifacts" aria-current="page">Artifacts</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/devices">Devices</a></li></ul></nav>
+<section class="acct-content">
+
+<nav style="font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin:0 0 10px"><a href="/account/artifacts" style="color:var(--ink-mute);text-decoration:none">&larr; All artifacts</a></nav>
+
+<h1>Compare versions.</h1>
+<p class="lede">Side-by-side metrics. K-Score, dataset delta, eval verdicts, weights size. Roll back from either column in one click.</p>
+
+<div class="kpanel">
+  <div class="diff-grid">
+    <div class="diff-col" id="col-a">
+      <h3>From <b id="from-ver" style="color:var(--accent)">v2</b></h3>
+      <div class="row"><span class="k">K-Score</span><b>0.83</b></div>
+      <div class="row"><span class="k">Pairs used</span><b>10,598</b></div>
+      <div class="row"><span class="k">Quant</span><b>INT8</b></div>
+      <div class="row"><span class="k">File size</span><b>4.7 GB</b></div>
+      <div class="row"><span class="k">Eval &mdash; on-policy</span><b>92%</b></div>
+      <div class="row"><span class="k">Eval &mdash; clarify</span><b>95%</b></div>
+      <div class="row"><span class="k">Sig hash</span><b>sha256:1c2a&hellip;9b04</b></div>
+      <div style="margin-top:12px"><a class="btn" href="#" id="rollback-a">Roll back to v2</a></div>
+    </div>
+    <div class="diff-col" id="col-b">
+      <h3>To <b id="to-ver" style="color:var(--accent)">v3</b></h3>
+      <div class="row"><span class="k">K-Score</span><b>0.91 <span class="delta" data-dir="up">+0.08</span></b></div>
+      <div class="row"><span class="k">Pairs used</span><b>12,418 <span class="delta" data-dir="up">+1,820</span></b></div>
+      <div class="row"><span class="k">Quant</span><b>INT4 NF4 <span class="delta" data-dir="down">smaller</span></b></div>
+      <div class="row"><span class="k">File size</span><b>1.9 GB <span class="delta" data-dir="down">-2.8 GB</span></b></div>
+      <div class="row"><span class="k">Eval &mdash; on-policy</span><b>96% <span class="delta" data-dir="up">+4</span></b></div>
+      <div class="row"><span class="k">Eval &mdash; clarify</span><b>97% <span class="delta" data-dir="up">+2</span></b></div>
+      <div class="row"><span class="k">Sig hash</span><b>sha256:b41f&hellip;e2c0</b></div>
+      <div style="margin-top:12px"><a class="btn primary" href="#" id="ship-b">Promote v3 to default</a></div>
+    </div>
+  </div>
+</div>
+
+<div class="kpanel">
+  <h2 style="margin:0 0 8px;font-size:15px">What changed</h2>
+  <ul style="margin:0;padding-left:20px;color:var(--ink-mute);font-size:13.5px;line-height:1.65">
+    <li>Re-trained on 1,820 newly-approved pairs from <code>support</code> namespace.</li>
+    <li>Switched quant from INT8 to INT4 NF4 + double; file shrinks 60% with no eval regression.</li>
+    <li>Both clarify-question and on-policy verdicts improved over the same eval slice.</li>
+    <li>No prompt template changes; both versions share the same input/output schema.</li>
+  </ul>
+</div>
+
+</section>
+</div>
+</main>
+
+<script>
+(function(){
+  try {
+    const u = new URL(window.location.href);
+    const from = u.searchParams.get('from') || 'v2';
+    const to = u.searchParams.get('to') || 'v3';
+    document.getElementById('from-ver').textContent = from;
+    document.getElementById('to-ver').textContent = to;
+    document.title = `Compare ${from} -> ${to} · Artifact · kolm.ai`;
+  } catch (_) {}
+})();
+</script>
+
+<footer class="ks-foot"><div class="ks-wrap"><div class="ks-foot__base"><span>&copy; 2026 kolm.ai</span></div></div></footer>
+</body>
+</html>

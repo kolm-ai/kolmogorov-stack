@@ -501,7 +501,24 @@ const PUBLIC_API = (p) =>
   // the same reason as teacher-chat/health: SDKs and the homepage status panel
   // need to render a live readiness pill without burning an authed budget call.
   // Body is provider-bool only — no per-tenant quota or pricing leak.
-  p === '/v1/gateway/health';
+  p === '/v1/gateway/health' ||
+  // W910 Track B — public routes powering the no-code /account/create-model
+  // wizard. Each is rate-limited inside the route handler. Templates is a
+  // pure catalog; estimate/preview/start are stateless heuristics; the SSE
+  // stream returns deterministic stub events; connector-notify appends to a
+  // single-file waitlist; capture/snippet renders a copy-paste snippet with
+  // tenant key when present and a placeholder when not; draft/save echoes
+  // for anon (page also persists to localStorage).
+  p === '/v1/recipes/templates' ||
+  /^\/v1\/recipes\/templates\/[a-z0-9][a-z0-9-]{0,63}$/.test(p) ||
+  p === '/v1/compile/estimate' ||
+  p === '/v1/compile/preview' ||
+  p === '/v1/compile/start' ||
+  /^\/v1\/compile\/stream\/[A-Za-z0-9._-]{1,64}$/.test(p) ||
+  p === '/v1/connectors/notify' ||
+  p === '/v1/draft/save' ||
+  p === '/v1/capture/snippet' ||
+  /^\/v1\/playground\/proxy\/[A-Za-z0-9._-]{1,64}$/.test(p);
 
 export function adminApiKey() {
   return process.env.ADMIN_KEY || null;

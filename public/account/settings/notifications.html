@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>Notifications &middot; Settings &middot; Account &middot; kolm.ai</title>
+<meta name="description" content="Configure Slack, webhook, and email notification channels per kolm tenant. Pick which events fire, send a test payload, and review the last 50 delivery attempts.">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://kolm.ai/account/settings/notifications">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<style>
+.acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
+#account-sidebar{position:sticky;top:24px;background:#ffffff;border:1px solid #e6eaef;border-radius:8px;padding:14px;font-size:13px}
+#account-sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#56606c;margin:0 0 10px}
+#account-sidebar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:#525a64;text-decoration:none;font-family:var(--mono,monospace);font-size:12.5px}
+#account-sidebar a:hover{background:#f3f5f7;color:#1f2937}
+#account-sidebar a[aria-current=page]{background:#eef1f4;color:#1f2937;border-left:2px solid #1f2937;padding-left:8px}
+.acct-content h1{margin:0 0 4px;font-size:28px;color:#1f2937;letter-spacing:0}
+.acct-content h2{font-size:16px;margin:22px 0 10px;color:#1f2937}
+.acct-content h3{font-size:14px;margin:16px 0 8px;color:#1f2937}
+.acct-content .lede{color:#56606c;font-size:14.5px;margin:0 0 20px;max-width:64ch;line-height:1.6}
+.skip-link{position:absolute;left:-9999px;top:0;background:#1f2937;color:#f3f5f7;padding:8px 12px;font-family:var(--mono,monospace);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.kpanel{background:#ffffff;border:1px solid #e6eaef;border-radius:8px;padding:18px;margin-bottom:16px}
+.kpanel h2{margin:0 0 6px;font-size:15px}
+.kpanel .pdesc{color:#56606c;font-size:13px;margin:0 0 14px;line-height:1.6}
+.field-row{display:grid;grid-template-columns:160px 1fr auto;gap:12px;align-items:start;padding:10px 0;border-bottom:1px solid #f3f5f7}
+.field-row:last-child{border-bottom:0}
+.field-row label{font-family:var(--mono,monospace);font-size:12.5px;color:#1f2937;padding-top:8px}
+.field-row .help{font-family:var(--mono,monospace);font-size:11.5px;color:#56606c;margin-top:4px;line-height:1.5}
+input[type=text],input[type=email],input[type=url]{background:#ffffff;border:1px solid #e6eaef;color:#1f2937;padding:7px 10px;border-radius:5px;font-family:var(--mono,monospace);font-size:12.5px;width:100%;max-width:480px}
+input[type=text]:focus,input[type=email]:focus,input[type=url]:focus{outline:none;border-color:#1f2937;box-shadow:0 0 0 1px #1f2937}
+input[type=checkbox]{accent-color:#1f2937;width:16px;height:16px;margin-right:6px;vertical-align:-3px}
+.btn{display:inline-block;padding:7px 14px;border-radius:5px;border:1px solid #e6eaef;background:#ffffff;color:#1f2937;font-family:var(--mono,monospace);font-size:12.5px;cursor:pointer;text-decoration:none;line-height:1.2}
+.btn:hover{background:#f3f5f7;border-color:#a8b3c2}
+.btn.primary{background:#1f2937;border-color:#1f2937;color:#f3f5f7}
+.btn.primary:hover{background:#525a64;border-color:#525a64;color:#f3f5f7}
+.btn.subtle{color:#56606c;border-color:transparent;background:transparent;text-decoration:underline}
+.btn.subtle:hover{color:#1f2937;background:transparent;border-color:transparent}
+.event-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:8px}
+.event-cell{display:flex;align-items:center;padding:9px 12px;border:1px solid #e6eaef;border-radius:6px;background:#ffffff;font-family:var(--mono,monospace);font-size:12.5px;color:#1f2937;cursor:pointer}
+.event-cell:hover{background:#f3f5f7;border-color:#a8b3c2}
+.event-cell input{margin-right:8px}
+.event-desc{font-family:var(--mono,monospace);font-size:11px;color:#56606c;margin-left:24px;display:block;margin-top:3px}
+.log-table{width:100%;border-collapse:collapse;font-family:var(--mono,monospace);font-size:12px;color:#1f2937;margin-top:8px}
+.log-table th{text-align:left;padding:8px 10px;border-bottom:1px solid #e6eaef;color:#56606c;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-size:10.5px;background:#f3f5f7}
+.log-table td{padding:8px 10px;border-bottom:1px solid #f3f5f7;vertical-align:top}
+.log-table tr:hover td{background:#f3f5f7}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono,monospace);border:1px solid currentColor;background:transparent}
+.pill.ok{color:#1f2937}
+.pill.bad{color:#525a64}
+.pill.mute{color:#56606c}
+.empty{background:#f3f5f7;border:1px dashed #e6eaef;border-radius:8px;padding:18px;color:#56606c;font-size:13.5px;line-height:1.6}
+#save-status,#test-status{font-family:var(--mono,monospace);font-size:11.5px;color:#56606c;margin-left:8px}
+@media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.event-grid{grid-template-columns:1fr}.field-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body class="kolm-account-surface ks">
+<a href="#main" class="skip-link">Skip to content</a>
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+  </nav>
+</div>
+<main id="main">
+<div class="acct-shell">
+<nav id="account-sidebar" aria-label="Account sections">
+  <h2>Settings</h2>
+  <ul>
+    <li><a href="/account/overview">Overview</a></li>
+    <li><a href="/account/settings">General</a></li>
+    <li><a href="/account/settings/notifications" aria-current="page">Notifications</a></li>
+    <li><a href="/account/api-keys">API keys</a></li>
+    <li><a href="/account/team">Team</a></li>
+    <li><a href="/account/billing">Billing</a></li>
+  </ul>
+</nav>
+<section class="acct-content">
+<h1>Notification channels.</h1>
+<p class="lede">Slack, generic HTTP webhook, and email. Pick which events fire per channel, test the payload before you depend on it, and inspect the last 50 delivery attempts. Same source of truth as <code>kolm notifications</code> in the CLI.</p>
+
+<div class="kpanel">
+<h2>Channels</h2>
+<p class="pdesc">Leave a URL blank to disable that channel. Slack webhooks must be on <code>hooks.slack.com</code>. HTTP webhooks must be <code>https://</code> and resolve to a public hostname.</p>
+<form id="settings-form">
+  <div class="field-row">
+    <label for="slack_webhook_url">Slack webhook</label>
+    <div>
+      <input type="url" id="slack_webhook_url" name="slack_webhook_url" placeholder="https://hooks.slack.com/services/..." autocomplete="off">
+      <div class="help">Incoming-webhook URL from your Slack app. Payload uses rich block layout with header, fields, and a dashboard action button.</div>
+    </div>
+    <button type="button" class="btn" data-test-channel="slack">Test</button>
+  </div>
+  <div class="field-row">
+    <label for="http_webhook_url">HTTP webhook</label>
+    <div>
+      <input type="url" id="http_webhook_url" name="http_webhook_url" placeholder="https://example.com/kolm-webhook" autocomplete="off">
+      <div class="help">JSON POST with <code>{event, tenant, payload, ts}</code>. Header <code>x-kolm-event</code> repeats the event name for routing.</div>
+    </div>
+    <button type="button" class="btn" data-test-channel="http">Test</button>
+  </div>
+  <div class="field-row">
+    <label for="email_to">Email</label>
+    <div>
+      <input type="email" id="email_to" name="email_to" placeholder="alerts@example.com" autocomplete="off">
+      <div class="help">Single recipient. Email sends through Resend; if Resend is not configured server-side, the row logs as skipped.</div>
+    </div>
+    <button type="button" class="btn" data-test-channel="email">Test</button>
+  </div>
+  <div style="margin-top:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <button type="submit" class="btn primary">Save channels</button>
+    <span id="save-status" aria-live="polite"></span>
+  </div>
+</form>
+</div>
+
+<div class="kpanel">
+<h2>Events</h2>
+<p class="pdesc">Toggle which events dispatch to the configured channels. All events default on so a freshly-saved channel starts receiving traffic.</p>
+<div class="event-grid" id="event-grid">
+  <label class="event-cell"><input type="checkbox" data-event="artifact_compiled" checked> artifact_compiled<span class="event-desc">a new specialist artifact passed its K-Score gate</span></label>
+  <label class="event-cell"><input type="checkbox" data-event="drift_detected" checked> drift_detected<span class="event-desc">a namespace fell out of its 2&sigma; drift band</span></label>
+  <label class="event-cell"><input type="checkbox" data-event="kscore_drop" checked> kscore_drop<span class="event-desc">a deployed artifact's current K-Score dropped vs deploy-time</span></label>
+  <label class="event-cell"><input type="checkbox" data-event="device_offline" checked> device_offline<span class="event-desc">a registered device missed two heartbeat windows</span></label>
+  <label class="event-cell"><input type="checkbox" data-event="compile_failed" checked> compile_failed<span class="event-desc">a compile job exited with a non-zero status</span></label>
+  <label class="event-cell"><input type="checkbox" data-event="quota_warning" checked> quota_warning<span class="event-desc">spend or capture quota crossed 80% of plan limit</span></label>
+  <label class="event-cell"><input type="checkbox" data-event="recompile_suggested" checked> recompile_suggested<span class="event-desc">next-actions engine flagged a stale or drifted artifact</span></label>
+</div>
+</div>
+
+<div class="kpanel">
+<h2>Test a payload</h2>
+<p class="pdesc">Send a synthetic event to all configured channels. Use to verify the Slack block layout, the HTTP body shape, or that the email recipient is correct.</p>
+<form id="test-form" style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap">
+  <label style="font-family:var(--mono,monospace);font-size:12.5px;color:#1f2937">Event
+    <select id="test-event" style="background:#ffffff;border:1px solid #e6eaef;color:#1f2937;padding:7px 10px;border-radius:5px;font-family:var(--mono,monospace);font-size:12.5px;margin-left:6px">
+      <option value="artifact_compiled">artifact_compiled</option>
+      <option value="drift_detected">drift_detected</option>
+      <option value="kscore_drop">kscore_drop</option>
+      <option value="device_offline">device_offline</option>
+      <option value="compile_failed">compile_failed</option>
+      <option value="quota_warning">quota_warning</option>
+      <option value="recompile_suggested">recompile_suggested</option>
+    </select>
+  </label>
+  <button type="submit" class="btn primary">Send test</button>
+  <span id="test-status" aria-live="polite"></span>
+</form>
+</div>
+
+<div class="kpanel">
+<h2>Delivery log</h2>
+<p class="pdesc">The last 50 attempts across all channels. Status is the HTTP response code from the channel (200 = accepted). Email rows show 200 when Resend accepted the message.</p>
+<div id="log-host">
+<div class="empty" data-empty-state>Loading deliveries...</div>
+</div>
+</div>
+
+</section>
+</div>
+</main>
+
+<script>
+(function(){
+  function $(s,r){return (r||document).querySelector(s);}
+  function $$(s,r){return Array.from((r||document).querySelectorAll(s));}
+  function kfetch(url,opts){
+    var o=Object.assign({credentials:'include',headers:{accept:'application/json'}},opts||{});
+    if(o.body && typeof o.body==='object'){o.headers['content-type']='application/json';o.body=JSON.stringify(o.body);}
+    return fetch(url,o).then(function(r){return r.json().catch(function(){return {ok:false,status:r.status};});});
+  }
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
+  function setStatus(id,text,ok){var el=$('#'+id);if(!el)return;el.textContent=text||'';el.style.color=(ok===false?'#525a64':'#56606c');}
+
+  // Load settings.
+  kfetch('/v1/notifications/settings').then(function(j){
+    if(!j||!j.settings)return;
+    var s=j.settings;
+    $('#slack_webhook_url').value=s.slack_webhook_url||'';
+    $('#http_webhook_url').value=s.http_webhook_url||'';
+    $('#email_to').value=s.email_to||'';
+    if(s.events){
+      $$('#event-grid input[data-event]').forEach(function(cb){cb.checked=!!s.events[cb.getAttribute('data-event')];});
+    }
+  }).catch(function(){});
+
+  // Save settings.
+  $('#settings-form').addEventListener('submit',function(e){
+    e.preventDefault();
+    var events={};
+    $$('#event-grid input[data-event]').forEach(function(cb){events[cb.getAttribute('data-event')]=cb.checked;});
+    setStatus('save-status','saving...');
+    kfetch('/v1/notifications/settings',{method:'PUT',body:{
+      slack_webhook_url:$('#slack_webhook_url').value.trim()||null,
+      http_webhook_url:$('#http_webhook_url').value.trim()||null,
+      email_to:$('#email_to').value.trim()||null,
+      events:events,
+    }}).then(function(j){
+      if(j&&j.ok){setStatus('save-status','saved '+new Date().toLocaleTimeString(),true);loadLog();}
+      else{setStatus('save-status','error: '+(j&&j.error||'unknown'),false);}
+    }).catch(function(){setStatus('save-status','network error',false);});
+  });
+
+  // Per-channel test buttons.
+  $$('[data-test-channel]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var event=$('#test-event').value||'artifact_compiled';
+      setStatus('save-status','testing '+b.getAttribute('data-test-channel')+'...');
+      kfetch('/v1/notifications/test-channel',{method:'POST',body:{event:event,payload:{artifact_id:'test-'+Date.now(),kscore:0.91,channel:b.getAttribute('data-test-channel'),test:true}}})
+      .then(function(j){
+        if(j&&j.results){
+          var ch=b.getAttribute('data-test-channel');
+          var r=j.results[ch];
+          if(r==null){setStatus('save-status',ch+' channel not configured',false);}
+          else if(r.ok||r.ok===true){setStatus('save-status',ch+' OK ('+(r.status||200)+')',true);}
+          else{setStatus('save-status',ch+' failed ('+(r.status||0)+')',false);}
+        }else{setStatus('save-status','test error',false);}
+        loadLog();
+      }).catch(function(){setStatus('save-status','test network error',false);});
+    });
+  });
+
+  // Test form.
+  $('#test-form').addEventListener('submit',function(e){
+    e.preventDefault();
+    var event=$('#test-event').value;
+    setStatus('test-status','sending...');
+    kfetch('/v1/notifications/test-channel',{method:'POST',body:{event:event,payload:{artifact_id:'test-'+Date.now(),kscore:0.91,test:true}}})
+    .then(function(j){
+      if(j&&j.ok){setStatus('test-status','sent: '+j.succeeded+'/'+j.sent+' channels delivered',true);}
+      else if(j&&j.sent===0){setStatus('test-status','no channels configured',false);}
+      else{setStatus('test-status','partial: '+(j.succeeded||0)+'/'+(j.sent||0),false);}
+      loadLog();
+    }).catch(function(){setStatus('test-status','network error',false);});
+  });
+
+  // Delivery log.
+  function loadLog(){
+    kfetch('/v1/notifications/log?limit=50').then(function(j){
+      var host=$('#log-host');
+      var rows=(j&&j.deliveries)||[];
+      if(!rows.length){host.innerHTML='<div class="empty" data-empty-state>No deliveries yet. Configure a channel and click test to populate this log.</div>';return;}
+      host.innerHTML='<table class="log-table"><thead><tr><th>When</th><th>Channel</th><th>Event</th><th>Status</th><th>Attempts</th></tr></thead><tbody>'+
+        rows.map(function(r){
+          var pillClass=(r.ok?'ok':'bad');
+          var when=r.attempted_at?new Date(r.attempted_at).toLocaleString():'-';
+          return '<tr><td>'+esc(when)+'</td><td>'+esc(r.channel)+'</td><td>'+esc(r.event_type)+'</td><td><span class="pill '+pillClass+'">'+(r.ok?'OK':'FAIL')+' '+(r.status||0)+'</span></td><td>'+(r.attempts||1)+'</td></tr>';
+        }).join('')+'</tbody></table>';
+    }).catch(function(){
+      $('#log-host').innerHTML='<div class="empty" data-empty-state>Delivery log unavailable.</div>';
+    });
+  }
+  loadLog();
+})();
+</script>
+</body>
+</html>

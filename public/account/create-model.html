@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
+<title>Create a model &middot; Account &middot; kolm.ai</title>
+<meta name="description" content="No-code wizard. Describe what your model should do, upload a dataset, connect a tool, or capture live traffic. Compile a signed .kolm artifact without opening a terminal.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/account/create-model">
+<meta property="og:title" content="Create a model &middot; Account &middot; kolm.ai" />
+<meta property="og:description" content="Four tabs, one outcome: a signed .kolm artifact you own." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://kolm.ai/account/create-model" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+/* Cool-slate palette: #1f2937 #56606c #a8b3c2 #525a64 #f3f5f7 #eef1f4 #e6eaef #dde1e7. Reuse account-shell variables from ks.css. */
+.acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
+#account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
+#account-sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin:0 0 10px}
+#account-sidebar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:var(--ink-mute);text-decoration:none;font-family:var(--mono);font-size:12.5px}
+#account-sidebar a:hover{background:var(--bg-elev);color:var(--ink)}
+#account-sidebar a[aria-current=page]{background:var(--bg-elev);color:var(--accent);border-left:2px solid var(--accent);padding-left:8px}
+.acct-content h1{margin:0 0 4px;font-size:28px;letter-spacing:0;font-weight:500}
+.acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#1f2937);color:var(--bg,#f3f5f7);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.kpanel{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
+.kpanel h2{margin:0 0 12px;font-size:15px}
+.kpanel .pdesc{color:var(--ink-mute);font-size:13px;margin:0 0 12px}
+.btn{display:inline-block;padding:6px 12px;border-radius:5px;border:1px solid var(--line-strong,#56606c);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#0b0d10}
+.btn.primary:hover{filter:brightness(1.1);color:#0b0d10}
+.btn:disabled{opacity:0.45;cursor:not-allowed}
+
+/* Wizard layout: tab list across the top, content split between main + right rail. */
+.cm-wizard{display:grid;grid-template-columns:minmax(0,1fr) 304px;gap:24px;align-items:start}
+@media (max-width:1080px){.cm-wizard{grid-template-columns:1fr}}
+
+.cm-tabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:18px;flex-wrap:wrap}
+.cm-tab{appearance:none;background:transparent;border:0;border-bottom:2px solid transparent;padding:10px 14px;font-family:var(--mono);font-size:12.5px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.08em;cursor:pointer;text-decoration:none;display:inline-flex;gap:8px;align-items:center}
+.cm-tab:hover{color:var(--ink)}
+.cm-tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.cm-tab .n{font-size:10.5px;color:var(--ink-faint);font-weight:600}
+.cm-tab[aria-selected="true"] .n{color:var(--accent)}
+
+.cm-pane{display:none}
+.cm-pane[data-active="true"]{display:block}
+
+/* Right-rail summary card. */
+.cm-rail{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.cm-rail h3{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin:0 0 4px;font-weight:600}
+.cm-rail .row{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--ink)}
+.cm-rail .row b{font-family:var(--mono);font-size:12.5px;color:var(--ink)}
+.cm-rail .row .k{color:var(--ink-mute);font-size:12.5px}
+.cm-rail hr{border:0;border-top:1px solid var(--line);margin:6px 0}
+.cm-rail .est{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.cm-rail .est small{font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);font-weight:400;text-transform:uppercase;letter-spacing:0.06em}
+.cm-rail .save-state{font-family:var(--mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.06em}
+.cm-rail .btn{width:100%;text-align:center;padding:10px 12px;font-size:13px}
+
+/* Describe tab. */
+.cm-describe textarea{width:100%;min-height:200px;background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:12px 14px;color:var(--ink);font-family:var(--sans,inherit);font-size:14px;line-height:1.55;resize:vertical}
+.cm-describe textarea:focus{outline:none;border-color:var(--accent)}
+.cm-describe .cc{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)}
+.cm-describe .cc[data-warn="true"]{color:#525a64}
+.cm-describe .cc[data-hard="true"]{color:#1f2937;font-weight:600}
+.cm-describe .preview-pairs{display:grid;gap:10px;margin-top:14px}
+.cm-describe .pair{padding:12px 14px;background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;font-size:13px;line-height:1.55}
+.cm-describe .pair .q{color:var(--ink-mute);margin-bottom:4px}
+.cm-describe .pair .a{color:var(--ink)}
+.cm-describe .pair .q::before{content:"Q. ";font-family:var(--mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em;margin-right:6px}
+.cm-describe .pair .a::before{content:"A. ";font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin-right:6px}
+.cm-describe .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+
+/* Upload tab. */
+.cm-upload .dropzone{border:2px dashed var(--line);border-radius:10px;padding:36px 18px;text-align:center;color:var(--ink-mute);font-size:14px;background:var(--bg-elev);transition:border-color 140ms,background 140ms;cursor:pointer}
+.cm-upload .dropzone[data-drag="true"]{border-color:var(--accent);background:var(--bg-card)}
+.cm-upload .dropzone strong{display:block;color:var(--ink);font-size:15px;margin-bottom:6px;font-weight:500}
+.cm-upload .dropzone small{display:block;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;margin-top:8px;letter-spacing:0.04em}
+.cm-upload .file-meta{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.cm-upload .file-meta .cell{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.cm-upload .file-meta .cell .k{font-size:10.5px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin-bottom:4px;font-family:var(--mono)}
+.cm-upload .file-meta .cell .v{font-family:var(--mono);font-size:13px;color:var(--ink);overflow-wrap:anywhere}
+.cm-upload .col-picker{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;align-items:center}
+.cm-upload .col-picker label{font-size:12.5px;color:var(--ink-mute);display:inline-flex;flex-direction:column;gap:4px}
+.cm-upload .col-picker select{background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);padding:6px 10px;border-radius:4px;font-family:var(--mono);font-size:12px}
+.cm-upload .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor;color:var(--ink-mute)}
+.cm-upload .badge.input{color:#56606c;border-color:#56606c}
+.cm-upload .badge.output{color:#1f2937;border-color:#1f2937}
+.cm-upload table.preview{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11.5px;margin-top:14px}
+.cm-upload table.preview th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);color:var(--ink-faint);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-size:10.5px}
+.cm-upload table.preview td{padding:6px 8px;border-bottom:1px solid var(--line);color:var(--ink);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cm-upload .qsum{display:flex;gap:18px;font-family:var(--mono);font-size:12px;color:var(--ink-mute);margin-top:12px;flex-wrap:wrap}
+.cm-upload .qsum b{color:var(--ink);font-weight:600}
+
+/* Connect tab. */
+.cm-connect .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:840px){.cm-connect .grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.cm-connect .tile{padding:18px 14px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;text-align:center;cursor:pointer;transition:border-color 140ms,transform 140ms}
+.cm-connect .tile:hover{border-color:var(--accent);transform:translateY(-1px)}
+.cm-connect .tile .logo{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--ink);margin-bottom:6px}
+.cm-connect .tile .name{font-size:13px;color:var(--ink-mute);margin-bottom:6px}
+.cm-connect .tile .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-faint);border:1px solid var(--ink-faint)}
+
+/* Capture tab. */
+.cm-capture .row-pick{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.cm-capture .row-pick select,.cm-capture .row-pick input{background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);padding:6px 10px;border-radius:4px;font-family:var(--mono);font-size:12px}
+.cm-capture .langtabs{display:flex;gap:6px;margin:12px 0 8px}
+.cm-capture .langtabs button{appearance:none;background:transparent;border:1px solid var(--line);color:var(--ink-mute);padding:5px 10px;border-radius:4px;font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;cursor:pointer}
+.cm-capture .langtabs button[aria-pressed="true"]{color:var(--accent);border-color:var(--accent)}
+.cm-capture pre.snippet{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:14px;color:var(--ink);font-family:var(--mono);font-size:12.5px;line-height:1.5;overflow-x:auto;white-space:pre}
+.cm-capture .copy-row{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+.cm-capture .ready-bars{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.cm-capture .bar{display:grid;grid-template-columns:140px minmax(0,1fr) 60px;gap:10px;align-items:center;font-family:var(--mono);font-size:11.5px;color:var(--ink-mute)}
+.cm-capture .bar .track{height:6px;background:var(--bg-elev);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.cm-capture .bar .fill{height:100%;background:var(--accent)}
+.cm-capture .bar .pct{text-align:right;color:var(--ink)}
+.cm-capture .live-tail{margin-top:14px;background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;font-family:var(--mono);font-size:11.5px;max-height:200px;overflow-y:auto}
+.cm-capture .live-tail .row{padding:6px 12px;border-bottom:1px solid var(--line);color:var(--ink-mute);display:grid;grid-template-columns:90px minmax(0,1fr) 60px;gap:8px}
+.cm-capture .live-tail .row:last-child{border-bottom:0}
+.cm-capture .live-tail .row .ts{color:var(--ink-faint)}
+.cm-capture .live-tail .row .preview{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Template empty state. */
+.cm-templates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+@media (max-width:740px){.cm-templates{grid-template-columns:1fr}}
+.cm-templates .t{padding:14px;background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;cursor:pointer;text-align:left}
+.cm-templates .t:hover{border-color:var(--accent)}
+.cm-templates .t b{display:block;color:var(--ink);font-size:14px;margin-bottom:4px}
+.cm-templates .t small{display:block;color:var(--ink-mute);font-size:12.5px;line-height:1.45}
+.cm-templates .t .meta{display:flex;gap:8px;margin-top:8px;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.06em}
+
+/* Compile overlay. */
+.cm-overlay{position:fixed;inset:0;background:rgba(15,18,24,0.78);z-index:9000;display:none;align-items:center;justify-content:center;padding:24px}
+.cm-overlay[data-open="true"]{display:flex}
+.cm-overlay .card{width:min(720px,100%);max-height:90vh;overflow-y:auto;background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:24px}
+.cm-overlay h2{margin:0 0 6px;font-size:18px;color:var(--ink);font-weight:500}
+.cm-overlay .sub{color:var(--ink-mute);font-size:13px;margin:0 0 18px}
+.cm-overlay .steps{display:flex;gap:8px;margin:0 0 18px;flex-wrap:wrap}
+.cm-overlay .step{flex:1;min-width:90px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg-elev);font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-faint)}
+.cm-overlay .step[data-state="running"]{border-color:var(--accent);color:var(--accent)}
+.cm-overlay .step[data-state="done"]{border-color:#56606c;color:var(--ink)}
+.cm-overlay .step[data-state="failed"]{border-color:#1f2937;color:#1f2937}
+.cm-overlay .step b{display:block;font-size:11px;color:var(--ink);font-weight:600;text-transform:none;letter-spacing:0;margin-top:3px}
+.cm-overlay .log{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:12px;font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);max-height:240px;overflow-y:auto;margin:0 0 14px;white-space:pre-wrap;line-height:1.55}
+.cm-overlay .meter{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);margin-bottom:12px}
+.cm-overlay .meter b{color:var(--ink)}
+.cm-overlay .actions{display:flex;justify-content:space-between;gap:10px}
+
+/* Cost confirm modal. */
+.cm-modal{position:fixed;inset:0;background:rgba(15,18,24,0.78);z-index:9100;display:none;align-items:center;justify-content:center;padding:24px}
+.cm-modal[data-open="true"]{display:flex}
+.cm-modal .card{width:min(420px,100%);background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:24px}
+.cm-modal h3{margin:0 0 6px;font-size:16px;font-weight:500}
+.cm-modal .sub{color:var(--ink-mute);font-size:13px;margin:0 0 16px}
+.cm-modal .breakdown{font-family:var(--mono);font-size:13px;color:var(--ink);margin:0 0 14px;display:flex;flex-direction:column;gap:4px;background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:12px}
+.cm-modal .breakdown .r{display:flex;justify-content:space-between}
+.cm-modal .actions{display:flex;justify-content:flex-end;gap:8px}
+
+@media (max-width:880px){
+  .acct-shell{grid-template-columns:1fr;padding:14px}
+  #account-sidebar{position:static}
+  .cm-rail{position:static}
+}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/nav.js"></script>
+</head>
+<body class="kolm-account-surface ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<main id="main">
+<p id="loading-status" aria-live="polite" class="ks-loading-status" hidden></p>
+<div class="acct-shell">
+<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/create-model" aria-current="page">Create a model</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured calls</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li></ul></nav>
+<section class="acct-content">
+<h1>Create a model.</h1>
+<p class="lede">Four ways in. One outcome: a signed <code>.kolm</code> artifact you own. Pick how you want to feed it &mdash; describe the job, upload examples, connect a tool, or capture live traffic.</p>
+
+<div class="cm-tabs" role="tablist" aria-label="Create a model: input methods">
+  <a class="cm-tab" role="tab" aria-selected="true" href="#" data-tab="describe"><span class="n">01</span> Describe</a>
+  <a class="cm-tab" role="tab" aria-selected="false" href="#" data-tab="upload"><span class="n">02</span> Upload</a>
+  <a class="cm-tab" role="tab" aria-selected="false" href="#" data-tab="connect"><span class="n">03</span> Connect</a>
+  <a class="cm-tab" role="tab" aria-selected="false" href="#" data-tab="capture"><span class="n">04</span> Capture</a>
+</div>
+
+<div class="cm-wizard">
+  <div class="cm-main">
+
+    <!-- Describe tab -->
+    <section class="cm-pane cm-describe" data-pane="describe" data-active="true" role="tabpanel" aria-labelledby="tab-describe">
+      <div class="kpanel">
+        <h2>Describe what your model should do.</h2>
+        <p class="pdesc">Plain English. Five sentences is enough. Click <b>Generate preview</b> to see five synthetic Q&amp;A pairs before you compile.</p>
+        <textarea id="describe-text" rows="8" placeholder="Example: A support triage bot for a SaaS. Replies should be one paragraph, ask for the order ID when missing, never invent a tracking link, and escalate billing questions to a human." aria-label="Describe your model"></textarea>
+        <div class="cc" id="describe-cc"><span><span id="cc-n">0</span> / 4000 chars</span><span class="hint" id="cc-hint">Soft limit at 3000 chars.</span></div>
+        <div class="actions">
+          <button class="btn" id="btn-templates">Start with a template</button>
+          <button class="btn" id="btn-preview">Generate preview</button>
+          <button class="btn primary" id="btn-compile-describe">Compile</button>
+        </div>
+        <div id="templates-block" hidden style="margin-top:10px"></div>
+        <div id="preview-block" hidden>
+          <h3 style="font-size:13px;margin:14px 0 8px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em;font-family:var(--mono)">Synthetic Q&amp;A preview</h3>
+          <div class="preview-pairs" id="preview-pairs"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Upload tab -->
+    <section class="cm-pane cm-upload" data-pane="upload" data-active="false" role="tabpanel" aria-labelledby="tab-upload">
+      <div class="kpanel">
+        <h2>Upload a dataset.</h2>
+        <p class="pdesc">CSV, JSONL, JSON, TSV, Parquet, or Excel. We auto-detect input/output columns, parse the first 1,000 rows in your browser, and never upload the file until you click <b>Compile</b>.</p>
+        <label class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Drop a dataset file or click to browse">
+          <strong>Drop your dataset or click to browse.</strong>
+          <span>500 MB max &middot; .csv .jsonl .json .tsv .parquet .xlsx</span>
+          <small>Parsed locally for preview. The file uploads only when you compile.</small>
+          <input type="file" id="dropzone-input" accept=".csv,.jsonl,.json,.tsv,.parquet,.xlsx" hidden>
+        </label>
+        <div id="upload-summary" hidden>
+          <div class="file-meta">
+            <div class="cell"><div class="k">File</div><div class="v" id="meta-name">&mdash;</div></div>
+            <div class="cell"><div class="k">Size</div><div class="v" id="meta-size">&mdash;</div></div>
+            <div class="cell"><div class="k">Rows (sampled)</div><div class="v" id="meta-rows">&mdash;</div></div>
+            <div class="cell"><div class="k">Columns</div><div class="v" id="meta-cols">&mdash;</div></div>
+          </div>
+          <div class="col-picker">
+            <label>Input column<select id="col-input"></select></label>
+            <label>Output column<select id="col-output"></select></label>
+            <span class="badge input">Input</span>
+            <span class="badge output">Output</span>
+          </div>
+          <table class="preview" id="preview-table" aria-label="Preview of first rows"></table>
+          <div class="qsum" id="quality-summary">
+            <span>Total <b id="q-total">0</b></span>
+            <span>Kept <b id="q-kept">0</b></span>
+            <span>Dropped <b id="q-dropped">0</b></span>
+          </div>
+        </div>
+        <div class="actions" style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn primary" id="btn-compile-upload" disabled>Compile</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Connect tab -->
+    <section class="cm-pane cm-connect" data-pane="connect" data-active="false" role="tabpanel" aria-labelledby="tab-connect">
+      <div class="kpanel">
+        <h2>Connect a tool.</h2>
+        <p class="pdesc">Live connector pulls coming soon &mdash; pick one to be notified when it ships. In the meantime, <a href="#" data-go-tab="upload" style="color:var(--accent)">upload an export</a> from the same tool.</p>
+        <div class="grid" id="connect-grid">
+          <button class="tile" data-connector="zendesk"><div class="logo">Z</div><div class="name">Zendesk</div><div class="pill">Notify me</div></button>
+          <button class="tile" data-connector="intercom"><div class="logo">I</div><div class="name">Intercom</div><div class="pill">Notify me</div></button>
+          <button class="tile" data-connector="slack"><div class="logo">S</div><div class="name">Slack</div><div class="pill">Notify me</div></button>
+          <button class="tile" data-connector="notion"><div class="logo">N</div><div class="name">Notion</div><div class="pill">Notify me</div></button>
+          <button class="tile" data-connector="salesforce"><div class="logo">SF</div><div class="name">Salesforce</div><div class="pill">Notify me</div></button>
+          <button class="tile" data-connector="github"><div class="logo">GH</div><div class="name">GitHub</div><div class="pill">Notify me</div></button>
+          <button class="tile" data-connector="hubspot"><div class="logo">H</div><div class="name">HubSpot</div><div class="pill">Notify me</div></button>
+          <button class="tile" data-connector="google_drive"><div class="logo">GD</div><div class="name">Google Drive</div><div class="pill">Notify me</div></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Capture tab -->
+    <section class="cm-pane cm-capture" data-pane="capture" data-active="false" role="tabpanel" aria-labelledby="tab-capture">
+      <div class="kpanel">
+        <h2>Capture live traffic.</h2>
+        <p class="pdesc">Drop in this snippet wherever you already call an LLM. Every (input, output) pair lands in the namespace you pick. Watch the live tail to see your first capture arrive.</p>
+        <div class="row-pick">
+          <label>Namespace
+            <select id="capture-namespace">
+              <option value="default">default</option>
+              <option value="support">support</option>
+              <option value="sales">sales</option>
+              <option value="engineering">engineering</option>
+              <option value="finance">finance</option>
+            </select>
+          </label>
+        </div>
+        <div class="langtabs" id="cap-langtabs">
+          <button data-lang="curl" aria-pressed="true">curl</button>
+          <button data-lang="js" aria-pressed="false">node</button>
+          <button data-lang="python" aria-pressed="false">python</button>
+        </div>
+        <pre class="snippet" id="cap-snippet" tabindex="0">Loading snippet&hellip;</pre>
+        <div class="copy-row">
+          <span id="cap-key-state">Using placeholder API key &middot; <a href="/signup?intent=login" style="color:var(--accent)">sign in</a> to bake yours in.</span>
+          <button class="btn" id="btn-cap-copy">Copy</button>
+        </div>
+        <h3 style="font-size:13px;margin:18px 0 6px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em;font-family:var(--mono)">Readiness per namespace</h3>
+        <div class="ready-bars" id="ready-bars">
+          <div class="bar"><span>default</span><span class="track"><span class="fill" style="width:62%"></span></span><span class="pct">62%</span></div>
+          <div class="bar"><span>support</span><span class="track"><span class="fill" style="width:88%"></span></span><span class="pct">88%</span></div>
+          <div class="bar"><span>sales</span><span class="track"><span class="fill" style="width:24%"></span></span><span class="pct">24%</span></div>
+          <div class="bar"><span>engineering</span><span class="track"><span class="fill" style="width:41%"></span></span><span class="pct">41%</span></div>
+          <div class="bar"><span>finance</span><span class="track"><span class="fill" style="width:8%"></span></span><span class="pct">8%</span></div>
+        </div>
+        <h3 style="font-size:13px;margin:18px 0 6px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em;font-family:var(--mono)">Live tail (last 10)</h3>
+        <div class="live-tail" id="live-tail" aria-live="polite">
+          <div class="row"><span class="ts">--:--:--</span><span class="preview">Waiting for your first capture&hellip;</span><span></span></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Sticky right-rail summary -->
+  <aside class="cm-rail" aria-label="Compile summary">
+    <h3>Summary</h3>
+    <div class="row"><span class="k">Recipe</span><b id="sum-recipe">default</b></div>
+    <div class="row"><span class="k">Student model</span><b id="sum-student">Qwen2.5-7B</b></div>
+    <div class="row"><span class="k">Target VRAM</span><b id="sum-vram">24 GB</b></div>
+    <div class="row"><span class="k">Source</span><b id="sum-source">Describe</b></div>
+    <hr>
+    <div class="est"><span>Est. cost</span><span><span id="sum-cost">$0.40</span> <small id="sum-mins">~2 min</small></span></div>
+    <button class="btn primary" id="btn-compile-rail" type="button">Compile</button>
+    <div class="save-state" id="save-state">Draft autosaved.</div>
+  </aside>
+</div>
+
+</section>
+</div>
+</main>
+
+<!-- Cost confirm modal -->
+<div class="cm-modal" id="cost-modal" role="dialog" aria-modal="true" aria-labelledby="cost-modal-title">
+  <div class="card">
+    <h3 id="cost-modal-title">Confirm compile</h3>
+    <p class="sub">Heuristic estimate from your current inputs. Final cost depends on dataset size + GPU SKU.</p>
+    <div class="breakdown">
+      <div class="r"><span>Recipe</span><b id="mod-recipe">default</b></div>
+      <div class="r"><span>Target VRAM</span><b id="mod-vram">24 GB</b></div>
+      <div class="r"><span>Estimated time</span><b id="mod-mins">~2 min</b></div>
+      <div class="r"><span>Estimated cost</span><b id="mod-cost">$0.40</b></div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="btn-modal-cancel">Cancel</button>
+      <button class="btn primary" id="btn-modal-go">Start compile</button>
+    </div>
+  </div>
+</div>
+
+<!-- Compile progress overlay -->
+<div class="cm-overlay" id="compile-overlay" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
+  <div class="card">
+    <h2 id="overlay-title">Compiling your model.</h2>
+    <p class="sub" id="overlay-job">Job <span id="overlay-job-id">&mdash;</span></p>
+    <div class="steps" id="overlay-steps"></div>
+    <div class="meter"><span>K-Score: <b id="m-k">&mdash;</b></span><span>ETA: <b id="m-eta">&mdash;</b></span><span>Duration: <b id="m-dur">0s</b></span></div>
+    <pre class="log" id="overlay-log" aria-live="polite"></pre>
+    <div class="actions">
+      <button class="btn" id="btn-cancel-compile">Cancel</button>
+      <a class="btn primary" id="btn-view-artifact" href="#" style="display:none">View artifact &rarr;</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ====================================================================
+  // W910 Track B create-model wizard.
+  //
+  // Tabs: describe / upload / connect / capture, state in URL ?tab=…
+  // Autosave draft to localStorage every 30s.
+  // Right-rail summary updates as you type.
+  // Compile -> cost confirm modal -> SSE overlay.
+  // ====================================================================
+  const $ = (s, root) => (root || document).querySelector(s);
+  const $$ = (s, root) => Array.from((root || document).querySelectorAll(s));
+
+  const DRAFT_KEY = 'kolm-create-model-draft-v1';
+  const TAB_DEFAULT = 'describe';
+
+  // ---------- Tabs ----------
+  function activateTab(tab) {
+    const valid = new Set(['describe', 'upload', 'connect', 'capture']);
+    if (!valid.has(tab)) tab = TAB_DEFAULT;
+    $$('.cm-tab').forEach(t => t.setAttribute('aria-selected', t.dataset.tab === tab ? 'true' : 'false'));
+    $$('.cm-pane').forEach(p => p.setAttribute('data-active', p.dataset.pane === tab ? 'true' : 'false'));
+    // Sync URL without scroll jump.
+    try {
+      const u = new URL(window.location.href);
+      u.searchParams.set('tab', tab);
+      history.replaceState(null, '', u.toString());
+    } catch (_) {}
+    const sumSource = { describe: 'Describe', upload: 'Upload', connect: 'Connect', capture: 'Capture' }[tab];
+    if (sumSource) $('#sum-source').textContent = sumSource;
+    if (tab === 'capture') refreshCaptureSnippet();
+  }
+  $$('.cm-tab').forEach(t => t.addEventListener('click', e => { e.preventDefault(); activateTab(t.dataset.tab); }));
+  $$('[data-go-tab]').forEach(t => t.addEventListener('click', e => { e.preventDefault(); activateTab(t.dataset.goTab); }));
+
+  // Initial tab from URL
+  (function initialTab() {
+    try {
+      const t = new URLSearchParams(window.location.search).get('tab');
+      activateTab(t || TAB_DEFAULT);
+    } catch (_) { activateTab(TAB_DEFAULT); }
+  })();
+
+  // ---------- Draft state + autosave ----------
+  const draft = (function loadDraft() {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (raw) return JSON.parse(raw) || {};
+    } catch (_) {}
+    return {};
+  })();
+  function saveDraft() {
+    try {
+      draft.describe = $('#describe-text').value || '';
+      draft.namespace = $('#capture-namespace').value || 'default';
+      draft.lang = currentLang;
+      draft.updated = new Date().toISOString();
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+      $('#save-state').textContent = 'Draft autosaved.';
+    } catch (_) {
+      $('#save-state').textContent = 'Draft not saved (storage blocked).';
+    }
+  }
+  if (draft.describe) $('#describe-text').value = draft.describe;
+  if (draft.namespace) $('#capture-namespace').value = draft.namespace;
+  setInterval(saveDraft, 30000);
+
+  // ---------- Describe tab ----------
+  const descEl = $('#describe-text');
+  const ccN = $('#cc-n');
+  const ccBox = $('#describe-cc');
+  let estimateTimer = null;
+  function onDescribeChange() {
+    const n = descEl.value.length;
+    ccN.textContent = n;
+    ccBox.dataset.warn = (n >= 3000).toString();
+    ccBox.dataset.hard = (n >= 4000).toString();
+    if (n > 4000) descEl.value = descEl.value.slice(0, 4000);
+    clearTimeout(estimateTimer);
+    estimateTimer = setTimeout(refreshEstimate, 500);
+  }
+  descEl.addEventListener('input', onDescribeChange);
+
+  async function refreshEstimate() {
+    const describe = descEl.value || '';
+    try {
+      const r = await fetch(`/v1/compile/estimate?describe=${encodeURIComponent(describe)}&recipe=default&target_vram_gb=24`);
+      if (!r.ok) throw new Error('estimate_failed');
+      const j = await r.json();
+      $('#sum-cost').textContent = '$' + (j.estimated_usd || 0).toFixed(2);
+      $('#sum-mins').textContent = '~' + (j.estimated_minutes || 2) + ' min';
+      $('#mod-cost').textContent = '$' + (j.estimated_usd || 0).toFixed(2);
+      $('#mod-mins').textContent = '~' + (j.estimated_minutes || 2) + ' min';
+    } catch (_) {
+      // Quiet fallback to defaults.
+    }
+  }
+  onDescribeChange();
+
+  // Generate preview
+  $('#btn-preview').addEventListener('click', async () => {
+    const describe = descEl.value.trim();
+    if (!describe) { descEl.focus(); return; }
+    $('#btn-preview').disabled = true;
+    $('#btn-preview').textContent = 'Generating&hellip;';
+    try {
+      const r = await fetch('/v1/compile/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ describe }),
+      });
+      const j = await r.json();
+      if (!j || !j.pairs) throw new Error('no_pairs');
+      const block = $('#preview-block');
+      const list = $('#preview-pairs');
+      list.innerHTML = '';
+      // Stream-style reveal: append one pair at a time.
+      let i = 0;
+      function appendNext() {
+        if (i >= j.pairs.length) return;
+        const p = j.pairs[i++];
+        const div = document.createElement('div');
+        div.className = 'pair';
+        div.innerHTML = '<div class="q"></div><div class="a"></div>';
+        div.querySelector('.q').textContent = p.q;
+        div.querySelector('.a').textContent = p.a;
+        list.appendChild(div);
+        setTimeout(appendNext, 220);
+      }
+      block.hidden = false;
+      appendNext();
+    } catch (e) {
+      const list = $('#preview-pairs');
+      list.innerHTML = '<div class="pair"><div class="a">Preview is unavailable right now. Try compiling and inspect the artifact playground.</div></div>';
+      $('#preview-block').hidden = false;
+    } finally {
+      $('#btn-preview').disabled = false;
+      $('#btn-preview').textContent = 'Generate preview';
+    }
+  });
+
+  // Templates picker
+  $('#btn-templates').addEventListener('click', async () => {
+    const block = $('#templates-block');
+    if (!block.hidden) { block.hidden = true; return; }
+    block.hidden = false;
+    block.innerHTML = '<div style="font-family:var(--mono);font-size:12px;color:var(--ink-faint)">Loading templates&hellip;</div>';
+    try {
+      const r = await fetch('/v1/recipes/templates');
+      const j = await r.json();
+      const wrap = document.createElement('div');
+      wrap.className = 'cm-templates';
+      (j.templates || []).forEach(t => {
+        const card = document.createElement('button');
+        card.className = 't';
+        card.type = 'button';
+        card.innerHTML = `<b></b><small></small><div class="meta"><span></span><span></span></div>`;
+        card.querySelector('b').textContent = t.name;
+        card.querySelector('small').textContent = t.blurb;
+        const meta = card.querySelectorAll('.meta span');
+        meta[0].textContent = t.recipe;
+        meta[1].textContent = t.target_vram_gb + ' GB VRAM';
+        card.addEventListener('click', () => {
+          descEl.value = `Use the ${t.name} template. ${t.blurb}`;
+          $('#sum-recipe').textContent = t.recipe;
+          $('#sum-vram').textContent = t.target_vram_gb + ' GB';
+          $('#mod-recipe').textContent = t.recipe;
+          $('#mod-vram').textContent = t.target_vram_gb + ' GB';
+          onDescribeChange();
+          block.hidden = true;
+        });
+        wrap.appendChild(card);
+      });
+      block.innerHTML = '';
+      block.appendChild(wrap);
+    } catch (_) {
+      block.innerHTML = '<div style="font-family:var(--mono);font-size:12px;color:#1f2937">Could not load templates. <a href="/recipes" style="color:var(--accent)">Browse the catalog</a>.</div>';
+    }
+  });
+
+  // ---------- Upload tab ----------
+  const dz = $('#dropzone');
+  const dzInput = $('#dropzone-input');
+  dz.addEventListener('click', () => dzInput.click());
+  dz.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); dzInput.click(); }});
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.dataset.drag = 'true'; });
+  dz.addEventListener('dragleave', e => { dz.dataset.drag = 'false'; });
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dz.dataset.drag = 'false';
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) handleFile(f);
+  });
+  dzInput.addEventListener('change', e => {
+    const f = e.target.files && e.target.files[0];
+    if (f) handleFile(f);
+  });
+
+  function fmtBytes(n) {
+    if (!n) return '0 B';
+    const u = ['B','KB','MB','GB']; let i = 0; let v = n;
+    while (v >= 1024 && i < u.length - 1) { v /= 1024; i++; }
+    return v.toFixed(v >= 10 ? 0 : 1) + ' ' + u[i];
+  }
+
+  function parseCSV(text) {
+    // Tiny tolerant CSV parser. Quoted cells with embedded commas/quotes supported.
+    const rows = [];
+    let i = 0, field = '', row = [], inQuote = false;
+    while (i < text.length) {
+      const ch = text[i];
+      if (inQuote) {
+        if (ch === '"' && text[i+1] === '"') { field += '"'; i += 2; continue; }
+        if (ch === '"') { inQuote = false; i++; continue; }
+        field += ch; i++; continue;
+      }
+      if (ch === '"') { inQuote = true; i++; continue; }
+      if (ch === ',') { row.push(field); field = ''; i++; continue; }
+      if (ch === '\n' || ch === '\r') {
+        if (field.length || row.length) { row.push(field); rows.push(row); }
+        field = ''; row = [];
+        if (ch === '\r' && text[i+1] === '\n') i++;
+        i++; continue;
+      }
+      field += ch; i++;
+    }
+    if (field.length || row.length) { row.push(field); rows.push(row); }
+    return rows;
+  }
+
+  function parseJSONL(text) {
+    const lines = text.split(/\r?\n/);
+    const rows = [];
+    let header = null;
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      try {
+        const obj = JSON.parse(line);
+        if (!header) header = Object.keys(obj);
+        rows.push(header.map(k => String(obj[k] != null ? obj[k] : '')));
+      } catch (_) { /* skip */ }
+    }
+    return header ? [header, ...rows] : [];
+  }
+
+  function detectColumns(headers) {
+    const lower = headers.map(h => h.toLowerCase());
+    const isInputName  = n => /(^|_)(input|prompt|question|query|user|text|content|msg|message)($|_)/.test(n);
+    const isOutputName = n => /(^|_)(output|response|reply|answer|completion|label|target|y)($|_)/.test(n);
+    let inputIdx = lower.findIndex(isInputName);
+    let outputIdx = lower.findIndex(isOutputName);
+    if (inputIdx === -1) inputIdx = 0;
+    if (outputIdx === -1) outputIdx = headers.length > 1 ? 1 : 0;
+    return { inputIdx, outputIdx };
+  }
+
+  function handleFile(file) {
+    if (file.size > 500 * 1024 * 1024) {
+      alert('File is over 500 MB. Trim it locally or contact support for large uploads.');
+      return;
+    }
+    $('#meta-name').textContent = file.name;
+    $('#meta-size').textContent = fmtBytes(file.size);
+    $('#upload-summary').hidden = false;
+    $('#btn-compile-upload').disabled = false;
+    $('#sum-source').textContent = 'Upload';
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = String(reader.result || '');
+      // Parse first 1k rows only by truncating after enough newlines.
+      let rows = [];
+      const lower = file.name.toLowerCase();
+      if (lower.endsWith('.jsonl')) {
+        rows = parseJSONL(text.split('\n').slice(0, 1001).join('\n'));
+      } else if (lower.endsWith('.json')) {
+        try {
+          const j = JSON.parse(text);
+          if (Array.isArray(j)) {
+            const headers = Object.keys(j[0] || { input: '', output: '' });
+            rows.push(headers);
+            j.slice(0, 1000).forEach(o => rows.push(headers.map(k => String(o[k] != null ? o[k] : ''))));
+          }
+        } catch (_) { /* skip */ }
+      } else if (lower.endsWith('.tsv')) {
+        const trimmed = text.split('\n').slice(0, 1001).join('\n');
+        rows = trimmed.split('\n').filter(Boolean).map(l => l.split('\t'));
+      } else {
+        // CSV (default), and a best-effort fallback for parquet/xlsx which we can't parse client-side.
+        if (lower.endsWith('.parquet') || lower.endsWith('.xlsx')) {
+          rows = [['input', 'output'], ['(parquet/xlsx preview not available in browser — file will upload as-is)', '']];
+        } else {
+          rows = parseCSV(text.slice(0, 256 * 1024));
+        }
+      }
+      if (!rows.length) {
+        $('#preview-table').innerHTML = '<tr><td>Could not parse file. Compile will still attempt server-side parsing.</td></tr>';
+        return;
+      }
+      const headers = rows[0];
+      const body = rows.slice(1);
+      $('#meta-rows').textContent = body.length + (body.length === 1000 ? '+ (truncated)' : '');
+      $('#meta-cols').textContent = headers.length;
+      const sel = detectColumns(headers);
+      const inSel = $('#col-input');
+      const outSel = $('#col-output');
+      inSel.innerHTML = ''; outSel.innerHTML = '';
+      headers.forEach((h, idx) => {
+        const o1 = document.createElement('option'); o1.value = String(idx); o1.textContent = h; if (idx === sel.inputIdx) o1.selected = true; inSel.appendChild(o1);
+        const o2 = document.createElement('option'); o2.value = String(idx); o2.textContent = h; if (idx === sel.outputIdx) o2.selected = true; outSel.appendChild(o2);
+      });
+      // Render first 5 rows
+      const tbl = $('#preview-table');
+      const thead = '<thead><tr>' + headers.map((h, idx) => {
+        const tag = idx === sel.inputIdx ? '<span class="badge input">in</span>' : idx === sel.outputIdx ? '<span class="badge output">out</span>' : '';
+        return '<th>' + h + ' ' + tag + '</th>';
+      }).join('') + '</tr></thead>';
+      const tbody = '<tbody>' + body.slice(0, 5).map(r => '<tr>' + headers.map((_, i) => '<td>' + (r[i] != null ? String(r[i]) : '') + '</td>').join('') + '</tr>').join('') + '</tbody>';
+      tbl.innerHTML = thead + tbody;
+      // Quality summary: rows with non-empty in+out columns count as kept.
+      const inI = sel.inputIdx, outI = sel.outputIdx;
+      let kept = 0;
+      body.forEach(r => { if ((r[inI] || '').trim() && (r[outI] || '').trim()) kept++; });
+      $('#q-total').textContent = body.length;
+      $('#q-kept').textContent = kept;
+      $('#q-dropped').textContent = body.length - kept;
+    };
+    reader.readAsText(file.slice(0, 1024 * 1024)); // first 1 MB is plenty for previews
+  }
+
+  // ---------- Connect tab ----------
+  $$('.cm-connect .tile').forEach(tile => {
+    tile.addEventListener('click', () => openConnectorModal(tile.dataset.connector));
+  });
+
+  function openConnectorModal(connector) {
+    const email = prompt(`We'll email you when ${connector.replace('_', ' ')} ships. Your email?`);
+    if (!email) return;
+    fetch('/v1/connectors/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ connector, email }),
+    }).then(r => r.json()).then(j => {
+      alert(j.message || 'Added to the waitlist.');
+    }).catch(() => alert('Could not reach the waitlist. Try again.'));
+  }
+
+  // ---------- Capture tab ----------
+  let currentLang = (draft.lang) || 'curl';
+  $$('#cap-langtabs button').forEach(b => {
+    if (b.dataset.lang === currentLang) b.setAttribute('aria-pressed', 'true');
+    b.addEventListener('click', () => {
+      $$('#cap-langtabs button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+      b.setAttribute('aria-pressed', 'true');
+      currentLang = b.dataset.lang;
+      refreshCaptureSnippet();
+      saveDraft();
+    });
+  });
+  $('#capture-namespace').addEventListener('change', refreshCaptureSnippet);
+  $('#btn-cap-copy').addEventListener('click', () => {
+    const txt = $('#cap-snippet').textContent;
+    try { navigator.clipboard.writeText(txt); $('#btn-cap-copy').textContent = 'Copied'; setTimeout(()=> $('#btn-cap-copy').textContent = 'Copy', 1500); } catch(_) {}
+  });
+
+  async function refreshCaptureSnippet() {
+    const ns = $('#capture-namespace').value || 'default';
+    try {
+      const r = await fetch(`/v1/capture/snippet?namespace=${encodeURIComponent(ns)}&lang=${encodeURIComponent(currentLang)}`);
+      const j = await r.json();
+      $('#cap-snippet').textContent = j.snippet || '';
+    } catch (_) {
+      $('#cap-snippet').textContent = '# Could not load snippet. Try refreshing.';
+    }
+  }
+
+  // Stub live-tail; in production this'd be an SSE feed from /v1/capture/stream.
+  function seedTail() {
+    const tail = $('#live-tail');
+    const sample = [
+      { ts: '14:02:11', preview: '(default) "where is my order #4892"', n: 1 },
+      { ts: '14:02:09', preview: '(support) "cancel my subscription"', n: 1 },
+      { ts: '14:01:53', preview: '(sales) "do you have a yearly plan?"', n: 1 },
+    ];
+    tail.innerHTML = sample.map(s => `<div class="row"><span class="ts">${s.ts}</span><span class="preview">${s.preview}</span><span>+${s.n}</span></div>`).join('');
+  }
+  seedTail();
+
+  // ---------- Compile flow ----------
+  function openCostModal() {
+    refreshEstimate();
+    $('#cost-modal').dataset.open = 'true';
+  }
+  function closeCostModal() { $('#cost-modal').dataset.open = 'false'; }
+  $('#btn-modal-cancel').addEventListener('click', closeCostModal);
+  $('#btn-modal-go').addEventListener('click', () => { closeCostModal(); startCompile(); });
+  $('#btn-compile-describe').addEventListener('click', openCostModal);
+  $('#btn-compile-upload').addEventListener('click', openCostModal);
+  $('#btn-compile-rail').addEventListener('click', openCostModal);
+
+  // Build the steps row inside the overlay
+  const STEPS = [
+    { id: 'preparing',   label: 'Prepare' },
+    { id: 'train.pass1', label: 'Train pass 1' },
+    { id: 'train.pass2', label: 'Train pass 2' },
+    { id: 'train.pass3', label: 'Train pass 3' },
+    { id: 'quantize',    label: 'Quantize' },
+    { id: 'sign',        label: 'Sign' },
+  ];
+  function renderSteps() {
+    const wrap = $('#overlay-steps');
+    wrap.innerHTML = STEPS.map(s => `<div class="step" data-step="${s.id}" data-state="pending"><span>${s.label}</span></div>`).join('');
+  }
+  function setStepState(stepId, state) {
+    const el = $('#overlay-steps .step[data-step="' + stepId + '"]');
+    if (el) el.dataset.state = state;
+  }
+  function appendLog(line) {
+    const el = $('#overlay-log');
+    const ts = new Date().toTimeString().split(' ')[0];
+    el.textContent += `[${ts}] ${line}\n`;
+    el.scrollTop = el.scrollHeight;
+  }
+
+  let activeSource = null;
+  let activeJobId = null;
+  let compileStartTs = 0;
+  let durTimer = null;
+
+  async function startCompile() {
+    renderSteps();
+    $('#overlay-log').textContent = '';
+    $('#m-k').textContent = '—';
+    $('#m-eta').textContent = '—';
+    $('#m-dur').textContent = '0s';
+    $('#btn-view-artifact').style.display = 'none';
+    $('#compile-overlay').dataset.open = 'true';
+    compileStartTs = Date.now();
+    if (durTimer) clearInterval(durTimer);
+    durTimer = setInterval(() => {
+      const s = Math.floor((Date.now() - compileStartTs) / 1000);
+      $('#m-dur').textContent = s + 's';
+    }, 500);
+
+    try {
+      const body = {
+        tab: $$('.cm-tab').find(t => t.getAttribute('aria-selected') === 'true').dataset.tab,
+        recipe: $('#sum-recipe').textContent.trim(),
+        target_vram_gb: parseInt(($('#sum-vram').textContent.trim() || '24'), 10),
+        describe: ($('#describe-text').value || '').slice(0, 4000),
+      };
+      const r = await fetch('/v1/compile/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const j = await r.json();
+      if (!j || !j.job) throw new Error('no_job');
+      activeJobId = j.job;
+      $('#overlay-job-id').textContent = j.job;
+      appendLog('Submitted job ' + j.job);
+      openSSE(j.stream_url || ('/v1/compile/stream/' + j.job));
+    } catch (e) {
+      appendLog('Could not submit job: ' + (e && e.message ? e.message : 'unknown'));
+      appendLog('You can retry from /account/builds.');
+    }
+  }
+
+  function openSSE(url) {
+    try {
+      if (activeSource) activeSource.close();
+      activeSource = new EventSource(url);
+      activeSource.addEventListener('hello', e => {
+        try { const d = JSON.parse(e.data); appendLog('Steps: ' + d.steps.map(s => s.id).join(' -> ')); } catch (_) {}
+      });
+      activeSource.addEventListener('step.start', e => {
+        try { const d = JSON.parse(e.data); setStepState(d.step, 'running'); appendLog('Start: ' + d.step); } catch (_) {}
+      });
+      activeSource.addEventListener('step.end', e => {
+        try { const d = JSON.parse(e.data); setStepState(d.step, 'done'); appendLog('Done: ' + d.step); } catch (_) {}
+      });
+      activeSource.addEventListener('metric', e => {
+        try { const d = JSON.parse(e.data); if (d.k_score != null) { $('#m-k').textContent = d.k_score.toFixed(2); appendLog(d.step + ' K-Score=' + d.k_score.toFixed(2)); } } catch (_) {}
+      });
+      activeSource.addEventListener('done', e => {
+        try {
+          const d = JSON.parse(e.data);
+          appendLog('All steps complete. Artifact slug ' + d.slug);
+          $('#btn-view-artifact').href = '/account/artifacts/' + d.slug;
+          $('#btn-view-artifact').style.display = 'inline-block';
+          if (durTimer) clearInterval(durTimer);
+          if (activeSource) activeSource.close();
+        } catch (_) {}
+      });
+      activeSource.onerror = () => {
+        appendLog('Stream interrupted. Reload to resume; cursor is preserved.');
+      };
+    } catch (e) {
+      appendLog('Could not open stream: ' + (e && e.message ? e.message : 'unknown'));
+    }
+  }
+
+  $('#btn-cancel-compile').addEventListener('click', () => {
+    if (activeSource) activeSource.close();
+    if (durTimer) clearInterval(durTimer);
+    $('#compile-overlay').dataset.open = 'false';
+  });
+})();
+</script>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a><a href="/capture">Capture</a><a href="/distill">Distill</a><a href="/compile">Compile</a><a href="/runtimes">Runtime</a><a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a><a href="/docs">Docs</a><a href="/sdks">SDKs</a><a href="/models">Models</a><a href="/benchmarks">Benchmarks</a><a href="/blog">Blog</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a><a href="/soc2">SOC 2</a><a href="/hipaa-mapping">HIPAA</a><a href="/baa">BAA</a><a href="/privacy">Privacy</a><a href="/status">Status</a><a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a><a href="/manifesto">Manifesto</a><a href="/why-kolm">Why kolm</a><a href="/press">Press</a><a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai - Apache-2.0 - Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

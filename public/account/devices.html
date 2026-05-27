@@ -3,319 +3,429 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Devices · Account · kolm.ai</title>
-<meta name="description" content="Registered devices on kolm.ai: kind, runtime, RAM, artifacts installed, last seen, test button per row. Backed by src/device-capabilities.js + src/device-install.js.">
+<meta name="description" content="Add and manage every device that runs a kolm artifact. SSH, Kubernetes, or RunPod cloud — same wizard, same cards, same deploy verb.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/devices">
 <meta property="og:title" content="Devices · Account · kolm.ai" />
-<meta property="og:description" content="Registered devices on kolm.ai: kind, runtime, RAM, artifacts installed, last seen, test button per row. Backed by src/device-capabilities.js + src/device-install.js." />
-<meta property="og:image" content="https://kolm.ai/brand-hero.png" />
+<meta property="og:description" content="Add and manage every device that runs a kolm artifact. SSH, Kubernetes, or RunPod cloud — same wizard." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://kolm.ai/account/devices" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Devices - Account - kolm.ai","description":"Registered devices on kolm.ai: kind, runtime, RAM, artifacts installed, last seen, test button per row. Backed by src/device-capabilities.js + src/device-install.js.","url":"https://kolm.ai/account/devices","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Devices","item":"https://kolm.ai/account/devices"}]}}</script>
-<style>
-.acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
-#account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
-#account-sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin:0 0 10px}
-#account-sidebar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
-#account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:var(--ink-mute);text-decoration:none;font-family:var(--mono);font-size:12.5px}
-#account-sidebar a:hover{background:var(--bg-elev);color:var(--ink)}
-#account-sidebar a[aria-current=page]{background:var(--bg-elev);color:var(--accent);border-left:2px solid var(--accent);padding-left:8px}
-.acct-content h1{margin:0 0 4px;font-size:28px;letter-spacing:0}
-.acct-content h2{font-size:16px;margin:22px 0 10px}
-.acct-content h3{font-size:14px;margin:16px 0 8px}
-.acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
-.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#e6e9ee);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
-.skip-link:focus{left:0}
-.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-.metric-card{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px}
-.metric-card .label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin-bottom:6px}
-.metric-card .value{font-size:22px;font-weight:600;font-family:var(--mono);color:var(--ink)}
-.metric-card .delta{font-size:11.5px;color:var(--ink-mute);margin-top:4px}
-.kpanel{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
-.kpanel h2{margin:0 0 12px;font-size:15px}
-.kpanel .pdesc{color:var(--ink-mute);font-size:13px;margin:0 0 12px}
-.ktable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
-.ktable th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);color:var(--ink-faint);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-size:10.5px}
-.ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,rgba(255,255,255,0.04));color:var(--ink)}
-.ktable tr:hover td{background:var(--bg-elev)}
-.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
-.pill.ok{color:var(--good)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}.pill.mute{color:var(--ink-faint)}
-.btn{display:inline-block;padding:6px 12px;border-radius:5px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:none}
-.btn:hover{border-color:var(--accent);color:var(--accent)}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#0b0d10}
-.btn.primary:hover{filter:brightness(1.1);color:#0b0d10}
-.btn.bad{color:var(--bad);border-color:var(--bad)}
-.skel{background:linear-gradient(90deg,var(--bg-elev) 0%,var(--bg-card) 50%,var(--bg-elev) 100%);background-size:200% 100%;animation:skel 1.4s linear infinite;border-radius:4px;height:12px}
-@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.empty{background:var(--bg-card);border:1px dashed var(--line);border-radius:8px;padding:18px;color:var(--ink-mute);font-size:13.5px;line-height:1.6}
-.empty code{background:var(--bg-elev);padding:2px 6px;border-radius:3px;font-size:12.5px;color:var(--accent)}
-.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
-.toolbar input[type=search],.toolbar select,.toolbar input[type=text]{background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);padding:6px 10px;border-radius:4px;font-family:var(--mono);font-size:12px}
-.kbd{font-family:var(--mono);font-size:11px;background:var(--bg-elev);padding:1px 5px;border-radius:3px;color:var(--ink-mute);border:1px solid var(--line)}
-@media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.metric-grid{grid-template-columns:repeat(2,1fr)}}
-
-</style>
+<link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/ks.css">
-    <link rel="stylesheet" href="/warm-paper.css">
+<style>
+.acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px;color:#1f2937}
+#account-sidebar{position:sticky;top:24px;background:#ffffff;border:1px solid #e6eaef;border-radius:10px;padding:14px;font-size:13px}
+#account-sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#56606c;margin:0 0 10px}
+#account-sidebar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#account-sidebar a{display:block;padding:6px 10px;border-radius:6px;color:#525a64;text-decoration:none;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
+#account-sidebar a:hover{background:#eef1f4;color:#1f2937}
+#account-sidebar a[aria-current=page]{background:#eef1f4;color:#1f2937;border-left:2px solid #1f2937;padding-left:8px}
+.acct-content h1{margin:0 0 4px;font-size:28px;letter-spacing:-0.01em;color:#1f2937}
+.acct-content .lede{color:#525a64;font-size:14.5px;margin:0 0 22px;max-width:64ch;line-height:1.55}
+
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px;align-items:center}
+.btn{display:inline-block;padding:8px 14px;border-radius:6px;border:1px solid #56606c;background:transparent;color:#1f2937;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;cursor:pointer;text-decoration:none;transition:background .12s ease}
+.btn:hover{background:#eef1f4}
+.btn.primary{background:#1f2937;border-color:#1f2937;color:#f3f5f7}
+.btn.primary:hover{background:#56606c;border-color:#56606c}
+.btn.bad{color:#7f2121;border-color:#a8b3c2}
+.btn.sm{padding:5px 10px;font-size:11.5px}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+
+.dev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin-bottom:18px}
+.dev-card{background:#ffffff;border:1px solid #e6eaef;border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.dev-card.selected{outline:2px solid #1f2937}
+.dev-head{display:flex;align-items:center;gap:10px}
+.dev-dot{width:9px;height:9px;border-radius:50%;background:#a8b3c2;flex-shrink:0}
+.dev-dot.on{background:#2d5a37}
+.dev-dot.err{background:#7f2121}
+.dev-name{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;color:#1f2937;font-weight:600;letter-spacing:-0.01em}
+.dev-kind{margin-left:auto;font-size:10.5px;text-transform:uppercase;letter-spacing:0.08em;color:#56606c;padding:3px 8px;border:1px solid #dde1e7;border-radius:999px}
+.dev-meta{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:12px;color:#525a64}
+.dev-meta dt{color:#56606c;font-weight:600}
+.dev-meta dd{margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#1f2937;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dev-arts{font-size:12px;color:#525a64;margin-top:4px}
+.dev-arts .ct{color:#1f2937;font-weight:600}
+.dev-actions{display:flex;gap:6px;margin-top:auto;padding-top:8px;border-top:1px dashed #e6eaef;align-items:center}
+.dev-actions .sel{margin-right:auto;display:flex;align-items:center;gap:6px;font-size:12px;color:#56606c}
+.dev-actions .sel input{accent-color:#1f2937}
+
+.empty{background:#ffffff;border:1px dashed #a8b3c2;border-radius:10px;padding:24px;text-align:center;color:#525a64;font-size:13.5px;line-height:1.6}
+.empty strong{color:#1f2937}
+.empty .btn{margin-top:12px}
+
+.wiz-back{position:fixed;inset:0;background:rgba(31,41,55,0.55);z-index:9000;display:none;align-items:center;justify-content:center;padding:24px}
+.wiz-back.show{display:flex}
+.wiz{background:#f3f5f7;border-radius:14px;max-width:640px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 48px -16px rgba(0,0,0,0.35);border:1px solid #dde1e7}
+.wiz-head{padding:20px 24px;border-bottom:1px solid #e6eaef;display:flex;align-items:center;gap:12px}
+.wiz-head h2{margin:0;font-size:18px;color:#1f2937}
+.wiz-head .close{margin-left:auto;background:transparent;border:0;color:#56606c;font-size:22px;cursor:pointer;padding:4px 10px;border-radius:6px}
+.wiz-head .close:hover{background:#eef1f4;color:#1f2937}
+.wiz-body{padding:20px 24px}
+.wiz-steps{display:flex;gap:0;margin-bottom:18px;border-radius:8px;overflow:hidden;background:#eef1f4;padding:4px}
+.wiz-steps button{flex:1;padding:10px 12px;background:transparent;border:0;color:#56606c;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;cursor:pointer;border-radius:6px;font-weight:600}
+.wiz-steps button[aria-pressed=true]{background:#ffffff;color:#1f2937;border:1px solid #dde1e7}
+.wiz-step{display:none}
+.wiz-step.show{display:block}
+.wiz-row{display:grid;grid-template-columns:120px 1fr;gap:10px;margin-bottom:12px;align-items:center}
+.wiz-row label{font-size:12.5px;color:#56606c;font-weight:600}
+.wiz-row input,.wiz-row textarea,.wiz-row select{background:#ffffff;border:1px solid #dde1e7;color:#1f2937;padding:8px 12px;border-radius:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;width:100%}
+.wiz-row textarea{min-height:96px;resize:vertical;font-size:11.5px}
+.wiz-row input:focus,.wiz-row textarea:focus,.wiz-row select:focus{outline:2px solid #56606c;outline-offset:1px;border-color:#56606c}
+.wiz-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+.wiz-test{margin-top:12px;padding:10px 12px;background:#eef1f4;border-left:3px solid #56606c;border-radius:0 6px 6px 0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:#1f2937;white-space:pre-wrap;display:none}
+.wiz-test.show{display:block}
+.wiz-test.ok{border-left-color:#2d5a37}
+.wiz-test.bad{border-left-color:#7f2121;color:#7f2121}
+.wiz-hint{font-size:11.5px;color:#56606c;margin:6px 0 14px;line-height:1.5}
+.wiz-hint a{color:#1f2937;text-decoration:underline}
+
+.bulk-bar{position:sticky;top:0;background:#1f2937;color:#f3f5f7;padding:10px 16px;border-radius:8px;display:none;align-items:center;gap:12px;margin-bottom:14px;z-index:50}
+.bulk-bar.show{display:flex}
+.bulk-bar .count{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;font-weight:600}
+.bulk-bar .spacer{flex:1}
+.bulk-bar button{background:transparent;border:1px solid #a8b3c2;color:#f3f5f7;padding:6px 12px;border-radius:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;cursor:pointer}
+.bulk-bar button:hover{background:rgba(243,245,247,0.1)}
+.crumbs{font-size:12px;color:#56606c;margin-bottom:14px;display:flex;gap:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.crumbs a{color:#525a64;text-decoration:none}
+.crumbs a:hover{color:#1f2937}
+.crumbs span{color:#a8b3c2}
+
+.skel{background:linear-gradient(90deg,#eef1f4 0%,#f3f5f7 50%,#eef1f4 100%);background-size:200% 100%;animation:skel 1.4s linear infinite;border-radius:6px;height:88px;border:1px solid #e6eaef}
+@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.dev-grid{grid-template-columns:1fr}}
+</style>
 </head>
 <body class="kolm-account-surface ks">
-<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
-
-<div class="ks-nav-wrap">
-  <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
-    <ul class="ks-nav__list">
-      <li><a href="/wrapper">Wrapper</a></li>
-      <li><a href="/studio">Studio</a></li>
-      <li><a href="/pricing">Pricing</a></li>
-      <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
-    </ul>
-    <div class="ks-nav__right">
-      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
-      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
-    </div>
-  </nav>
-  <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
-  </div>
-</div>
-
-<a href="#main" class="skip-link">Skip to content</a>
-
+<div data-include-nav></div>
 
 <main id="main">
-<p id="loading-status" aria-live="polite" class="ks-loading-status" hidden></p>
+<p id="loading-status" aria-live="polite" hidden></p>
 <div class="acct-shell">
-<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured calls</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices" aria-current="page">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li></ul></nav>
+<nav id="account-sidebar" aria-label="Account sections">
+  <h2>Account</h2>
+  <ul>
+    <li><a href="/account/overview">Overview</a></li>
+    <li><a href="/account/artifacts">Artifacts</a></li>
+    <li><a href="/account/devices" aria-current="page">Devices</a></li>
+    <li><a href="/account/billing">Billing</a></li>
+    <li><a href="/account/settings/integrations">Integrations</a></li>
+  </ul>
+</nav>
 <section class="acct-content">
+<div class="crumbs"><a href="/account/overview">Account</a><span>/</span><span>Devices</span></div>
 <h1>Devices.</h1>
-<p class="lede">Every device this account knows about. Kind, runtime, RAM, the artifacts installed there, last heartbeat. Test reachability with one click.</p>
+<p class="lede">Every device that runs a <code>.kolm</code> artifact. Add a laptop, a RunPod pod, a colo cluster, or a Jetson on the edge &mdash; same wizard, same cards, same deploy verb. Bulk deploy to multiple devices in one click.</p>
+
 <div class="toolbar">
-  <button class="btn primary" id="btn-detect" type="button">Detect this device</button>
-  <a class="btn" href="/docs/devices">Register a remote device</a>
+  <button class="btn primary" id="btn-add" type="button">+ Add device</button>
+  <button class="btn" id="btn-detect" type="button">Detect this device</button>
+  <button class="btn" id="btn-refresh" type="button">Refresh</button>
+  <a class="btn" href="/account/settings/integrations">Manage integrations</a>
 </div>
-<section class="kpanel" data-panel="team-remote-ops">
-  <h2>Team remote ops</h2>
-  <p class="pdesc">Register laptops, servers, phones, and edge boxes, then install artifacts over local, SSH, or HTTP paths without asking each user to become an infra operator.</p>
-  <pre><code>kolm tunnel new --team
-kolm install-device artifact.kolm --device m3-mac --via ssh</code></pre>
-</section>
-<table class="ktable" id="dev-table">
-  <thead><tr><th>Device id</th><th>Kind</th><th>Runtime</th><th>RAM</th><th>Artifacts</th><th>Last seen</th><th>Test</th></tr></thead>
-  <tbody id="dev-rows">
-    <!-- row template: <tr><td>...</td>...<td><button class="btn" data-action="test-device" data-id="...">test</button></td></tr> -->
-    <tr><td colspan="7"><div class="skel" style="width:260px"></div></td></tr>
-  </tbody>
-</table>
-<div id="empty-state" class="empty" hidden data-empty-state>
-  <strong>No devices registered.</strong> Click "Detect this device" to auto-register the box you are reading this on. Or follow <a href="/docs/devices">the docs</a> to register a remote.
+
+<div class="bulk-bar" id="bulk-bar" role="region" aria-label="Bulk actions">
+  <span class="count" id="bulk-count">0 selected</span>
+  <span class="spacer"></span>
+  <button type="button" id="bulk-deploy">Deploy artifact to selected</button>
+  <button type="button" id="bulk-clear">Clear</button>
 </div>
+
+<div class="dev-grid" id="dev-grid">
+  <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+</div>
+<div id="empty-state" class="empty" hidden>
+  <strong>No devices registered yet.</strong>
+  <p>Click <b>Add device</b> for a 3-step wizard, or <b>Detect this device</b> to auto-register the box you're reading this on.</p>
+  <a class="btn primary" href="javascript:void(0)" onclick="openWizard()">Add your first device</a>
+</div>
+
 </section>
 </div>
 </main>
 
+<!-- Add-device wizard modal -->
+<div class="wiz-back" id="wiz-back" role="dialog" aria-modal="true" aria-labelledby="wiz-title">
+  <div class="wiz">
+    <div class="wiz-head">
+      <h2 id="wiz-title">Add a device</h2>
+      <button class="close" type="button" data-close-wiz aria-label="Close">&times;</button>
+    </div>
+    <div class="wiz-body">
+      <div class="wiz-steps" role="tablist">
+        <button type="button" role="tab" data-tab="ssh" aria-pressed="true">SSH</button>
+        <button type="button" role="tab" data-tab="k8s" aria-pressed="false">Kubernetes</button>
+        <button type="button" role="tab" data-tab="runpod" aria-pressed="false">RunPod cloud</button>
+      </div>
+
+      <!-- SSH tab -->
+      <div class="wiz-step show" data-step="ssh">
+        <p class="wiz-hint">Connect any Linux or macOS box over SSH. No agent daemon to install &mdash; we use your existing key. The host must be reachable from the kolm control plane (or run <code>kolm tunnel new</code> to expose a local box).</p>
+        <div class="wiz-row"><label for="ssh-host">Host</label><input id="ssh-host" type="text" placeholder="gpu-1.example.com or 10.0.0.42" autocomplete="off" /></div>
+        <div class="wiz-row"><label for="ssh-port">Port</label><input id="ssh-port" type="number" value="22" min="1" max="65535" /></div>
+        <div class="wiz-row"><label for="ssh-user">User</label><input id="ssh-user" type="text" placeholder="ubuntu" autocomplete="off" /></div>
+        <div class="wiz-row"><label for="ssh-key">SSH key</label><textarea id="ssh-key" placeholder="-----BEGIN OPENSSH PRIVATE KEY-----&#10;...&#10;-----END OPENSSH PRIVATE KEY-----" spellcheck="false"></textarea></div>
+        <div class="wiz-row"><label for="ssh-namespace">Namespace</label><input id="ssh-namespace" type="text" placeholder="prod / staging / canary (optional)" /></div>
+        <div class="wiz-test" data-wiz-out="ssh" role="status" aria-live="polite"></div>
+        <div class="wiz-actions">
+          <button class="btn" type="button" data-wiz-test="ssh">Test connection</button>
+          <button class="btn primary" type="button" data-wiz-save="ssh">Add device</button>
+        </div>
+      </div>
+
+      <!-- K8s tab -->
+      <div class="wiz-step" data-step="k8s">
+        <p class="wiz-hint">Apply the kolm operator to a cluster you already manage. Configure cluster credentials at <a href="/account/settings/integrations">/account/settings/integrations</a>; this wizard registers the cluster as a single logical device.</p>
+        <div class="wiz-row"><label for="k8s-context">Context name</label><input id="k8s-context" type="text" placeholder="prod-east" autocomplete="off" /></div>
+        <div class="wiz-row"><label for="k8s-ns">Namespace</label><input id="k8s-ns" type="text" placeholder="kolm-system" value="kolm-system" /></div>
+        <div class="wiz-row"><label for="k8s-tag">Tag</label><input id="k8s-tag" type="text" placeholder="prod" /></div>
+        <div class="wiz-test" data-wiz-out="k8s" role="status" aria-live="polite"></div>
+        <div class="wiz-actions">
+          <button class="btn" type="button" data-wiz-test="k8s">Test connection</button>
+          <button class="btn primary" type="button" data-wiz-save="k8s">Add cluster</button>
+        </div>
+      </div>
+
+      <!-- RunPod tab -->
+      <div class="wiz-step" data-step="runpod">
+        <p class="wiz-hint">Provision a serverless GPU pod from a <code>.kolm</code> artifact. You need a RunPod API key set at <a href="/account/settings/integrations">/account/settings/integrations</a>. Approximate cost: <b>~$0.30/hr (A4000)</b> &mdash; $3.89/hr (H100). Billed directly by RunPod.</p>
+        <div class="wiz-row"><label for="rp-name">Name</label><input id="rp-name" type="text" placeholder="serving-prod-1" autocomplete="off" /></div>
+        <div class="wiz-row"><label for="rp-gpu">GPU</label>
+          <select id="rp-gpu">
+            <option value="RTX A4000">RTX A4000 · ~$0.30/hr</option>
+            <option value="RTX 4090">RTX 4090 · ~$0.69/hr</option>
+            <option value="L40S">L40S · ~$1.19/hr</option>
+            <option value="A100">A100 80GB · ~$1.89/hr</option>
+            <option value="H100">H100 80GB · ~$3.89/hr</option>
+          </select>
+        </div>
+        <div class="wiz-row"><label for="rp-artifact">Artifact URL</label><input id="rp-artifact" type="text" placeholder="https://kolm.ai/registry/art_xxxxx.kolm (optional, can deploy later)" autocomplete="off" /></div>
+        <div class="wiz-test" data-wiz-out="runpod" role="status" aria-live="polite"></div>
+        <div class="wiz-actions">
+          <button class="btn" type="button" data-wiz-test="runpod">Test integration</button>
+          <button class="btn primary" type="button" data-wiz-save="runpod">Provision pod</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
   var key=null; try{key=localStorage.getItem("kolm-key")||localStorage.getItem("ks_api_key")||localStorage.getItem("kolm_api_key")||localStorage.getItem("KOLM_API_KEY");}catch(_){}
-
   window.KOLM_AUTH=key?{"Authorization":"Bearer "+key,"Accept":"application/json"}:{"Accept":"application/json"};
-  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
+  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({"Content-Type":"application/json"},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){return r.text().then(function(t){var ct=r.headers.get("content-type")||"";var j=ct.indexOf("application/json")>=0&&t?JSON.parse(t):t;if(!r.ok){var e=new Error((j&&j.error)||(j&&j.message)||("HTTP "+r.status));e.status=r.status;e.body=j;throw e;}return j;});});};
   window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
-  window.knum=function(v){if(v==null)return "-";return typeof v==="number"?v.toLocaleString():String(v);};
-  window.kusd=function(v){if(v==null)return "-";return "$"+Number(v).toFixed(2);};
-  window.kbytes=function(b){if(b==null)return "-";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(1)+" MB";return (b/1073741824).toFixed(2)+" GB";};
   if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
 })();
-var rows=document.getElementById("dev-rows");
-function render(list){
-  if(!list.length){rows.innerHTML="";document.getElementById("empty-state").hidden=false;return;}
-  document.getElementById("empty-state").hidden=true;
-  rows.innerHTML=list.map(function(d){
-    var arts=(d.artifacts_installed||d.installed||[]).length;
-    var last=d.last_seen||d.detected_at||"-";
-    return "<tr>"+
-      "<td><b>"+window.kesc(d.device_id||"-")+"</b></td>"+
-      "<td>"+window.kesc(d.kind||"-")+"</td>"+
-      "<td><code>"+window.kesc((d.runtimes||[d.runtime||"-"]).join(", "))+"</code></td>"+
-      "<td>"+(d.ram_gb!=null?d.ram_gb+" GB":"-")+"</td>"+
-      "<td>"+arts+"</td>"+
-      "<td>"+window.kesc(last)+"</td>"+
-      "<td><button class=\"btn\" data-action=\"test-device\" data-id=\""+window.kesc(d.device_id||"")+"\">test</button></td>"+
-    "</tr>";
-  }).join("");
+
+var SELECTED=new Set();
+
+function statusClass(d){
+  if(d&&d.health==='online')return 'on';
+  if(d&&(d.health==='offline'||d.reachable===false))return 'err';
+  return '';
 }
-function refresh(){window.kfetch("/v1/devices").catch(function(){return {devices:[]};}).then(function(j){render((j&&j.devices)||(Array.isArray(j)?j:[]));});}
-refresh();
-document.getElementById("btn-detect").addEventListener("click",function(){window.kfetch("/v1/devices/detect",{method:"POST"}).then(refresh).catch(function(e){alert("detect failed: "+e.message);});});
-rows.addEventListener("click",function(e){
-  var b=e.target.closest("button[data-action=test-device]"); if(!b)return;
-  b.textContent="testing..."; b.disabled=true;
-  var id=b.getAttribute("data-id");
-  window.kfetch("/v1/devices/"+encodeURIComponent(id)+"/test",{method:"POST"}).then(function(t){b.textContent=t.reachable?"reachable":"unreachable";b.className="btn "+(t.reachable?"":"bad");}).catch(function(){b.textContent="error";b.className="btn bad";}).finally(function(){b.disabled=false;});
+
+function renderDevices(list){
+  var grid=document.getElementById('dev-grid');
+  var empty=document.getElementById('empty-state');
+  if(!list||!list.length){grid.innerHTML='';empty.hidden=false;return;}
+  empty.hidden=true;
+  grid.innerHTML=list.map(function(d){
+    var id=d.device_id||d.id||d.name||'-';
+    var kind=d.kind||d.type||'device';
+    var deployed=d.deployed_artifacts||d.artifacts_installed||[];
+    var depCount=Array.isArray(deployed)?deployed.length:0;
+    var lastDep=Array.isArray(deployed)&&deployed[0]?(deployed[0].artifact_id||deployed[0].name||deployed[0].sha256||''):'';
+    var gpu=(d.hardware&&(d.hardware.gpu||d.hardware.accelerator))||d.gpu||'-';
+    var last=d.last_seen||d.last_heartbeat||d.detected_at||'-';
+    var hasArt=!!lastDep;
+    var checked=SELECTED.has(id)?'checked':'';
+    return '<div class="dev-card" data-id="'+window.kesc(id)+'">'+
+      '<div class="dev-head">'+
+        '<span class="dev-dot '+statusClass(d)+'"></span>'+
+        '<span class="dev-name">'+window.kesc(id)+'</span>'+
+        '<span class="dev-kind">'+window.kesc(kind)+'</span>'+
+      '</div>'+
+      '<dl class="dev-meta">'+
+        '<dt>GPU</dt><dd>'+window.kesc(gpu)+'</dd>'+
+        '<dt>Last seen</dt><dd>'+window.kesc(String(last).slice(0,19))+'</dd>'+
+      '</dl>'+
+      '<div class="dev-arts">'+(depCount?'<span class="ct">'+depCount+'</span> artifact'+(depCount===1?'':'s')+' deployed'+(hasArt?' · '+window.kesc(lastDep):''):'No artifacts deployed.')+'</div>'+
+      '<div class="dev-actions">'+
+        '<label class="sel"><input type="checkbox" data-select="'+window.kesc(id)+'" '+checked+' /> Select</label>'+
+        '<a class="btn sm" href="/account/devices/'+encodeURIComponent(id)+'">Open</a>'+
+        '<button class="btn sm" data-act="deploy" data-id="'+window.kesc(id)+'">Deploy</button>'+
+        (hasArt?'<button class="btn sm bad" data-act="undeploy" data-id="'+window.kesc(id)+'">Undeploy</button>':'')+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function updateBulkBar(){
+  var bar=document.getElementById('bulk-bar');
+  var count=document.getElementById('bulk-count');
+  count.textContent=SELECTED.size+' selected';
+  bar.classList.toggle('show', SELECTED.size>0);
+}
+
+function refresh(){
+  return window.kfetch('/v1/devices').catch(function(){return {devices:[]};}).then(function(j){
+    var list=(j&&j.devices)||(Array.isArray(j)?j:[]);
+    renderDevices(list);
+    updateBulkBar();
+  });
+}
+
+document.addEventListener('change', function(e){
+  var cb=e.target.closest('input[type=checkbox][data-select]'); if(!cb)return;
+  var id=cb.getAttribute('data-select');
+  if(cb.checked)SELECTED.add(id);else SELECTED.delete(id);
+  cb.closest('.dev-card').classList.toggle('selected', cb.checked);
+  updateBulkBar();
 });
+
+document.addEventListener('click', function(e){
+  var btn=e.target.closest('button[data-act]'); if(!btn)return;
+  var act=btn.getAttribute('data-act');
+  var id=btn.getAttribute('data-id');
+  if(act==='deploy'){
+    var art=prompt('Artifact id or URL to deploy to '+id+' :');
+    if(!art)return;
+    btn.disabled=true;btn.textContent='Deploying...';
+    var body={artifactPath:art, device_id:id};
+    window.kfetch('/v1/deploy',{method:'POST',body:JSON.stringify(body)})
+      .then(function(){btn.textContent='Deployed';refresh();})
+      .catch(function(err){btn.textContent='Failed';alert('Deploy failed: '+err.message);})
+      .finally(function(){setTimeout(function(){btn.disabled=false;btn.textContent='Deploy';},2400);});
+  } else if(act==='undeploy'){
+    if(!confirm('Undeploy the current artifact on '+id+'? The device keeps running but stops serving until you deploy again.'))return;
+    btn.disabled=true;btn.textContent='Stopping...';
+    window.kfetch('/v1/fleet/stop',{method:'POST',body:JSON.stringify({device:id,confirm:true})})
+      .then(function(){btn.textContent='Stopped';refresh();})
+      .catch(function(err){btn.textContent='Failed';alert('Undeploy failed: '+err.message);})
+      .finally(function(){setTimeout(function(){btn.disabled=false;btn.textContent='Undeploy';},2400);});
+  }
+});
+
+document.getElementById('btn-detect').addEventListener('click', function(){
+  var b=this; b.disabled=true; b.textContent='Detecting...';
+  window.kfetch('/v1/devices/detect',{method:'POST'}).then(refresh).catch(function(e){alert('Detect failed: '+e.message);}).finally(function(){b.disabled=false;b.textContent='Detect this device';});
+});
+document.getElementById('btn-refresh').addEventListener('click', refresh);
+
+// Bulk deploy
+document.getElementById('bulk-deploy').addEventListener('click', function(){
+  if(!SELECTED.size)return;
+  var art=prompt('Artifact id or URL to deploy to '+SELECTED.size+' device(s):');
+  if(!art)return;
+  var ids=Array.from(SELECTED);
+  var btn=this; btn.disabled=true; var done=0,fail=0;
+  Promise.all(ids.map(function(id){
+    return window.kfetch('/v1/deploy',{method:'POST',body:JSON.stringify({artifactPath:art,device_id:id})})
+      .then(function(){done++;})
+      .catch(function(){fail++;});
+  })).then(function(){
+    alert('Bulk deploy: '+done+' ok, '+fail+' failed.');
+    SELECTED.clear();
+    refresh();
+  }).finally(function(){btn.disabled=false;});
+});
+document.getElementById('bulk-clear').addEventListener('click', function(){
+  SELECTED.clear();
+  document.querySelectorAll('input[data-select]').forEach(function(c){c.checked=false;c.closest('.dev-card').classList.remove('selected');});
+  updateBulkBar();
+});
+
+// Wizard
+function openWizard(){document.getElementById('wiz-back').classList.add('show');}
+function closeWizard(){document.getElementById('wiz-back').classList.remove('show');}
+window.openWizard=openWizard;
+document.getElementById('btn-add').addEventListener('click', openWizard);
+document.addEventListener('click', function(e){
+  if(e.target.closest('[data-close-wiz]'))closeWizard();
+  if(e.target.id==='wiz-back')closeWizard();
+});
+
+document.querySelectorAll('.wiz-steps button[data-tab]').forEach(function(t){
+  t.addEventListener('click', function(){
+    var tab=this.getAttribute('data-tab');
+    document.querySelectorAll('.wiz-steps button[data-tab]').forEach(function(x){x.setAttribute('aria-pressed', x===t?'true':'false');});
+    document.querySelectorAll('.wiz-step').forEach(function(s){s.classList.toggle('show', s.getAttribute('data-step')===tab);});
+  });
+});
+
+function wizOut(kind, text, cls){
+  var el=document.querySelector('[data-wiz-out="'+kind+'"]'); if(!el)return;
+  el.textContent=text; el.className='wiz-test show '+(cls||'');
+}
+
+document.addEventListener('click', function(e){
+  var b=e.target.closest('[data-wiz-test]'); if(b){
+    var kind=b.getAttribute('data-wiz-test');
+    if(kind==='ssh'){
+      var host=document.getElementById('ssh-host').value.trim();
+      var port=document.getElementById('ssh-port').value;
+      var user=document.getElementById('ssh-user').value.trim();
+      var sshKey=document.getElementById('ssh-key').value.trim();
+      if(!host||!user||!sshKey){wizOut('ssh','Host, user, and key are required.','bad');return;}
+      b.disabled=true; var orig=b.textContent; b.textContent='Testing...';
+      window.kfetch('/v1/devices/add',{method:'POST',body:JSON.stringify({type:'ssh',host:host,port:Number(port)||22,user:user,private_key:sshKey,test_only:true})})
+        .then(function(j){wizOut('ssh','Reachable. '+(j&&j.hardware?'GPU: '+(j.hardware.gpu||'unknown'):''),'ok');})
+        .catch(function(err){wizOut('ssh','Test failed: '+err.message,'bad');})
+        .finally(function(){b.disabled=false; b.textContent=orig;});
+    } else if(kind==='runpod'){
+      b.disabled=true; var origR=b.textContent; b.textContent='Testing...';
+      window.kfetch('/v1/integrations/runpod/test',{method:'POST',body:'{}'})
+        .then(function(j){if(j&&j.ok){wizOut('runpod','RunPod integration ready.','ok');}else{wizOut('runpod','RunPod not configured. Open /account/settings/integrations.','bad');}})
+        .catch(function(err){wizOut('runpod','Test failed: '+err.message,'bad');})
+        .finally(function(){b.disabled=false; b.textContent=origR;});
+    } else if(kind==='k8s'){
+      wizOut('k8s','Kubernetes operator is in beta. Email rodney@kolm.ai for access.','');
+    }
+    return;
+  }
+  var s=e.target.closest('[data-wiz-save]'); if(!s)return;
+  var kind=s.getAttribute('data-wiz-save');
+  if(kind==='ssh'){
+    var host=document.getElementById('ssh-host').value.trim();
+    var port=document.getElementById('ssh-port').value;
+    var user=document.getElementById('ssh-user').value.trim();
+    var sshKey=document.getElementById('ssh-key').value.trim();
+    var ns=document.getElementById('ssh-namespace').value.trim();
+    if(!host||!user||!sshKey){wizOut('ssh','Host, user, and key are required.','bad');return;}
+    s.disabled=true; var orig=s.textContent; s.textContent='Adding...';
+    window.kfetch('/v1/devices/add',{method:'POST',body:JSON.stringify({type:'ssh',host:host,port:Number(port)||22,user:user,private_key:sshKey,namespace:ns||null})})
+      .then(function(){wizOut('ssh','Device added.','ok'); refresh(); setTimeout(closeWizard, 800);})
+      .catch(function(err){wizOut('ssh','Add failed: '+err.message,'bad');})
+      .finally(function(){s.disabled=false; s.textContent=orig;});
+  } else if(kind==='runpod'){
+    var name=document.getElementById('rp-name').value.trim();
+    var gpu=document.getElementById('rp-gpu').value;
+    var art=document.getElementById('rp-artifact').value.trim();
+    if(!confirm('Provision a RunPod '+gpu+' pod? You will be billed by RunPod directly. Approximate rate shown next to the GPU.'))return;
+    s.disabled=true; var origR=s.textContent; s.textContent='Provisioning...';
+    var body={gpu_type:gpu};
+    if(name)body.name=name;
+    if(art)body.artifact_url=art; else body.artifact_id='placeholder';
+    window.kfetch('/v1/deploy/runpod',{method:'POST',body:JSON.stringify(body)})
+      .then(function(j){wizOut('runpod','Pod provisioned: '+(j.pod_id||'(no id)')+'. Cost: '+(j.cost_per_hr!=null?'$'+Number(j.cost_per_hr).toFixed(2)+'/hr':'unknown'),'ok'); refresh();})
+      .catch(function(err){wizOut('runpod','Provision failed: '+err.message+(err.body&&err.body.action_url?' (see '+err.body.action_url+')':''),'bad');})
+      .finally(function(){s.disabled=false; s.textContent=origR;});
+  } else if(kind==='k8s'){
+    wizOut('k8s','Kubernetes adapter is in beta. Email rodney@kolm.ai for access.','');
+  }
+});
+
+refresh();
 </script>
 
-<footer class="ks-foot">
-  <div class="ks-wrap">
-    <div class="ks-foot__grid">
-      <div class="ks-foot__col">
-        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
-        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Product</h4>
-        <a href="/gateway">Gateway</a>
-        <a href="/capture">Capture</a>
-        <a href="/distill">Distill</a>
-        <a href="/compile">Compile</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/registry">Registry</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/sdks">SDKs</a>
-        <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/blog">Blog</a>
-        <a href="/faq">FAQ</a>
-        <a href="/changelog">Changelog</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Trust</h4>
-        <a href="/security">Security</a>
-        <a href="/soc2">SOC 2</a>
-        <a href="/hipaa-mapping">HIPAA</a>
-        <a href="/baa">BAA</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/status">Status</a>
-        <a href="/subprocessors">Subprocessors</a>
-        <a href="/verify-prod">Verify a .kolm</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
-        <a href="/why-kolm">Why kolm</a>
-        <a href="/press">Press</a>
-        <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
-      </div>
-    </div>
-    <div class="ks-foot__base">
-      <span>&copy; 2026 kolm.ai - Apache-2.0 - Made with .kolm</span>
-      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
-    </div>
-  </div>
-</footer>
-
-<div hidden data-w221-anchors="account" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
-    
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/product">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training loop</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Run</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--models has-mega">
-      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
-      <div class="mega-menu" role="menu" aria-label="models menu">
-        <div class="mega-col">
-          <p class="mega-h">Choose</p>
-          <a href="/models">Model catalog</a>
-          <a href="/build-your-own">Build your own</a>
-          <a href="/docs/runtime">Runtime targets</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/compute">Compute</a>
-          <a href="/runtimes">Mobile and edge</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
-    </nav>
-    
-</div>
+<div data-include-footer></div>
+<script src="/nav.js" defer></script>
 </body>
 </html>

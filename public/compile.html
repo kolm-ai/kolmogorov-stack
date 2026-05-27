@@ -224,6 +224,47 @@
   </div>
 </section>
 
+<section class="sec-section" id="start">
+  <div class="ks-wrap">
+    <h2>Four ways to start a compile</h2>
+    <p class="sub">Pick the path that matches the shape of your data. Each lands in the same compiler and produces the same signed .kolm artifact. No CLI required; the no-code console mirrors every step.</p>
+    <ul class="fr-spec-list cp-start-list" data-w910="start-rail">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Upload your data</h3>
+          <span class="fr-spec-list__delta fr-spec-list__delta--cat">CSV &middot; JSONL &middot; folder of files</span>
+        </div>
+        <p class="fr-spec-list__p">Drop a CSV, a JSONL dataset, or a folder of documents. The console parses, schemas, and previews the rows before any teacher call.</p>
+        <a class="fr-spec-list__cta" href="/account/create-model?tab=upload">Start &rarr;</a>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Describe the task</h3>
+          <span class="fr-spec-list__delta fr-spec-list__delta--cat">PROMPT &middot; SYNTHESIZED EVALS</span>
+        </div>
+        <p class="fr-spec-list__p">Write one sentence about the behavior you want. The console synthesizes a starter dataset and a held-out eval pack, then asks you to confirm or edit.</p>
+        <a class="fr-spec-list__cta" href="/account/create-model?tab=describe">Start &rarr;</a>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Connect a source</h3>
+          <span class="fr-spec-list__delta fr-spec-list__delta--cat">ZENDESK &middot; INTERCOM &middot; NOTION &middot; SLACK</span>
+        </div>
+        <p class="fr-spec-list__p">Authenticate a connector and pick a slice. The console pulls a sample, redacts PII per your policy, and turns the slice into a labeled corpus.</p>
+        <a class="fr-spec-list__cta" href="/account/create-model?tab=connect">Start &rarr;</a>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head">
+          <h3>Capture from your stack</h3>
+          <span class="fr-spec-list__delta fr-spec-list__delta--cat">GATEWAY &middot; LOGS &middot; PASSIVE</span>
+        </div>
+        <p class="fr-spec-list__p">Route your existing LLM traffic through the kolm gateway. The capture lake fills with real production pairs, ready to distill the moment you have enough rows.</p>
+        <a class="fr-spec-list__cta" href="/account/create-model?tab=capture">Start &rarr;</a>
+      </li>
+    </ul>
+  </div>
+</section>
+
 <section class="sec-section" id="templates">
   <div class="ks-wrap">
     <h2>Six tasks you can compile in five minutes</h2>
@@ -306,7 +347,7 @@ verify      kolm verify support-triage.kolm</pre>
   <span class="k">"quantize"</span>: { <span class="k">"scheme"</span>: <span class="s">"nf4-double"</span>, <span class="k">"library"</span>: <span class="s">"bitsandbytes-0.49.2"</span> },
   <span class="k">"eval_pack"</span>: { <span class="k">"id"</span>: <span class="s">"ks-finance-2026-q2"</span>, <span class="k">"cid"</span>: <span class="s">"bafkreif5...8a21"</span> },
   <span class="k">"k_score"</span>: { <span class="k">"composite"</span>: <span class="n">86.3</span>, <span class="k">"verdict"</span>: <span class="s">"ship"</span>, <span class="k">"threshold"</span>: <span class="n">80</span> },
-  <span class="k">"axes"</span>: { <span class="k">"faithfulness"</span>: <span class="n">87</span>, <span class="k">"coverage"</span>: <span class="n">82</span>, <span class="k">"calibration"</span>: <span class="n">79</span>, <span class="k">"honesty"</span>: <span class="n">91</span>, <span class="k">"cost"</span>: <span class="n">84</span> },
+  <span class="k">"axes"</span>: { <span class="k">"faithfulness"</span>: <span class="n">87</span>, <span class="k">"coverage"</span>: <span class="n">82</span>, <span class="k">"calibration"</span>: <span class="n">79</span>, <span class="k">"groundedness"</span>: <span class="n">91</span>, <span class="k">"cost"</span>: <span class="n">84</span> },
   <span class="k">"artifact_bytes_sha256"</span>: <span class="s">"3f29...a01e"</span>,
   <span class="k">"signed_at"</span>: <span class="s">"2026-05-22T18:14:08Z"</span>,
   <span class="k">"signature"</span>: <span class="s">"ed25519:9c4f...e801"</span>,
@@ -909,7 +950,7 @@ public-key: ed25519:2dba&hellip;77c4</pre>
 </div>
 <script>
   // K_AXIS_LABELS — canonical seven-axis K-score labels used by the manual compile preview.
-  window.K_AXIS_LABELS = ["correctness", "latency", "cost", "robustness", "safety", "fairness", "honesty"];
+  window.K_AXIS_LABELS = ["correctness", "latency", "cost", "robustness", "safety", "fairness", "groundedness"];
 </script>
 
 <!-- w220-claim w260-trust w271-frontier w335-claim w373-receipts w408-quantize-matrix -->

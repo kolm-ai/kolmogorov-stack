@@ -22,7 +22,7 @@
 <script src="/nav.js" defer></script>
 <script defer src="/supplement.js"></script>
 <style>
-  .cmp-matrix { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 920px; }
+  .cmp-matrix { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 1080px; }
   .cmp-wrap { overflow-x: auto; padding: var(--ks-3); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); }
   .cmp-matrix th { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); text-align: left; padding: 14px 12px; border-bottom: 1px solid var(--ks-line-2); font-weight: 500; vertical-align: bottom; }
   .cmp-matrix th.kc { color: var(--ks-accent); }
@@ -30,8 +30,11 @@
   .cmp-matrix td.ax { font-weight: 580; color: var(--ks-ink); min-width: 200px; }
   .cmp-matrix td.k { color: var(--ks-ink); background: var(--ks-accent-soft); }
   .cmp-matrix td.k b { display: block; color: var(--ks-accent); font-weight: 600; font-family: var(--ks-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+  .cmp-matrix td.pc { color: var(--ks-ink); background: rgba(168, 179, 194, 0.08); border-left: 1px solid var(--ks-line-2); border-right: 1px solid var(--ks-line-2); }
+  .cmp-matrix td.pc b { display: block; color: var(--ks-ink-1, #1f2937); font-weight: 600; font-family: var(--ks-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
   .cmp-matrix tbody tr:hover td { background: rgba(255,255,255,0.015); }
   .cmp-matrix tbody tr:hover td.k { background: rgba(118, 237, 208, 0.10); }
+  .cmp-matrix tbody tr:hover td.pc { background: rgba(168, 179, 194, 0.14); }
   .ico { display: inline-block; width: 14px; height: 14px; vertical-align: middle; margin-right: 4px; }
   .ico-y { background: var(--ks-accent); -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13.5 4.5" fill="none" stroke="black" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>') no-repeat center / contain; mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13.5 4.5" fill="none" stroke="black" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>') no-repeat center / contain; }
   .ico-n { background: var(--ks-bad); -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M4 4 L12 12 M12 4 L4 12" fill="none" stroke="black" stroke-width="2.4" stroke-linecap="round"/></svg>') no-repeat center / contain; mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M4 4 L12 12 M12 4 L4 12" fill="none" stroke="black" stroke-width="2.4" stroke-linecap="round"/></svg>') no-repeat center / contain; }
@@ -160,6 +163,7 @@
           <tr>
             <th>Axis</th>
             <th class="kc">kolm</th>
+            <th>Pioneer category</th>
             <th>Fireworks AI</th>
             <th>Together AI</th>
             <th>Baseten</th>
@@ -171,6 +175,7 @@
           <tr>
             <td class="ax">Signed, content-addressed artifact per build</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>Every .kolm carries Ed25519 receipt + CID; verifiable years later.</td>
+            <td class="pc"><b>kolm pioneered</b><span class="ico ico-y"></span>No prior art at this layer. ML artifacts ship as tarballs of weights, not signed envelopes.</td>
             <td><span class="ico ico-n"></span>Serves checkpoints; no signed receipt format.</td>
             <td><span class="ico ico-n"></span>Model registry, no per-build signature surface.</td>
             <td><span class="ico ico-p"></span>Versioned deploys; no cryptographic provenance.</td>
@@ -180,6 +185,7 @@
           <tr>
             <td class="ax">Per-artifact eval gate (K-score)</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>Five composed axes, deterministic, embedded in receipt.</td>
+            <td class="pc"><b>kolm pioneered</b><span class="ico ico-y"></span>A composite, embedded, build-gating score &mdash; HELM, MMLU, lm-eval are leaderboards, not gates inside a compile.</td>
             <td><span class="ico ico-n"></span>Eval-out-of-band; bring your own harness.</td>
             <td><span class="ico ico-p"></span>Eval traces in console; not a binary gate.</td>
             <td><span class="ico ico-n"></span>Serving layer only; eval is your responsibility.</td>
@@ -189,6 +195,7 @@
           <tr>
             <td class="ax">Runs offline on your laptop after build</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>llama.cpp + GGUF runtime; no network calls.</td>
+            <td class="pc"><b>Prior art exists</b><span class="ico ico-p"></span>llama.cpp + Ollama got us here; kolm adds the signed-artifact envelope around it.</td>
             <td><span class="ico ico-n"></span>Hosted only.</td>
             <td><span class="ico ico-p"></span>Open-weight models downloadable; runtime is your problem.</td>
             <td><span class="ico ico-n"></span>Hosted only.</td>
@@ -198,6 +205,7 @@
           <tr>
             <td class="ax">Open source, Apache-2.0 license</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>Compiler, runtime, SDKs, verifier all Apache-2.0.</td>
+            <td class="pc"><b>Standard</b><span class="ico ico-y"></span>The norm in compilers and ML infra. kolm holds the line; no closed-source verifier.</td>
             <td><span class="ico ico-n"></span>Closed source SaaS (uses open-weight models).</td>
             <td><span class="ico ico-n"></span>Closed source SaaS (uses open-weight models).</td>
             <td><span class="ico ico-p"></span>Truss serving framework open; control plane closed.</td>
@@ -207,6 +215,7 @@
           <tr>
             <td class="ax">Tenant-fenced PHI / regulated data path</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>BYOC + VPC patterns; HIPAA + SOC 2 mappings shipped.</td>
+            <td class="pc"><b>kolm pioneered</b><span class="ico ico-y"></span>Tenant-fenced PHI with a verifiable receipt chain back to the build is new; vendors offer BAAs, not provenance.</td>
             <td><span class="ico ico-p"></span>HIPAA-eligible on enterprise; opaque audit trail.</td>
             <td><span class="ico ico-p"></span>VPC + dedicated endpoints on enterprise tier.</td>
             <td><span class="ico ico-p"></span>HIPAA available on enterprise dedicated deploys.</td>
@@ -216,6 +225,7 @@
           <tr>
             <td class="ax">Distillation built in, not bolted on</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>Capture &rarr; teacher &rarr; student in one command; KD, RAG-into-weights, on-policy.</td>
+            <td class="pc"><b>kolm pioneered</b><span class="ico ico-y"></span>Distillation as a first-class compiler verb &mdash; not a research script, not a fine-tune SKU, not a notebook.</td>
             <td><span class="ico ico-p"></span>Fine-tune service available; LoRA only, not distillation-specific.</td>
             <td><span class="ico ico-y"></span>First-class fine-tune product (LoRA + full).</td>
             <td><span class="ico ico-n"></span>No fine-tune; serving layer only (bring your own model).</td>
@@ -225,6 +235,7 @@
           <tr>
             <td class="ax">Auditable receipt per inference call</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>Per-call signed receipt: artifact CID + input hash + decision + confidence.</td>
+            <td class="pc"><b>kolm pioneered</b><span class="ico ico-y"></span>Per-inference cryptographic provenance is new ground; observability vendors log, they do not sign.</td>
             <td><span class="ico ico-n"></span>Request logs; no signed receipt.</td>
             <td><span class="ico ico-p"></span>Audit log; not cryptographically anchored.</td>
             <td><span class="ico ico-p"></span>Request logs; not call-level signed.</td>
@@ -234,6 +245,7 @@
           <tr>
             <td class="ax">Multi-runtime: GGUF, ONNX, vLLM, MLX, TRT-LLM</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>Single artifact, five-target export from one compile.</td>
+            <td class="pc"><b>Prior art exists</b><span class="ico ico-p"></span>HuggingFace + each runtime separately. kolm consolidates into one build &rarr; many targets.</td>
             <td><span class="ico ico-p"></span>FireAttention runtime; hosted only.</td>
             <td><span class="ico ico-p"></span>Hosted serve; runtime opaque.</td>
             <td><span class="ico ico-p"></span>Truss + vLLM/TGI/TensorRT-LLM on dedicated deploys.</td>
@@ -243,6 +255,7 @@
           <tr>
             <td class="ax">Drift detection + auto re-distill loop</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>K-score drift baseline + alert + one-command re-distill from rolling captures.</td>
+            <td class="pc"><b>kolm pioneered</b><span class="ico ico-y"></span>Closed-loop drift &rarr; re-distill keyed off a build-gating score &mdash; MLOps dashboards exist; the closed loop does not.</td>
             <td><span class="ico ico-n"></span>Drift out of scope (inference only).</td>
             <td><span class="ico ico-p"></span>Drift dashboards; re-train is manual.</td>
             <td><span class="ico ico-n"></span>Drift out of scope (serving layer).</td>
@@ -252,6 +265,7 @@
           <tr>
             <td class="ax">Total cost of ownership, year 1</td>
             <td class="k"><b>Lowest</b><span class="ico ico-y"></span>BYOC compute + Apache-2.0; no per-token revshare.</td>
+            <td class="pc"><b>Cost frontier</b><span class="ico ico-y"></span>The pattern (distill once, run on owned hardware) is what compilers have always done; kolm brings it to LLMs.</td>
             <td><span class="ico ico-p"></span>Per-token on shared / per-GPU on dedicated.</td>
             <td><span class="ico ico-p"></span>Per-token on inference; per-job on fine-tune.</td>
             <td><span class="ico ico-p"></span>Per-GPU-minute on dedicated deploys.</td>
@@ -261,6 +275,7 @@
           <tr>
             <td class="ax">INT4 quantize verified on real hardware</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>NF4 + double quantize via bitsandbytes; matrix from 0.5B to 32B verified on RTX 5090.</td>
+            <td class="pc"><b>Standard</b><span class="ico ico-y"></span>The community shipped INT4 (bitsandbytes, AWQ, GPTQ); kolm wraps the recipe and signs the result.</td>
             <td><span class="ico ico-p"></span>FP8 default on shared; INT4 selectable on dedicated.</td>
             <td><span class="ico ico-p"></span>FP8 / INT4 on selected models; runtime hosted.</td>
             <td><span class="ico ico-p"></span>Precision is your choice on dedicated deploys.</td>
@@ -270,6 +285,7 @@
           <tr>
             <td class="ax">Gateway capture in front of any provider</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>OpenAI/Anthropic/vLLM/TGI drop-in; tenant-fenced redacted captures land in your VPC.</td>
+            <td class="pc"><b>kolm pioneered</b><span class="ico ico-y"></span>Capture-for-distill in the gateway path is new; LiteLLM / Helicone log for analytics, not as a corpus source.</td>
             <td><span class="ico ico-n"></span>Inference layer; capture is out of scope.</td>
             <td><span class="ico ico-n"></span>Inference + fine-tune; capture is out of scope.</td>
             <td><span class="ico ico-n"></span>No capture surface (serving only).</td>
@@ -279,6 +295,7 @@
           <tr>
             <td class="ax">Open published artifact format spec</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>.kolm format v1 spec under Apache-2.0; reference implementation + verifier published.</td>
+            <td class="pc"><b>kolm pioneered</b><span class="ico ico-y"></span>A published model-artifact spec with a signed receipt is novel; safetensors covers weights, not provenance.</td>
             <td><span class="ico ico-p"></span>Open-weight model formats (safetensors); no signed-receipt envelope.</td>
             <td><span class="ico ico-p"></span>Open-weight + LoRA upload; no spec.</td>
             <td><span class="ico ico-p"></span>Truss config is open; no model-spec.</td>
@@ -288,6 +305,7 @@
           <tr>
             <td class="ax">Published cost per 1M tokens, INT4 7B student</td>
             <td class="k"><b>~$0.08</b><span class="ico ico-y"></span>Amortized RTX A6000 power + a monthly re-distill, no per-token markup.</td>
+            <td class="pc"><b>Cost frontier</b><span class="ico ico-y"></span>Driven by Moore's law on consumer GPUs; kolm publishes the matrix.</td>
             <td><span class="ico ico-p"></span>~$0.20 / 1M tokens for 7B on shared (vendor rate sheet).</td>
             <td><span class="ico ico-p"></span>~$0.20 / 1M tokens for 7B on shared (vendor rate sheet).</td>
             <td><span class="ico ico-p"></span>Per-GPU-minute on dedicated; ~$1.30/hr on A10G.</td>

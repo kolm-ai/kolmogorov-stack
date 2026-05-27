@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Angle Health × kolm — HIPAA-grade specialist models, BYOC</title>
+<meta name="description" content="Angle Health × kolm.ai. Distill HIPAA-grade specialist models inside your VPC. PHI never leaves. Per-decision signed receipts. BAA available. One-pager for security review.">
+<meta name="theme-color" content="#f3f5f7">
+<style>
+  :root {
+    --ink:#1f2937; --ink-2:#56606c; --ink-3:#a8b3c2; --ink-4:#525a64;
+    --bg:#f3f5f7; --bg-2:#eef1f4; --rule:#dde1e7;
+    --mono: ui-monospace, "JetBrains Mono", monospace;
+    --display: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--ink); font-family: var(--display); -webkit-font-smoothing: antialiased; line-height: 1.55; }
+  body { max-width: 880px; margin: 0 auto; padding: 56px 40px 80px; }
+  header { padding-bottom: 28px; border-bottom: 1px solid var(--rule); margin-bottom: 36px; }
+  .eyebrow { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-4); margin-bottom: 12px; }
+  h1 { font-weight: 580; font-size: 36px; letter-spacing: -0.025em; line-height: 1.1; margin-bottom: 18px; max-width: 22ch; }
+  .lede { font-size: 17px; color: var(--ink-2); max-width: 62ch; }
+  .meta { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 22px; font-family: var(--mono); font-size: 12px; color: var(--ink-4); }
+  .meta b { color: var(--ink); font-weight: 500; }
+  section { margin-bottom: 36px; }
+  h2 { font-weight: 580; font-size: 22px; letter-spacing: -0.015em; margin-bottom: 14px; padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
+  h3 { font-weight: 580; font-size: 16px; margin: 18px 0 8px; }
+  p { margin-bottom: 12px; color: var(--ink); }
+  ul, ol { padding-left: 22px; margin-bottom: 12px; }
+  ul li, ol li { margin-bottom: 6px; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0 16px; font-size: 13.5px; }
+  th, td { padding: 10px 12px; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+  th { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-4); font-weight: 500; }
+  td b { color: var(--ink); font-weight: 580; }
+  code { font-family: var(--mono); font-size: 12.5px; background: var(--bg-2); padding: 2px 6px; border-radius: 4px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .card { padding: 16px; background: var(--bg-2); border: 1px solid var(--rule); border-radius: 8px; }
+  .card h4 { font-weight: 580; font-size: 14px; margin-bottom: 6px; }
+  .card p { font-size: 13px; color: var(--ink-2); margin: 0; }
+  .axes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 12px; }
+  .axes div { padding: 10px 12px; background: var(--bg-2); border-radius: 6px; font-size: 13px; }
+  .axes b { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-4); display: block; margin-bottom: 3px; font-weight: 500; }
+  footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--rule); font-size: 12px; color: var(--ink-4); display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  footer a { color: var(--ink); border-bottom: 1px dashed var(--ink-3); text-decoration: none; }
+
+  /* Print-friendly styles. */
+  @media print {
+    body { padding: 24mm 18mm; max-width: 100%; background: #fff; color: #000; font-size: 11pt; }
+    h1 { font-size: 22pt; }
+    h2 { font-size: 14pt; border-bottom: 1pt solid #000; }
+    h3 { font-size: 12pt; }
+    a { color: #000; text-decoration: none; }
+    .meta, .card, .axes div { background: #fff; border: 1pt solid #ccc; }
+    table { font-size: 10pt; }
+    th, td { border-bottom: 0.5pt solid #999; }
+    section { page-break-inside: avoid; }
+    footer { border-top: 1pt solid #000; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">Angle Health × kolm.ai &middot; Security review one-pager</p>
+  <h1>HIPAA-grade specialist models. PHI never leaves your VPC.</h1>
+  <p class="lede">kolm is an open-source AI compiler. Angle Health deploys it inside an Angle-owned AWS account; PHI is captured, distilled, quantized, and served entirely inside that perimeter. Every inference produces an Ed25519-signed receipt your auditor can verify offline.</p>
+  <div class="meta">
+    <span><b>Deployment</b> BYOC inside Angle AWS</span>
+    <span><b>BAA</b> available, executed before any PHI flow</span>
+    <span><b>License</b> Apache-2.0 (compiler, runtime, verifier, SDKs)</span>
+    <span><b>Audit log</b> per-call signed receipts; export-on-demand</span>
+  </div>
+</header>
+
+<section>
+  <h2>1. The architecture in one sentence</h2>
+  <p>An OpenAI-compatible gateway sits in front of a base model. Member-facing calls hit the gateway; (input, output) pairs are redacted and persisted to an Angle-owned S3 bucket; a periodic <code>kolm compile</code> job distills a smaller specialist model from those pairs; the artifact is signed and served back through the same gateway. PHI does not traverse the kolm.ai control plane at any step.</p>
+  <p>For diagram, see <code>architecture.svg</code> in this directory.</p>
+</section>
+
+<section>
+  <h2>2. PHI lifecycle, step by step</h2>
+  <ol>
+    <li><b>Capture.</b> A member request enters the gateway. The redactor runs HIPAA Safe Harbor profile on the request body and the model response before either is written to disk. Original payloads are never persisted in cleartext; only the redacted, hashed canonical form lands in the lake.</li>
+    <li><b>Storage.</b> Redacted pairs live in an Angle-controlled S3 bucket with SSE-KMS using an Angle-owned CMK. The bucket policy denies access to the kolm.ai principal; only the in-VPC compute role can read it.</li>
+    <li><b>Distill.</b> A scheduled batch job runs <code>kolm compile</code> on an Angle-owned GPU instance. Teacher calls (Claude, GPT-4, or an in-VPC base model) execute through the same gateway, so any teacher traffic is also subject to the redactor profile. The compiler writes a signed <code>.kolm</code> artifact to Angle S3.</li>
+    <li><b>Serve.</b> The runtime loads the <code>.kolm</code> from Angle S3 and serves it through the gateway. Every inference returns a per-call receipt: <code>{ artifact_cid, input_hash, output_hash, k_axes, signed_at, signature }</code>. The receipt is the audit log entry; it is appended to a Postgres table in Angle's account.</li>
+    <li><b>Verify.</b> An auditor exports the receipt table and runs <code>kolm verify</code> on any laptop. The verifier recomputes the artifact hash, re-signs the canonical receipt, and checks the Ed25519 signature against the embedded public key. No network call to kolm.ai is required.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>3. Compliance posture, mapped</h2>
+  <table>
+    <thead>
+      <tr><th>HIPAA §</th><th>Requirement</th><th>How the stack satisfies it</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>164.308(a)(1)</td><td>Security management</td><td>Risk-assessment template included with the BYOC bundle; kolm publishes a <a href="/hipaa-mapping">/hipaa-mapping</a> page.</td></tr>
+      <tr><td>164.308(a)(3)</td><td>Workforce access controls</td><td>IAM roles scope the gateway, the lake, and the compile runner separately; least-privilege examples shipped.</td></tr>
+      <tr><td>164.308(a)(4)</td><td>Access authorization</td><td>SSO/SAML to the kolm console (Business + Enterprise tiers); SCIM provisioning available.</td></tr>
+      <tr><td>164.308(b)(1)</td><td>Business associate contracts</td><td>BAA executed before any PHI flow. kolm.ai is a BA when it ships software; the data plane is wholly inside Angle.</td></tr>
+      <tr><td>164.312(a)(1)</td><td>Access control</td><td>Per-call receipts include caller identity (member ID hashed); receipts are tamper-detectable.</td></tr>
+      <tr><td>164.312(b)</td><td>Audit controls</td><td>Per-inference signed receipt is the audit record. Append-only Postgres table with WAL backups.</td></tr>
+      <tr><td>164.312(c)(1)</td><td>Integrity</td><td>Artifact hash + receipt signature both embedded in the artifact; any post-build edit breaks verification.</td></tr>
+      <tr><td>164.312(e)(1)</td><td>Transmission security</td><td>TLS 1.3 in the gateway path; mTLS available between the redactor and the lake writer.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>4. Signed receipts: what is in one, what they prove</h2>
+  <p>Every inference returns a receipt. The receipt names the inputs that produced the answer and binds them under a single Ed25519 signature.</p>
+  <div class="axes">
+    <div><b>artifact_cid</b> content address of the .kolm that served the call</div>
+    <div><b>input_hash</b> sha-256 of the redacted, canonicalized prompt</div>
+    <div><b>output_hash</b> sha-256 of the redacted, canonicalized response</div>
+    <div><b>k_axes</b> per-call K-score (faithfulness, coverage, calibration, groundedness, cost)</div>
+    <div><b>signed_at</b> RFC 3339 timestamp inside the signature scope</div>
+    <div><b>signature</b> Ed25519 over JCS-canonical receipt body</div>
+  </div>
+  <p>Editing any field invalidates the signature. The verifier requires no network call; the public-key fingerprint is embedded in the artifact and pinned at deploy time.</p>
+</section>
+
+<section>
+  <h2>5. Revocation and key custody</h2>
+  <h3>Revocation</h3>
+  <p>Per-artifact revocation: an Angle operator publishes a revocation entry naming the <code>artifact_cid</code>; the gateway refuses to load any artifact whose CID matches. Per-key revocation: an Angle operator rotates the signing key; all artifacts signed by the rotated key fail verification until re-signed.</p>
+  <h3>Key custody</h3>
+  <p>The Ed25519 signing key lives in AWS KMS in the Angle account. The kolm compiler calls <code>kms:Sign</code>; the raw key material never leaves KMS. Public-key fingerprints are pinned per environment (sandbox, staging, production) so a compromised lower-environment key cannot mint production artifacts.</p>
+</section>
+
+<section>
+  <h2>6. Failure-mode catalogue</h2>
+  <table>
+    <thead>
+      <tr><th>Scenario</th><th>What happens</th><th>Operator action</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Redactor missed PII in a pair</td><td>Pair lands in the lake. Detected on weekly review or on synthetic-PII probe.</td><td>Drop pair via <code>kolm capture drop --cid X</code>; re-run distill from the cleaned lake.</td></tr>
+      <tr><td>Artifact fails K-score floor</td><td>Build halts before signing; nothing reaches the gateway.</td><td>Inspect the failing axis; widen the training set or raise the teacher quality.</td></tr>
+      <tr><td>Signing-key compromise</td><td>Rotate key via KMS. Old artifacts fail verification immediately.</td><td>Re-sign artifacts under the new key or re-compile.</td></tr>
+      <tr><td>Gateway outage</td><td>Fall back to teacher endpoint (per-call configurable). Captures buffer until gateway returns.</td><td>None required if buffer is sized to your peak; verify queue depth via <code>kolm doctor</code>.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>7. What we do not do</h2>
+  <ul>
+    <li><b>kolm.ai does not see PHI.</b> The data plane is in your AWS account. The control plane (license, telemetry opt-out, version pin) sees only the artifact CID and a per-tenant counter.</li>
+    <li><b>We do not store an external copy of any .kolm artifact.</b> Artifacts live in the customer S3 bucket. The kolm.ai marketplace shows only signed metadata for artifacts that opt-in to publication.</li>
+    <li><b>We do not have any signing key for any customer.</b> The Ed25519 key is generated in the customer KMS and never copied.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>8. Where to take this next</h2>
+  <div class="grid2">
+    <div class="card"><h4>Architecture diagram</h4><p>See <code>architecture.svg</code> — inline SVG of the Angle VPC envelope and the PHI lifecycle.</p></div>
+    <div class="card"><h4>Live demo script</h4><p>See <code>demo-script.md</code> — 15-minute walk-through with per-segment timings.</p></div>
+    <div class="card"><h4>ROI estimator</h4><p>See <code>roi-calculator.html</code> — conservative defaults; tune for your member volume and AHT.</p></div>
+    <div class="card"><h4>Sign the BAA</h4><p>BAA executed before any PHI flow. Contact <a href="mailto:rodneyyesep@gmail.com?subject=Angle%20BAA">rodneyyesep@gmail.com</a>.</p></div>
+  </div>
+</section>
+
+<footer>
+  <span>kolm.ai &middot; open-source AI compiler &middot; Apache-2.0</span>
+  <span>One-pager v1 &middot; 2026-05-28 &middot; <a href="/baa">BAA</a> &middot; <a href="/hipaa-mapping">HIPAA mapping</a></span>
+</footer>
+
+</body>
+</html>

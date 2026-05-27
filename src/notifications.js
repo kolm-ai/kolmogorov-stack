@@ -253,3 +253,206 @@ export function publicConfig() {
     thresholds: THRESHOLDS.slice(),
   };
 }
+
+// =====================================================================
+// W910 Track C3 - multi-channel webhook notifications.
+//
+// Adds Slack-incoming-webhook + generic HTTP POST + email channels for
+// seven event types. Per-tenant settings are stored in the same
+// preferences table; delivery attempts are appended to a delivery log so
+// /v1/notifications/log can render the last 50 attempts.
+//
+// Retry policy: 3 attempts with exponential backoff (250ms, 500ms, 1s).
+// Only 5xx + network errors retry; 4xx are terminal.
+// =====================================================================
+
+export const NOTIFICATION_EVENT_TYPES = [
+  'artifact_compiled',
+  'drift_detected',
+  'kscore_drop',
+  'device_offline',
+  'compile_failed',
+  'quota_warning',
+  'recompile_suggested',
+];
+
+const SETTINGS_TABLE = 'webhook_notification_settings';
+const DELIVERY_TABLE = 'notification_deliveries';
+
+const SLACK_HOST_ALLOW = ['hooks.slack.com'];
+const SLACK_HOST_SUFFIX_ALLOW = ['.slack.com'];
+
+function assertSafeWebhookUrl(raw, { allowSlack = false } = {}) {
+  if (!raw) throw new Error('url required');
+  let u;
+  try { u = new URL(raw); }
+  catch { throw new Error('url must be a valid URL'); }
+  if (u.protocol !== 'https:') throw new Error('url must be https://');
+  const host = u.hostname.toLowerCase();
+  if (/^(\d{1,3}\.){3}\d{1,3}$/.test(host) || host.startsWith('[') || host === 'localhost') {
+    throw new Error('webhook host must be a public hostname');
+  }
+  if (allowSlack) {
+    const ok = SLACK_HOST_ALLOW.includes(host) || SLACK_HOST_SUFFIX_ALLOW.some((sfx) => host.endsWith(sfx));
+    if (!ok) throw new Error('slack webhook must be on hooks.slack.com');
+  }
+  return u.toString();
+}
+
+export function getWebhookSettings(tenant) {
+  if (!tenant) throw new Error('tenant required');
+  const row = findOne(SETTINGS_TABLE, (r) => r && r.tenant === tenant);
+  return row || {
+    tenant,
+    slack_webhook_url: null,
+    http_webhook_url: null,
+    email_to: null,
+    events: {
+      artifact_compiled: true,
+      drift_detected: true,
+      kscore_drop: true,
+      device_offline: true,
+      compile_failed: true,
+      quota_warning: true,
+      recompile_suggested: true,
+    },
+    updated_at: null,
+  };
+}
+
+export function setWebhookSettings(tenant, patch) {
+  if (!tenant) throw new Error('tenant required');
+  const existing = findOne(SETTINGS_TABLE, (r) => r && r.tenant === tenant);
+  const next = { ...(existing || getWebhookSettings(tenant)), tenant };
+  if ('slack_webhook_url' in patch) {
+    next.slack_webhook_url = patch.slack_webhook_url
+      ? assertSafeWebhookUrl(String(patch.slack_webhook_url), { allowSlack: true })
+      : null;
+  }
+  if ('http_webhook_url' in patch) {
+    next.http_webhook_url = patch.http_webhook_url
+      ? assertSafeWebhookUrl(String(patch.http_webhook_url))
+      : null;
+  }
+  if ('email_to' in patch) {
+    next.email_to = typeof patch.email_to === 'string' ? patch.email_to.slice(0, 254) : null;
+  }
+  if (patch.events && typeof patch.events === 'object') {
+    const events = { ...(next.events || {}) };
+    for (const k of NOTIFICATION_EVENT_TYPES) {
+      if (k in patch.events) events[k] = !!patch.events[k];
+    }
+    next.events = events;
+  }
+  next.updated_at = new Date().toISOString();
+  if (existing) {
+    update(SETTINGS_TABLE, (r) => r && r.tenant === tenant, next);
+  } else {
+    insert(SETTINGS_TABLE, next);
+  }
+  return next;
+}
+
+function buildSlackBlocks(eventType, payload) {
+  const title = eventType.replace(/_/g, ' ');
+  const fields = [];
+  for (const [k, v] of Object.entries(payload || {})) {
+    if (typeof v === 'object') continue;
+    fields.push({ type: 'mrkdwn', text: `*${k}*\n${String(v).slice(0, 200)}` });
+    if (fields.length >= 10) break;
+  }
+  return {
+    blocks: [
+      { type: 'header', text: { type: 'plain_text', text: `kolm: ${title}` } },
+      ...(fields.length ? [{ type: 'section', fields }] : []),
+      { type: 'context', elements: [{ type: 'mrkdwn', text: `Event: \`${eventType}\` - <https://kolm.ai/account/overview|Open dashboard>` }] },
+    ],
+    text: `kolm: ${title}`,
+  };
+}
+
+async function postWithRetry(url, body, { headers = {} } = {}) {
+  const delays = [0, 250, 500];
+  const attempts = [];
+  for (let i = 0; i < delays.length; i++) {
+    if (delays[i]) await new Promise((r) => setTimeout(r, delays[i]));
+    let res, status, errStr;
+    try {
+      res = await fetch(url, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...headers },
+        body: typeof body === 'string' ? body : JSON.stringify(body),
+      });
+      status = res.status;
+    } catch (e) {
+      errStr = String(e.message || e);
+    }
+    attempts.push({ attempt: i + 1, status: status || 0, error: errStr || null });
+    if (status && status >= 200 && status < 300) {
+      return { ok: true, status, attempts };
+    }
+    if (status && status >= 400 && status < 500) {
+      return { ok: false, status, attempts, terminal: true };
+    }
+  }
+  const last = attempts[attempts.length - 1];
+  return { ok: false, status: last.status || 0, attempts, terminal: false };
+}
+
+function logDelivery(row) {
+  try { insert(DELIVERY_TABLE, row); } catch { /* best-effort */ }
+}
+
+export function listDeliveries(tenant, { limit = 50 } = {}) {
+  const rows = find(DELIVERY_TABLE, (r) => r && r.tenant === tenant);
+  rows.sort((a, b) => Date.parse(b.attempted_at || '') - Date.parse(a.attempted_at || ''));
+  return rows.slice(0, Math.max(1, Math.min(500, Number(limit) || 50)));
+}
+
+export async function notify(tenant, eventType, payload = {}) {
+  if (!tenant) throw new Error('tenant required');
+  if (!NOTIFICATION_EVENT_TYPES.includes(eventType)) {
+    throw new Error(`unknown event type ${eventType}`);
+  }
+  const settings = getWebhookSettings(tenant);
+  if (!settings.events?.[eventType]) {
+    return { ok: false, reason: 'event_disabled', tenant, eventType };
+  }
+
+  const attemptedAt = new Date().toISOString();
+  const results = { slack: null, http: null, email: null };
+
+  if (settings.slack_webhook_url) {
+    const body = buildSlackBlocks(eventType, payload);
+    const r = await postWithRetry(settings.slack_webhook_url, body);
+    results.slack = r;
+    logDelivery({ tenant, channel: 'slack', event_type: eventType, attempted_at: attemptedAt, ok: r.ok, status: r.status, attempts: r.attempts.length });
+  }
+  if (settings.http_webhook_url) {
+    const body = { event: eventType, tenant, payload, ts: attemptedAt };
+    const r = await postWithRetry(settings.http_webhook_url, body, { headers: { 'x-kolm-event': eventType } });
+    results.http = r;
+    logDelivery({ tenant, channel: 'http', event_type: eventType, attempted_at: attemptedAt, ok: r.ok, status: r.status, attempts: r.attempts.length });
+  }
+  if (settings.email_to && emailConfigured()) {
+    const subject = `kolm: ${eventType.replace(/_/g, ' ')}`;
+    const fieldLines = Object.entries(payload).filter(([, v]) => typeof v !== 'object').map(([k, v]) => `${k}: ${String(v).slice(0, 200)}`).join('\n');
+    const html = `<h2 style="font-family:sans-serif;color:#1f2937">kolm: ${eventType.replace(/_/g, ' ')}</h2><pre style="background:#f3f5f7;padding:12px;border-radius:6px;color:#1f2937;font-family:monospace;font-size:12.5px">${fieldLines.replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]))}</pre><p style="font-family:sans-serif;color:#56606c;font-size:13px"><a href="https://kolm.ai/account/overview" style="color:#1f2937">Open dashboard</a></p>`;
+    const emailRes = await sendMail({
+      to: settings.email_to,
+      subject,
+      text: `${subject}\n\n${fieldLines}\n\nhttps://kolm.ai/account/overview`,
+      html,
+      tags: [{ name: 'kolm_event', value: eventType }],
+    });
+    results.email = emailRes;
+    logDelivery({ tenant, channel: 'email', event_type: eventType, attempted_at: attemptedAt, ok: !!emailRes.ok, status: emailRes.status || (emailRes.ok ? 200 : 0), attempts: 1 });
+  }
+
+  const okCount = ['slack', 'http', 'email'].filter((c) => results[c] && (results[c].ok || results[c].ok === true)).length;
+  const sentCount = ['slack', 'http', 'email'].filter((c) => results[c] != null).length;
+  return { ok: okCount > 0 || sentCount === 0, tenant, eventType, results, sent: sentCount, succeeded: okCount, attempted_at: attemptedAt };
+}
+
+// Exposed for tests to assert retry/backoff without hitting the network.
+export const _internals = { postWithRetry, buildSlackBlocks, assertSafeWebhookUrl };

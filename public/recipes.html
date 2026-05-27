@@ -159,6 +159,147 @@
   </div>
 </section>
 
+<section class="fr-section fr-section--tight" id="templates" data-w910="recipe-templates">
+  <div class="fr-container">
+    <div class="fr-section__head fr-reveal">
+      <span class="fr-eyebrow">Starter templates &middot; 8</span>
+      <h2 class="fr-h2">Pick a template. Drop in your CSV. Compile.</h2>
+      <p class="fr-lede">Eight production starting points with sane defaults: recommended student, recommended quantization target, K-Score gate, expected score, and a sample CSV you can edit to match your workflow. Every template surfaces the <code>kolm compile</code> command pre-filled.</p>
+    </div>
+    <div class="w910-templates-grid">
+      <article class="w910-tpl" data-template="customer-support">
+        <header class="w910-tpl__head"><h3>Customer Support</h3><span class="w910-tpl__icon" aria-hidden="true">&#9742;</span></header>
+        <p class="w910-tpl__desc">Tier-1 support replies grounded in your KB. Friendly, accurate, escalates what it cannot answer.</p>
+        <dl class="w910-tpl__meta">
+          <dt>Student</dt><dd>qwen2.5-7b-instruct</dd>
+          <dt>Target</dt><dd>gguf-q4km</dd>
+          <dt>K-Score gate</dt><dd>0.85</dd>
+          <dt>Expected</dt><dd>0.88</dd>
+        </dl>
+        <div class="w910-tpl__foot">
+          <a href="/samples/customer-support.csv" class="w910-tpl__btn" download>Sample CSV</a>
+          <a href="/account/create-model?template=customer-support" class="w910-tpl__btn w910-tpl__btn--primary">Use template</a>
+        </div>
+      </article>
+      <article class="w910-tpl" data-template="document-extractor">
+        <header class="w910-tpl__head"><h3>Document Extractor</h3><span class="w910-tpl__icon" aria-hidden="true">&#9112;</span></header>
+        <p class="w910-tpl__desc">Pull structured JSON fields from invoices, receipts, contracts. Strict schema, never invents.</p>
+        <dl class="w910-tpl__meta">
+          <dt>Student</dt><dd>qwen2.5-7b-instruct</dd>
+          <dt>Target</dt><dd>gguf-q4km</dd>
+          <dt>K-Score gate</dt><dd>0.90</dd>
+          <dt>Expected</dt><dd>0.91</dd>
+        </dl>
+        <div class="w910-tpl__foot">
+          <a href="/samples/document-extractor.csv" class="w910-tpl__btn" download>Sample CSV</a>
+          <a href="/account/create-model?template=document-extractor" class="w910-tpl__btn w910-tpl__btn--primary">Use template</a>
+        </div>
+      </article>
+      <article class="w910-tpl" data-template="medical-coding">
+        <header class="w910-tpl__head"><h3>Medical Coding</h3><span class="w910-tpl__icon" aria-hidden="true">&#9763;</span></header>
+        <p class="w910-tpl__desc">ICD-10 / CPT mapping with a strict no-invention gate. HIPAA PHI mode required.</p>
+        <dl class="w910-tpl__meta">
+          <dt>Student</dt><dd>qwen2.5-7b-instruct</dd>
+          <dt>Target</dt><dd>gguf-q5km</dd>
+          <dt>K-Score gate</dt><dd>0.92</dd>
+          <dt>Expected</dt><dd>0.93</dd>
+        </dl>
+        <div class="w910-tpl__foot">
+          <a href="/samples/medical-coding.csv" class="w910-tpl__btn" download>Sample CSV</a>
+          <a href="/account/create-model?template=medical-coding" class="w910-tpl__btn w910-tpl__btn--primary">Use template</a>
+        </div>
+      </article>
+      <article class="w910-tpl" data-template="sales-qualifier">
+        <header class="w910-tpl__head"><h3>Sales Qualifier</h3><span class="w910-tpl__icon" aria-hidden="true">&#9678;</span></header>
+        <p class="w910-tpl__desc">Score inbound leads on BANT and route to SDR, AE, or nurture with a per-axis rationale.</p>
+        <dl class="w910-tpl__meta">
+          <dt>Student</dt><dd>qwen2.5-7b-instruct</dd>
+          <dt>Target</dt><dd>gguf-q4km</dd>
+          <dt>K-Score gate</dt><dd>0.85</dd>
+          <dt>Expected</dt><dd>0.87</dd>
+        </dl>
+        <div class="w910-tpl__foot">
+          <a href="/samples/sales-qualifier.csv" class="w910-tpl__btn" download>Sample CSV</a>
+          <a href="/account/create-model?template=sales-qualifier" class="w910-tpl__btn w910-tpl__btn--primary">Use template</a>
+        </div>
+      </article>
+      <article class="w910-tpl" data-template="text-classifier">
+        <header class="w910-tpl__head"><h3>Text Classifier</h3><span class="w910-tpl__icon" aria-hidden="true">&#9874;</span></header>
+        <p class="w910-tpl__desc">Multi-class labeling with calibrated confidence; below 0.7 returns 'uncertain' for review.</p>
+        <dl class="w910-tpl__meta">
+          <dt>Student</dt><dd>qwen2.5-7b-instruct</dd>
+          <dt>Target</dt><dd>gguf-q4km</dd>
+          <dt>K-Score gate</dt><dd>0.88</dd>
+          <dt>Expected</dt><dd>0.90</dd>
+        </dl>
+        <div class="w910-tpl__foot">
+          <a href="/samples/text-classifier.csv" class="w910-tpl__btn" download>Sample CSV</a>
+          <a href="/account/create-model?template=text-classifier" class="w910-tpl__btn w910-tpl__btn--primary">Use template</a>
+        </div>
+      </article>
+      <article class="w910-tpl" data-template="content-writer">
+        <header class="w910-tpl__head"><h3>Content Writer</h3><span class="w910-tpl__icon" aria-hidden="true">&#9998;</span></header>
+        <p class="w910-tpl__desc">Brand-voice copy across web, email, social. Respects word count; never invents claims.</p>
+        <dl class="w910-tpl__meta">
+          <dt>Student</dt><dd>qwen2.5-7b-instruct</dd>
+          <dt>Target</dt><dd>gguf-q4km</dd>
+          <dt>K-Score gate</dt><dd>0.82</dd>
+          <dt>Expected</dt><dd>0.85</dd>
+        </dl>
+        <div class="w910-tpl__foot">
+          <a href="/samples/content-writer.csv" class="w910-tpl__btn" download>Sample CSV</a>
+          <a href="/account/create-model?template=content-writer" class="w910-tpl__btn w910-tpl__btn--primary">Use template</a>
+        </div>
+      </article>
+      <article class="w910-tpl" data-template="code-reviewer">
+        <header class="w910-tpl__head"><h3>Code Reviewer</h3><span class="w910-tpl__icon" aria-hidden="true">&lt;/&gt;</span></header>
+        <p class="w910-tpl__desc">PR-style review comments anchored to specific lines. Senior-eng tone, no praise filler.</p>
+        <dl class="w910-tpl__meta">
+          <dt>Student</dt><dd>qwen2.5-7b-instruct</dd>
+          <dt>Target</dt><dd>gguf-q5km</dd>
+          <dt>K-Score gate</dt><dd>0.87</dd>
+          <dt>Expected</dt><dd>0.89</dd>
+        </dl>
+        <div class="w910-tpl__foot">
+          <a href="/samples/code-reviewer.csv" class="w910-tpl__btn" download>Sample CSV</a>
+          <a href="/account/create-model?template=code-reviewer" class="w910-tpl__btn w910-tpl__btn--primary">Use template</a>
+        </div>
+      </article>
+      <article class="w910-tpl" data-template="data-analyst">
+        <header class="w910-tpl__head"><h3>Data Analyst</h3><span class="w910-tpl__icon" aria-hidden="true">&#9930;</span></header>
+        <p class="w910-tpl__desc">Translate questions into SQL or Python with a one-line interpretation. Admits when data is missing.</p>
+        <dl class="w910-tpl__meta">
+          <dt>Student</dt><dd>qwen2.5-7b-instruct</dd>
+          <dt>Target</dt><dd>gguf-q4km</dd>
+          <dt>K-Score gate</dt><dd>0.86</dd>
+          <dt>Expected</dt><dd>0.88</dd>
+        </dl>
+        <div class="w910-tpl__foot">
+          <a href="/samples/data-analyst.csv" class="w910-tpl__btn" download>Sample CSV</a>
+          <a href="/account/create-model?template=data-analyst" class="w910-tpl__btn w910-tpl__btn--primary">Use template</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+<style>
+.w910-templates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:24px}
+.w910-tpl{display:flex;flex-direction:column;gap:10px;padding:16px 18px;border:1px solid #e6eaef;background:#ffffff;border-radius:8px;transition:background 120ms ease,border-color 120ms ease}
+.w910-tpl:hover{background:#f3f5f7;border-color:#a8b3c2}
+.w910-tpl__head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.w910-tpl__head h3{margin:0;font-family:var(--fr-font-display,inherit);font-size:15px;font-weight:600;color:#1f2937;letter-spacing:-0.005em}
+.w910-tpl__icon{font-size:16px;color:#56606c}
+.w910-tpl__desc{font-size:12.5px;line-height:1.55;color:#525a64;margin:0}
+.w910-tpl__meta{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;font-family:var(--fr-font-mono,monospace);font-size:11.5px}
+.w910-tpl__meta dt{color:#56606c;text-transform:uppercase;letter-spacing:0.04em}
+.w910-tpl__meta dd{color:#1f2937;margin:0;font-variant-numeric:tabular-nums}
+.w910-tpl__foot{display:flex;gap:8px;margin-top:auto;flex-wrap:wrap}
+.w910-tpl__btn{flex:1;text-align:center;display:inline-block;padding:7px 10px;border-radius:5px;font-family:var(--fr-font-mono,monospace);font-size:11.5px;text-decoration:none;border:1px solid #e6eaef;background:#ffffff;color:#1f2937;white-space:nowrap}
+.w910-tpl__btn:hover{background:#eef1f4;border-color:#a8b3c2}
+.w910-tpl__btn--primary{background:#1f2937;border-color:#1f2937;color:#f3f5f7}
+.w910-tpl__btn--primary:hover{background:#525a64;border-color:#525a64;color:#f3f5f7}
+</style>
+
 <section class="fr-section fr-section--tight" id="lanes">
   <div class="fr-container">
     <div class="fr-section__head fr-reveal">

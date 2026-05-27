@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="archTitle archDesc" font-family="-apple-system, BlinkMacSystemFont, Inter, Segoe UI, sans-serif">
+  <title id="archTitle">Angle Health × kolm BYOC architecture</title>
+  <desc id="archDesc">Diagram of the Angle-owned AWS account: gateway, redactor, capture lake, distill runner, signing key in KMS, runtime, and per-call receipt store. PHI stays inside the Angle VPC envelope; the kolm.ai control plane only sees artifact CIDs and version pins.</desc>
+
+  <defs>
+    <linearGradient id="vpcFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#eef1f4" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#e6eaef" stop-opacity="1"/>
+    </linearGradient>
+    <linearGradient id="boxFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#f3f5f7" stop-opacity="1"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#1f2937"/>
+    </marker>
+    <marker id="arrowMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#a8b3c2"/>
+    </marker>
+  </defs>
+
+  <!-- Backdrop -->
+  <rect x="0" y="0" width="1200" height="720" fill="#f3f5f7"/>
+
+  <!-- Title -->
+  <text x="40" y="44" font-size="13" letter-spacing="2.4" fill="#525a64" font-weight="500" text-transform="uppercase">ANGLE HEALTH &middot; KOLM BYOC ARCHITECTURE</text>
+  <text x="40" y="74" font-size="24" letter-spacing="-0.4" fill="#1f2937" font-weight="580">PHI never leaves the Angle VPC. The kolm control plane sees only artifact CIDs.</text>
+
+  <!-- VPC envelope -->
+  <rect x="40" y="110" width="940" height="560" rx="14" fill="url(#vpcFill)" stroke="#a8b3c2" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <text x="60" y="138" font-size="12" letter-spacing="1.6" fill="#525a64" font-weight="500">ANGLE AWS ACCOUNT &middot; PRIVATE VPC &middot; TLS 1.3 EDGE</text>
+
+  <!-- Member client (outside VPC) -->
+  <rect x="40" y="180" width="160" height="80" rx="10" fill="url(#boxFill)" stroke="#dde1e7" stroke-width="1"/>
+  <text x="120" y="208" font-size="14" fill="#1f2937" font-weight="580" text-anchor="middle">Member client</text>
+  <text x="120" y="228" font-size="11" fill="#56606c" text-anchor="middle">Angle app / web</text>
+  <text x="120" y="246" font-size="10" fill="#a8b3c2" text-anchor="middle">PHI in request</text>
+
+  <!-- Inbound arrow -->
+  <line x1="200" y1="220" x2="260" y2="220" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="218" y="212" font-size="10" fill="#525a64">TLS 1.3</text>
+
+  <!-- 1. Gateway -->
+  <rect x="260" y="180" width="180" height="80" rx="10" fill="url(#boxFill)" stroke="#1f2937" stroke-width="1.5"/>
+  <text x="350" y="206" font-size="13" fill="#525a64" font-weight="500" text-anchor="middle" letter-spacing="1">01 &middot; GATEWAY</text>
+  <text x="350" y="226" font-size="14" fill="#1f2937" font-weight="580" text-anchor="middle">kolm wrapper</text>
+  <text x="350" y="244" font-size="10.5" fill="#56606c" text-anchor="middle">OpenAI-compatible :4180</text>
+
+  <!-- 2. Redactor -->
+  <line x1="440" y1="220" x2="500" y2="220" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="500" y="180" width="180" height="80" rx="10" fill="url(#boxFill)" stroke="#1f2937" stroke-width="1.5"/>
+  <text x="590" y="206" font-size="13" fill="#525a64" font-weight="500" text-anchor="middle" letter-spacing="1">02 &middot; REDACT</text>
+  <text x="590" y="226" font-size="14" fill="#1f2937" font-weight="580" text-anchor="middle">HIPAA Safe Harbor</text>
+  <text x="590" y="244" font-size="10.5" fill="#56606c" text-anchor="middle">18 identifiers stripped</text>
+
+  <!-- 3. Capture lake -->
+  <line x1="680" y1="220" x2="740" y2="220" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="740" y="180" width="200" height="80" rx="10" fill="url(#boxFill)" stroke="#1f2937" stroke-width="1.5"/>
+  <text x="840" y="206" font-size="13" fill="#525a64" font-weight="500" text-anchor="middle" letter-spacing="1">03 &middot; CAPTURE LAKE</text>
+  <text x="840" y="226" font-size="14" fill="#1f2937" font-weight="580" text-anchor="middle">S3 (Angle CMK)</text>
+  <text x="840" y="244" font-size="10.5" fill="#56606c" text-anchor="middle">SSE-KMS &middot; deny kolm.ai</text>
+
+  <!-- Periodic distill arrow -->
+  <line x1="840" y1="260" x2="840" y2="320" stroke="#56606c" stroke-width="1.2" stroke-dasharray="4 4" marker-end="url(#arrow)"/>
+  <text x="860" y="290" font-size="11" fill="#56606c">scheduled batch</text>
+
+  <!-- 4. Distill runner -->
+  <rect x="740" y="320" width="200" height="100" rx="10" fill="url(#boxFill)" stroke="#1f2937" stroke-width="1.5"/>
+  <text x="840" y="346" font-size="13" fill="#525a64" font-weight="500" text-anchor="middle" letter-spacing="1">04 &middot; DISTILL</text>
+  <text x="840" y="366" font-size="14" fill="#1f2937" font-weight="580" text-anchor="middle">kolm compile</text>
+  <text x="840" y="384" font-size="10.5" fill="#56606c" text-anchor="middle">teacher &rarr; student</text>
+  <text x="840" y="400" font-size="10.5" fill="#56606c" text-anchor="middle">nf4-double &middot; K-score gate</text>
+
+  <!-- KMS signing -->
+  <line x1="740" y1="370" x2="680" y2="370" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="500" y="330" width="180" height="80" rx="10" fill="url(#boxFill)" stroke="#1f2937" stroke-width="1.5"/>
+  <text x="590" y="356" font-size="13" fill="#525a64" font-weight="500" text-anchor="middle" letter-spacing="1">05 &middot; SIGN</text>
+  <text x="590" y="376" font-size="14" fill="#1f2937" font-weight="580" text-anchor="middle">AWS KMS (Angle)</text>
+  <text x="590" y="394" font-size="10.5" fill="#56606c" text-anchor="middle">Ed25519 over canonical</text>
+
+  <!-- 6. Artifact -->
+  <line x1="500" y1="370" x2="440" y2="370" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="260" y="330" width="180" height="80" rx="10" fill="url(#boxFill)" stroke="#1f2937" stroke-width="1.5"/>
+  <text x="350" y="356" font-size="13" fill="#525a64" font-weight="500" text-anchor="middle" letter-spacing="1">06 &middot; .KOLM ARTIFACT</text>
+  <text x="350" y="376" font-size="14" fill="#1f2937" font-weight="580" text-anchor="middle">S3 (Angle CMK)</text>
+  <text x="350" y="394" font-size="10.5" fill="#56606c" text-anchor="middle">artifact_cid bafkrei...</text>
+
+  <!-- Loaded into runtime -->
+  <line x1="350" y1="410" x2="350" y2="470" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- 7. Runtime -->
+  <rect x="260" y="470" width="180" height="100" rx="10" fill="url(#boxFill)" stroke="#1f2937" stroke-width="1.5"/>
+  <text x="350" y="496" font-size="13" fill="#525a64" font-weight="500" text-anchor="middle" letter-spacing="1">07 &middot; RUNTIME</text>
+  <text x="350" y="516" font-size="14" fill="#1f2937" font-weight="580" text-anchor="middle">vLLM / llama.cpp</text>
+  <text x="350" y="534" font-size="10.5" fill="#56606c" text-anchor="middle">in-VPC GPU</text>
+  <text x="350" y="552" font-size="10.5" fill="#56606c" text-anchor="middle">24.5 tok/s on 7B INT4</text>
+
+  <!-- Runtime back to gateway -->
+  <path d="M 260 520 Q 200 520 200 350 Q 200 280 260 280" fill="none" stroke="#56606c" stroke-width="1.2" stroke-dasharray="4 4" marker-end="url(#arrow)"/>
+  <text x="100" y="408" font-size="10.5" fill="#56606c">serves through</text>
+  <text x="100" y="422" font-size="10.5" fill="#56606c">same gateway</text>
+
+  <!-- 8. Receipt store -->
+  <line x1="440" y1="520" x2="500" y2="520" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="500" y="470" width="180" height="100" rx="10" fill="url(#boxFill)" stroke="#1f2937" stroke-width="1.5"/>
+  <text x="590" y="496" font-size="13" fill="#525a64" font-weight="500" text-anchor="middle" letter-spacing="1">08 &middot; RECEIPT STORE</text>
+  <text x="590" y="516" font-size="14" fill="#1f2937" font-weight="580" text-anchor="middle">Postgres (Angle)</text>
+  <text x="590" y="534" font-size="10.5" fill="#56606c" text-anchor="middle">append-only audit log</text>
+  <text x="590" y="552" font-size="10.5" fill="#56606c" text-anchor="middle">per-call signed receipt</text>
+
+  <!-- 9. Verifier (auditor, can be air-gapped) -->
+  <line x1="680" y1="520" x2="740" y2="520" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="740" y="470" width="200" height="100" rx="10" fill="url(#boxFill)" stroke="#1f2937" stroke-width="1.5"/>
+  <text x="840" y="496" font-size="13" fill="#525a64" font-weight="500" text-anchor="middle" letter-spacing="1">09 &middot; VERIFIER (auditor)</text>
+  <text x="840" y="516" font-size="14" fill="#1f2937" font-weight="580" text-anchor="middle">kolm verify</text>
+  <text x="840" y="534" font-size="10.5" fill="#56606c" text-anchor="middle">offline / air-gapped</text>
+  <text x="840" y="552" font-size="10.5" fill="#56606c" text-anchor="middle">no network call</text>
+
+  <!-- Footer band -->
+  <text x="60" y="640" font-size="11" fill="#525a64">PHI lifecycle: capture &rarr; redact &rarr; lake &rarr; distill &rarr; sign &rarr; artifact &rarr; runtime &rarr; receipt &rarr; verify</text>
+  <text x="60" y="658" font-size="11" fill="#525a64">All boxes inside the dashed envelope sit in the Angle AWS account. Nothing leaves; nothing is shared.</text>
+
+  <!-- kolm control plane (outside VPC) -->
+  <rect x="1010" y="180" width="160" height="120" rx="10" fill="url(#boxFill)" stroke="#a8b3c2" stroke-width="1" stroke-dasharray="3 3"/>
+  <text x="1090" y="208" font-size="11" fill="#525a64" letter-spacing="1.4" text-anchor="middle">KOLM.AI CONTROL PLANE</text>
+  <text x="1090" y="228" font-size="13" fill="#1f2937" font-weight="580" text-anchor="middle">License + telemetry</text>
+  <text x="1090" y="248" font-size="10" fill="#56606c" text-anchor="middle">sees: artifact CID,</text>
+  <text x="1090" y="262" font-size="10" fill="#56606c" text-anchor="middle">version pin, counter</text>
+  <text x="1090" y="280" font-size="10" fill="#a8b3c2" text-anchor="middle">does NOT see PHI</text>
+
+  <!-- Muted arrow control-plane -->
+  <line x1="980" y1="240" x2="1010" y2="240" stroke="#a8b3c2" stroke-width="1.2" stroke-dasharray="3 3" marker-end="url(#arrowMuted)"/>
+
+  <!-- Legend -->
+  <g transform="translate(1010 360)">
+    <text x="0" y="0" font-size="11" letter-spacing="1.4" fill="#525a64">LEGEND</text>
+    <line x1="0" y1="20" x2="32" y2="20" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="40" y="24" font-size="10.5" fill="#56606c">PHI / artifact in-VPC</text>
+    <line x1="0" y1="44" x2="32" y2="44" stroke="#a8b3c2" stroke-width="1.2" stroke-dasharray="3 3" marker-end="url(#arrowMuted)"/>
+    <text x="40" y="48" font-size="10.5" fill="#56606c">control-plane metadata</text>
+    <line x1="0" y1="68" x2="32" y2="68" stroke="#56606c" stroke-width="1.2" stroke-dasharray="4 4" marker-end="url(#arrow)"/>
+    <text x="40" y="72" font-size="10.5" fill="#56606c">scheduled / batch</text>
+  </g>
+</svg>

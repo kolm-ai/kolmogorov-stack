@@ -3,30 +3,57 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Fleet · Roll a .kolm artifact to 1 or 10,000 devices · kolm.ai</title>
-<meta name="description" content="kolm fleet deploy --rolling / --canary, kolm fleet monitor, kolm fleet rollback. One CLI to push a signed .kolm to every device, watch the rollout, and revert on regression.">
+<title>Fleet · Deploy your kolm artifact anywhere — cloud, on-prem, or edge · kolm.ai</title>
+<meta name="description" content="One CLI to push a signed .kolm to RunPod, a Jetson, an A100 cluster, or your laptop. BYOC. Multi-device sync. OTA updates. Health monitoring. Rollback. You pay your cloud bills directly.">
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/wave889-vertical.css">
 <link rel="canonical" href="https://kolm.ai/fleet">
-<meta property="og:title" content="Fleet · Roll one .kolm to thousands of devices">
-<meta property="og:description" content="kolm fleet deploy --rolling / --canary, kolm fleet monitor, kolm fleet rollback. One CLI to push a signed .kolm to every device, watch the rollout, and revert on regression.">
+<meta property="og:title" content="Fleet · Deploy your kolm artifact anywhere">
+<meta property="og:description" content="One CLI to push a signed .kolm to RunPod, a Jetson, an A100 cluster, or your laptop. BYOC. Multi-device sync. OTA updates. Health monitoring. Rollback.">
 <meta property="og:url" content="https://kolm.ai/fleet">
 <meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/og/fleet.svg">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "kolm",
+  "name": "kolm fleet",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/fleet",
-  "description": "kolm fleet deploy --rolling / --canary, kolm fleet monitor, kolm fleet rollback. One CLI to push a signed .kolm to every device, watch the rollout, and revert on regression.",
+  "description": "One CLI to push a signed .kolm to RunPod, a Jetson, an A100 cluster, or your laptop. BYOC. Multi-device sync. OTA updates. Health monitoring. Rollback.",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
   "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" }
 }
 </script>
-  <meta property="og:image" content="https://kolm.ai/og/fleet.svg">
+<style>
+/* Cool-slate diagram + hardware grid for /fleet — scoped to this page only. */
+.fleet-diagram{margin:8px 0 24px;padding:24px;background:#f3f5f7;border:1px solid #dde1e7;border-radius:14px;overflow:hidden}
+.fleet-diagram svg{display:block;width:100%;max-width:920px;margin:0 auto;height:auto;font-family:ui-sans-serif,system-ui,-apple-system,sans-serif}
+.fleet-diagram .hint{margin:14px auto 0;max-width:760px;text-align:center;color:#525a64;font-size:13px;line-height:1.55}
+.fleet-diagram .hint b{color:#1f2937;font-weight:600}
+
+.hw-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px}
+.hw-card{background:#f3f5f7;border:1px solid #dde1e7;border-radius:10px;padding:14px 14px 16px}
+.hw-card .vendor{font-size:10.5px;text-transform:uppercase;letter-spacing:0.09em;color:#56606c;margin-bottom:8px;font-weight:600}
+.hw-card h4{margin:0 0 8px;font-size:14px;color:#1f2937;font-weight:600;letter-spacing:-0.01em}
+.hw-card ul{list-style:none;margin:0;padding:0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:#525a64;line-height:1.7}
+.hw-card li{display:flex;justify-content:space-between;gap:8px;padding:1px 0}
+.hw-card li span:last-child{color:#a8b3c2;font-size:10.5px}
+@media (max-width:880px){.hw-grid{grid-template-columns:repeat(2,1fr)}}
+
+.deploy-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px}
+.deploy-tile{background:#f3f5f7;border:1px solid #dde1e7;border-radius:10px;padding:16px}
+.deploy-tile .tag{display:inline-block;font-size:10.5px;text-transform:uppercase;letter-spacing:0.09em;color:#56606c;margin-bottom:8px;font-weight:600}
+.deploy-tile h3{margin:0 0 6px;font-size:15px;color:#1f2937;font-weight:600}
+.deploy-tile p{margin:0 0 10px;font-size:13px;color:#525a64;line-height:1.55}
+.deploy-tile .cmd{display:block;background:#eef1f4;border:1px solid #e6eaef;border-radius:6px;padding:8px 10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:#1f2937;overflow-x:auto;white-space:nowrap}
+@media (max-width:880px){.deploy-tiles{grid-template-columns:1fr}}
+
+.foot-note{margin-top:16px;padding:14px 16px;background:#eef1f4;border-left:3px solid #56606c;border-radius:0 8px 8px 0;font-size:13px;color:#525a64;line-height:1.6}
+.foot-note b{color:#1f2937}
+</style>
 </head>
 <body class="ks">
 <div data-include-nav></div>
@@ -34,13 +61,201 @@
 <section class="v-hero">
   <div class="v-wrap">
     <span class="v-eyebrow">Fleet management</span>
-    <h1 class="v-h1">One CLI. One .kolm. Every device on the rollout you choose.</h1>
-    <p class="v-lede"><code>kolm fleet deploy out.kolm --rolling 10%</code> pushes to 10% of the fleet, watches success rates, advances to 25 / 50 / 100 — or rolls back automatically on the first device that regresses past your K-Score floor.</p>
+    <h1 class="v-h1">Deploy your kolm artifact anywhere — cloud, on-prem, or edge.</h1>
+    <p class="v-lede">One signed <code>.kolm</code>. One CLI verb. Push it to a RunPod H100, a rack of A100s in your colo, a Jetson Orin on a robot, or every laptop on your team. Watch the rollout, gate on K-Score, rollback the second it slips.</p>
     <div class="v-ctas">
       <a class="v-btn v-btn--primary" href="/account/signup">Try it free</a>
       <a class="v-btn v-btn--ghost" href="/docs/devices">Read the fleet docs -&gt;</a>
     </div>
-    <div class="v-caveat">Caveats: rolling and canary deploys require devices registered via <code>kolm devices add</code>. SSH, agent, and MQTT transports supported. No agent daemon required for SSH mode.</div>
+    <div class="v-caveat">Caveats: rolling and canary deploys require devices registered via <code>kolm devices add</code>. SSH, agent, and MQTT transports supported. RunPod and Kubernetes paths require an API key or kubeconfig configured in <a href="/account/settings/integrations">integrations</a>.</div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">One artifact, three destinations</span>
+      <h2 class="v-h2">The same <code>.kolm</code> ships to cloud, on-prem, or edge.</h2>
+      <p>The artifact is signed once. Where it runs is a CLI flag. The receipt format is identical across destinations.</p>
+    </div>
+    <div class="fleet-diagram" role="img" aria-label="One artifact deployed to cloud, on-prem, and edge destinations from a single source.">
+      <svg viewbox="0 0 920 360" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <marker id="arr" viewbox="0 0 10 10" refx="9" refy="5" markerwidth="7" markerheight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#56606c" />
+          </marker>
+          <linearGradient id="line-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#a8b3c2" />
+            <stop offset="100%" stop-color="#56606c" />
+          </linearGradient>
+        </defs>
+
+        <!-- Source artifact -->
+        <rect x="40" y="140" width="220" height="80" rx="10" fill="#eef1f4" stroke="#56606c" stroke-width="1.5" />
+        <text x="150" y="170" text-anchor="middle" fill="#56606c" font-size="11" font-weight="600" letter-spacing="0.08em">SIGNED ARTIFACT</text>
+        <text x="150" y="195" text-anchor="middle" fill="#1f2937" font-size="16" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-weight="600">qwen-3b-int4.kolm</text>
+        <text x="150" y="212" text-anchor="middle" fill="#525a64" font-size="11" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">sha256: 9f3a...c4d2</text>
+
+        <!-- Connector lines -->
+        <path d="M 260 165 L 410 80" stroke="url(#line-grad)" stroke-width="1.5" fill="none" marker-end="url(#arr)" />
+        <path d="M 260 180 L 410 180" stroke="url(#line-grad)" stroke-width="1.5" fill="none" marker-end="url(#arr)" />
+        <path d="M 260 195 L 410 280" stroke="url(#line-grad)" stroke-width="1.5" fill="none" marker-end="url(#arr)" />
+
+        <!-- Cloud destination -->
+        <rect x="410" y="40" width="220" height="80" rx="10" fill="#f3f5f7" stroke="#a8b3c2" stroke-width="1.2" />
+        <text x="520" y="64" text-anchor="middle" fill="#56606c" font-size="10.5" font-weight="600" letter-spacing="0.08em">CLOUD</text>
+        <text x="520" y="86" text-anchor="middle" fill="#1f2937" font-size="14" font-weight="600">RunPod · H100 · serverless</text>
+        <text x="520" y="105" text-anchor="middle" fill="#525a64" font-size="11" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">~$0.30/hr · OpenAI-compatible URL</text>
+
+        <!-- On-prem destination -->
+        <rect x="410" y="140" width="220" height="80" rx="10" fill="#f3f5f7" stroke="#a8b3c2" stroke-width="1.2" />
+        <text x="520" y="164" text-anchor="middle" fill="#56606c" font-size="10.5" font-weight="600" letter-spacing="0.08em">ON-PREM</text>
+        <text x="520" y="186" text-anchor="middle" fill="#1f2937" font-size="14" font-weight="600">A100 cluster · SSH · k8s</text>
+        <text x="520" y="205" text-anchor="middle" fill="#525a64" font-size="11" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">your colo · your bills · your data</text>
+
+        <!-- Edge destination -->
+        <rect x="410" y="240" width="220" height="80" rx="10" fill="#f3f5f7" stroke="#a8b3c2" stroke-width="1.2" />
+        <text x="520" y="264" text-anchor="middle" fill="#56606c" font-size="10.5" font-weight="600" letter-spacing="0.08em">EDGE</text>
+        <text x="520" y="286" text-anchor="middle" fill="#1f2937" font-size="14" font-weight="600">Jetson Orin · Mac mini · Pi</text>
+        <text x="520" y="305" text-anchor="middle" fill="#525a64" font-size="11" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">no internet · MQTT heartbeat</text>
+
+        <!-- Health loop back -->
+        <rect x="690" y="140" width="190" height="80" rx="10" fill="#eef1f4" stroke="#56606c" stroke-width="1.5" />
+        <text x="785" y="170" text-anchor="middle" fill="#56606c" font-size="11" font-weight="600" letter-spacing="0.08em">FLEET LEDGER</text>
+        <text x="785" y="193" text-anchor="middle" fill="#1f2937" font-size="14" font-weight="600">K-Score · p95 · errors</text>
+        <text x="785" y="211" text-anchor="middle" fill="#525a64" font-size="11" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">rollback on regression</text>
+
+        <path d="M 630 80 Q 700 80 720 130" stroke="#a8b3c2" stroke-width="1.2" fill="none" stroke-dasharray="3 3" marker-end="url(#arr)" />
+        <path d="M 630 180 L 690 180" stroke="#a8b3c2" stroke-width="1.2" fill="none" stroke-dasharray="3 3" marker-end="url(#arr)" />
+        <path d="M 630 280 Q 700 280 720 230" stroke="#a8b3c2" stroke-width="1.2" fill="none" stroke-dasharray="3 3" marker-end="url(#arr)" />
+      </svg>
+      <p class="hint">One <b>signed artifact</b> &middot; three destination classes &middot; one <b>fleet ledger</b> that knows which SHA lives on which device and what its K-Score is right now.</p>
+    </div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">The deploy targets</span>
+      <h2 class="v-h2">Pick a destination. The verb is the same.</h2>
+      <p>Every target accepts the same .kolm artifact. The CLI auto-resolves credentials from <a href="/account/settings/integrations">integrations</a>.</p>
+    </div>
+    <div class="deploy-tiles">
+      <div class="deploy-tile">
+        <span class="tag">Cloud</span>
+        <h3>RunPod · one-click</h3>
+        <p>POST to <code>/v1/deploy/runpod</code> or click "Deploy to RunPod" on any artifact page. You get an OpenAI-compatible URL in under 90 seconds. Billed directly by RunPod (~$0.30/hr A4000, $1.89/hr H100).</p>
+        <code class="cmd">kolm fleet deploy out.kolm --to runpod --gpu A100</code>
+      </div>
+      <div class="deploy-tile">
+        <span class="tag">On-prem</span>
+        <h3>SSH · Kubernetes</h3>
+        <p>Register a device with <code>kolm devices add --ssh user@host</code> or apply the kolm operator to your cluster. The artifact ships as a single file. No agent daemon required for SSH mode.</p>
+        <code class="cmd">kolm fleet deploy out.kolm --to prod-cluster --rolling 10%</code>
+      </div>
+      <div class="deploy-tile">
+        <span class="tag">Edge</span>
+        <h3>Jetson · Mac mini · Pi</h3>
+        <p>The same .kolm runs on a Jetson Orin Nano, an M-series Mac mini, or a Pi 5 with an USB Coral. The runtime auto-selects target profile from <code>nvcc --version</code> / <code>uname -m</code>.</p>
+        <code class="cmd">kolm fleet deploy out.kolm --to edge --canary 3 --soak 24h</code>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Hardware compatibility</span>
+      <h2 class="v-h2">NVIDIA · AMD · Apple Silicon · edge.</h2>
+      <p>Each row is a target profile the compiler emits. Pick by <code>kolm compile --target-profile &lt;name&gt;</code> or let the runtime auto-detect.</p>
+    </div>
+    <div class="hw-grid">
+      <div class="hw-card">
+        <div class="vendor">NVIDIA · datacenter</div>
+        <h4>H100 / A100 / L40S</h4>
+        <ul>
+          <li><span>H100 80GB HBM3</span><span>FP8</span></li>
+          <li><span>A100 80GB PCIe</span><span>INT4 NF4</span></li>
+          <li><span>L40S 48GB</span><span>INT4 GPTQ</span></li>
+          <li><span>H200 141GB</span><span>FP8</span></li>
+        </ul>
+      </div>
+      <div class="hw-card">
+        <div class="vendor">NVIDIA · workstation</div>
+        <h4>RTX 5090 / 4090 / 3090</h4>
+        <ul>
+          <li><span>RTX 5090 32GB</span><span>INT4 NF4</span></li>
+          <li><span>RTX 4090 24GB</span><span>INT4 NF4</span></li>
+          <li><span>RTX 3090 24GB</span><span>INT4 AWQ</span></li>
+          <li><span>RTX 4070 Ti 16GB</span><span>INT4 GGUF</span></li>
+        </ul>
+      </div>
+      <div class="hw-card">
+        <div class="vendor">AMD · datacenter</div>
+        <h4>MI300X / MI250</h4>
+        <ul>
+          <li><span>MI300X 192GB</span><span>INT4 GGUF</span></li>
+          <li><span>MI250 128GB</span><span>INT4 GGUF</span></li>
+          <li><span>MI210 64GB</span><span>INT4 GGUF</span></li>
+          <li><span>ROCm 6.0+</span><span>llama.cpp</span></li>
+        </ul>
+      </div>
+      <div class="hw-card">
+        <div class="vendor">Apple Silicon</div>
+        <h4>M-series · MLX</h4>
+        <ul>
+          <li><span>M4 Pro / Max</span><span>MLX 4-bit</span></li>
+          <li><span>M3 Ultra</span><span>MLX 4-bit</span></li>
+          <li><span>M2 / M1</span><span>MLX 4-bit</span></li>
+          <li><span>iPhone (Core ML)</span><span>palettize 4-bit</span></li>
+        </ul>
+      </div>
+      <div class="hw-card">
+        <div class="vendor">NVIDIA · edge</div>
+        <h4>Jetson · Orin</h4>
+        <ul>
+          <li><span>Orin AGX 64GB</span><span>TRT-LLM INT4</span></li>
+          <li><span>Orin NX 16GB</span><span>TRT-LLM INT4</span></li>
+          <li><span>Orin Nano 8GB</span><span>GGUF Q4</span></li>
+          <li><span>Xavier NX 16GB</span><span>GGUF Q4</span></li>
+        </ul>
+      </div>
+      <div class="hw-card">
+        <div class="vendor">CPU / accelerator</div>
+        <h4>x86 · ARM · Coral</h4>
+        <ul>
+          <li><span>x86_64 + AVX-512</span><span>llama.cpp Q4</span></li>
+          <li><span>ARM64 (Pi 5)</span><span>llama.cpp Q4</span></li>
+          <li><span>Coral USB TPU</span><span>TFLite int8</span></li>
+          <li><span>Intel Arc</span><span>OpenVINO INT4</span></li>
+        </ul>
+      </div>
+      <div class="hw-card">
+        <div class="vendor">Cloud · serverless</div>
+        <h4>RunPod · Modal</h4>
+        <ul>
+          <li><span>RunPod A4000</span><span>$0.30/hr</span></li>
+          <li><span>RunPod A100 80GB</span><span>$1.89/hr</span></li>
+          <li><span>RunPod H100 80GB</span><span>$3.89/hr</span></li>
+          <li><span>Modal A100 40GB</span><span>$1.10/hr</span></li>
+        </ul>
+      </div>
+      <div class="hw-card">
+        <div class="vendor">Cloud · bare-metal</div>
+        <h4>Lambda · CoreWeave · Vast</h4>
+        <ul>
+          <li><span>Lambda H100 SXM</span><span>$2.49/hr</span></li>
+          <li><span>CoreWeave H200</span><span>$3.05/hr</span></li>
+          <li><span>Vast RTX 4090</span><span>$0.34/hr</span></li>
+          <li><span>Vast A100 80GB</span><span>$1.45/hr</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-note">
+      <b>BYOC pricing.</b> You pay your cloud provider or your hardware bill directly &mdash; we never mark up GPU time. kolm.ai charges only for the control plane (Studio, registry, gateway) on plans that include hosting. <a href="/pricing">See pricing</a>.
+    </div>
   </div>
 </section>
 
@@ -61,7 +276,7 @@
       <div class="v-card">
         <span class="ctag">Rolling deploy</span>
         <h3>kolm fleet deploy --rolling</h3>
-        <p>10% → 25% → 50% → 100% with a wait window between stages. Configurable per-stage success threshold. Stops on first device-class failure.</p>
+        <p>10% &rarr; 25% &rarr; 50% &rarr; 100% with a wait window between stages. Configurable per-stage success threshold. Stops on first device-class failure.</p>
         <div class="cmd">kolm fleet deploy out.kolm --rolling 10%</div>
       </div>
       <div class="v-card">
@@ -79,7 +294,7 @@
       <div class="v-card">
         <span class="ctag">Rollback</span>
         <h3>kolm fleet rollback</h3>
-        <p>Reverts every device to the previous .kolm SHA recorded in the fleet ledger. Survives partial rollouts — devices on the new build get reverted, devices on the old build are skipped.</p>
+        <p>Reverts every device to the previous .kolm SHA recorded in the fleet ledger. Survives partial rollouts &mdash; devices on the new build get reverted, devices on the old build are skipped.</p>
         <div class="cmd">kolm fleet rollback --tag prod</div>
       </div>
       <div class="v-card">
@@ -177,7 +392,7 @@
     <div class="v-shead">
       <span class="v-eyebrow">Next</span>
       <h2 class="v-h2">Compile once. Roll out the way you choose. Roll back the second it slips.</h2>
-      <p>Target profiles for the device class are at <a href="/edge">/edge</a>. CI integration so the .kolm gets built on every merge is at <a href="/ci">/ci</a>.</p>
+      <p>Target profiles for the device class are at <a href="/edge">/edge</a>. CI integration so the .kolm gets built on every merge is at <a href="/ci">/ci</a>. Manage RunPod and Kubernetes credentials at <a href="/account/settings/integrations">/account/settings/integrations</a>.</p>
     </div>
     <div class="v-ctas">
       <a class="v-btn v-btn--primary" href="/account/signup">Try it free</a>

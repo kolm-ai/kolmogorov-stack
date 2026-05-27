@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
+<title>Public playground &middot; kolm.ai</title>
+<meta name="description" content="Try this signed .kolm artifact live, no account required. 20 messages per IP per day. Share or embed the playground in a tweet.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/playground">
+<meta property="og:title" content="Public playground &middot; kolm.ai" />
+<meta property="og:description" content="Try a signed .kolm artifact live." />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="https://kolm.ai/brand-hero.png" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+.pg-wrap{max-width:920px;margin:0 auto;padding:32px 24px 64px}
+.pg-hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:flex-start;margin-bottom:18px}
+.pg-hero h1{margin:0;font-size:28px;font-weight:500;letter-spacing:-0.01em}
+.pg-hero .sub{font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin:6px 0 0;text-transform:uppercase;letter-spacing:0.06em}
+.pg-hero .blurb{color:var(--ink-mute);font-size:14px;margin:8px 0 0;max-width:54ch;line-height:1.55}
+.k-badge{display:flex;flex-direction:column;align-items:center;justify-content:center;width:96px;height:96px;border-radius:12px;background:var(--bg-elev);border:1px solid var(--line);font-family:var(--mono)}
+.k-badge b{font-size:28px;color:var(--ink);font-weight:600}
+.k-badge small{font-size:10px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em;margin-top:3px}
+.share-row{display:flex;gap:8px;margin:14px 0;flex-wrap:wrap}
+.btn{display:inline-block;padding:6px 12px;border-radius:5px;border:1px solid var(--line-strong,#56606c);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#0b0d10}
+.chat{display:flex;flex-direction:column;gap:12px;background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:14px}
+.chat .messages{display:flex;flex-direction:column;gap:10px;min-height:280px;max-height:520px;overflow-y:auto;padding:8px 4px}
+.msg{padding:10px 14px;border-radius:8px;font-size:14px;line-height:1.55;max-width:88%}
+.msg.user{align-self:flex-end;background:var(--bg-elev);border:1px solid var(--line);color:var(--ink)}
+.msg.bot{align-self:flex-start;background:var(--bg-card);border:1px solid var(--line);color:var(--ink)}
+.msg .who{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin-bottom:4px}
+.composer{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding-top:12px;border-top:1px solid var(--line)}
+.composer textarea{background:var(--bg-elev);border:1px solid var(--line);border-radius:6px;padding:10px 12px;color:var(--ink);font-family:var(--sans,inherit);font-size:14px;resize:vertical;min-height:64px}
+.composer textarea:focus{outline:none;border-color:var(--accent)}
+.quota{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:8px;text-transform:uppercase;letter-spacing:0.06em}
+.foot-link{display:block;font-family:var(--mono);font-size:12px;color:var(--ink-mute);margin-top:18px;text-align:center}
+.foot-link a{color:var(--accent);text-decoration:none}
+body[data-embed="true"] .ks-nav-wrap, body[data-embed="true"] .ks-foot, body[data-embed="true"] .pg-hero .sub, body[data-embed="true"] .pg-hero .blurb, body[data-embed="true"] .share-row{display:none}
+body[data-embed="true"] .pg-wrap{padding:14px}
+@media (max-width:680px){.pg-hero{grid-template-columns:1fr}}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/nav.js"></script>
+</head>
+<body class="ks">
+<a href="#main" class="ks-skip">Skip to content</a>
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list"><li><a href="/wrapper">Wrapper</a></li><li><a href="/studio">Studio</a></li><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li></ul>
+    <div class="ks-nav__right"><a href="/signup?intent=login" class="ks-nav__signin">Sign in</a><a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started</a></div>
+  </nav>
+</div>
+
+<main id="main" class="pg-wrap">
+<div class="pg-hero">
+  <div>
+    <h1 id="pg-name">support-triage</h1>
+    <div class="sub">Public playground &middot; <span id="pg-quant">INT4</span> &middot; <span id="pg-base">Qwen2.5-7B</span></div>
+    <p class="blurb">Try this signed <code>.kolm</code> artifact live, no account required. <b>20 messages per IP per day.</b> Replies are streamed from a fleet RunPod proxy &mdash; quality matches the local <code>kolm run</code> result.</p>
+  </div>
+  <div class="k-badge"><b id="pg-k">0.91</b><small>K-Score</small></div>
+</div>
+
+<div class="share-row">
+  <button class="btn" id="btn-share">Copy share link</button>
+  <button class="btn" id="btn-embed">Copy embed snippet</button>
+  <a class="btn" id="btn-passport" href="#">View passport</a>
+  <a class="btn primary" href="/account/create-model">Fork &amp; re-compile</a>
+</div>
+
+<div class="chat" aria-label="Playground chat">
+  <div class="messages" id="messages">
+    <div class="msg bot"><div class="who">Bot</div><div>Hi. Try something this model would see in production. Example: "where is my order #4892?"</div></div>
+  </div>
+  <form class="composer" id="composer" autocomplete="off">
+    <textarea id="composer-input" placeholder="Ask the model anything&hellip;" rows="2" aria-label="Message"></textarea>
+    <button class="btn primary" id="composer-send" type="submit">Send</button>
+  </form>
+  <div class="quota"><span id="quota-left">20 messages left today</span><span>Powered by .kolm</span></div>
+</div>
+
+<div class="foot-link">
+  Like what you see? <a href="/account/create-model">Compile your own specialist &rarr;</a>
+</div>
+</main>
+
+<script>
+(function(){
+  // Embed mode: hide chrome when ?embed=1
+  try {
+    const u = new URL(window.location.href);
+    if (u.searchParams.get('embed') === '1') document.body.dataset.embed = 'true';
+    const m = window.location.pathname.match(/\/playground\/([^\/?#]+)/);
+    const slug = m && m[1] ? decodeURIComponent(m[1]) : 'support-triage';
+    document.getElementById('pg-name').textContent = slug;
+    document.getElementById('btn-passport').href = '/account/artifacts/' + encodeURIComponent(slug);
+    document.title = slug + ' · Public playground · kolm.ai';
+  } catch (_) {}
+
+  const QUOTA_KEY = 'kolm-playground-quota-v1';
+  function getQuota() {
+    try {
+      const raw = localStorage.getItem(QUOTA_KEY);
+      if (!raw) return { date: new Date().toISOString().slice(0, 10), left: 20 };
+      const j = JSON.parse(raw);
+      const today = new Date().toISOString().slice(0, 10);
+      if (j.date !== today) return { date: today, left: 20 };
+      return j;
+    } catch (_) { return { date: new Date().toISOString().slice(0, 10), left: 20 }; }
+  }
+  function setQuota(q) { try { localStorage.setItem(QUOTA_KEY, JSON.stringify(q)); } catch (_) {} }
+  function refreshQuotaUI() {
+    const q = getQuota();
+    document.getElementById('quota-left').textContent = q.left + ' message' + (q.left === 1 ? '' : 's') + ' left today';
+    document.getElementById('composer-send').disabled = q.left <= 0;
+  }
+  refreshQuotaUI();
+
+  document.getElementById('btn-share').addEventListener('click', () => {
+    try { navigator.clipboard.writeText(window.location.href.split('?')[0]); } catch(_) {}
+    document.getElementById('btn-share').textContent = 'Copied';
+    setTimeout(() => document.getElementById('btn-share').textContent = 'Copy share link', 1500);
+  });
+  document.getElementById('btn-embed').addEventListener('click', () => {
+    const url = window.location.href.split('?')[0] + '?embed=1';
+    const snippet = `<iframe src="${url}" style="width:100%;height:560px;border:1px solid #dde1e7;border-radius:10px"></iframe>`;
+    try { navigator.clipboard.writeText(snippet); } catch(_) {}
+    document.getElementById('btn-embed').textContent = 'Copied';
+    setTimeout(() => document.getElementById('btn-embed').textContent = 'Copy embed snippet', 1500);
+  });
+
+  const form = document.getElementById('composer');
+  const input = document.getElementById('composer-input');
+  const messages = document.getElementById('messages');
+  function appendMsg(who, text) {
+    const div = document.createElement('div');
+    div.className = 'msg ' + (who === 'user' ? 'user' : 'bot');
+    div.innerHTML = '<div class="who"></div><div class="body"></div>';
+    div.querySelector('.who').textContent = who === 'user' ? 'You' : 'Bot';
+    div.querySelector('.body').textContent = text;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  }
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const txt = input.value.trim();
+    if (!txt) return;
+    const q = getQuota();
+    if (q.left <= 0) { appendMsg('bot', 'Daily quota reached. Sign in for unlimited.'); return; }
+    appendMsg('user', txt);
+    input.value = '';
+    q.left -= 1; setQuota(q); refreshQuotaUI();
+    const m = window.location.pathname.match(/\/playground\/([^\/?#]+)/);
+    const slug = m && m[1] ? decodeURIComponent(m[1]) : 'support-triage';
+    try {
+      const r = await fetch('/v1/playground/proxy/' + encodeURIComponent(slug), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: txt }),
+      });
+      const j = await r.json();
+      appendMsg('bot', j && j.reply ? j.reply : '(no reply)');
+    } catch (_) {
+      appendMsg('bot', 'Could not reach the proxy. Retry?');
+    }
+  });
+})();
+</script>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__base"><span>&copy; 2026 kolm.ai - Apache-2.0</span><span><a href="/verify-prod" class="ks-accent">Verify a .kolm</a></span></div>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Angle Health × kolm — ROI calculator</title>
+<meta name="description" content="Conservative ROI estimator for Angle Health on a kolm distilled tier-1 prior-auth specialist. Tune for your member volume, AHT, and cost-per-agent. No assumptions you cannot read.">
+<meta name="theme-color" content="#f3f5f7">
+<style>
+  :root {
+    --ink:#1f2937; --ink-2:#56606c; --ink-3:#a8b3c2; --ink-4:#525a64;
+    --bg:#f3f5f7; --bg-2:#eef1f4; --rule:#dde1e7;
+    --mono: ui-monospace, "JetBrains Mono", monospace;
+    --display: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--ink); font-family: var(--display); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  body { max-width: 1080px; margin: 0 auto; padding: 56px 32px 80px; }
+
+  header { margin-bottom: 32px; }
+  .eyebrow { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-4); margin-bottom: 10px; }
+  h1 { font-weight: 580; font-size: 32px; letter-spacing: -0.025em; line-height: 1.1; margin-bottom: 14px; max-width: 22ch; }
+  .lede { font-size: 16px; color: var(--ink-2); max-width: 60ch; }
+
+  .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 880px) { .layout { grid-template-columns: 1fr; } }
+
+  .panel { padding: 24px; background: #fff; border: 1px solid var(--rule); border-radius: 12px; }
+  .panel h2 { font-weight: 580; font-size: 18px; margin-bottom: 14px; letter-spacing: -0.015em; }
+
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-size: 13.5px; color: var(--ink); margin-bottom: 6px; font-weight: 500; }
+  .field .help { font-size: 12px; color: var(--ink-4); margin-top: 4px; }
+  .field input[type="number"], .field input[type="range"] { width: 100%; }
+  .field input[type="number"] { padding: 10px 12px; border: 1px solid var(--rule); border-radius: 6px; font-family: var(--mono); font-size: 14px; background: var(--bg); color: var(--ink); }
+  .field input[type="number"]:focus { outline: 2px solid var(--ink); outline-offset: -1px; }
+  .field input[type="range"] { accent-color: var(--ink); }
+  .row { display: flex; gap: 12px; align-items: baseline; }
+  .row .v { font-family: var(--mono); color: var(--ink); font-size: 14px; min-width: 80px; text-align: right; }
+
+  .out { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .stat { padding: 16px; background: var(--bg-2); border: 1px solid var(--rule); border-radius: 8px; }
+  .stat__k { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-4); margin-bottom: 6px; }
+  .stat__v { font-family: var(--mono); font-size: 22px; color: var(--ink); font-feature-settings: "tnum"; }
+  .stat__sub { font-size: 12px; color: var(--ink-2); margin-top: 4px; }
+  .stat.big { grid-column: 1 / -1; padding: 20px; }
+  .stat.big .stat__v { font-size: 32px; }
+
+  .assumptions { margin-top: 16px; font-size: 12.5px; color: var(--ink-2); }
+  .assumptions ul { padding-left: 18px; margin-top: 6px; }
+  .assumptions li { margin-bottom: 4px; }
+
+  footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--rule); font-size: 12px; color: var(--ink-4); display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  footer a { color: var(--ink); border-bottom: 1px dashed var(--ink-3); text-decoration: none; }
+
+  details { margin-top: 14px; }
+  summary { cursor: pointer; font-size: 13px; color: var(--ink-2); }
+  summary:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">Angle Health × kolm.ai &middot; ROI estimator</p>
+  <h1>What does a tier-1 prior-auth specialist save Angle?</h1>
+  <p class="lede">Default values are conservative and named in the assumption box. Tune for your member volume, your AHT (average handle time), and your loaded cost per agent-hour. The numbers below recompute live.</p>
+</header>
+
+<div class="layout">
+  <div class="panel">
+    <h2>Inputs</h2>
+
+    <div class="field">
+      <label for="members">Members covered</label>
+      <input type="number" id="members" value="120000" min="1000" step="1000">
+      <p class="help">Default: 120,000 (Angle public posture, May 2026).</p>
+    </div>
+
+    <div class="field">
+      <label for="ticketsPerMemberPerYear">Support / prior-auth tickets per member per year</label>
+      <input type="number" id="ticketsPerMemberPerYear" value="0.6" min="0.05" step="0.05">
+      <p class="help">Default: 0.6 (industry benchmark for direct-to-employer health plans).</p>
+    </div>
+
+    <div class="field">
+      <label for="ahtMinutes">Current AHT (average handle time, minutes)</label>
+      <input type="number" id="ahtMinutes" value="14" min="2" step="1">
+      <p class="help">Default: 14 min (combined queue + handle for tier-1 ticket).</p>
+    </div>
+
+    <div class="field">
+      <label for="loadedCostPerAgentHour">Loaded cost per agent-hour (USD)</label>
+      <input type="number" id="loadedCostPerAgentHour" value="55" min="20" step="1">
+      <p class="help">Default: $55/hr (US tier-1 health-plan agent, fully loaded).</p>
+    </div>
+
+    <div class="field">
+      <label for="deflectionRate">Expected deflection rate (% of tickets the specialist closes without an agent)</label>
+      <input type="number" id="deflectionRate" value="0.35" min="0.05" max="0.85" step="0.01">
+      <p class="help">Default: 35% (conservative; vertical recipes typically see 40-60% after one quarter of capture-driven retraining).</p>
+    </div>
+
+    <div class="field">
+      <label for="ahtReductionOnAssisted">AHT reduction on the assisted (non-deflected) tickets (%)</label>
+      <input type="number" id="ahtReductionOnAssisted" value="0.22" min="0" max="0.6" step="0.01">
+      <p class="help">Default: 22% (drafting + summarisation lift, conservative).</p>
+    </div>
+
+    <div class="field">
+      <label for="kolmRunCostMonthly">kolm run cost / month (USD)</label>
+      <input type="number" id="kolmRunCostMonthly" value="3800" min="0" step="100">
+      <p class="help">Default: $3,800/mo. Includes a 4-GPU A10G fleet (~$2,600/mo) + a monthly re-distill batch on an A100 spot (~$1,200/mo). Apache-2.0 software has no per-token markup.</p>
+    </div>
+
+    <div class="field">
+      <label for="implementationCost">One-time implementation cost (USD)</label>
+      <input type="number" id="implementationCost" value="42000" min="0" step="1000">
+      <p class="help">Default: $42,000. Covers BYOC bundle wire-up, redactor profile tuning, capture lake hookup, first compile, BAA, and a security review readback. Charged once at go-live.</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Estimated impact, year 1</h2>
+    <div class="out">
+      <div class="stat big">
+        <div class="stat__k">net savings, year 1</div>
+        <div class="stat__v" id="outNet">--</div>
+        <div class="stat__sub" id="outNetSub">vs current agent cost, after kolm run + implementation</div>
+      </div>
+      <div class="stat">
+        <div class="stat__k">tickets / year</div>
+        <div class="stat__v" id="outTickets">--</div>
+      </div>
+      <div class="stat">
+        <div class="stat__k">deflected</div>
+        <div class="stat__v" id="outDeflected">--</div>
+      </div>
+      <div class="stat">
+        <div class="stat__k">agent-hours saved</div>
+        <div class="stat__v" id="outHours">--</div>
+        <div class="stat__sub">deflection + AHT reduction</div>
+      </div>
+      <div class="stat">
+        <div class="stat__k">gross labor saving</div>
+        <div class="stat__v" id="outGross">--</div>
+      </div>
+      <div class="stat">
+        <div class="stat__k">kolm cost, year 1</div>
+        <div class="stat__v" id="outCost">--</div>
+        <div class="stat__sub">run + implementation</div>
+      </div>
+      <div class="stat">
+        <div class="stat__k">payback period</div>
+        <div class="stat__v" id="outPayback">--</div>
+        <div class="stat__sub">months to break even</div>
+      </div>
+    </div>
+
+    <details>
+      <summary>Show the formulas (no magic)</summary>
+      <div class="assumptions">
+        <ul>
+          <li><b>tickets/year</b> = members &times; tickets_per_member_per_year</li>
+          <li><b>deflected</b> = tickets/year &times; deflection_rate</li>
+          <li><b>assisted</b> = tickets/year &minus; deflected</li>
+          <li><b>hours_deflected</b> = deflected &times; (AHT_minutes / 60)</li>
+          <li><b>hours_saved_on_assisted</b> = assisted &times; (AHT_minutes / 60) &times; AHT_reduction</li>
+          <li><b>agent_hours_saved</b> = hours_deflected + hours_saved_on_assisted</li>
+          <li><b>gross_labor_saving</b> = agent_hours_saved &times; loaded_cost_per_agent_hour</li>
+          <li><b>kolm_cost_year_1</b> = kolm_run_cost_monthly &times; 12 + implementation_cost</li>
+          <li><b>net_savings_year_1</b> = gross_labor_saving &minus; kolm_cost_year_1</li>
+          <li><b>payback_months</b> = (implementation_cost) / ((gross_labor_saving / 12) &minus; kolm_run_cost_monthly)</li>
+        </ul>
+      </div>
+    </details>
+
+    <div class="assumptions" style="margin-top:18px;">
+      <b style="color:var(--ink)">Conservative defaults justified:</b>
+      <ul>
+        <li>Deflection rate starts at 35%; specialist models trained on captured tickets typically reach 40-60% within a quarter of re-distill cycles. We hold the model to 35% in this view.</li>
+        <li>AHT reduction on assisted tickets is 22%; published draft-assistant studies see 30-50%. We use 22% to keep the bar low.</li>
+        <li>Loaded cost per agent-hour is $55/hr fully loaded. If you use a higher BPO rate, the savings scale linearly.</li>
+        <li>kolm run cost is hardware + power + a monthly re-distill batch. No per-token markup; the gateway is Apache-2.0 software.</li>
+        <li>This estimator is for tier-1 specialist deflection only. It does not credit downstream effects (member NPS lift, fewer manual chart reviews, lower handoff loss). Real ROI is typically higher.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>Estimator v1 &middot; conservative defaults &middot; 2026-05-28</span>
+  <span>Want this pre-loaded with your numbers? <a href="mailto:rodneyyesep@gmail.com?subject=Angle%20ROI%20preload">Email us</a>.</span>
+</footer>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var fmt = function(n, opts){
+    opts = opts || {};
+    if (!isFinite(n)) return '--';
+    if (opts.usd) {
+      return '$' + Math.round(n).toLocaleString('en-US');
+    }
+    if (opts.int) return Math.round(n).toLocaleString('en-US');
+    if (opts.months) return n.toFixed(1) + ' mo';
+    return n.toLocaleString('en-US');
+  };
+  var inputs = ['members','ticketsPerMemberPerYear','ahtMinutes','loadedCostPerAgentHour','deflectionRate','ahtReductionOnAssisted','kolmRunCostMonthly','implementationCost'];
+  function readNum(id){ var v = parseFloat($(id).value); return isFinite(v) ? v : 0; }
+
+  function compute() {
+    var members = readNum('members');
+    var tpmpy = readNum('ticketsPerMemberPerYear');
+    var aht = readNum('ahtMinutes');
+    var cost = readNum('loadedCostPerAgentHour');
+    var defl = readNum('deflectionRate');
+    var ahtRed = readNum('ahtReductionOnAssisted');
+    var runMo = readNum('kolmRunCostMonthly');
+    var impl = readNum('implementationCost');
+
+    var tickets = members * tpmpy;
+    var deflected = tickets * defl;
+    var assisted = tickets - deflected;
+    var hoursDeflected = deflected * (aht / 60);
+    var hoursSavedOnAssisted = assisted * (aht / 60) * ahtRed;
+    var agentHoursSaved = hoursDeflected + hoursSavedOnAssisted;
+    var grossLaborSaving = agentHoursSaved * cost;
+    var kolmCostY1 = runMo * 12 + impl;
+    var netY1 = grossLaborSaving - kolmCostY1;
+    var monthlyNetAfterPayback = (grossLaborSaving / 12) - runMo;
+    var paybackMonths = monthlyNetAfterPayback > 0 ? (impl / monthlyNetAfterPayback) : Infinity;
+
+    $('outTickets').textContent = fmt(tickets, {int:true});
+    $('outDeflected').textContent = fmt(deflected, {int:true});
+    $('outHours').textContent = fmt(agentHoursSaved, {int:true});
+    $('outGross').textContent = fmt(grossLaborSaving, {usd:true});
+    $('outCost').textContent = fmt(kolmCostY1, {usd:true});
+    $('outNet').textContent = fmt(netY1, {usd:true});
+    $('outNetSub').textContent = netY1 > 0
+      ? 'Saving vs current agent cost, after all kolm spend, year 1.'
+      : 'Net loss in year 1; revisit deflection rate or AHT lift before pilot.';
+    $('outPayback').textContent = isFinite(paybackMonths) && paybackMonths > 0
+      ? fmt(paybackMonths, {months:true})
+      : (monthlyNetAfterPayback <= 0 ? 'no payback at these inputs' : 'immediate');
+  }
+
+  inputs.forEach(function(id){
+    $(id).addEventListener('input', compute);
+    $(id).addEventListener('change', compute);
+  });
+  compute();
+})();
+</script>
+</body>
+</html>

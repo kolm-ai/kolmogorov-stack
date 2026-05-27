@@ -3377,6 +3377,35 @@ EXAMPLES
   kolm team invite acme alice@example.com --role admin
   kolm team queue list --json
 `,
+  group: `kolm group - compile groups: bundle namespaces that should compile as one model.
+
+USAGE
+  kolm group create <name> [--namespaces "ns1,ns2,..."]    create a named compile group
+  kolm group list                                          list groups in this tenant
+  kolm group show <slug>                                   show one group (namespaces, last compile)
+  kolm group update <slug> [--name N] [--add-namespace n]  edit a group
+                          [--remove-namespace n]
+  kolm group delete <slug>                                 soft-delete a group
+
+A compile group bundles namespaces so they train as one model. Example:
+  support-all = retail-support + b2b-support + billing-support
+Then 'kolm compile --group support-all' pulls captures from each namespace
+and the passport records {source:'group', namespaces:[...]} for verifiers.
+
+FLAGS
+  --namespaces        comma-or-space-separated list at create time
+  --add-namespace     append one namespace (repeatable)
+  --remove-namespace  drop one namespace (repeatable)
+  --json              deterministic envelope for scripts
+
+EXIT CODES
+  0 ok   1 user error   2 server error   3 auth required
+
+EXAMPLES
+  kolm group create support-all --namespaces "retail-support,b2b-support"
+  kolm group update support-all --add-namespace billing-support
+  kolm compile --group support-all --target gguf-q4km
+`,
   tunnel: `kolm tunnel - remote access to a self-hosted .kolm via a signed reverse tunnel.
 
 USAGE
@@ -7710,6 +7739,68 @@ async function cmdCompile(args) {
     }
   }
 
+  // W910-E2 — `--group <slug>` pulls captures from every namespace in a compile
+  // group. Resolved BEFORE the rent / namespace / spec paths so the downstream
+  // pipeline sees a normal --namespace value. The full group descriptor (slug,
+  // member namespaces, per-namespace pair counts) is stashed in
+  // KOLM_COMPILE_GROUP_CONTEXT so src/runtime-passport.js (or any caller) can
+  // attach it to the passport without circular-importing this CLI.
+  const groupIdx = args.indexOf('--group');
+  if (groupIdx >= 0) {
+    const groupRef = args[groupIdx + 1];
+    if (!groupRef || groupRef.startsWith('--')) {
+      console.error('error: --group needs a group slug or id (e.g. support-all)');
+      console.error('       kolm group list  # see your groups');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const groups = await import('../src/groups.js');
+    const c = loadConfig();
+    const tenantId = process.env.KOLM_TENANT_ID
+      || c.tenant_id
+      || (c.api_key ? `tenant_${String(c.api_key).slice(3, 19)}` : 'tenant_local');
+    // Pre-fetch capture counts per namespace (capture-store.countCaptures is
+    // async) so the sync countPairs() callback inside resolveGroupForCompile
+    // can return a plain number.
+    const preview = groups.getGroup(tenantId, groupRef);
+    const counts = {};
+    if (preview && Array.isArray(preview.namespaces)) {
+      try {
+        const store = await import('../src/capture-store.js');
+        for (const ns of preview.namespaces) {
+          try { counts[ns] = await store.countCaptures(tenantId, ns); }
+          catch { counts[ns] = 0; }
+        }
+      } catch {
+        for (const ns of preview.namespaces) counts[ns] = 0;
+      }
+    }
+    let resolved;
+    try {
+      resolved = groups.resolveGroupForCompile(tenantId, groupRef, {
+        countPairs: (ns) => counts[ns] || 0,
+      });
+    } catch (e) {
+      const code = e && e.code === 'not_found' ? EXIT.NOT_FOUND : EXIT.BAD_ARGS;
+      console.error('error: ' + (e.message || String(e)));
+      if (e && e.code === 'not_found') console.error('       kolm group list  # see available groups');
+      if (e && e.code === 'empty_group') console.error(`       kolm group update ${groupRef} --add-namespace <n>`);
+      process.exit(code);
+    }
+    const passportDesc = groups.passportSourceFromGroup(resolved);
+    process.env.KOLM_COMPILE_GROUP_CONTEXT = JSON.stringify(passportDesc);
+    args.splice(groupIdx, 2);
+    // If --namespace isn't already passed, default to the first namespace in
+    // the group so the rest of the pipeline keeps working unchanged. The
+    // passport context still records the full group membership.
+    if (args.indexOf('--namespace') < 0 && args.indexOf('-n') < 0) {
+      args.push('--namespace', resolved.namespaces[0]);
+    }
+    console.error(`[group] ${resolved.group.slug}: ${resolved.namespaces.length} namespaces, ${resolved.total_pairs} pairs total`);
+    for (const ns of resolved.namespaces) {
+      console.error(`        ${ns.padEnd(28)} ${resolved.pairs_per_namespace[ns]} pairs`);
+    }
+  }
+
   // ---- Rent-compile path: ship a spec to a rental backend (modal/vast/lambda/runpod),
   // train remotely, fetch the .kolm back. Must run BEFORE the local --spec path
   // since both require --spec; the presence of --rent decides where the work lands.
@@ -7946,6 +8037,122 @@ async function cmdCompile(args) {
       }
       return;
     }
+  }
+
+  // ---- W910 Track A: data-ingestion fallthrough --------------------------------
+  // --data <file|dir> / --describe "..." / --docs <folder> let a non-technical
+  // user point the CLI at their real corpus without writing JSON. Any of these
+  // three (or combinations) synthesize a spec on disk and inject `--spec
+  // <tmp>` so the rest of the compile pipeline is unchanged.
+  const dataIdxC = args.indexOf('--data');
+  const describeIdxC = args.indexOf('--describe');
+  const docsIdxC = args.indexOf('--docs');
+  if ((dataIdxC >= 0 || describeIdxC >= 0 || docsIdxC >= 0) && args.indexOf('--spec') < 0) {
+    const ingest = await import('../src/data-ingest.js');
+    const sources = [];
+    const passport = {};
+    try {
+      if (dataIdxC >= 0) {
+        const dataPath = args[dataIdxC + 1];
+        if (!dataPath || dataPath.startsWith('--')) { console.error('error: --data needs a file or directory path.'); process.exit(EXIT.BAD_ARGS); }
+        const inputCol = pickFlag(args, '--input-col');
+        const outputCol = pickFlag(args, '--output-col');
+        const r = await ingest.ingestData(dataPath, { inputCol, outputCol });
+        sources.push(r);
+        passport.upload = { file: r.stats.file || r.stats.directory, kept: r.stats.kept, raw: r.stats.raw_rows, sha256: r.stats.file_sha256 || null };
+        console.error(`[ingest] --data ${path.basename(dataPath)}: kept ${r.stats.kept} / ${r.stats.raw_rows} pairs (dropped empty=${r.stats.dropped_empty} dup=${r.stats.dropped_dup} long=${r.stats.dropped_long})`);
+      }
+      if (docsIdxC >= 0) {
+        const docsPath = args[docsIdxC + 1];
+        if (!docsPath || docsPath.startsWith('--')) { console.error('error: --docs needs a directory path.'); process.exit(EXIT.BAD_ARGS); }
+        const r = await ingest.ingestDocs(docsPath);
+        sources.push(r);
+        passport.docs = { folder: r.stats.folder, files: r.stats.files_scanned, chunks: r.stats.chunks, kept: r.stats.kept };
+        console.error(`[ingest] --docs ${path.basename(docsPath)}: ${r.stats.files_scanned} files / ${r.stats.chunks} chunks → ${r.stats.kept} Q&A pairs`);
+      }
+      if (describeIdxC >= 0) {
+        const desc = args[describeIdxC + 1];
+        if (!desc || desc.startsWith('--')) { console.error('error: --describe needs a description string in quotes.'); process.exit(EXIT.BAD_ARGS); }
+        const countFlag = pickFlag(args, '--count');
+        const budgetFlag = pickFlag(args, '--budget-usd');
+        const r = await ingest.ingestDescribe(desc, {
+          count: countFlag ? Number(countFlag) : undefined,
+          budgetUsd: budgetFlag ? Number(budgetFlag) : undefined,
+          onProgress: ({ stage, done, total }) => {
+            if (stage === 'describe-batch') process.stderr.write(`\r[describe] ${done}/${total} pairs generated`);
+            if (stage === 'teacher-fallback') console.error(`\n[describe] teacher unavailable; using bootstrap scaffolds`);
+          },
+        });
+        if (r.stats.mode === 'teacher') process.stderr.write('\n');
+        sources.push(r);
+        passport.describe = { mode: r.stats.mode, generated: r.stats.generated, kept: r.stats.kept, estimated_cost_usd: r.stats.estimated_cost_usd };
+        console.error(`[ingest] --describe (${r.stats.mode}): generated ${r.stats.generated} pairs, kept ${r.stats.kept}`);
+      }
+    } catch (e) {
+      console.error(`error: ${e.message}`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+
+    const merged = ingest.mergeAndDedupe(sources);
+    if (merged.rows.length === 0) {
+      console.error('error: no usable training pairs produced from --data / --describe / --docs sources.');
+      nextStep({ try: ['kolm compile --data <file.csv> --dry-run', 'kolm compile --describe "..." --dry-run'] });
+      process.exit(EXIT.BAD_ARGS);
+    }
+
+    console.error(`[ingest] merged ${merged.stats.merged} pairs from ${Object.keys(merged.stats.by_source).join('+')} → ${merged.stats.after_dedupe} after cross-source dedupe`);
+
+    // Dry-run: print plan + cost estimate and stop here.
+    if (args.includes('--dry-run')) {
+      const estCost = merged.rows.length * 0.001;
+      const out = {
+        ok: true,
+        dry_run: true,
+        ingest: {
+          sources: passport,
+          merged: merged.stats.merged,
+          after_dedupe: merged.stats.after_dedupe,
+          estimated_compile_cost_usd: estCost,
+        },
+        next_steps: [
+          'remove --dry-run to actually compile',
+          `or: kolm compile --data ... --target gguf-q4km --tier 3090`,
+        ],
+      };
+      if (args.includes('--json')) {
+        console.log(JSON.stringify(out, null, 2));
+      } else {
+        console.log('');
+        console.log('Data-ingestion plan:');
+        console.log(`  sources:             ${Object.keys(passport).join(', ')}`);
+        console.log(`  pairs after dedupe:  ${merged.stats.after_dedupe}`);
+        console.log(`  est. compile cost:   $${estCost.toFixed(2)}`);
+        console.log('');
+        console.log('Re-run without --dry-run to compile.');
+      }
+      return;
+    }
+
+    // Synthesize spec + seeds and inject --spec into argv so the existing
+    // compile pipeline runs unchanged.
+    const baseModelFlag = pickFlag(args, '--base-model');
+    const namespaceFlag = pickFlag(args, '--namespace');
+    const synthSpec = ingest.synthesizeSpec(merged.rows, {
+      baseModel: baseModelFlag || undefined,
+      namespace: namespaceFlag || 'data-ingest',
+      description: describeIdxC >= 0 ? args[describeIdxC + 1] : undefined,
+      passport,
+    });
+    const os = await import('node:os');
+    const tmpDir = path.join(os.tmpdir(), `kolm-ingest-${Date.now()}`);
+    fs.mkdirSync(tmpDir, { recursive: true });
+    const specPath = path.join(tmpDir, 'synth-spec.json');
+    fs.writeFileSync(specPath, JSON.stringify(synthSpec, null, 2));
+    const seedsPath = path.join(tmpDir, 'seeds.jsonl');
+    ingest.writeSeedsJsonl(merged.rows, seedsPath);
+    args.push('--spec', specPath, '--seeds', seedsPath);
+    console.error(`[ingest] synth spec: ${specPath}`);
+    console.error(`[ingest] seeds:      ${seedsPath}`);
   }
 
   const specIdx = args.indexOf('--spec');
@@ -28506,6 +28713,111 @@ function rejectUnknownFlags(args, allowed, ctx) {
   throw err;
 }
 
+// ---------- kolm group ----------
+// Compile groups bundle namespaces that should compile as one model. Persistence
+// is via src/groups.js (table 'groups'), scoped by tenant_id. The dispatcher
+// resolves the caller's tenant from KOLM_TENANT_ID env or the local config.
+async function cmdGroup(args) {
+  const sub = args.find(a => !a.startsWith('-')) ?? args[0];
+  const subIdx = sub ? args.indexOf(sub) : -1;
+  const rest = subIdx >= 0 ? args.slice(subIdx + 1) : args.slice(1);
+  if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
+    usage('group');
+    return;
+  }
+  const wantJson = args.includes('--json');
+  const groups = await import('../src/groups.js');
+  const c = loadConfig();
+  const tenantId = process.env.KOLM_TENANT_ID
+    || c.tenant_id
+    || (c.api_key ? `tenant_${String(c.api_key).slice(3, 19)}` : 'tenant_local');
+
+  if (sub === 'create') {
+    const name = rest.find(a => !a.startsWith('-'));
+    if (!name) { console.error('error: kolm group create <name> --namespaces "ns1,ns2"'); process.exit(EXIT.BAD_ARGS); }
+    const nsFlag = flag(rest, '--namespaces') || flag(rest, '--namespace') || '';
+    try {
+      const row = groups.createGroup({ tenantId, name, namespaces: nsFlag });
+      if (wantJson) { console.log(JSON.stringify(row, null, 2)); return; }
+      console.log(`created group: ${row.slug}`);
+      console.log(`  id:         ${row.id}`);
+      console.log(`  name:       ${row.name}`);
+      console.log(`  namespaces: ${(row.namespaces || []).join(', ') || '(none — add with: kolm group update ' + row.slug + ' --add-namespace <n>)'}`);
+      console.log('');
+      console.log(`compile:    kolm compile --group ${row.slug} --target gguf-q4km`);
+    } catch (e) {
+      console.error('error: ' + (e.message || String(e)));
+      process.exit(EXIT.BAD_ARGS);
+    }
+    return;
+  }
+  if (sub === 'list' || sub === 'ls') {
+    const rows = groups.listGroups(tenantId);
+    if (wantJson) { console.log(JSON.stringify({ groups: rows }, null, 2)); return; }
+    if (!rows.length) { console.log('(no groups; create one with `kolm group create <name>`)'); return; }
+    for (const g of rows) {
+      const nsLine = (g.namespaces || []).length
+        ? (g.namespaces || []).join(',')
+        : '(empty)';
+      console.log(`${g.slug.padEnd(24)} ${String((g.namespaces || []).length).padStart(3)}ns  ${nsLine}  — ${g.name}`);
+    }
+    return;
+  }
+  if (sub === 'show') {
+    const slug = rest.find(a => !a.startsWith('-'));
+    if (!slug) { console.error('error: slug required'); process.exit(EXIT.BAD_ARGS); }
+    const row = groups.getGroup(tenantId, slug);
+    if (!row) { console.error(`error: group not found: ${slug}`); process.exit(EXIT.NOT_FOUND); }
+    if (wantJson) { console.log(JSON.stringify(row, null, 2)); return; }
+    console.log(`group:      ${row.slug}`);
+    console.log(`  id:         ${row.id}`);
+    console.log(`  name:       ${row.name}`);
+    console.log(`  namespaces: ${(row.namespaces || []).join(', ') || '(none)'}`);
+    console.log(`  created:    ${row.created_at}`);
+    console.log(`  updated:    ${row.updated_at}`);
+    return;
+  }
+  if (sub === 'update' || sub === 'edit') {
+    const slug = rest.find(a => !a.startsWith('-'));
+    if (!slug) { console.error('error: slug required'); process.exit(EXIT.BAD_ARGS); }
+    const name = flag(rest, '--name');
+    const namespaces = flag(rest, '--namespaces');
+    const addNamespaces = rest
+      .map((a, i) => a === '--add-namespace' ? rest[i + 1] : null)
+      .filter(Boolean);
+    const removeNamespaces = rest
+      .map((a, i) => a === '--remove-namespace' ? rest[i + 1] : null)
+      .filter(Boolean);
+    try {
+      const row = groups.updateGroup(tenantId, slug, {
+        name,
+        namespaces: namespaces || undefined,
+        addNamespaces: addNamespaces.length ? addNamespaces : undefined,
+        removeNamespaces: removeNamespaces.length ? removeNamespaces : undefined,
+      });
+      if (wantJson) { console.log(JSON.stringify(row, null, 2)); return; }
+      console.log(`updated:    ${row.slug}`);
+      console.log(`  namespaces: ${(row.namespaces || []).join(', ') || '(none)'}`);
+    } catch (e) {
+      const code = e && e.code === 'not_found' ? EXIT.NOT_FOUND : EXIT.BAD_ARGS;
+      console.error('error: ' + (e.message || String(e)));
+      process.exit(code);
+    }
+    return;
+  }
+  if (sub === 'delete' || sub === 'rm') {
+    const slug = rest.find(a => !a.startsWith('-'));
+    if (!slug) { console.error('error: slug required'); process.exit(EXIT.BAD_ARGS); }
+    const ok = groups.deleteGroup(tenantId, slug);
+    if (!ok) { console.error(`error: group not found: ${slug}`); process.exit(EXIT.NOT_FOUND); }
+    if (wantJson) { console.log(JSON.stringify({ ok: true, deleted: slug }, null, 2)); return; }
+    console.log(`deleted:    ${slug}`);
+    return;
+  }
+  console.error('unknown group subcommand: ' + sub);
+  process.exit(EXIT.BAD_ARGS);
+}
+
 async function cmdTeam(args) {
   // W384 — accept flags before the sub: scan for the first positional.
   const sub = args.find(a => !a.startsWith('-')) ?? args[0];
@@ -31114,6 +31426,8 @@ const COMPLETION_VERBS = [
   // W848 — interactive setup wizard: `kolm quickstart` picks wrapper or studio
   // and walks the user through the 4-5 setup steps with confirm-or-skip prompts.
   'quickstart',
+  // W910-E — compile groups: bundle namespaces that should compile as one model.
+  'group',
 ];
 const COMPLETION_SUBS = {
   auditor: ['keygen', 'sign', 'verify'],
@@ -31121,6 +31435,7 @@ const COMPLETION_SUBS = {
   compute: ['list', 'detect', 'pick', 'use', 'info', 'test', 'status'],
   airgap:  ['status', 'enable', 'disable', 'verify', 'test'],
   team:    ['create', 'list', 'show', 'invite', 'accept', 'members', 'role', 'remove', 'transfer', 'delete'],
+  group:   ['create', 'list', 'ls', 'show', 'update', 'edit', 'delete', 'rm'],
   tunnel:  ['new', 'list', 'start', 'close'],
     cloud:   ['broker', 'compute-plan', 'train', 'readiness', 'doctor', 'storage', 'targets', 'deploy-plan', 'deploy', 'list', 'show', 'destroy'],
   surfaces: [],
@@ -39529,7 +39844,7 @@ async function _dispatchVerb(verb, args) {
     mesh: cmdMesh, migrate: cmdMigrate, wrap: cmdWrap,
     tail: cmdTail, replay: cmdReplay, sync: cmdSync, profile: cmdProfile, bridges: cmdBridges,
     drift: cmdDrift, install: cmdInstall, tune: cmdTune, rag: cmdRag,
-    team: cmdTeam, tunnel: cmdTunnel, cloud: cmdCloud, surfaces: cmdSurfaces,
+    team: cmdTeam, group: cmdGroup, tunnel: cmdTunnel, cloud: cmdCloud, surfaces: cmdSurfaces,
     packages: cmdPackages, package: cmdPackages, evidence: cmdEvidence, airgap: cmdAirgap,
     compute: cmdCompute, doctor: cmdDoctor, loop: cmdLoop, logs: cmdLogs,
     ask: cmdAsk, chat: cmdChat, 'chat-tui': cmdChatTui, completion: cmdCompletion,
@@ -39559,7 +39874,13 @@ async function _dispatchVerb(verb, args) {
   };
   const fn = table[verb];
   if (!fn) {
-    console.error('unknown verb: ' + verb);
+    // W910-F1 — fuzzy verb suggestion. Suggest only when the typo is genuinely
+    // close (suggestVerb returns null otherwise) so we never confidently
+    // misdirect on a long mistype.
+    const guess = suggestVerb(verb, Object.keys(table));
+    let msg = 'unknown verb: ' + verb;
+    if (guess) msg += '\ndid you mean: kolm ' + guess + ' ?';
+    console.error(msg);
     process.exit(EXIT.BAD_ARGS);
   }
   return withErrorContext(verb, () => fn(args || []));

@@ -207,6 +207,62 @@
     <div class="metric-card"><div class="skel" style="width:160px"></div><div class="skel" style="width:220px;margin-top:8px"></div></div>
   </div>
 </section>
+<section class="kpanel" data-w910="proactive-next-actions" aria-label="Proactive next actions">
+  <h2>What to do next</h2>
+  <p class="pdesc">Proactive cards ranked by impact: compile-ready namespaces, drift, stale artifacts, idle capture, cost burn, missing redaction, fallback rate. <a href="/account/settings/notifications" style="color:#56606c">Manage notifications</a>.</p>
+  <div id="w910-next-actions-body" aria-busy="true" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">
+    <div style="border:1px solid #e6eaef;background:#ffffff;border-radius:8px;padding:14px"><div class="skel" style="width:160px"></div><div class="skel" style="width:240px;margin-top:8px"></div></div>
+  </div>
+</section>
+<style>
+.w910-card{border:1px solid #e6eaef;background:#ffffff;border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;transition:background 120ms ease,border-color 120ms ease}
+.w910-card:hover{background:#f3f5f7;border-color:#a8b3c2}
+.w910-card__row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.w910-card__title{font-family:var(--mono,monospace);font-size:13.5px;font-weight:650;color:#1f2937;line-height:1.3}
+.w910-card__rank{font-family:var(--mono,monospace);font-size:10.5px;color:#56606c;text-transform:uppercase;letter-spacing:0.06em;padding:2px 8px;border:1px solid #e6eaef;border-radius:999px;background:#f3f5f7;white-space:nowrap}
+.w910-card__body{color:#525a64;font-size:12.5px;line-height:1.55}
+.w910-card__foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:auto}
+.w910-card__cta{display:inline-block;padding:6px 12px;border-radius:5px;border:1px solid #1f2937;background:#1f2937;color:#f3f5f7;font-family:var(--mono,monospace);font-size:11.5px;text-decoration:none}
+.w910-card__cta:hover{background:#525a64;border-color:#525a64;color:#f3f5f7}
+.w910-card__dismiss{font-family:var(--mono,monospace);font-size:11.5px;color:#56606c;background:transparent;border:0;padding:4px 8px;cursor:pointer;text-decoration:underline}
+.w910-card__dismiss:hover{color:#1f2937}
+.w910-card__type{font-family:var(--mono,monospace);font-size:10.5px;color:#56606c;text-transform:uppercase;letter-spacing:0.06em}
+.w910-empty{border:1px dashed #e6eaef;background:#f3f5f7;border-radius:8px;padding:18px;color:#56606c;font-size:13px;line-height:1.6;grid-column:1/-1}
+</style>
+<script>
+(function(){
+  var host=document.getElementById('w910-next-actions-body');
+  if(!host)return;
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
+  function render(actions){
+    if(!actions.length){host.innerHTML='<div class="w910-empty" data-empty-state>All clear. Capture more data or run <code>kolm compile</code>.</div>';return;}
+    host.innerHTML=actions.map(function(a,i){
+      var href=esc(a.cta_href||'/account/overview');
+      return '<article class="w910-card" data-w910="next-action" data-type="'+esc(a.type)+'">'+
+        '<div class="w910-card__row"><div><span class="w910-card__type">'+esc(a.type)+'</span><div class="w910-card__title">'+esc(a.title)+'</div></div><span class="w910-card__rank">rank '+(i+1)+'</span></div>'+
+        '<div class="w910-card__body">'+esc(a.body)+'</div>'+
+        '<div class="w910-card__foot"><a class="w910-card__cta" href="'+href+'">'+esc(a.cta_label||'Open')+'</a>'+
+        '<button class="w910-card__dismiss" type="button" data-snooze="'+esc(a.dismiss_key||'')+'">Dismiss</button></div>'+
+      '</article>';
+    }).join('');
+  }
+  function load(){
+    fetch('/v1/account/next-actions?limit=5',{credentials:'include',headers:{accept:'application/json'}})
+      .then(function(r){return r.ok?r.json():{actions:[]};})
+      .then(function(j){host.removeAttribute('aria-busy');render((j&&j.actions)||[]);})
+      .catch(function(){host.removeAttribute('aria-busy');host.innerHTML='<div class="w910-empty" data-empty-state>Next-actions engine unavailable.</div>';});
+  }
+  host.addEventListener('click',function(e){
+    var b=e.target.closest('[data-snooze]');if(!b)return;
+    var key=b.getAttribute('data-snooze');if(!key)return;
+    b.disabled=true;b.textContent='dismissing...';
+    fetch('/v1/account/next-actions/snooze',{method:'POST',credentials:'include',headers:{'content-type':'application/json',accept:'application/json'},body:JSON.stringify({dismiss_key:key,days:14})})
+      .then(function(){load();})
+      .catch(function(){b.disabled=false;b.textContent='Dismiss';});
+  });
+  load();
+})();
+</script>
 <div class="metric-grid" id="metric-grid" data-counter-count="9" aria-busy="true">
   <div class="metric-card" data-counter="captured-traffic"><div class="label">Captured AI calls</div><div class="value" id="m-events">...</div><div class="delta" id="m-events-d">&nbsp;</div></div>
   <div class="metric-card" data-counter="savings-opportunities"><div class="label">Savings opportunities</div><div class="value" id="m-opps">...</div><div class="delta" id="m-opps-d">&nbsp;</div></div>

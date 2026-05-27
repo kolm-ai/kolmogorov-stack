@@ -48,6 +48,7 @@ import {
   autoExtractReasoningTrace,
 } from './capture.js';
 import * as teams from './teams.js';
+import * as groupsModule from './groups.js';
 import * as tunnel from './tunnel.js';
 import * as byoc from './byoc.js';
 import { buildDeployPlan, deploymentMatrix } from './deployment-plans.js';
@@ -185,7 +186,17 @@ import {
   isDistillReady as notifIsDistillReady,
   fireThresholdAlert as notifFireThresholdAlert,
   publicConfig as notifPublicConfig,
+  NOTIFICATION_EVENT_TYPES as notifEventTypes,
+  getWebhookSettings as notifGetWebhookSettings,
+  setWebhookSettings as notifSetWebhookSettings,
+  notify as notifNotify,
+  listDeliveries as notifListDeliveries,
 } from './notifications.js';
+import { compute as computeNextActions, snooze as snoozeNextAction } from './next-actions.js';
+import {
+  listTemplates as recipeListTemplates,
+  getTemplate as recipeGetTemplate,
+} from './recipe-templates.js';
 
 // W368 connector daemon — direct passthrough routes for OpenAI/Anthropic/
 // OpenRouter/Gemini SDKs that point their BASE_URL at the daemon. Mounted
@@ -1266,6 +1277,181 @@ export function buildRouter() {
     res.set('X-Frame-Options', 'DENY');
     res.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     next();
+  });
+
+  // W910 Track B — no-code /account/create-model surface routes.
+  // Registered here, BEFORE the parameter-matching /v1/recipes/:id and
+  // /v1/compile/:id handlers further down, so the literal `templates` /
+  // `estimate` / `preview` / `start` segments resolve to the wizard
+  // handlers instead of being treated as IDs.
+  //
+  // All routes are public+stubbed by default (declared in PUBLIC_API in
+  // src/auth.js) so the no-code wizard works pre-auth. Rate-limited inside
+  // the handler via freeChatLimiter (20/IP/day for the budget-bearing ones).
+  // GET /v1/recipes/templates — picker for the "Start with a template" empty
+  // state. Curated catalog; no tenant scoping.
+  r.get('/v1/recipes/templates', (_req, res) => {
+    res.json({
+      ok: true,
+      templates: [
+        { id: 'support-triage',     name: 'Support triage',        recipe: 'support',   target_vram_gb: 24, blurb: 'Inbox classifier + reply drafter. Ships with 12 starter labels.' },
+        { id: 'soap-redactor',      name: 'SOAP note redactor',    recipe: 'medical',   target_vram_gb: 24, blurb: 'PHI scrub + structured SOAP extraction. HIPAA-shaped.' },
+        { id: 'invoice-extractor',  name: 'Invoice extractor',     recipe: 'default',   target_vram_gb: 16, blurb: 'PDF/image -> line-items JSON. Vendor-agnostic.' },
+        { id: 'code-review',        name: 'Code review assistant', recipe: 'code',      target_vram_gb: 48, blurb: 'Inline PR comments matching your team style guide.' },
+        { id: 'sales-summary',      name: 'Sales call summary',    recipe: 'default',   target_vram_gb: 16, blurb: 'Call transcript -> CRM-shaped summary + next action.' },
+        { id: 'legal-clause',       name: 'Legal clause finder',   recipe: 'legal',     target_vram_gb: 48, blurb: 'Spot non-standard clauses across contracts.' },
+        { id: 'prior-auth-review',  name: 'Prior-auth reviewer',   recipe: 'medical',   target_vram_gb: 24, blurb: 'Member auth request -> approve/deny/escalate.' },
+        { id: 'fraud-detector',     name: 'Fraud signal scorer',   recipe: 'financial', target_vram_gb: 24, blurb: 'Transaction stream -> risk score + reason codes.' },
+      ],
+    });
+  });
+
+  // POST /v1/compile/estimate — debounced cost/time estimate. Heuristic
+  // via src/compile-stream.js. GET alias accepts ?describe=… so the
+  // browser fetcher doesn't need a CORS preflight.
+  const compileEstimateHandler = async (req, res) => {
+    try {
+      const { estimateCompile } = await import('./compile-stream.js');
+      const body = req.body || {};
+      const out = estimateCompile({
+        describe: typeof body.describe === 'string' && body.describe.length ? body.describe : (req.query.describe || ''),
+        recipe: body.recipe || req.query.recipe || 'default',
+        target_vram_gb: Number(body.target_vram_gb || req.query.target_vram_gb || 24),
+      });
+      res.json(out);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: String(e.message || e) });
+    }
+  };
+  r.post('/v1/compile/estimate', freeChatLimiter, compileEstimateHandler);
+  r.get('/v1/compile/estimate', freeChatLimiter, compileEstimateHandler);
+
+  // POST /v1/compile/preview — 5 synthetic Q&A pairs (stub). Real version
+  // would call the LLM bridge; this returns a deterministic sample so the
+  // Describe-tab "Generate preview" button works without any keys.
+  r.post('/v1/compile/preview', freeChatLimiter, (req, res) => {
+    const describe = String((req.body && req.body.describe) || '').trim();
+    if (!describe) {
+      return res.status(400).json({ ok: false, error: 'missing_describe' });
+    }
+    const seed = describe.toLowerCase();
+    const samples = [
+      { q: 'A customer wrote: "where is my order"', a: 'Ask for the order number; if unavailable, search by email; never invent a tracking link.' },
+      { q: 'A customer wrote: "this is broken"',     a: 'Ask which feature, with a screenshot if possible; route to engineering if reproducible.' },
+      { q: 'A customer wrote: "cancel my subscription"', a: 'Confirm intent, pull the active plan, and send the cancellation link; do not bargain.' },
+      { q: 'A customer wrote: "is this HIPAA compliant"', a: 'Reply with the HIPAA mapping link and the BAA contact; do not assert compliance without legal sign-off.' },
+      { q: 'A customer wrote: "do you support SSO"', a: 'List the SAML/SCIM tiers and link the SSO setup doc; if Business+ plan, offer to schedule onboarding.' },
+    ];
+    res.json({
+      ok: true,
+      describe_hash: crypto.createHash('sha1').update(seed).digest('hex').slice(0, 12),
+      pairs: samples,
+      generated_at: new Date().toISOString(),
+      method: 'stub_v1',
+      note: 'Synthetic preview; real generation runs when you click Compile.',
+    });
+  });
+
+  // POST /v1/compile/start — wizard "Compile" CTA. Returns a job id the
+  // overlay opens an SSE stream against. Stubbed for the no-code path.
+  r.post('/v1/compile/start', freeChatLimiter, (req, res) => {
+    const body = req.body || {};
+    const jobId = 'cj_' + crypto.randomBytes(8).toString('hex');
+    res.json({
+      ok: true,
+      job: jobId,
+      stream_url: `/v1/compile/stream/${jobId}`,
+      reattach_hint: 'Append ?cursor=<last seq> to resume after a reload.',
+      submitted: { tab: body.tab || 'describe', recipe: body.recipe || 'default', target_vram_gb: Number(body.target_vram_gb || 24) },
+      note: 'Stub job — emits deterministic progress events for the wizard overlay.',
+    });
+  });
+
+  // GET /v1/compile/stream/:job — SSE event stream powering the compile
+  // overlay. Reload-safe via ?cursor. See src/compile-stream.js for the
+  // event contract.
+  r.get('/v1/compile/stream/:job', async (req, res) => {
+    try {
+      const { streamCompile } = await import('./compile-stream.js');
+      await streamCompile(req, res, String(req.params.job || 'cj_stub'));
+    } catch (e) {
+      if (!res.headersSent) {
+        res.status(500).json({ ok: false, error: String(e.message || e) });
+      }
+    }
+  });
+
+  // POST /v1/connectors/notify — capture an email for a not-yet-shipped
+  // connector tile on the Connect tab. Appends to
+  // data/connector-waitlist.jsonl. Best-effort: never breaks the UI.
+  r.post('/v1/connectors/notify', freeChatLimiter, async (req, res) => {
+    try {
+      const body = req.body || {};
+      const connector = String(body.connector || '').trim().toLowerCase();
+      const email = String(body.email || '').trim();
+      const allowed = new Set(['zendesk', 'intercom', 'slack', 'notion', 'salesforce', 'github', 'hubspot', 'google_drive']);
+      if (!allowed.has(connector)) {
+        return res.status(400).json({ ok: false, error: 'unknown_connector', allowed: [...allowed] });
+      }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({ ok: false, error: 'invalid_email' });
+      }
+      try {
+        const fsMod = await import('node:fs');
+        const pathMod = await import('node:path');
+        const dir = pathMod.resolve(process.cwd(), 'data');
+        try { fsMod.mkdirSync(dir, { recursive: true }); } catch (_) {}
+        const line = JSON.stringify({ connector, email, at: new Date().toISOString(), ip: req.ip || null }) + '\n';
+        fsMod.appendFileSync(pathMod.join(dir, 'connector-waitlist.jsonl'), line, 'utf8');
+      } catch (_) {
+        // file append is best-effort; never break the surface for it.
+      }
+      res.json({ ok: true, connector, email_accepted: true, message: `We'll email you when ${connector.replace('_', ' ')} is live.` });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: String(e.message || e) });
+    }
+  });
+
+  // POST /v1/draft/save — autosave wizard draft state. Returns a draft_id
+  // so authed callers can later resume; anon callers also get an id but
+  // the persistence flag is false (the page falls back to localStorage).
+  r.post('/v1/draft/save', (req, res) => {
+    const body = req.body || {};
+    const surface = String(body.surface || 'create-model');
+    const draftId = body.draft_id ? String(body.draft_id) : 'd_' + crypto.randomBytes(6).toString('hex');
+    res.json({ ok: true, surface, draft_id: draftId, saved_at: new Date().toISOString(), persisted: !!req.tenant_record });
+  });
+
+  // GET /v1/capture/snippet — copy-paste snippet for the Capture tab.
+  // Fills tenant key when authed, placeholder otherwise.
+  r.get('/v1/capture/snippet', (req, res) => {
+    const namespace = String(req.query.namespace || 'default').trim().slice(0, 64) || 'default';
+    const lang = String(req.query.lang || 'curl');
+    const apiKey = req.tenant_record && req.tenant_record.api_key ? req.tenant_record.api_key : 'ks_YOUR_API_KEY';
+    const base = (req.protocol || 'https') + '://' + (req.get('host') || 'kolm.ai');
+    const snippets = {
+      curl: `curl -X POST ${base}/v1/capture/log \\\n  -H "Authorization: Bearer ${apiKey}" \\\n  -H "Content-Type: application/json" \\\n  -d '{"namespace":"${namespace}","items":[{"input":"...","output":"..."}]}'`,
+      js: `import fetch from "node-fetch";\nawait fetch("${base}/v1/capture/log", {\n  method: "POST",\n  headers: { "Authorization": "Bearer ${apiKey}", "Content-Type": "application/json" },\n  body: JSON.stringify({ namespace: "${namespace}", items: [{ input: "...", output: "..." }] })\n});`,
+      python: `import requests\nrequests.post(\n  "${base}/v1/capture/log",\n  headers={"Authorization": "Bearer ${apiKey}", "Content-Type": "application/json"},\n  json={"namespace": "${namespace}", "items": [{"input": "...", "output": "..."}]},\n)`,
+    };
+    res.json({ ok: true, namespace, lang, snippet: snippets[lang] || snippets.curl, snippets });
+  });
+
+  // POST /v1/playground/proxy/:slug — public playground stub. Echo so
+  // /playground/[slug] renders without RunPod bound. 20/IP/day.
+  r.post('/v1/playground/proxy/:slug', freeChatLimiter, (req, res) => {
+    const slug = String(req.params.slug || '').slice(0, 64);
+    const message = String((req.body && req.body.message) || '').slice(0, 600);
+    if (!message) return res.status(400).json({ ok: false, error: 'missing_message' });
+    res.json({
+      ok: true,
+      slug,
+      reply: `(${slug} playground stub) you said: ${message}`,
+      latency_ms: 320,
+      tokens_in: Math.round(message.length / 4),
+      tokens_out: Math.round(message.length / 4) + 8,
+      note: 'Public playground stub; real RunPod proxy ships once the artifact is deployed.',
+    });
   });
 
   // Public /health — no provider-key leakage. Authenticated callers can
@@ -8524,6 +8710,21 @@ export function buildRouter() {
     });
   });
 
+  // W910 Track C1 — recipe template catalog. MUST be registered before the
+  // /v1/recipes/:id artifact alias below, otherwise Express matches :id first
+  // and the literal "templates" path returns 404 recipe-not-found.
+  // Recipe templates list - returns all 8 W910 starter templates with metadata.
+  r.get('/v1/recipes/templates', (req, res) => {
+    const templates = recipeListTemplates();
+    res.json({ ok: true, count: templates.length, templates });
+  });
+  // Recipe template detail - returns one template plus its sample CSV reference.
+  r.get('/v1/recipes/templates/:name', (req, res) => {
+    const t = recipeGetTemplate(req.params.name);
+    if (!t) return res.status(404).json({ ok: false, error: 'template not found' });
+    res.json({ ok: true, template: t, sample_csv_url: t.sample_csv_url || `/samples/${t.name}.csv` });
+  });
+
   // Recipe artifact aliases over the artifact/job surface.
   // POST /v1/compile returns a job_id of shape `job_*`. Conventional SDKs
   // expect GET /v1/recipes/{id} to return the recipe (artifact) and POST
@@ -14745,6 +14946,74 @@ export function buildRouter() {
     });
   });
 
+  // ---------- W910 Track C - next-actions + webhook notifications ----------
+  // (Recipe-templates routes are registered earlier so the static :name
+  //  segment beats the /v1/recipes/:id alias.)
+
+  // Next-actions list - returns the top-5 ranked proactive actions for the tenant.
+  r.get('/v1/account/next-actions', authMiddleware, (req, res) => {
+    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    const limit = Math.max(1, Math.min(50, parseInt(String(req.query?.limit || '5'), 10) || 5));
+    try {
+      const actions = computeNextActions(req.tenant, { limit });
+      res.json({ ok: true, count: actions.length, actions, generated_at: new Date().toISOString() });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: String(e.message || e) });
+    }
+  });
+  // Next-actions snooze - silences the matching dismiss_key for N days (default 14).
+  r.post('/v1/account/next-actions/snooze', authMiddleware, (req, res) => {
+    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    const body = req.body || {};
+    const key = String(body.dismiss_key || '').trim();
+    const days = Math.max(1, Math.min(365, parseInt(String(body.days || '14'), 10) || 14));
+    if (!key) return res.status(400).json({ ok: false, error: 'dismiss_key required' });
+    try {
+      const row = snoozeNextAction(req.tenant, key, days);
+      res.json({ ok: true, snooze: row });
+    } catch (e) {
+      res.status(400).json({ ok: false, error: String(e.message || e) });
+    }
+  });
+
+  // Webhook notification settings - returns Slack/HTTP/email channels plus event toggles.
+  r.get('/v1/notifications/settings', authMiddleware, (req, res) => {
+    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    const s = notifGetWebhookSettings(req.tenant);
+    res.json({ ok: true, settings: s, event_types: notifEventTypes });
+  });
+  // Webhook notification settings update - writes Slack/HTTP/email channels and event toggles.
+  r.put('/v1/notifications/settings', authMiddleware, (req, res) => {
+    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    try {
+      const next = notifSetWebhookSettings(req.tenant, req.body || {});
+      res.json({ ok: true, settings: next });
+    } catch (e) {
+      res.status(400).json({ ok: false, error: String(e.message || e) });
+    }
+  });
+  // Webhook notification test - dispatches a sample event payload to configured channels.
+  r.post('/v1/notifications/test-channel', authMiddleware, async (req, res) => {
+    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    const body = req.body || {};
+    const event = String(body.event || 'artifact_compiled');
+    if (!notifEventTypes.includes(event)) {
+      return res.status(400).json({ ok: false, error: `unknown event type ${event}` });
+    }
+    try {
+      const out = await notifNotify(req.tenant, event, body.payload || { artifact_id: 'demo-artifact', kscore: 0.91, test: true });
+      res.json(out);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: String(e.message || e) });
+    }
+  });
+  // Webhook notification log - returns the last 50 delivery attempts.
+  r.get('/v1/notifications/log', authMiddleware, (req, res) => {
+    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    const limit = Math.max(1, Math.min(500, parseInt(String(req.query?.limit || '50'), 10) || 50));
+    res.json({ ok: true, deliveries: notifListDeliveries(req.tenant, { limit }) });
+  });
+
   // Drop-in `base_url` aliases so SDKs that append `/v1/messages` or
   // `/v1/chat/completions` keep working:
   //   ANTHROPIC_BASE_URL=https://kolm.ai/v1/capture/anthropic  →  POST .../v1/messages
@@ -16709,6 +16978,91 @@ res.json({
     } catch (e) {
       if (e instanceof TeamError) return res.status(400).json({ error: e.code, detail: e.message });
       res.status(500).json(_w384Err(e, 'team_namespace_error'));
+    }
+  });
+
+  // ============== W910-E2: compile groups (tenant-scoped) ==============
+  // A compile group bundles namespaces that should compile together. The
+  // pipeline reads `kolm compile --group support-all` and resolves to the
+  // union of namespaces, threading per-namespace pair counts into the
+  // passport. Backing store: src/groups.js → store.js TABLE='groups'.
+  //
+  // Auth: req.tenant_record.id scopes every read/write. No cross-tenant
+  // read path — getGroup returns null when tenant_id doesn't match.
+
+  function _w910GroupsTenant(req) {
+    return (req.tenant_record && req.tenant_record.id)
+      || req.tenant
+      || 'tenant_local';
+  }
+
+  // GET /v1/groups — list groups for the caller tenant.
+  r.get('/v1/groups', (req, res) => {
+    try {
+      const tenantId = _w910GroupsTenant(req);
+      const rows = groupsModule.listGroups(tenantId);
+      res.json({ ok: true, total: rows.length, groups: rows });
+    } catch (e) {
+      res.status(500).json(_w384Err(e, 'groups_list_error'));
+    }
+  });
+
+  // POST /v1/groups — create a new group.
+  r.post('/v1/groups', (req, res) => {
+    try {
+      const tenantId = _w910GroupsTenant(req);
+      const body = req.body || {};
+      const row = groupsModule.createGroup({
+        tenantId,
+        name: body.name,
+        namespaces: body.namespaces,
+      });
+      res.status(201).json({ ok: true, group: row });
+    } catch (e) {
+      if (e && e.code === 'bad_request') return res.status(400).json({ error: e.code, detail: e.message });
+      res.status(500).json(_w384Err(e, 'groups_create_error'));
+    }
+  });
+
+  // GET /v1/groups/:slug — fetch one group by id or slug.
+  r.get('/v1/groups/:slug', (req, res) => {
+    try {
+      const tenantId = _w910GroupsTenant(req);
+      const row = groupsModule.getGroup(tenantId, req.params.slug);
+      if (!row) return res.status(404).json({ error: 'not_found', detail: `group '${req.params.slug}' not found` });
+      res.json({ ok: true, group: row });
+    } catch (e) {
+      res.status(500).json(_w384Err(e, 'groups_get_error'));
+    }
+  });
+
+  // PATCH /v1/groups/:slug — update name / namespaces / add / remove.
+  r.patch('/v1/groups/:slug', (req, res) => {
+    try {
+      const tenantId = _w910GroupsTenant(req);
+      const body = req.body || {};
+      const row = groupsModule.updateGroup(tenantId, req.params.slug, {
+        name: body.name,
+        namespaces: body.namespaces,
+        addNamespaces: body.add_namespaces || body.addNamespaces,
+        removeNamespaces: body.remove_namespaces || body.removeNamespaces,
+      });
+      res.json({ ok: true, group: row });
+    } catch (e) {
+      if (e && e.code === 'not_found') return res.status(404).json({ error: e.code, detail: e.message });
+      res.status(500).json(_w384Err(e, 'groups_update_error'));
+    }
+  });
+
+  // DELETE /v1/groups/:slug — soft-delete.
+  r.delete('/v1/groups/:slug', (req, res) => {
+    try {
+      const tenantId = _w910GroupsTenant(req);
+      const ok = groupsModule.deleteGroup(tenantId, req.params.slug);
+      if (!ok) return res.status(404).json({ error: 'not_found', detail: `group '${req.params.slug}' not found` });
+      res.json({ ok: true, deleted: true });
+    } catch (e) {
+      res.status(500).json(_w384Err(e, 'groups_delete_error'));
     }
   });
 
@@ -19071,6 +19425,186 @@ res.json({
       const tick = await monitor.tick({ tag, namespace, alertSinks: [{ name: 'noop', async send() { return { ok: true }; } }] });
       res.json({ ok: true, ...tick });
     } catch (e) { res.status(500).json(_w384Err(e, 'fleet_monitor_error')); }
+  });
+
+  // ============================================================================
+  // W910-D — RunPod one-click integrations + cloud deploy
+  // ============================================================================
+  // Routes:
+  //   POST   /v1/integrations/runpod         body {api_key}   -> stores encrypted
+  //   GET    /v1/integrations/runpod                          -> {configured, masked_key}
+  //   POST   /v1/integrations/runpod/test    body {api_key?}  -> {ok, account?}
+  //   DELETE /v1/integrations/runpod                          -> revokes
+  //   POST   /v1/deploy/runpod   body {artifact_id|artifact_url, gpu_type?, container_image?}
+  //   GET    /v1/deploy/runpod/:pod_id
+  //   DELETE /v1/deploy/runpod/:pod_id
+  //   GET    /v1/deploy/runpod/:pod_id/logs?tail=200
+  //
+  // The integrations endpoints persist via secrets-vault.js (AES-256-GCM at
+  // rest). Tenant scoping lives in the secret id: `runpod-api-key:<tenant>`.
+  // Test/deploy routes look up the stored key first, then fall back to the
+  // RUNPOD_API_KEY env var so a server-wide key still works.
+
+  function _w910RunPodKeyId(req) {
+    const tenant = (req && (req.tenant || (req.tenant_record && req.tenant_record.id))) || 'default';
+    return `runpod-api-key:${tenant}`;
+  }
+  async function _w910LoadRunPodKey(req) {
+    try {
+      const vault = await import('./secrets-vault.js');
+      const secret = vault.getSecret(_w910RunPodKeyId(req));
+      if (secret && secret.value) return secret.value;
+    } catch (_) { /* fall through to env */ }
+    return process.env.RUNPOD_API_KEY || process.env.KOLM_RUNPOD_TOKEN || '';
+  }
+  function _w910MaskKey(k) {
+    if (!k) return null;
+    const s = String(k);
+    if (s.length <= 8) return '***';
+    return `${s.slice(0, 4)}...${s.slice(-4)}`;
+  }
+
+  r.post('/v1/integrations/runpod', async (req, res) => {
+    try {
+      const body = req.body || {};
+      const apiKey = String(body.api_key || body.apiKey || '').trim();
+      if (!apiKey) return res.status(400).json({ ok: false, error: 'api_key_required', hint: 'POST {"api_key": "..."} from https://runpod.io/console/user/settings.' });
+      if (apiKey.length < 16) return res.status(400).json({ ok: false, error: 'api_key_too_short', hint: 'RunPod keys are typically 40+ chars. Re-copy from the RunPod console.' });
+      const vault = await import('./secrets-vault.js');
+      const id = _w910RunPodKeyId(req);
+      const envelope = vault.putSecret({
+        id,
+        value: apiKey,
+        scope: 'tenant',
+        labels: { provider: 'runpod', kind: 'api_key', tenant: req.tenant || 'default' },
+        note: 'RunPod API key for cloud deploy (W910-D)',
+      });
+      res.json({ ok: true, provider: 'runpod', configured: true, masked_key: _w910MaskKey(apiKey), id: envelope.id, updated_at: envelope.updated_at });
+    } catch (e) { res.status(500).json(_w384Err(e, 'integrations_runpod_set_error')); }
+  });
+
+  r.get('/v1/integrations/runpod', async (req, res) => {
+    try {
+      const key = await _w910LoadRunPodKey(req);
+      res.json({
+        ok: true,
+        provider: 'runpod',
+        configured: !!key,
+        masked_key: _w910MaskKey(key),
+        source: key ? (process.env.RUNPOD_API_KEY === key || process.env.KOLM_RUNPOD_TOKEN === key ? 'env' : 'vault') : null,
+      });
+    } catch (e) { res.status(500).json(_w384Err(e, 'integrations_runpod_get_error')); }
+  });
+
+  r.post('/v1/integrations/runpod/test', async (req, res) => {
+    try {
+      const body = req.body || {};
+      const apiKey = String(body.api_key || body.apiKey || '').trim() || await _w910LoadRunPodKey(req);
+      if (!apiKey) {
+        return res.status(400).json({ ok: false, error: 'no_api_key', hint: 'Save a key via POST /v1/integrations/runpod first, or pass {"api_key": "..."}.' });
+      }
+      const rp = await import('./cloud/runpod.js');
+      const result = await rp.testConnection({ apiKey });
+      res.json(result);
+    } catch (e) { res.status(500).json(_w384Err(e, 'integrations_runpod_test_error')); }
+  });
+
+  r.delete('/v1/integrations/runpod', async (req, res) => {
+    try {
+      const vault = await import('./secrets-vault.js');
+      const id = _w910RunPodKeyId(req);
+      const result = vault.deleteSecret(id);
+      res.json({ ok: true, provider: 'runpod', revoked: !!result.deleted });
+    } catch (e) { res.status(500).json(_w384Err(e, 'integrations_runpod_delete_error')); }
+  });
+
+  r.post('/v1/deploy/runpod', async (req, res) => {
+    try {
+      const body = req.body || {};
+      const artifactId = body.artifact_id || body.artifactId || null;
+      const artifactUrl = body.artifact_url || body.artifactUrl || null;
+      if (!artifactId && !artifactUrl) {
+        return res.status(400).json({ ok: false, error: 'artifact_id_or_url_required', hint: 'POST {"artifact_id": "art_..."} or {"artifact_url": "https://..."}.' });
+      }
+      const apiKey = await _w910LoadRunPodKey(req);
+      if (!apiKey) {
+        return res.status(400).json({
+          ok: false,
+          error: 'runpod_api_key_missing',
+          action_url: '/account/settings/integrations',
+          hint: 'Configure a RunPod API key at /account/settings/integrations first.',
+        });
+      }
+      let resolvedUrl = artifactUrl;
+      if (!resolvedUrl && artifactId) {
+        // Best-effort: try the artifact store. If the artifact isn't reachable,
+        // we surface the error rather than provisioning a doomed pod.
+        try {
+          const artifactsMod = await import('./artifacts.js');
+          if (typeof artifactsMod.getArtifactUrl === 'function') {
+            resolvedUrl = await artifactsMod.getArtifactUrl(artifactId);
+          }
+        } catch (_) { /* artifacts module optional */ }
+        if (!resolvedUrl) {
+          // Synthesize a registry URL so the worker can attempt fetch — the
+          // worker logs will surface a clear 404 if the artifact isn't public.
+          resolvedUrl = `https://kolm.ai/registry/${encodeURIComponent(artifactId)}.kolm`;
+        }
+      }
+      const rp = await import('./cloud/runpod.js');
+      const result = await rp.provisionPod({
+        apiKey,
+        gpu_type: body.gpu_type || body.gpuType || 'RTX A4000',
+        container_image: body.container_image || body.containerImage || 'kolm/serve:latest',
+        artifact_url: resolvedUrl,
+        name: body.name || (artifactId ? `kolm-${artifactId}` : undefined),
+        env: body.env || {},
+        ports: body.ports,
+        volume_gb: body.volume_gb,
+        container_disk_gb: body.container_disk_gb,
+      });
+      res.json(result);
+    } catch (e) {
+      const status = e.code === 'runpod_no_gpu_available' ? 409 : (e.code === 'runpod_api_key_missing' ? 400 : 500);
+      res.status(status).json(_w384Err(e, e.code || 'deploy_runpod_error'));
+    }
+  });
+
+  r.get('/v1/deploy/runpod/:pod_id', async (req, res) => {
+    try {
+      const podId = String(req.params.pod_id || '').trim();
+      if (!podId) return res.status(400).json({ ok: false, error: 'pod_id_required' });
+      const apiKey = await _w910LoadRunPodKey(req);
+      if (!apiKey) return res.status(400).json({ ok: false, error: 'runpod_api_key_missing', action_url: '/account/settings/integrations' });
+      const rp = await import('./cloud/runpod.js');
+      const result = await rp.getPodStatus(podId, { apiKey });
+      res.json(result);
+    } catch (e) { res.status(500).json(_w384Err(e, 'deploy_runpod_status_error')); }
+  });
+
+  r.delete('/v1/deploy/runpod/:pod_id', async (req, res) => {
+    try {
+      const podId = String(req.params.pod_id || '').trim();
+      if (!podId) return res.status(400).json({ ok: false, error: 'pod_id_required' });
+      const apiKey = await _w910LoadRunPodKey(req);
+      if (!apiKey) return res.status(400).json({ ok: false, error: 'runpod_api_key_missing', action_url: '/account/settings/integrations' });
+      const rp = await import('./cloud/runpod.js');
+      const result = await rp.tearDownPod(podId, { apiKey });
+      res.json(result);
+    } catch (e) { res.status(500).json(_w384Err(e, 'deploy_runpod_teardown_error')); }
+  });
+
+  r.get('/v1/deploy/runpod/:pod_id/logs', async (req, res) => {
+    try {
+      const podId = String(req.params.pod_id || '').trim();
+      if (!podId) return res.status(400).json({ ok: false, error: 'pod_id_required' });
+      const apiKey = await _w910LoadRunPodKey(req);
+      if (!apiKey) return res.status(400).json({ ok: false, error: 'runpod_api_key_missing', action_url: '/account/settings/integrations' });
+      const tail = Number(req.query.tail) || 200;
+      const rp = await import('./cloud/runpod.js');
+      const result = await rp.getPodLogs(podId, { apiKey, tail });
+      res.json(result);
+    } catch (e) { res.status(500).json(_w384Err(e, 'deploy_runpod_logs_error')); }
   });
 
   // W888-D HTTP control plane: POST /v1/deploy + /v1/deploy/canary +
