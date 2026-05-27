@@ -95,7 +95,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 <main id="main">
 
 <p class="muted"><a href="/compile/all">&larr; Compile catalog</a></p>
-<h1>Compile DeepSeek-R1-Distill-Qwen-7B to GGUF Q4_K_M on consumer hardware with kolm.</h1>
+<h1>Compile DeepSeek-R1-Distill-Qwen-7B to GGUF Q4_K_M.</h1>
 <p class="lede"><strong>DeepSeek-R1-Distill-Qwen-7B</strong> is DeepSeek's 7B reasoning-distilled checkpoint. <strong>GGUF Q4_K_M</strong> is a 4.5-bit GGUF mixed-precision quantization that balances size and quality. Q4_K_M is the most popular GGUF level for consumer GPUs and CPU offload.</p>
 
 <p>DeepSeek-R1-Distill-Qwen-7B is an open-weight checkpoint (7B parameters from DeepSeek). kolm compile pulls the bf16 weights, runs GGUF mixed-precision quantization via llama.cpp, and emits a signed .kolm artifact with the quantized weights and the original bf16 SHA-256 hashes for reproducibility.</p>

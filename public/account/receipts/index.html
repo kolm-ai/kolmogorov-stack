@@ -12,6 +12,7 @@
 </head>
 <body data-account="receipts" class="kolm-account-surface">
 <main class="ks-wrap acct-shell" style="padding:32px 0">
+<p id="loading-status" aria-live="polite" class="ks-loading-status" hidden></p>
   <nav aria-label="Breadcrumb" style="font-size:14px;margin-bottom:12px"><a href="/account/overview">Account</a> &rsaquo; Receipts</nav>
   <h1 class="acct-h1">Receipts</h1>
   <p class="acct-lede">Every gateway call your tenant makes is signed with Ed25519 and hash-chained into a per-tenant ledger. Each row links to <code>/v1/verify/&lt;cid&gt;</code> for independent verification.</p>
@@ -19,6 +20,7 @@
   <section class="acct-card" id="recent-receipts">
     <h2>Recent receipts</h2>
     <div id="recent-list" aria-busy="true">Loading...</div>
+    <div class="ks-empty-state" hidden><p>No items yet.</p></div>
   </section>
 
   <section class="acct-card" style="margin-top:24px">

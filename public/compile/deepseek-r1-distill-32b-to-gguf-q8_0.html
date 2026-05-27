@@ -95,7 +95,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 <main id="main">
 
 <p class="muted"><a href="/compile/all">&larr; Compile catalog</a></p>
-<h1>Compile DeepSeek-R1-Distill-Qwen-32B to GGUF Q8_0 on consumer hardware with kolm.</h1>
+<h1>Compile DeepSeek-R1-Distill-Qwen-32B to GGUF Q8_0.</h1>
 <p class="lede"><strong>DeepSeek-R1-Distill-Qwen-32B</strong> is DeepSeek's 32B reasoning-distilled checkpoint. <strong>GGUF Q8_0</strong> is an 8.5-bit GGUF quantization that is nearly lossless versus the bf16 source. Recommended when disk and VRAM are not the constraint.</p>
 
 <p>DeepSeek-R1-Distill-Qwen-32B is an open-weight checkpoint (32B parameters from DeepSeek). kolm compile pulls the bf16 weights, runs GGUF mixed-precision quantization via llama.cpp, and emits a signed .kolm artifact with the quantized weights and the original bf16 SHA-256 hashes for reproducibility.</p>

@@ -95,7 +95,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 <main id="main">
 
 <p class="muted"><a href="/compile/all">&larr; Compile catalog</a></p>
-<h1>Compile DeepSeek-R1-Distill-Qwen-7B to AWQ on consumer hardware with kolm.</h1>
+<h1>Compile DeepSeek-R1-Distill-Qwen-7B to AWQ.</h1>
 <p class="lede"><strong>DeepSeek-R1-Distill-Qwen-7B</strong> is DeepSeek's 7B reasoning-distilled checkpoint. <strong>AWQ</strong> is AWQ (activation-aware weight quantization, Lin et al., 2023). Preserves the salient 1% of weights at higher precision for better fidelity than naive 4-bit.</p>
 
 <p>DeepSeek-R1-Distill-Qwen-7B is an open-weight checkpoint (7B parameters from DeepSeek). kolm compile pulls the bf16 weights, runs activation-aware AWQ quantization with calibration, and emits a signed .kolm artifact with the quantized weights and the original bf16 SHA-256 hashes for reproducibility.</p>

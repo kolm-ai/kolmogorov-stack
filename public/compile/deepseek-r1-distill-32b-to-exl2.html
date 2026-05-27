@@ -95,7 +95,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 <main id="main">
 
 <p class="muted"><a href="/compile/all">&larr; Compile catalog</a></p>
-<h1>Compile DeepSeek-R1-Distill-Qwen-32B to EXL2 on consumer hardware with kolm.</h1>
+<h1>Compile DeepSeek-R1-Distill-Qwen-32B to EXL2.</h1>
 <p class="lede"><strong>DeepSeek-R1-Distill-Qwen-32B</strong> is DeepSeek's 32B reasoning-distilled checkpoint. <strong>EXL2</strong> is EXL2 (ExLlamaV2) packed quantization with calibration-aware bits-per-weight (typically 4.0-6.0 bpw). Highest throughput on NVIDIA GPUs.</p>
 
 <p>DeepSeek-R1-Distill-Qwen-32B is an open-weight checkpoint (32B parameters from DeepSeek). kolm compile pulls the bf16 weights, runs EXL2 packed quantization with calibration, and emits a signed .kolm artifact with the quantized weights and the original bf16 SHA-256 hashes for reproducibility.</p>

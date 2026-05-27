@@ -64,6 +64,7 @@
 </div>
 
 <main id="main" class="ob-shell">
+<p id="loading-status" aria-live="polite" class="ks-loading-status" hidden></p>
 <a href="/account/overview" class="ob-skip">Skip onboarding &rarr;</a>
 
 <p class="ob-eyebrow">Welcome</p>
@@ -101,6 +102,7 @@
     <span class="est">2 steps &middot; ~30 s</span>
   </a>
 </div>
+<div class="ks-empty-state" hidden><p>No items yet.</p></div>
 
 <p class="ob-foot">
   Prefer the terminal? Run <code>kolm onboard</code> for the CLI version &mdash; same four paths, same checkpoints, saves to <code>~/.kolm/onboarding.json</code>.

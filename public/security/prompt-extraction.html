@@ -120,7 +120,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/security">security</a> / prompt-extraction</div>
 <p class="brand-eyebrow">Open-source AI workbench</p>
-<h1>Prompt extraction defense &mdash; protect system prompts in distilled artifacts.</h1>
+<h1>Prompt extraction defense for distilled artifacts.</h1>
 <p class="lede">A distilled student inherits the literal text of its training prompts. If your system prompt contains an API key, a partner name, a customer list, or an internal policy in literal form, every one of those tokens lives inside the student's weights and can be recovered by a sufficiently motivated attacker. ships a three-layer defense: build-time redaction of system prompts before distillation, runtime detection across ten-plus extraction-attempt pattern families, and four policy decisions that NEVER silent-pass a matched attack. Stamped <code>w765-v1</code>.</p>
 
 <h2 id="why">Why distilled models leak system prompts</h2>
