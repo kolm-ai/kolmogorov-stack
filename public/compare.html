@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>kolm vs LoRAX, Predibase, OpenPipe, DIY, hyperscaler · kolm.ai</title>
-<meta name="description" content="Honest column-by-column matrix that compares a signed .kolm artifact against every adjacent build-or-serve stack. Capability claims cite vendor docs; pricing cites published rate sheets.">
+<title>kolm vs Fireworks, Together, Baseten, DIY, hyperscaler · kolm.ai</title>
+<meta name="description" content="Column-by-column matrix that compares a signed .kolm artifact against current inference clouds and fine-tune SaaS. Capability claims cite vendor docs; pricing cites published rate sheets.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
-<meta property="og:title" content="kolm vs LoRAX, Predibase, OpenPipe, DIY, hyperscaler &middot; kolm.ai">
-<meta property="og:description" content="Honest column-by-column matrix that compares a signed .kolm artifact against every adjacent build-or-serve stack.">
+<meta property="og:title" content="kolm vs Fireworks, Together, Baseten, DIY, hyperscaler &middot; kolm.ai">
+<meta property="og:description" content="Column-by-column matrix that compares a signed .kolm artifact against current inference clouds and fine-tune SaaS.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/compare">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -67,7 +67,7 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/compare",
-  "description": "Honest column-by-column matrix that compares a signed .kolm artifact against every adjacent build-or-serve stack. Capability claims cite vendor docs; pricing cites published rate sheets.",
+  "description": "Column-by-column matrix that compares a signed .kolm artifact against Fireworks, Together, Baseten, DIY, and hyperscaler stacks. Capability claims cite vendor docs; pricing cites published rate sheets.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -122,7 +122,7 @@
   <div class="ks-wrap">
     <span class="ks-eyebrow">For developers, engineers, and architects weighing build versus serve</span>
     <h1 class="ks-h1" style="margin-top: var(--ks-3);">kolm vs the adjacent stacks. Read the matrix.</h1>
-    <p class="ks-lede">Honest column-by-column. We credit competitors where they earn it and name axes where kolm is the wrong fit.</p>
+    <p class="ks-lede">Direct column-by-column. We credit competitors where they earn it and name axes where kolm is the wrong fit.</p>
     <div style="display: flex; gap: var(--ks-3); flex-wrap: wrap; margin-top: var(--ks-5);">
       <a href="/quickstart" class="ks-btn ks-btn--primary ks-btn--lg">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
       <a href="#matrix" class="ks-btn ks-btn--ghost ks-btn--lg">Open the matrix</a>
@@ -142,7 +142,10 @@
     <div class="ks-shead">
       <span class="ks-eyebrow">The matrix</span>
       <h2 class="ks-h2">Read the axis. Walk right. Pick a column.</h2>
-      <p class="ks-lede">Each cell is the most accurate one-liner we can write about that stack in its current public posture (2026-05-23). Pricing cites published rate sheets; capability cites vendor docs. Spot a stale cell? <a href="mailto:rodneyyesep@gmail.com?subject=compare.html%20correction" style="color:var(--ks-accent);border-bottom:1px solid var(--ks-accent-edge)">Tell us</a>.</p>
+      <p class="ks-lede">Each cell is the most accurate one-liner we can write about that stack in its current public posture (2026-05-27). Pricing cites published rate sheets; capability cites vendor docs. Spot a stale cell? <a href="mailto:rodneyyesep@gmail.com?subject=compare.html%20correction" style="color:var(--ks-accent);border-bottom:1px solid var(--ks-accent-edge)">Tell us</a>.</p>
+    </div>
+    <div style="margin: 0 auto var(--ks-5); max-width: 760px; padding: 14px 16px; background: var(--ks-bg-2, #0f1115); border: 1px solid var(--ks-line-2); border-left: 3px solid var(--ks-accent); border-radius: var(--ks-r-md); font-size: 13.5px; line-height: 1.6; color: var(--ks-ink-2);">
+      <b style="color: var(--ks-ink-1)">Market update (May 2026).</b> OpenPipe completed its wind-down inside CoreWeave (Jul 2026 final shutoff). Predibase folded into Rubrik. LoRAX remains open-source but is maintained downstream of the Predibase / Rubrik transition. Helicone has moved into maintenance mode. The matrix below names the stacks we see in active POCs today: Fireworks AI, Together AI, Baseten, plus DIY and hyperscalers.
     </div>
 
     <div class="ks-legend">
@@ -157,9 +160,9 @@
           <tr>
             <th>Axis</th>
             <th class="kc">kolm</th>
-            <th>LoRAX / vLLM</th>
-            <th>Predibase</th>
-            <th>OpenPipe</th>
+            <th>Fireworks AI</th>
+            <th>Together AI</th>
+            <th>Baseten</th>
             <th>DIY (Triton + HF)</th>
             <th>Hyperscaler fine-tune</th>
           </tr>
@@ -169,8 +172,8 @@
             <td class="ax">Signed, content-addressed artifact per build</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>Every .kolm carries Ed25519 receipt + CID; verifiable years later.</td>
             <td><span class="ico ico-n"></span>Serves checkpoints; no signed receipt format.</td>
-            <td><span class="ico ico-p"></span>Adapter registry, no per-build signature surface.</td>
-            <td><span class="ico ico-p"></span>Versioned URLs; no cryptographic provenance.</td>
+            <td><span class="ico ico-n"></span>Model registry, no per-build signature surface.</td>
+            <td><span class="ico ico-p"></span>Versioned deploys; no cryptographic provenance.</td>
             <td><span class="ico ico-n"></span>What you wire is what you get.</td>
             <td><span class="ico ico-p"></span>Vendor-managed model id; opaque to the buyer.</td>
           </tr>
@@ -178,16 +181,16 @@
             <td class="ax">Per-artifact eval gate (K-score)</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>Five composed axes, deterministic, embedded in receipt.</td>
             <td><span class="ico ico-n"></span>Eval-out-of-band; bring your own harness.</td>
-            <td><span class="ico ico-p"></span>Aggregate metrics dashboard; not a binary gate.</td>
-            <td><span class="ico ico-p"></span>Built-in evals; not cryptographically embedded.</td>
+            <td><span class="ico ico-p"></span>Eval traces in console; not a binary gate.</td>
+            <td><span class="ico ico-n"></span>Serving layer only; eval is your responsibility.</td>
             <td><span class="ico ico-n"></span>Roll your own CI gate.</td>
             <td><span class="ico ico-p"></span>Held-out test split, no per-decision verifiability.</td>
           </tr>
           <tr>
             <td class="ax">Runs offline on your laptop after build</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>llama.cpp + GGUF runtime; no network calls.</td>
-            <td><span class="ico ico-p"></span>Self-hostable; not laptop-class.</td>
             <td><span class="ico ico-n"></span>Hosted only.</td>
+            <td><span class="ico ico-p"></span>Open-weight models downloadable; runtime is your problem.</td>
             <td><span class="ico ico-n"></span>Hosted only.</td>
             <td><span class="ico ico-p"></span>If you set up the runtime yourself.</td>
             <td><span class="ico ico-n"></span>Vendor endpoint only.</td>
@@ -195,72 +198,72 @@
           <tr>
             <td class="ax">Open source, Apache-2.0 license</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>Compiler, runtime, SDKs, verifier all Apache-2.0.</td>
-            <td><span class="ico ico-y"></span>Apache-2.0 / similar.</td>
-            <td><span class="ico ico-n"></span>Closed source SaaS.</td>
-            <td><span class="ico ico-p"></span>Partial open; core stack closed.</td>
+            <td><span class="ico ico-n"></span>Closed source SaaS (uses open-weight models).</td>
+            <td><span class="ico ico-n"></span>Closed source SaaS (uses open-weight models).</td>
+            <td><span class="ico ico-p"></span>Truss serving framework open; control plane closed.</td>
             <td><span class="ico ico-y"></span>All you carry is open source.</td>
             <td><span class="ico ico-n"></span>Vendor-proprietary.</td>
           </tr>
           <tr>
             <td class="ax">Tenant-fenced PHI / regulated data path</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>BYOC + VPC patterns; HIPAA + SOC 2 mappings shipped.</td>
-            <td><span class="ico ico-p"></span>Self-host gives you the boundary; you wire the controls.</td>
-            <td><span class="ico ico-p"></span>VPC mode available on enterprise tier.</td>
-            <td><span class="ico ico-n"></span>Hosted; no PHI path.</td>
+            <td><span class="ico ico-p"></span>HIPAA-eligible on enterprise; opaque audit trail.</td>
+            <td><span class="ico ico-p"></span>VPC + dedicated endpoints on enterprise tier.</td>
+            <td><span class="ico ico-p"></span>HIPAA available on enterprise dedicated deploys.</td>
             <td><span class="ico ico-p"></span>You designed it; you tested it.</td>
             <td><span class="ico ico-p"></span>BAA + dedicated zone available; opaque audit trail.</td>
           </tr>
           <tr>
             <td class="ax">Distillation built in, not bolted on</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>Capture &rarr; teacher &rarr; student in one command; KD, RAG-into-weights, on-policy.</td>
-            <td><span class="ico ico-n"></span>Inference layer; bring your own training.</td>
-            <td><span class="ico ico-y"></span>First-class fine-tune product.</td>
-            <td><span class="ico ico-y"></span>Workflow-capture &rarr; LoRA pipeline.</td>
+            <td><span class="ico ico-p"></span>Fine-tune service available; LoRA only, not distillation-specific.</td>
+            <td><span class="ico ico-y"></span>First-class fine-tune product (LoRA + full).</td>
+            <td><span class="ico ico-n"></span>No fine-tune; serving layer only (bring your own model).</td>
             <td><span class="ico ico-n"></span>Stitch HF + Axolotl + your scripts.</td>
             <td><span class="ico ico-y"></span>SFT job offering; opaque internals.</td>
           </tr>
           <tr>
             <td class="ax">Auditable receipt per inference call</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>Per-call signed receipt: artifact CID + input hash + decision + confidence.</td>
-            <td><span class="ico ico-n"></span>Logs; no signed receipt.</td>
+            <td><span class="ico ico-n"></span>Request logs; no signed receipt.</td>
             <td><span class="ico ico-p"></span>Audit log; not cryptographically anchored.</td>
-            <td><span class="ico ico-p"></span>Workflow logs; not call-level signed.</td>
+            <td><span class="ico ico-p"></span>Request logs; not call-level signed.</td>
             <td><span class="ico ico-n"></span>What you log is what you have.</td>
             <td><span class="ico ico-p"></span>CloudTrail-style logging; vendor-owned.</td>
           </tr>
           <tr>
             <td class="ax">Multi-runtime: GGUF, ONNX, vLLM, MLX, TRT-LLM</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>Single artifact, five-target export from one compile.</td>
-            <td><span class="ico ico-p"></span>vLLM + LoRAX; one runtime family.</td>
+            <td><span class="ico ico-p"></span>FireAttention runtime; hosted only.</td>
             <td><span class="ico ico-p"></span>Hosted serve; runtime opaque.</td>
-            <td><span class="ico ico-n"></span>Hosted serve only.</td>
+            <td><span class="ico ico-p"></span>Truss + vLLM/TGI/TensorRT-LLM on dedicated deploys.</td>
             <td><span class="ico ico-y"></span>Whatever you carry, you can target.</td>
             <td><span class="ico ico-n"></span>Vendor runtime.</td>
           </tr>
           <tr>
             <td class="ax">Drift detection + auto re-distill loop</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>K-score drift baseline + alert + one-command re-distill from rolling captures.</td>
-            <td><span class="ico ico-n"></span>Drift out of scope.</td>
+            <td><span class="ico ico-n"></span>Drift out of scope (inference only).</td>
             <td><span class="ico ico-p"></span>Drift dashboards; re-train is manual.</td>
-            <td><span class="ico ico-p"></span>Drift tracking; manual re-build.</td>
+            <td><span class="ico ico-n"></span>Drift out of scope (serving layer).</td>
             <td><span class="ico ico-n"></span>Wire it yourself.</td>
             <td><span class="ico ico-p"></span>Provider-specific monitoring add-on.</td>
           </tr>
           <tr>
             <td class="ax">Total cost of ownership, year 1</td>
             <td class="k"><b>Lowest</b><span class="ico ico-y"></span>BYOC compute + Apache-2.0; no per-token revshare.</td>
-            <td><span class="ico ico-y"></span>Open source; you absorb the integration cost.</td>
-            <td><span class="ico ico-p"></span>Annual platform + per-token egress.</td>
-            <td><span class="ico ico-p"></span>Per-deploy + per-token pricing.</td>
+            <td><span class="ico ico-p"></span>Per-token on shared / per-GPU on dedicated.</td>
+            <td><span class="ico ico-p"></span>Per-token on inference; per-job on fine-tune.</td>
+            <td><span class="ico ico-p"></span>Per-GPU-minute on dedicated deploys.</td>
             <td><span class="ico ico-p"></span>Cheapest software, expensive labor.</td>
             <td><span class="ico ico-n"></span>Per-token + dedicated capacity premiums.</td>
           </tr>
           <tr>
             <td class="ax">INT4 quantize verified on real hardware</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>NF4 + double quantize via bitsandbytes; matrix from 0.5B to 32B verified on RTX 5090.</td>
-            <td><span class="ico ico-p"></span>vLLM serves int4; quantize step is your own conversion.</td>
-            <td><span class="ico ico-p"></span>Quantize selectable per fine-tune; runtime hosted.</td>
-            <td><span class="ico ico-p"></span>Inference precision vendor-managed.</td>
+            <td><span class="ico ico-p"></span>FP8 default on shared; INT4 selectable on dedicated.</td>
+            <td><span class="ico ico-p"></span>FP8 / INT4 on selected models; runtime hosted.</td>
+            <td><span class="ico ico-p"></span>Precision is your choice on dedicated deploys.</td>
             <td><span class="ico ico-p"></span>You assemble bitsandbytes + AutoGPTQ + AWQ yourself.</td>
             <td><span class="ico ico-p"></span>Vendor chooses runtime precision; opaque to buyer.</td>
           </tr>
@@ -268,26 +271,26 @@
             <td class="ax">Gateway capture in front of any provider</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>OpenAI/Anthropic/vLLM/TGI drop-in; tenant-fenced redacted captures land in your VPC.</td>
             <td><span class="ico ico-n"></span>Inference layer; capture is out of scope.</td>
-            <td><span class="ico ico-p"></span>Captures inside the Predibase platform only.</td>
-            <td><span class="ico ico-y"></span>Workflow-capture in front of OpenAI is the on-ramp.</td>
+            <td><span class="ico ico-n"></span>Inference + fine-tune; capture is out of scope.</td>
+            <td><span class="ico ico-n"></span>No capture surface (serving only).</td>
             <td><span class="ico ico-n"></span>Wire LiteLLM / OpenLLMetry / Helicone yourself.</td>
             <td><span class="ico ico-n"></span>Vendor logs only; not a capture-for-training surface.</td>
           </tr>
           <tr>
             <td class="ax">Open published artifact format spec</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>.kolm format v1 spec under Apache-2.0; reference implementation + verifier published.</td>
-            <td><span class="ico ico-p"></span>Open source ecosystem formats (GGUF, safetensors); no signed-receipt envelope.</td>
-            <td><span class="ico ico-n"></span>Vendor-internal artifact representation.</td>
-            <td><span class="ico ico-n"></span>Vendor-internal artifact representation.</td>
+            <td><span class="ico ico-p"></span>Open-weight model formats (safetensors); no signed-receipt envelope.</td>
+            <td><span class="ico ico-p"></span>Open-weight + LoRA upload; no spec.</td>
+            <td><span class="ico ico-p"></span>Truss config is open; no model-spec.</td>
             <td><span class="ico ico-y"></span>You define your own; no published spec to align around.</td>
             <td><span class="ico ico-n"></span>Vendor-proprietary, no public spec.</td>
           </tr>
           <tr>
             <td class="ax">Published cost per 1M tokens, INT4 7B student</td>
             <td class="k"><b>~$0.08</b><span class="ico ico-y"></span>Amortized RTX A6000 power + a monthly re-distill, no per-token markup.</td>
-            <td><span class="ico ico-y"></span>Your hardware, no software markup.</td>
-            <td><span class="ico ico-p"></span>Per-deploy + per-token; see vendor rate sheet.</td>
-            <td><span class="ico ico-p"></span>Per-call pricing; see vendor rate sheet.</td>
+            <td><span class="ico ico-p"></span>~$0.20 / 1M tokens for 7B on shared (vendor rate sheet).</td>
+            <td><span class="ico ico-p"></span>~$0.20 / 1M tokens for 7B on shared (vendor rate sheet).</td>
+            <td><span class="ico ico-p"></span>Per-GPU-minute on dedicated; ~$1.30/hr on A10G.</td>
             <td><span class="ico ico-y"></span>Your hardware, your labor; no software markup.</td>
             <td><span class="ico ico-n"></span>Per-token + dedicated-capacity uplift on top.</td>
           </tr>
@@ -311,22 +314,22 @@
         <div class="when"><b>Decisive when:</b> HIPAA, SOC 2, FedRAMP, or an internal compliance review is on the path to production.</div>
       </div>
       <div class="cmp-card">
-        <div class="tag">Pick LoRAX / vLLM if</div>
-        <h3>You serve thousands of LoRA adapters at scale</h3>
-        <p>The adapter-multiplexing inference layer is genuinely excellent and worth using. Pair it with kolm for the build-time artifact pipeline and the signed receipts, and serve the result on LoRAX.</p>
-        <div class="when"><b>Decisive when:</b> you have 1000+ adapters to serve from one node; you do not need build-time compliance.</div>
+        <div class="tag">Pick Fireworks AI if</div>
+        <h3>You want the fastest hosted inference for open weights</h3>
+        <p>Fireworks runs an excellent serverless inference layer for open models with low-latency adapter swapping. Pair it with kolm for the build-time artifact pipeline and the signed receipts, then serve the result on Fireworks.</p>
+        <div class="when"><b>Decisive when:</b> latency-critical workloads; you do not need build-time compliance or a self-hosted runtime.</div>
       </div>
       <div class="cmp-card">
-        <div class="tag">Pick Predibase if</div>
-        <h3>You want a managed fine-tune SaaS</h3>
-        <p>Predibase is a competent fine-tune-as-a-service. If you do not need the artifact to leave their cloud and per-token vendor cost is fine, the managed experience is fast to start.</p>
+        <div class="tag">Pick Together AI if</div>
+        <h3>You want a model-cloud with fine-tune SaaS</h3>
+        <p>Together is a competent fine-tune-and-host across 100+ open models. If you do not need the artifact to leave their cloud and per-token vendor cost is fine, the managed experience is fast to start.</p>
         <div class="when"><b>Decisive when:</b> no regulatory boundary, no need to run offline, value managed UX over open weights.</div>
       </div>
       <div class="cmp-card">
-        <div class="tag">Pick OpenPipe if</div>
-        <h3>Your captures live inside one vendor</h3>
-        <p>Workflow-capture &rarr; LoRA is the original elegant idea. If your traffic is already routed through their gateway and a hosted runtime is acceptable, it is a fast on-ramp.</p>
-        <div class="when"><b>Decisive when:</b> simple workflows, hosted runtime acceptable, no per-call receipt needed.</div>
+        <div class="tag">Pick Baseten if</div>
+        <h3>You want polished deploys with autoscaling</h3>
+        <p>Baseten's Truss and Chains are a clean serving stack with autoscaling, A/B routing, and a strong ops surface. If a hosted runtime is acceptable, it is a fast on-ramp.</p>
+        <div class="when"><b>Decisive when:</b> simple deployment surface required, hosted runtime acceptable, no per-call receipt needed.</div>
       </div>
       <div class="cmp-card">
         <div class="tag">Pick DIY if</div>
@@ -347,7 +350,7 @@
 <section class="ks-section">
   <div class="ks-wrap">
     <div class="ks-shead">
-      <span class="ks-eyebrow">Honest tradeoffs</span>
+      <span class="ks-eyebrow">Where we are the wrong fit</span>
       <h2 class="ks-h2">Where kolm is not the right fit.</h2>
       <p class="ks-lede">Cases where we will tell you to pick a different stack. Save yourself a pilot.</p>
     </div>
@@ -361,8 +364,8 @@
       <div class="cmp-card">
         <div class="tag">Skip kolm if</div>
         <h3>You serve 10,000+ adapters multiplexed</h3>
-        <p>Our inference path supports adapter swapping but it is not where we put first-quintile engineering effort. If your dominant cost is "I have ten thousand customer-specific adapters and I need them all warm on one node", LoRAX is the better fit and we will tell you so.</p>
-        <div class="when"><b>Better fit:</b> LoRAX, or kolm-for-build &rarr; LoRAX-for-serve combo.</div>
+        <p>Our inference path supports adapter swapping but it is not where we put first-quintile engineering effort. If your dominant cost is "I have ten thousand customer-specific adapters and I need them all warm on one node", Fireworks AI or Together AI is the better serving fit and we will tell you so.</p>
+        <div class="when"><b>Better fit:</b> Fireworks AI, or kolm-for-build &rarr; Fireworks-for-serve combo.</div>
       </div>
       <div class="cmp-card">
         <div class="tag">Skip kolm if</div>
@@ -382,19 +385,24 @@
     </div>
     <div class="cmp-cards">
       <div class="cmp-card">
-        <div class="tag">From LoRAX</div>
-        <h3>Build with kolm, serve with LoRAX</h3>
-        <p>The cleanest hybrid. Use kolm to capture, distill, and sign the artifact; export the LoRA + GGUF that LoRAX already understands; keep your serving layer. The artifact arrives in your runtime with a verifiable receipt and a K-score baked in.</p>
+        <div class="tag">From Fireworks</div>
+        <h3>Build with kolm, serve with Fireworks</h3>
+        <p>The cleanest hybrid. Use kolm to capture, distill, and sign the artifact; export the LoRA + GGUF that Fireworks already serves; keep your inference layer. The artifact arrives in your runtime with a verifiable receipt and a K-score baked in.</p>
       </div>
       <div class="cmp-card">
-        <div class="tag">From Predibase</div>
-        <h3>Export adapter, sign with kolm</h3>
-        <p>Export your existing Predibase adapter as a base, point kolm distill at your captures for the next iteration. The first kolm artifact is a parity check; the second is the one that ships under the new gate.</p>
+        <div class="tag">From Together</div>
+        <h3>Export fine-tune, sign with kolm</h3>
+        <p>Export your existing Together fine-tune as a base, point kolm distill at your captures for the next iteration. The first kolm artifact is a parity check; the second is the one that ships under the new gate.</p>
       </div>
       <div class="cmp-card">
-        <div class="tag">From OpenPipe</div>
-        <h3>Re-import captures, re-distill</h3>
-        <p>Captured traffic transfers. Convert OpenPipe's capture format with `kolm import --from openpipe`; the same captures go into kolm distill. K-score against the same held-out cases is the apples-to-apples check.</p>
+        <div class="tag">From Baseten</div>
+        <h3>Re-import traffic, re-distill</h3>
+        <p>Logged traffic transfers. Convert Baseten request logs with `kolm import --from json`; the same captures go into kolm distill. K-score against the same held-out cases is the apples-to-apples check.</p>
+      </div>
+      <div class="cmp-card">
+        <div class="tag">From OpenPipe / Predibase / LoRAX</div>
+        <h3>Migrate before the acquirer migrates you</h3>
+        <p>OpenPipe wound down inside CoreWeave (Jul 2026), Predibase rolled into Rubrik, and LoRAX is maintained downstream of that move. Export the captures you still own, point `kolm import --from openpipe` (or `--from predibase`) at them, re-distill, and ship under your own signed artifact contract before the next pricing change lands.</p>
       </div>
       <div class="cmp-card">
         <div class="tag">From DIY</div>
@@ -575,7 +583,7 @@
     <div style="background: linear-gradient(180deg, var(--ks-accent-soft) 0%, transparent 100%); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-lg); padding: var(--ks-10); text-align: center;">
       <span class="ks-eyebrow">Side-by-side</span>
       <h2 class="ks-h2" style="font-size: clamp(28px, 4vw, 40px); margin: var(--ks-3) auto; max-width: 28ch;">Run the same eval pack on your incumbent and on kolm. Compare K-scores.</h2>
-      <p class="ks-prose" style="margin: 0 auto var(--ks-5); max-width: 60ch;">The honest test. We help you write the eval pack, score your existing artifact, score a kolm-compiled artifact on the same cases. Pick the better K. We have been wrong before.</p>
+      <p class="ks-prose" style="margin: 0 auto var(--ks-5); max-width: 60ch;">The direct test. We help you write the eval pack, score your existing artifact, score a kolm-compiled artifact on the same cases. Pick the better K. We have been wrong before.</p>
       <div style="display: inline-flex; gap: var(--ks-3); flex-wrap: wrap; justify-content: center;">
         <a class="ks-btn ks-btn--primary ks-btn--lg" href="/quickstart">Run the bake-off <span class="ks-btn-arrow">&rarr;</span></a>
         <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/enterprise">Talk to procurement</a>

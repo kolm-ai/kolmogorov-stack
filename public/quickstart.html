@@ -269,7 +269,7 @@
     -H "Authorization: Bearer $KOLM_API_KEY" \
     -H "Content-Type: application/json" \
     -d '{
-      "model": "openai/gpt-5",
+      "model": "openai/gpt-4o",
       "messages": [{"role":"user","content":"hello"}]
     }'</pre>
           <pre class="ks-code qs-pane" data-pane="route-node">import OpenAI from "openai";
@@ -278,7 +278,7 @@ const client = new OpenAI({
   apiKey:  process.env.KOLM_API_KEY,
 });
 const r = await client.chat.completions.create({
-  model: "openai/gpt-5",
+  model: "openai/gpt-4o",
   messages: [{ role: "user", content: "hello" }],
 });
 console.log(r.choices[0].message.content);</pre>
@@ -288,7 +288,7 @@ client = OpenAI(
     api_key=os.environ["KOLM_API_KEY"],
 )
 r = client.chat.completions.create(
-    model="openai/gpt-5",
+    model="openai/gpt-4o",
     messages=[{"role":"user","content":"hello"}],
 )
 print(r.choices[0].message.content)</pre>

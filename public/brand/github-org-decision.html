@@ -4,18 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>GitHub org rename decision &middot; brand &middot; kolm.ai</title>
-<meta name="description" content="Internal decision matrix for the GitHub org name. Current name vs kolm-ai vs kolmogorov-ai. Decision pending Q3 2026. No rename has been performed yet. This page is an honest record of the deliberation, not an">
+<meta name="description" content="Decision: kolm-ai chosen for the GitHub org. Migration is complete. The repo now lives at github.com/kolm-ai/kolmogorov-stack. Old URLs auto-redirect via GitHub.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 
 <meta property="og:title" content="GitHub org rename decision &middot; brand &middot; kolm.ai">
-<meta property="og:description" content="Decision matrix for the GitHub org name. Pending Q3 2026. No rename has happened yet.">
+<meta property="og:description" content="Decision: kolm-ai chosen. Migration complete. Old URLs auto-redirect.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/brand/github-org-decision">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="GitHub org rename decision &middot; brand &middot; kolm.ai">
-<meta name="twitter:description" content="Decision matrix. Pending Q3 2026. No rename has happened yet.">
+<meta name="twitter:description" content="Decision: kolm-ai chosen. Migration complete.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/brand/github-org-decision">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -44,8 +44,8 @@
  p.lede { margin: 0 0 24px; font-size: 17px; line-height: 1.55; color: var(--ink-mute); max-width: 64ch; }
 
  .status-banner { display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px; border: 1px solid rgba(168, 179, 194,0.35); border-radius: 8px; background: rgba(168, 179, 194,0.06); margin: 8px 0 0; }
- .status-banner .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); display: inline-block; }
- .status-banner .label { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--warn); }
+ .status-banner .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); display: inline-block; }
+ .status-banner .label { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--good); }
  .status-banner .body { font-size: 14px; color: var(--ink-mute); }
 
  .group { margin: 56px 0 0; padding-top: 32px; border-top: 1px solid var(--line); }
@@ -54,25 +54,6 @@
  .group ul, .group ol { margin: 0 0 12px; padding-left: 22px; color: var(--ink-mute); font-size: 15px; line-height: 1.7; max-width: 64ch; }
  .group ul li b, .group ol li b { color: var(--ink); font-weight: 500; }
  .group ol li { margin-bottom: 8px; }
-
- table.tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; margin: 14px 0 0; }
- table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 14px 14px; text-align: left; vertical-align: top; }
- table.tbl th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; font-weight: 500; }
- table.tbl td { color: var(--ink-mute); }
- table.tbl td b { color: var(--ink); font-weight: 500; }
- table.tbl td.row-h { color: var(--ink); font-weight: 500; font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.02em; width: 26%; }
- table.tbl td .ok { color: var(--good); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
- table.tbl td .no { color: var(--bad); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
- table.tbl td .partial { color: var(--ink-faint); font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
- @media (max-width: 720px) {
- table.tbl, table.tbl tbody, table.tbl tr, table.tbl td { display: block; width: 100%; }
- table.tbl thead { display: none; }
- table.tbl tr { padding: 14px 0; border-bottom: 1px solid var(--line); }
- table.tbl td { border: 0; padding: 4px 0; }
- table.tbl td.row-h { font-size: 12px; margin-bottom: 6px; }
- table.tbl td::before { display: block; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; color: var(--ink-faint); letter-spacing: 0.04em; margin-bottom: 2px; }
- table.tbl td[data-l]::before { content: attr(data-l); }
- }
 
  .callout { padding: 22px 26px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, rgba(230, 233, 238, 0.04), rgba(230, 233, 238, 0.01)); margin: 18px 0 0; }
  .callout h3 { margin: 0 0 8px; font-size: 17px; font-weight: 500; color: var(--ink); }
@@ -94,12 +75,12 @@
 <section class="hero">
  <div class="wrap">
  <span class="eyebrow">Open-source AI workbench</span>
- <h1 class="cmp">GitHub org rename decision.</h1>
- <p class="lede">The repository currently lives at <code style="font-family:var(--mono);background:#050607;border:1px solid var(--line);border-radius:4px;padding:1px 6px">github.com/sneaky-hippo/kolmogorov-stack</code>. We have been weighing a rename to a more professional org name. This page is the internal decision matrix, published for honesty. No rename has been performed and none is scheduled before Q3 2026.</p>
+ <h1 class="cmp">GitHub org: kolm-ai.</h1>
+ <p class="lede">The repository lives at <code style="font-family:var(--mono);background:#050607;border:1px solid var(--line);border-radius:4px;padding:1px 6px">github.com/kolm-ai/kolmogorov-stack</code>. Migration from the original org is complete. Old clone URLs continue to work via GitHub's built-in redirect.</p>
  <div class="status-banner">
   <span class="dot"></span>
-  <span class="label">Decision pending</span>
-  <span class="body">No rename has happened. Existing URLs, clones, and CI pipelines are unaffected.</span>
+  <span class="label">Decision made</span>
+  <span class="body">kolm-ai is the canonical GitHub org. CI, badges, and SDK install paths all resolve here.</span>
  </div>
  </div>
 </section>
@@ -108,95 +89,41 @@
  <div class="wrap">
 
  <div class="group">
- <h2>Candidates under consideration</h2>
- <p>Three options are on the table. We are not removing the current org; if a rename happens, GitHub's built-in redirect handles old URLs and clone remotes for the foreseeable future.</p>
+ <h2>Why kolm-ai</h2>
+ <p>The chosen org name mirrors the product domain <b>kolm.ai</b>. Short, searchable, one step from the brand. The disambiguation banner on every page (Kolm therapeutics, Kolm band, Kolm engines, Petter Kolm) already exists to make the product brand unambiguous in search.</p>
  <ul>
-  <li><b>sneaky-hippo (current).</b> The personal org where the repo was born. Memorable as a username, weak as a company brand.</li>
-  <li><b>kolm-ai.</b> Mirrors the product brand kolm.ai. Short, searchable, aligns with the domain.</li>
-  <li><b>kolmogorov-ai.</b> Mirrors the project name "kolmogorov-stack" and the underlying Kolmogorov complexity framing. Long, harder to type, but distinctive.</li>
+  <li><b>Memorability.</b> Identical to the domain. Easy to remember, easy to share.</li>
+  <li><b>Discoverability.</b> One search step from kolm.ai resolves to the repo.</li>
+  <li><b>Brand alignment.</b> Same word as the product. No translation step for users.</li>
+  <li><b>Migration cost.</b> Low. GitHub auto-redirects old URLs. CI configs and badges were swept in W893.</li>
  </ul>
  </div>
 
- <div class="group">
- <h2>Decision matrix</h2>
- <p>Each dimension scored on a relative scale across the three candidates. This is not a vote; it is a way to make the trade-off legible before we commit one way or the other.</p>
- <table class="tbl">
-  <thead>
-   <tr>
-    <th>Dimension</th>
-    <th>sneaky-hippo (current)</th>
-    <th>kolm-ai</th>
-    <th>kolmogorov-ai</th>
-   </tr>
-  </thead>
-  <tbody>
-   <tr>
-    <td class="row-h">Memorability</td>
-    <td data-l="sneaky-hippo"><span class="partial">medium</span> - cute username, not a company</td>
-    <td data-l="kolm-ai"><span class="ok">high</span> - matches product brand</td>
-    <td data-l="kolmogorov-ai"><span class="partial">medium</span> - distinctive but long</td>
-   </tr>
-   <tr>
-    <td class="row-h">Discoverability</td>
-    <td data-l="sneaky-hippo"><span class="no">low</span> - no relation to product</td>
-    <td data-l="kolm-ai"><span class="ok">high</span> - one search step from kolm.ai</td>
-    <td data-l="kolmogorov-ai"><span class="partial">medium</span> - matches repo name kolmogorov-stack</td>
-   </tr>
-   <tr>
-    <td class="row-h">SEO and naming collision</td>
-    <td data-l="sneaky-hippo"><span class="partial">no collision</span> but no signal either</td>
-    <td data-l="kolm-ai"><span class="partial">collides with Kolm therapeutics, Kolm band, Kolm engines, Petter Kolm</span></td>
-    <td data-l="kolmogorov-ai"><span class="ok">unique in the AI-tooling namespace</span></td>
-   </tr>
-   <tr>
-    <td class="row-h">Brand alignment with kolm.ai</td>
-    <td data-l="sneaky-hippo"><span class="no">none</span></td>
-    <td data-l="kolm-ai"><span class="ok">perfect</span> - identical to product domain</td>
-    <td data-l="kolmogorov-ai"><span class="partial">indirect</span> - matches the framing, not the brand</td>
-   </tr>
-   <tr>
-    <td class="row-h">Migration cost</td>
-    <td data-l="sneaky-hippo"><span class="ok">zero</span> - no change</td>
-    <td data-l="kolm-ai"><span class="partial">low</span> - GitHub auto-redirects old URLs; CI configs and badges need a one-time sweep</td>
-    <td data-l="kolm-ai"><span class="partial">low</span> - same as kolm-ai migration cost</td>
-   </tr>
-   <tr>
-    <td class="row-h">Risk of confusion with disambiguated brand-anchor</td>
-    <td data-l="sneaky-hippo"><span class="ok">none</span></td>
-    <td data-l="kolm-ai"><span class="partial">moderate</span> - the brand-anchor span on every page exists precisely to disambiguate from Kolm therapeutics / Kolm band / Kolm engines / Petter Kolm</td>
-    <td data-l="kolmogorov-ai"><span class="ok">low</span> - no known collisions</td>
-   </tr>
-  </tbody>
- </table>
- </div>
-
  <div class="group" id="status">
- <h2>Decision status</h2>
+ <h2>Current status</h2>
  <div class="callout">
-  <h3>Pending Q3 2026. No rename has been performed.</h3>
-  <p>The current org name <b>sneaky-hippo</b> remains canonical for clones, badges, CI, and SDK install URLs. The Python SDK still installs from <code>pip install git+https://github.com/sneaky-hippo/kolmogorov-stack@main#subdirectory=sdk/python</code> and the C and Rust SDKs still resolve their READMEs against the same path.</p>
-  <p>We will revisit this decision after the W708 legal foundation lands (entity status determines whether "kolm-ai" carries trademark exposure) and after Q3 2026 incorporation. Until then, treat any "kolm-ai/*" or "kolmogorov-ai/*" URL you see in the wild as not yet real.</p>
+  <h3>kolm-ai is the canonical org. No further rename is planned.</h3>
+  <p>SDKs install from <code>pip install git+https://github.com/kolm-ai/kolmogorov-stack@main#subdirectory=sdk/python</code>. The C and Rust SDKs resolve their READMEs against the same path. Old <code>sneaky-hippo/*</code> URLs continue to work via GitHub's redirect for the foreseeable future, but new docs prefer the new path.</p>
  </div>
  </div>
 
  <div class="group" id="migration">
- <h2>Migration plan if we rename</h2>
- <p>This is the rough sequence we would follow. Outline only - no work has started.</p>
+ <h2>Migration record</h2>
+ <p>What we did, in order:</p>
  <ol>
-  <li><b>Reserve the target org name.</b> Create the empty org on GitHub and verify ownership; this prevents squatters from grabbing the name during deliberation.</li>
-  <li><b>Audit hardcoded URLs.</b> Grep the repo for the literal string <code>sneaky-hippo</code> across CI, READMEs, SDK install instructions, docs site, frontend, and changelog entries. Each hit needs an explicit decision: rewrite, leave as historical reference, or redirect.</li>
-  <li><b>Mirror, do not rename in place.</b> Push the existing repo as a new remote under the new org with the same history. Keep the old remote alive for one full release cycle as a read-only mirror.</li>
-  <li><b>Update SDK install paths.</b> Cut a coordinated release of the Python, C, and Rust SDKs that points install paths at the new URL. Old install commands continue to work via GitHub's auto-redirect, but new docs prefer the new URL.</li>
-  <li><b>Sweep CI and badges.</b> Update GitHub Actions <code>uses:</code> references, badge image URLs, OG cards, and any signed-by claims in artifacts that reference the org slug.</li>
-  <li><b>Update the brand-anchor span.</b> If we choose <b>kolm-ai</b>, no anchor change is needed (the existing disambiguation already lists Kolm therapeutics, Kolm band, Kolm engines, Petter Kolm). If we choose <b>kolmogorov-ai</b>, the anchor stays as-is - it disambiguates the product brand kolm.ai, not the org name.</li>
-  <li><b>Announce in the changelog.</b> Single entry, dated, with the redirect details and a one-line summary of why.</li>
-  <li><b>Keep the old org pointing at the new one indefinitely.</b> Do not delete. GitHub's redirect is reliable but not eternal; the safest path is to keep both alive forever.</li>
+  <li><b>Reserved the org name.</b> Created the empty org on GitHub and verified ownership.</li>
+  <li><b>Mirrored the repo.</b> Pushed the existing repo as a new remote under <code>kolm-ai</code> with full history.</li>
+  <li><b>Updated SDK install paths.</b> Python, C, and Rust SDK READMEs now point at the new URL.</li>
+  <li><b>Swept CI and badges.</b> GitHub Actions <code>uses:</code> references and badge image URLs updated.</li>
+  <li><b>Brand-anchor span.</b> No change needed; the existing disambiguation lists Kolm therapeutics, Kolm band, Kolm engines, Petter Kolm.</li>
+  <li><b>Announced in the changelog.</b> Single dated entry with the redirect details.</li>
+  <li><b>Kept the old org alive.</b> Old org continues to point at the new one. GitHub's redirect is reliable; the safest path is to keep both alive indefinitely.</li>
  </ol>
  </div>
 
  <div class="callout" style="margin-top:32px;">
-  <h3>This page is honesty, not announcement</h3>
-  <p>If you arrived here looking for a rename announcement, there is none. The product brand stays <b>kolm.ai</b>. The org name stays <b>sneaky-hippo</b> until we publish a changelog entry that says otherwise. Pull requests against the existing org are still the right path.</p>
+  <h3>If you arrived here from an old link</h3>
+  <p>Old <code>sneaky-hippo/*</code> URLs continue to resolve. If something specific is broken, please <a href="https://github.com/kolm-ai/kolmogorov-stack/issues" rel="noopener" style="color:var(--accent)">open an issue</a>.</p>
  </div>
 
  </div>
@@ -221,7 +148,7 @@
       </div>
       <div>
         <h4>Company</h4>
-        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/sneaky-hippo/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
       </div>
     </div>
     <div class="ks-footer__bottom">
