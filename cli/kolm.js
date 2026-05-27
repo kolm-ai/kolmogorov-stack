@@ -7660,6 +7660,56 @@ async function cmdCompile(args) {
     return;
   }
 
+  // W892-C5 — `--list-target-profiles` prints the lookup table and exits.
+  // Lives inside cmdCompile so users discover it next to --target itself.
+  if (args.includes('--list-target-profiles')) {
+    const tp = await import('../src/target-profiles.js');
+    if (args.includes('--json')) {
+      console.log(JSON.stringify(tp.asJson(), null, 2));
+    } else {
+      console.log(tp.formatTable());
+      console.log('');
+      console.log('Use: kolm compile --target-profile <profile> --spec my.spec.json');
+    }
+    return;
+  }
+
+  // W892-C5 — `--target-profile <name>` is a friendly alias for the right
+  // combination of (--target, runtime, context limit) for a known device.
+  // The flag is resolved FIRST so the rest of compile pipeline (--cloud,
+  // --rent, --spec, the dry-run path, the real path) sees an already-set
+  // --target. If --target is also passed explicitly, the explicit value
+  // wins (so power users can override the recommendation without warning).
+  const tpIdx = args.indexOf('--target-profile');
+  if (tpIdx >= 0) {
+    const tpName = args[tpIdx + 1];
+    if (!tpName || tpName.startsWith('--')) {
+      console.error('error: --target-profile needs a profile name (e.g. jetson-orin-nano).');
+      console.error('       kolm compile --list-target-profiles  # see all available');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const tp = await import('../src/target-profiles.js');
+    const profile = tp.lookup(tpName);
+    if (!profile) {
+      console.error(`error: unknown --target-profile '${tpName}'. Known profiles:`);
+      console.error('');
+      console.error(tp.formatTable());
+      process.exit(EXIT.BAD_ARGS);
+    }
+    // Strip --target-profile <name> from argv; inject --target if absent.
+    args.splice(tpIdx, 2);
+    const existingTarget = args.indexOf('--target');
+    if (existingTarget < 0) {
+      args.push('--target', profile.target);
+      console.error(`[target-profile] ${profile.name}: --target ${profile.target} (runtime: ${profile.runtime}, ~${profile.est_tok_s_7b} tok/s on 7B)`);
+    } else {
+      console.error(`[target-profile] ${profile.name}: keeping explicit --target ${args[existingTarget + 1]} (profile recommended ${profile.target})`);
+    }
+    if (profile.notes) {
+      console.error(`[target-profile] note: ${profile.notes}`);
+    }
+  }
+
   // ---- Rent-compile path: ship a spec to a rental backend (modal/vast/lambda/runpod),
   // train remotely, fetch the .kolm back. Must run BEFORE the local --spec path
   // since both require --spec; the presence of --rent decides where the work lands.

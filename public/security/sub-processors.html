@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sub-processors · GDPR Article 28 + DPA Annex III · kolm.ai</title>
+<meta name="description" content="Full list of kolm.ai sub-processors with purpose, region, and certification. Required by GDPR Article 28 and disclosed in DPA Annex III.">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/wave889-vertical.css">
+<link rel="canonical" href="https://kolm.ai/security/sub-processors">
+</head>
+<body class="ks">
+<div data-include-nav></div>
+
+<section class="v-hero">
+  <div class="v-wrap">
+    <span class="v-eyebrow">Security &middot; sub-processors</span>
+    <h1 class="v-h1">Every third party with access to customer data.</h1>
+    <p class="v-lede">This list is current. We notify by email + update this page 30 days before adding a new sub-processor; you have 30 days to object per the <a href="/legal/dpa">DPA</a>. Subscribe to the change feed at the bottom.</p>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="mailto:security@kolm.ai?subject=Sub-processor%20change%20notice%20subscription">Subscribe to change notices</a>
+      <a class="v-btn v-btn--ghost" href="/legal/dpa">Read the DPA -&gt;</a>
+    </div>
+    <div class="v-caveat">Caveats: this list excludes service providers that never touch customer data (e.g. payroll, accounting). Frontier-model providers (OpenAI, Anthropic, Google) are sub-processors only when you route through them via the Wrapper.</div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Core infrastructure</span>
+      <h2 class="v-h2">Cloud + delivery.</h2>
+      <p>These are present in every deployment. You can opt out of AWS by self-hosting; the rest run the public service.</p>
+    </div>
+    <div class="v-compl">
+      <div>
+        <div class="label">AWS</div>
+        <b>Compute + storage &middot; us-east-1, eu-west-1</b>
+        <p>S3 (capture lake + artifact store), RDS Postgres (control plane). SOC 2 Type II, ISO 27001, GDPR-compliant. EU mirror is in eu-west-1 only.</p>
+      </div>
+      <div>
+        <div class="label">Vercel</div>
+        <b>CDN + frontend hosting &middot; global edge</b>
+        <p>Serves kolm.ai static pages + /account/*. No customer data persisted on Vercel — control-plane data lives in AWS. SOC 2 Type II.</p>
+      </div>
+      <div>
+        <div class="label">Railway</div>
+        <b>API hosting &middot; us-west, eu-west on request</b>
+        <p>Runs the /v1/* API. Receives in-flight requests; persists nothing — all writes go to AWS S3 + RDS. SOC 2 Type II.</p>
+      </div>
+      <div>
+        <div class="label">Cloudflare</div>
+        <b>WAF + DNS + DDoS &middot; global edge</b>
+        <p>Layer-7 filtering and rate limiting before requests reach origin. Does not see decrypted payloads (mTLS not enforced). SOC 2 Type II, ISO 27001.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Operational</span>
+      <h2 class="v-h2">Billing, transactional email, monitoring.</h2>
+      <p>Each receives a narrow slice: Stripe sees billing metadata, Postmark sees email-addressed transactional content, Sentry sees error stack traces with PII redacted before send.</p>
+    </div>
+    <div class="v-compl">
+      <div>
+        <div class="label">Stripe</div>
+        <b>Billing &middot; us-west-1</b>
+        <p>Customer name, email, billing address, payment method. No prompt/completion data. PCI DSS Level 1.</p>
+      </div>
+      <div>
+        <div class="label">Postmark</div>
+        <b>Transactional email &middot; us-east-1</b>
+        <p>Signup, password reset, compile-done, usage alert emails. Sees recipient email + subject + body. SOC 2 Type II.</p>
+      </div>
+      <div>
+        <div class="label">Sentry</div>
+        <b>Error monitoring &middot; us-east-1, eu-west-1</b>
+        <p>Stack traces and breadcrumbs. PII redactor strips request bodies + headers before send. SOC 2 Type II.</p>
+      </div>
+      <div>
+        <div class="label">HackerOne</div>
+        <b>Bug bounty intake &middot; us-east-1</b>
+        <p>Researcher reports, including any reproduction data they submit. SOC 2 Type II.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Conditional</span>
+      <h2 class="v-h2">Only present when you opt in.</h2>
+      <p>These appear in your sub-processor list only if you enable the corresponding feature.</p>
+    </div>
+    <div class="v-compl">
+      <div>
+        <div class="label">Anthropic / OpenAI / Google / Together / Fireworks</div>
+        <b>Frontier inference &middot; varies by provider</b>
+        <p>Sub-processor only when you route Gateway calls through them. Listed individually in your namespace's <code>provider</code> block.</p>
+      </div>
+      <div>
+        <div class="label">RunPod / Modal</div>
+        <b>GPU compile &middot; varies by region</b>
+        <p>Sub-processor only when you use <code>kolm compile --cloud runpod</code> or <code>--cloud modal</code>. Receives the captured training data for the duration of the compile job.</p>
+      </div>
+      <div>
+        <div class="label">Hugging Face</div>
+        <b>Model card publish &middot; us</b>
+        <p>Sub-processor only when you use <code>kolm publish --to huggingface</code>. Receives the compiled artifact + model card you author.</p>
+      </div>
+      <div>
+        <div class="label">GitHub</div>
+        <b>CI quality gate &middot; us</b>
+        <p>Sub-processor only when you use <code>kolm-ai/quality-gate-action@v1</code> in a public repo. Receives the eval set you commit + the K-Score on the PR.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div data-include-footer></div>
+<script src="/nav.js" defer></script>
+</body>
+</html>

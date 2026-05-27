@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The kolm spec format, TOML reference · kolm.ai</title>
+<meta name="description" content="Canonical, field-by-field TOML reference for the kolm spec. Round-trips to canonical JSON; same .kolm artifact, byte-identical, either way.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<link rel="canonical" href="https://kolm.ai/spec/toml">
+<meta property="og:title" content="The kolm spec format, TOML reference · kolm.ai">
+<meta property="og:description" content="Canonical, field-by-field TOML reference for the kolm spec. Round-trips to canonical JSON; same .kolm artifact, byte-identical, either way.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/spec/toml">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The kolm spec format, TOML reference · kolm.ai">
+<meta name="twitter:description" content="Canonical, field-by-field TOML reference for the kolm spec. Round-trips to canonical JSON; same .kolm artifact, byte-identical, either way.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "TechArticle",
+ "headline": "The kolm spec format, TOML reference",
+ "description": "Canonical, field-by-field TOML reference for the kolm spec. Round-trips to canonical JSON; same .kolm artifact, byte-identical, either way.",
+ "url": "https://kolm.ai/spec/toml",
+ "author": {"@type": "Organization", "name": "Kolm"},
+ "publisher": {"@type": "Organization", "name": "Kolm", "url": "https://kolm.ai"},
+ "datePublished": "2026-05-27",
+ "license": "https://www.apache.org/licenses/LICENSE-2.0"
+}
+</script>
+<style>
+ :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669}
+ body{background:var(--bg);color:var(--ink);font:16.5px/1.7 -apple-system,Inter,system-ui,sans-serif;margin:0}
+ .wrap{max-width:760px;margin:0 auto;padding:0 24px}
+ header.site{padding:18px 0;border-bottom:1px solid var(--line)}
+ header.site .wrap{display:flex;justify-content:space-between;align-items:center;max-width:1080px}
+ header.site nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px}
+ header.site nav a{color:inherit;text-decoration:none}
+ header.site .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+ .paper{padding:80px 0 64px}
+ .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
+ .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ h1{font-size:34px;line-height:1.15;font-weight:500;letter-spacing:-0.018em;margin:0 0 8px;max-width:680px}
+ .subtitle{font-size:16.5px;color:var(--ink-mute);margin:0 0 14px;font-style:italic;line-height:1.55}
+ .authors{font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin:0 0 6px;letter-spacing:0.04em}
+ .stamp{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:6px 0 0;letter-spacing:0.04em}
+ .abstract{margin:32px 0 0;padding:20px 24px;border-left:2px solid var(--accent);background:rgba(17, 17, 17,0.04);font-size:15.5px;line-height:1.65;color:var(--ink-mute)}
+ .abstract b{color:var(--ink);font-weight:500}
+ h2{font-size:22px;font-weight:500;letter-spacing:-0.012em;margin:48px 0 12px;color:var(--ink)}
+ h3{font-size:17px;font-weight:500;margin:24px 0 8px;color:var(--ink)}
+ p{color:var(--ink-mute);margin:0 0 16px}
+ p b{color:var(--ink);font-weight:500}
+ ul,ol{color:var(--ink-mute);margin:0 0 16px;padding-left:24px}
+ li{margin:0 0 6px}
+ li b{color:var(--ink);font-weight:500}
+ code{font-family:var(--mono);font-size:0.92em;color:var(--ink);background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+ pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:0 0 16px;color:var(--ink)}
+ pre code{background:transparent;border:0;padding:0}
+ table{width:100%;border-collapse:collapse;margin:0 0 16px;font-size:14px}
+ th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+ th{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-faint);font-weight:500}
+ td code{font-size:12.5px}
+ .tbl-wrap{border:1px solid var(--line);border-radius:8px;overflow-x:auto;margin:0 0 16px}
+ .feedback{margin:48px 0 0;padding:22px 24px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);font-size:14.5px}
+ .feedback h3{margin:0 0 6px;font-size:16px}
+ .feedback p{margin:0 0 8px;color:var(--ink-mute)}
+ .feedback ul{margin:8px 0 0}
+ .pill-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 18px}
+ .pill-row .p{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-radius:4px;padding:3px 8px;color:var(--ink-mute);letter-spacing:0.02em}
+ .pill-row .p.live{color:var(--accent);border-color:rgba(17, 17, 17,0.4)}
+ footer.site{padding:32px 0;border-top:1px solid var(--line);color:var(--ink-faint);font-size:13px;margin-top:64px}
+ footer.site .wrap{max-width:1180px}
+ footer.site a{color:var(--ink-mute);text-decoration:none}
+ footer.site a:hover{color:var(--ink)}
+ .footer-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;margin-bottom:24px}
+ @media(max-width:760px){.footer-grid{grid-template-columns:repeat(2,1fr);gap:18px}}
+ .footer-grid h4{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-faint);font-weight:500;margin:0 0 10px}
+ .footer-grid a{display:block;padding:3px 0;font-size:13px}
+ .footer-tag{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-top:18px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11.5px}
+ .footer-tag span{color:var(--ink-faint)}
+</style>
+
+
+<link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
+<main id="main">
+<section class="paper">
+<div class="wrap">
+
+<p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; <a href="/spec">spec</a> &nbsp;/&nbsp; spec.toml reference</p>
+
+<h1>The kolm spec format, <code>spec.toml</code> reference.</h1>
+<p class="subtitle">Canonical, field-by-field TOML reference. Round-trips to the JSON contract; same <code>.kolm</code> artifact, byte-identical, either way.</p>
+<p class="authors">kolm engineering . hello@kolm.ai</p>
+<p class="stamp">v1.0 . 2026-05-27 . citeable as <code>kolm.ai/spec/toml</code> . source <a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/docs/spec-toml-reference.md" style="color:inherit">docs/spec-toml-reference.md</a></p>
+
+<div class="pill-row">
+ <span class="p live">status: in production</span>
+ <span class="p">parser: @iarna/toml (TOML 1.0 strict)</span>
+ <span class="p">round-trip: lossless</span>
+ <span class="p">adapter: src/spec-toml.js</span>
+</div>
+
+<div class="abstract">
+<b>One spec, two surfaces.</b> The JSON shape documented at <a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/docs/spec-reference.md" style="color:inherit">spec-reference.md</a> is the stable contract that <code>compileSpec()</code> validates and writes into every <code>.kolm</code> archive. The TOML form on this page is a <b>1:1 mapping</b>: author <code>spec.toml</code>, feed it to <code>kolm compile --spec spec.toml</code>, get the same signed artifact you would get from the equivalent <code>spec.json</code>. Use TOML when you want comments, multi-line literal strings for regex / source bodies, and tables that read top-to-bottom; use JSON when you generate specs from code. Round-trip either way with <code>kolm spec toml-to-json</code> and <code>kolm spec json-to-toml</code>.
+</div>
+
+<h2>1. Minimum viable spec</h2>
+
+<p>Five things are mandatory: <code>job_id</code>, <code>task</code>, at least one <code>[[recipes]]</code> entry, and each recipe needs <code>id</code> + <code>name</code> + one of (<code>source</code>, <code>dsl</code>). Everything else has a sensible default.</p>
+
+<pre><code>job_id = "job_sentiment_demo"
+task   = "sentiment binary classifier"
+
+[[recipes]]
+id     = "rcp_sentiment_v1"
+name   = "sentiment v1"
+source = '''
+function generate(input, lib) {
+  return { sentiment: input.length &gt; 0 ? 'unknown' : null };
+}
+'''
+
+[evals]
+spec     = "rs-1-evals"
+coverage = 1.0
+
+[[evals.cases]]
+id       = "p1"
+input    = "loved this"
+expected = { sentiment = "positive" }</code></pre>
+
+<p><code>[[recipes]]</code> becomes one entry of the <code>"recipes": [ &hellip; ]</code> JSON array; <code>[evals]</code> becomes the <code>"evals": { &hellip; }</code> object; <code>[[evals.cases]]</code> becomes one entry of <code>"evals": { "cases": [ &hellip; ] }</code>.</p>
+
+<h2>2. Top-level fields</h2>
+
+<p>All top-level fields live at the <b>root</b> of the TOML document (above any <code>[table]</code> headers). Order at the root is free; place arrays of tables (<code>[[recipes]]</code>) and nested tables (<code>[evals]</code>, <code>[pack]</code>, <code>[index]</code>, <code>[training_stats]</code>) <b>after</b> the root scalars to avoid accidental capture.</p>
+
+<div class="tbl-wrap">
+<table>
+<thead><tr><th>Field</th><th>TOML type</th><th>Default</th><th>Required</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>job_id</code></td><td>string</td><td>&mdash;</td><td>yes</td><td>Unique slug. Regex <code>/^job_[a-z0-9_-]+$/i</code>. Becomes the artifact filename <code>&lt;job_id&gt;.kolm</code>.</td></tr>
+<tr><td><code>task</code></td><td>string</td><td>&mdash;</td><td>yes</td><td>Human-readable description. Surfaced in <code>kolm inspect</code> and the model card.</td></tr>
+<tr><td><code>base_model</code></td><td>string</td><td><code>"none"</code></td><td>no</td><td>HF repo id (e.g. <code>"Qwen/Qwen2.5-3B-Instruct"</code>) or <code>"none"</code> for rule-only artifacts. Drives <code>kolm fit</code> / <code>kolm hardware</code>.</td></tr>
+<tr><td><code>artifact_class</code></td><td>string</td><td><code>"recipe"</code></td><td>no</td><td>One of <code>"recipe"</code>, <code>"compiled_rule"</code>, <code>"lora_adapter"</code>, <code>"full_model"</code>. <code>compiled_rule</code> requires every recipe to provide a <code>dsl</code> block.</td></tr>
+<tr><td><code>recipes</code></td><td>array of table</td><td>&mdash;</td><td>yes</td><td>One or more <code>[[recipes]]</code> tables. Order is preserved and significant for fall-through chains.</td></tr>
+<tr><td><code>evals</code></td><td>table</td><td>omitted</td><td>recommended</td><td>Eval set the K-Score is computed against. See <a href="#evals">&sect; Evals</a>.</td></tr>
+<tr><td><code>pack</code></td><td>table</td><td>omitted</td><td>no</td><td>Optional KOLMPACK metadata (display name, tags, vendor, license).</td></tr>
+<tr><td><code>index</code></td><td>table</td><td>omitted</td><td>no</td><td>Optional KOLMIDX block (search-time hints used by Workbench).</td></tr>
+<tr><td><code>training_stats</code></td><td>table</td><td>omitted</td><td>no</td><td>Optional pre-recorded training metrics. Shown in the manifest verbatim.</td></tr>
+<tr><td><code>comparator</code></td><td>string</td><td><code>"exact"</code></td><td>no</td><td>One of <code>exact</code>, <code>subset</code>, <code>regex</code>, <code>levenshtein</code>, <code>numeric_close</code>.</td></tr>
+<tr><td><code>split_seed</code></td><td>integer</td><td>random</td><td>no</td><td>Seed for the train/holdout split. Pin this for byte-stable artifacts across recompiles.</td></tr>
+<tr><td><code>holdout_ratio</code></td><td>float 0..1</td><td><code>0.2</code></td><td>no</td><td>Fraction of seed pairs held back for eval (only when a seeds file is used).</td></tr>
+<tr><td><code>seeds_path</code></td><td>string</td><td>&mdash;</td><td>no</td><td>Path to a seeds JSONL file. Triggers the Q+2 seed-gate path.</td></tr>
+<tr><td><code>examples_path</code></td><td>string</td><td>&mdash;</td><td>no</td><td>Alias for <code>seeds_path</code> (legacy).</td></tr>
+<tr><td><code>examples</code></td><td>integer</td><td><code>200</code></td><td>no</td><td>Target example count for compute estimation only. Not a hard cap.</td></tr>
+<tr><td><code>epochs</code></td><td>integer</td><td><code>3</code></td><td>no</td><td>Training epochs (LoRA / full-model targets only).</td></tr>
+<tr><td><code>batch_size</code></td><td>integer</td><td><code>4</code></td><td>no</td><td>Mini-batch size.</td></tr>
+<tr><td><code>seq_len</code></td><td>integer</td><td><code>1024</code></td><td>no</td><td>Max sequence length. <code>max_seq_length</code> is an accepted alias.</td></tr>
+<tr><td><code>weights_url</code></td><td>string</td><td>&mdash;</td><td>no</td><td>When the recipe is a LoRA-style wrapper, URL of the trained weights blob.</td></tr>
+<tr><td><code>weights_sha256</code></td><td>string</td><td>&mdash;</td><td>no</td><td>SHA-256 of the weights blob &mdash; verified at load time.</td></tr>
+<tr><td><code>rank</code></td><td>integer</td><td><code>8</code></td><td>no</td><td>LoRA rank (only when <code>artifact_class = "lora_adapter"</code>).</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>Root example</h3>
+<pre><code>job_id         = "job_demo"
+task           = "demo"
+base_model     = "Qwen/Qwen2.5-3B-Instruct"
+artifact_class = "recipe"
+comparator     = "exact"
+split_seed     = 7
+holdout_ratio  = 0.2
+examples       = 200
+epochs         = 3
+batch_size     = 4
+seq_len        = 1024</code></pre>
+
+<h2 id="recipes">3. <code>[[recipes]]</code> entries</h2>
+
+<p>Each <code>[[recipes]]</code> header opens one entry in the JSON <code>recipes[]</code> array. Order is preserved &mdash; recipes earlier in the file are tried first by fall-through chains.</p>
+
+<div class="tbl-wrap">
+<table>
+<thead><tr><th>Field</th><th>TOML type</th><th>Default</th><th>Required</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>id</code></td><td>string</td><td>&mdash;</td><td>yes</td><td>Recipe slug. Convention: <code>rcp_&lt;slug&gt;</code>.</td></tr>
+<tr><td><code>name</code></td><td>string</td><td>&mdash;</td><td>yes</td><td>Human-readable. Surfaced in <code>kolm inspect</code>.</td></tr>
+<tr><td><code>source</code></td><td>multi-line string <code>'''&hellip;'''</code></td><td>&mdash;</td><td>one of <code>source</code>/<code>dsl</code></td><td>JS function body. Must compile under <code>src/verifier.js</code> <code>compileJs()</code>. <b>Always literal multi-line (<code>'''&hellip;'''</code>)</b> &mdash; basic strings interpret <code>\b</code>/<code>\n</code> escapes and mangle regex literals.</td></tr>
+<tr><td><code>dsl</code></td><td>inline table or <code>[recipes.dsl]</code></td><td>&mdash;</td><td>one of <code>source</code>/<code>dsl</code></td><td>rule-dsl-v1 AST (<code>src/dsl.js</code> <code>DSL_SPEC</code>). Required when <code>artifact_class = "compiled_rule"</code>. Triggers native C / Rust codegen.</td></tr>
+<tr><td><code>version_id</code></td><td>string</td><td><code>"ver_&lt;id&gt;_001"</code></td><td>no</td><td>Pin for receipt diffing. Bump on every meaningful source edit.</td></tr>
+<tr><td><code>tags</code></td><td>array of string</td><td><code>[]</code></td><td>no</td><td>Free-form labels. Used by <code>kolm find</code> and the Studio search.</td></tr>
+<tr><td><code>schema</code></td><td>inline table</td><td>omitted</td><td>no</td><td><code>{ input = &lt;jsonschema&gt;, output = &lt;jsonschema&gt; }</code>.</td></tr>
+<tr><td><code>params</code></td><td>inline or <code>[recipes.params]</code></td><td>omitted</td><td>no</td><td>Recipe-specific runtime knobs. Passed through to the manifest verbatim.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>A recipe that supplies <b>both</b> <code>source</code> and <code>dsl</code> is honored verbatim &mdash; source wins for the JS path; the DSL still ships so a verifier can recompute the C / Rust targets. This is the recommended pattern for advanced authors who want a custom JS path kept in lock-step with a declared DSL contract.</p>
+
+<h3>Two recipes with sub-tables</h3>
+
+<pre><code>[[recipes]]
+id         = "rcp_sentiment_v1"
+name       = "sentiment v1"
+version_id = "ver_sentiment_v1_003"
+tags       = ["sentiment", "english"]
+source     = '''
+function generate(input, lib) {
+  const s = String(input).toLowerCase();
+  if (/love|great|awesome/.test(s)) return { sentiment: 'positive' };
+  if (/hate|awful|terrible/.test(s)) return { sentiment: 'negative' };
+  return { sentiment: 'neutral' };
+}
+'''
+
+  [recipes.schema]
+  input  = { type = "string" }
+  output = { type = "object", required = ["sentiment"] }
+
+  [recipes.params]
+  threshold = 0.5
+
+[[recipes]]
+id   = "rcp_ssn_v1"
+name = "SSN redactor"
+
+  [recipes.dsl]
+  spec    = "rule-dsl-v1"
+  op      = "replace_regex"
+  pattern = '\b\d{3}-\d{2}-\d{4}\b'
+  with    = "[REDACTED-SSN]"</code></pre>
+
+<p>The leading two-space indent on <code>[recipes.schema]</code> is cosmetic &mdash; TOML ignores it. The sub-table header scopes to the <b>most recent</b> <code>[[recipes]]</code>.</p>
+
+<h2 id="evals">4. <code>[evals]</code> table</h2>
+
+<pre><code>[evals]
+spec     = "rs-1-evals"
+coverage = 1.0
+n        = 1
+
+[[evals.cases]]
+id       = "p1"
+input    = "loved this"
+expected = { sentiment = "positive" }
+
+  [evals.cases.params]
+  comparator = "exact"</code></pre>
+
+<div class="tbl-wrap">
+<table>
+<thead><tr><th>Field</th><th>TOML type</th><th>Default</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>spec</code></td><td>string</td><td><code>"rs-1-evals"</code></td><td>Eval-set format version. <code>rs-1-evals</code> is the only published format today.</td></tr>
+<tr><td><code>cases</code></td><td>array of table</td><td><code>[]</code></td><td>One eval case per <code>[[evals.cases]]</code> entry. Each must have <code>id</code>, <code>input</code>, <code>expected</code>.</td></tr>
+<tr><td><code>coverage</code></td><td>float 0..1</td><td><code>0</code></td><td>Self-declared coverage. Surfaced in the manifest but not enforced.</td></tr>
+<tr><td><code>n</code></td><td>integer</td><td><code>cases</code> length</td><td>Optional explicit count &mdash; useful when <code>cases</code> is a sample and the full set lives at <code>seeds_path</code>.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>Per-case fields (each <code>[[evals.cases]]</code>)</h3>
+
+<div class="tbl-wrap">
+<table>
+<thead><tr><th>Field</th><th>TOML type</th><th>Required</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>id</code></td><td>string</td><td>yes</td><td>Case slug, unique within the eval set.</td></tr>
+<tr><td><code>input</code></td><td>any</td><td>yes</td><td>Passed verbatim to the recipe's <code>generate(input, lib)</code>.</td></tr>
+<tr><td><code>expected</code></td><td>any</td><td>yes</td><td>Reference value compared via the active comparator.</td></tr>
+<tr><td><code>params</code></td><td>inline or <code>[evals.cases.params]</code></td><td>no</td><td>Per-case overrides. <code>params.comparator</code> is the most-used; <code>params.max_distance</code> (levenshtein) and <code>params.tolerance</code> (numeric_close) are also honored.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>5. <code>[pack]</code>, <code>[index]</code>, <code>[training_stats]</code></h2>
+
+<p>Three optional tables surfaced verbatim in the manifest. The field set is open &mdash; any keys at these tables flow through to <code>manifest.json</code>. Common fields below.</p>
+
+<h3><code>[pack]</code> &mdash; model-card metadata</h3>
+<pre><code>[pack]
+display_name = "Sentiment v1"
+vendor       = "acme-ml"
+license      = "Apache-2.0"
+tags         = ["sentiment", "english", "binary"]
+homepage     = "https://acme-ml.example.com/models/sentiment-v1"</code></pre>
+
+<h3><code>[index]</code> &mdash; Workbench search hints</h3>
+<pre><code>[index]
+domain        = "nlp"
+subdomain     = "classification"
+language      = ["en"]
+modality      = ["text"]
+latency_class = "sub_ms"</code></pre>
+
+<p><code>latency_class</code> is one of <code>"sub_ms"</code>, <code>"ms"</code>, <code>"sub_sec"</code>, <code>"sec"</code>. <code>modality</code> entries are drawn from <code>text</code>, <code>image</code>, <code>audio</code>, <code>video</code>, <code>pdf</code>.</p>
+
+<h3><code>[training_stats]</code> &mdash; pre-recorded training metrics</h3>
+<pre><code>[training_stats]
+pass_rate_positive = 0.94
+pass_rate_negative = 0.91
+latency_p50_us     = 38
+latency_p99_us     = 142
+train_examples     = 160
+holdout_examples   = 40</code></pre>
+
+<h2>6. Comparators</h2>
+
+<p>Implemented in <code>src/comparators.js</code>. Set at spec level via root-level <code>comparator = "&hellip;"</code>, or per-case via <code>params.comparator = "&hellip;"</code> inside a <code>[[evals.cases]]</code> table.</p>
+
+<div class="tbl-wrap">
+<table>
+<thead><tr><th>Comparator</th><th>Match rule</th><th>Use for</th></tr></thead>
+<tbody>
+<tr><td><code>exact</code></td><td>Strict deep-equal</td><td>Classifiers, structured extraction</td></tr>
+<tr><td><code>subset</code></td><td>Output is a superset of expected</td><td>Tolerant structured extraction</td></tr>
+<tr><td><code>regex</code></td><td><code>expected</code> is a regex applied to stringified output</td><td>Pattern matching</td></tr>
+<tr><td><code>levenshtein</code></td><td>Edit-distance &le; <code>params.max_distance</code></td><td>Fuzzy string match</td></tr>
+<tr><td><code>numeric_close</code></td><td>|output - expected| &le; <code>params.tolerance</code></td><td>Forecasts, scores</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>7. CLI / opts overrides</h2>
+
+<p>These are not spec fields but flags / env vars that override TOML defaults &mdash; identical to the JSON path:</p>
+
+<div class="tbl-wrap">
+<table>
+<thead><tr><th>CLI flag</th><th>Env var</th><th>Overrides</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>--workload-profile latency</code></td><td><code>KOLM_WORKLOAD_PROFILE</code></td><td>(sets manifest only)</td><td>One of <code>latency</code>, <code>batching</code>, <code>auto</code>. Pinned in the manifest for kernel selection at serve time.</td></tr>
+<tr><td><code>--comparator regex</code></td><td>&mdash;</td><td>root-level <code>comparator</code></td><td></td></tr>
+<tr><td><code>--seeds path.jsonl</code></td><td>&mdash;</td><td><code>seeds_path</code></td><td>Triggers the seed-gate path.</td></tr>
+<tr><td><code>--split-seed 7</code></td><td>&mdash;</td><td><code>split_seed</code></td><td></td></tr>
+<tr><td><code>--holdout-ratio 0.3</code></td><td>&mdash;</td><td><code>holdout_ratio</code></td><td>Must be 0..1.</td></tr>
+<tr><td><code>--target c</code> / <code>--target rust</code> / <code>--target wasm</code></td><td>&mdash;</td><td>(none)</td><td>Adds native compile targets. Requires the corresponding toolchain (<code>kolm doctor</code>).</td></tr>
+<tr><td><code>--cloud modal</code> / <code>--cloud runpod</code></td><td><code>KOLM_CLOUD</code></td><td>(none)</td><td>Routes the compile to a cloud GPU partner. Requires API key + budget confirmation.</td></tr>
+<tr><td><code>--no-fit-check</code></td><td>&mdash;</td><td>(none)</td><td>Skips pre-compile VRAM gate. Use when you know the spec fits or when running on cloud.</td></tr>
+<tr><td><code>--refit</code></td><td>&mdash;</td><td>(none)</td><td>Forces a retrain even when the manifest hash hasn't changed.</td></tr>
+<tr><td><code>--format toml</code> / <code>--format json</code></td><td>&mdash;</td><td>(auto from extension)</td><td>Force the spec parser. Only needed when reading <code>--spec -</code> from stdin.</td></tr>
+<tr><td>&mdash;</td><td><code>KOLM_ARTIFACT_SECRET</code></td><td>(none)</td><td>Override the per-user receipt secret. Set on every machine that needs to verify each other's artifacts byte-stably.</td></tr>
+<tr><td>&mdash;</td><td><code>RECIPE_RECEIPT_SECRET</code></td><td>(none)</td><td>Alias for <code>KOLM_ARTIFACT_SECRET</code>.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>8. Constraints &amp; invariants</h2>
+
+<p>Enforced at validate-time on the TOML&rarr;JSON output; violating one is a hard fail (<code>KOLM_E_SPEC_INVALID</code>):</p>
+
+<ol>
+<li><code>job_id</code> matches <code>/^job_[a-z0-9_-]+$/i</code>.</li>
+<li>At least one <code>[[recipes]]</code> entry is present.</li>
+<li>Every recipe has <code>id</code>, <code>name</code>, and <b>one of</b> <code>source</code> or <code>dsl</code>.</li>
+<li>If <code>artifact_class = "compiled_rule"</code>, every recipe must have a <code>[recipes.dsl]</code> block (raw JS is not eligible for native codegen).</li>
+<li><code>dsl</code> tables must validate against <code>validateDsl()</code> (<code>src/dsl.js</code>).</li>
+<li><code>source</code> multi-line strings must compile under <code>compileJs()</code>.</li>
+<li><code>[[evals.cases]]</code> (when present) must be a valid array of tables.</li>
+<li><code>comparator</code> must be one of the SUPPORTED_COMPARATORS list.</li>
+<li><code>workload_profile</code> (CLI / env / opts) must be <code>latency</code>, <code>batching</code>, or <code>auto</code>.</li>
+<li><code>holdout_ratio</code> must be 0..1.</li>
+</ol>
+
+<p>Additional TOML-only parse-time invariants enforced by <code>@iarna/toml</code> before validation runs:</p>
+
+<ul>
+<li>The document must be valid strict TOML 1.0 &mdash; no comments inside arrays of inline tables, no trailing commas, integers fit signed-64-bit.</li>
+<li><code>[[recipes]]</code> headers must appear <b>after</b> root scalars &mdash; putting them before <code>job_id</code> accidentally hoists <code>job_id</code> into the first recipe.</li>
+<li>Multi-line literal strings (<code>'''&hellip;'''</code>) preserve the leading newline only if the opening delimiter is followed by a newline; trim with care if you embed source that must be byte-stable across editors.</li>
+</ul>
+
+<h2>9. What ends up in the <code>.kolm</code></h2>
+
+<p>After the TOML is converted to JSON and validated, <code>compileSpec()</code> writes a ZIP at <code>~/.kolm/artifacts/&lt;job_id&gt;.kolm</code>. Output is identical to the JSON path (see <a href="/spec/kolm-format-v1">the .kolm file format spec</a> for the archive layout). The original <code>spec.toml</code> is <b>also</b> archived under <code>spec.toml</code> next to <code>spec.json</code> inside the artifact, so <code>kolm inspect</code> can round-trip back to either form.</p>
+
+<p>Verify any artifact offline: <code>kolm verify &lt;artifact.kolm&gt;</code> re-runs every ring and emits <code>ok: true</code> only when all four seals replay clean.</p>
+
+<h2>10. Worked examples</h2>
+
+<h3>Rule-only artifact (no model)</h3>
+<pre><code>job_id = "job_email_classifier"
+task   = "email subject -&gt; {spam, ham}"
+
+[[recipes]]
+id     = "rcp_keyword_v1"
+name   = "keyword classifier v1"
+source = '''
+function generate(input, lib) {
+  const subj = String(input.subject || '').toLowerCase();
+  return { label: /viagra|nigerian prince|wire transfer/.test(subj)
+    ? 'spam' : 'ham' };
+}
+'''
+
+[evals]
+spec     = "rs-1-evals"
+coverage = 0.85
+
+[[evals.cases]]
+id       = "s1"
+input    = { subject = "URGENT: nigerian prince wire transfer" }
+expected = { label = "spam" }
+
+[[evals.cases]]
+id       = "h1"
+input    = { subject = "your invoice for May" }
+expected = { label = "ham" }</code></pre>
+
+<h3>Compiled-rule artifact (native C / Rust target)</h3>
+<pre><code>job_id         = "job_ssn_redactor"
+task           = "redact US SSN from input string"
+artifact_class = "compiled_rule"
+
+[[recipes]]
+id   = "rcp_ssn_v1"
+name = "SSN redactor"
+
+  [recipes.dsl]
+  spec    = "rule-dsl-v1"
+  op      = "replace_regex"
+  pattern = '\b\d{3}-\d{2}-\d{4}\b'
+  with    = "[REDACTED-SSN]"
+
+[evals]
+spec = "rs-1-evals"
+
+[[evals.cases]]
+id       = "r1"
+input    = "my ssn is 123-45-6789"
+expected = "my ssn is [REDACTED-SSN]"</code></pre>
+
+<p>Compile with <code>kolm compile --spec ssn.toml --target c --target rust</code>. A TOML <b>literal</b> string (single-quoted <code>'&hellip;'</code>) passes the backslashes through verbatim, so <code>'\b\d{3}-\d{2}-\d{4}\b'</code> becomes the JSON string <code>"\\b\\d{3}-\\d{2}-\\d{4}\\b"</code> &mdash; the exact form the DSL validator expects. <b>Do not</b> use a basic string (<code>"\b\d{3}&hellip;"</code>): TOML would interpret <code>\b</code> and <code>\d</code> as escape sequences and the regex would be mangled.</p>
+
+<h3>LoRA adapter artifact</h3>
+<pre><code>job_id         = "job_customer_support_lora"
+task           = "customer support tone adapter for Qwen 2.5 3B"
+artifact_class = "lora_adapter"
+base_model     = "Qwen/Qwen2.5-3B-Instruct"
+rank           = 16
+epochs         = 3
+batch_size     = 8
+seq_len        = 2048
+weights_url    = "https://hub.kolm.ai/blobs/sha256:abcdef0123..."
+weights_sha256 = "abcdef0123..."
+seeds_path     = "./customer-support-pairs.jsonl"
+holdout_ratio  = 0.2
+comparator     = "subset"
+
+[[recipes]]
+id     = "rcp_lora_routing_v1"
+name   = "LoRA routing wrapper"
+source = '''
+function generate(input, lib) {
+  return lib.lora.infer({
+    adapter: 'rcp_lora_routing_v1',
+    prompt: input.prompt
+  });
+}
+'''
+
+[evals]
+spec  = "rs-1-evals"
+cases = []</code></pre>
+
+<p><code>cases = []</code> is an explicit empty array; the seed-gate path will populate the actual eval set from <code>seeds_path</code> at compile time.</p>
+
+<h2>11. Authoring tips</h2>
+
+<ul>
+<li><b>Always quote with literal strings (<code>'&hellip;'</code> / <code>'''&hellip;'''</code>) when the value contains backslashes</b> &mdash; regex patterns, Windows paths, JS source with <code>\n</code> templates. Basic strings (<code>"&hellip;"</code>) interpret <code>\</code> as the start of an escape.</li>
+<li><b>Order matters at table boundaries.</b> A <code>[recipes.params]</code> sub-table scopes to the <em>most recent</em> <code>[[recipes]]</code>. Put your sub-tables immediately under the <code>[[recipes]]</code> header they belong to.</li>
+<li><b>Inline tables vs sub-tables are equivalent.</b> <code>schema = { input = { type = "string" } }</code> and a <code>[recipes.schema.input]</code> sub-table produce identical JSON. Pick whichever reads better at the site.</li>
+<li><b>Run <code>kolm spec toml-to-json spec.toml</code></b> to see exactly what the validator sees; pipe to <code>jq</code> to inspect.</li>
+<li><b>Round-trip check:</b> <code>kolm spec toml-to-json spec.toml | kolm spec json-to-toml -</code> should equal <code>spec.toml</code> up to comments and whitespace.</li>
+</ul>
+
+<h2>12. Authoring tools</h2>
+
+<ul>
+<li><code>kolm init --format toml</code> &mdash; interactive scaffold for a new TOML spec.</li>
+<li><code>kolm spec validate &lt;file&gt;</code> &mdash; dry-run validate without compiling (auto-detects TOML vs JSON by extension).</li>
+<li><code>kolm spec toml-to-json &lt;file&gt;</code> &mdash; emit the equivalent canonical JSON to stdout.</li>
+<li><code>kolm spec json-to-toml &lt;file&gt;</code> &mdash; round-trip the other way (for migration).</li>
+<li><code>kolm fit &lt;spec&gt;</code> &mdash; projects VRAM / disk / wall-clock for a spec.</li>
+<li><code>kolm inspect &lt;artifact&gt;</code> &mdash; round-trip view of any compiled spec (renders TOML if the artifact was authored that way).</li>
+<li><code>kolm explain &lt;spec&gt;</code> &mdash; render the spec as natural language for review.</li>
+</ul>
+
+<div class="feedback">
+<h3>See also</h3>
+<ul>
+<li><a href="/spec/kolm-format-v1" style="color:var(--accent)">The .kolm file format, v1</a> &mdash; what the artifact looks like once <code>compileSpec()</code> packs it.</li>
+<li><a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/docs/spec-reference.md" style="color:var(--accent)">spec-reference.md</a> &mdash; the canonical JSON shape (this page mirrors it 1:1).</li>
+<li><a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/docs/AUTHORING.md" style="color:var(--accent)">AUTHORING.md</a> &mdash; recipe authoring guide.</li>
+<li><a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/docs/distill-strategy.md" style="color:var(--accent)">distill-strategy.md</a> &mdash; when to LoRA vs full-model vs rule.</li>
+</ul>
+</div>
+
+</div>
+</section>
+</main>
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li><li><a href="/spec/toml">.kolm spec</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

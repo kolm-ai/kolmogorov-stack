@@ -1,0 +1,189 @@
+name: kolm quality gate
+description: One-line CI gate for a .kolm artifact. Verifies signature + receipt chain, blocks on K-Score regression vs a baseline, and posts a PR comment when the gate fails. Wraps `kolm verify` + the K-Score regression check.
+author: kolm.ai
+
+branding:
+  icon: shield
+  color: gray-dark
+
+inputs:
+  artifact:
+    description: Path to the .kolm artifact to gate (relative to workspace root).
+    required: true
+  threshold:
+    description: Minimum K-Score required to pass (0.0 - 1.0). Default 0.85.
+    required: false
+    default: "0.85"
+  baseline:
+    description: Optional path to a baseline .kolm artifact (e.g. the artifact pinned on main). When set, the action fails if the candidate's K-Score is more than `max-regression` below the baseline.
+    required: false
+    default: ""
+  max-regression:
+    description: Maximum allowed K-Score regression vs baseline, as a fraction (0.02 = 2 percentage points). Only applied when `baseline` is set.
+    required: false
+    default: "0.01"
+  namespace:
+    description: Optional namespace label written into the receipt envelope when the gate publishes a report receipt (for the PR-comment audit trail).
+    required: false
+    default: ""
+  kolm-api-key:
+    description: Optional KOLM_API_KEY. Only needed when the gate calls api.kolm.ai for tenant-scoped verification (the default offline verify path does not need it).
+    required: false
+    default: ""
+  comment-on-pr:
+    description: Post a comment on the PR with the K-Score result and any regression details. Requires `pull-requests:write` on the calling workflow.
+    required: false
+    default: "true"
+  github-token:
+    description: GITHUB_TOKEN with `pull-requests:write` scope. Required only when `comment-on-pr` is true.
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  k-score:
+    description: K-Score of the candidate artifact (0.0 - 1.0).
+    value: ${{ steps.gate.outputs.k_score }}
+  baseline-k-score:
+    description: K-Score of the baseline artifact (empty when no baseline supplied).
+    value: ${{ steps.gate.outputs.baseline_k_score }}
+  delta:
+    description: Candidate minus baseline (positive = improvement, negative = regression). Empty when no baseline.
+    value: ${{ steps.gate.outputs.delta }}
+  passed:
+    description: '"true" or "false" — whether the gate passed.'
+    value: ${{ steps.gate.outputs.passed }}
+  receipt-id:
+    description: Receipt id for the verification call (empty on offline-only verify).
+    value: ${{ steps.gate.outputs.receipt_id }}
+
+runs:
+  using: composite
+  steps:
+    - name: install kolm CLI
+      shell: bash
+      run: |
+        if ! command -v kolm >/dev/null 2>&1; then
+          npm i -g github:kolm-ai/kolmogorov-stack
+        else
+          echo "kolm CLI on PATH ($(kolm --version 2>/dev/null || echo unknown))"
+        fi
+
+    - name: gate
+      id: gate
+      shell: bash
+      env:
+        KOLM_GATE_ARTIFACT: ${{ inputs.artifact }}
+        KOLM_GATE_THRESHOLD: ${{ inputs.threshold }}
+        KOLM_GATE_BASELINE: ${{ inputs.baseline }}
+        KOLM_GATE_MAX_REGRESSION: ${{ inputs.max-regression }}
+        KOLM_GATE_NAMESPACE: ${{ inputs.namespace }}
+        KOLM_API_KEY: ${{ inputs.kolm-api-key }}
+      run: |
+        set -e
+        if [ ! -f "$KOLM_GATE_ARTIFACT" ]; then
+          echo "::error::artifact not found: $KOLM_GATE_ARTIFACT"
+          exit 1
+        fi
+        cand=$(kolm verify "$KOLM_GATE_ARTIFACT" --json)
+        echo "candidate verify:"
+        echo "$cand"
+        cand_ok=$(echo "$cand" | jq -r '.ok')
+        cand_score=$(echo "$cand" | jq -r '.k_score // .manifest.k_score // empty')
+        cand_receipt=$(echo "$cand" | jq -r '.receipt_id // empty')
+        if [ "$cand_ok" != "true" ]; then
+          echo "::error::candidate artifact failed verification"
+          exit 1
+        fi
+        if [ -z "$cand_score" ] || [ "$cand_score" = "null" ]; then
+          echo "::error::candidate artifact has no k_score in manifest — cannot gate"
+          exit 1
+        fi
+        echo "k_score=$cand_score" >> "$GITHUB_OUTPUT"
+        [ -n "$cand_receipt" ] && echo "receipt_id=$cand_receipt" >> "$GITHUB_OUTPUT" || true
+
+        threshold="$KOLM_GATE_THRESHOLD"
+        below_thresh=$(awk -v a="$cand_score" -v b="$threshold" 'BEGIN{ print (a+0 < b+0) ? 1 : 0 }')
+        if [ "$below_thresh" = "1" ]; then
+          echo "::error::K-Score $cand_score is below threshold $threshold"
+          echo "passed=false" >> "$GITHUB_OUTPUT"
+          echo "GATE_REASON=below_threshold" >> "$GITHUB_ENV"
+          echo "GATE_CAND_SCORE=$cand_score" >> "$GITHUB_ENV"
+          echo "GATE_THRESHOLD=$threshold" >> "$GITHUB_ENV"
+          exit 1
+        fi
+
+        if [ -n "$KOLM_GATE_BASELINE" ]; then
+          if [ ! -f "$KOLM_GATE_BASELINE" ]; then
+            echo "::error::baseline artifact not found: $KOLM_GATE_BASELINE"
+            exit 1
+          fi
+          base=$(kolm verify "$KOLM_GATE_BASELINE" --json)
+          base_ok=$(echo "$base" | jq -r '.ok')
+          base_score=$(echo "$base" | jq -r '.k_score // .manifest.k_score // empty')
+          if [ "$base_ok" != "true" ]; then
+            echo "::error::baseline artifact failed verification"
+            exit 1
+          fi
+          if [ -z "$base_score" ] || [ "$base_score" = "null" ]; then
+            echo "::error::baseline artifact has no k_score in manifest"
+            exit 1
+          fi
+          delta=$(awk -v a="$cand_score" -v b="$base_score" 'BEGIN{ printf "%.6f", (a+0) - (b+0) }')
+          echo "baseline_k_score=$base_score" >> "$GITHUB_OUTPUT"
+          echo "delta=$delta" >> "$GITHUB_OUTPUT"
+          regressed=$(awk -v d="$delta" -v m="$KOLM_GATE_MAX_REGRESSION" 'BEGIN{ print (d+0 < -1 * (m+0)) ? 1 : 0 }')
+          if [ "$regressed" = "1" ]; then
+            echo "::error::K-Score regressed by $delta vs baseline (max allowed: -$KOLM_GATE_MAX_REGRESSION)"
+            echo "passed=false" >> "$GITHUB_OUTPUT"
+            echo "GATE_REASON=regression_vs_baseline" >> "$GITHUB_ENV"
+            echo "GATE_CAND_SCORE=$cand_score" >> "$GITHUB_ENV"
+            echo "GATE_BASE_SCORE=$base_score" >> "$GITHUB_ENV"
+            echo "GATE_DELTA=$delta" >> "$GITHUB_ENV"
+            exit 1
+          fi
+        fi
+        echo "passed=true" >> "$GITHUB_OUTPUT"
+        echo "K-Score gate PASSED — candidate=$cand_score threshold=$threshold ${KOLM_GATE_BASELINE:+baseline=$base_score delta=$delta}"
+
+    - name: comment on PR (regression)
+      if: failure() && inputs.comment-on-pr == 'true' && github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      env:
+        GATE_REASON: ${{ env.GATE_REASON }}
+        GATE_CAND_SCORE: ${{ env.GATE_CAND_SCORE }}
+        GATE_BASE_SCORE: ${{ env.GATE_BASE_SCORE }}
+        GATE_THRESHOLD: ${{ env.GATE_THRESHOLD }}
+        GATE_DELTA: ${{ env.GATE_DELTA }}
+        GATE_ARTIFACT: ${{ inputs.artifact }}
+        GATE_NAMESPACE: ${{ inputs.namespace }}
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const reason = process.env.GATE_REASON || 'unknown';
+          const cand = process.env.GATE_CAND_SCORE || 'unknown';
+          const base = process.env.GATE_BASE_SCORE || '';
+          const thresh = process.env.GATE_THRESHOLD || '';
+          const delta = process.env.GATE_DELTA || '';
+          const artifact = process.env.GATE_ARTIFACT || '';
+          const namespace = process.env.GATE_NAMESPACE || '';
+          let body = `### kolm quality gate FAILED\n\n`;
+          body += `**Artifact:** \`${artifact}\`\n`;
+          if (namespace) body += `**Namespace:** \`${namespace}\`\n`;
+          body += `\n`;
+          if (reason === 'below_threshold') {
+            body += `**Reason:** K-Score \`${cand}\` is below threshold \`${thresh}\`.\n\n`;
+            body += `Run \`kolm verify ${artifact}\` locally to reproduce, then \`kolm compile --refit\` to retrain on the latest captured corpus.`;
+          } else if (reason === 'regression_vs_baseline') {
+            body += `**Reason:** K-Score regressed by \`${delta}\` vs baseline.\n\n`;
+            body += `| | K-Score |\n|---|---|\n| candidate | \`${cand}\` |\n| baseline | \`${base}\` |\n| delta | \`${delta}\` |\n\n`;
+            body += `If this regression is expected (broader eval set, capture drift, intentional smaller student), bump the artifact version and adjust the gate inputs.`;
+          } else {
+            body += `**Reason:** \`${reason}\`. Check the workflow logs for the kolm CLI output.`;
+          }
+          body += `\n\n---\n[kolm quality gate docs](https://kolm.ai/docs/ci/quality-gate)`;
+          await github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body,
+          });

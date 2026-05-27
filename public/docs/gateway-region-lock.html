@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Gateway region lock · gateway.toml region_lock=true · kolm.ai docs</title>
+<meta name="description" content="region_lock = true in gateway.toml forces the gateway to refuse fallback to non-region-pinned providers. Use this for EU / sovereign / regulated workloads.">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/wave889-vertical.css">
+<link rel="canonical" href="https://kolm.ai/docs/gateway-region-lock">
+</head>
+<body class="ks">
+<div data-include-nav></div>
+
+<section class="v-hero">
+  <div class="v-wrap">
+    <span class="v-eyebrow">Docs &middot; gateway region lock</span>
+    <h1 class="v-h1">region_lock = true. One line. Fallback to a non-pinned provider refused.</h1>
+    <p class="v-lede">When set, the gateway will only fall back to providers whose configured region matches the namespace's pinned region. A request that would otherwise cross the boundary returns <code>HTTP 451 region_lock_violation</code>.</p>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup">Try it free</a>
+      <a class="v-btn v-btn--ghost" href="/docs/gateway-toml">Full gateway.toml reference -&gt;</a>
+    </div>
+    <div class="v-caveat">Caveats: region pinning is a routing constraint, not an encryption-in-transit guarantee. Pair with TLS pinning + your own VPC peering for end-to-end region custody.</div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">The config</span>
+      <h2 class="v-h2">Two lines in gateway.toml.</h2>
+      <p>Place at the top of the file, outside any <code>[provider.&lt;name&gt;]</code> block. Applies to every namespace served by this gateway.</p>
+    </div>
+    <div class="v-trio">
+      <div class="v-card" style="grid-column:1 / -1">
+        <span class="ctag">gateway.toml</span>
+        <h3>Region lock + EU pin</h3>
+        <pre style="background:#0a0a0a;color:#e8e8e8;padding:18px;border-radius:8px;overflow-x:auto;font-size:13px;line-height:1.6"><code>region        = "eu-west-1"
+region_lock   = true
+
+[provider.anthropic]
+endpoint = "https://api.anthropic.com"
+region   = "us-east-1"   # cross-region — fallback will be refused
+
+[provider.local-vllm]
+endpoint = "http://10.0.0.7:8000"
+region   = "eu-west-1"   # in-region — fallback allowed</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">What happens</span>
+      <h2 class="v-h2">Fallback paths the gateway evaluates.</h2>
+      <p>The ConfidenceRouter (W807) still runs. The only difference is that out-of-region providers are removed from the candidate list before scoring.</p>
+    </div>
+    <div class="v-compl">
+      <div>
+        <div class="label">In-region primary OK</div>
+        <b>HTTP 200 + receipt</b>
+        <p>Primary serves the call. Same as without region_lock.</p>
+      </div>
+      <div>
+        <div class="label">Primary down, in-region fallback OK</div>
+        <b>HTTP 200 + receipt + provider_used</b>
+        <p>Fallback to an in-region provider. <code>provider_used</code> in the receipt records the actual provider.</p>
+      </div>
+      <div>
+        <div class="label">Primary down, no in-region fallback</div>
+        <b>HTTP 451 region_lock_violation</b>
+        <p>Out-of-region providers are skipped even if they are healthier. The error body lists the candidates and why each was rejected.</p>
+      </div>
+      <div>
+        <div class="label">Audit</div>
+        <b>receipt.region_decision = "locked"</b>
+        <p>Every receipt records whether the region lock was enforced for that call. Use <code>kolm captures stats --region-locked</code> to count.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div data-include-footer></div>
+<script src="/nav.js" defer></script>
+</body>
+</html>

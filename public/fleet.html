@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Fleet · Roll a .kolm artifact to 1 or 10,000 devices · kolm.ai</title>
+<meta name="description" content="kolm fleet deploy --rolling / --canary, kolm fleet monitor, kolm fleet rollback. One CLI to push a signed .kolm to every device, watch the rollout, and revert on regression.">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/wave889-vertical.css">
+<link rel="canonical" href="https://kolm.ai/fleet">
+<meta property="og:title" content="Fleet · Roll one .kolm to thousands of devices">
+<meta property="og:description" content="kolm fleet deploy --rolling / --canary, kolm fleet monitor, kolm fleet rollback. One CLI to push a signed .kolm to every device, watch the rollout, and revert on regression.">
+<meta property="og:url" content="https://kolm.ai/fleet">
+<meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/fleet",
+  "description": "kolm fleet deploy --rolling / --canary, kolm fleet monitor, kolm fleet rollback. One CLI to push a signed .kolm to every device, watch the rollout, and revert on regression.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" }
+}
+</script>
+</head>
+<body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler for fleet rollouts.</span>
+<div data-include-nav></div>
+
+<section class="v-hero">
+  <div class="v-wrap">
+    <span class="v-eyebrow">Fleet management</span>
+    <h1 class="v-h1">One CLI. One .kolm. Every device on the rollout you choose.</h1>
+    <p class="v-lede"><code>kolm fleet deploy out.kolm --rolling 10%</code> pushes to 10% of the fleet, watches success rates, advances to 25 / 50 / 100 — or rolls back automatically on the first device that regresses past your K-Score floor.</p>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup">Try it free</a>
+      <a class="v-btn v-btn--ghost" href="/docs/devices">Read the fleet docs -&gt;</a>
+    </div>
+    <div class="v-caveat">Caveats: rolling and canary deploys require devices registered via <code>kolm devices add</code>. SSH, agent, and MQTT transports supported. No agent daemon required for SSH mode.</div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">The six verbs</span>
+      <h2 class="v-h2">Everything the CLI does for fleet, top to bottom.</h2>
+      <p>The fleet is a flat list of device IDs with tags. Each verb takes <code>--all</code>, <code>--tag &lt;name&gt;</code>, or an explicit device list.</p>
+    </div>
+    <div class="v-trio">
+      <div class="v-card">
+        <span class="ctag">Inventory</span>
+        <h3>kolm fleet status</h3>
+        <p>Lists every device, current .kolm SHA, last heartbeat, K-Score on the most recent benchmark, and reachable status. JSON with <code>--json</code>.</p>
+        <div class="cmd">kolm fleet status --tag prod</div>
+      </div>
+      <div class="v-card">
+        <span class="ctag">Rolling deploy</span>
+        <h3>kolm fleet deploy --rolling</h3>
+        <p>10% → 25% → 50% → 100% with a wait window between stages. Configurable per-stage success threshold. Stops on first device-class failure.</p>
+        <div class="cmd">kolm fleet deploy out.kolm --rolling 10%</div>
+      </div>
+      <div class="v-card">
+        <span class="ctag">Canary</span>
+        <h3>kolm fleet deploy --canary</h3>
+        <p>Picks N tagged canary devices, runs them at the new build for a soak window, then promotes to fleet only if K-Score holds. <code>--canary 3 --soak 24h</code> typical.</p>
+        <div class="cmd">kolm fleet deploy out.kolm --canary 3 --soak 24h</div>
+      </div>
+      <div class="v-card">
+        <span class="ctag">Watch</span>
+        <h3>kolm fleet monitor</h3>
+        <p>Streams per-device K-Score, latency, and error counts. Use during a rollout, or tail continuously for ongoing health. <code>--json</code> emits per-tick events.</p>
+        <div class="cmd">kolm fleet monitor --tag prod --since 1h</div>
+      </div>
+      <div class="v-card">
+        <span class="ctag">Rollback</span>
+        <h3>kolm fleet rollback</h3>
+        <p>Reverts every device to the previous .kolm SHA recorded in the fleet ledger. Survives partial rollouts — devices on the new build get reverted, devices on the old build are skipped.</p>
+        <div class="cmd">kolm fleet rollback --tag prod</div>
+      </div>
+      <div class="v-card">
+        <span class="ctag">Stop</span>
+        <h3>kolm fleet stop</h3>
+        <p>Halts an in-progress rolling deploy at the current stage. The fleet ledger records the partial state so a subsequent <code>kolm fleet deploy --resume</code> picks up where it stopped.</p>
+        <div class="cmd">kolm fleet stop --tag prod</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">A rollout, end to end</span>
+      <h2 class="v-h2">Compile once. Canary three. Soak. Promote. Rollback if it ever slips.</h2>
+      <p>This is the recipe one team uses to push a 7B specialist to 1,200 retail edge boxes every two weeks.</p>
+    </div>
+    <div class="v-flows">
+      <div class="v-flow">
+        <span class="who">1</span>
+        <h3>Compile + sign</h3>
+        <div class="io">in: distilled model &middot; out: signed .kolm</div>
+        <p><code>kolm compile model/ --target-profile jetson-orin-nx -o out.kolm</code></p>
+      </div>
+      <div class="v-flow">
+        <span class="who">2</span>
+        <h3>Canary three devices</h3>
+        <div class="io">in: out.kolm &middot; out: soak ledger entry</div>
+        <p><code>kolm fleet deploy out.kolm --canary 3 --soak 24h</code></p>
+      </div>
+      <div class="v-flow">
+        <span class="who">3</span>
+        <h3>Monitor the soak</h3>
+        <div class="io">in: fleet &middot; out: live K-Score stream</div>
+        <p><code>kolm fleet monitor --tag canary --since 24h</code></p>
+      </div>
+      <div class="v-flow">
+        <span class="who">4</span>
+        <h3>Promote to rolling</h3>
+        <div class="io">in: passed canary &middot; out: 10/25/50/100 rollout</div>
+        <p><code>kolm fleet deploy out.kolm --rolling 10% --gate k-score:0.92</code></p>
+      </div>
+      <div class="v-flow">
+        <span class="who">5</span>
+        <h3>Rollback on regression</h3>
+        <div class="io">in: failed gate &middot; out: previous SHA on every device</div>
+        <p><code>kolm fleet rollback --tag prod</code> (or automatic when <code>--gate</code> trips)</p>
+      </div>
+      <div class="v-flow">
+        <span class="who">6</span>
+        <h3>Receipts for audit</h3>
+        <div class="io">in: deploy id &middot; out: signed deploy receipt</div>
+        <p><code>kolm verify deploy_01KYZ...</code> &mdash; who pushed which SHA when to which device.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">What the gate watches</span>
+      <h2 class="v-h2">A K-Score floor + p95 latency cap + error-rate ceiling.</h2>
+      <p>The gate is what makes the rollout safe. Three numbers per device, evaluated every stage.</p>
+    </div>
+    <div class="v-compl">
+      <div>
+        <div class="label">K-Score floor</div>
+        <b>--gate k-score:0.92</b>
+        <p>Min on-policy quality on your eval set. Computed from the most recent <code>kolm test</code> recorded for the device.</p>
+      </div>
+      <div>
+        <div class="label">Latency cap</div>
+        <b>--gate p95-ms:800</b>
+        <p>p95 ms-per-request across the soak window. Trips on the first device that exceeds.</p>
+      </div>
+      <div>
+        <div class="label">Error rate</div>
+        <b>--gate error-rate:0.01</b>
+        <p>Errors per 100 requests. Bounded against the device's baseline before deploy, not against zero.</p>
+      </div>
+      <div>
+        <div class="label">Custom</div>
+        <b>--gate &lt;name&gt;:&lt;op&gt;:&lt;value&gt;</b>
+        <p>Plug in your own metric. The fleet ledger stores whatever <code>kolm gate eval</code> emits, so any custom check fits the same shape.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-cta-row">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Next</span>
+      <h2 class="v-h2">Compile once. Roll out the way you choose. Roll back the second it slips.</h2>
+      <p>Target profiles for the device class are at <a href="/edge">/edge</a>. CI integration so the .kolm gets built on every merge is at <a href="/ci">/ci</a>.</p>
+    </div>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup">Try it free</a>
+      <a class="v-btn v-btn--ghost" href="/docs/devices">Open the fleet docs -&gt;</a>
+    </div>
+  </div>
+</section>
+
+<div data-include-footer></div>
+<script src="/nav.js" defer></script>
+</body>
+</html>

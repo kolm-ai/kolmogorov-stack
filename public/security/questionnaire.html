@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Security questionnaire (50 pre-answers) &middot; kolm.ai</title>
+<meta name="description" content="50 pre-answered enterprise security questions for kolm.ai. Data residency, encryption, identity, sub-processors, deletion, incident response, AI risk, SOC 2, ISO 27001. Linkable per-question for procurement.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<link rel="canonical" href="https://kolm.ai/security/questionnaire">
+<meta property="og:title" content="Security questionnaire (50 pre-answers) &middot; kolm.ai">
+<meta property="og:description" content="50 pre-answered enterprise security questions. Linkable per-question for procurement. Data residency, encryption, identity, sub-processors, incident response, AI risk, SOC 2, ISO 27001.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/security/questionnaire">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Security questionnaire (50 pre-answers) &middot; kolm.ai">
+<meta name="twitter:description" content="50 pre-answered enterprise security questions. Linkable per-question for procurement.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "TechArticle",
+ "headline": "Security questionnaire (50 pre-answers)",
+ "description": "50 pre-answered enterprise security questions for kolm.ai. Covers data residency, encryption, identity, sub-processors, deletion, incident response, AI risk, SOC 2, ISO 27001.",
+ "url": "https://kolm.ai/security/questionnaire",
+ "author": {"@type": "Organization", "name": "Kolm"},
+ "publisher": {"@type": "Organization", "name": "Kolm", "url": "https://kolm.ai"},
+ "datePublished": "2026-05-27",
+ "dateModified": "2026-05-27",
+ "license": "https://www.apache.org/licenses/LICENSE-2.0"
+}
+</script>
+<style>
+ :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669}
+ body{background:var(--bg);color:var(--ink);font:16.5px/1.7 -apple-system,Inter,system-ui,sans-serif;margin:0}
+ .wrap{max-width:840px;margin:0 auto;padding:0 24px}
+ .paper{padding:80px 0 64px}
+ .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
+ .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ h1{font-size:34px;line-height:1.15;font-weight:500;letter-spacing:-0.018em;margin:0 0 8px;max-width:680px}
+ .subtitle{font-size:16.5px;color:var(--ink-mute);margin:0 0 14px;font-style:italic;line-height:1.55}
+ .stamp{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:6px 0 0;letter-spacing:0.04em}
+ .abstract{margin:28px 0 0;padding:18px 22px;border-left:2px solid var(--accent);background:rgba(17, 17, 17,0.04);font-size:15.5px;line-height:1.65;color:var(--ink-mute)}
+ .abstract b{color:var(--ink);font-weight:500}
+ .toc{margin:32px 0 0;padding:16px 22px;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev);font-size:14.5px}
+ .toc h3{margin:0 0 8px;font-size:13px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);font-weight:500}
+ .toc ol{margin:0;padding-left:20px;columns:2;column-gap:24px}
+ .toc li{margin:0 0 4px;break-inside:avoid}
+ .toc a{color:var(--ink-mute);text-decoration:none;border-bottom:1px dashed var(--line)}
+ .toc a:hover{color:var(--ink)}
+ h2{font-size:22px;font-weight:500;letter-spacing:-0.012em;margin:48px 0 12px;color:var(--ink);scroll-margin-top:60px}
+ h2 .num{color:var(--ink-faint);font-family:var(--mono);font-size:14px;margin-right:8px;font-weight:400}
+ .q{margin:24px 0 0;padding:14px 18px;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev);scroll-margin-top:60px}
+ .q .label{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.10em;color:var(--ink-faint);margin:0 0 6px}
+ .q .label a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ .q .ask{font-size:15.5px;color:var(--ink);margin:0 0 8px;font-weight:500;line-height:1.45}
+ .q .ans{font-size:14.5px;color:var(--ink-mute);margin:0;line-height:1.62}
+ .q .ans b{color:var(--ink);font-weight:500}
+ .q .meta{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin:8px 0 0;letter-spacing:0.02em}
+ .q .meta a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ .feedback{margin:48px 0 0;padding:22px 24px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);font-size:14.5px}
+ .feedback h3{margin:0 0 6px;font-size:16px}
+ .feedback p{margin:0 0 8px;color:var(--ink-mute)}
+ footer.site{padding:32px 0;border-top:1px solid var(--line);color:var(--ink-faint);font-size:13px;margin-top:64px}
+ footer.site .wrap{max-width:1180px}
+ footer.site a{color:var(--ink-mute);text-decoration:none}
+ footer.site a:hover{color:var(--ink)}
+ .footer-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;margin-bottom:24px}
+ @media(max-width:760px){.footer-grid{grid-template-columns:repeat(2,1fr);gap:18px}.toc ol{columns:1}}
+ .footer-grid h4{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-faint);font-weight:500;margin:0 0 10px}
+ .footer-grid a{display:block;padding:3px 0;font-size:13px}
+ .footer-tag{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-top:18px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11.5px}
+ .footer-tag span{color:var(--ink-faint)}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </nav>
+</div>
+
+<main id="main">
+<section class="paper">
+<div class="wrap">
+
+<p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; <a href="/security">security</a> &nbsp;/&nbsp; questionnaire</p>
+
+<h1>Security questionnaire</h1>
+<p class="subtitle">50 pre-answered procurement questions. Linkable per-question.</p>
+<p class="stamp">v2026.05.27 &middot; refreshed quarterly &middot; if a question you need is missing, mail security@kolm.ai</p>
+
+<div class="abstract">
+<b>What this is.</b> Most enterprise vendor reviews ask the same 50 questions. Rather than answer them one redline at a time, every answer is here and linkable. Send your security team this URL plus the SOC 2 Type II report (NDA at <a href="https://kolm.ai/security/soc2-type2" style="color:var(--accent)">/security/soc2-type2</a>) and most reviews close in one round.
+<br><br>
+<b>Constraints.</b> Where the answer is "we are working on this" or "this is a customer-side responsibility" we say so. The point is to be linkable, not to oversell.
+</div>
+
+<div class="toc">
+<h3>Sections</h3>
+<ol>
+<li><a href="#data">Data &amp; residency</a></li>
+<li><a href="#encryption">Encryption &amp; keys</a></li>
+<li><a href="#identity">Identity &amp; access</a></li>
+<li><a href="#tenancy">Tenancy &amp; isolation</a></li>
+<li><a href="#network">Network &amp; perimeter</a></li>
+<li><a href="#audit">Audit &amp; logging</a></li>
+<li><a href="#incident">Incident response</a></li>
+<li><a href="#deletion">Deletion &amp; retention</a></li>
+<li><a href="#subprocessors">Sub-processors</a></li>
+<li><a href="#compliance">Compliance &amp; certs</a></li>
+<li><a href="#ai">AI-specific risk</a></li>
+<li><a href="#deployment">Deployment models</a></li>
+</ol>
+</div>
+
+<h2 id="data"><span class="num">1.</span>Data &amp; residency</h2>
+
+<div class="q" id="q-1"><p class="label"><a href="#q-1">Q1 &middot; #q-1</a></p>
+<p class="ask">Where is customer data stored?</p>
+<p class="ans"><b>SaaS:</b> us-east-1 (AWS, Vercel, Railway) with an EU mirror (eu-west-1) for customers on the <b>Business</b> tier. <b>Self-hosted:</b> in your cloud account or air-gapped data center. We never see the data.</p>
+<p class="meta">see: <a href="/security/posture">/security/posture</a></p>
+</div>
+
+<div class="q" id="q-2"><p class="label"><a href="#q-2">Q2 &middot; #q-2</a></p>
+<p class="ask">Is data ever transferred outside the chosen region?</p>
+<p class="ans">No, with one exception: <b>frontier-model fallback</b>. If you route a call through the Wrapper to (e.g.) <code>anthropic</code>, that call hits Anthropic's US endpoint. Disable cross-region fallback in <code>gateway.toml</code> with <code>region_lock = true</code> and the gateway will refuse to fall back to a non-region-pinned provider.</p>
+<p class="meta">see: <a href="/docs/gateway-region-lock">/docs/gateway-region-lock</a></p>
+</div>
+
+<div class="q" id="q-3"><p class="label"><a href="#q-3">Q3 &middot; #q-3</a></p>
+<p class="ask">Do you support EU data residency / GDPR Article 28?</p>
+<p class="ans">Yes. EU mirror is on the Business tier (us-east-1 → eu-west-1). DPA available at <a href="/legal/dpa" style="color:var(--accent)">/legal/dpa</a>. Article 28 sub-processor list at <a href="/security/sub-processors" style="color:var(--accent)">/security/sub-processors</a>.</p>
+</div>
+
+<div class="q" id="q-4"><p class="label"><a href="#q-4">Q4 &middot; #q-4</a></p>
+<p class="ask">What customer data do you hold by default?</p>
+<p class="ans">Authentication metadata (email, hashed API key), namespace metadata, capture envelopes you ship to the Wrapper, and compiled artifact manifests. <b>Prompts / completions are captured only when the namespace has capture enabled</b> &mdash; default is off.</p>
+</div>
+
+<div class="q" id="q-5"><p class="label"><a href="#q-5">Q5 &middot; #q-5</a></p>
+<p class="ask">Can you process PHI / HIPAA-regulated data?</p>
+<p class="ans">A BAA is available on the <b>Business</b> tier. The SaaS path is configured for HIPAA-compatible storage. Self-hosted in your VPC is the simpler answer for regulated workloads.</p>
+</div>
+
+<h2 id="encryption"><span class="num">2.</span>Encryption &amp; keys</h2>
+
+<div class="q" id="q-6"><p class="label"><a href="#q-6">Q6 &middot; #q-6</a></p>
+<p class="ask">Encryption at rest?</p>
+<p class="ans">AES-256-GCM for all object storage (S3, Postgres column-level for high-sensitivity columns). AWS-managed KMS by default; <b>BYOK</b> (Bring Your Own Key) on the Business tier via AWS KMS or HashiCorp Vault transit secrets.</p>
+</div>
+
+<div class="q" id="q-7"><p class="label"><a href="#q-7">Q7 &middot; #q-7</a></p>
+<p class="ask">Encryption in transit?</p>
+<p class="ask" style="display:none"></p>
+<p class="ans">TLS 1.3 only. HSTS with preload (max-age 63072000). Certificates issued by AWS ACM and rotated automatically. No TLS 1.0 / 1.1 endpoints; TLS 1.2 fallback is disabled.</p>
+</div>
+
+<div class="q" id="q-8"><p class="label"><a href="#q-8">Q8 &middot; #q-8</a></p>
+<p class="ask">How are API keys stored?</p>
+<p class="ans">Argon2id (memory-hard) hash with per-key salt. Never logged in plaintext. The plaintext key is shown <b>once</b> at creation; if lost, rotate.</p>
+</div>
+
+<div class="q" id="q-9"><p class="label"><a href="#q-9">Q9 &middot; #q-9</a></p>
+<p class="ask">Receipt signing key management?</p>
+<p class="ans">Per-tenant Ed25519 keypair. Private key encrypted at rest under the tenant master key (KMS). Public key surfaces at <code>/v1/keys/pub</code> for offline receipt verification. <code>kolm receipts rotate-key</code> for periodic rotation.</p>
+</div>
+
+<div class="q" id="q-10"><p class="label"><a href="#q-10">Q10 &middot; #q-10</a></p>
+<p class="ask">Do you support customer-managed encryption keys (CMEK / BYOK)?</p>
+<p class="ans">Yes, on the Business tier (AWS KMS or Vault transit). Self-hosted: you bring your own KMS.</p>
+</div>
+
+<h2 id="identity"><span class="num">3.</span>Identity &amp; access</h2>
+
+<div class="q" id="q-11"><p class="label"><a href="#q-11">Q11 &middot; #q-11</a></p>
+<p class="ask">Single sign-on (SSO / SAML)?</p>
+<p class="ask" style="display:none"></p>
+<p class="ans">SAML 2.0 IdP-initiated and SP-initiated. Metadata at <code>/v1/sso/saml/metadata</code>. Tested with Okta, Azure AD, Google Workspace, Auth0.</p>
+</div>
+
+<div class="q" id="q-12"><p class="label"><a href="#q-12">Q12 &middot; #q-12</a></p>
+<p class="ask">SCIM provisioning?</p>
+<p class="ans">SCIM 2.0 endpoint at <code>/v1/sso/scim</code> for user / group lifecycle. <code>ServiceProviderConfig</code> exposes capabilities per RFC 7644.</p>
+</div>
+
+<div class="q" id="q-13"><p class="label"><a href="#q-13">Q13 &middot; #q-13</a></p>
+<p class="ask">Multi-factor authentication?</p>
+<p class="ans">TOTP and WebAuthn / passkey for the web console. SSO-mandated MFA flows through unchanged when SAML is enabled. Required for users in the <code>admin</code> role on Business plans.</p>
+</div>
+
+<div class="q" id="q-14"><p class="label"><a href="#q-14">Q14 &middot; #q-14</a></p>
+<p class="ask">Role-based access control?</p>
+<p class="ans">Roles: <code>owner</code>, <code>admin</code>, <code>maintainer</code>, <code>contributor</code>, <code>viewer</code>. Per-namespace ACLs override tenant-level role. Audit log records every role change.</p>
+</div>
+
+<div class="q" id="q-15"><p class="label"><a href="#q-15">Q15 &middot; #q-15</a></p>
+<p class="ask">Session timeouts and idle policy?</p>
+<p class="ans">12-hour absolute session lifetime, 30-minute idle timeout. Configurable down to 1-hour / 5-minute on Business tier. Sessions invalidated on password change, key rotation, or admin revoke.</p>
+</div>
+
+<h2 id="tenancy"><span class="num">4.</span>Tenancy &amp; isolation</h2>
+
+<div class="q" id="q-16"><p class="label"><a href="#q-16">Q16 &middot; #q-16</a></p>
+<p class="ask">How are tenants isolated?</p>
+<p class="ans">Logical isolation at every layer: row-level <code>tenant_id</code> on Postgres, S3 key prefixes per tenant, and a tenant-fence enforced in <code>src/auth.js</code> on every request. Cross-tenant reads are a high-severity bug-class &mdash; we have lock-in tests that fail the build if a query is added without a tenant predicate.</p>
+</div>
+
+<div class="q" id="q-17"><p class="label"><a href="#q-17">Q17 &middot; #q-17</a></p>
+<p class="ask">Do you offer dedicated infrastructure?</p>
+<p class="ans">Yes &mdash; <b>Business</b> tier offers single-tenant deployments (dedicated VPC + Postgres + S3 bucket). Self-hosted in your account is the strongest isolation.</p>
+</div>
+
+<div class="q" id="q-18"><p class="label"><a href="#q-18">Q18 &middot; #q-18</a></p>
+<p class="ask">Is customer data ever co-mingled in caches?</p>
+<p class="ans">No. The capture lake and artifact store are partitioned by <code>tenant_id</code> all the way to the storage backend. CDN caching applies only to public marketing pages and the docs site, never to authenticated routes (the Vercel rewrite explicitly excludes <code>/v1/*</code> from cache).</p>
+</div>
+
+<h2 id="network"><span class="num">5.</span>Network &amp; perimeter</h2>
+
+<div class="q" id="q-19"><p class="label"><a href="#q-19">Q19 &middot; #q-19</a></p>
+<p class="ask">What ports are open at the perimeter?</p>
+<p class="ans">443 only. The API server has no inbound port other than HTTPS. Self-hosted defaults are the same; <code>kolm serve</code> binds to an explicit port (default 8765) and you choose your reverse proxy.</p>
+</div>
+
+<div class="q" id="q-20"><p class="label"><a href="#q-20">Q20 &middot; #q-20</a></p>
+<p class="ask">IP allow-list?</p>
+<p class="ans">Yes, configurable per-namespace under <code>access_control.allowed_ip_cidrs</code>. Requests from outside the allow-list return 403 with an audit-logged reason.</p>
+</div>
+
+<div class="q" id="q-21"><p class="label"><a href="#q-21">Q21 &middot; #q-21</a></p>
+<p class="ask">Web application firewall?</p>
+<p class="ans">Cloudflare WAF in front of <code>kolm.ai</code> and <code>api.kolm.ai</code>. Standard OWASP rule set + bot management. Rate-limit rules also enforced at the application layer in case the WAF is bypassed.</p>
+</div>
+
+<div class="q" id="q-22"><p class="label"><a href="#q-22">Q22 &middot; #q-22</a></p>
+<p class="ask">DDoS protection?</p>
+<p class="ans">Cloudflare L3/4 and L7 DDoS protection on all public endpoints. Self-hosted: bring your own (Cloudflare, AWS Shield, etc.) &mdash; the deployment guide includes recommended configs.</p>
+</div>
+
+<h2 id="audit"><span class="num">6.</span>Audit &amp; logging</h2>
+
+<div class="q" id="q-23"><p class="label"><a href="#q-23">Q23 &middot; #q-23</a></p>
+<p class="ask">What gets audit-logged?</p>
+<p class="ans">Every authenticated request (who, when, route, response code), every role change, every key rotation, every compile / deploy / serve event, every capture-approval action. Logs are append-only with an HMAC chain so deletion is detectable.</p>
+</div>
+
+<div class="q" id="q-24"><p class="label"><a href="#q-24">Q24 &middot; #q-24</a></p>
+<p class="ask">How long are audit logs retained?</p>
+<p class="ans">365 days hot, 7 years cold (S3 Glacier). Business tier customers can export to their own SIEM (Splunk, Datadog, Sumo Logic) via a streaming connector.</p>
+</div>
+
+<div class="q" id="q-25"><p class="label"><a href="#q-25">Q25 &middot; #q-25</a></p>
+<p class="ask">Can the audit log be tampered with?</p>
+<p class="ans">Each log entry includes <code>prev_chain_hash</code> = HMAC(secret, sorted-key JSON of prior entry). A deletion or modification breaks the chain and is detected on read via <code>kolm audit verify-chain</code>.</p>
+</div>
+
+<div class="q" id="q-26"><p class="label"><a href="#q-26">Q26 &middot; #q-26</a></p>
+<p class="ask">Do you offer audit log streaming?</p>
+<p class="ans">Yes. Webhook (HTTPS POST + HMAC signature) or S3 sink. Streaming on Business tier; Pro tier uses pull-based export.</p>
+</div>
+
+<h2 id="incident"><span class="num">7.</span>Incident response</h2>
+
+<div class="q" id="q-27"><p class="label"><a href="#q-27">Q27 &middot; #q-27</a></p>
+<p class="ask">Do you have a documented incident response plan?</p>
+<p class="ans">Yes &mdash; available under NDA. Public summary at <a href="/security/incident-response" style="color:var(--accent)">/security/incident-response</a>. Severity 1 paging targets &lt;15 minutes; root-cause public post-mortem within 14 days for any incident that affects customer data.</p>
+</div>
+
+<div class="q" id="q-28"><p class="label"><a href="#q-28">Q28 &middot; #q-28</a></p>
+<p class="ask">Breach notification SLA?</p>
+<p class="ans">72 hours for incidents involving customer data, regardless of regulatory minimum. DPA codifies this commitment.</p>
+</div>
+
+<div class="q" id="q-29"><p class="label"><a href="#q-29">Q29 &middot; #q-29</a></p>
+<p class="ask">Status page?</p>
+<p class="ans"><a href="https://status.kolm.ai" style="color:var(--accent)">status.kolm.ai</a> &mdash; uptime, latency, and active incidents. Updated automatically from the same Sentry / uptime probes the engineering team uses.</p>
+</div>
+
+<div class="q" id="q-30"><p class="label"><a href="#q-30">Q30 &middot; #q-30</a></p>
+<p class="ask">Disaster recovery RTO / RPO?</p>
+<p class="ans">RTO 4 hours, RPO 15 minutes. Postgres point-in-time recovery + cross-region read replicas. Quarterly DR drill; the most recent drill report is available under NDA.</p>
+</div>
+
+<h2 id="deletion"><span class="num">8.</span>Deletion &amp; retention</h2>
+
+<div class="q" id="q-31"><p class="label"><a href="#q-31">Q31 &middot; #q-31</a></p>
+<p class="ask">How do I delete my data?</p>
+<p class="ans">Self-serve: <code>Settings &rarr; Account &rarr; Delete</code> in the web console, or <code>kolm account delete --confirm</code>. Soft-delete for 30 days, then hard-delete from primary + replicas + cold storage. Backups expire on rolling 90-day cycle.</p>
+</div>
+
+<div class="q" id="q-32"><p class="label"><a href="#q-32">Q32 &middot; #q-32</a></p>
+<p class="ask">Per-record deletion (GDPR Article 17)?</p>
+<p class="ans">Yes &mdash; <code>kolm captures delete --capture-id &lt;id&gt;</code> or the equivalent web action. Deletion is propagated to the hash chain via a tombstone entry so the chain stays verifiable while the body is gone.</p>
+</div>
+
+<div class="q" id="q-33"><p class="label"><a href="#q-33">Q33 &middot; #q-33</a></p>
+<p class="ask">Data export?</p>
+<p class="ans">Capture lake: JSONL, Parquet, Hugging Face datasets format. Receipts: CSV, JSONL. Artifacts: native <code>.kolm</code> (portable, signed). All exports stream from <code>/v1/captures/export</code> and <code>/v1/receipts/export</code>; no email-me-a-zip flow.</p>
+</div>
+
+<div class="q" id="q-34"><p class="label"><a href="#q-34">Q34 &middot; #q-34</a></p>
+<p class="ask">Do you use customer data to train models?</p>
+<p class="ans"><b>No.</b> Captures stay in the customer's tenant; only that tenant can compile against them. We do not aggregate, anonymize, or include any customer data in our own training. The trinity-500 student card calls out every source dataset; none are customer-derived.</p>
+</div>
+
+<h2 id="subprocessors"><span class="num">9.</span>Sub-processors</h2>
+
+<div class="q" id="q-35"><p class="label"><a href="#q-35">Q35 &middot; #q-35</a></p>
+<p class="ask">Who are your sub-processors?</p>
+<p class="ans">Full list at <a href="/security/sub-processors" style="color:var(--accent)">/security/sub-processors</a>. Core: AWS (us-east-1, eu-west-1), Vercel (CDN + frontend), Railway (API), Cloudflare (WAF + DNS), Stripe (billing), Postmark (transactional email), Sentry (error monitoring).</p>
+</div>
+
+<div class="q" id="q-36"><p class="label"><a href="#q-36">Q36 &middot; #q-36</a></p>
+<p class="ask">How are sub-processors vetted?</p>
+<p class="ans">Each one ships under our DPA template; SOC 2 Type II or ISO 27001 evidence reviewed on add and on annual re-cert.</p>
+</div>
+
+<div class="q" id="q-37"><p class="label"><a href="#q-37">Q37 &middot; #q-37</a></p>
+<p class="ask">Will you notify me before adding a sub-processor?</p>
+<p class="ans">Yes &mdash; 30 days advance notice to the address listed in your contract. You can object in writing; if we cannot accommodate, you have a 30-day termination right.</p>
+</div>
+
+<h2 id="compliance"><span class="num">10.</span>Compliance &amp; certifications</h2>
+
+<div class="q" id="q-38"><p class="label"><a href="#q-38">Q38 &middot; #q-38</a></p>
+<p class="ask">SOC 2?</p>
+<p class="ans">SOC 2 Type II covering Security, Availability, and Confidentiality. Report under NDA at <a href="/security/soc2-type2" style="color:var(--accent)">/security/soc2-type2</a>. Most recent audit: 2026-Q1.</p>
+</div>
+
+<div class="q" id="q-39"><p class="label"><a href="#q-39">Q39 &middot; #q-39</a></p>
+<p class="ask">ISO 27001?</p>
+<p class="ask" style="display:none"></p>
+<p class="ans">In progress &mdash; targeting certification by end of 2026. Status and scope at <a href="/security/iso-27001" style="color:var(--accent)">/security/iso-27001</a>.</p>
+</div>
+
+<div class="q" id="q-40"><p class="label"><a href="#q-40">Q40 &middot; #q-40</a></p>
+<p class="ask">Penetration testing?</p>
+<p class="ans">Annual third-party penetration test (Halborn, 2026-04). Findings remediated within SLA (P0 &lt;7d, P1 &lt;30d, P2 &lt;90d). Summary at <a href="/security/halborn-2026-04" style="color:var(--accent)">/security/halborn-2026-04</a>.</p>
+</div>
+
+<div class="q" id="q-41"><p class="label"><a href="#q-41">Q41 &middot; #q-41</a></p>
+<p class="ask">Bug bounty?</p>
+<p class="ans">Yes &mdash; private program with HackerOne. Scope and payout schedule at <a href="/security/bug-bounty" style="color:var(--accent)">/security/bug-bounty</a>. Public disclosure window 90 days after fix.</p>
+</div>
+
+<div class="q" id="q-42"><p class="label"><a href="#q-42">Q42 &middot; #q-42</a></p>
+<p class="ask">SBOM?</p>
+<p class="ans">CycloneDX SBOM generated on every release. Latest at <a href="/security/sbom" style="color:var(--accent)">/security/sbom</a>. Includes every npm + pip + Cargo dependency with version + license + CVE status.</p>
+</div>
+
+<h2 id="ai"><span class="num">11.</span>AI-specific risk</h2>
+
+<div class="q" id="q-43"><p class="label"><a href="#q-43">Q43 &middot; #q-43</a></p>
+<p class="ask">How do you prevent prompt injection?</p>
+<p class="ans">Defense in depth: structured input parsing, system-prompt isolation, untrusted-content tagging, and the <code>kolm-audit-1</code> receipt schema that records the exact prompt + completion so injections are auditable after the fact. Full posture at <a href="/security/prompt-extraction" style="color:var(--accent)">/security/prompt-extraction</a>.</p>
+</div>
+
+<div class="q" id="q-44"><p class="label"><a href="#q-44">Q44 &middot; #q-44</a></p>
+<p class="ask">Training data poisoning?</p>
+<p class="ans">Five-signal poison detector on every capture before it enters the compile pool: low-entropy floods, gradient-attack patterns, repeated-substring attacks, content-policy violations, and one-shot-jailbreak templates. Quarantined samples never enter training. See <a href="/security/model-poisoning" style="color:var(--accent)">/security/model-poisoning</a>.</p>
+</div>
+
+<div class="q" id="q-45"><p class="label"><a href="#q-45">Q45 &middot; #q-45</a></p>
+<p class="ask">Membership inference?</p>
+<p class="ans">Compile pipeline includes a membership-inference probe and gates the artifact if the probe AUC exceeds a tenant-configurable threshold (default 0.55). Detail at <a href="/security/membership-inference" style="color:var(--accent)">/security/membership-inference</a>.</p>
+</div>
+
+<div class="q" id="q-46"><p class="label"><a href="#q-46">Q46 &middot; #q-46</a></p>
+<p class="ask">Red-team / safety evaluation?</p>
+<p class="ans">Every compiled artifact runs through a 200-prompt red-team battery (jailbreaks, PII extraction, self-harm, hate, copyright). Failures gate the artifact. Battery + leaderboard at <a href="/security/red-team" style="color:var(--accent)">/security/red-team</a>.</p>
+</div>
+
+<div class="q" id="q-47"><p class="label"><a href="#q-47">Q47 &middot; #q-47</a></p>
+<p class="ask">Model card / passport?</p>
+<p class="ans">Every artifact ships a <code>passport.json</code> with full provenance: teacher models, recipe versions, training pair counts, eval results, K-Score, hallucination rate, source datasets. <code>kolm passport export --format compliance</code> produces a model-risk-review-ready PDF.</p>
+</div>
+
+<h2 id="deployment"><span class="num">12.</span>Deployment models</h2>
+
+<div class="q" id="q-48"><p class="label"><a href="#q-48">Q48 &middot; #q-48</a></p>
+<p class="ask">Self-hosted / bring-your-own-cloud?</p>
+<p class="ans">Yes. Docker Compose, Kubernetes (Helm chart shipped), VPC reference Terraform. <code>kolm deploy bundle --airgap</code> produces a self-contained tarball for offline installation. Full guide at <a href="/docs/self-hosted-deploy-complete" style="color:var(--accent)">/docs/self-hosted-deploy-complete</a>.</p>
+</div>
+
+<div class="q" id="q-49"><p class="label"><a href="#q-49">Q49 &middot; #q-49</a></p>
+<p class="ask">Air-gapped deployment?</p>
+<p class="ans">Supported. Air-gap bundle includes the API server, the compile pipeline, all model weights you license, and a local certificate authority. License and signature verification works offline; receipts continue to be Ed25519-signed against your local key.</p>
+</div>
+
+<div class="q" id="q-50"><p class="label"><a href="#q-50">Q50 &middot; #q-50</a></p>
+<p class="ask">FedRAMP / IL5 / classified environments?</p>
+<p class="ans">FedRAMP Moderate is on the roadmap (target 2027). For IL5 / classified, the air-gap bundle is the supported path today &mdash; the entire stack runs in your environment with no outbound calls. See <a href="/government" style="color:var(--accent)">/government</a>.</p>
+</div>
+
+<div class="feedback">
+<h3>Have a question not on the list?</h3>
+<p>Mail <a href="mailto:security@kolm.ai" style="color:var(--accent)">security@kolm.ai</a>. We add answers here within one business day if the question is one others are likely to ask too.</p>
+<p>For NDA-gated artifacts (SOC 2 Type II report, DR drill summary, IR plan), mail with your DPA / NDA template and we'll counter-sign.</p>
+</div>
+
+</div>
+</section>
+</main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li><li><a href="/spec/toml">.kolm spec</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

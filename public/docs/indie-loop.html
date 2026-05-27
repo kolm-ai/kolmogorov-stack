@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The indie loop, end to end · kolm.ai docs</title>
+<meta name="description" content="The 8-command end-to-end indie loop: capture → distill → compile → test → deploy → verify. Bring a Jetson, Pi 5, or Mac mini. Runs in ~45 minutes.">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/wave889-vertical.css">
+<link rel="canonical" href="https://kolm.ai/docs/indie-loop">
+</head>
+<body class="ks">
+<div data-include-nav></div>
+
+<section class="v-hero">
+  <div class="v-wrap">
+    <span class="v-eyebrow">Docs &middot; indie loop</span>
+    <h1 class="v-h1">The 8 commands. End to end. About 45 minutes.</h1>
+    <p class="v-lede">This page walks every command from the 3-minute demo at <a href="/demo">/demo</a>. Bring a recent dev box and one edge device — Jetson Orin Nano, Raspberry Pi 5, or Mac mini all work.</p>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup">Get a free API key</a>
+      <a class="v-btn v-btn--ghost" href="/docs/quickstart">60-second quickstart -&gt;</a>
+    </div>
+    <div class="v-caveat">Caveats: distill time depends on student size and GPU. Times below are for Qwen2.5-7B on a single RTX 5090 with 200 captured pairs.</div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">The 8 commands</span>
+      <h2 class="v-h2">Run them in order. Each prints what the next one needs.</h2>
+      <p>Substitute your own namespace name and target device. Everything else is verbatim.</p>
+    </div>
+    <div class="v-flows">
+      <div class="v-flow">
+        <span class="who">1</span>
+        <h3>Install + sign in</h3>
+        <div class="io">out: ~/.kolm/credentials</div>
+        <p><code>npm i -g @kolm/cli &amp;&amp; kolm login</code></p>
+      </div>
+      <div class="v-flow">
+        <span class="who">2</span>
+        <h3>Create a namespace</h3>
+        <div class="io">out: namespace id</div>
+        <p><code>kolm namespace create support-bot --primary-provider anthropic</code></p>
+      </div>
+      <div class="v-flow">
+        <span class="who">3</span>
+        <h3>Capture real traffic</h3>
+        <div class="io">in: prod gateway calls &middot; out: capture lake rows</div>
+        <p>Point your app at <code>api.kolm.ai/v1/chat/completions</code> with header <code>X-Kolm-Namespace: support-bot</code>. Run ~200 calls.</p>
+      </div>
+      <div class="v-flow">
+        <span class="who">4</span>
+        <h3>Approve the captures</h3>
+        <div class="io">in: capture browser &middot; out: approved rows</div>
+        <p><code>kolm captures approve --namespace support-bot --status pending --all</code></p>
+      </div>
+      <div class="v-flow">
+        <span class="who">5</span>
+        <h3>Compile</h3>
+        <div class="io">in: approved captures &middot; out: out.kolm + K-Score</div>
+        <p><code>kolm compile --namespace support-bot --target gguf-q4km --kscore-gate 0.90</code></p>
+      </div>
+      <div class="v-flow">
+        <span class="who">6</span>
+        <h3>Test on the device</h3>
+        <div class="io">in: out.kolm + device &middot; out: pass/fail + latency</div>
+        <p><code>kolm devices add edge-01 --type ssh --host 10.0.0.7 &amp;&amp; kolm test-device out.kolm --device edge-01</code></p>
+      </div>
+      <div class="v-flow">
+        <span class="who">7</span>
+        <h3>Deploy</h3>
+        <div class="io">in: out.kolm + device &middot; out: live endpoint</div>
+        <p><code>kolm deploy out.kolm --device edge-01 --port 8766</code></p>
+      </div>
+      <div class="v-flow">
+        <span class="who">8</span>
+        <h3>Verify the receipt</h3>
+        <div class="io">in: deploy id &middot; out: signed receipt</div>
+        <p><code>kolm verify $(kolm fleet status --tag edge-01 --json | jq -r .receipt)</code></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-cta-row">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Next</span>
+      <h2 class="v-h2">When you have the loop down, automate it in CI.</h2>
+      <p>Add <code>kolm-ai/quality-gate-action@v1</code> so every PR runs the K-Score gate. See <a href="/ci">/ci</a>.</p>
+    </div>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup">Try it free</a>
+      <a class="v-btn v-btn--ghost" href="/docs">Open the docs -&gt;</a>
+    </div>
+  </div>
+</section>
+
+<div data-include-footer></div>
+<script src="/nav.js" defer></script>
+</body>
+</html>

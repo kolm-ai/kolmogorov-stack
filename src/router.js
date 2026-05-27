@@ -3216,6 +3216,33 @@ export function buildRouter() {
     });
   });
 
+  // W892-C5: public target-profile catalog — maps friendly device names
+  // (jetson-orin-nano, iphone-15-pro, rtx-5090, ...) to the recommended
+  // (--target, runtime, context, est tok/s) combo. The data is the same as
+  // `kolm compile --list-target-profiles --json` and ships with the CLI; the
+  // HTTP surface is here so the docs site and Studio compile wizard can read
+  // it without shelling out.
+  r.get('/v1/target-profiles', async (_req, res) => {
+    try {
+      const tp = await import('./target-profiles.js');
+      return res.json(tp.asJson());
+    } catch (e) {
+      return res.status(500).json({ error: 'target_profiles_failed', message: String(e.message || e) });
+    }
+  });
+  r.get('/v1/target-profiles/:name', async (req, res) => {
+    try {
+      const tp = await import('./target-profiles.js');
+      const profile = tp.lookup(req.params.name);
+      if (!profile) {
+        return res.status(404).json({ error: 'unknown_target_profile', name: req.params.name, available: tp.TARGET_PROFILE_NAMES });
+      }
+      return res.json({ ok: true, profile });
+    } catch (e) {
+      return res.status(500).json({ error: 'target_profile_failed', message: String(e.message || e) });
+    }
+  });
+
   // W456: public changelog — marketing surface, no auth, no tenant scoping.
   // Source of truth lives in src/changelog.js (a single static WAVES array).
   r.get('/v1/changelog', async (req, res) => {

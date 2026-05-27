@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The 3-minute kolm demo &middot; kolm.ai</title>
+<meta name="description" content="A 3-minute end-to-end walkthrough: capture 20 prod calls, distill to a 1.5B student, compile to GGUF, deploy to a Jetson, verify the receipt.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<link rel="canonical" href="https://kolm.ai/demo">
+<meta property="og:title" content="The 3-minute kolm demo &middot; kolm.ai">
+<meta property="og:description" content="A 3-minute end-to-end walkthrough: capture 20 prod calls, distill to a 1.5B student, compile to GGUF, deploy to a Jetson, verify the receipt.">
+<meta property="og:type" content="video.other">
+<meta property="og:url" content="https://kolm.ai/demo">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:card" content="player">
+<meta name="twitter:title" content="The 3-minute kolm demo &middot; kolm.ai">
+<meta name="twitter:description" content="3 minutes, end to end: capture, distill, compile, deploy, verify.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "VideoObject",
+ "name": "The 3-minute kolm demo",
+ "description": "A 3-minute end-to-end walkthrough of the indie kolm loop: capture 20 prod calls, distill to a 1.5B student, compile to GGUF, deploy to a Jetson Orin Nano, verify the receipt.",
+ "thumbnailUrl": ["https://kolm.ai/brand-hero.png"],
+ "uploadDate": "2026-05-27",
+ "publisher": {"@type": "Organization", "name": "Kolm", "url": "https://kolm.ai"}
+}
+</script>
+<style>
+ :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#111111;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669}
+ body{background:var(--bg);color:var(--ink);font:16.5px/1.7 -apple-system,Inter,system-ui,sans-serif;margin:0}
+ .wrap{max-width:880px;margin:0 auto;padding:0 24px}
+ .paper{padding:72px 0 64px}
+ .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 16px}
+ .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+ h1{font-size:34px;line-height:1.15;font-weight:500;letter-spacing:-0.018em;margin:0 0 8px;max-width:680px}
+ .subtitle{font-size:16.5px;color:var(--ink-mute);margin:0 0 14px;font-style:italic;line-height:1.55}
+ .player{margin:28px 0 0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#000;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center}
+ .player iframe{width:100%;height:100%;border:0;display:block}
+ .player .placeholder{color:#999;font-family:var(--mono);font-size:13px;letter-spacing:0.08em;text-transform:uppercase;text-align:center;padding:24px}
+ .player .placeholder b{display:block;color:#bbb;font-size:18px;margin:0 0 8px;letter-spacing:0;text-transform:none;font-weight:500}
+ .meta-row{display:flex;gap:18px;margin:16px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);letter-spacing:0.04em;flex-wrap:wrap}
+ .meta-row .m{padding:3px 8px;border:1px solid var(--line);border-radius:4px}
+ h2{font-size:22px;font-weight:500;letter-spacing:-0.012em;margin:48px 0 12px;color:var(--ink)}
+ h3{font-size:17px;font-weight:500;margin:24px 0 8px;color:var(--ink)}
+ p{color:var(--ink-mute);margin:0 0 16px}
+ p b{color:var(--ink);font-weight:500}
+ ol.chapters{margin:0;padding:0;list-style:none;counter-reset:chap;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--bg-elev)}
+ ol.chapters li{counter-increment:chap;padding:14px 18px;border-top:1px solid var(--line);display:grid;grid-template-columns:60px 1fr auto;gap:14px;align-items:baseline}
+ ol.chapters li:first-child{border-top:0}
+ ol.chapters li::before{content:counter(chap,decimal-leading-zero);font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:0.04em}
+ ol.chapters .ch-title{color:var(--ink);font-weight:500;font-size:15px}
+ ol.chapters .ch-cmd{display:block;font-family:var(--mono);font-size:12px;color:var(--ink-mute);margin-top:4px}
+ ol.chapters .ch-time{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:0.06em}
+ pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:0 0 16px;color:var(--ink)}
+ .cta{margin:48px 0 0;padding:22px 24px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);font-size:15px}
+ .cta h3{margin:0 0 6px;font-size:16px}
+ .cta p{margin:0 0 10px;color:var(--ink-mute)}
+ .cta a{color:var(--accent);text-decoration:none;font-weight:500}
+ footer.site{padding:32px 0;border-top:1px solid var(--line);color:var(--ink-faint);font-size:13px;margin-top:64px}
+ footer.site .wrap{max-width:1180px}
+ footer.site a{color:var(--ink-mute);text-decoration:none}
+ footer.site a:hover{color:var(--ink)}
+ .footer-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;margin-bottom:24px}
+ @media(max-width:760px){.footer-grid{grid-template-columns:repeat(2,1fr);gap:18px}ol.chapters li{grid-template-columns:40px 1fr}ol.chapters .ch-time{grid-column:1/-1;padding-left:54px}}
+ .footer-grid h4{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-faint);font-weight:500;margin:0 0 10px}
+ .footer-grid a{display:block;padding:3px 0;font-size:13px}
+ .footer-tag{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-top:18px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11.5px}
+ .footer-tag span{color:var(--ink-faint)}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </nav>
+</div>
+
+<main id="main">
+<section class="paper">
+<div class="wrap">
+
+<p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; the 3-minute demo</p>
+
+<h1>The 3-minute kolm demo</h1>
+<p class="subtitle">Capture 20 prod calls, distill to a 1.5B student, compile to GGUF, deploy to a Jetson, verify the receipt. End to end.</p>
+
+<div class="player">
+<div class="placeholder" id="placeholder" data-video-id="">
+<b>The 3-minute demo</b>
+Video uploads 2026-05-28. While that lands, the chapter list below walks the same path you'd watch &mdash; every command is real and copy-pasteable.
+</div>
+<iframe id="ytPlayer" style="display:none" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" title="The 3-minute kolm demo"></iframe>
+</div>
+<div class="meta-row">
+<span class="m">3:00 runtime</span>
+<span class="m">no audio</span>
+<span class="m">real terminal</span>
+<span class="m">verifiable end state</span>
+</div>
+
+<h2>What happens in the video</h2>
+<p>You watch one indie developer take a working OpenAI app, route 20 calls through the kolm gateway to capture them, distill a 1.5B student from that capture pool, compile it to a Q4_K_M GGUF, deploy it to a Jetson Orin Nano on their desk, and verify the runtime receipt &mdash; in three minutes. No cuts, no narration, no slides.</p>
+
+<ol class="chapters">
+<li>
+  <span></span>
+  <div>
+    <span class="ch-title">Install the CLI + sign up</span>
+    <code class="ch-cmd">npm i -g github:kolm-ai/kolmogorov-stack && kolm signup --email you@example.com</code>
+  </div>
+  <span class="ch-time">0:00 &mdash; 0:18</span>
+</li>
+<li>
+  <span></span>
+  <div>
+    <span class="ch-title">Create a namespace + route the existing OpenAI calls through the kolm gateway</span>
+    <code class="ch-cmd">kolm namespace create my-skill --primary-provider openai && export OPENAI_BASE_URL=https://api.kolm.ai/v1</code>
+  </div>
+  <span class="ch-time">0:18 &mdash; 0:42</span>
+</li>
+<li>
+  <span></span>
+  <div>
+    <span class="ch-title">Send 20 calls (your existing app code, unchanged)</span>
+    <code class="ch-cmd">for i in {1..20}; do node my-existing-app.js; done</code>
+  </div>
+  <span class="ch-time">0:42 &mdash; 1:05</span>
+</li>
+<li>
+  <span></span>
+  <div>
+    <span class="ch-title">Approve the captured pool</span>
+    <code class="ch-cmd">kolm captures approve --namespace my-skill --status pending --all</code>
+  </div>
+  <span class="ch-time">1:05 &mdash; 1:18</span>
+</li>
+<li>
+  <span></span>
+  <div>
+    <span class="ch-title">Compile to a 1.5B student, GGUF Q4_K_M</span>
+    <code class="ch-cmd">kolm compile --namespace my-skill --target gguf-q4km --base-model Qwen2.5-1.5B-Instruct</code>
+  </div>
+  <span class="ch-time">1:18 &mdash; 2:05</span>
+</li>
+<li>
+  <span></span>
+  <div>
+    <span class="ch-title">Deploy to a Jetson Orin Nano via SSH</span>
+    <code class="ch-cmd">kolm deploy artifact.kolm --target-profile jetson-orin-nano --device jetson-1 --port 8766</code>
+  </div>
+  <span class="ch-time">2:05 &mdash; 2:38</span>
+</li>
+<li>
+  <span></span>
+  <div>
+    <span class="ch-title">Hit the local endpoint + verify the receipt</span>
+    <code class="ch-cmd">curl http://jetson-1:8766/v1/chat/completions ... && kolm verify $RECEIPT_ID</code>
+  </div>
+  <span class="ch-time">2:38 &mdash; 3:00</span>
+</li>
+</ol>
+
+<h2>Try it yourself, right now</h2>
+<p>Every command in the video is real. If you have an OpenAI app today, you can do steps 1-4 in ten minutes without leaving your editor:</p>
+<pre><code>npm i -g github:kolm-ai/kolmogorov-stack
+kolm signup --email you@example.com
+kolm namespace create my-skill --primary-provider openai
+
+# point your existing app at the gateway (1 env var change)
+export OPENAI_BASE_URL=https://api.kolm.ai/v1
+export OPENAI_API_KEY=ks_...   # the key from `kolm signup`
+
+# run your app normally for a while, then:
+kolm captures stats --namespace my-skill
+kolm captures approve --namespace my-skill --status pending --all
+kolm compile --namespace my-skill --target gguf-q4km</code></pre>
+
+<div class="cta">
+<h3>The full indie loop is documented</h3>
+<p>For the deploy + verify steps in the back half of the video: <a href="/docs/indie-loop">/docs/indie-loop</a> walks each command with the expected output. Bring your own Jetson, Raspberry Pi 5, or Mac mini and the loop runs end-to-end.</p>
+<p><a href="/signup">Get a free API key &rarr;</a> &nbsp;&middot;&nbsp; <a href="/docs/quickstart">Read the 60-second quickstart</a></p>
+</div>
+
+</div>
+</section>
+</main>
+
+<footer class="ks-footer">
+  <div class="ks-wrap">
+    <div class="ks-footer__grid">
+      <div>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+      </div>
+      <div>
+        <h4>Wrapper</h4>
+        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li><li><a href="/spec/toml">.kolm spec</a></li></ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+      </div>
+    </div>
+    <div class="ks-footer__bottom">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // When a maintainer fills the data-video-id attribute on the .placeholder
+  // (or via the URL hash like #v=YOUTUBE_ID), swap the placeholder for the
+  // real YouTube iframe. No need to redeploy when the upload lands.
+  var ph = document.getElementById('placeholder');
+  var iframe = document.getElementById('ytPlayer');
+  var fromHash = (location.hash || '').match(/v=([A-Za-z0-9_-]{6,})/);
+  var vid = (fromHash && fromHash[1]) || (ph && ph.dataset.videoId) || '';
+  if (vid) {
+    iframe.src = 'https://www.youtube.com/embed/' + encodeURIComponent(vid) + '?rel=0&modestbranding=1';
+    iframe.style.display = 'block';
+    ph.style.display = 'none';
+  }
+})();
+</script>
+
+</body>
+</html>

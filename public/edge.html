@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Edge AI · Distill once, ship to Jetson, Pi, phone, browser · kolm.ai</title>
+<meta name="description" content="One signed .kolm artifact. Target profiles for Jetson Orin, Raspberry Pi 5, iPhone, Android, MacBook, browser-WASM. Run inside your power and latency budget.">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/wave889-vertical.css">
+<link rel="canonical" href="https://kolm.ai/edge">
+<meta property="og:title" content="Edge AI · Distill once, ship anywhere">
+<meta property="og:description" content="One signed .kolm artifact. Target profiles for Jetson Orin, Raspberry Pi 5, iPhone, Android, MacBook, browser-WASM. Run inside your power and latency budget.">
+<meta property="og:url" content="https://kolm.ai/edge">
+<meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL), iOS, Android",
+  "url": "https://kolm.ai/edge",
+  "description": "One signed .kolm artifact. Target profiles for Jetson Orin, Raspberry Pi 5, iPhone, Android, MacBook, browser-WASM. Run inside your power and latency budget.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" }
+}
+</script>
+</head>
+<body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler for edge.</span>
+<div data-include-nav></div>
+
+<section class="v-hero">
+  <div class="v-wrap">
+    <span class="v-eyebrow">Edge &amp; on-device AI</span>
+    <h1 class="v-h1">Pick a target. Compile once. Ship to the device.</h1>
+    <p class="v-lede">A target profile is a hardware preset: peak memory, sustained power, latency budget, instruction set. <code>kolm compile --target-profile jetson-orin-nx</code> picks the right quant, the right runtime, and the right kv-cache pattern automatically.</p>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup">Try it free</a>
+      <a class="v-btn v-btn--ghost" href="/docs/devices">Read the profile reference -&gt;</a>
+    </div>
+    <div class="v-caveat">Caveats: edge profiles set defaults, not guarantees. Verify on the device with <code>kolm test-device --device &lt;name&gt;</code> before fleet rollout.</div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Target profile catalog</span>
+      <h2 class="v-h2">Hardware presets that ship with the compiler.</h2>
+      <p>Eight presets cover ~95% of edge requests. BYO profile for the rest via <code>kolm config set target-profiles.&lt;name&gt; ...</code>.</p>
+    </div>
+    <div class="v-trio">
+      <div class="v-card">
+        <span class="ctag">Jetson</span>
+        <h3>Jetson Orin NX / Nano</h3>
+        <p>16 GB shared GPU/CPU. Compiles to GGUF Q4_K_M with vLLM-on-Jetson runtime. Sustains 30 tok/s on a 7B at 15 W power cap.</p>
+        <div class="cmd">kolm compile --target-profile jetson-orin-nx</div>
+      </div>
+      <div class="v-card">
+        <span class="ctag">Raspberry Pi</span>
+        <h3>Raspberry Pi 5 (8 GB)</h3>
+        <p>ARM Cortex-A76, no GPU. Compiles to GGUF Q3_K_M + llama.cpp ARM-NEON runtime. Use for 1-3B specialists on intermittent power.</p>
+        <div class="cmd">kolm compile --target-profile raspi-5-8gb</div>
+      </div>
+      <div class="v-card">
+        <span class="ctag">Phone</span>
+        <h3>iPhone (A17) / Pixel 8</h3>
+        <p>Compiles to GGUF Q4_K_S + Core ML (iOS) or NNAPI (Android). Ships inside your app. No model auto-update without your release cycle.</p>
+        <div class="cmd">kolm compile --target-profile iphone-a17</div>
+      </div>
+      <div class="v-card">
+        <span class="ctag">MacBook</span>
+        <h3>MacBook M-series</h3>
+        <p>Unified memory + Metal. Compiles to MLX or GGUF Q5_K_M. Used as a dev box AND the runtime when the use case fits one machine.</p>
+        <div class="cmd">kolm compile --target-profile macbook-m3</div>
+      </div>
+      <div class="v-card">
+        <span class="ctag">Browser</span>
+        <h3>WebAssembly</h3>
+        <p>WASM SIMD runtime. Compiles to a downloadable .wasm bundle &lt; 200 MB. Ships inside a static site, no server.</p>
+        <div class="cmd">kolm compile --target-profile browser-wasm</div>
+      </div>
+      <div class="v-card">
+        <span class="ctag">Industrial</span>
+        <h3>Industrial PC / NVIDIA IGX</h3>
+        <p>Fanless, ECC RAM, 24 V power. Compiles to GGUF Q4_K_M with watchdog timer + crash-safe restart hook.</p>
+        <div class="cmd">kolm compile --target-profile igx-orin</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">What a profile actually sets</span>
+      <h2 class="v-h2">No magic. Just defaults you would have set anyway.</h2>
+      <p>A profile is a JSON blob shipped with the compiler. Inspect any of them with <code>kolm inspect target-profile &lt;name&gt;</code>.</p>
+    </div>
+    <div class="v-compl">
+      <div>
+        <div class="label">Quant format</div>
+        <b>GGUF Q4_K_M / Q5_K_M / Q3_K_M / MLX / Core ML / WASM</b>
+        <p>Chosen by peak-memory headroom against the model size you supply.</p>
+      </div>
+      <div>
+        <div class="label">Runtime</div>
+        <b>llama.cpp / vLLM / MLX / Core ML / WebAssembly</b>
+        <p>The runtime that ships on or builds for that device class.</p>
+      </div>
+      <div>
+        <div class="label">KV-cache pattern</div>
+        <b>Shard 10x or full attention</b>
+        <p>Edge devices typically use Shard kv-cache to fit a longer context inside small VRAM. <a href="/research">See Shard write-up</a>.</p>
+      </div>
+      <div>
+        <div class="label">Power &amp; thermal hints</div>
+        <b>nice-level / power cap / batch size</b>
+        <p>Used by <code>kolm serve</code> to set realistic concurrency for the target.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Verify on real hardware</span>
+      <h2 class="v-h2">Profile defaults compile fast. Real device measurements decide.</h2>
+      <p>Add the device with <code>kolm devices add</code>, then run a Pareto sweep before committing the build.</p>
+    </div>
+    <div class="v-flows">
+      <div class="v-flow">
+        <span class="who">1</span>
+        <h3>Register the device</h3>
+        <div class="io">in: SSH host &middot; out: device id</div>
+        <p><code>kolm devices add edge-01 --type ssh --host 10.0.0.7</code></p>
+      </div>
+      <div class="v-flow">
+        <span class="who">2</span>
+        <h3>Sweep quants</h3>
+        <div class="io">in: artifact + device &middot; out: Pareto plot</div>
+        <p><code>kolm test-quants out.kolm --device edge-01</code></p>
+      </div>
+      <div class="v-flow">
+        <span class="who">3</span>
+        <h3>Roll out</h3>
+        <div class="io">in: winning quant &middot; out: deployed</div>
+        <p><code>kolm deploy out.kolm --device edge-01 --port 8766</code></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-cta-row">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Next</span>
+      <h2 class="v-h2">Compile for the device. Ship the .kolm. Update on your release cadence.</h2>
+      <p>The fleet is documented at <a href="/fleet">/fleet</a>. CI integration at <a href="/ci">/ci</a>. The full profile reference is in the docs.</p>
+    </div>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup">Try it free</a>
+      <a class="v-btn v-btn--ghost" href="/docs">Open the docs -&gt;</a>
+    </div>
+  </div>
+</section>
+
+<div data-include-footer></div>
+<script src="/nav.js" defer></script>
+</body>
+</html>

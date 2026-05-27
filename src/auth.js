@@ -388,6 +388,8 @@ const PUBLIC_API = (p) =>
   p === '/v1/oauth/providers' ||
   p === '/v1/byoc/attestation' ||
   p === '/v1/byoc/targets' ||
+  p === '/v1/target-profiles' ||                                        // W892-C5 device→target lookup catalog, public read
+  /^\/v1\/target-profiles\/[A-Za-z0-9_\-]+$/.test(p) ||                 // single profile lookup
   /^\/v1\/teams\/invites\/[A-Za-z0-9_\-]+$/.test(p) ||                  // preview is public; /accept is its own path
   /^\/v1\/oauth\/(google|github)\/(start|callback)$/.test(p) ||
   // W889-8.4 — short OAuth aliases. /v1/auth/github + /v1/auth/github/callback
@@ -494,7 +496,12 @@ const PUBLIC_API = (p) =>
   // have a server-side key configured). Used by local distill workers to
   // decide whether to route through the proxy before burning a real call.
   // The actual POST /v1/teacher/chat remains auth-gated.
-  p === '/v1/teacher/chat/health';
+  p === '/v1/teacher/chat/health' ||
+  // W891 — gateway health probe surfaces upstream model-provider booleans for
+  // the same reason as teacher-chat/health: SDKs and the homepage status panel
+  // need to render a live readiness pill without burning an authed budget call.
+  // Body is provider-bool only — no per-tenant quota or pricing leak.
+  p === '/v1/gateway/health';
 
 export function adminApiKey() {
   return process.env.ADMIN_KEY || null;

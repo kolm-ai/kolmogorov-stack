@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CI · K-Score gate for every PR · kolm-ai/quality-gate-action@v1 · kolm.ai</title>
+<meta name="description" content="A single GitHub Action that fails the PR if the new .kolm artifact regresses on your eval set. K-Score floor, latency cap, error-rate ceiling — same gate as the fleet, run in CI.">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/wave889-vertical.css">
+<link rel="canonical" href="https://kolm.ai/ci">
+<meta property="og:title" content="CI · K-Score gate for every PR">
+<meta property="og:description" content="A single GitHub Action that fails the PR if the new .kolm artifact regresses on your eval set. Same gate as the fleet, run in CI.">
+<meta property="og:url" content="https://kolm.ai/ci">
+<meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/ci",
+  "description": "GitHub Action kolm-ai/quality-gate-action@v1 fails the PR if the new .kolm artifact regresses on your eval set.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" }
+}
+</script>
+</head>
+<body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler for CI.</span>
+<div data-include-nav></div>
+
+<section class="v-hero">
+  <div class="v-wrap">
+    <span class="v-eyebrow">Continuous integration</span>
+    <h1 class="v-h1">A K-Score gate for every pull request.</h1>
+    <p class="v-lede">Add <code>kolm-ai/quality-gate-action@v1</code> to your workflow. The action compiles the new model, runs your eval set, compares against the K-Score on <code>main</code>, and fails the PR if it regresses past the floor.</p>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup">Try it free</a>
+      <a class="v-btn v-btn--ghost" href="/docs">Read the CI docs -&gt;</a>
+    </div>
+    <div class="v-caveat">Caveats: the action runs <code>kolm compile</code> + <code>kolm test</code> inside the runner. For models &gt; 13B parameters use a self-hosted GPU runner or the <code>cloud-compile</code> input to offload to RunPod.</div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Drop in</span>
+      <h2 class="v-h2">One YAML block. Two required inputs. Done.</h2>
+      <p>Save as <code>.github/workflows/kolm-gate.yml</code>. The action installs the kolm CLI, runs the compile + eval, and posts the K-Score diff as a PR comment.</p>
+    </div>
+    <div class="v-compl">
+      <div>
+        <div class="label">Workflow file</div>
+        <b>.github/workflows/kolm-gate.yml</b>
+        <p>One job, three steps: checkout, run gate, report. The action self-installs the kolm CLI so the runner needs nothing pre-baked.</p>
+      </div>
+      <div>
+        <div class="label">Required inputs</div>
+        <b>api-key + eval-set</b>
+        <p><code>api-key</code> from <code>secrets.KOLM_API_KEY</code>, <code>eval-set</code> a path to your <code>eval.jsonl</code> in the repo.</p>
+      </div>
+      <div>
+        <div class="label">Optional gate floor</div>
+        <b>min-k-score: "0.90"</b>
+        <p>Hard floor below which the action fails the PR. Default is the K-Score recorded on the merge base (regression-only gate).</p>
+      </div>
+      <div>
+        <div class="label">Optional runner offload</div>
+        <b>cloud-compile: "true"</b>
+        <p>Compile happens on a kolm-managed RunPod GPU, eval runs on the GitHub runner. Useful for &gt; 13B without a self-hosted runner.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">The full workflow</span>
+      <h2 class="v-h2">Copy this. Replace the eval set path. Ship.</h2>
+      <p>Triggers on pull-request, runs once per PR, reports as a PR comment + a status check named <code>kolm-gate</code>.</p>
+    </div>
+    <div class="v-trio">
+      <div class="v-card" style="grid-column:1 / -1">
+        <span class="ctag">GitHub Actions</span>
+        <h3>.github/workflows/kolm-gate.yml</h3>
+        <pre style="background:#0a0a0a;color:#e8e8e8;padding:18px;border-radius:8px;overflow-x:auto;font-size:13px;line-height:1.6"><code>name: kolm-gate
+on: [pull_request]
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: kolm-ai/quality-gate-action@v1
+        with:
+          api-key:     ${{ secrets.KOLM_API_KEY }}
+          eval-set:    eval/support-tickets.jsonl
+          min-k-score: "0.90"
+          recipe:      recipes/support-bot.toml
+          # cloud-compile: "true"   # uncomment to offload &gt; 13B builds</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">What the gate produces</span>
+      <h2 class="v-h2">A PR comment, a status check, and a signed receipt.</h2>
+      <p>All three reference the same artifact SHA, so a green merge is the same artifact the fleet later runs.</p>
+    </div>
+    <div class="v-flows">
+      <div class="v-flow">
+        <span class="who">1</span>
+        <h3>PR comment</h3>
+        <div class="io">in: PR &middot; out: K-Score diff comment</div>
+        <p>Markdown table: K-Score base vs head, latency p95 base vs head, top 5 eval items that regressed.</p>
+      </div>
+      <div class="v-flow">
+        <span class="who">2</span>
+        <h3>Status check</h3>
+        <div class="io">in: gate result &middot; out: kolm-gate ✓ / ✗</div>
+        <p>Set as required in branch protection. Blocks merge on regression. Same shape as a test or lint check.</p>
+      </div>
+      <div class="v-flow">
+        <span class="who">3</span>
+        <h3>Signed receipt</h3>
+        <div class="io">in: gate run &middot; out: rcpt_01KZ...</div>
+        <p>Pinned to the .kolm SHA. The fleet's <code>kolm fleet deploy</code> can <code>--require-gate-receipt</code> so only PR-gated artifacts roll.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-section">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Beyond GitHub</span>
+      <h2 class="v-h2">Same gate, three other runners.</h2>
+      <p>The action wraps <code>kolm gate run</code>. That command is the gate — call it from any CI you already use.</p>
+    </div>
+    <div class="v-compl">
+      <div>
+        <div class="label">GitLab CI</div>
+        <b>.gitlab-ci.yml job</b>
+        <p>Single job that runs <code>kolm gate run --eval-set eval.jsonl --min-k-score 0.90</code>. Exit code = gate result.</p>
+      </div>
+      <div>
+        <div class="label">CircleCI</div>
+        <b>orb: kolm-ai/quality-gate@1</b>
+        <p>Same inputs as the GitHub Action, packaged as a CircleCI orb command.</p>
+      </div>
+      <div>
+        <div class="label">Buildkite</div>
+        <b>kolm-gate-pipeline.yml</b>
+        <p>Plugin invocation. Buildkite's <code>annotations</code> render the same K-Score diff comment as a build annotation.</p>
+      </div>
+      <div>
+        <div class="label">Bare shell</div>
+        <b>kolm gate run --json</b>
+        <p>Returns JSON with K-Score base, K-Score head, gate result, receipt id. Pipe into anything.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="v-cta-row">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Next</span>
+      <h2 class="v-h2">Gate every PR. Ship only gated builds. Roll back on regression.</h2>
+      <p>Edge device profiles at <a href="/edge">/edge</a>. Fleet rollout commands at <a href="/fleet">/fleet</a>. The full gate reference is in the docs.</p>
+    </div>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/account/signup">Try it free</a>
+      <a class="v-btn v-btn--ghost" href="/docs">Open the docs -&gt;</a>
+    </div>
+  </div>
+</section>
+
+<div data-include-footer></div>
+<script src="/nav.js" defer></script>
+</body>
+</html>
