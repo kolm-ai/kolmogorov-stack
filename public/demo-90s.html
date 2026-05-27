@@ -1306,6 +1306,12 @@
 </div>
 
 <script>
+const safeHTML = (strings, ...values) => {
+  const esc = v => (v && typeof v === 'object' && v.__html != null) ? String(v.__html) : String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return strings.reduce((acc, s, i) => acc + s + (i < values.length ? esc(values[i]) : ''), '');
+};
+const rawHTML = html => ({ __html: String(html) });
+
 /* ============================================================
    TIMELINE
    ============================================================ */
@@ -1449,7 +1455,7 @@ function startScene3() {
     row.className = 'stream__row';
     const conf = parseFloat(r[3]);
     const sClass = conf < 0.85 ? 's warn' : 's';
-    row.innerHTML = `<span class="t">${r[0]}</span><span class="m">${r[1]}</span><span class="q">${r[2]}</span><span class="${sClass}">${r[3]}</span>`;
+    row.innerHTML = safeHTML`<span class="t">${r[0]}</span><span class="m">${r[1]}</span><span class="q">${r[2]}</span><span class="${sClass}">${r[3]}</span>`;
     streamHost.appendChild(row);
     requestAnimationFrame(() => row.classList.add('on'));
     // Keep ~6 visible

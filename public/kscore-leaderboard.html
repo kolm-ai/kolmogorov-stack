@@ -150,6 +150,12 @@
 
 
 <script>
+const safeHTML = (strings, ...values) => {
+  const esc = v => (v && typeof v === 'object' && v.__html != null) ? String(v.__html) : String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return strings.reduce((acc, s, i) => acc + s + (i < values.length ? esc(values[i]) : ''), '');
+};
+const rawHTML = html => ({ __html: String(html) });
+
 (async () => {
  try {
  const r = await fetch('/kscore-leaderboard.json', { cache: 'no-store' });
@@ -171,7 +177,7 @@
  const sig = (row.signature || '').replace(/^sha256:/, '').slice(0, 14);
  const div = document.createElement('div');
  div.className = 'row';
- div.innerHTML = `
+ div.innerHTML = safeHTML`
  <span class="rank">#${row.rank}</span>
  <span class="name">${row.artifact}</span>
  <span>${row.base_model || '-'}</span>

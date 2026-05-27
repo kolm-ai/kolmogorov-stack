@@ -149,6 +149,12 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </div></footer>
 
 <script>
+const safeHTML = (strings, ...values) => {
+  const esc = v => (v && typeof v === 'object' && v.__html != null) ? String(v.__html) : String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return strings.reduce((acc, s, i) => acc + s + (i < values.length ? esc(values[i]) : ''), '');
+};
+const rawHTML = html => ({ __html: String(html) });
+
 // Pre-fill VRAM from /v1/hardware on load
 (async function(){
   try {
@@ -180,12 +186,12 @@ document.getElementById('form-q').addEventListener('submit', async function(e){
     });
     const f = await fr.json();
     if (!f.ok) {
-      fitOut.innerHTML = `<div class="empty-note">Fit check failed: ${f.error}</div>`;
+      fitOut.innerHTML = safeHTML`<div class="empty-note">Fit check failed: ${f.error}</div>`;
       return;
     }
     const pillClass = f.fits ? (f.tight ? 'fit-no' : 'fit-yes') : 'fit-no';
     const pillTxt = f.fits ? (f.tight ? 'fits (tight)' : 'fits') : 'does not fit';
-    fitOut.innerHTML = `
+    fitOut.innerHTML = safeHTML`
       <div class="panel">
         <span class="fit-pill ${pillClass}">${pillTxt}</span>
         <div style="margin-top:10px">${f.recommendation}</div>
@@ -210,10 +216,10 @@ document.getElementById('form-q').addEventListener('submit', async function(e){
       return;
     }
     if (!q.ok) {
-      jobOut.innerHTML = `<div class="empty-note">Queue failed: ${q.error}</div>`;
+      jobOut.innerHTML = safeHTML`<div class="empty-note">Queue failed: ${q.error}</div>`;
       return;
     }
-    jobOut.innerHTML = `
+    jobOut.innerHTML = safeHTML`
       <div class="panel">
         <div><strong>Job queued.</strong></div>
         <div style="font-family:var(--mono);font-size:13px;color:var(--ink-mute);margin-top:6px">
@@ -224,7 +230,7 @@ document.getElementById('form-q').addEventListener('submit', async function(e){
         <div style="margin-top:12px"><a href="/account/builds" class="cta-secondary">View builds -&gt;</a></div>
       </div>`;
   } catch (err) {
-    fitOut.innerHTML = `<div class="empty-note">Request failed: ${String(err.message || err)}</div>`;
+    fitOut.innerHTML = safeHTML`<div class="empty-note">Request failed: ${String(err.message || err)}</div>`;
   }
 });
 </script>

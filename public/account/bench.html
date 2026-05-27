@@ -117,6 +117,11 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </div></footer>
 
 <script>
+const safeHTML = (strings, ...values) => {
+  const esc = v => (v && typeof v === 'object' && v.__html != null) ? String(v.__html) : String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return strings.reduce((acc, s, i) => acc + s + (i < values.length ? esc(values[i]) : ''), '');
+};
+const rawHTML = html => ({ __html: String(html) });
 const QUALITY_ORDER = [
   'fp16','bf16','fp8','nvfp4','gguf-q8','gguf-q6k','gguf-q5km',
   'awq-4bit','gptq-4bit','gguf-q4km','gguf-iq4xs','int4','exl2',
@@ -177,17 +182,17 @@ document.getElementById('form-b').addEventListener('submit', async function(e){
         <td class="${row.fits ? 'fit-yes' : 'fit-no'}">${row.fits ? (row.tight ? 'tight' : 'fits') : 'no'}</td>
       </tr>`).join('');
 
-    out.innerHTML = `
+    out.innerHTML = safeHTML`
       <div class="panel" style="padding:0">
         <table>
           <thead><tr>
             <th>Quant target</th><th>bpp</th><th>weights (GB)</th><th>kv (GB)</th><th>total (GB)</th><th>headroom (GB)</th><th>fit</th>
           </tr></thead>
-          <tbody>${tbody}</tbody>
+          <tbody>${rawHTML(tbody)}</tbody>
         </table>
       </div>`;
   } catch (err) {
-    out.innerHTML = `<div class="empty-note">Bench failed: ${String(err.message || err)}</div>`;
+    out.innerHTML = safeHTML`<div class="empty-note">Bench failed: ${String(err.message || err)}</div>`;
   }
 });
 </script>

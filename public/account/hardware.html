@@ -90,6 +90,12 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </div></footer>
 
 <script>
+const safeHTML = (strings, ...values) => {
+  const esc = v => (v && typeof v === 'object' && v.__html != null) ? String(v.__html) : String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return strings.reduce((acc, s, i) => acc + s + (i < values.length ? esc(values[i]) : ''), '');
+};
+const rawHTML = html => ({ __html: String(html) });
+
 (async function(){
   const fmtList = (arr, cls) => (arr||[]).map(s => `<span class="pill ${cls||''}">${s}</span>`).join('');
   const primary = document.getElementById('primary-panel');
@@ -102,7 +108,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       return;
     }
     const p = j.primary;
-    primary.innerHTML = `
+    primary.innerHTML = safeHTML`
       <h2 style="margin-top:0">Primary device</h2>
       <dl class="kv">
         <dt>Vendor</dt><dd>${p.vendor}</dd>
@@ -110,8 +116,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <dt>VRAM</dt><dd>${p.vram_gb} GB</dd>
         <dt>Compute capability</dt><dd>${p.compute_capability || '-'}</dd>
         <dt>Driver</dt><dd>${p.driver_version || '-'}</dd>
-        <dt>Native dtypes</dt><dd>${fmtList(p.native_dtypes, 'native')}</dd>
-        <dt>Supported quants</dt><dd>${fmtList(p.supported_methods)}</dd>
+        <dt>Native dtypes</dt><dd>${rawHTML(fmtList(p.native_dtypes, 'native'))}</dd>
+        <dt>Supported quants</dt><dd>${rawHTML(fmtList(p.supported_methods))}</dd>
       </dl>`;
     if (Array.isArray(j.all) && j.all.length > 1) {
       all.innerHTML = '<h2>All devices</h2>' + j.all.map((d,i) => `
@@ -125,7 +131,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         </div>`).join('');
     }
   } catch (e) {
-    primary.innerHTML = `<div class="empty-note">Hardware probe failed: ${String(e.message || e)}</div>`;
+    primary.innerHTML = safeHTML`<div class="empty-note">Hardware probe failed: ${String(e.message || e)}</div>`;
   }
 })();
 </script>

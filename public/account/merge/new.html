@@ -113,6 +113,12 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </div></footer>
 
 <script>
+const safeHTML = (strings, ...values) => {
+  const esc = v => (v && typeof v === 'object' && v.__html != null) ? String(v.__html) : String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return strings.reduce((acc, s, i) => acc + s + (i < values.length ? esc(values[i]) : ''), '');
+};
+const rawHTML = html => ({ __html: String(html) });
+
 document.getElementById('form-m').addEventListener('submit', async function(e){
   e.preventDefault();
   const out = document.getElementById('result');
@@ -136,16 +142,16 @@ document.getElementById('form-m').addEventListener('submit', async function(e){
       return;
     }
     if (!j.method) {
-      out.innerHTML = `<div class="empty-note">Plan failed: ${j.error || 'unknown'}</div>`;
+      out.innerHTML = safeHTML`<div class="empty-note">Plan failed: ${j.error || 'unknown'}</div>`;
       return;
     }
     const lineagePill = j.same_lineage
       ? '<span class="ok-pill">same lineage</span>'
       : '<span class="warn-pill">lineage mismatch &mdash; merge will likely fail</span>';
     const delta = j.heuristic_kscore_delta || [0, 0];
-    out.innerHTML = `
+    out.innerHTML = safeHTML`
       <div class="panel">
-        <div>${lineagePill}</div>
+        <div>${rawHTML(lineagePill)}</div>
         <dl class="kv" style="margin-top:14px">
           <dt>Method</dt><dd>${j.method} (alpha=${j.alpha})</dd>
           <dt>Base</dt><dd><code>${j.base.path}</code><br>base_model: ${j.base.base_model || '-'} &middot; K-Score: ${j.base.k_score ?? '-'}</dd>
@@ -155,7 +161,7 @@ document.getElementById('form-m').addEventListener('submit', async function(e){
       </div>
       <div class="empty-note">Execution: run locally to write the merged .kolm &mdash; <code>kolm merge ${j.base.path} ${j.head.path} --method ${j.method}</code></div>`;
   } catch (err) {
-    out.innerHTML = `<div class="empty-note">Request failed: ${String(err.message || err)}</div>`;
+    out.innerHTML = safeHTML`<div class="empty-note">Request failed: ${String(err.message || err)}</div>`;
   }
 });
 </script>
