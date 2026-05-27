@@ -699,17 +699,11 @@ body::before {
   z-index: 0;
 }
 
-/* Paper grain - SVG fractal noise */
+/* Paper grain disabled — was leaking warm-paper aesthetic site-wide */
 body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.07 0'/></filter><rect width='220' height='220' filter='url(%23n)'/></svg>");
-  background-size: 220px 220px;
-  mix-blend-mode: multiply;
-  opacity: 0.5;
-  z-index: 0;
+  content: none;
+  display: none;
+  background-image: none;
 }
 
 [data-theme="dark"] body::before {
@@ -719,8 +713,9 @@ body::after {
 }
 
 [data-theme="dark"] body::after {
-  mix-blend-mode: overlay;
-  opacity: 0.16;
+  content: none;
+  display: none;
+  background-image: none;
 }
 
 body > * { position: relative; z-index: 1; }
@@ -2540,6 +2535,38 @@ html[data-theme="dark"] .kolm-deep__cmd {
 .fr-h1--hero .h1-claim { font-weight: inherit; }
 
 
+.ks-hero__h1 .grad,
+.ks-hero__h1 .ks-em,
+.ks-hero__h1 em,
+.ks-hero__h1 strong,
+.ks-hero__h1 b,
+.ks-hero__h1 .accent,
+.ks-hero__h1 span,
+.fr-h1--hero .grad,
+.fr-h1--hero .ks-em,
+.fr-h1--hero em,
+.fr-h1--hero strong,
+.fr-h1--hero b,
+.fr-h1--hero .accent,
+.fr-h1--hero span,
+.display-hero .grad,
+.display-hero .ks-em,
+.display-hero em,
+.display-hero strong,
+.display-hero b,
+.display-hero .accent,
+.display-hero span {
+  font-weight: inherit !important;
+  font-family: inherit !important;
+  font-style: inherit !important;
+  letter-spacing: inherit !important;
+  background: none !important;
+  background-image: none !important;
+  -webkit-text-fill-color: currentColor !important;
+  color: inherit !important;
+}
+
+
 .ks-hero {
   background: var(--surface-0, #f3f5f7);
   position: relative;
@@ -2781,17 +2808,8 @@ html::before {
 }
 
 html::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.55;
-  background-image:
-    radial-gradient(circle at 1px 1px, rgba(31, 41, 55, 0.18) 1px, transparent 1.5px);
-  background-size: 24px 24px;
-  background-position: 0 0;
-  contain: strict;
+  content: none;
+  display: none;
 }
 
 [data-theme="dark"] html::before,
@@ -2804,10 +2822,9 @@ html[data-theme="dark"]::before {
 
 [data-theme="dark"] html::after,
 html[data-theme="dark"]::after {
-  opacity: 0.40;
-  background-image:
-    radial-gradient(circle at 1px 1px, rgba(230, 233, 238, 0.16) 1px, transparent 1.5px);
-  background-size: 24px 24px;
+  content: none;
+  display: none;
+  background-image: none;
 }
 
 /* Keep body transparent over the html backdrop. */
