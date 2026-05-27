@@ -1352,14 +1352,14 @@
    horizontal and the dividing lines are hairlines. */
 .fr-tier-row {
   display: grid;
-  
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 0;
   margin: clamp(24px, 3vw, 36px) 0;
   border-radius: var(--radius-lg, 16px);
-  background: var(--surface-1);
-  border: 1px solid rgba(230, 233, 238, 0.06);
+  background: #ffffff;
+  border: 1px solid #dde1e7;
   overflow: hidden;
+  box-shadow: 0 1px 2px rgba(31, 41, 55, 0.04), 0 8px 24px -16px rgba(31, 41, 55, 0.10);
 }
 @media (max-width: 900px) { .fr-tier-row { grid-template-columns: 1fr; } }
 .fr-tier {
@@ -1368,22 +1368,22 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  border-right: 1px solid rgba(230, 233, 238, 0.06);
+  border-right: 1px solid #eef1f4;
   transition: background var(--fr-duration-quick) var(--fr-spring-base);
 }
 .fr-tier:last-child { border-right: 0; }
 @media (max-width: 1000px) {
   .fr-tier:nth-child(2n) { border-right: 0; }
-  .fr-tier:nth-child(-n+2) { border-bottom: 1px solid rgba(230, 233, 238, 0.06); }
+  .fr-tier:nth-child(-n+2) { border-bottom: 1px solid #eef1f4; }
 }
 @media (max-width: 540px) {
-  .fr-tier { border-right: 0; border-bottom: 1px solid rgba(230, 233, 238, 0.06); }
+  .fr-tier { border-right: 0; border-bottom: 1px solid #eef1f4; }
   .fr-tier:last-child { border-bottom: 0; }
 }
-.fr-tier:hover { background: rgba(17, 17, 17, 0.025); }
+.fr-tier:hover { background: #f7f8fa; }
 .fr-tier--feat {
-  background: linear-gradient(180deg, rgba(17, 17, 17, 0.10) 0%, rgba(17, 17, 17, 0.015) 60%, transparent 100%);
-  box-shadow: inset 0 3px 0 0 var(--fr-mint), 0 18px 50px -20px rgba(17, 17, 17, 0.28);
+  background: linear-gradient(180deg, #f3f5f7 0%, #f7f8fa 60%, #ffffff 100%);
+  box-shadow: inset 0 3px 0 0 #1f2937, 0 18px 50px -20px rgba(31, 41, 55, 0.16);
   z-index: 1;
 }
 .fr-tier--feat::before {
@@ -1395,15 +1395,15 @@
   font-size: 10.5px;
   letter-spacing: var(--fr-track-label);
   text-transform: uppercase;
-  color: #0c1a16;
-  background: var(--fr-mint);
+  color: #ffffff;
+  background: #1f2937;
   padding: 4px 12px;
   border-radius: 999px;
   white-space: nowrap;
   font-weight: 600;
-  box-shadow: 0 6px 16px -4px rgba(17, 17, 17, 0.45);
+  box-shadow: 0 6px 16px -4px rgba(31, 41, 55, 0.32);
 }
-.fr-tier--feat .fr-tier__price { color: var(--fr-mint); }
+.fr-tier--feat .fr-tier__price { color: #1f2937; }
 .fr-tier__name {
   font-family: var(--fr-font-mono);
   font-size: var(--fr-text-xs);

@@ -445,244 +445,6 @@
 </section>
 
 
-<section class="kolm-demo-video" aria-label="90-second product walkthrough">
-  <div class="kolm-demo-video__inner">
-    <p class="kolm-demo-video__eye">90-second walkthrough</p>
-    <h2 class="kolm-demo-video__h">Route &middot; Compile &middot; Run.</h2>
-    <p class="kolm-demo-video__sub">
-      One real session. Pin a call to a small model, distill three teachers
-      into a 7B specialist, quantize it for a 5090, serve OpenAI-compatible
-      on <code>localhost:8080</code>. No edits, no cuts.
-    </p>
-    <div class="kolm-demo-video__shell">
-      <div class="kolm-demo-video__frame">
-        <video
-          id="kolm-demo-vid"
-          class="kolm-demo-video__el"
-          autoplay muted loop playsinline
-          preload="metadata"
-          poster="/demo-90s-poster.jpg"
-          aria-label="90-second cinematic walkthrough of the kolm compiler"
-        >
-          <source src="/demo-90s.mp4" type="video/mp4">
-          <p>Your browser does not support embedded video.
-            <a href="/demo-90s.mp4">Download the MP4</a>.</p>
-        </video>
-        <button class="kolm-demo-video__replay" type="button" aria-label="Replay from start"
-                onclick="(function(v){if(!v)return;v.currentTime=0;v.play();}(document.getElementById('kolm-demo-vid')))">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M2.5 8a5.5 5.5 0 1 1 1.61 3.89" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M2.5 4.5v3h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <span>Replay</span>
-        </button>
-      </div>
-      <ol class="kolm-demo-video__chapters" aria-label="Chapters">
-        <li><span class="ch-num">00</span><span class="ch-name">Intro</span><span class="ch-t">0:00</span></li>
-        <li><span class="ch-num">01</span><span class="ch-name">Route &amp; Capture</span><span class="ch-t">0:04</span></li>
-        <li><span class="ch-num">02</span><span class="ch-name">Distill &amp; Compile</span><span class="ch-t">0:28</span></li>
-        <li><span class="ch-num">03</span><span class="ch-name">Run &amp; Verify</span><span class="ch-t">1:00</span></li>
-      </ol>
-    </div>
-    <p class="kolm-demo-video__cta">
-      <a class="kolm-demo-video__link" href="/quickstart">Run it yourself &rarr;</a>
-      <a class="kolm-demo-video__link kolm-demo-video__link--ghost" href="/demo-live">Watch the full /demo-live</a>
-    </p>
-  </div>
-</section>
-
-<style>
-.kolm-demo-video {
-  background: var(--paper-2, #eef1f4);
-  border-top: 1px solid var(--rule, #dde1e7);
-  border-bottom: 1px solid var(--rule, #dde1e7);
-  padding: clamp(48px, 6vw, 96px) clamp(20px, 4vw, 48px);
-}
-.kolm-demo-video__inner {
-  max-width: 1080px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-.kolm-demo-video__eye {
-  font: 500 12px/1 ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-3, #6e7681);
-  margin: 0;
-}
-.kolm-demo-video__h {
-  font: 600 clamp(28px, 4vw, 44px)/1.1 var(--font-display, ui-sans-serif, system-ui, sans-serif);
-  color: var(--ink-1, #0e1116);
-  margin: 0;
-  text-align: center;
-  letter-spacing: -0.01em;
-}
-.kolm-demo-video__sub {
-  font: 400 clamp(15px, 1.4vw, 17px)/1.55 var(--font-body, ui-sans-serif, system-ui, sans-serif);
-  color: var(--ink-2, #3e4651);
-  margin: 0;
-  text-align: center;
-  max-width: 640px;
-}
-.kolm-demo-video__sub code {
-  font: 500 0.92em/1 ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
-  background: var(--paper-3, #e6eaef);
-  padding: 1px 6px;
-  border-radius: 4px;
-  color: var(--ink-1, #0e1116);
-}
-.kolm-demo-video__shell {
-  width: 100%;
-  max-width: 1080px;
-  margin-top: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  position: relative;
-}
-.kolm-demo-video__shell::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: 14px;
-  padding: 1px;
-  background: linear-gradient(135deg,
-    rgba(121, 192, 255, 0.35) 0%,
-    rgba(184, 188, 196, 0.18) 40%,
-    rgba(63, 185, 80, 0.25) 100%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-          mask-composite: exclude;
-  pointer-events: none;
-  opacity: 0.65;
-}
-.kolm-demo-video__frame {
-  width: 100%;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #0e1116;
-  border: 1px solid var(--rule, #dde1e7);
-  box-shadow: 0 12px 40px -16px rgba(14, 17, 22, 0.22),
-              0 2px 10px -4px rgba(14, 17, 22, 0.10);
-  aspect-ratio: 16 / 9;
-  position: relative;
-}
-.kolm-demo-video__el {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-}
-.kolm-demo-video__replay {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(184, 188, 196, 0.28);
-  background: rgba(14, 17, 22, 0.6);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: #e6edf3;
-  font: 500 12px/1 ui-sans-serif, system-ui, -apple-system, sans-serif;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 240ms ease, border-color 240ms ease, background 240ms ease;
-}
-.kolm-demo-video__frame:hover .kolm-demo-video__replay,
-.kolm-demo-video__frame:focus-within .kolm-demo-video__replay {
-  opacity: 1;
-}
-.kolm-demo-video__replay:hover {
-  border-color: rgba(184, 188, 196, 0.55);
-  background: rgba(14, 17, 22, 0.78);
-}
-.kolm-demo-video__chapters {
-  list-style: none;
-  margin: 16px 0 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0;
-  border-top: 1px solid var(--rule, #dde1e7);
-  border-radius: 0;
-  background: transparent;
-}
-.kolm-demo-video__chapters li {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 14px 16px 0;
-  border-right: 1px solid var(--rule, #dde1e7);
-  position: relative;
-}
-.kolm-demo-video__chapters li:last-child { border-right: none; }
-.kolm-demo-video__chapters li::before {
-  content: "";
-  position: absolute;
-  top: -1px; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, rgba(121, 192, 255, 0.55), rgba(121, 192, 255, 0));
-  opacity: 0;
-  transition: opacity 240ms ease;
-}
-.kolm-demo-video__chapters li:hover::before { opacity: 1; }
-.ch-num {
-  font: 500 11px/1 ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
-  letter-spacing: 0.14em;
-  color: var(--ink-3, #6e7681);
-}
-.ch-name {
-  font: 500 14px/1.3 ui-sans-serif, system-ui, -apple-system, sans-serif;
-  color: var(--ink-1, #0e1116);
-  letter-spacing: -0.005em;
-}
-.ch-t {
-  font: 400 11px/1 ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
-  color: var(--ink-3, #6e7681);
-  letter-spacing: 0.04em;
-}
-.kolm-demo-video__cta {
-  display: flex;
-  gap: 24px;
-  margin: 8px 0 0;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-.kolm-demo-video__link {
-  font: 500 15px/1 var(--font-body, ui-sans-serif, system-ui, sans-serif);
-  color: var(--ink-1, #0e1116);
-  text-decoration: none;
-  border-bottom: 1px solid var(--ink-1, #0e1116);
-  padding-bottom: 2px;
-  transition: opacity 160ms ease;
-}
-.kolm-demo-video__link:hover { opacity: 0.7; }
-.kolm-demo-video__link--ghost {
-  color: var(--ink-3, #6e7681);
-  border-bottom-color: var(--rule, #dde1e7);
-}
-@media (max-width: 760px) {
-  .kolm-demo-video__chapters { grid-template-columns: repeat(2, 1fr); }
-  .kolm-demo-video__chapters li:nth-child(2) { border-right: none; }
-  .kolm-demo-video__chapters li:nth-child(3),
-  .kolm-demo-video__chapters li:nth-child(4) { padding-bottom: 14px; }
-  .kolm-demo-video__chapters li:nth-child(1),
-  .kolm-demo-video__chapters li:nth-child(2) { border-bottom: 1px solid var(--rule, #dde1e7); }
-}
-@media (max-width: 640px) {
-  .kolm-demo-video { padding: 40px 16px; }
-  .kolm-demo-video__cta { gap: 16px; flex-direction: column; align-items: center; }
-  .kolm-demo-video__replay { opacity: 1; }
-}
-</style>
-
 <section class="kolm-whatis" aria-label="What kolm is">
   <div class="kolm-whatis__inner">
     <p class="kolm-whatis__eye">In plain English</p>
@@ -1061,7 +823,34 @@
 
     
     <div class="kolm-receipt-strip" aria-label="Real receipt example">
-      <pre>CODE28</pre>
+      <pre>{
+  "receipt_id": "rcpt_01KYC1ZVTGDCW3FX06JQSC",
+  "artifact": "support.kolm",
+  "manifest_sha256": "bf8a3d1c4e92...f047",
+  "model": {
+    "teacher": "claude-opus-4-7",
+    "student": "qwen-2.5-7b-instruct",
+    "quant": "NF4 + double"
+  },
+  "bakeoff": {
+    "k_score": 0.91,
+    "gate": 0.85,
+    "accuracy": 0.94,
+    "safety": 0.96,
+    "latency_p50_ms": 147
+  },
+  "eval": {
+    "rows": 240,
+    "frozen": true,
+    "hash": "sha256:9c1e...a3b2"
+  },
+  "signature": {
+    "algo": "ed25519",
+    "key": "kolm-registry-prod-2026",
+    "value": "7c4a...e1b3"
+  },
+  "verified_offline": true
+}</pre>
       <div class="kolm-receipt-strip__copy">
         <h4>This is the audit trail.</h4>
         <p>Every <code>.kolm</code> artifact carries its own offline verifier and a receipt your auditor can replay. Same JSON on your laptop, in CI, and at the regulator's desk. No phone-home, no trust in our service required.</p>
