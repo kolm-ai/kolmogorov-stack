@@ -373,24 +373,10 @@ if (/start\s+free|get api key|get a key|sign up|new artifact/i.test(item.textCon
  // site from feeling like hundreds of disconnected landing pages while leaving
  // auth/app consoles uncluttered.
  (function injectProductSpine() {
- if (document.querySelector('.kolm-product-spine')) return;
- if (path === '/' || path === '/index.html') return;
- if (/^\/(account|admin|signin|signup|password-reset|teams-accept)(\/|$)/.test(path)) return;
- var main = document.querySelector('main');
- if (!main || main.querySelector('.home-hero') || main.querySelector('.ks-hero')) return;
- if (main.closest('.app')) return;
- function spineActive(re) { return re.test(path) ? ' aria-current="page"' : ''; }
- var spine = document.createElement('nav');
- spine.className = 'kolm-product-spine';
- spine.setAttribute('aria-label', 'Kolm product map');
- spine.innerHTML =
- '<a href="/capture"' + spineActive(/^\/(capture|captures|quickstart|api|integrations|docs\/connect|sdks)(\/|$)/) + '><span>01</span><b>Gateway</b><em>one AI API</em></a>' +
- '<a href="/captures"' + spineActive(/^\/(captures|docs\/lake|lake|privacy|datasets|labeling)(\/|$)/) + '><span>02</span><b>Capture</b><em>calls to data</em></a>' +
- '<a href="/training"' + spineActive(/^\/(training|train|benchmarks|leaderboard|kscore|research|distill|compile|models|registry|marketplace)(\/|$)/) + '><span>03</span><b>Compile</b><em>distill specialists</em></a>' +
- '<a href="/runtimes"' + spineActive(/^\/(runtimes|run|device|device-transfer|compute|setup|install)(\/|$)/) + '><span>04</span><b>Deploy</b><em>any device</em></a>' +
- '<a href="/use-cases"' + spineActive(/^\/(use-cases|healthcare|finance|legal|defense|edge|devtools|insure|health-insurance|saas|eu|gov|compare|vs-|how-vs|migrate|case-studies)(\/|$)/) + '><span>05</span><b>Use cases</b><em>where it pays</em></a>' +
- '<a href="/enterprise"' + spineActive(/^\/(enterprise|trust|security|compliance|baa|soc2|slsa|sbom|self-host|airgap|byoc|teams|status|sla)(\/|$)/) + '><span>06</span><b>Trust</b><em>security + audit</em></a>';
- main.parentNode.insertBefore(spine, main);
+ // Disabled: this secondary 6-slot nav duplicated the primary nav and
+ // doubled the chrome height on every content page. Main nav (Wrapper /
+ // Studio / Pricing / Docs / GitHub) already covers the surface map.
+ return;
  })();
 
  (function injectAccountCommandCenter() {

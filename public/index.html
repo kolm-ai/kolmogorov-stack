@@ -46,7 +46,6 @@
 <script defer src="/nav.js"></script>
 <script defer src="/w687.js"></script>
 <script defer src="/supplement.js"></script>
-<script defer src="/kolm-chat.js"></script>
 <script src="/sentry-init.js" defer></script>
 <style>
   
@@ -806,30 +805,182 @@
 </section>
 
 
-<section class="ks-cli-chat" id="chat" aria-label="Try kolm before signing up">
-  <div class="ks-cli-chat__inner">
-    <div class="ks-cli-chat__copy">
-      <span class="eye">Live &middot; /v1/free/cli &middot; spawns this server&rsquo;s <code>cli/kolm.js</code></span>
-      <h2>This box is the CLI. Not a demo.</h2>
-      <p>Read-only verbs (<code>whoami</code>, <code>doctor</code>, <code>changelog</code>, <code>route doctor</code>, <code>federated peers</code>, &hellip;) run inline against this server&rsquo;s <code>cli/kolm.js</code> through <code>POST /v1/free/cli</code>. Write verbs (<code>capture</code>, <code>distill</code>, <code>compile</code>, <code>run</code>) return the exact shell command to copy. Same allowlist for everyone; 20 calls/IP/day on the free tier.</p>
-      <ul>
-        <li>20 free messages per day &middot; no account needed</li>
-        <li>Sign up free for unlimited &middot; same chat at <code>/account</code></li>
-        <li>Apache-2.0 <code>src/intent.js</code> &middot; you can read the classifier</li>
-      </ul>
-      <details class="ks-cli-chat__verify">
-        <summary>verify it yourself &middot; two curls</summary>
-<pre class="ks-cli-chat__verify-pre">CODE18</pre>
-        <p class="ks-cli-chat__verify-why">The CLI route enforces a verb allowlist (<code>whoami</code>, <code>doctor</code>, <code>changelog</code>, <code>route</code>, <code>federated</code>, &hellip;) and a strict arg-token regex - shell metachars are rejected before <code>spawn</code>. 5s timeout, 8KB output cap, 20 calls/IP/day. <code>GET /v1/free/cli/allowlist</code> returns the exact set the server accepts.</p>
-      </details>
-      <div class="ctas">
-        <a class="ks-btn ks-btn--ghost" href="/docs/cli">Read the CLI reference</a>
-        <a class="ks-btn ks-btn--primary" href="/signup">Sign up free <span class="ks-btn-arrow">&rarr;</span></a>
-      </div>
+<style>
+  .ks-race { padding: 64px 0 56px; background: #fafbfc; border-top: 1px solid #eef1f4; border-bottom: 1px solid #eef1f4; }
+  .ks-race__inner { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+  .ks-race__head { max-width: 760px; margin: 0 auto 36px; text-align: center; }
+  .ks-race__eye { display: inline-block; font: 500 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.08em; text-transform: uppercase; color: #56606c; padding: 6px 10px; border: 1px solid #dde1e7; border-radius: 999px; background: #fff; }
+  .ks-race__h2 { margin: 14px 0 10px; font: 600 clamp(26px, 3.6vw, 36px)/1.2 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #1f2937; letter-spacing: -0.01em; }
+  .ks-race__h2 code { font: inherit; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88em; background: #eef1f4; padding: 1px 8px; border-radius: 6px; color: #1f2937; }
+  .ks-race__lede { margin: 0; font: 400 16px/1.55 ui-sans-serif, system-ui, sans-serif; color: #56606c; }
+  .ks-race__panes { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
+  @media (max-width: 820px) { .ks-race__panes { grid-template-columns: 1fr; } }
+  .ks-race__pane { display: flex; flex-direction: column; height: 380px; min-height: 380px; max-height: 380px; background: #fff; border: 1px solid #dde1e7; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 0 rgba(31,41,55,0.02); position: relative; }
+  .ks-race__pane.is-winner { border-color: #a8b3c2; box-shadow: 0 8px 24px -16px rgba(31,41,55,0.18), 0 1px 0 rgba(31,41,55,0.02); }
+  .ks-race__head-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-bottom: 1px solid #eef1f4; background: #f3f5f7; flex: 0 0 auto; }
+  .ks-race__model { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .ks-race__model-name { font: 600 13px/1.2 ui-sans-serif, system-ui, sans-serif; color: #1f2937; }
+  .ks-race__model-sub { font: 400 11px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; color: #8a929c; letter-spacing: 0.02em; }
+  .ks-race__clock { display: flex; align-items: baseline; gap: 6px; font: 500 13px/1 ui-monospace, SFMono-Regular, Menlo, monospace; color: #56606c; padding: 6px 10px; border: 1px solid #dde1e7; border-radius: 8px; background: #fff; min-width: 84px; justify-content: flex-end; }
+  .ks-race__clock-num { color: #1f2937; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .ks-race__clock-unit { color: #8a929c; font-size: 11px; }
+  .ks-race__pane.is-winner .ks-race__clock-num { color: #2e5a3d; }
+  .ks-race__body { flex: 1 1 auto; padding: 14px 16px; overflow: hidden; font: 400 13.5px/1.55 ui-monospace, SFMono-Regular, Menlo, "Cascadia Code", monospace; color: #1f2937; white-space: pre-wrap; word-break: break-word; position: relative; }
+  .ks-race__caret { display: inline-block; width: 7px; height: 15px; background: #56606c; vertical-align: -2px; margin-left: 1px; animation: ks-race-caret 1s steps(2) infinite; }
+  .ks-race__pane.is-winner .ks-race__caret { background: #2e5a3d; }
+  @keyframes ks-race-caret { 50% { opacity: 0; } }
+  .ks-race__pane[data-done="1"] .ks-race__caret { display: none; }
+  .ks-race__foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; border-top: 1px solid #eef1f4; background: #fafbfc; flex: 0 0 auto; font: 400 11px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace; color: #56606c; letter-spacing: 0.02em; }
+  .ks-race__pane.is-winner .ks-race__foot { background: #f0f4f1; color: #2e5a3d; }
+  .ks-race__cta { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 28px auto 0; flex-wrap: wrap; }
+  .ks-race__replay { appearance: none; display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; font: 500 13px/1 ui-sans-serif, system-ui, sans-serif; color: #1f2937; background: #fff; border: 1px solid #dde1e7; border-radius: 999px; cursor: pointer; transition: border-color 140ms, background 140ms; }
+  .ks-race__replay:hover { border-color: #a8b3c2; background: #f3f5f7; }
+  .ks-race__replay svg { width: 14px; height: 14px; }
+  .ks-race__note { font: 400 12.5px/1.4 ui-sans-serif, system-ui, sans-serif; color: #8a929c; text-align: center; margin: 14px auto 0; max-width: 580px; }
+  [data-theme="dark"] .ks-race { background: #15171b; border-color: #2a2d34; }
+  [data-theme="dark"] .ks-race__eye { background: #1c1f24; border-color: #2a2d34; color: #a8b3c2; }
+  [data-theme="dark"] .ks-race__h2 { color: #eef1f4; }
+  [data-theme="dark"] .ks-race__h2 code { background: #2a2d34; color: #eef1f4; }
+  [data-theme="dark"] .ks-race__lede { color: #a8b3c2; }
+  [data-theme="dark"] .ks-race__pane { background: #1c1f24; border-color: #2a2d34; }
+  [data-theme="dark"] .ks-race__pane.is-winner { border-color: #4a5566; }
+  [data-theme="dark"] .ks-race__head-row { background: #15171b; border-color: #2a2d34; }
+  [data-theme="dark"] .ks-race__model-name { color: #eef1f4; }
+  [data-theme="dark"] .ks-race__clock { background: #1c1f24; border-color: #2a2d34; color: #a8b3c2; }
+  [data-theme="dark"] .ks-race__clock-num { color: #eef1f4; }
+  [data-theme="dark"] .ks-race__body { color: #eef1f4; }
+  [data-theme="dark"] .ks-race__foot { background: #15171b; color: #a8b3c2; border-color: #2a2d34; }
+  [data-theme="dark"] .ks-race__pane.is-winner .ks-race__foot { background: #182019; color: #8ecaa1; }
+  [data-theme="dark"] .ks-race__pane.is-winner .ks-race__clock-num { color: #8ecaa1; }
+  [data-theme="dark"] .ks-race__pane.is-winner .ks-race__caret { background: #8ecaa1; }
+  [data-theme="dark"] .ks-race__replay { background: #1c1f24; border-color: #2a2d34; color: #eef1f4; }
+  [data-theme="dark"] .ks-race__replay:hover { background: #2a2d34; }
+  [data-theme="dark"] .ks-race__note { color: #8a929c; }
+  @media (prefers-reduced-motion: reduce) { .ks-race__caret { animation: none; } }
+</style>
+<section class="ks-race" id="chat" aria-label="Speed comparison: frontier wrapper vs compiled specialist">
+  <div class="ks-race__inner">
+    <div class="ks-race__head">
+      <span class="ks-race__eye">Same prompt &middot; same answer &middot; one trained on your support log</span>
+      <h2 class="ks-race__h2">Frontier wrapper vs your compiled <code>support.kolm</code></h2>
+      <p class="ks-race__lede">Both panes answer the same support ticket. Left calls Claude Sonnet 4.6 through a hosted API. Right runs a 4-bit specialist you distilled from your own captures, on your hardware. Watch the clock.</p>
     </div>
-    <div data-kolm-chat data-kolm-chat-mode="free" data-kolm-chat-heading="kolm chat"></div>
+    <div class="ks-race__panes" data-ks-race>
+      <article class="ks-race__pane" data-ks-race-pane="claude" data-done="0">
+        <header class="ks-race__head-row">
+          <div class="ks-race__model">
+            <span class="ks-race__model-name">Frontier wrapper</span>
+            <span class="ks-race__model-sub">claude-sonnet-4-6 &middot; hosted</span>
+          </div>
+          <div class="ks-race__clock"><span class="ks-race__clock-num" data-ks-race-clock>0.00</span><span class="ks-race__clock-unit">s</span></div>
+        </header>
+        <div class="ks-race__body"><span data-ks-race-out></span><span class="ks-race__caret"></span></div>
+        <footer class="ks-race__foot"><span data-ks-race-stat>queued</span><span>$0.0094 / call</span></footer>
+      </article>
+      <article class="ks-race__pane is-winner" data-ks-race-pane="kolm" data-done="0">
+        <header class="ks-race__head-row">
+          <div class="ks-race__model">
+            <span class="ks-race__model-name">Your compiled specialist</span>
+            <span class="ks-race__model-sub">support.kolm &middot; 4-bit &middot; local</span>
+          </div>
+          <div class="ks-race__clock"><span class="ks-race__clock-num" data-ks-race-clock>0.00</span><span class="ks-race__clock-unit">s</span></div>
+        </header>
+        <div class="ks-race__body"><span data-ks-race-out></span><span class="ks-race__caret"></span></div>
+        <footer class="ks-race__foot"><span data-ks-race-stat>queued</span><span>$0 / call</span></footer>
+      </article>
+    </div>
+    <div class="ks-race__cta">
+      <button type="button" class="ks-race__replay" data-ks-race-replay aria-label="Replay the demo">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8a6 6 0 1 0 1.76-4.24"/><path d="M2 2v3.5h3.5"/></svg>
+        Replay
+      </button>
+      <a class="ks-btn ks-btn--ghost" href="/quickstart">How compile works</a>
+      <a class="ks-btn ks-btn--primary" href="/signup">Compile your own <span class="ks-btn-arrow">&rarr;</span></a>
+    </div>
+    <p class="ks-race__note">Frontier latency is a hosted-API median; specialist latency is from a Q4_K_M GGUF on an RTX 4090. Same answer, different cost-per-call.</p>
   </div>
 </section>
+<script>
+(function(){
+  var root = document.querySelector('[data-ks-race]');
+  if (!root) return;
+  var panes = {
+    claude: root.querySelector('[data-ks-race-pane="claude"]'),
+    kolm:   root.querySelector('[data-ks-race-pane="kolm"]')
+  };
+  var ANSWER = 'Order #38421 shipped Tuesday via UPS Ground.\nTracking: 1Z999AA10123456784.\nETA Friday between 11am-2pm at the address on file.\nNo action needed. Reply STATUS for live tracking updates.';
+  var CONFIG = {
+    claude: { firstByte: 1100, cps: 38, doneStat: 'first byte 1.10s &middot; complete' },
+    kolm:   { firstByte: 140,  cps: 260, doneStat: 'first byte 0.14s &middot; complete' }
+  };
+  var anim = { running: false, raf: 0 };
+  function resetPane(name) {
+    var pane = panes[name];
+    pane.setAttribute('data-done', '0');
+    pane.querySelector('[data-ks-race-out]').textContent = '';
+    pane.querySelector('[data-ks-race-clock]').textContent = '0.00';
+    pane.querySelector('[data-ks-race-stat]').textContent = 'queued';
+  }
+  function step(now, state) {
+    for (var i = 0; i < state.lanes.length; i++) {
+      var lane = state.lanes[i];
+      var elapsed = (now - state.start) / 1000;
+      var pane = panes[lane.name];
+      var clock = pane.querySelector('[data-ks-race-clock]');
+      var out = pane.querySelector('[data-ks-race-out]');
+      var stat = pane.querySelector('[data-ks-race-stat]');
+      clock.textContent = elapsed.toFixed(2);
+      if (elapsed * 1000 < lane.firstByte) {
+        if (stat.textContent !== 'thinking') stat.textContent = 'thinking';
+        continue;
+      }
+      if (stat.textContent === 'thinking' || stat.textContent === 'queued') stat.textContent = 'streaming';
+      var charsAfterFirst = Math.floor(((elapsed * 1000) - lane.firstByte) / 1000 * lane.cps);
+      var shown = Math.min(ANSWER.length, charsAfterFirst);
+      if (shown !== lane.shown) {
+        out.textContent = ANSWER.slice(0, shown);
+        lane.shown = shown;
+      }
+      if (shown >= ANSWER.length && !lane.done) {
+        lane.done = true;
+        pane.setAttribute('data-done', '1');
+        stat.innerHTML = lane.doneStat;
+      }
+    }
+    var allDone = state.lanes.every(function(l){ return l.done; });
+    if (allDone) { anim.running = false; return; }
+    anim.raf = requestAnimationFrame(function(t){ step(t, state); });
+  }
+  function play() {
+    cancelAnimationFrame(anim.raf);
+    resetPane('claude');
+    resetPane('kolm');
+    anim.running = true;
+    var start = performance.now();
+    var state = {
+      start: start,
+      lanes: [
+        { name: 'claude', firstByte: CONFIG.claude.firstByte, cps: CONFIG.claude.cps, doneStat: CONFIG.claude.doneStat, shown: 0, done: false },
+        { name: 'kolm',   firstByte: CONFIG.kolm.firstByte,   cps: CONFIG.kolm.cps,   doneStat: CONFIG.kolm.doneStat,   shown: 0, done: false }
+      ]
+    };
+    anim.raf = requestAnimationFrame(function(t){ step(t, state); });
+  }
+  var replay = root.parentElement.querySelector('[data-ks-race-replay]');
+  if (replay) replay.addEventListener('click', play);
+  var played = false;
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting && !played) { played = true; play(); }
+      });
+    }, { threshold: 0.35 });
+    io.observe(root);
+  } else {
+    setTimeout(play, 500);
+  }
+})();
+</script>
 
 
 
