@@ -2692,6 +2692,144 @@ h3.fr-h3, .fr-h3, h3.ks-h3, .ks-h3 {
 .ks-shead .ks-lede { margin-top: 6px; max-width: 64ch; }
 
 
+/* ============================================================
+   W907  COOL-SLATE CONSOLIDATION
+   Kills three things at once:
+   (1) warm-paper fallback hexes (--paper-2 / --paper-3) bleeding cream
+   (2) font-weight child override on every button, heading, and link
+   (3) primary CTA color drift on legacy surfaces
+   ============================================================ */
+
+:root {
+  --paper-0: #ffffff;
+  --paper-1: #f3f5f7;
+  --paper-2: #eef1f4;
+  --paper-3: #e6eaef;
+  --paper-rule: #dde1e7;
+}
+[data-theme="dark"] {
+  --paper-0: #0e1116;
+  --paper-1: #12161c;
+  --paper-2: #161b22;
+  --paper-3: #1b2129;
+  --paper-rule: rgba(230, 233, 238, 0.10);
+}
+
+/* Any inline style still using the warm hex fallback (#f5f3ee / #ece8dd) */
+/* will now be overridden by the token even when the inline value wins on */
+/* specificity, because we re-target the same selectors used in index.html.*/
+.kolm-demo-video {
+  background: var(--paper-2, #eef1f4) !important;
+  border-top-color: var(--paper-rule, #dde1e7) !important;
+  border-bottom-color: var(--paper-rule, #dde1e7) !important;
+}
+.kolm-demo-video__sub code,
+.kolm-demo-video__inner code {
+  background: var(--paper-3, #e6eaef) !important;
+}
+
+/* Buttons: child elements must inherit font-weight + color */
+.btn, .button, button.btn, .kolm-btn, .ks-btn, .ks-btn--primary, .ks-btn--ghost,
+.ks-btn--secondary, .cta, .pricing-cta, .nav-cta, a.button {
+  font-weight: 500;
+}
+.btn span, .btn b, .btn strong, .btn em, .btn i, .btn code, .btn a,
+.button span, .button b, .button strong, .button em, .button i, .button code,
+.kolm-btn span, .kolm-btn b, .kolm-btn strong, .kolm-btn em, .kolm-btn i, .kolm-btn code,
+.ks-btn span, .ks-btn b, .ks-btn strong, .ks-btn em, .ks-btn i, .ks-btn code,
+.cta span, .cta b, .cta strong, .cta em, .cta i, .cta code,
+.pricing-cta span, .pricing-cta b, .pricing-cta strong, .pricing-cta em,
+.nav-cta span, .nav-cta b, .nav-cta strong, .nav-cta em,
+.ks-btn-arrow, .ks-btn .arrow, .btn .arrow, .button .arrow {
+  font-weight: inherit !important;
+  color: inherit !important;
+  font-family: inherit !important;
+  font-style: inherit !important;
+  letter-spacing: inherit !important;
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* Section headings — same cascade so inline children don't go bold */
+h1 span, h1 b, h1 strong, h1 em, h1 i, h1 a,
+h2 span, h2 b, h2 strong, h2 em, h2 i, h2 a,
+h3 span, h3 b, h3 strong, h3 em, h3 i, h3 a,
+h4 span, h4 b, h4 strong, h4 em, h4 i, h4 a {
+  font-weight: inherit !important;
+  font-family: inherit !important;
+  font-style: inherit !important;
+  letter-spacing: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+/* But preserve explicit accent classes that intentionally vary weight */
+h1 .strong, h2 .strong, h3 .strong,
+h1 .bold,   h2 .bold,   h3 .bold {
+  font-weight: 700 !important;
+}
+
+/* Primary CTA: force cool-slate ink, never green/teal drift */
+.ks-btn--primary,
+.ks-btn.ks-btn--primary,
+a.ks-btn--primary,
+button.ks-btn--primary {
+  background: #1f2937 !important;
+  color: #f3f5f7 !important;
+  border-color: #1f2937 !important;
+}
+.ks-btn--primary:hover,
+.ks-btn.ks-btn--primary:hover,
+a.ks-btn--primary:hover {
+  background: #111827 !important;
+  color: #ffffff !important;
+  border-color: #111827 !important;
+}
+[data-theme="dark"] .ks-btn--primary,
+[data-theme="dark"] a.ks-btn--primary {
+  background: #e6e9ee !important;
+  color: #0e1116 !important;
+  border-color: #e6e9ee !important;
+}
+[data-theme="dark"] .ks-btn--primary:hover,
+[data-theme="dark"] a.ks-btn--primary:hover {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-color: #ffffff !important;
+}
+
+/* Secondary buttons (used on studio surface cards) */
+.ks-btn--secondary, a.ks-btn--secondary {
+  background: transparent;
+  color: #1f2937;
+  border: 1px solid #56606c;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border-radius: 6px;
+  font-size: 13.5px;
+  letter-spacing: -0.005em;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+.ks-btn--secondary:hover, a.ks-btn--secondary:hover {
+  background: #f3f5f7;
+  border-color: #1f2937;
+  color: #111827;
+}
+[data-theme="dark"] .ks-btn--secondary,
+[data-theme="dark"] a.ks-btn--secondary {
+  color: #e6e9ee;
+  border-color: #525a64;
+}
+[data-theme="dark"] .ks-btn--secondary:hover,
+[data-theme="dark"] a.ks-btn--secondary:hover {
+  background: #1b2129;
+  border-color: #a8b3c2;
+  color: #ffffff;
+}
+
+
 .kolm-deep__card {
   position: relative;
   background: #ffffff;

@@ -52,7 +52,13 @@
   .stu-face h3 { margin: 0; font-size: 22px; font-weight: 580; letter-spacing: -0.012em; color: var(--ks-ink); }
   .stu-face p { margin: 0; font-size: 14.5px; line-height: 1.6; color: var(--ks-ink-2); }
   .stu-face p code { font-family: var(--ks-mono); font-size: 0.9em; padding: 1px 5px; border-radius: 4px; background: rgba(17,17,17,0.05); color: var(--ks-ink); }
-  .stu-face__cmd { margin-top: auto !important; font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink-2); padding: 10px 12px; background: rgba(17,17,17,0.04); border: 1px solid var(--ks-line-2); border-radius: 6px; }
+  .stu-face__cmd { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink-2); padding: 10px 12px; background: rgba(17,17,17,0.04); border: 1px solid var(--ks-line-2); border-radius: 6px; }
+  .stu-face__cta { margin-top: auto; display: inline-flex; align-items: center; gap: 8px; font-family: var(--ks-mono); font-size: 12.5px; letter-spacing: 0.02em; color: var(--ks-ink); text-decoration: none; padding: 10px 14px; border: 1px solid var(--ks-ink); border-radius: 6px; background: transparent; transition: background 140ms ease, color 140ms ease; align-self: flex-start; }
+  .stu-face--feat .stu-face__cta { background: var(--ks-ink); color: var(--ks-bg-1); }
+  .stu-face__cta:hover { background: var(--ks-ink); color: var(--ks-bg-1); }
+  .stu-face--feat .stu-face__cta:hover { background: var(--ks-ink-2); border-color: var(--ks-ink-2); color: var(--ks-bg-1); }
+  .stu-face__cta .arrow { transition: transform 140ms ease; }
+  .stu-face__cta:hover .arrow { transform: translateX(2px); }
   .stu-faces__caption { max-width: 64ch; margin: var(--ks-5) auto 0; text-align: center; font-size: 14.5px; color: var(--ks-ink-3); }
   .stu-faces__caption code { font-family: var(--ks-mono); font-size: 0.92em; padding: 1px 5px; border-radius: 4px; background: rgba(17,17,17,0.05); color: var(--ks-ink); }
 </style>
@@ -142,18 +148,21 @@
         <h3>Studio</h3>
         <p>The browser tab. Pick captures from a list, pick a base model, click <em>distill</em>. Watch loss, k-score, and quantize size update live. Download the signed <code>.kolm</code>.</p>
         <p class="stu-face__cmd">$ kolm studio open</p>
+        <a class="stu-face__cta" href="/studio/">Open Studio <span class="arrow">&rarr;</span></a>
       </div>
       <div class="stu-face stu-face--feat">
         <p class="stu-face__step">02 &middot; cli</p>
         <h3>CLI</h3>
         <p>The same compiler from a terminal. Scriptable, pipeable, CI-friendly. Every Studio click maps to a verb you can paste into a Makefile or a GitHub Action.</p>
         <p class="stu-face__cmd">$ kolm distill from-captures --since 7d</p>
+        <a class="stu-face__cta" href="/docs/quickstart">Install the CLI <span class="arrow">&rarr;</span></a>
       </div>
       <div class="stu-face">
         <p class="stu-face__step">03 &middot; tui</p>
         <h3>TUI</h3>
         <p>The same compiler from a single keystroke. Twenty live views over your namespaces, captures, runs, artifacts. Same key bindings on every machine.</p>
         <p class="stu-face__cmd">$ kolm tui</p>
+        <a class="stu-face__cta" href="/docs/tui">Read the TUI guide <span class="arrow">&rarr;</span></a>
       </div>
     </div>
     <p class="stu-faces__caption">Three faces. One compiler. One <code>.kolm</code> file. Pick the surface that fits the moment.</p>

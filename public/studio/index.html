@@ -51,8 +51,13 @@
   .shub-face h3 { margin: 0 0 var(--ks-2); font-size: 18px; font-weight: 580; color: var(--ks-ink); }
   .shub-face p { margin: 0 0 var(--ks-3); font-size: 13.5px; color: var(--ks-ink-2); line-height: 1.55; }
   .shub-face code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); padding: 8px 10px; background: var(--ks-bg-2); border: 1px solid var(--ks-line-2); border-radius: 6px; display: inline-block; }
+  .shub-face__cta { margin-top: var(--ks-3); display: inline-flex; align-items: center; gap: 6px; font-family: var(--ks-mono); font-size: 12px; letter-spacing: 0.02em; color: var(--ks-ink); text-decoration: none; padding: 8px 12px; border: 1px solid var(--ks-line-2); border-radius: 6px; background: var(--ks-bg-1); transition: border-color 140ms ease, background 140ms ease; }
+  .shub-face__cta:hover { border-color: var(--ks-ink); background: var(--ks-bg-2); }
+  .shub-face__cta .arrow { color: var(--ks-ink-3); transition: color 140ms ease, transform 140ms ease; }
+  .shub-face__cta:hover .arrow { color: var(--ks-ink); transform: translateX(2px); }
+  .shub-face__row { display: flex; align-items: center; gap: var(--ks-3); flex-wrap: wrap; }
 
-  @media (prefers-reduced-motion: reduce) { .shub-card { transition: none !important; } }
+  @media (prefers-reduced-motion: reduce) { .shub-card { transition: none !important; } .shub-face__cta { transition: none !important; } }
 </style>
 </head>
 <body class="ks">
@@ -169,19 +174,28 @@
         <p class="shub-face__step">surface 1</p>
         <h3>Studio (you are here)</h3>
         <p>Forms, status boards, quote-first wizards. Best for first runs and demos.</p>
-        <code>open /studio</code>
+        <div class="shub-face__row">
+          <code>open /studio</code>
+          <a class="shub-face__cta" href="/studio/compile">Open compile wizard <span class="arrow">&rarr;</span></a>
+        </div>
       </div>
       <div class="shub-face">
         <p class="shub-face__step">surface 2</p>
         <h3>CLI</h3>
         <p>Same verbs, scriptable, JSON output. Best for CI, ops, repeat work.</p>
-        <code>kolm compile --namespace support</code>
+        <div class="shub-face__row">
+          <code>kolm compile --namespace support</code>
+          <a class="shub-face__cta" href="/docs/quickstart">Install the CLI <span class="arrow">&rarr;</span></a>
+        </div>
       </div>
       <div class="shub-face">
         <p class="shub-face__step">surface 3</p>
         <h3>TUI</h3>
         <p>Full keyboard navigation inside your terminal. Best when SSH'd into a GPU box.</p>
-        <code>kolm tui</code>
+        <div class="shub-face__row">
+          <code>kolm tui</code>
+          <a class="shub-face__cta" href="/docs/tui">Read the TUI guide <span class="arrow">&rarr;</span></a>
+        </div>
       </div>
     </div>
   </section>

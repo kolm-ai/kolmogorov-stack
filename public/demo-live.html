@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Live walkthrough &middot; kolm.ai</title>
-<meta name="description" content="A 70-second cinematic walkthrough of the kolm loop: signup, namespace, gateway calls, compile, serve, verify. Plays in your browser, no video file.">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
+<meta name="description" content="70 seconds. Capture &rarr; Compile &rarr; Verify &rarr; Run. A 1.9 GB signed artifact distilled from prod traffic, served at 11.5 tok/s on-device. Plays in your browser, no video file.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <link rel="canonical" href="https://kolm.ai/demo-live">
 <meta property="og:title" content="Live walkthrough · kolm.ai">
@@ -17,20 +17,20 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
  :root{
-   --ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;
-   --line:rgba(230,233,238,0.10);--line-strong:rgba(230,233,238,0.22);
-   --bg:#0b0d10;--bg-elev:#0f1216;--bg-pane:#0c0f12;
-   --accent:#e6e9ee;--accent-dim:#aab0b8;
-   --green:#7fb88a;--amber:#c8a86b;--blue:#88a6c8;--red:#c89090;
+   --ink:#1f2937;--ink-mute:#56606c;--ink-faint:#8a929c;
+   --line:rgba(31,41,55,0.10);--line-strong:rgba(31,41,55,0.20);
+   --bg:#f3f5f7;--bg-elev:#ffffff;--bg-pane:#fafbfc;
+   --accent:#1f2937;--accent-dim:#56606c;
+   --green:#2e5a3d;--amber:#525a64;--blue:#2a4d75;--red:#7a2828;
    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
    --sans:Inter,-apple-system,system-ui,sans-serif;
  }
- [data-theme=light]{
-   --ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#787f86;
-   --line:rgba(0,0,0,0.08);--line-strong:rgba(0,0,0,0.18);
-   --bg:#f3f5f7;--bg-elev:#ffffff;--bg-pane:#fafbfc;
-   --accent:#111111;--accent-dim:#4b5158;
-   --green:#2d5a37;--amber:#7d5d1c;--blue:#2a4d75;--red:#7f2121;
+ [data-theme=dark]{
+   --ink:#e6e9ee;--ink-mute:#a8b3c2;--ink-faint:#6a727c;
+   --line:rgba(230,233,238,0.10);--line-strong:rgba(230,233,238,0.22);
+   --bg:#0e1116;--bg-elev:#161b22;--bg-pane:#12161c;
+   --accent:#e6e9ee;--accent-dim:#a8b3c2;
+   --green:#9bb6a0;--amber:#b8bcc4;--blue:#9bb1c8;--red:#b89898;
  }
  *{box-sizing:border-box}
  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
@@ -133,16 +133,24 @@
  .scrub .fill{position:absolute;left:0;top:0;height:100%;background:var(--ink);width:0}
  .scrub .marks{position:absolute;inset:0;display:flex;pointer-events:none}
  .scrub .mark{width:1px;background:var(--line-strong);height:100%}
- .end-card{position:absolute;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px;text-align:center;padding:40px;z-index:10}
+ .end-card{position:absolute;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center;padding:36px 30px;z-index:10;overflow:auto}
  .end-card.is-on{display:flex}
- .end-card h2{font-size:26px;font-weight:500;letter-spacing:-0.016em;margin:0;color:var(--ink)}
- .end-card .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:720px;width:100%;margin:4px 0 8px}
- .end-card .stat{padding:14px 12px;border:1px solid var(--line);border-radius:8px}
- .end-card .stat .n{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--ink)}
- .end-card .stat .l{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.1em;margin-top:4px}
- .end-card .ctas{display:flex;gap:10px;margin-top:4px}
- .end-card a{font-family:var(--mono);font-size:12px;letter-spacing:0.06em;padding:9px 14px;border:1px solid var(--line-strong);border-radius:5px;text-decoration:none;color:var(--ink)}
- .end-card a:hover{background:var(--bg-elev)}
+ .end-card .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-faint);margin:0}
+ .end-card h2{font-size:28px;font-weight:600;letter-spacing:-0.020em;margin:0;color:var(--ink);line-height:1.18}
+ .end-card .lede{font-size:14px;color:var(--ink-mute);max-width:520px;margin:2px 0 6px;line-height:1.5}
+ .end-card .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:600px;width:100%;margin:4px 0}
+ .end-card .stat{padding:12px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev)}
+ .end-card .stat .n{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--ink);letter-spacing:-0.01em}
+ .end-card .stat .l{font-family:var(--mono);font-size:9.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.10em;margin-top:3px}
+ .end-card .cta-primary{display:inline-flex;align-items:center;gap:8px;font-family:var(--sans);font-size:14.5px;font-weight:600;letter-spacing:-0.005em;padding:13px 22px;border-radius:6px;text-decoration:none;background:var(--ink);color:var(--bg);border:1px solid var(--ink);transition:transform 140ms ease, background 140ms ease}
+ .end-card .cta-primary:hover{background:var(--ink-mute);border-color:var(--ink-mute);transform:translateY(-1px)}
+ .end-card .cta-primary .arrow{display:inline-block;transition:transform 160ms ease}
+ .end-card .cta-primary:hover .arrow{transform:translateX(3px)}
+ .end-card .cta-detail{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:0.04em;margin-top:6px}
+ .end-card .ctas-secondary{display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap;justify-content:center}
+ .end-card .ctas-secondary a{font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;color:var(--ink-mute);text-decoration:none;padding:6px 10px;border-radius:4px;transition:color 140ms ease, background 140ms ease}
+ .end-card .ctas-secondary a:hover{color:var(--ink);background:var(--bg-elev)}
+ .end-card .ctas-secondary .dot-sep{color:var(--ink-faint);font-size:11px}
  /* responsive */
  @media (max-width: 1000px){
    .stage{grid-template-columns:1fr;grid-template-rows:1fr 1fr 1fr}
@@ -199,29 +207,37 @@
     <!-- RECEIPT PANE -->
     <section class="pane" aria-label="Receipt detail">
       <div class="pane-h"><span class="lights"><i></i><i></i><i></i></span> receipt &mdash; live trace <span class="pill" id="recPill">ed25519</span></div>
-      <div class="pane-body"><div class="receipt" id="receipt"><div class="empty">No receipt selected yet. Walk through the loop on the left &mdash; the receipt builds itself.</div></div></div>
+      <div class="pane-body"><div class="receipt" id="receipt"></div></div>
     </section>
 
     <!-- end card -->
     <div class="end-card" id="endCard" role="dialog" aria-label="End of walkthrough">
-      <h2>That&rsquo;s the full kolm loop in 70 seconds.</h2>
+      <p class="eyebrow">That&rsquo;s the kolm loop &middot; 70 seconds</p>
+      <h2>Capture &rarr; Compile &rarr; Verify &rarr; Run.</h2>
+      <p class="lede">A signed, verifiable artifact distilled from your own traffic. Runs on the box you already own.</p>
       <div class="stats">
         <div class="stat"><div class="n">$0.07</div><div class="l">total spend</div></div>
         <div class="stat"><div class="n">1.9 GB</div><div class="l">artifact</div></div>
         <div class="stat"><div class="n">11.5 t/s</div><div class="l">on-device</div></div>
-        <div class="stat"><div class="n">1</div><div class="l">signed receipt</div></div>
+        <div class="stat"><div class="n">0.91</div><div class="l">k-score</div></div>
       </div>
-      <div class="ctas">
-        <a href="/signup">create an account</a>
-        <a href="/docs/quickstart">read the quickstart</a>
-        <a href="#" id="replayBtn">replay walkthrough</a>
+      <div>
+        <a class="cta-primary" href="/signup">Start your first compile <span class="arrow">&rarr;</span></a>
+        <span class="cta-detail">$5 free credit &middot; no card required</span>
+      </div>
+      <div class="ctas-secondary">
+        <a href="/docs/quickstart">Quickstart</a>
+        <span class="dot-sep">&middot;</span>
+        <a href="/verify">Verify a receipt</a>
+        <span class="dot-sep">&middot;</span>
+        <a href="#" id="replayBtn">Replay walkthrough</a>
       </div>
     </div>
   </div>
 
   <div class="subtitle">
     <div class="cap-num" id="capNum">00:00 &middot; 0/6</div>
-    <div class="cap-text" id="capText">Press play. We&rsquo;ll walk through signup, namespace, gateway calls, compile, serve, and receipt verification &mdash; all in 70 seconds.</div>
+    <div class="cap-text" id="capText">Press play. Capture &rarr; Compile &rarr; Verify &rarr; Run, on real traffic, in 70 seconds. Signup is at the end &mdash; it&rsquo;s the easy part.</div>
   </div>
   <div class="scrub" id="scrub" role="slider" aria-label="Timeline" aria-valuemin="0" aria-valuemax="70" aria-valuenow="0" tabindex="0">
     <div class="fill" id="scrubFill"></div>
@@ -247,137 +263,155 @@ var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: r
 //   {at, type:'receipt', html}             — replace receipt pane
 //   {at, type:'subtitle', text}            — update lower caption
 var CHAPTERS = [
-  { id:'signup',  label:'signup',    start:0,  end:8,
-    sub:'Step 1 of 6. Create an account from the CLI — no browser required.',
+  // Chapter 1: Capture — open with live traffic flowing
+  { id:'capture', label:'Capture',  start:0,  end:12,
+    sub:'Step 1 of 6 · Capture. Your prod workload routes through the kolm gateway. Every reply gets a signed receipt; every prompt + reply is captured.',
     events: [
-      { at:0,   type:'subtitle', text:'<em>Step 1 of 6.</em> Create an account from the CLI &mdash; no browser required.' },
-      { at:0.2, type:'page', name:'home', url:'kolm.ai' },
-      { at:0.3, type:'prompt' },
-      { at:0.4, type:'type', text:'kolm signup --email rod@indie.dev', klass:'you' },
-      { at:3.1, type:'enter' },
-      { at:3.3, type:'out',  text:'> opening browser to https://kolm.ai/signup?cli=1', klass:'dim' },
-      { at:4.2, type:'page', name:'signup', url:'kolm.ai/signup?cli=1' },
-      { at:4.4, type:'out',  text:'> waiting for browser confirmation...', klass:'dim' },
-      { at:5.6, type:'page', name:'signup-ok', url:'kolm.ai/signup?cli=1' },
-      { at:6.0, type:'out',  text:'> account: indie.dev (tenant_4d3d8db6c820)', klass:'info' },
-      { at:6.4, type:'out',  text:'> API key saved to ~/.kolm/config.toml', klass:'ok' },
-      { at:6.8, type:'out',  text:'> plan: developer  /  $5 free credit', klass:'ok' },
-      { at:7.0, type:'newprompt' },
+      { at:0,    type:'subtitle', text:'<em>Step 1 of 6 · Capture.</em> Your prod workload routes through the kolm gateway. Every reply gets a signed receipt; every prompt + reply is captured.' },
+      { at:0.1,  type:'page', name:'ns-card', url:'kolm.ai/account/namespaces/support' },
+      { at:0.3,  type:'receipt', html: receiptSkeleton() },
+      { at:0.5,  type:'prompt' },
+      { at:0.6,  type:'type', text:'kolm gateway up --namespace support', klass:'you' },
+      { at:2.2,  type:'enter' },
+      { at:2.4,  type:'out',  text:'> gateway listening on :7421 (OpenAI-compatible)', klass:'ok' },
+      { at:2.7,  type:'newprompt' },
+      { at:2.9,  type:'type', text:'curl -s :7421/v1/chat/completions -d @support-1.json | jq .id', klass:'you' },
+      { at:5.0,  type:'enter' },
+      { at:5.1,  type:'out',  text:'> "rcpt_01KYC1ZVTGDCW3FX06JQSC"', klass:'green' },
+      { at:5.3,  type:'capture', who:'curl', body:'order status for #38214', cost:'$0.0011', verb:'POST' },
+      { at:5.5,  type:'newprompt' },
+      { at:5.7,  type:'type', text:'for i in {1..18}; do curl -s :7421/v1/chat/completions -d @"support-$i.json"; done', klass:'you' },
+      { at:7.6,  type:'enter' },
+      { at:7.8,  type:'capture', who:'curl', body:'where is my refund? order #38219', cost:'$0.0009', verb:'POST' },
+      { at:8.0,  type:'capture', who:'curl', body:'reset my password please', cost:'$0.0007', verb:'POST' },
+      { at:8.2,  type:'capture', who:'curl', body:'subscription cancel before renewal', cost:'$0.0012', verb:'POST' },
+      { at:8.4,  type:'capture', who:'curl', body:'change shipping addr on #38301', cost:'$0.0010', verb:'POST' },
+      { at:8.6,  type:'capture', who:'curl', body:'is the X-12 in stock in red?', cost:'$0.0008', verb:'POST' },
+      { at:8.8,  type:'capture', who:'curl', body:'why is my charge twice?', cost:'$0.0013', verb:'POST' },
+      { at:9.0,  type:'capture', who:'curl', body:'cancel order #38422 before ship', cost:'$0.0010', verb:'POST' },
+      { at:9.3,  type:'capture', who:'curl', body:'change delivery date on #38501', cost:'$0.0011', verb:'POST' },
+      { at:9.6,  type:'out',  text:'> 19 calls / 19 receipts / $0.022 spent', klass:'ok' },
+      { at:10.0, type:'page', name:'captures', url:'kolm.ai/account/captures?ns=support' },
+      { at:10.3, type:'out',  text:'> dashboard: 19 captures, pii-redacted, ready to compile', klass:'info' },
+      { at:11.0, type:'newprompt' },
     ]},
-  { id:'ns',      label:'namespace', start:8,  end:16,
-    sub:'Step 2. Define a namespace for your support workload — what to capture, what to redact.',
+
+  // Chapter 2: Compile — the money shot
+  { id:'compile', label:'Compile',  start:12, end:28,
+    sub:'Step 2 of 6 · Compile. Distill the captured behavior into a 1.9 GB signed artifact in 78 seconds.',
     events: [
-      { at:8,    type:'subtitle', text:'<em>Step 2 of 6.</em> Define a namespace for your support workload &mdash; what to capture, what to redact.' },
-      { at:8.2,  type:'type', text:'kolm namespace create support --primary anthropic --redact pii', klass:'you' },
-      { at:11.1, type:'enter' },
-      { at:11.3, type:'out',  text:'> created namespace `support`', klass:'ok' },
-      { at:11.6, type:'out',  text:'> primary provider: anthropic/claude-3.7-haiku', klass:'info' },
-      { at:11.9, type:'out',  text:'> redact policy: pii (emails, names, card-like, ssn-like)', klass:'info' },
-      { at:12.2, type:'out',  text:'> capture sink: ~/.kolm/captures/support.jsonl', klass:'dim' },
-      { at:12.5, type:'out',  text:'> gateway endpoint: http://127.0.0.1:7421/v1', klass:'dim' },
-      { at:12.8, type:'page', name:'ns-card', url:'kolm.ai/account/namespaces/support' },
-      { at:13.2, type:'out',  text:'> dashboard: https://kolm.ai/account/namespaces/support', klass:'info' },
-      { at:13.6, type:'newprompt' },
+      { at:12,    type:'subtitle', text:'<em>Step 2 of 6 · Compile.</em> Distill the captured behavior into a 1.9 GB signed artifact in 78 seconds.' },
+      { at:12.2,  type:'type', text:'kolm compile --namespace support --target gguf-q4km --kscore-gate 0.85', klass:'you' },
+      { at:15.0,  type:'enter' },
+      { at:15.2,  type:'out',  text:'> approving 19 captures (k-score gate 0.85)', klass:'dim' },
+      { at:15.5,  type:'page', name:'compile', url:'kolm.ai/account/compile/jobs/cmp_72a9' },
+      { at:15.8,  type:'out',  text:'> teacher: claude-3.7-haiku  /  student: qwen2.5-1.5b-instruct', klass:'info' },
+      { at:16.1,  type:'progress', sel:'#prog-distill', pct:18 },
+      { at:16.3,  type:'out',  text:'> distill: SeqKD + contrastive SKL  /  bs=4 ml=1024 lr=2e-4', klass:'dim' },
+      { at:16.8,  type:'progress', sel:'#prog-distill', pct:45 },
+      { at:17.2,  type:'out',  text:'> step 24/56  loss=1.41  perplexity=4.12', klass:'dim' },
+      { at:17.8,  type:'progress', sel:'#prog-distill', pct:78 },
+      { at:18.4,  type:'out',  text:'> step 56/56  loss=0.93  perplexity=2.54', klass:'dim' },
+      { at:18.8,  type:'progress', sel:'#prog-distill', pct:100 },
+      { at:19.0,  type:'out',  text:'> distill done in 78s', klass:'ok' },
+      { at:19.3,  type:'out',  text:'> running k-score eval on 6 holdout prompts...', klass:'dim' },
+      { at:20.2,  type:'out',  text:'> k-score: 0.91 (gate 0.85 PASS)', klass:'ok' },
+      { at:20.5,  type:'out',  text:'> exporting GGUF Q4_K_M with imatrix...', klass:'dim' },
+      { at:21.2,  type:'progress', sel:'#prog-export', pct:100 },
+      { at:21.6,  type:'out',  text:'> artifact: dist/support-q4km-1.0.0.kolm  (1.9 GB)', klass:'ok' },
+      { at:21.9,  type:'out',  text:'> compile receipt: rcpt_compile_71F2A6...', klass:'info' },
+      { at:22.2,  type:'page', name:'compile-done', url:'kolm.ai/account/compile/jobs/cmp_72a9' },
+      { at:22.6,  type:'receipt', html: receiptPartial() },
+      { at:23.0,  type:'newprompt' },
+      { at:23.3,  type:'type', text:'kolm inspect dist/support-q4km-1.0.0.kolm', klass:'you' },
+      { at:25.3,  type:'enter' },
+      { at:25.5,  type:'out',  text:'> passport: 19 captures, 1 teacher, kscore=0.91, gate=PASS, ed25519=ok', klass:'ok' },
+      { at:26.0,  type:'newprompt' },
     ]},
-  { id:'gw',      label:'gateway',   start:16, end:30,
-    sub:'Step 3. Point your app at the local gateway. Every reply gets a signed receipt; every prompt + reply is captured.',
+
+  // Chapter 3: Verify — receipt detail
+  { id:'verify',  label:'Verify',   start:28, end:42,
+    sub:'Step 3 of 6 · Verify. The compile receipt is signed ed25519 and chained. Anyone can audit it — no login required.',
     events: [
-      { at:16,   type:'subtitle', text:'<em>Step 3 of 6.</em> Point your app at the local gateway. Every reply gets a signed receipt; every prompt + reply is captured.' },
-      { at:16.2, type:'type', text:'kolm gateway up --namespace support', klass:'you' },
-      { at:18.6, type:'enter' },
-      { at:18.8, type:'out',  text:'> gateway listening on :7421 (OpenAI-compatible)', klass:'ok' },
-      { at:19.0, type:'newprompt' },
-      { at:19.2, type:'type', text:"curl -s :7421/v1/chat/completions -d @support-1.json | jq .id", klass:'you' },
-      { at:22.4, type:'enter' },
-      { at:22.5, type:'out',  text:'> "rcpt_01KYC1ZVTGDCW3FX06JQSC"', klass:'green' },
-      { at:22.7, type:'capture', who:'curl', body:'order status for #38214', cost:'$0.0011', verb:'POST' },
-      { at:22.9, type:'newprompt' },
-      { at:23.0, type:'type', text:'for i in {1..18}; do curl -s :7421/v1/chat/completions -d @"support-$i.json" >/dev/null ; done', klass:'you' },
-      { at:25.8, type:'enter' },
-      { at:26.0, type:'capture', who:'curl', body:'where is my refund? order #38219', cost:'$0.0009', verb:'POST' },
-      { at:26.3, type:'capture', who:'curl', body:'reset my password please', cost:'$0.0007', verb:'POST' },
-      { at:26.6, type:'capture', who:'curl', body:'subscription cancel before renewal', cost:'$0.0012', verb:'POST' },
-      { at:26.9, type:'capture', who:'curl', body:'change shipping addr on #38301', cost:'$0.0010', verb:'POST' },
-      { at:27.2, type:'capture', who:'curl', body:'is the X-12 in stock in red?', cost:'$0.0008', verb:'POST' },
-      { at:27.5, type:'capture', who:'curl', body:'why is my charge twice?', cost:'$0.0013', verb:'POST' },
-      { at:27.8, type:'out',  text:'> 19 calls / 19 receipts / $0.022 spent', klass:'ok' },
-      { at:28.1, type:'page', name:'captures', url:'kolm.ai/account/captures?ns=support' },
-      { at:28.4, type:'out',  text:'> dashboard updated: 19 captures pending approval', klass:'info' },
-      { at:29.0, type:'newprompt' },
+      { at:28,    type:'subtitle', text:'<em>Step 3 of 6 · Verify.</em> The compile receipt is signed ed25519 and chained. Anyone can audit it &mdash; no login required.' },
+      { at:28.2,  type:'type', text:'kolm verify rcpt_compile_71F2A6 --pretty', klass:'you' },
+      { at:31.0,  type:'enter' },
+      { at:31.2,  type:'out',  text:'> fetching receipt rcpt_compile_71F2A6 from kolm-audit-1', klass:'dim' },
+      { at:31.6,  type:'out',  text:'> signature: ed25519:7f3a8e4b... VERIFIED', klass:'ok' },
+      { at:31.9,  type:'out',  text:'> chain: linked to prev_chain_hash 0x91ce4f... (intact)', klass:'ok' },
+      { at:32.2,  type:'out',  text:'> claims:', klass:'info' },
+      { at:32.4,  type:'out',  text:'>   captures_in:      19', klass:'dim' },
+      { at:32.6,  type:'out',  text:'>   teacher_council:  [claude-3.7-haiku]', klass:'dim' },
+      { at:32.8,  type:'out',  text:'>   k_score:          0.91   (gate 0.85 PASS)', klass:'dim' },
+      { at:33.0,  type:'out',  text:'>   hallu_rate:       0.00   (gate <0.05 PASS)', klass:'dim' },
+      { at:33.2,  type:'out',  text:'>   artifact_hash:    sha256:d4ce91...8f0a', klass:'dim' },
+      { at:33.4,  type:'out',  text:'>   gpu_hours:        0.0217 (RTX 5090)', klass:'dim' },
+      { at:33.6,  type:'out',  text:'>   spend_usd:        0.0478 (teacher) + 0.0218 (compute) = 0.0696', klass:'dim' },
+      { at:33.9,  type:'receipt', html: receiptDetail() },
+      { at:34.2,  type:'page', name:'receipt-ui', url:'kolm.ai/verify/rcpt_compile_71F2A6' },
+      { at:35.0,  type:'newprompt' },
+      { at:35.3,  type:'type', text:'open https://kolm.ai/verify/rcpt_compile_71F2A6', klass:'you' },
+      { at:38.0,  type:'enter' },
+      { at:38.2,  type:'out',  text:'> opened in browser  /  share with anyone, no login required', klass:'ok' },
+      { at:39.0,  type:'newprompt' },
+      { at:39.3,  type:'out',  text:'# receipt is portable - paste the ID anywhere kolm runs', klass:'dim' },
+      { at:40.6,  type:'newprompt' },
     ]},
-  { id:'compile', label:'compile',   start:30, end:44,
-    sub:'Step 4. Distill the captured behavior into a small artifact you can ship anywhere.',
+
+  // Chapter 4: Run — on-device serve
+  { id:'run',     label:'Run',      start:42, end:56,
+    sub:'Step 4 of 6 · Run. Serve the artifact locally — OpenAI-compatible, 11.5 tok/s on M3 Max, no network egress.',
     events: [
-      { at:30,   type:'subtitle', text:'<em>Step 4 of 6.</em> Distill the captured behavior into a small artifact you can ship anywhere.' },
-      { at:30.2, type:'type', text:'kolm compile --namespace support --target gguf-q4km --kscore-gate 0.85', klass:'you' },
-      { at:33.5, type:'enter' },
-      { at:33.7, type:'out',  text:'> approving 19 captures (k-score gate 0.85)', klass:'dim' },
-      { at:34.0, type:'page', name:'compile', url:'kolm.ai/account/compile/jobs/cmp_72a9' },
-      { at:34.3, type:'out',  text:'> teacher: claude-3.7-haiku  /  student: qwen2.5-1.5b-instruct', klass:'info' },
-      { at:34.6, type:'progress', sel:'#prog-distill', pct:18 },
-      { at:34.8, type:'out',  text:'> distill: SeqKD + contrastive SKL  /  bs=4 ml=1024 lr=2e-4', klass:'dim' },
-      { at:35.2, type:'progress', sel:'#prog-distill', pct:45 },
-      { at:35.6, type:'out',  text:'> step 24/56  loss=1.41  perplexity=4.12', klass:'dim' },
-      { at:36.2, type:'progress', sel:'#prog-distill', pct:78 },
-      { at:36.8, type:'out',  text:'> step 56/56  loss=0.93  perplexity=2.54', klass:'dim' },
-      { at:37.2, type:'progress', sel:'#prog-distill', pct:100 },
-      { at:37.4, type:'out',  text:'> distill done in 78s', klass:'ok' },
-      { at:37.7, type:'out',  text:'> running k-score eval on 6 holdout prompts...', klass:'dim' },
-      { at:38.6, type:'out',  text:'> k-score: 0.91 (gate 0.85 PASS)', klass:'ok' },
-      { at:38.9, type:'out',  text:'> exporting GGUF Q4_K_M with imatrix...', klass:'dim' },
-      { at:39.6, type:'progress', sel:'#prog-export', pct:100 },
-      { at:40.0, type:'out',  text:'> artifact: dist/support-q4km-1.0.0.kolm  (1.9 GB)', klass:'ok' },
-      { at:40.3, type:'out',  text:'> compile receipt: rcpt_compile_71F2A6...', klass:'info' },
-      { at:40.6, type:'page', name:'compile-done', url:'kolm.ai/account/compile/jobs/cmp_72a9' },
-      { at:41.0, type:'newprompt' },
-      { at:41.3, type:'type', text:'kolm inspect dist/support-q4km-1.0.0.kolm', klass:'you' },
-      { at:43.3, type:'enter' },
-      { at:43.4, type:'out',  text:'> passport: 19 captures, 1 teacher, kscore=0.91, gate=PASS, ed25519=ok', klass:'ok' },
-      { at:43.8, type:'newprompt' },
+      { at:42,    type:'subtitle', text:'<em>Step 4 of 6 · Run.</em> Serve the artifact locally &mdash; OpenAI-compatible, 11.5 tok/s on M3 Max, no network egress.' },
+      { at:42.2,  type:'type', text:'kolm serve dist/support-q4km-1.0.0.kolm --port 8766', klass:'you' },
+      { at:44.6,  type:'enter' },
+      { at:44.8,  type:'out',  text:'> detecting hardware...  Apple M3 Max, 36 GB unified', klass:'info' },
+      { at:45.1,  type:'out',  text:'> runtime: llama.cpp (metal)  /  ctx 4096', klass:'info' },
+      { at:45.4,  type:'out',  text:'> loaded in 0.9s  /  vram 1.9 GB  /  ready on :8766', klass:'ok' },
+      { at:45.7,  type:'page', name:'serve', url:'127.0.0.1:8766/health' },
+      { at:46.1,  type:'newprompt' },
+      { at:46.3,  type:'type', text:"curl -s :8766/v1/chat/completions -d '{\"messages\":[{\"role\":\"user\",\"content\":\"order #38421 status?\"}]}' | jq -r .choices[0].message.content", klass:'you' },
+      { at:49.8,  type:'enter' },
+      { at:50.0,  type:'out',  text:'> "Order #38421 shipped Tuesday via UPS. Tracking: 1Z999 AA10 1234 5678 90. ETA Friday."', klass:'green' },
+      { at:50.4,  type:'out',  text:'> 11.5 tok/s  /  latency 217ms  /  on-device (no egress)', klass:'info' },
+      { at:50.8,  type:'page', name:'serve-replies', url:'127.0.0.1:8766/v1/chat/completions' },
+      { at:51.4,  type:'newprompt' },
+      { at:51.8,  type:'out',  text:'# air-gap test: pull the ethernet - still answers', klass:'dim' },
+      { at:53.0,  type:'newprompt' },
+      { at:53.2,  type:'type', text:'kolm export --format onnx dist/support-q4km-1.0.0.kolm', klass:'you' },
+      { at:55.0,  type:'enter' },
+      { at:55.2,  type:'out',  text:'> exported support-q4km-1.0.0.onnx - runs on CPU, GPU, mobile, edge', klass:'ok' },
     ]},
-  { id:'serve',   label:'serve',     start:44, end:56,
-    sub:'Step 5. Run the artifact locally. OpenAI-compatible. No network calls leave the box.',
+
+  // Chapter 5: Setup recap — show signup was trivial
+  { id:'setup',   label:'Setup',    start:56, end:64,
+    sub:'Step 5 of 6 · Setup. Two commands started this — signup and namespace create.',
     events: [
-      { at:44,   type:'subtitle', text:'<em>Step 5 of 6.</em> Run the artifact locally. OpenAI-compatible. No network calls leave the box.' },
-      { at:44.2, type:'type', text:'kolm serve dist/support-q4km-1.0.0.kolm --port 8766', klass:'you' },
-      { at:46.6, type:'enter' },
-      { at:46.8, type:'out',  text:'> detecting hardware...  Apple M3 Max, 36 GB unified', klass:'info' },
-      { at:47.1, type:'out',  text:'> runtime: llama.cpp (metal)  /  ctx 4096', klass:'info' },
-      { at:47.4, type:'out',  text:'> loaded in 0.9s  /  vram 1.9 GB  /  ready on :8766', klass:'ok' },
-      { at:47.7, type:'page', name:'serve', url:'127.0.0.1:8766/health' },
-      { at:48.1, type:'newprompt' },
-      { at:48.3, type:'type', text:"curl -s :8766/v1/chat/completions -d '{\"messages\":[{\"role\":\"user\",\"content\":\"order #38421 status?\"}]}' | jq -r .choices[0].message.content", klass:'you' },
-      { at:51.8, type:'enter' },
-      { at:52.0, type:'out',  text:'> "Order #38421 shipped Tuesday via UPS. Tracking: 1Z999 AA10 1234 5678 90. ETA Friday."', klass:'green' },
-      { at:52.4, type:'out',  text:'> 11.5 tok/s  /  latency 217ms  /  on-device (no egress)', klass:'info' },
-      { at:52.8, type:'page', name:'serve-replies', url:'127.0.0.1:8766/v1/chat/completions' },
-      { at:53.4, type:'newprompt' },
+      { at:56,    type:'subtitle', text:'<em>Step 5 of 6 · Setup.</em> Two commands started this &mdash; signup and namespace create. Takes about 30 seconds the first time.' },
+      { at:56.2,  type:'newprompt' },
+      { at:56.4,  type:'out',  text:'# how it started - 30 seconds of setup', klass:'dim' },
+      { at:57.4,  type:'newprompt' },
+      { at:57.6,  type:'type', text:'kolm signup --email rod@indie.dev', klass:'you' },
+      { at:59.6,  type:'enter' },
+      { at:59.8,  type:'out',  text:'> account: indie.dev / API key saved / $5 free credit', klass:'ok' },
+      { at:60.1,  type:'page', name:'signup-ok', url:'kolm.ai/welcome' },
+      { at:60.4,  type:'newprompt' },
+      { at:60.6,  type:'type', text:'kolm namespace create support --primary anthropic --redact pii', klass:'you' },
+      { at:62.4,  type:'enter' },
+      { at:62.6,  type:'out',  text:'> created namespace `support` / gateway ready on :7421', klass:'ok' },
+      { at:63.2,  type:'newprompt' },
     ]},
-  { id:'verify',  label:'verify',    start:56, end:70,
-    sub:'Step 6. Anyone with the receipt ID can verify what was promised, what shipped, and who signed it.',
+
+  // Chapter 6: Try it — strong CTA
+  { id:'try',     label:'Try it',   start:64, end:70,
+    sub:'Step 6 of 6 · Try it. Same loop, your own traffic. $5 free credit, no card.',
     events: [
-      { at:56,   type:'subtitle', text:'<em>Step 6 of 6.</em> Anyone with the receipt ID can verify what was promised, what shipped, and who signed it.' },
-      { at:56.2, type:'type', text:'kolm verify rcpt_compile_71F2A6 --pretty', klass:'you' },
-      { at:59.0, type:'enter' },
-      { at:59.2, type:'out',  text:'> fetching receipt rcpt_compile_71F2A6 from kolm-audit-1', klass:'dim' },
-      { at:59.6, type:'out',  text:'> signature: ed25519:7f3a8e4b... VERIFIED', klass:'ok' },
-      { at:59.9, type:'out',  text:'> chain: linked to prev_chain_hash 0x91ce4f... (intact)', klass:'ok' },
-      { at:60.2, type:'out',  text:'> claims:', klass:'info' },
-      { at:60.4, type:'out',  text:'>   captures_in:      19', klass:'dim' },
-      { at:60.6, type:'out',  text:'>   teacher_council:  [claude-3.7-haiku]', klass:'dim' },
-      { at:60.8, type:'out',  text:'>   k_score:          0.91   (gate 0.85 PASS)', klass:'dim' },
-      { at:61.0, type:'out',  text:'>   hallu_rate:       0.00   (gate <0.05 PASS)', klass:'dim' },
-      { at:61.2, type:'out',  text:'>   artifact_hash:    sha256:d4ce91...8f0a', klass:'dim' },
-      { at:61.4, type:'out',  text:'>   gpu_hours:        0.0217 (RTX 5090)', klass:'dim' },
-      { at:61.6, type:'out',  text:'>   spend_usd:        0.0478 (teacher) + 0.0218 (compute) = 0.0696', klass:'dim' },
-      { at:61.9, type:'receipt', html: receiptDetail() },
-      { at:62.2, type:'page', name:'receipt-ui', url:'kolm.ai/verify/rcpt_compile_71F2A6' },
-      { at:63.0, type:'newprompt' },
-      { at:63.2, type:'type', text:'open https://kolm.ai/verify/rcpt_compile_71F2A6', klass:'you' },
-      { at:66.0, type:'enter' },
-      { at:66.2, type:'out',  text:'> opened in browser  /  share with anyone, no login required', klass:'ok' },
-      { at:67.5, type:'subtitle', text:'<em>End of walkthrough.</em> 6 steps, 70 seconds, one signed receipt anyone can audit.' },
-      { at:69.0, type:'end' },
+      { at:64,    type:'subtitle', text:'<em>Step 6 of 6 · Try it.</em> Same loop, your own traffic. $5 free credit, no card.' },
+      { at:64.4,  type:'type', text:'curl -fsSL kolm.ai/get | sh', klass:'you' },
+      { at:67.0,  type:'enter' },
+      { at:67.2,  type:'out',  text:'> kolm installed - run `kolm signup` to start', klass:'ok' },
+      { at:68.0,  type:'subtitle', text:'<em>End of walkthrough.</em> 6 steps, 70 seconds, one signed receipt anyone can audit.' },
+      { at:69.0,  type:'end' },
     ]},
 ];
 var TOTAL = CHAPTERS[CHAPTERS.length-1].end;
@@ -404,6 +438,48 @@ function receiptDetail(){
     '<h3>chain</h3>',
     '<div class="hash">prev: 0x91ce4f8a3b2e7d1c</div>',
     '<div class="hash">next: pending</div>',
+  ].join('');
+}
+
+function receiptSkeleton(){
+  return [
+    '<h3>receipt id</h3>',
+    '<div class="hash" style="opacity:0.40">awaiting first compile job&hellip;</div>',
+    '<h3>verdict</h3>',
+    '<div style="color:var(--ink-faint);font-size:11.5px;letter-spacing:0.08em;text-transform:uppercase">pending</div>',
+    '<h3>signature</h3>',
+    '<div class="hash" style="opacity:0.35">ed25519:&hellip;</div>',
+    '<h3>schema</h3>',
+    '<div>kolm-audit-1</div>',
+    '<h3>claims</h3>',
+    '<div style="color:var(--ink-faint)">captures_in:      <span id="rec-caps">0</span></div>',
+    '<div style="color:var(--ink-faint)">teacher:          &mdash;</div>',
+    '<div style="color:var(--ink-faint)">k_score:          &mdash;</div>',
+    '<div style="color:var(--ink-faint)">artifact_hash:    &mdash;</div>',
+    '<div style="color:var(--ink-faint)">spend_usd:        &mdash;</div>',
+    '<h3>chain</h3>',
+    '<div class="hash" style="opacity:0.35">prev: &hellip;</div>',
+  ].join('');
+}
+
+function receiptPartial(){
+  return [
+    '<h3>receipt id</h3>',
+    '<div class="hash">rcpt_compile_71F2A6B0D9C84E7F</div>',
+    '<h3>verdict</h3>',
+    '<div style="color:var(--amber);font-size:11.5px;letter-spacing:0.08em;text-transform:uppercase">computing&hellip;</div>',
+    '<h3>signature</h3>',
+    '<div class="hash" style="opacity:0.55">ed25519:7f3a8e4b&hellip; signing&hellip;</div>',
+    '<h3>schema</h3>',
+    '<div>kolm-audit-1</div>',
+    '<h3>claims</h3>',
+    '<div>captures_in: 19</div>',
+    '<div>teacher: claude-3.7-haiku</div>',
+    '<div>student: qwen2.5-1.5b-instruct</div>',
+    '<div>k_score: 0.91 (gate 0.85)</div>',
+    '<div>artifact: sha256:d4ce91&hellip;8f0a</div>',
+    '<h3>chain</h3>',
+    '<div class="hash" style="opacity:0.55">prev: 0x91ce4f8a3b2e7d1c</div>',
   ].join('');
 }
 
@@ -549,12 +625,12 @@ function resetAll(){
   term.innerHTML = '';
   body.innerHTML = PAGES.home;
   url.innerHTML = '<span class="scheme">https://</span>kolm.ai';
-  rec.innerHTML = '<div class="empty">No receipt selected yet. Walk through the loop on the left &mdash; the receipt builds itself.</div>';
+  rec.innerHTML = '';
   captures = [];
   fired = {};
   setProgress('#prog-distill', 0);
   setProgress('#prog-export', 0);
-  setSubtitle('Press play. We’ll walk through signup, namespace, gateway calls, compile, serve, and receipt verification — all in 70 seconds.');
+  setSubtitle('Press play. Capture &rarr; Compile &rarr; Verify &rarr; Run, on real traffic, in 70 seconds. Signup is at the end &mdash; it&rsquo;s the easy part.');
   $('#endCard').classList.remove('is-on');
   lastApplied = -1; current = 0;
   updateChips(0);
