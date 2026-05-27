@@ -1,0 +1,265 @@
+/* W894 post-auth shell — generous, scannable, no cramping.
+   Loaded by nav.js when body.kolm-account-surface is present.
+   Overrides the duplicated cramped inline <style> blocks across all
+   53 /account/* pages without editing each file.
+   Source-order strategy: nav.js appends this link to <head> at runtime,
+   so it lands AFTER the page's inline <style>. Same-specificity rules
+   here therefore win. Targeted .kolm-account-surface scoping keeps
+   it from leaking onto marketing pages. */
+
+body.kolm-account-surface {
+  /* Quiet the background so panels read as the dominant surface. */
+  background: var(--bg, #0b0b0d);
+}
+
+body.kolm-account-surface .acct-shell {
+  display: grid;
+  grid-template-columns: 256px minmax(0, 1fr);
+  gap: 32px;
+  align-items: flex-start;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 32px 28px 56px;
+}
+
+@media (max-width: 960px) {
+  body.kolm-account-surface .acct-shell {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 20px 16px 40px;
+  }
+}
+
+/* Sidebar — let it breathe. */
+body.kolm-account-surface .acct-shell > nav,
+body.kolm-account-surface .acct-shell > aside,
+body.kolm-account-surface .acct-side {
+  position: sticky;
+  top: 80px;
+  padding: 8px 4px;
+}
+
+/* The card system: bigger padding, real vertical rhythm, real typography. */
+body.kolm-account-surface .kpanel {
+  background: var(--bg-card, #14151a);
+  border: 1px solid var(--line, #23252b);
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+}
+
+body.kolm-account-surface .kpanel + .kpanel {
+  margin-top: 0;
+}
+
+body.kolm-account-surface .kpanel h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 580;
+  letter-spacing: -0.012em;
+  line-height: 1.25;
+  color: var(--ink, #e8e9ec);
+}
+
+body.kolm-account-surface .kpanel h3 {
+  margin: 24px 0 10px;
+  font-size: 15px;
+  font-weight: 580;
+  letter-spacing: -0.006em;
+  color: var(--ink, #e8e9ec);
+}
+
+body.kolm-account-surface .kpanel .pdesc,
+body.kolm-account-surface .kpanel .panel-desc {
+  color: var(--ink-mute, #8a8d96);
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 0 0 18px;
+  max-width: 68ch;
+}
+
+body.kolm-account-surface .kpanel > p {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--ink-2, #c7c9d1);
+}
+
+/* Metric grid: less cramping, generous figures. */
+body.kolm-account-surface .metric-card,
+body.kolm-account-surface .metric {
+  background: var(--bg-card, #14151a);
+  border: 1px solid var(--line, #23252b);
+  border-radius: 10px;
+  padding: 20px 22px;
+}
+
+body.kolm-account-surface .metric-card .label,
+body.kolm-account-surface .metric .label {
+  display: block;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-mute, #8a8d96);
+  margin: 0 0 8px;
+  font-weight: 520;
+}
+
+body.kolm-account-surface .metric-card .value,
+body.kolm-account-surface .metric .value,
+body.kolm-account-surface .metric-card b,
+body.kolm-account-surface .metric b {
+  font-size: 24px;
+  font-weight: 580;
+  letter-spacing: -0.014em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink, #e8e9ec);
+}
+
+body.kolm-account-surface .metric-card .delta,
+body.kolm-account-surface .metric .delta {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--ink-mute, #8a8d96);
+}
+
+/* Grids: comfortable density. */
+body.kolm-account-surface .metric-grid,
+body.kolm-account-surface .grid-3,
+body.kolm-account-surface .grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin: 0 0 8px;
+}
+
+body.kolm-account-surface .journey-grid,
+body.kolm-account-surface .journey-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+body.kolm-account-surface .journey-card {
+  background: var(--bg-card, #14151a);
+  border: 1px solid var(--line, #23252b);
+  border-radius: 12px;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 140ms ease, transform 140ms ease;
+}
+
+body.kolm-account-surface .journey-card:hover {
+  border-color: var(--accent-edge, #3a3d46);
+  transform: translateY(-1px);
+}
+
+body.kolm-account-surface .journey-card h3,
+body.kolm-account-surface .journey-card .jc-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 580;
+  letter-spacing: -0.008em;
+}
+
+body.kolm-account-surface .journey-card p,
+body.kolm-account-surface .journey-card .jc-desc {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-mute, #8a8d96);
+}
+
+/* Tables: legible row height. */
+body.kolm-account-surface .ktable,
+body.kolm-account-surface table.ktable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13.5px;
+}
+
+body.kolm-account-surface .ktable th,
+body.kolm-account-surface table.ktable th {
+  text-align: left;
+  font-weight: 580;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-mute, #8a8d96);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line, #23252b);
+}
+
+body.kolm-account-surface .ktable td,
+body.kolm-account-surface table.ktable td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line, #23252b);
+  vertical-align: top;
+  font-variant-numeric: tabular-nums;
+}
+
+body.kolm-account-surface .ktable tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Empty states get room to breathe. */
+body.kolm-account-surface .kpanel .empty,
+body.kolm-account-surface .empty-state {
+  padding: 32px 24px;
+  text-align: center;
+  color: var(--ink-mute, #8a8d96);
+  font-size: 14px;
+}
+
+/* Buttons inside panels: pleasant size, real focus ring. */
+body.kolm-account-surface .kpanel button,
+body.kolm-account-surface .kpanel .btn,
+body.kolm-account-surface .kpanel a.btn {
+  min-height: 38px;
+  padding: 8px 16px;
+  border-radius: 7px;
+  font-size: 13.5px;
+  font-weight: 520;
+  line-height: 1.2;
+}
+
+body.kolm-account-surface .kpanel button:focus-visible,
+body.kolm-account-surface .kpanel .btn:focus-visible,
+body.kolm-account-surface .kpanel a.btn:focus-visible {
+  outline: 2px solid var(--accent, #6a8aff);
+  outline-offset: 2px;
+}
+
+/* Hero-row "What's next" gets visual weight without shouting. */
+body.kolm-account-surface .kpanel--feature,
+body.kolm-account-surface .acct-hero,
+body.kolm-account-surface .next-up {
+  padding: 28px 32px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent);
+  border-color: var(--accent-edge, #3a3d46);
+}
+
+body.kolm-account-surface .acct-hero h1,
+body.kolm-account-surface .acct-hero .h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+  font-weight: 580;
+  letter-spacing: -0.016em;
+  line-height: 1.15;
+}
+
+body.kolm-account-surface .acct-hero p {
+  margin: 0;
+  font-size: 15px;
+  color: var(--ink-mute, #8a8d96);
+  max-width: 70ch;
+}
+
+/* Section spacing — give the page a heartbeat. */
+body.kolm-account-surface main > section,
+body.kolm-account-surface .acct-content > section {
+  margin: 0 0 32px;
+}
