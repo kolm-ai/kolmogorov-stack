@@ -103,6 +103,102 @@
   --ks-dur-2: 240ms;
   --ks-dur-3: 420ms;
   --ks-ease:  cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ==========================================================================
+     Legacy token aliases — bind every historical token name to the live
+     --ks-* tokens so pages that pre-date the rename, or that load only
+     warm-paper.css / frontier.css without design-tokens.css, resolve cleanly
+     in BOTH light and dark mode. CSS custom properties are evaluated at the
+     use-site cascade, so an alias defined here as `var(--ks-ink)` correctly
+     flips when [data-theme="dark"] redefines --ks-ink further down.
+
+     Why this lives in ks.css: every public HTML page loads ks.css. Putting
+     the aliases here means one edit covers the whole site — no per-page
+     <link> additions, no SW cache cascade thrash.
+     ========================================================================== */
+
+  /* Ink */
+  --ink-1: var(--ks-ink);
+  --ink-2: var(--ks-ink-2);
+  --ink-3: var(--ks-ink-3);
+  --ink-4: var(--ks-ink-4);
+  --ink:        var(--ks-ink);
+  --ink-mute:   var(--ks-ink-2);
+  --ink-faint:  var(--ks-ink-3);
+  --ink-dim:    var(--ks-ink-3);
+  --ink-soft:   var(--ks-ink-2);
+  --text:       var(--ks-ink);
+  --text-mute:  var(--ks-ink-2);
+
+  /* Paper / surface / background — all aliases for the same scale */
+  --paper-1:   var(--ks-bg);
+  --paper-2:   var(--ks-bg-1);
+  --paper-3:   var(--ks-bg-2);
+  --paper-4:   var(--ks-bg-3);
+  --paper:     var(--ks-bg);
+  --paper-rule: var(--ks-line-1);
+  --surface-0: var(--ks-bg);
+  --surface-1: var(--ks-bg-1);
+  --surface-2: var(--ks-bg-2);
+  --surface-3: var(--ks-bg-3);
+  --surface:   var(--ks-bg-1);
+  --bg:        var(--ks-bg);
+  --bg-0:      var(--ks-bg);
+  --bg-1:      var(--ks-bg-1);
+  --bg-2:      var(--ks-bg-2);
+  --bg-3:      var(--ks-bg-3);
+  --bg-elev:   var(--ks-bg-1);
+  --bg-pane:   var(--ks-bg-1);
+  --bg-card:   var(--ks-bg-1);
+  --canvas:    var(--ks-bg);
+
+  /* Lines / dividers */
+  --line:        var(--ks-line-2);
+  --line-1:      var(--ks-line-1);
+  --line-2:      var(--ks-line-2);
+  --line-3:      var(--ks-line-3);
+  --line-soft:   var(--ks-line-1);
+  --line-strong: var(--ks-line-3);
+  --rule:        var(--ks-line-2);
+  --border:      var(--ks-line-2);
+  --divider:     var(--ks-line-1);
+
+  /* Status colors (legacy semantic names) */
+  --green:      var(--ks-pos);
+  --amber:      var(--ks-warn);
+  --red:        var(--ks-err);
+  --positive:   var(--ks-pos);
+  --warning:    var(--ks-warn);
+  --error:      var(--ks-err);
+  --danger:     var(--ks-err);
+  --success:    var(--ks-pos);
+  --blue:       #2a4d75;
+  --info:       #2a4d75;
+
+  /* Type families (legacy names) */
+  --mono:       var(--ks-mono);
+  --sans:       var(--ks-sans);
+  --serif:      var(--ks-serif);
+  --font-mono:  var(--ks-mono);
+  --font-sans:  var(--ks-sans);
+
+  /* Accent */
+  --accent:        var(--ks-accent);
+  --accent-2:      var(--ks-accent-2);
+  --accent-dim:    var(--ks-ink-2);
+  --accent-soft:   var(--ks-accent-soft);
+  --accent-edge:   var(--ks-accent-edge);
+  --brand:         var(--ks-accent);
+  --brand-primary: var(--ks-accent);
+  --brand-ink:     var(--ks-ink);
+
+  /* Frontier-style aliases (used by frontier.css / hero pages) */
+  --fr-bg:       var(--ks-bg);
+  --fr-bg-1:     var(--ks-bg-1);
+  --fr-ink:      var(--ks-ink);
+  --fr-ink-2:    var(--ks-ink-2);
+  --fr-line:     var(--ks-line-2);
+  --fr-accent:   var(--ks-accent);
 }
 
 /* Light mode = the new default. This block is kept (and identical to :root)
@@ -150,6 +246,9 @@
   --ks-pos:         #7fb38a;
   --ks-warn:        #b8b094;
   --ks-err:         #b86a72;
+  /* Dark-mode override for the one legacy alias that isn't already var()-bound */
+  --blue:           #8aabd1;
+  --info:           #8aabd1;
 }
 
 /* ----- 2. Base reset, scoped to .ks --------------------------------------- */
@@ -438,6 +537,113 @@ body { position: relative; }
 }
 .ks-card__h { font-size: 18px; font-weight: 580; color: var(--ks-ink); margin: 0 0 var(--ks-3); letter-spacing: 0; }
 .ks-card__p { font-size: 14.5px; line-height: 1.55; color: var(--ks-ink-2); margin: 0; }
+
+/* ----- 7b. Legacy page-shell classes -----------------------------------
+   Used by airgap, dashboard, account, byoc, tunnels, teams, settings,
+   healthcare/assessment, enterprise/{console,self-hosted}. Define them
+   here so every shared shell page renders consistently without per-page
+   <style> blocks.
+   ----------------------------------------------------------------------- */
+.page-main {
+  max-width: var(--ks-container);
+  margin: 0 auto;
+  padding: var(--ks-12) var(--ks-pad-x) var(--ks-16);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ks-8);
+}
+@media (max-width: 720px) {
+  .page-main { padding-top: var(--ks-8); gap: var(--ks-6); }
+}
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--ks-6);
+  flex-wrap: wrap;
+  padding-bottom: var(--ks-6);
+  border-bottom: 1px solid var(--ks-line-1);
+}
+.page-head .eyebrow {
+  font-family: var(--ks-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ks-ink-3);
+  margin-bottom: var(--ks-3);
+}
+.page-head h1 {
+  font-family: var(--ks-sans);
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 540;
+  letter-spacing: -0.022em;
+  line-height: 1.05;
+  color: var(--ks-ink);
+  margin: 0 0 var(--ks-3);
+}
+.page-head .lede {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ks-ink-2);
+  max-width: 64ch;
+  margin: 0;
+}
+.page-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.dashboard-panel {
+  background: var(--ks-bg-1);
+  border: 1px solid var(--ks-line-2);
+  border-radius: var(--ks-r-lg);
+  padding: var(--ks-7) var(--ks-7);
+}
+@media (max-width: 720px) {
+  .dashboard-panel { padding: var(--ks-5); }
+}
+.dashboard-panel + .dashboard-panel { margin-top: 0; }
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ks-4);
+  margin-bottom: var(--ks-4);
+  flex-wrap: wrap;
+}
+.section-head h2 {
+  font-size: 20px;
+  font-weight: 580;
+  letter-spacing: -0.012em;
+  color: var(--ks-ink);
+  margin: 0;
+}
+/* Legacy button shorthand used by older page templates */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: var(--ks-r-md);
+  font-family: var(--ks-sans);
+  font-size: 14px;
+  font-weight: 540;
+  line-height: 1;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background var(--ks-dur-1) var(--ks-ease),
+              border-color var(--ks-dur-1) var(--ks-ease),
+              color var(--ks-dur-1) var(--ks-ease);
+}
+.btn.primary {
+  background: var(--ks-ink);
+  color: var(--ks-bg);
+  border-color: var(--ks-ink);
+}
+.btn.primary:hover { background: var(--ks-ink-2); border-color: var(--ks-ink-2); }
+.btn.ghost {
+  background: transparent;
+  color: var(--ks-ink);
+  border-color: var(--ks-line-3);
+}
+.btn.ghost:hover { background: var(--ks-bg-2); border-color: var(--ks-ink-3); }
 
 /* ----- 8. Code blocks --------------------------------------------------- */
 .ks-code {
