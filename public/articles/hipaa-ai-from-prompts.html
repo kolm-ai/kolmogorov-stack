@@ -149,7 +149,7 @@ kolm inspect my-clinical-summarizer.kolm --receipts | jq '.chain[] | {step, hash
 <h2>Drift detection on a regulated artifact</h2>
 <p>A frozen-eval gate at compile time isn't enough on its own; clinical language drifts, ICD codes update, patient population shifts. <code>kolm drift detect</code> re-runs the frozen eval against the live artifact on a schedule (cron / systemd / k8s job, your choice). On a breach the verifier rejects the artifact and a supersession entry names the successor. See <a href="/drift">/drift</a> for the lifecycle tiers (M+1 stale notification, M+2 re-distillation cadence, M+3 drift detection cron, M+4 supersession chain).</p>
 
-<div class="warn"><b>Honest scope.</b> kolm ships the verifier, the manifest format, and the scheduler hooks. It does not fork a daemon, run your cron, or page your on-call. The compliance posture this article describes requires the covered entity to operate the schedule, the alert routing, and the redactor selection. The kolm tool is a build step + a verifier; the operations are yours.</div>
+<div class="warn"><b>Scope.</b> kolm ships the verifier, the manifest format, and the scheduler hooks. It does not fork a daemon, run your cron, or page your on-call. The compliance posture this article describes requires the covered entity to operate the schedule, the alert routing, and the redactor selection. The kolm tool is a build step + a verifier; the operations are yours.</div>
 
 <h2>Common questions</h2>
 <h3>Does kolm.ai see PHI?</h3>
@@ -161,13 +161,23 @@ kolm inspect my-clinical-summarizer.kolm --receipts | jq '.chain[] | {step, hash
 <h3>What about training-data memorization?</h3>
 <p>Memorization is a real risk for any model trained on PHI even after redaction. Mitigations: differential privacy noise during distillation (<code>--dp-epsilon=8</code>), holdout extraction tests in the eval phase, and the frozen-eval gate rejecting artifacts that score above an extractive baseline. See <a href="/articles/k-sample-verified-inference">"K-sample verified inference"</a> for the extractive-test detail.</p>
 
+<h2>The rest of the healthcare tree</h2>
+<ul>
+<li><a href="/healthcare">/healthcare</a> &mdash; the healthcare vertical overview (six clinical workflows + the BAA + the HIPAA mapping).</li>
+<li><a href="/for/healthcare">/for/healthcare</a> &mdash; cost compression on clinical AI workloads.</li>
+<li><a href="/case-studies/healthcare-phi-redactor">Regional health plan PHI redactor</a> &mdash; K-score 0.982, leak rate 0 / 50k.</li>
+<li><a href="/articles/hipaa-on-device">HIPAA AI on device</a> &mdash; what changes when inference runs on a laptop, kiosk, or phone.</li>
+<li><a href="/cookbook/hipaa-summarizer">HIPAA summarizer recipe</a> &mdash; capture &rarr; redact &rarr; distill &rarr; verify, with the exact commands.</li>
+<li><a href="/hipaa-mapping">/hipaa-mapping</a> &middot; <a href="/baa">/baa</a> &middot; <a href="/security">/security</a></li>
+</ul>
+
 <h2>Related reading</h2>
 <ul>
 <li><a href="/what-is-an-ai-compiler">What is an AI compiler? Definition and flow</a></li>
 <li><a href="/articles/fine-tune-vs-compile">Fine-tune vs AI compile: when each is right</a></li>
 <li><a href="/articles/kolm-artifact-walkthrough">The .kolm artifact, field by field</a></li>
 <li><a href="/articles/kolm-ai-vs-kolm-therapeutics">kolm.ai vs Kolm therapeutics for procurement teams</a></li>
-<li><a href="/security">/security</a> · <a href="/drift">/drift</a> · <a href="/spec/rs-1">/spec/rs-1</a></li>
+<li><a href="/drift">/drift</a> &middot; <a href="/spec/rs-1">/spec/rs-1</a></li>
 </ul>
 </main>
 <footer>kolm.ai &middot; the AI compiler &middot; <a href="/product">Product</a> &middot; <a href="/security">Security</a> &middot; <a href="/baa">BAA</a> &middot; <a href="/spec/rs-1">RS-1</a> &middot; <a href="/what-is-an-ai-compiler">What is an AI compiler?</a></footer>

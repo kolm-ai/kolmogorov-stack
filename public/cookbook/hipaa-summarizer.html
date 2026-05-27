@@ -113,7 +113,7 @@
 
 <section class="hero">
  <div class="wrap">
- <div class="crumbs"><a href="/docs">cookbook</a> &middot; vertical &middot; hipaa-summarizer</div>
+ <div class="crumbs"><a href="/docs">cookbook</a> &middot; <a href="/healthcare">healthcare</a> &middot; hipaa-summarizer</div>
  <span class="pill">Recipe &middot; vertical</span>
  <h1>Clinical notes, <span class="tone">summarized behind PHI controls.</span></h1>
  <p class="lede">A local <code>.kolm</code> file that summarizes a clinical note into <em>(chief_complaint, history, assessment, plan)</em>. PHI (HIPAA's 18 identifiers) is redacted before training and the verifier rejects any output that contains an HIPAA identifier or hallucinates a finding not supported by the input. Compiled in your VPC; the artifact runs on the EHR host.</p>
@@ -205,6 +205,18 @@ on_note_signed = (note) =&gt; {
  audit.log({ artifact: <span class="k">'hipaa-summarizer.kolm'</span>, note_id: note.id, k_score: sum.receipt.k_score });
 };</pre>
  <p>Audit log includes the artifact's signed receipt · every summary is traceable to the exact compiled model that produced it.</p>
+ </div>
+
+ <div class="group">
+ <h2>The rest of the healthcare tree</h2>
+ <div class="related">
+ <a href="/healthcare"><div class="h">Healthcare vertical</div><div class="d">Six clinical workflows + BAA + HIPAA mapping in one place.</div></a>
+ <a href="/for/healthcare"><div class="h">Cost compression</div><div class="d">7B specialist on your VPC vs frontier API line item.</div></a>
+ <a href="/case-studies/healthcare-phi-redactor"><div class="h">PHI redactor case study</div><div class="d">K-score 0.982, leak rate 0 / 50k, $1.8M&rarr;$0.04M / yr.</div></a>
+ <a href="/articles/hipaa-ai-from-prompts"><div class="h">HIPAA AI from prompts</div><div class="d">Hosted vs compile topologies, BAA scope under each.</div></a>
+ <a href="/articles/hipaa-on-device"><div class="h">HIPAA AI on device</div><div class="d">Inference on laptop, kiosk, or phone.</div></a>
+ <a href="/hipaa-mapping"><div class="h">HIPAA mapping</div><div class="d">Per-control 164.308 / .310 / .312 / .314 with the BAA.</div></a>
+ </div>
  </div>
 
  <div class="group">
