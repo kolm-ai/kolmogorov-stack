@@ -225,7 +225,7 @@ echo "=== Page status (200 + kolm wordmark) ==="
 # the body. We don't pin specific copy — marketing evolves. /registry may
 # 301 to /registry.html in dev; -L follows the redirect so we test the
 # destination payload.
-for p in "" dashboard playground docs registry signup pricing status \
+for p in "" dashboard docs registry signup pricing status \
          cookbook legal edge healthcare finance api k-score manifesto \
          quickstart; do
   C=$(curl -sL -o /dev/null -w "%{http_code}" "$URL/$p")

@@ -312,7 +312,7 @@ const ROUTE_ALIASES = {
 };
 // /registry + /atlas are handled BEFORE express.static (see top of file) because
 // public/registry/ exists as a subdirectory (submit.html).
-for (const route of ['/', '/dashboard', '/playground', '/docs', '/signup', '/signin', '/login', '/why', '/pricing', '/status', '/account', '/how-it-works', '/device', '/compile', '/run', '/recall', '/cloud', '/k-score', '/benchmarks', '/compare', '/research', '/serve', '/evolve', '/anatomy', '/security', '/privacy', '/terms', '/healthcare', '/finance', '/legal', '/edge', '/cookbook', '/defense', '/manifesto', '/faq', '/quickstart', '/trust', '/integrations', '/press', '/vs-ollama', '/vs-rag', '/vs-fine-tune', '/vs-predibase', '/vs-openpipe', '/vs-langsmith', '/vs-mem0', '/vs-hindsight', '/vs-openai-fine-tune', '/vs-together', '/why-now', '/threat-model', '/roi', '/api', '/whitepaper', '/build-your-own', '/developers', '/solutions', '/audit-log', '/baa', '/captures', '/capture', '/enterprise', '/glossary', '/leaderboard', '/hub', '/spec', '/spec/grammar', '/models', '/compute', '/troubleshooting', '/teams', '/teams/accept', '/tunnels', '/byoc', '/airgap', '/showcase', '/sdks', '/compliance-packs', '/audit', '/cli', '/contact', '/insurance', '/health-insurance', '/distill', '/train', '/frontier-stack', '/license', '/datasets', '/gateway']) {
+for (const route of ['/', '/dashboard', '/docs', '/signup', '/signin', '/login', '/why', '/pricing', '/status', '/account', '/how-it-works', '/device', '/compile', '/run', '/recall', '/cloud', '/k-score', '/benchmarks', '/compare', '/research', '/serve', '/evolve', '/anatomy', '/security', '/privacy', '/terms', '/healthcare', '/finance', '/legal', '/edge', '/cookbook', '/defense', '/manifesto', '/faq', '/quickstart', '/trust', '/integrations', '/press', '/vs-ollama', '/vs-rag', '/vs-fine-tune', '/vs-predibase', '/vs-openpipe', '/vs-langsmith', '/vs-mem0', '/vs-hindsight', '/vs-openai-fine-tune', '/vs-together', '/why-now', '/threat-model', '/roi', '/api', '/whitepaper', '/build-your-own', '/developers', '/solutions', '/audit-log', '/baa', '/captures', '/capture', '/enterprise', '/glossary', '/leaderboard', '/hub', '/spec', '/spec/grammar', '/models', '/compute', '/troubleshooting', '/teams', '/teams/accept', '/tunnels', '/byoc', '/airgap', '/showcase', '/sdks', '/compliance-packs', '/audit', '/cli', '/contact', '/insurance', '/health-insurance', '/distill', '/train', '/frontier-stack', '/license', '/datasets', '/gateway']) {
   app.get(route, (_req, res) => {
     const name = route === '/' ? 'index' : (ROUTE_ALIASES[route] || route.slice(1));
     const file = path.join(__dirname, 'public', name + '.html');
@@ -639,7 +639,7 @@ if (process.argv[1] && process.argv[1].endsWith('server.js')) {
     console.log('\nkolm server');
     console.log(`  home:       http://localhost:${PORT}`);
     console.log(`  dashboard:  http://localhost:${PORT}/dashboard`);
-    console.log(`  playground: http://localhost:${PORT}/playground`);
+    console.log(`  docs:       http://localhost:${PORT}/docs`);
     console.log(`  docs:       http://localhost:${PORT}/docs`);
     console.log(`  demo key:   ${!!demo.api_key ? 'configured' : 'missing'}`);
     console.log(`  admin key:  ${!!process.env.ADMIN_KEY ? 'configured' : 'not set'}`);
