@@ -74,7 +74,7 @@ test('W495 #4 - adapter READMEs and metadata point at the real source repo', () 
     'packages/python-llamaindex-kolm/README.md',
   ]) {
     const text = read(rel);
-    assert.match(text, /github\.com\/sneaky-hippo\/kolm-stack/);
+    assert.match(text, /github\.com\/kolm-ai\/kolm-stack/);
     assert.match(text, /not published under Kolm control/i);
   }
 
@@ -85,7 +85,7 @@ test('W495 #4 - adapter READMEs and metadata point at the real source repo', () 
     'packages/python-llamaindex-kolm/pyproject.toml',
   ]) {
     const text = read(rel);
-    assert.match(text, /sneaky-hippo\/kolm-stack/);
+    assert.match(text, /kolm-ai\/kolm-stack/);
     assert.doesNotMatch(text, OLD_REPO_RE);
   }
 });

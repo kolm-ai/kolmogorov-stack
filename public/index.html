@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>kolm.ai · Compile your AI workload into a model you own · kolm.ai</title>
+<title>kolm.ai · Compile your AI workload into a model you own</title>
 <meta name="description" content="Kolm is the evidence-to-artifact compiler. Capture your traffic, distill it into a private .kolm artifact, deploy to your hardware. Apache-2.0, signed, no per-token bill.">
 <meta name="keywords" content="AI compiler, evidence to artifact, model distillation, INT4 quantization, on-device LLM, OpenRouter alternative, model gateway, edge inference, private AI, regulated AI">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
@@ -341,8 +341,8 @@
   <nav class="ks-nav" aria-label="Primary">
     <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
-      <li><a href="/product">Product</a></li>
-      <li><a href="/use-cases">Use cases</a></li>
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
       <li><a href="https://github.com/kolm-ai/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true" style="font-size:0.78em;opacity:0.55;margin-left:3px;">↗</span></a></li>
@@ -360,8 +360,8 @@
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/product">Product</a>
-    <a href="/use-cases">Use cases</a>
+    <a href="/wrapper">Wrapper</a>
+    <a href="/studio">Studio</a>
     <a href="/pricing">Pricing</a>
     <a href="/docs">Docs</a>
     <a href="https://github.com/kolm-ai/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
@@ -606,7 +606,7 @@
           <text x="810" y="272" class="kolm-arch__chipt">iOS &middot; Android &middot; WebGPU</text>
           <text x="810" y="292" class="kolm-arch__chipt">VPC &middot; air-gap &middot; edge</text>
           <text x="810" y="338" class="kolm-arch__note">$0 per token after compile.</text>
-          <text x="810" y="358" class="kolm-arch__note">Yours forever.</text>
+          <text x="810" y="358" class="kolm-arch__note">Yours to run.</text>
         </g>
       </svg>
     </figure>
@@ -675,7 +675,7 @@ $ curl -s https://kolm.ai/v1/free/chat \
   <span class="receipt-line-key">"hash"</span>:     <span class="receipt-line-str">"sha256:3f2c1a...8de4"</span>,
   <span class="receipt-line-key">"k_score"</span>:  <span class="receipt-line-str">0.913</span>,    <span class="receipt-line-ok">// passes 0.85 floor</span>
   <span class="receipt-line-key">"signed_by"</span>: <span class="receipt-line-str">"ed25519:9e7b...c41a"</span>,
-  <span class="receipt-line-key">"teacher"</span>:  <span class="receipt-line-str">"claude-3-5-sonnet"</span>,
+  <span class="receipt-line-key">"teacher"</span>:  <span class="receipt-line-str">"claude-sonnet-4-6"</span>,
   <span class="receipt-line-key">"eval"</span>:     <span class="receipt-line-str">"support-v3.eval (frozen)"</span>,
   <span class="receipt-line-key">"verifier"</span>: <span class="receipt-line-str">"offline / no network call"</span>,
   <span class="receipt-line-key">"ok"</span>: <span class="receipt-line-ok">true</span>
@@ -1176,86 +1176,6 @@ $ curl -s https://kolm.ai/v1/free/chat \
 
 <!-- ================== Verified transcript ================== -->
 
-<!-- ================== Finale ================== -->
-<section class="ks-finale">
-  <div class="ks-finale__inner">
-    <h2 class="ks-finale__h2">Stop paying per token.<br>Start shipping models you own.</h2>
-    <p class="ks-finale__lede">Compile your first <code>.kolm</code> in under 10 minutes. Run it on your laptop. Verify it on the registry. No credit card.</p>
-    <div class="ks-finale__ctas">
-      <a class="ks-btn ks-btn--primary ks-btn--lg" href="/signup">Start free <span class="ks-btn-arrow" aria-hidden="true">&rarr;</span></a>
-      <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/quickstart">Read the quickstart</a>
-    </div>
-    <p class="ks-finale__meta">Apache-2.0 - No credit card - Self-hostable - <a href="https://github.com/kolm-ai/kolmogorov-stack" class="ks-accent" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a></p>
-  </div>
-</section>
-
-
-<!-- ================== W706: tiny vendor-compare strip  -  moved here from #vs.
-     User: "should be super small just at the very bottom of the page under the
-     CTA". Three rows max, kolm column highlighted; no "X rows" framing,
-     no random numbers. Full teardown still lives at /compare. ================== -->
-<section class="fr-section fr-section--tight" aria-label="kolm vs hosted gateways" style="padding-top:0;">
-  <div class="fr-container">
-    <div class="w706-bot-cmp">
-      <div class="w706-bot-cmp__head">kolm vs hosted gateways &middot; <a href="/compare" style="color:var(--brand-primary); text-decoration:none;">full teardown &rarr;</a></div>
-      <div class="w706-bot-cmp__grid">
-        <div class="l"></div>
-        <div class="k">kolm</div>
-        <div class="n">OpenAI / Anthropic</div>
-        <div class="n">OpenRouter</div>
-
-        <div class="l">You own the weights</div>
-        <div class="k">signed <code>.kolm</code></div>
-        <div>no</div>
-        <div>no</div>
-
-        <div class="l">Per-token after compile</div>
-        <div class="k">$0 (your hardware)</div>
-        <div>per token</div>
-        <div>per token</div>
-
-        <div class="l">Self-host the stack</div>
-        <div class="k">Apache-2.0, end&nbsp;to&nbsp;end</div>
-        <div>no</div>
-        <div>no</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ================== Detailed performance table ================== -->
-
-<!-- ================== Cost scenarios (calc presets) ================== -->
-
-<!-- ================== Quickstart preview ================== -->
-
-<!-- ================== Press / mentions ================== -->
-<!-- ================== Trust + security deeper ================== -->
-
-<!-- ================== Community ================== -->
-
-<!-- W373 marker block: visually hidden DOM anchors so lock-in tests can find
-     the W373/W271/W260 markers without disrupting the visual design. The
-     primary nav (W221 5-item) and pain hero remain canonical chrome. -->
-<div data-w373="hidden-markers" aria-hidden="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">
-  <nav data-w373="hero-nav" aria-label="Marketing nav">
-    <a data-w373="nav-product" href="/product">Product</a>
-    <a data-w373="nav-use-cases" href="/use-cases">Use Cases</a>
-    <a data-w373="nav-pricing" href="/pricing">Pricing</a>
-    <a data-w373="nav-docs" href="/docs/">Docs</a>
-    <a data-w373="nav-download" href="/download">Download</a>
-    <a data-w373="nav-signin" href="/signup">Sign in</a>
-  </nav>
-  <span data-w271="pain-sub">Stop renting your AI. Compile your workload into a model you own.</span>
-  <span data-w260="lede-beats">Capture &rarr; distill &rarr; compile &rarr; deploy. Signed artifacts on your hardware.</span>
-  <section data-w373="sec-connect"><h2>Connect</h2><p>Drop-in OpenAI-compatible gateway routes your traffic.</p></section>
-  <section data-w373="sec-capture"><h2>Capture</h2><p>Every prompt + response is recorded with a signed receipt.</p></section>
-  <section data-w373="sec-optimize"><h2>Optimize</h2><p>Distill, quantize (INT4/FP8/NF4), compile to .kolm artifact.</p></section>
-  <section data-w373="sec-privacy"><h2>Privacy</h2><p>PII redaction, BYOK, on-device inference, no per-token bill.</p></section>
-  <section data-w373="sec-datasets"><h2>Datasets &amp; Training</h2><p>Export Parquet/HuggingFace, fine-tune with LoRA on your captures.</p></section>
-  <section data-w373="sec-devices"><h2>Devices</h2><p>3090 / 5090 / A100 / H100 / H200 / DGX Spark / M3 Ultra / CPU AVX-512.</p></section>
-</div>
-
 <!-- ============================================================ -->
 <!-- W404 numbers strip                                            -->
 <!-- ============================================================ -->
@@ -1294,27 +1214,27 @@ $ curl -s https://kolm.ai/v1/free/chat \
       </li>
       <li data-w410-step="opportunity" style="counter-increment:ks-loop;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1)">
         <div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">Step 2</div>
-        <h3 style="margin:6px 0 8px;font-size:17px;font-weight:580"><a href="/account/opportunities" style="color:var(--ks-ink);text-decoration:none;border-bottom:1px solid var(--ks-accent-edge)">Opportunity</a></h3>
+        <h3 style="margin:6px 0 8px;font-size:17px;font-weight:580"><a href="/docs/distill.html" style="color:var(--ks-ink);text-decoration:none;border-bottom:1px solid var(--ks-accent-edge)">Opportunity</a></h3>
         <p style="margin:0;font-size:14px;color:var(--ks-ink-2);line-height:1.55">Cluster repeated prompts. The optimizer flags template families that would distill cleanly into a smaller specialist.</p>
       </li>
       <li data-w410-step="dataset" style="counter-increment:ks-loop;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1)">
         <div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">Step 3</div>
-        <h3 style="margin:6px 0 8px;font-size:17px;font-weight:580"><a href="/account/datasets" style="color:var(--ks-ink);text-decoration:none;border-bottom:1px solid var(--ks-accent-edge)">Dataset</a></h3>
+        <h3 style="margin:6px 0 8px;font-size:17px;font-weight:580"><a href="/docs/datasets.html" style="color:var(--ks-ink);text-decoration:none;border-bottom:1px solid var(--ks-accent-edge)">Dataset</a></h3>
         <p style="margin:0;font-size:14px;color:var(--ks-ink-2);line-height:1.55">Promote a cluster into a training set. Export as Parquet or HuggingFace Datasets so the same rows feed eval and SFT.</p>
       </li>
       <li data-w410-step="label" style="counter-increment:ks-loop;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1)">
         <div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">Step 4</div>
-        <h3 style="margin:6px 0 8px;font-size:17px;font-weight:580"><a href="/account/labeling" style="color:var(--ks-ink);text-decoration:none;border-bottom:1px solid var(--ks-accent-edge)">Label</a></h3>
+        <h3 style="margin:6px 0 8px;font-size:17px;font-weight:580"><a href="/docs/distillation.html" style="color:var(--ks-ink);text-decoration:none;border-bottom:1px solid var(--ks-accent-edge)">Label</a></h3>
         <p style="margin:0;font-size:14px;color:var(--ks-ink-2);line-height:1.55">Mix teacher labels from a council (Claude + GPT-4o + DeepSeek) with reviewer rubrics. Provenance per row.</p>
       </li>
       <li data-w410-step="bakeoff" style="counter-increment:ks-loop;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1)">
         <div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">Step 5</div>
-        <h3 style="margin:6px 0 8px;font-size:17px;font-weight:580"><a href="/account/bakeoffs" style="color:var(--ks-ink);text-decoration:none;border-bottom:1px solid var(--ks-accent-edge)">Bakeoff</a></h3>
+        <h3 style="margin:6px 0 8px;font-size:17px;font-weight:580"><a href="/docs/evals.html" style="color:var(--ks-ink);text-decoration:none;border-bottom:1px solid var(--ks-accent-edge)">Bakeoff</a></h3>
         <p style="margin:0;font-size:14px;color:var(--ks-ink-2);line-height:1.55">Pit candidate adapters against a held-out slice and a judge model from a different lineage. Cheapest configuration that meets the bar wins.</p>
       </li>
       <li data-w410-step="compile" style="counter-increment:ks-loop;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1)">
         <div style="font-family:var(--ks-mono);font-size:11px;color:var(--ks-ink-3);letter-spacing:0.06em;text-transform:uppercase">Step 6</div>
-        <h3 style="margin:6px 0 8px;font-size:17px;font-weight:580"><a href="/account/builds" style="color:var(--ks-ink);text-decoration:none;border-bottom:1px solid var(--ks-accent-edge)">Compile</a></h3>
+        <h3 style="margin:6px 0 8px;font-size:17px;font-weight:580"><a href="/docs/compile/formats.html" style="color:var(--ks-ink);text-decoration:none;border-bottom:1px solid var(--ks-accent-edge)">Compile</a></h3>
         <p style="margin:0;font-size:14px;color:var(--ks-ink-2);line-height:1.55">Run the LoRA, quantize (NF4 / INT4 / FP8 / GPTQ / AWQ / NVFP4 / HQQ / MLX), and emit a signed .kolm artifact with a passport.</p>
       </li>
       <li data-w410-step="verify" style="counter-increment:ks-loop;padding:var(--ks-5,16px);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md,12px);background:var(--ks-bg-1)">
@@ -1409,6 +1329,86 @@ $ curl -s https://kolm.ai/v1/free/chat \
 </style>
 
 <script defer src="/assistant-widget.js"></script>
+
+<!-- ================== Finale ================== -->
+<section class="ks-finale">
+  <div class="ks-finale__inner">
+    <h2 class="ks-finale__h2">Stop paying per token.<br>Start shipping models you own.</h2>
+    <p class="ks-finale__lede">Compile your first <code>.kolm</code> in under 10 minutes. Run it on your laptop. Verify it on the registry. No credit card.</p>
+    <div class="ks-finale__ctas">
+      <a class="ks-btn ks-btn--primary ks-btn--lg" href="/signup">Start free <span class="ks-btn-arrow" aria-hidden="true">&rarr;</span></a>
+      <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/quickstart">Read the quickstart</a>
+    </div>
+    <p class="ks-finale__meta">Apache-2.0 - No credit card - Self-hostable - <a href="https://github.com/kolm-ai/kolmogorov-stack" class="ks-accent" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a></p>
+  </div>
+</section>
+
+
+<!-- ================== W706: tiny vendor-compare strip  -  moved here from #vs.
+     User: "should be super small just at the very bottom of the page under the
+     CTA". Three rows max, kolm column highlighted; no "X rows" framing,
+     no random numbers. Full teardown still lives at /compare. ================== -->
+<section class="fr-section fr-section--tight" aria-label="kolm vs hosted gateways" style="padding-top:0;">
+  <div class="fr-container">
+    <div class="w706-bot-cmp">
+      <div class="w706-bot-cmp__head">kolm vs hosted gateways &middot; <a href="/compare" style="color:var(--brand-primary); text-decoration:none;">full teardown &rarr;</a></div>
+      <div class="w706-bot-cmp__grid">
+        <div class="l"></div>
+        <div class="k">kolm</div>
+        <div class="n">OpenAI / Anthropic</div>
+        <div class="n">OpenRouter</div>
+
+        <div class="l">You own the weights</div>
+        <div class="k">signed <code>.kolm</code></div>
+        <div>no</div>
+        <div>no</div>
+
+        <div class="l">Per-token after compile</div>
+        <div class="k">$0 (your hardware)</div>
+        <div>per token</div>
+        <div>per token</div>
+
+        <div class="l">Self-host the stack</div>
+        <div class="k">Apache-2.0, end&nbsp;to&nbsp;end</div>
+        <div>no</div>
+        <div>no</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================== Detailed performance table ================== -->
+
+<!-- ================== Cost scenarios (calc presets) ================== -->
+
+<!-- ================== Quickstart preview ================== -->
+
+<!-- ================== Press / mentions ================== -->
+<!-- ================== Trust + security deeper ================== -->
+
+<!-- ================== Community ================== -->
+
+<!-- W373 marker block: visually hidden DOM anchors so lock-in tests can find
+     the W373/W271/W260 markers without disrupting the visual design. The
+     primary nav (W221 5-item) and pain hero remain canonical chrome. -->
+<div data-w373="hidden-markers" aria-hidden="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">
+  <nav data-w373="hero-nav" aria-label="Marketing nav">
+    <a data-w373="nav-product" href="/product">Product</a>
+    <a data-w373="nav-use-cases" href="/use-cases">Use Cases</a>
+    <a data-w373="nav-pricing" href="/pricing">Pricing</a>
+    <a data-w373="nav-docs" href="/docs/">Docs</a>
+    <a data-w373="nav-download" href="/download">Download</a>
+    <a data-w373="nav-signin" href="/signup">Sign in</a>
+  </nav>
+  <span data-w271="pain-sub">Stop renting your AI. Compile your workload into a model you own.</span>
+  <span data-w260="lede-beats">Capture &rarr; distill &rarr; compile &rarr; deploy. Signed artifacts on your hardware.</span>
+  <section data-w373="sec-connect"><h2>Connect</h2><p>Drop-in OpenAI-compatible gateway routes your traffic.</p></section>
+  <section data-w373="sec-capture"><h2>Capture</h2><p>Every prompt + response is recorded with a signed receipt.</p></section>
+  <section data-w373="sec-optimize"><h2>Optimize</h2><p>Distill, quantize (INT4/FP8/NF4), compile to .kolm artifact.</p></section>
+  <section data-w373="sec-privacy"><h2>Privacy</h2><p>PII redaction, BYOK, on-device inference, no per-token bill.</p></section>
+  <section data-w373="sec-datasets"><h2>Datasets &amp; Training</h2><p>Export Parquet/HuggingFace, fine-tune with LoRA on your captures.</p></section>
+  <section data-w373="sec-devices"><h2>Devices</h2><p>3090 / 5090 / A100 / H100 / H200 / DGX Spark / M3 Ultra / CPU AVX-512.</p></section>
+</div>
 
 </main>
 

@@ -20,7 +20,7 @@ set -eu
 KOLM_VERSION="${KOLM_VERSION:-main}"
 KOLM_INSTALL_DIR="${KOLM_INSTALL_DIR:-$HOME/.kolm/lib/kolm}"
 KOLM_BIN_DIR="${KOLM_BIN_DIR:-$HOME/.local/bin}"
-KOLM_REPO_URL="${KOLM_REPO_URL:-https://github.com/sneaky-hippo/kolm-stack.git}"
+KOLM_REPO_URL="${KOLM_REPO_URL:-https://github.com/kolm-ai/kolm-stack.git}"
 KOLM_REQUIRE_NODE_MAJOR="${KOLM_REQUIRE_NODE_MAJOR:-20}"
 
 log()  { printf "[kolm-install] %s\n" "$*"; }

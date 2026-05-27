@@ -240,28 +240,58 @@ $ <b>kolm verify</b> support-triage.kolm
 </section>
 
 </main>
-<footer class="ks-footer">
+<footer class="ks-foot">
   <div class="ks-wrap">
-    <div class="ks-footer__grid">
-      <div>
-        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
-        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
       </div>
-      <div>
-        <h4>Wrapper</h4>
-        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
       </div>
-      <div>
-        <h4>Studio</h4>
-        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li><li><a href="/spec/toml">.kolm spec</a></li></ul>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/blog">Blog</a>
+        <a href="/faq">FAQ</a>
+        <a href="/changelog">Changelog</a>
       </div>
-      <div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/status">Status</a>
+        <a href="/subprocessors">Subprocessors</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
         <h4>Company</h4>
-        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/press">Press</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
-    <div class="ks-footer__bottom">
-      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai - Apache-2.0 - Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
     </div>
   </div>
 </footer>
@@ -269,7 +299,58 @@ $ <b>kolm verify</b> support-triage.kolm
 <!-- W806 lock-in anchors restored after W598-W707 page redesign (WC02) -->
 <div hidden data-w806-anchors="wave274-w274-header-footer-siblings">
 <header class="site-header"><a href="/compare">All comparisons</a></header>
-<footer class="site"><a href="/compare/kolm-vs-predibase-2026">Predibase 2026</a><a href="/compare/kolm-vs-together-2026">Together 2026</a><a href="/compare/kolm-vs-bedrock-distill">Bedrock distill</a><a href="/compare/kolm-vs-proxis">Proxis</a></footer>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="meta">
+      kolm v0.1.0 / MIT SDK / <a href="https://github.com/kolm-ai/kolm-stack">github</a> / <a href="/status">status</a>
+    </div>
+    <div class="links">
+      <div>
+        <div class="col-h">build</div>
+        <a href="/capture">capture</a>
+        <a href="/compile">compile</a>
+        <a href="/run">run</a>
+        <a href="/recall">recall</a>
+        <a href="/evolve">evolve</a>
+      </div>
+      <div>
+        <div class="col-h">deploy</div>
+        <a href="/teams">teams</a>
+        <a href="/tunnels">remote access</a>
+        <a href="/byoc">byoc cloud</a>
+        <a href="/airgap">airgap</a>
+        <a href="/enterprise">enterprise</a>
+      </div>
+      <div>
+        <div class="col-h">proof</div>
+        <a href="/benchmarks">benchmarks</a>
+        <a href="/research">research</a>
+        <a href="/k-score">k-score</a>
+        <a href="/leaderboard">registry</a>
+        <a href="/spec">rs-1 spec</a>
+      </div>
+      <div>
+        <div class="col-h">industries</div>
+        <a href="/healthcare">healthcare</a>
+        <a href="/finance">finance</a>
+        <a href="/legal">legal</a>
+        <a href="/edge">edge</a>
+        <a href="/cookbook">cookbook</a>
+      </div>
+      <div>
+        <div class="col-h">company</div>
+        <a href="/pricing">pricing</a>
+        <a href="/docs">docs</a>
+        <a href="/roadmap">roadmap</a>
+        <a href="/manifesto">manifesto</a>
+        <a href="/roi">roi</a>
+      </div>
+    </div>
+    <small class="footer-tag">
+      <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="https://github.com/kolm-ai/kolm-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
+    </small>
+  </div>
+</footer>
 </div>
 </body>
 </html>

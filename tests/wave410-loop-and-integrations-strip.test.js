@@ -31,15 +31,17 @@ test('W410 #2 - loop section names all 8 canonical steps', () => {
 });
 
 test('W410 #3 - each step links to the corresponding account / docs surface', () => {
-  // Behavior: at minimum, the loop must link out to the W409 surfaces the
-  // step describes so a reader can act on it without leaving the page hunt.
+  // Behavior: at minimum, the loop must link out to a public surface the
+  // step describes so a reader can act on it without hitting the auth wall.
+  // W902-C4 swapped /account/* targets for /docs/* (public) — keep accepting
+  // either family so this lock doesn't break the next time the surfaces move.
   const REQUIRED = [
     '/captures',
-    '/account/opportunities',
-    '/account/datasets',
-    '/account/labeling',
-    '/account/bakeoffs',
-    '/account/builds',
+    /\/(docs\/distill\.html|account\/opportunities)/,
+    /\/(docs\/datasets\.html|account\/datasets)/,
+    /\/(docs\/distillation\.html|account\/labeling)/,
+    /\/(docs\/evals\.html|account\/bakeoffs)/,
+    /\/(docs\/compile\/formats\.html|account\/builds)/,
     '/docs/verify',
     '/runtimes',
   ];
@@ -48,8 +50,13 @@ test('W410 #3 - each step links to the corresponding account / docs surface', ()
   const loopClose = INDEX.indexOf('</section>', loopOpen);
   const body = INDEX.slice(loopOpen, loopClose);
   for (const href of REQUIRED) {
-    assert.match(body, new RegExp(`href=["']${href.replace(/\//g, '\\/')}["']`),
-      `loop must link to ${href}`);
+    if (href instanceof RegExp) {
+      const matchRe = new RegExp(`href=["']${href.source}["']`);
+      assert.match(body, matchRe, `loop must link to one of ${href.source}`);
+    } else {
+      assert.match(body, new RegExp(`href=["']${href.replace(/\//g, '\\/')}["']`),
+        `loop must link to ${href}`);
+    }
   }
 });
 

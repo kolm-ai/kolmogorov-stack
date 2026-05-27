@@ -36816,7 +36816,7 @@ function _badArgs(msg) { const e = new Error(msg); e.exitCode = EXIT.BAD_ARGS; r
 // ---------- update ----------
 // `kolm update` self-installs the latest commit from the canonical github
 // source. This is the verb that actually does it (kolm upgrade only checks).
-// Honest path: spawn `npm i -g github:kolm-ai/kolm-stack` and
+// Direct path: spawn `npm i -g github:kolm-ai/kolm-stack` and
 // stream npm's stdout/stderr through to the user. Exit code is whatever npm
 // returned. On Windows we shell through `cmd /c` so npm.cmd resolves.
 async function cmdUpdate(args) {

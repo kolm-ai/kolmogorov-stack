@@ -44,12 +44,12 @@ test('W278 /spec/rs-1 has v2.1 current callout pointing at /spec/changelog', () 
 test('W278 /spec/rs-1 banner links to /verify-cli and GitHub', () => {
   const html = readPublic('spec/rs-1.html');
   assert.match(html, /\/verify-cli/, 'banner links to /verify-cli');
-  assert.match(html, /github\.com\/sneaky-hippo\/kolm-stack/, 'banner links to GitHub source');
+  assert.match(html, /github\.com\/kolm-ai\/kolm-stack/, 'banner links to GitHub source');
 });
 
 test('W278 /verify-cli has at least one install command', () => {
   // W380d: relaxed from exact curl-pipe snippet to behavior — the canonical
-  // install is `npm i -g github:sneaky-hippo/kolm-stack`. The page is
+  // install is `npm i -g github:kolm-ai/kolm-stack`. The page is
   // free to surface npm, curl, brew, or docker — but at least one install
   // command must be present.
   const html = readPublic('verify-cli.html');
@@ -113,9 +113,9 @@ test('W278 /spec/changelog lists v2.1 with k-score-2 axes', () => {
 test('W278 /spec/changelog provides diff links per version', () => {
   const html = readPublic('spec/changelog.html');
   // Each non-initial version should link to a compare URL on GitHub
-  assert.match(html, /github\.com\/sneaky-hippo\/kolm-stack\/compare\/spec-v1\.0\.\.\.spec-v1\.1/);
-  assert.match(html, /github\.com\/sneaky-hippo\/kolm-stack\/compare\/spec-v1\.1\.\.\.spec-v2\.0/);
-  assert.match(html, /github\.com\/sneaky-hippo\/kolm-stack\/compare\/spec-v2\.0\.\.\.spec-v2\.1/);
+  assert.match(html, /github\.com\/kolm-ai\/kolm-stack\/compare\/spec-v1\.0\.\.\.spec-v1\.1/);
+  assert.match(html, /github\.com\/kolm-ai\/kolm-stack\/compare\/spec-v1\.1\.\.\.spec-v2\.0/);
+  assert.match(html, /github\.com\/kolm-ai\/kolm-stack\/compare\/spec-v2\.0\.\.\.spec-v2\.1/);
 });
 
 test('W278 /spec/changelog has canonical URL', () => {

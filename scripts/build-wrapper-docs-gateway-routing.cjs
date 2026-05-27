@@ -82,7 +82,7 @@ function pageShell({ slug, family, title, description, eyebrow, h1, lede, sectio
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/sneaky-hippo/kolm" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -626,7 +626,7 @@ const GATEWAY_PAGES = [
         paragraphs: [
           'The published compose file ships three services. <code>gateway</code> runs the proxy; <code>postgres</code> stores captures and routing decisions; <code>minio</code> provides S3-compatible storage for long-term capture archives.',
         ],
-        code: `# docker-compose.yml\nservices:\n  gateway:\n    image: ghcr.io/sneaky-hippo/kolm-gateway:latest\n    ports:\n      - "8080:8080"\n    environment:\n      KOLM_GATEWAY_CONFIG: /etc/kolm/gateway.toml\n    volumes:\n      - ./gateway.toml:/etc/kolm/gateway.toml:ro\n      - ./signing.ed25519:/etc/kolm/signing.ed25519:ro\n    depends_on: [postgres, minio]\n    restart: unless-stopped\n\n  postgres:\n    image: postgres:16-alpine\n    environment:\n      POSTGRES_USER: kolm\n      POSTGRES_PASSWORD: change_me\n      POSTGRES_DB: kolm\n    volumes:\n      - pg-data:/var/lib/postgresql/data\n    restart: unless-stopped\n\n  minio:\n    image: minio/minio:latest\n    command: server /data --console-address ":9001"\n    environment:\n      MINIO_ROOT_USER: kolm\n      MINIO_ROOT_PASSWORD: change_me_too\n    volumes:\n      - minio-data:/data\n    ports:\n      - "9000:9000"\n      - "9001:9001"\n    restart: unless-stopped\n\nvolumes:\n  pg-data:\n  minio-data:`,
+        code: `# docker-compose.yml\nservices:\n  gateway:\n    image: ghcr.io/kolm-ai/kolm-gateway:latest\n    ports:\n      - "8080:8080"\n    environment:\n      KOLM_GATEWAY_CONFIG: /etc/kolm/gateway.toml\n    volumes:\n      - ./gateway.toml:/etc/kolm/gateway.toml:ro\n      - ./signing.ed25519:/etc/kolm/signing.ed25519:ro\n    depends_on: [postgres, minio]\n    restart: unless-stopped\n\n  postgres:\n    image: postgres:16-alpine\n    environment:\n      POSTGRES_USER: kolm\n      POSTGRES_PASSWORD: change_me\n      POSTGRES_DB: kolm\n    volumes:\n      - pg-data:/var/lib/postgresql/data\n    restart: unless-stopped\n\n  minio:\n    image: minio/minio:latest\n    command: server /data --console-address ":9001"\n    environment:\n      MINIO_ROOT_USER: kolm\n      MINIO_ROOT_PASSWORD: change_me_too\n    volumes:\n      - minio-data:/data\n    ports:\n      - "9000:9000"\n      - "9001:9001"\n    restart: unless-stopped\n\nvolumes:\n  pg-data:\n  minio-data:`,
       },
       {
         h2: 'Boot sequence',
@@ -655,7 +655,7 @@ const GATEWAY_PAGES = [
         paragraphs: [
           'The same image runs in Kubernetes with the published chart. The chart includes a StatefulSet for Postgres, a Deployment for the gateway (with HPA on request rate), and a Service of type ClusterIP. Pair with cert-manager for TLS and external-dns for DNS.',
         ],
-        code: `helm repo add kolm https://sneaky-hippo.github.io/kolm/charts\nhelm repo update\n\nhelm install gateway kolm/gateway \\\n  --namespace kolm --create-namespace \\\n  --set image.tag=latest \\\n  --set config.signingKeySecret=kolm-signing \\\n  --set ingress.host=gateway.internal.example.com \\\n  --set postgres.enabled=true \\\n  --set minio.enabled=true`,
+        code: `helm repo add kolm https://kolm-ai.github.io/kolmogorov-stack/charts\nhelm repo update\n\nhelm install gateway kolm/gateway \\\n  --namespace kolm --create-namespace \\\n  --set image.tag=latest \\\n  --set config.signingKeySecret=kolm-signing \\\n  --set ingress.host=gateway.internal.example.com \\\n  --set postgres.enabled=true \\\n  --set minio.enabled=true`,
       },
       {
         h2: 'Air-gapped install',
@@ -738,7 +738,7 @@ const GATEWAY_PAGES = [
       {
         h2: 'Where to file a bug',
         paragraphs: [
-          'Include the receipt CID (visible in <code>X-Kolm-Receipt-CID</code>) and the output of <code>kolm doctor --gateway --json</code>. Open an issue at <a href="https://github.com/sneaky-hippo/kolm/issues">github.com/sneaky-hippo/kolm/issues</a>.',
+          'Include the receipt CID (visible in <code>X-Kolm-Receipt-CID</code>) and the output of <code>kolm doctor --gateway --json</code>. Open an issue at <a href="https://github.com/kolm-ai/kolmogorov-stack/issues">github.com/kolm-ai/kolmogorov-stack/issues</a>.',
         ],
       },
     ],

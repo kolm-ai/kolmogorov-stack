@@ -91,28 +91,58 @@
   <p>W806 i18n payload extension ja-tail-1. The kolm gateway wrapper accepts OpenAI chat completion bodies, OpenAI completion bodies, Anthropic messages bodies, Anthropic completion bodies, the kolm-native invocation body, and the kolm-native streaming body. Every request and response pair is captured into the receipt chain with input_hash, output_hash, teacher_id, student_id, captured_at, captured_by, redaction_applied, redaction_profile, k_score, k_score_floor, supersession_block, drift_report, attestation_report, attestation_kind, and confidential_compute_hash fields. The capture pipeline writes durably to the configured store driver (vercel_postgres, vercel_kv, or jsonl) and surfaces 503 with capture_store_unavailable on store failure rather than silently swallowing the row. The k-score floor gate refuses to ship a .kolm artifact whose K-score is below the configured floor for the recipe, the teacher, the student, and the quantization profile.</p>
   <p>W806 i18n payload extension ja-tail-2. The drift detection ladder runs at M+1, M+2, M+3, and M+4 months after artifact signing, with progressively tighter tolerances on K-score floor delta, recipe version delta, corpus hash delta, evaluation metric delta, hardware target delta, quantization profile delta, and attestation kind delta. The six SUPERSESSION_REASONS (corpus_drift, recipe_drift, K-score_floor_violation, evaluation_drift, hardware_target_drift, manual_override) each trigger a supersession block on the artifact, surfacing kolm.ai/drift card status. The /spec/rs-1 receipt schema is the moat anchor; the /k-score-explained page documents the gate; the /frozen-eval page documents the deterministic eval pack; the /format/v2 page documents the artifact bundle format; the /training and /training/data-sources pages document the per-class licensing footnote; the /research/methods-2026-q2 page documents the published methods; the /quickstart/nl page documents the natural-language scaffolder; and the /compare page documents the matrix versus LoRAX, Predibase, OpenPipe, DIY, and hyperscaler. CLI verbs to know: kolm nl, kolm seeds new, kolm keys rotate.</p>
 </main>
-<footer class="ks-footer">
+<footer class="ks-foot">
   <div class="ks-wrap">
-    <div class="ks-footer__grid">
-      <div>
-        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
-        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
       </div>
-      <div>
-        <h4>Wrapper</h4>
-        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/integrations">Integrations</a></li><li><a href="/docs/api">API reference</a></li></ul>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
       </div>
-      <div>
-        <h4>Studio</h4>
-        <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li><li><a href="/spec/toml">.kolm spec</a></li></ul>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/blog">Blog</a>
+        <a href="/faq">FAQ</a>
+        <a href="/changelog">Changelog</a>
       </div>
-      <div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/status">Status</a>
+        <a href="/subprocessors">Subprocessors</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
         <h4>Company</h4>
-        <ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/press">Press</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
-    <div class="ks-footer__bottom">
-      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; <a href="/legal">Legal</a> &middot; <a href="/security">Security</a></span>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai - Apache-2.0 - Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
     </div>
   </div>
 </footer>

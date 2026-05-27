@@ -7,7 +7,7 @@ import path from 'node:path';
 
 const ROOT = process.cwd();
 const PUBLIC = path.join(ROOT, 'public');
-const CANONICAL = 'npm i -g github:sneaky-hippo/kolm-stack';
+const CANONICAL = 'npm i -g github:kolm-ai/kolm-stack';
 
 function read(rel) {
   return fs.readFileSync(path.join(ROOT, rel), 'utf8');
@@ -61,7 +61,7 @@ test('W494 #2 - first-party install docs use the GitHub npm source path', () => 
     'public/quickstart.html',
   ]) {
     const html = read(relPath);
-    assert.ok(html.includes('github:sneaky-hippo/kolm-stack'), `${relPath} must show source install`);
+    assert.ok(html.includes('github:kolm-ai/kolm-stack'), `${relPath} must show source install`);
   }
 
   for (const relPath of [
@@ -83,13 +83,13 @@ test('W494 #3 - Homebrew, winget, scoop, and Docker are runtime setup, not shipp
   assert.match(html, /<h3>winget \/ scoop<\/h3><span class="stat">node setup<\/span>/i);
 });
 
-test('W494 #4 - marketing copy and CLI help name the honest source install', () => {
+test('W494 #4 - marketing copy and CLI help name the canonical source install', () => {
   const why = read('public/why-kolm.html');
-  assert.ok(why.includes('npm install -g github:sneaky-hippo/kolm-stack'));
+  assert.ok(why.includes('npm install -g github:kolm-ai/kolm-stack'));
   assert.equal(why.includes('Homebrew, winget, apt'), false);
 
   const cli = read('cli/kolm.js');
-  assert.ok(cli.includes('npm i -g github:sneaky-hippo/kolm-stack'));
+  assert.ok(cli.includes('npm i -g github:kolm-ai/kolm-stack'));
   assert.doesNotMatch(cli, /\bnpm\s+(?:i|install)\s+-g\s+kolm\b/i);
 });
 

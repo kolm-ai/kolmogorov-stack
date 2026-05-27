@@ -18,7 +18,7 @@ const ROOT = new URL('../public/', import.meta.url).pathname.replace(/^\/([A-Za-
 const CANONICAL = `<footer class="site-footer">
   <div class="wrap">
     <div class="meta">
-      kolm v0.1.0 / MIT SDK / <a href="https://github.com/sneaky-hippo/kolm-stack">github</a> / <a href="/status">status</a>
+      kolm v0.1.0 / MIT SDK / <a href="https://github.com/kolm-ai/kolm-stack">github</a> / <a href="/status">status</a>
     </div>
     <div class="links">
       <div>
@@ -63,7 +63,7 @@ const CANONICAL = `<footer class="site-footer">
       </div>
     </div>
     <small class="footer-tag">
-      <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="https://github.com/sneaky-hippo/kolm-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
+      <a href="/trust">trust</a> &middot; <a href="/security">security</a> &middot; <a href="/privacy">privacy</a> &middot; <a href="/terms">terms</a> &middot; <a href="/faq">faq</a> &middot; <a href="https://github.com/kolm-ai/kolm-stack">github</a> &middot; kolm.ai &middot; MIT licensed runtime
     </small>
   </div>
 </footer>`;

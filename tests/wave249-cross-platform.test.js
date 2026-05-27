@@ -28,14 +28,14 @@ test('W249 #2 - install.ps1 exists and is non-empty', () => {
 
 test('W249 #3 - install.sh repo URL is kolm-stack (post-W254)', () => {
   const body = fs.readFileSync(SH, 'utf8');
-  assert.match(body, /github\.com\/sneaky-hippo\/kolm-stack\.git/);
+  assert.match(body, /github\.com\/kolm-ai\/kolm-stack\.git/);
   assert.doesNotMatch(body, OLD_REPO_RE);
   assert.doesNotMatch(body, OLD_BRAND_RE);
 });
 
 test('W249 #4 - install.ps1 repo URL is kolm-stack (post-W254)', () => {
   const body = fs.readFileSync(PS1, 'utf8');
-  assert.match(body, /github\.com\/sneaky-hippo\/kolm-stack\.git/);
+  assert.match(body, /github\.com\/kolm-ai\/kolm-stack\.git/);
   assert.doesNotMatch(body, OLD_REPO_RE);
   assert.doesNotMatch(body, OLD_BRAND_RE);
 });
