@@ -541,12 +541,21 @@
         const card = document.createElement('button');
         card.className = 't';
         card.type = 'button';
-        card.innerHTML = `<b></b><small></small><div class="meta"><span></span><span></span></div>`;
-        card.querySelector('b').textContent = t.name;
-        card.querySelector('small').textContent = t.blurb;
-        const meta = card.querySelectorAll('.meta span');
-        meta[0].textContent = t.recipe;
-        meta[1].textContent = t.target_vram_gb + ' GB VRAM';
+        const cardName = document.createElement('b');
+        cardName.textContent = t.name;
+        const cardBlurb = document.createElement('small');
+        cardBlurb.textContent = t.blurb;
+        const cardMeta = document.createElement('div');
+        cardMeta.className = 'meta';
+        const cardRecipe = document.createElement('span');
+        cardRecipe.textContent = t.recipe;
+        const cardVram = document.createElement('span');
+        cardVram.textContent = t.target_vram_gb + ' GB VRAM';
+        cardMeta.appendChild(cardRecipe);
+        cardMeta.appendChild(cardVram);
+        card.appendChild(cardName);
+        card.appendChild(cardBlurb);
+        card.appendChild(cardMeta);
         card.addEventListener('click', () => {
           descEl.value = `Use the ${t.name} template. ${t.blurb}`;
           $('#sum-recipe').textContent = t.recipe;
