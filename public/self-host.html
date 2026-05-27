@@ -77,7 +77,7 @@
   .tier-band .text p { margin: 0; font-size: 13.5px; color: var(--ks-ink-2); line-height: 1.55; max-width: 64ch; }
   .tier-band .actions { display: flex; flex-wrap: wrap; gap: var(--ks-3); }
 
-  /* W645: editorial spec-list helpers. */
+  
   .sh-list { margin-top: var(--ks-2); }
   .sh-list .fr-spec-list__p code,
   .sh-list .fr-spec-list__p a { font-family: inherit; }
@@ -90,7 +90,7 @@
   .sh-reach-list .fr-spec-list__row.--book .fr-spec-list__delta { color: #b693ff; }
   .sh-reach-list .fr-spec-list__row.--verify .fr-spec-list__delta { color: #a8b3c2; }
 </style>
-  <meta property="og:title" content="Self-host &middot; kolm.ai">
+  <meta property="og:title" content="Self-host · kolm.ai">
   <meta property="og:description" content="Run the kolm stack on your own hardware. Helm chart plus Terraform module ship a control plane in your Kubernetes and a data plane in your VPC subnet. Hardware sizing for INT4 7B-32B and BF16 70B. KMS integration. Enterprise plan for support SLA.">
   <meta property="og:image" content="https://kolm.ai/og/self-host.svg">
   <meta property="og:url" content="https://kolm.ai/self-host">
@@ -124,13 +124,13 @@
 <div class="ks-nav-wrap">
   <header class="ks-nav">
     <div class="ks-wrap ks-nav__row">
-      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
       <nav class="ks-nav__links" aria-label="Primary">
         <a href="/wrapper">Wrapper</a>
         <a href="/studio">Studio</a>
         <a href="/pricing">Pricing</a>
         <a href="/docs">Docs</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
       </nav>
       <div class="ks-nav__cta">
         <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
@@ -277,7 +277,7 @@ kolm verify ./sample.kolm    <span class="c"># offline signature check</span></p
         </tr>
       </tbody>
     </table>
-    <p style="margin-top:var(--ks-4); font-size:13.5px; color:var(--ks-ink-3); line-height:1.6">The 0.5B, 3B, 7B, and 32B INT4 sizes are verified end-to-end with our frontier quantize matrix (W408). The 70B and frontier rows reflect operational guidance from current pilots; we will surface the verified numbers once they land in the matrix.</p>
+    <p style="margin-top:var(--ks-4); font-size:13.5px; color:var(--ks-ink-3); line-height:1.6">The 0.5B, 3B, 7B, and 32B INT4 sizes are verified end-to-end with our frontier quantize matrix. The 70B and frontier rows reflect operational guidance from current pilots; we will surface the verified numbers once they land in the matrix.</p>
   </div>
 </section>
 
@@ -419,7 +419,7 @@ kolm verify ./sample.kolm    <span class="c"># offline signature check</span></p
           <h3 class="fr-spec-list__h">CLI runs without a subscription</h3>
           <span class="fr-spec-list__delta">FREE &middot; Apache-2.0</span>
         </div>
-        <p class="fr-spec-list__p">The full compiler, distill workers, quantization runtimes, and the verifier are Apache-2.0. Install with <code>pip install git+https://github.com/kolm-ai/kolmogorov-stack@main#subdirectory=sdk/python</code> or grab a static binary from the releases page. No license server; no telemetry beacon required; no feature gates on the open-source path.</p>
+        <p class="fr-spec-list__p">The full compiler, distill workers, quantization runtimes, and the verifier are Apache-2.0. Install with <code>pip install git+https://github.com/kolm-ai/kolm@main#subdirectory=sdk/python</code> or grab a static binary from the releases page. No license server; no telemetry beacon required; no feature gates on the open-source path.</p>
       </li>
       <li class="fr-spec-list__row --paid">
         <div class="fr-spec-list__head">
@@ -523,7 +523,7 @@ kolm verify ./sample.kolm    <span class="c"># offline signature check</span></p
         <a href="/manifesto">Manifesto</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub &rarr;</a>
       </div>
     </div>
     <div class="ks-foot__base">

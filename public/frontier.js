@@ -1,4 +1,3 @@
-// frontier.js - W621 interaction layer.
 // Magnetic CTAs, scroll-reveal, tilt cards, copy-to-clipboard.
 // All motion gated on prefers-reduced-motion + pointer:fine.
 

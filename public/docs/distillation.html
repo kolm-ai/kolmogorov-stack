@@ -61,10 +61,10 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </style>
 
 <link rel="stylesheet" href="/ks.css">
-<!-- ds-shell W619 -->
+
 <link rel="stylesheet" href="/docs-shell.css">
 <script defer src="/docs-shell.js"></script>
-<!-- W621 frontier design system -->
+
 <link rel="stylesheet" href="/frontier.css">
     <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/frontier.js"></script>
@@ -77,22 +77,22 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 <main id="main" tabindex="-1"><div class="wrap">
@@ -146,7 +146,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       <p>Capture full step-by-step traces from the teacher. The student learns the reasoning shape, not just the final answer. Lineage: Hinton, Vinyals, Dean 2015 on soft targets; the DeepSeek-R1-Distill family 2025 is the canonical open reference at 1.5B-70B scale.</p>
       <div class="fr-cli">
         <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--from-captures</span> <span class="fr-cli__flag">--namespace</span> support <span class="fr-cli__flag">--base-model</span> Qwen/Qwen2.5-7B-Instruct <span class="fr-cli__flag">--reasoning-trace-loss-weight</span> 0.5
-        <div class="fr-cli__comment"># student inherits the trace, not just the label (W713)</div>
+        <div class="fr-cli__comment"># student inherits the trace, not just the label</div>
       </div>
     </div>
 
@@ -156,7 +156,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       <p>Student generates rollouts. A grader (the teacher or a separate judge) scores them. Only the positives flow into the SFT batch. Lineage: the RLHF reward-model family and the more recent self-distill papers that close the loop without a full reinforcement-learning stage.</p>
       <div class="fr-cli">
         <span class="fr-cli__prompt">$</span> kolm distill onpolicy <span class="fr-cli__flag">--namespace</span> support <span class="fr-cli__flag">--grader</span> claude-opus-4-7 <span class="fr-cli__flag">--base-model</span> Qwen/Qwen2.5-7B-Instruct
-        <div class="fr-cli__comment"># student rolls out, grader scores, only positives flow back (W480)</div>
+        <div class="fr-cli__comment"># student rolls out, grader scores, only positives flow back</div>
       </div>
     </div>
 
@@ -166,7 +166,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       <p>Per-token best-of across multiple teacher logits. Pair a reasoning teacher, a code teacher, and a generalist into one student. The runner records which teacher won each token; auditable end to end. Lineage: the multi-teacher distillation line; Fukuda et al. 2017 is an early reference.</p>
       <div class="fr-cli">
         <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--teachers</span> claude-opus-4-7,gpt-4o,deepseek-v4-pro <span class="fr-cli__flag">--weights</span> auto <span class="fr-cli__flag">--namespace</span> support <span class="fr-cli__flag">--base-model</span> Qwen/Qwen2.5-14B-Instruct
-        <div class="fr-cli__comment"># per-token best-of across teachers, attribution preserved (W718)</div>
+        <div class="fr-cli__comment"># per-token best-of across teachers, attribution preserved</div>
       </div>
     </div>
 
@@ -176,7 +176,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       <p>Replay captured multi-step LangGraph or CrewAI runs. Compile the orchestrator plus the tool dialogues into one forward pass on a single student. Reduces inference cost on workflows that repeat. Lineage: the 2025-2026 agent-distill literature.</p>
       <div class="fr-cli">
         <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--from-captures</span> <span class="fr-cli__flag">--namespace</span> workflows <span class="fr-cli__flag">--base-model</span> Qwen/Qwen2.5-7B-Instruct
-        <div class="fr-cli__comment"># capture LangGraph/CrewAI rollouts under ns=workflows, then distill the orchestrator + tool calls into one forward (W463 trace-compile)</div>
+        <div class="fr-cli__comment"># capture LangGraph/CrewAI rollouts under ns=workflows, then distill the orchestrator + tool calls into one forward</div>
       </div>
     </div>
 
@@ -186,7 +186,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       <p>Run mergekit TIES (Yadav et al. 2023), DARE (Yu et al. 2024), or SLERP on multiple bases or teachers, then distill the merged result. Lineage: mergekit by Charles Goddard; community recipes popularized by mlabonne. The merge config and source SHAs are pinned in the receipt.</p>
       <div class="fr-cli">
         <span class="fr-cli__prompt">$</span> kolm distill <span class="fr-cli__flag">--auto-arch</span> <span class="fr-cli__flag">--namespace</span> support <span class="fr-cli__flag">--base-model</span> Qwen/Qwen2.5-14B-Instruct
-        <div class="fr-cli__comment"># TAAS searches student-arch + merge recipe; result + source SHAs land in spec.json (W716). Pin a specific merge with --merge-recipe ties|dare|slerp.</div>
+        <div class="fr-cli__comment"># TAAS searches student-arch + merge recipe; result + source SHAs land in spec.json. Pin a specific merge with --merge-recipe ties|dare|slerp.</div>
       </div>
     </div>
 
@@ -276,7 +276,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">
@@ -287,7 +287,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </footer>
 
 <div hidden data-w221-anchors="docs" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
-    <!-- KOLM_NAV_BEGIN (W221) -->
+    
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
       <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
@@ -383,7 +383,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       </div>
     </div>
     </nav>
-    <!-- KOLM_NAV_END (W221) -->
+    
 </div>
 </body>
 </html>

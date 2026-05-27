@@ -57,13 +57,13 @@
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -77,12 +77,12 @@
  <div class="wrap">
   <p class="eyebrow">Open-source AI workbench</p>
   <h1>Adversarial robustness — red-team framework.</h1>
-  <p class="lede">Eight categories of attack-framing patterns. A deterministic corpus generator you can seed for reproducibility. A bake-off harness that scores how a distilled student handles each pattern. A runtime sanitizer that blocks, redacts, or falls back to a stronger teacher via W709 entropy-aware routing. All open-source, all plain about what heuristic scoring can and cannot prove.</p>
+  <p class="lede">Eight categories of attack-framing patterns. A deterministic corpus generator you can seed for reproducibility. A bake-off harness that scores how a distilled student handles each pattern. A runtime sanitizer that blocks, redacts, or falls back to a stronger teacher via entropy-aware routing. All open-source, all plain about what heuristic scoring can and cannot prove.</p>
   <div class="meta">
     <span>Module <b>src/adversarial-bakeoff.js</b></span>
     <span>Categories <b>8</b></span>
     <span>Policies <b>4</b></span>
-    <span>Wave <b>W762</b></span>
+    <span>Wave <b></b></span>
   </div>
  </div>
 </section>
@@ -143,7 +143,7 @@ const prompts = generateAdversarialPrompts({
     <tbody>
       <tr><td><span class="pol">block</span></td><td>Return a refusal envelope. The underlying handler is never reached. <code>sanitized:null</code>.</td><td>High-stakes endpoints where any uncertainty should fail closed.</td></tr>
       <tr><td><span class="pol">redact</span></td><td>Strip matched spans from the input and replace with <code>[REDACTED]</code>. Forward the sanitized text to the handler.</td><td>When you want the user request to proceed but with the attack-framing removed.</td></tr>
-      <tr><td><span class="pol">fallback_to_teacher</span></td><td>Route the request to a stronger teacher model via the operator's <code>fallback_handler</code>. Returns <code>no_fallback_handler_configured</code> when none is wired — NEVER silent passthrough.</td><td>Default. Production-recommended. Pairs with W709 entropy-aware routing.</td></tr>
+      <tr><td><span class="pol">fallback_to_teacher</span></td><td>Route the request to a stronger teacher model via the operator's <code>fallback_handler</code>. Returns <code>no_fallback_handler_configured</code> when none is wired — NEVER silent passthrough.</td><td>Default. Production-recommended. Pairs with entropy-aware routing.</td></tr>
       <tr><td><span class="pol">passthrough</span></td><td>Record the classification but forward unchanged. Envelope carries a warning.</td><td>Plain A/B experiments only. NOT for production traffic.</td></tr>
     </tbody>
   </table>
@@ -152,11 +152,11 @@ const prompts = generateAdversarialPrompts({
 
 <section class="body">
  <div class="wrap">
-  <h2>5. W709 routing integration.</h2>
+  <h2>5. routing integration.</h2>
   <p>The <code>fallback_to_teacher</code> policy is a dependency-injection seam. It does not import the routing module directly — the operator wires the handler at startup. In production, the wiring looks like this:</p>
   <pre><span style="color:var(--ink-faint)">// startup.js</span>
 import { wrapForRuntime } from './src/runtime-sanitizer.js';
-import { routeToTeacher } from './src/confidence-routing.js'; <span style="color:var(--ink-faint)">// W709</span>
+import { routeToTeacher } from './src/confidence-routing.js';
 
 const safeHandler = wrapForRuntime(studentHandler, {
   policy: 'fallback_to_teacher',
@@ -181,13 +181,13 @@ kolm redteam sanitize --text "..." --policy fallback_to_teacher</pre>
 <section class="body">
  <div class="wrap">
   <h2>7. Caveats about what this proves.</h2>
-  <div class="note"><b>This framework is not a security certification.</b> A passing pass_rate on the W762 corpus means the student handled the FRAMING patterns we know about. It does not mean the student is safe against novel attacks. It does not mean the student is safe against well-crafted adaptive attacks. It does not substitute for an external red-team engagement, a penetration test, or a formal evaluation. Use this in CI to catch regressions. Pair it with a judge callable for production. Pair it with a human red-team for compliance.</div>
+  <div class="note"><b>This framework is not a security certification.</b> A passing pass_rate on the corpus means the student handled the FRAMING patterns we know about. It does not mean the student is safe against novel attacks. It does not mean the student is safe against well-crafted adaptive attacks. It does not substitute for an external red-team engagement, a penetration test, or a formal evaluation. Use this in CI to catch regressions. Pair it with a judge callable for production. Pair it with a human red-team for compliance.</div>
  </div>
 </section>
 
 <footer>
  <div class="wrap">
-  See <a href="/security/halborn-2026-04">Halborn pentest 2026-04</a> for the most recent external review. Source for the red-team framework lives at <a href="https://github.com/kolm-ai/kolmogorov-stack/tree/main/src">src/adversarial-bakeoff.js</a>.
+  See <a href="/security/halborn-2026-04">Halborn pentest 2026-04</a> for the most recent external review. Source for the red-team framework lives at <a href="https://github.com/kolm-ai/kolm/tree/main/src">src/adversarial-bakeoff.js</a>.
  </div>
 </footer>
 </main>

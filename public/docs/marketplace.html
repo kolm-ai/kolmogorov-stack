@@ -7,7 +7,7 @@
 <meta name="description" content="Publish a signed .kolm artifact to kolm.ai. Three-step flow, 70/30 revenue split, faceted search, ratings and reviews, transfer-learning hand-off via namespace-fingerprint.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
-<meta property="og:title" content="Marketplace &middot; kolm.ai">
+<meta property="og:title" content="Marketplace · kolm.ai">
 <meta property="og:description" content="Storefront for signed .kolm artifacts. Paid + free listings, anti-gaming on ratings, 70/30 publisher/platform revenue split, fine-tune queue.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/docs/marketplace">
@@ -53,13 +53,13 @@
 <div class="ks-nav-wrap">
   <header class="ks-nav">
     <div class="ks-wrap ks-nav__row">
-      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
       <nav class="ks-nav__links" aria-label="Primary">
         <a href="/wrapper">Wrapper</a>
         <a href="/studio">Studio</a>
         <a href="/pricing">Pricing</a>
         <a href="/docs">Docs</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
       </nav>
       <div class="ks-nav__cta">
         <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
@@ -104,7 +104,7 @@
   "price_micro_usd": 0,
   "created_at": "2026-05-22T14:08:12Z"
 }</pre></div>
-    <p>The data-layer module sits at <code>src/marketplace-w825.js</code> and exposes three pure-read helpers - <code>listListings()</code>, <code>getListing(id)</code>, <code>upsertListing(listing)</code> - and the frozen facet enums (<code>W825_VERTICALS</code>, <code>W825_TASK_TYPES</code>, <code>W825_HARDWARE_TARGETS</code>, <code>W825_SORT_MODES</code>) that the route + UI share.</p>
+    <p>The data-layer module sits at <code>src/marketplace.js</code> and exposes three pure-read helpers - <code>listListings()</code>, <code>getListing(id)</code>, <code>upsertListing(listing)</code> - and the frozen facet enums (<code>VERTICALS</code>, <code>TASK_TYPES</code>, <code>HARDWARE_TARGETS</code>, <code>SORT_MODES</code>) that the route + UI share.</p>
   </div>
 </section>
 
@@ -148,7 +148,7 @@
   <div class="ks-wrap">
     <h2>Fine-tune queue</h2>
     <p class="sub">Any marketplace artifact can be the starting point for a transfer-learning fine-tune. <code>POST /v1/marketplace/finetune</code> queues a distill run against the artifact's bytes using your tenant's capture namespace.</p>
-    <p>The endpoint copies the artifact into <code>~/.kolm/artifacts/&lt;artifact_id&gt;.kolm</code> for the distill pipeline to pick up by stable filename, then writes a queued event with <code>provider: 'kolm_marketplace_finetune_queued'</code>. The response carries <code>status: 'queued'</code> (never <code>'running'</code> or <code>'completed'</code> - the real distill runs in a follow-up worker). The W381 distill pipeline scans for these rows and picks them up on its next cycle.</p>
+    <p>The endpoint copies the artifact into <code>~/.kolm/artifacts/&lt;artifact_id&gt;.kolm</code> for the distill pipeline to pick up by stable filename, then writes a queued event with <code>provider: 'kolm_marketplace_finetune_queued'</code>. The response carries <code>status: 'queued'</code> (never <code>'running'</code> or <code>'completed'</code> - the real distill runs in a follow-up worker). The distill pipeline scans for these rows and picks them up on its next cycle.</p>
     <p>No-silent-pass contract: when <code>artifact_uri</code> is missing on disk or is a remote URL we cannot stage locally, the response still carries <code>ok: true</code> + <code>copied_to: null</code> + <code>copy_skipped_reason</code> so the operator can see why the bytes did not stage. The distill row is still queued; the worker can retry the copy when the bytes show up.</p>
   </div>
 </section>
@@ -242,7 +242,7 @@ kolm marketplace publish ./my-artifact.kolm</pre></div>
         <a href="/enterprise">Enterprise</a>
         <a href="/manifesto">Manifesto</a>
         <a href="mailto:rodneyyesep@gmail.com">rodneyyesep@gmail.com</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub &rarr;</a>
       </div>
     </div>
     <div class="ks-foot__base">

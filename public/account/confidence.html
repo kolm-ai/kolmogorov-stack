@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Confidence routing - Account - kolm.ai</title>
-<meta name="description" content="W807 confidence-aware adaptive routing dashboard: local-vs-teacher ratio, cost savings, splice latency p50/p95/p99, and threshold distribution.">
+<meta name="description" content="confidence-aware adaptive routing dashboard: local-vs-teacher ratio, cost savings, splice latency p50/p95/p99, and threshold distribution.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/confidence">
-<meta property="og:title" content="Confidence routing &middot; Account &middot; kolm.ai">
-<meta property="og:description" content="W807 confidence-aware adaptive routing dashboard: local-vs-teacher ratio, cost savings, splice latency p50/p95/p99, and threshold distribution.">
+<meta property="og:title" content="Confidence routing · Account · kolm.ai">
+<meta property="og:description" content="confidence-aware adaptive routing dashboard: local-vs-teacher ratio, cost savings, splice latency p50/p95/p99, and threshold distribution.">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/account/confidence">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Confidence routing - Account - kolm.ai","description":"W807 confidence-aware adaptive routing dashboard.","url":"https://kolm.ai/account/confidence","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Confidence routing","item":"https://kolm.ai/account/confidence"}]}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Confidence routing - Account - kolm.ai","description":"confidence-aware adaptive routing dashboard.","url":"https://kolm.ai/account/confidence","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Confidence routing","item":"https://kolm.ai/account/confidence"}]}}</script>
 <style>
 .acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
 #account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
@@ -81,13 +81,13 @@
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -104,9 +104,9 @@
 <nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured calls</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li><li><a href="/account/routing">Routing decisions</a></li><li><a href="/account/confidence" aria-current="page">Confidence routing</a></li><li><a href="/account/active-learning">Active learning</a></li></ul></nav>
 <section class="acct-content">
 
-<p class="eyebrow">Mid-response teacher splice telemetry (W807)</p>
+<p class="eyebrow">Mid-response teacher splice telemetry</p>
 <h1>Confidence routing.</h1>
-<p class="lede">W807 watches a streaming entropy window during student generation and splices in the teacher mid-response when the window crosses your threshold. This page reports the local-vs-teacher ratio, cost saved, splice latency percentiles, and the distribution of thresholds in use.</p>
+<p class="lede">watches a streaming entropy window during student generation and splices in the teacher mid-response when the window crosses your threshold. This page reports the local-vs-teacher ratio, cost saved, splice latency percentiles, and the distribution of thresholds in use.</p>
 
 <div class="toolbar">
   <label for="ns-input" style="color:var(--ink-faint);font-family:var(--mono);font-size:11px">Namespace</label>
@@ -128,7 +128,7 @@
   <h2>Local-vs-teacher ratio over time</h2>
   <p class="pdesc">Sparkline of the most recent 30 routing decisions, oldest on the left. Bar height encodes the share of local (student) tokens; color encodes the dominant route.</p>
   <div class="sparkbox">
-    <svg id="spark-ratio" viewBox="0 0 600 60" preserveAspectRatio="none" aria-label="Last 30 routing decisions"></svg>
+    <svg id="spark-ratio" viewbox="0 0 600 60" preserveaspectratio="none" aria-label="Last 30 routing decisions"></svg>
     <div class="legend">
       <span><span class="dot" style="background:var(--good,#7fbf3f)"></span>student</span>
       <span><span class="dot" style="background:var(--warn,#d9a020)"></span>mixed (spliced)</span>
@@ -141,7 +141,7 @@
   <h2>Cost savings over time</h2>
   <p class="pdesc">Cumulative teacher cost avoided across the most recent decisions, oldest on the left. A flat line means every recent decision escalated to the teacher; a steep climb means the student handled the load.</p>
   <div class="sparkbox">
-    <svg id="spark-cost" viewBox="0 0 600 60" preserveAspectRatio="none" aria-label="Cumulative cost savings sparkline"></svg>
+    <svg id="spark-cost" viewbox="0 0 600 60" preserveaspectratio="none" aria-label="Cumulative cost savings sparkline"></svg>
     <div class="legend">
       <span><span class="dot" style="background:var(--accent,#7fbf3f)"></span>cumulative USD saved</span>
     </div>
@@ -177,12 +177,12 @@
     <tbody id="recent-rows"></tbody>
   </table>
   <div id="recent-empty" class="empty" hidden>
-    <strong>No confidence routing events yet.</strong> Call <code>/v1/route/chat/completions</code> with at least one high-entropy span and a row will appear here within a few seconds. See <a href="/docs/api">API reference</a> for the W807 metadata schema.
-  </div>
+    <strong>No confidence routing events yet.</strong> Call <code>/v1/route/chat/completions</code> with at least one high-entropy span and a row will appear here within a few seconds. See <a href="/docs/api">API reference</a> for the metadata schema.
+ </div>
 </div>
 
 <div class="note">
-  <strong>Caveat.</strong> Every fallback (splice or budget-exceeded) is wired into the W720 self-improvement loop as a <em>weakness signal</em>: the underlying capture climbs to the top of the re-distill queue. Cost savings shown are estimates; settle against your invoice.
+  <strong>Caveat.</strong> Every fallback (splice or budget-exceeded) is wired into the self-improvement loop as a <em>weakness signal</em>: the underlying capture climbs to the top of the re-distill queue. Cost savings shown are estimates; settle against your invoice.
 </div>
 
 </section>
@@ -429,7 +429,7 @@ load();
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">
@@ -440,7 +440,7 @@ load();
 </footer>
 
 <div hidden data-w221-anchors="account" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
-    <!-- KOLM_NAV_BEGIN (W221) -->
+    
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
       <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
@@ -536,7 +536,7 @@ load();
       </div>
     </div>
     </nav>
-    <!-- KOLM_NAV_END (W221) -->
+    
 </div>
 </body>
 </html>

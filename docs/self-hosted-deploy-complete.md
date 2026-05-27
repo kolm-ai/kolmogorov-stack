@@ -48,7 +48,7 @@ kolm doctor          # probes Node, Python, GPU, signing keys
 ### Option B — git clone (air-gap or custom build)
 
 ```bash
-git clone https://github.com/kolm-ai/kolmogorov-stack.git
+git clone https://github.com/kolm-ai/kolm.git
 cd kolmogorov-stack
 npm install --omit=dev
 node cli/kolm.js --version
@@ -619,7 +619,7 @@ into a support ticket.
 
 ## 15. Support
 
-- **Issues:** https://github.com/kolm-ai/kolmogorov-stack/issues
+- **Issues:** https://github.com/kolm-ai/kolm/issues
 - **Security:** security@kolm.ai (PGP key at `/.well-known/security.txt`)
 - **Enterprise support:** support@kolm.ai (response within 4 business hours)
 - **Status:** https://status.kolm.ai (managed cloud only — self-hosted is your status)

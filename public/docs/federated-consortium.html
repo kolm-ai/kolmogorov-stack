@@ -7,7 +7,7 @@
 <meta name="description" content="Multi-tenant federated learning. Opt-in / opt-out consortium membership, differential-privacy budget tracking (epsilon spent vs allocated), membership-inference attack verification on shipped artifacts.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
-<meta property="og:title" content="Federated consortium &middot; kolm.ai">
+<meta property="og:title" content="Federated consortium · kolm.ai">
 <meta property="og:description" content="Multiple tenants contribute gradients, not raw data. DP budget bookkeeping is enforced at the consortium level; MIA verification rounds out the privacy proof.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/docs/federated-consortium">
@@ -53,13 +53,13 @@
 <div class="ks-nav-wrap">
   <header class="ks-nav">
     <div class="ks-wrap ks-nav__row">
-      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
       <nav class="ks-nav__links" aria-label="Primary">
         <a href="/wrapper">Wrapper</a>
         <a href="/studio">Studio</a>
         <a href="/pricing">Pricing</a>
         <a href="/docs">Docs</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
       </nav>
       <div class="ks-nav__cta">
         <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
@@ -159,7 +159,7 @@
 </pre></div>
     <h3>GET /v1/federated/consortium/aggregations</h3>
     <div class="code-card"><pre>curl -H "Authorization: Bearer $KOLM_API_KEY" \
-  "https://kolm.ai/v1/federated/consortium/aggregations?consortium_id=support-bots-2026&limit=20"
+  "https://kolm.ai/v1/federated/consortium/aggregations?consortium_id=support-bots-2026&limit;=20"
 
 # -&gt; { "ok":true, "consortium_id":"...", "total":4, "aggregations":[
 #      { "aggregation_id":"agg_...", "round_id":"round_...", "status":"completed",
@@ -175,7 +175,7 @@
 <section class="doc-section" id="mia-verify">
   <div class="ks-wrap">
     <h2>Membership-inference verification</h2>
-    <p class="sub">A shipped artifact should resist the "was this row in your training set" attack. The W830-2 verifier scores an attacker's AUC against a configured threshold (default 0.55, near-chance) and returns <code>passing</code> or <code>leaking</code>.</p>
+    <p class="sub">A shipped artifact should resist the "was this row in your training set" attack. The-2 verifier scores an attacker's AUC against a configured threshold (default 0.55, near-chance) and returns <code>passing</code> or <code>leaking</code>.</p>
     <h3>POST /v1/federated/consortium/verify-mia</h3>
     <div class="code-card"><pre>curl -X POST https://kolm.ai/v1/federated/consortium/verify-mia \
   -H "Authorization: Bearer $KOLM_API_KEY" \
@@ -209,7 +209,7 @@
   <div class="ks-wrap">
     <div class="ks-foot__grid">
       <div class="ks-foot__brand">
-        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
         <p class="ks-foot__tag">Open-source AI workbench. Distill, compile, deploy.</p>
       </div>
       <div class="ks-foot__col">
@@ -226,7 +226,7 @@
       </div>
       <div class="ks-foot__col">
         <h4>Company</h4>
-        <a href="/contact">Contact</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a>
+        <a href="/contact">Contact</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
       </div>
     </div>
     <div class="ks-foot__bottom"><span>&copy; 2026 kolm.ai</span><span>Apache-2.0</span></div>

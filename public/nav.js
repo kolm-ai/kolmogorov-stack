@@ -1,5 +1,4 @@
 (function () {
- // W844: ensure kolm-chat.js is loaded site-wide so the post-auth console
  // and any page that adds a [data-kolm-chat] placeholder gets the live
  // chat box. Cheap: idempotent script-tag injection.
  (function ensureChatScript() {
@@ -51,8 +50,6 @@
 installSurfaceGuard();
   document.documentElement.classList.add('kolm-sota-ui-v560', 'kolm-sota-ui-v565', 'kolm-sota-ui-v567', 'kolm-sota-ui-v597');
 
-  // W894 — fill <div data-include-nav> / <div data-include-footer> with
-  // canonical site chrome. The W893 vertical/security/legal pages emit
   // these placeholders but no script previously filled them, leaving
   // those pages with NO nav and NO footer. That looked like a "broken
   // nav" / "old nav bleeding through" when arriving from a page that
@@ -68,7 +65,7 @@ installSurfaceGuard();
       '<li><a href="/studio">Studio</a></li>',
       '<li><a href="/pricing">Pricing</a></li>',
       '<li><a href="/docs">Docs</a></li>',
-      '<li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>',
+      '<li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>',
       '</ul>',
       '<div class="ks-nav__right">',
       '<a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>',
@@ -77,7 +74,7 @@ installSurfaceGuard();
       '</div>',
       '</nav>',
       '<div class="ks-nav__sheet" id="navSheet">',
-      '<a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>',
+      '<a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>',
       '</div>',
       '</div>'
     ].join('');
@@ -99,7 +96,7 @@ installSurfaceGuard();
       '</div>',
       '<div>',
       '<h4>Company</h4>',
-      '<ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li></ul>',
+      '<ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li></ul>',
       '</div>',
       '</div>',
       '<div class="ks-footer__bottom">',
@@ -120,167 +117,6 @@ installSurfaceGuard();
     } catch (e) {}
   })();
 
-  // W894 — load /account-shell.css on post-auth pages. The 53 /account/*
-  // files duplicate a cramped inline <style> block (padding:16px,
-  // margin-bottom:16px, font-size:15/13). A single shared stylesheet
-  // appended at runtime overrides those via source order and gives
-  // every account page the same generous spacing without touching
-  // 53 files.
-  (function loadAccountShell() {
-    try {
-      if (!document.body || !document.body.classList.contains('kolm-account-surface')) return;
-      if (document.querySelector('link[href="/account-shell.css"]')) return;
-      var link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = '/account-shell.css';
-      document.head.appendChild(link);
-    } catch (e) {}
-  })();
-
- // Two header conventions in the repo:
- // newer: <header class="site-header"> + .site-nav + .site-actions
- // older: <header class="site"> with .left>nav + .right
- // nav.js handles both: applies the active class on whichever pre-baked
- // 3-item nav already lives in the HTML, then wires mobile toggle clicks.
- // It does NOT rewrite innerHTML; that caused visible layout shift on
- // every navigation as the DOM mutated mid-paint.
- var header = document.querySelector('header.site-header, header.site');
- if (!header) return;
- var brandLink = header.querySelector('a.brand, a.logo');
- if (brandLink && brandLink.textContent.replace(/\s+/g, '').toLowerCase() === 'kolm') {
- brandLink.textContent = 'kolm.ai';
- }
-
- var isLegacy = header.classList.contains('site') && !header.classList.contains('site-header');
- var nav = isLegacy ? header.querySelector('.left nav, nav') : header.querySelector('.site-nav');
- var actions = isLegacy ? header.querySelector('.right') : header.querySelector('.site-actions');
- if (!nav) return;
- if (!actions && !isLegacy) {
- actions = document.createElement('div');
- actions.className = 'site-actions';
- var wrapForActions = header.querySelector('.wrap') || header;
- wrapForActions.appendChild(actions);
- }
- if (!actions) return;
-
- // Final guard for legacy pages that still contain late inline CSS blocks.
- // The stylesheet file is the source of truth; this small runtime layer keeps
- // old body-level styles from reintroducing compressed headlines or tiny
- // shared header controls after the finish layer has loaded.
- installSurfaceGuard();
-
- // Active state only. Path-driven; idempotent; never rewrites innerHTML.
- // W221/W561: canonical top nav plus product-spine stages.
- // Solutions are first-class; vertical, comparison, migration, and use-case
- // pages should not make the Product tab look active.
- // /models + /runtimes both activate the Models tab.
- var path = (window.location.pathname || '/').replace(/\/+$/, '') || '/';
-var prdRe = /^\/(product|whitepaper|motion|capture|captures|quickstart|compile|distill|training|train|run|recall|serve|evolve|anatomy|k-score|build-your-own|integrations|use-cases|healthcare|finance)(\/|$)/;
-var solRe = /^\/(use-cases|healthcare|finance|legal|defense|edge|devtools|insure|health-insurance|saas|eu|gov|compare|vs-|how-vs|migrate|case-studies|frontier-stack|sovereign-ai|why-now|why-kolm)(\/|$)/;
-var modRe = /^\/(models|runtimes|frontier-stack|compute|device|hub|registry|marketplace|atlas)(\/|$)/;
-var devRe = /^\/(docs|research|training|train|spec|api|sdk|articles|cookbook|architecture|launch|troubleshooting|faq|press|changelog|benchmarks|leaderboard|kscore-bench|kscore-leaderboard)(\/|$)/;
- var entRe = /^\/(enterprise|customers|roi|baa|teams|tunnels|byoc|airgap|hipaa-mapping|soc2|security|subprocessors|trust|threat-model|slsa|sbom|compliance|compliance-packs|self-host|cloud)(\/|$)/;
- var prRe = /^\/pricing(\/|$)/;
- var topSection = prRe.test(path) ? 'pricing'
- : entRe.test(path) ? 'enterprise'
- : modRe.test(path) ? 'models'
- : solRe.test(path) ? 'solutions'
- : prdRe.test(path) ? 'product'
- : devRe.test(path) ? 'docs'
- : '';
-
- (function repairInteractiveContracts() {
- function cleanLabel(s) {
- return String(s || '')
- .replace(/[-_]+/g, ' ')
- .replace(/\s+/g, ' ')
- .trim();
- }
- function labelForControl(el) {
- if (el.getAttribute('aria-label') || el.getAttribute('aria-labelledby')) return '';
- var explicit = el.id ? document.querySelector('label[for="' + CSS.escape(el.id) + '"]') : null;
- var wrap = el.closest('label');
- var rowField = el.closest('tr') ? el.closest('tr').querySelector('.field-name') : null;
- var fieldLabel = el.closest('[aria-labelledby]');
- var fieldLabelText = fieldLabel ? document.getElementById(fieldLabel.getAttribute('aria-labelledby')) : null;
- return cleanLabel(
- (explicit && explicit.textContent) ||
- (wrap && wrap.textContent) ||
- (rowField && rowField.textContent) ||
- (fieldLabelText && fieldLabelText.textContent) ||
- el.getAttribute('placeholder') ||
- el.getAttribute('name') ||
- el.id ||
- el.getAttribute('type') ||
- el.tagName
- );
- }
- function repairControls(root) {
- Array.prototype.forEach.call((root || document).querySelectorAll('input:not([type="hidden"]), textarea, select'), function (el) {
- var label = labelForControl(el);
- if (label) el.setAttribute('aria-label', label);
- if ((el.type === 'checkbox' || el.type === 'radio') && !el.closest('.kolm-check-hit')) {
- var hit = el.closest('label');
- if (hit) {
- hit.classList.add('kolm-check-hit');
- } else if (el.parentNode) {
- hit = document.createElement('label');
- hit.className = 'kolm-check-hit';
- hit.setAttribute('aria-label', el.getAttribute('aria-label') || 'Toggle setting');
- el.parentNode.insertBefore(hit, el);
- hit.appendChild(el);
- }
- }
- });
- }
- repairControls(document);
- if (window.MutationObserver && !document.__kolm_control_observer) {
- document.__kolm_control_observer = true;
- new MutationObserver(function (records) {
- for (var i = 0; i < records.length; i++) {
- for (var j = 0; j < records[i].addedNodes.length; j++) {
- var node = records[i].addedNodes[j];
- if (node && node.nodeType === 1) repairControls(node);
- }
- }
- }).observe(document.body, { childList: true, subtree: true });
- }
- var apiFilter = document.getElementById('hide-preview');
- if (apiFilter && !apiFilter.__kolm_wired) {
- apiFilter.__kolm_wired = true;
- if (!apiFilter.getAttribute('aria-label')) apiFilter.setAttribute('aria-label', 'Show reference-ready routes only');
- apiFilter.addEventListener('change', function () {
- document.body.setAttribute('data-api-filter', apiFilter.checked ? 'live' : 'all');
- });
- }
- if (!document.__kolm_copy_wired) {
- document.__kolm_copy_wired = true;
- document.addEventListener('click', function (e) {
- var btn = e.target && e.target.closest ? e.target.closest('button.copy[data-copy-text]') : null;
- if (!btn) return;
- var text = btn.getAttribute('data-copy-text') || '';
- if (!text) return;
- var done = function () {
- btn.textContent = 'copied';
- window.setTimeout(function () { btn.textContent = btn.getAttribute('data-copy-label') || 'copy'; }, 1400);
- };
- if (navigator.clipboard && navigator.clipboard.writeText) {
- navigator.clipboard.writeText(text).then(done, done);
- } else {
- var ta = document.createElement('textarea');
- ta.value = text;
- document.body.appendChild(ta);
- ta.select();
- try { document.execCommand('copy'); } catch (err) {}
- document.body.removeChild(ta);
- done();
- }
- });
- }
- })();
-
- /* W846 fix-the-site round 2: mega-menu dropdown killed per user mandate.
-    Nav already exposes the canonical links; dropdown was visual noise. */
  (function ensureSolutionsNav() { return; })();
 
  var anchors = nav.querySelectorAll('a');
@@ -601,7 +437,6 @@ function accountPageTagline() {
  if (path.indexOf('/account/security') === 0) return 'Manage 2FA, sessions, recovery, and admin safeguards.';
  return 'Route model calls, compile specialists, deploy signed artifacts, prove governance.';
 }
- // W840 job-based sidebar — every account/*.html reachable in <=2 clicks.
  // Collapsible <details> groups: open by default + open when active route lives
  // inside the group so the user always sees their current section expanded.
  // Single ungrouped Overview row sits above the BUILD..ACCOUNT eyebrows.
@@ -728,7 +563,6 @@ function accountPageTagline() {
  main.insertBefore(band, main.firstElementChild || main.firstChild);
  renderAccountSidebar();
 
- // W844: post-auth console chat. Same component as the homepage free-tier
  // chat; data-kolm-chat-mode="auth" hides the "20/day" framing and tells
  // the chat to assume the soft-auth cookie will upgrade the response to a
  // tenant-scoped snapshot. Mounts above the band so it's the first thing
@@ -896,10 +730,8 @@ return profile('platform', 'Product map', 'Gateway, compiler, runtime, proof.', 
  main.insertBefore(band, main.firstChild);
  })();
 
- // W689: footer trust ribbon. Injected once above the existing site footer
  // on every page. Four chips: license / signing / billing / contact.
  // Idempotent. Skips if the page already has a hand-placed .ks-trust-ribbon.
- // W691: Primary-nav unifier. Many pages still carry the legacy verb-rail
  // (Gateway/Capture/Distill/Compile/Runtime/K-score/Pricing). Replace with the
  // canonical 5-item marketing nav so brand reads as one product across every
  // page on the next service-worker refresh. CTAs are left alone — pages keep
@@ -910,7 +742,7 @@ return profile('platform', 'Product map', 'Gateway, compiler, runtime, proof.', 
    { href: '/use-cases', label: 'Use cases' },
    { href: '/pricing', label: 'Pricing' },
    { href: '/docs', label: 'Docs' },
-   { href: 'https://github.com/kolm-ai/kolmogorov-stack', label: 'GitHub', rel: 'noopener' },
+   { href: 'https://github.com/kolm-ai/kolm', label: 'GitHub', rel: 'noopener' },
   ];
   function render(target, tag) {
    target.innerHTML = '';

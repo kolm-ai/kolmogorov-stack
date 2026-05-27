@@ -1,27 +1,4 @@
-/*  W888-S — assistant-widget.js
- *
- *  Inline meta-demo widget. Mounts to any [data-kolm-assistant] element.
- *  POSTs to the public docs endpoint /v1/assistant/chat-docs (W888-R) and
- *  falls through to the authed /v1/assistant/chat endpoint (W888-Q) when
- *  a session cookie is detected. Each successful reply renders the
- *  passport_hash inline with a "Verify ->" link to /v1/verify/<hash>.
- *
- *  The widget intentionally does not depend on a framework so the same
- *  bundle ships with the public homepage and the standalone /about-the-assistant
- *  page. It re-uses kolm-chat.js's pre-paint conventions (warm-paper.css
- *  class tokens, cool slate dark palette) without duplicating its CLI
- *  classifier surface — that is for /v1/free/chat. This widget is for
- *  natural-language Q&A about kolm itself.
- *
- *  Endpoint resolution order (first 2xx wins):
- *    1. /v1/assistant/chat-docs       (public, rate-limited, W888-R)
- *    2. /v1/assistant/chat            (authed, W888-Q)
- *
- *  If neither route exists yet (W888-Q + W888-R both pending) the widget
- *  surfaces a "verifying soon" banner with the passport hash from
- *  build/kolm-assistant-1.5b/compile-passport.json — visitors can still
- *  click through to /v1/verify/<hash> to see the chain.
- */
+
 (function () {
   'use strict';
   if (typeof document === 'undefined') return;
@@ -98,7 +75,7 @@
         return Promise.resolve({
           ok: false,
           status: 0,
-          body: { error: 'route_pending', message: 'Public assistant endpoint is being wired up. Each reply will land with a verifiable passport once W888-R ships.' },
+          body: { error: 'route_pending', message: 'Public assistant endpoint is being wired up. Each reply will land with a verifiable passport once the assistant ships.' },
         });
       }
       var url = ENDPOINTS[idx++];

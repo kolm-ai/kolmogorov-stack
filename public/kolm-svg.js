@@ -1,8 +1,4 @@
-/* kolm-svg.js — W598 visual language: inline SVG icons + semantic illustrations.
-   - Icons: Lucide-style 24x24, 1.5px stroke, currentColor. Use anywhere text + icon.
-   - Illustrations: animated semantic diagrams that show what kolm actually does.
-   Auto-renders elements with data-kolm-icon or data-kolm-illustration on DOMContentLoaded.
-   Also exposes window.kolmIcon(name) and window.kolmIllustration(name) for programmatic use. */
+
 (function () {
   'use strict';
 
@@ -169,7 +165,6 @@
 
   function illArtifactAnatomy() {
     // .kolm internals — cutaway layers + magnifying-glass overlay.
-    // W659: 6 rows match the homepage file tree (spec.toml, weights/, eval.frozen.jsonl,
     // bakeoff/, receipts/, sidecar.ed25519). Filename header is generic (support.kolm)
     // so the same illustration drops into any page that shows a .kolm artifact.
     return '<svg class="kolm-ill kolm-ill--anatomy" viewBox="0 0 360 360" role="img" aria-label="The .kolm artifact is a zip containing spec, weights, frozen eval, bakeoff, receipts, and an Ed25519 signature">' +
@@ -313,7 +308,6 @@
     return fn ? fn() : '';
   }
 
-  // ---- BADGES — reusable visual stamps (W658). ----
   // K-score badge: medallion with the "K" mark, a score number, and a "verified by kolm.ai"
   // microtype on the bottom arc. currentColor for outer ring; mint accent on the K + score
   // so it sits on any background. opts.score (string, e.g. "0.91"), opts.size (px).
@@ -330,16 +324,11 @@
       '<circle cx="60" cy="60" r="58" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="1"/>' +
       // inner ring (slightly stronger)
       '<circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" stroke-opacity=".28" stroke-width="1"/>' +
-      // W686: top arc label tracked from 0.18em -> 0.22em for engraved feel
       '<text x="60" y="26" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8.5" letter-spacing="0.22em" fill="currentColor" fill-opacity=".60">K-SCORE</text>' +
-      // W686: K mark fallback #a3e7c7 -> #7ef0d2 (matches actual brand mint),
-      // weight 700 -> 600 for W665 monochrome discipline
       '<text x="60" y="62" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="34" font-weight="600" fill="var(--ks-accent, #7ef0d2)">K</text>' +
       // divider
       '<line x1="34" y1="72" x2="86" y2="72" stroke="currentColor" stroke-opacity=".22" stroke-width="1"/>' +
-      // W686: score number weight 540 -> 500 (editorial)
       '<text x="60" y="90" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" font-weight="500" fill="currentColor">' + score + '</text>' +
-      // W686: bottom-arc microtype tracked 0.20em -> 0.24em + slightly hotter for legibility
       '<text font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="7" letter-spacing="0.24em" fill="currentColor" fill-opacity=".62">' +
         '<textPath href="#kbadge-arc" startOffset="50%" text-anchor="middle">VERIFIED BY KOLM.AI</textPath>' +
       '</text>' +

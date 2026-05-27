@@ -8,7 +8,7 @@
 <meta name="description" content="Per-namespace embedding-distribution drift detection via KL divergence. Configurable thresholds, webhook + email alerts, opt-in auto-remediation. Stamped w813-v1.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Drift detection &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:title" content="Drift detection · Open-source AI workbench · kolm.ai">
 <meta property="og:description" content="KL divergence + fallback-rate lift. Explicit envelopes. Auto-remediate is opt-in (never silent).">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/account/drift">
@@ -82,8 +82,7 @@ td code{font-size:12px}
 <h1 data-w813="h1">Drift detection &mdash; your traffic vs your training distribution.</h1>
 <p class="lede" data-w813="lede">Compare live embeddings against the training distribution via KL divergence; pair with fallback-rate lift; act when either crosses threshold. Auto-remediate is opt-in.</p>
 
-<div class="caveat-note" data-w813="caveat-note">
-W813 operating contract: <code>drift_detected</code> is never true without crossing a numeric threshold. Auto-remediate never fires unless <code>auto_remediate_drift</code> is explicitly enabled per namespace AND <code>dry_run:false</code> is sent on the trigger call. Stamped <code>w813-v1</code>.
+<div class="caveat-note" data-w813="caveat-note"> operating contract: <code>drift_detected</code> is never true without crossing a numeric threshold. Auto-remediate never fires unless <code>auto_remediate_drift</code> is explicitly enabled per namespace AND <code>dry_run:false</code> is sent on the trigger call. Stamped <code>w813-v1</code>.
 </div>
 
 <section data-w813="current-status">
@@ -91,7 +90,7 @@ W813 operating contract: <code>drift_detected</code> is never true without cross
 <p>Live snapshot of the most recent drift scan for this namespace.</p>
 <div class="metric-grid">
   <div class="metric-card"><div class="label">KL divergence</div><div class="value" data-w813="kl-value" id="m-kl-value">&mdash;</div><div class="delta" data-w813="kl-note">live vs training (nats)</div></div>
-  <div class="metric-card"><div class="label">KL threshold</div><div class="value" data-w813="kl-threshold" id="m-kl-threshold">0.10</div><div class="delta">W813-2 default; per-namespace override below</div></div>
+  <div class="metric-card"><div class="label">KL threshold</div><div class="value" data-w813="kl-threshold" id="m-kl-threshold">0.10</div><div class="delta">-2 default; per-namespace override below</div></div>
   <div class="metric-card"><div class="label">Fallback-rate &Delta;</div><div class="value" data-w813="fallback-delta" id="m-fallback-delta">&mdash;</div><div class="delta">live - training</div></div>
   <div class="metric-card"><div class="label">Severity</div><div class="value" data-w813="severity" id="m-severity"><span class="pill pill-none">none</span></div><div class="delta">none / minor / moderate / severe</div></div>
 </div>
@@ -112,12 +111,12 @@ W813 operating contract: <code>drift_detected</code> is never true without cross
 <h2>Suggested action</h2>
 <p>Quantified shift summary, surfaced verbatim from <code>buildSuggestedActionText()</code> in <code>src/drift-detect.js</code>:</p>
 <pre data-w813="suggested-action-text">no action required; live distribution within tolerance of training distribution</pre>
-<p>Template (W813-4 spec): <code>your traffic shifted N% more X queries; re-distill recommended</code>. The N + X are computed from the top per-cluster shift; the recommendation text is never fabricated.</p>
+<p>Template (-4 spec): <code>your traffic shifted N% more X queries; re-distill recommended</code>. The N + X are computed from the top per-cluster shift; the recommendation text is never fabricated.</p>
 </section>
 
 <section data-w813="recent-alerts">
 <h2>Recent alerts</h2>
-<p>Last 10 <code>drift_detected</code> events for this namespace, tenant-fenced via W411 defense-in-depth.</p>
+<p>Last 10 <code>drift_detected</code> events for this namespace, tenant-fenced via defense-in-depth.</p>
 <table>
   <thead><tr><th>created_at</th><th>namespace</th><th>severity</th><th>KL</th><th>fallback &Delta;</th></tr></thead>
   <tbody data-w813="alerts-table-body">
@@ -128,7 +127,7 @@ W813 operating contract: <code>drift_detected</code> is never true without cross
 
 <section data-w813="per-namespace-config">
 <h2>Per-namespace configuration</h2>
-<p>Override the W813-2 defaults per namespace via <code>POST /v1/drift/configure</code> (requires <code>confirm:true</code>).</p>
+<p>Override the-2 defaults per namespace via <code>POST /v1/drift/configure</code> (requires <code>confirm:true</code>).</p>
 <table>
   <thead><tr><th>setting</th><th>default</th><th>active</th><th>bounds</th></tr></thead>
   <tbody>
@@ -152,7 +151,7 @@ W813 operating contract: <code>drift_detected</code> is never true without cross
     </tr>
   </tbody>
 </table>
-<p style="margin-top:14px">Auto-remediate triggers W720 self-improvement only when the namespace flag is <code>true</code> AND the operator sends <code>dry_run:false</code>. Either alone returns <code>would_trigger:false</code> or <code>triggered:false</code>. This is a P0 trust invariant.</p>
+<p style="margin-top:14px">Auto-remediate triggers self-improvement only when the namespace flag is <code>true</code> AND the operator sends <code>dry_run:false</code>. Either alone returns <code>would_trigger:false</code> or <code>triggered:false</code>. This is a P0 trust invariant.</p>
 </section>
 
 <section data-w813="cli-quickstart">
@@ -174,7 +173,7 @@ kolm drift auto-remediate --namespace prod --live</pre>
 </section>
 
 <footer style="margin-top:48px;padding-top:24px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">
-  <span data-w813="version-stamp">w813-v1</span> &middot; tenant-fenced via W411 defense-in-depth &middot; explicit envelopes &middot; auto-remediate opt-in
+  <span data-w813="version-stamp">w813-v1</span> &middot; tenant-fenced via defense-in-depth &middot; explicit envelopes &middot; auto-remediate opt-in
 </footer>
 
 </div>
@@ -218,7 +217,7 @@ kolm drift auto-remediate --namespace prod --live</pre>
 })();
 </script>
 <div hidden data-w221-anchors="account" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
-    <!-- KOLM_NAV_BEGIN (W221) -->
+    
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
       <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
@@ -314,7 +313,7 @@ kolm drift auto-remediate --namespace prod --live</pre>
       </div>
     </div>
     </nav>
-    <!-- KOLM_NAV_END (W221) -->
+    
 </div>
 <div hidden class="empty" data-empty-state="account" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">No data yet. Run kolm connect start to wire your local proxy.</div>
 </body>

@@ -24,7 +24,7 @@ Numeric latency varies with hardware; everything else is deterministic.
 ## How to reproduce
 
 ```bash
-git clone https://github.com/kolm-ai/kolmogorov-stack
+git clone https://github.com/kolm-ai/kolm
 cd kolmogorov-stack
 npm i
 RECIPE_RECEIPT_SECRET=kolm-public-fixture-v0-1-0 \

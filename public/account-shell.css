@@ -1,11 +1,4 @@
-/* W894 post-auth shell — generous, scannable, no cramping.
-   Loaded by nav.js when body.kolm-account-surface is present.
-   Overrides the duplicated cramped inline <style> blocks across all
-   53 /account/* pages without editing each file.
-   Source-order strategy: nav.js appends this link to <head> at runtime,
-   so it lands AFTER the page's inline <style>. Same-specificity rules
-   here therefore win. Targeted .kolm-account-surface scoping keeps
-   it from leaking onto marketing pages. */
+
 
 body.kolm-account-surface {
   /* Quiet the background so panels read as the dominant surface. */

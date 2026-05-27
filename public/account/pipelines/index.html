@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Pipelines — Kolm</title>
-<meta name="description" content="W821 pipeline orchestrator: classifier + specialists, weighted K-Score, flow diagram. List all pipelines in your tenant." />
+<meta name="description" content="pipeline orchestrator: classifier + specialists, weighted K-Score, flow diagram. List all pipelines in your tenant." />
 <meta name="kolm:wave" content="wave821" />
 <link rel="stylesheet" href="/design-tokens.css" />
     <link rel="stylesheet" href="/warm-paper.css">
@@ -33,7 +33,7 @@
 <body class="kolm-account-surface">
 <nav aria-label="Breadcrumb"><a href="/account">Account</a> <span aria-hidden="true">›</span> Pipelines <span class="pill" data-wave="wave821">wave821</span></nav>
 <h1>Pipelines</h1>
-<p class="lede">W821 pipeline orchestrator. Compose <strong>classifier + specialist</strong> artifacts into a single named pipeline. Run via <code>POST /v1/pipelines/:id/run</code> or CLI <code>kolm pipeline run pl_… --input-json '{…}'</code>.</p>
+<p class="lede">pipeline orchestrator. Compose <strong>classifier + specialist</strong> artifacts into a single named pipeline. Run via <code>POST /v1/pipelines/:id/run</code> or CLI <code>kolm pipeline run pl_… --input-json '{…}'</code>.</p>
 
 <div class="toolbar">
   <a class="btn btn-primary" href="/docs/pipelines">Read the docs</a>
@@ -50,7 +50,7 @@
     <li><strong>CLI</strong>: <code>kolm pipeline create --name &lt;name&gt; --file kolm.pipeline.yaml</code></li>
     <li><strong>HTTP</strong>: <code>POST /v1/pipelines</code> with body <code>{name, yaml}</code></li>
   </ul>
-  <p>YAML schema (W821 friendly format, distinct from W738 cid-pinned format):</p>
+  <p>YAML schema:</p>
   <pre><code>version: v1
 classifier: ./classifier.kolm
 routes:

@@ -9,13 +9,13 @@
 <meta name="description" content="Auto-generated REST API reference for kolm.ai. 736 wired routes across 193 groups, sourced directly from route source files.">
 <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="API reference &middot; kolm.ai">
+<meta property="og:title" content="API reference · kolm.ai">
 <meta property="og:description" content="Auto-generated REST API reference for kolm.ai. 736 wired routes across 193 groups, sourced directly from route source files.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/docs/api">
 <meta property="og:image" content="https://kolm.ai/og/docs-api.svg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="API reference &middot; kolm.ai">
+<meta name="twitter:title" content="API reference · kolm.ai">
 <meta name="twitter:description" content="Auto-generated REST API reference for kolm.ai. 736 wired routes across 193 groups, sourced directly from route source files.">
 <meta name="twitter:image" content="https://kolm.ai/og/docs-api.svg">
 <link rel="canonical" href="https://kolm.ai/docs/api">
@@ -90,7 +90,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header"><div class="wrap">
   <a class="logo" href="/">kolm.ai</a>
-    <!-- KOLM_NAV_BEGIN (W221) -->
+    
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
       <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
@@ -186,7 +186,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       </div>
     </div>
     </nav>
-    <!-- KOLM_NAV_END (W221) -->
+    
 </div></header>
 <script defer src="/nav.js"></script>
 
@@ -434,7 +434,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="POST-v1-ab-feedback">
   <h3><span class="m m-post">POST</span> <code>/v1/ab/feedback</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">thumb:&#39;up&#39;|&#39;down&#39;?, comment?, ab_test_id? }</p>
-  <details class="route-detail"><summary>Full comment</summary><p>thumb:&#39;up&#39;|&#39;down&#39;?, comment?, ab_test_id? } Persists a row to the event-store under workflow_id=AB_FEEDBACK_WORKFLOW so ab-metrics.aggregate() can read it. Also fans the row to the W720 self-improvement queue when deps.selfImprovement.enqueue is wired.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>thumb:&#39;up&#39;|&#39;down&#39;?, comment?, ab_test_id? } Persists a row to the event-store under workflow_id=AB_FEEDBACK_WORKFLOW so ab-metrics.aggregate can read it. Also fans the row to the self-improvement queue when deps.selfImprovement.enqueue is wired.</p></details>
   <pre>CODE34</pre>
   <pre>CODE35</pre>
 </section>
@@ -510,7 +510,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="POST-v1-ab-tests-create">
   <h3><span class="m m-post">POST</span> <code>/v1/ab-tests/create</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Returns: {ok, ab_test_id, request_hash, arm, frozen, reason, version}</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Returns: {ok, ab_test_id, request_hash, arm, frozen, reason, version} Auth-gated via req.tenant_record. Tenant fence forced from session, never from request body. Distinct prefix /v1/ab-tests/* so parallel agents on W779-W783 cannot collide on these route paths.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Returns: {ok, ab_test_id, request_hash, arm, frozen, reason, version} Auth-gated via req.tenant_record. Tenant fence forced from session, never from request body. Distinct prefix /v1/ab-tests/* so parallel agents on cannot collide on these route paths.</p></details>
   <pre>CODE68</pre>
   <pre>CODE69</pre>
 </section>
@@ -528,16 +528,16 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-v1-account-audit-log">
   <h3><span class="m m-get">GET</span> <code>/v1/account/audit-log</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W409f – /v1/account/audit-log surfaces the audit ledger for the calling</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409f – /v1/account/audit-log surfaces the audit ledger for the calling tenant. The audit-log.html page renders {entries:[{at,actor,op,payload}]}. W448 – added ?format=csv (defaults to json) so the page&#39;s export button and `kolm audit --format csv` CLI verb hit the same route. Also added ?since=&lt;iso|epoch&gt; filter so the CLI can scope to a recent window.</p></details>
+  <p class="route-desc">/v1/account/audit-log surfaces the audit ledger for the calling</p>
+  <details class="route-detail"><summary>Full comment</summary><p>/v1/account/audit-log surfaces the audit ledger for the calling tenant. The audit-log.html page renders {entries:[{at,actor,op,payload}]}. – added ?format=csv (defaults to json) so the page&#39;s export button and `kolm audit --format csv` CLI verb hit the same route. Also added ?since=&lt;iso|epoch&gt; filter so the CLI can scope to a recent window.</p></details>
   <pre>CODE78</pre>
   <pre>CODE79</pre>
 </section>
 
 <section class="api-route" id="GET-v1-account-audit-log-verify">
   <h3><span class="m m-get">GET</span> <code>/v1/account/audit-log/verify</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W409f – GET /v1/account/audit-log/verify – chain-verify the calling</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409f – GET /v1/account/audit-log/verify – chain-verify the calling tenant&#39;s audit ledger (no body). Returns { ok, verified, chain_length, broken_at? } so the audit-log page can render a green/red state.</p></details>
+  <p class="route-desc">GET /v1/account/audit-log/verify – chain-verify the calling</p>
+  <details class="route-detail"><summary>Full comment</summary><p>GET /v1/account/audit-log/verify – chain-verify the calling tenant&#39;s audit ledger (no body). Returns { ok, verified, chain_length, broken_at? } so the audit-log page can render a green/red state.</p></details>
   <pre>CODE81</pre>
   <pre>CODE82</pre>
 </section>
@@ -680,7 +680,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="GET-v1-account-state">
   <h3><span class="m m-get">GET</span> <code>/v1/account/state</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">/account/overview &quot;What&#39;s next&quot; engine reads. Returns artifact + capture</p>
-  <details class="route-detail"><summary>Full comment</summary><p>/account/overview &quot;What&#39;s next&quot; engine reads. Returns artifact + capture + namespace counts, the age of the last artifact, age of the primary api key, plus a flat `signals` array each rule in whats-next.js matches on. Auth-gated (NOT in PUBLIC_API) – cross-tenant state leaks were what made /v1/intent/next add tenant_id scoping in W432.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>/account/overview &quot;What&#39;s next&quot; engine reads. Returns artifact + capture + namespace counts, the age of the last artifact, age of the primary api key, plus a flat `signals` array each rule in whats-next.js matches on. Auth-gated (NOT in PUBLIC_API) – cross-tenant state leaks were what made /v1/intent/next add tenant_id scoping in.</p></details>
   <pre>CODE138</pre>
   <pre>CODE139</pre>
 </section>
@@ -784,8 +784,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-agents">
   <h3><span class="m m-get">GET</span> <code>/v1/agents</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W424 – agent telemetry routes fence on req.tenant_record and forward</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W424 – agent telemetry routes fence on req.tenant_record and forward req.tenant_record.id as tenant_id into the helper so cross-tenant rows never appear in the rollup. _tenantScope() returns null for admin (cross-tenant reads allowed) and the canonical tenant_id otherwise.</p></details>
+  <p class="route-desc">– agent telemetry routes fence on req.tenant_record and forward</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– agent telemetry routes fence on req.tenant_record and forward req.tenant_record.id as tenant_id into the helper so cross-tenant rows never appear in the rollup. _tenantScope returns null for admin (cross-tenant reads allowed) and the canonical tenant_id otherwise.</p></details>
   <pre>CODE189</pre>
   <pre>CODE190</pre>
 </section>
@@ -860,7 +860,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="GET-v1-airgap-jobs">
   <h3><span class="m m-get">GET</span> <code>/v1/airgap/jobs</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">/v1/airgap/jobs – bare collection GET that lists tenant air-gapped</p>
-  <details class="route-detail"><summary>Full comment</summary><p>/v1/airgap/jobs – bare collection GET that lists tenant air-gapped distill + sneakernet jobs. Each W831 job is keyed by run_id; the actual status route is /v1/airgap/distill/status/:id. This bare GET returns an empty envelope until a wave wires the per-tenant job index.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>/v1/airgap/jobs – bare collection GET that lists tenant air-gapped distill + sneakernet jobs. Each job is keyed by run_id; the actual status route is /v1/airgap/distill/status/:id. This bare GET returns an empty envelope until a wave wires the per-tenant job index.</p></details>
   <pre>CODE223</pre>
   <pre>CODE224</pre>
 </section>
@@ -881,8 +881,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-v1-airgap-status">
   <h3><span class="m m-get">GET</span> <code>/v1/airgap/status</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">All four auth-gate on req.tenant_record. W411 defense-in-depth: every</p>
-  <details class="route-detail"><summary>Full comment</summary><p>All four auth-gate on req.tenant_record. W411 defense-in-depth: every route binds tenant into the args so a future schema change cannot leak across tenants.</p></details>
+  <p class="route-desc">All four auth-gate on req.tenant_record. defense-in-depth: every</p>
+  <details class="route-detail"><summary>Full comment</summary><p>All four auth-gate on req.tenant_record. defense-in-depth: every route binds tenant into the args so a future schema change cannot leak across tenants.</p></details>
   <pre>CODE232</pre>
   <pre>CODE233</pre>
 </section>
@@ -1057,8 +1057,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="POST-v1-assistant-chat">
   <h3><span class="m m-post">POST</span> <code>/v1/assistant/chat</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">chat widget on every authed /account page. Routes through the W888-P</p>
-  <details class="route-detail"><summary>Full comment</summary><p>chat widget on every authed /account page. Routes through the W888-P AssistantClient three-layer fallback (local GGUF -&gt; api.kolm.ai -&gt; gateway frontier). Tier-gated to paid plans; rate-limited to 60 calls/hour/tenant. Returns the W888-P envelope verbatim plus the canonical aliases (provider_used / latency_ms) the widget consumes.</p></details>
+  <p class="route-desc">chat widget on every authed /account page. Routes through the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>chat widget on every authed /account page. Routes through the AssistantClient three-layer fallback (local GGUF -&gt; api.kolm.ai -&gt; gateway frontier). Tier-gated to paid plans; rate-limited to 60 calls/hour/tenant. Returns the envelope verbatim plus the canonical aliases (provider_used / latency_ms) the widget consumes.</p></details>
   <pre>CODE313</pre>
   <pre>CODE314</pre>
 </section>
@@ -1104,7 +1104,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="POST-v1-audio-capture-detect">
   <h3><span class="m m-post">POST</span> <code>/v1/audio/capture-detect</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">stamped by captureAudioMessage (NEVER the raw audio bytes).</p>
-  <details class="route-detail"><summary>Full comment</summary><p>stamped by captureAudioMessage (NEVER the raw audio bytes). All three are tenant-fenced via req.tenant_record.id (W411). Loud-fail envelopes on bad input – no silent passthrough.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>stamped by captureAudioMessage (NEVER the raw audio bytes). All three are tenant-fenced via req.tenant_record.id. Loud-fail envelopes on bad input – no silent passthrough.</p></details>
   <pre>CODE336</pre>
   <pre>CODE337</pre>
 </section>
@@ -1118,8 +1118,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="POST-v1-audio-speech">
   <h3><span class="m m-post">POST</span> <code>/v1/audio/speech</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span> <span class="route-stub">array-literal expansion</span></h3>
-  <p class="route-desc">W409k – audio routes. Real proxy when configured; fixture returns deterministic</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409k – audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise plain 501 with a structured &quot;not yet supported&quot; envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.</p></details>
+  <p class="route-desc">audio routes. Real proxy when configured; fixture returns deterministic</p>
+  <details class="route-detail"><summary>Full comment</summary><p>audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise plain 501 with a structured &quot;not yet supported&quot; envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.</p></details>
   <pre>CODE342</pre>
   <pre>CODE343</pre>
 </section>
@@ -1141,16 +1141,16 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="POST-v1-audio-transcriptions">
   <h3><span class="m m-post">POST</span> <code>/v1/audio/transcriptions</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span> <span class="route-stub">array-literal expansion</span></h3>
-  <p class="route-desc">W409k – audio routes. Real proxy when configured; fixture returns deterministic</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409k – audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise plain 501 with a structured &quot;not yet supported&quot; envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.</p></details>
+  <p class="route-desc">audio routes. Real proxy when configured; fixture returns deterministic</p>
+  <details class="route-detail"><summary>Full comment</summary><p>audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise plain 501 with a structured &quot;not yet supported&quot; envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.</p></details>
   <pre>CODE351</pre>
   <pre>CODE352</pre>
 </section>
 
 <section class="api-route" id="POST-v1-audio-translations">
   <h3><span class="m m-post">POST</span> <code>/v1/audio/translations</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span> <span class="route-stub">array-literal expansion</span></h3>
-  <p class="route-desc">W409k – audio routes. Real proxy when configured; fixture returns deterministic</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409k – audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise plain 501 with a structured &quot;not yet supported&quot; envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.</p></details>
+  <p class="route-desc">audio routes. Real proxy when configured; fixture returns deterministic</p>
+  <details class="route-detail"><summary>Full comment</summary><p>audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise plain 501 with a structured &quot;not yet supported&quot; envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.</p></details>
   <pre>CODE354</pre>
   <pre>CODE355</pre>
 </section>
@@ -1203,8 +1203,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-auth-github">
   <h3><span class="m m-get">GET</span> <code>/v1/auth/github</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W889-8.4 – short OAuth aliases: GET /v1/auth/github redirects to the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W889-8.4 – short OAuth aliases: GET /v1/auth/github redirects to the canonical /v1/oauth/github/start (preserving any ?redirect= query). Same for /v1/auth/github/callback (forwards code+state to the canonical callback). When env vars are missing, the canonical route returns the operator-facing 503 oauth_not_configured envelope.</p></details>
+  <p class="route-desc">-8.4 – short OAuth aliases: GET /v1/auth/github redirects to the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>-8.4 – short OAuth aliases: GET /v1/auth/github redirects to the canonical /v1/oauth/github/start (preserving any ?redirect= query). Same for /v1/auth/github/callback (forwards code+state to the canonical callback). When env vars are missing, the canonical route returns the operator-facing 503 oauth_not_configured envelope.</p></details>
   <pre>CODE380</pre>
   <pre>CODE381</pre>
 </section>
@@ -1219,7 +1219,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="POST-v1-auth-login">
   <h3><span class="m m-post">POST</span> <code>/v1/auth/login</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">API key (ks_*/kao_*) + OAuth; there is no password endpoint. We add live</p>
-  <details class="route-detail"><summary>Full comment</summary><p>API key (ks_*/kao_*) + OAuth; there is no password endpoint. We add live deprecation aliases that 410 Gone with redirect hints so the routes are not &quot;dead&quot; – the deprecated-endpoint lock-in in W890-9 expects every routed path to have a handler. Both alias handlers carry the canonical {ok:false, error:&#39;&lt;id&gt;&#39;} envelope so W890-9 lock-in 9 stays green.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>API key (ks_*/kao_*) + OAuth; there is no password endpoint. We add live deprecation aliases that 410 Gone with redirect hints so the routes are not &quot;dead&quot; – the deprecated-endpoint lock-in in-9 expects every routed path to have a handler. Both alias handlers carry the canonical {ok:false, error:&#39;&lt;id&gt;&#39;} envelope so-9 lock-in 9 stays green.</p></details>
   <pre>CODE386</pre>
   <pre>CODE387</pre>
 </section>
@@ -1244,8 +1244,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="POST-v1-autopilot-enable">
   <h3><span class="m m-post">POST</span> <code>/v1/autopilot/enable</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">All five are tenant-fenced via req.tenant_record.id (W411 law). The</p>
-  <details class="route-detail"><summary>Full comment</summary><p>All five are tenant-fenced via req.tenant_record.id (W411 law). The route layer ALWAYS forces tenant_id from auth – body.tenant_id is ignored even if the client tries to pass one.</p></details>
+  <p class="route-desc">All five are tenant-fenced via req.tenant_record.id. The</p>
+  <details class="route-detail"><summary>Full comment</summary><p>All five are tenant-fenced via req.tenant_record.id. The route layer ALWAYS forces tenant_id from auth – body.tenant_id is ignored even if the client tries to pass one.</p></details>
   <pre>CODE399</pre>
   <pre>CODE400</pre>
 </section>
@@ -1298,7 +1298,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="POST-v1-bakeoffs">
   <h3><span class="m m-post">POST</span> <code>/v1/bakeoffs</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Bakeoffs run alias - SDK-friendly synonym for /v1/bakeoff/run with the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Bakeoffs run alias - SDK-friendly synonym for /v1/bakeoff/run with the added W411 tenant fence at the dataset boundary (cross-tenant dataset_id returns 404). Same body: { dataset_id, contestants, opts }.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Bakeoffs run alias - SDK-friendly synonym for /v1/bakeoff/run with the added tenant fence at the dataset boundary (cross-tenant dataset_id returns 404). Same body: { dataset_id, contestants, opts }.</p></details>
   <pre>CODE425</pre>
   <pre>CODE426</pre>
 </section>
@@ -1343,8 +1343,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-v1-billing-meters">
   <h3><span class="m m-get">GET</span> <code>/v1/billing/meters</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">Returns the static catalog of legacy W384 meters merged with the W409y</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Returns the static catalog of legacy W384 meters merged with the W409y billing-unit catalog (10 units the auditor signed off on). The W409y entries carry tier_soft + tier_hard limits resolved from the caller&#39;s tenant plan when an authenticated key is present.</p></details>
+  <p class="route-desc">Returns the static catalog of legacy meters merged with the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>Returns the static catalog of legacy meters merged with the billing-unit catalog (10 units the auditor signed off on). The entries carry tier_soft + tier_hard limits resolved from the caller&#39;s tenant plan when an authenticated key is present.</p></details>
   <pre>CODE448</pre>
   <pre>CODE449</pre>
 </section>
@@ -1395,7 +1395,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="POST-v1-bridges-observe">
   <h3><span class="m m-post">POST</span> <code>/v1/bridges/observe</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">POST /v1/bridges/observe – agents log a (model, prompt, response) tuple.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>POST /v1/bridges/observe – agents log a (model, prompt, response) tuple. After ≥4 calls with the same template signature we surface a synthesis suggestion. W258-BE-1: persists via insertCapture (durable contract). 503 on store failure – same envelope as the capture proxy handlers.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>POST /v1/bridges/observe – agents log a (model, prompt, response) tuple. After ≥4 calls with the same template signature we surface a synthesis suggestion.-1: persists via insertCapture (durable contract). 503 on store failure – same envelope as the capture proxy handlers.</p></details>
   <pre>CODE470</pre>
   <pre>CODE471</pre>
 </section>
@@ -1420,8 +1420,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-build-preview">
   <h3><span class="m m-post">POST</span> <code>/v1/build/preview</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W347 – POST /v1/build/preview. Richer dry-run preview that powers the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W347 – POST /v1/build/preview. Richer dry-run preview that powers the builder UI&#39;s results pane: returns k_score, first 3 train rows, first 3 holdout rows, production_ready verdict + gate reasons, and the synth metadata. Public + rate-limited; no artifact write, no charge. Accepts {spec, seeds_jsonl_text}. Errors map to 400 (validation) or 500.</p></details>
+  <p class="route-desc">– POST /v1/build/preview. Richer dry-run preview that powers the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– POST /v1/build/preview. Richer dry-run preview that powers the builder UI&#39;s results pane: returns k_score, first 3 train rows, first 3 holdout rows, production_ready verdict + gate reasons, and the synth metadata. Public + rate-limited; no artifact write, no charge. Accepts {spec, seeds_jsonl_text}. Errors map to 400 (validation) or 500.</p></details>
   <pre>CODE483</pre>
   <pre>CODE484</pre>
 </section>
@@ -1588,8 +1588,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-v1-capture-browse">
   <h3><span class="m m-get">GET</span> <code>/v1/capture/browse</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W409f – /v1/capture/browse / /v1/capture/bulk / /v1/capture/export – page</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409f – /v1/capture/browse / /v1/capture/bulk / /v1/capture/export – page surface for the captures.html admin view. Browse paginates, bulk acts on a set of capture ids, export streams JSONL/CSV. Empty-tenant safe.</p></details>
+  <p class="route-desc">/v1/capture/browse / /v1/capture/bulk / /v1/capture/export – page</p>
+  <details class="route-detail"><summary>Full comment</summary><p>/v1/capture/browse / /v1/capture/bulk / /v1/capture/export – page surface for the captures.html admin view. Browse paginates, bulk acts on a set of capture ids, export streams JSONL/CSV. Empty-tenant safe.</p></details>
   <pre>CODE564</pre>
   <pre>CODE565</pre>
 </section>
@@ -1700,8 +1700,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-v1-capture-stream">
   <h3><span class="m m-get">GET</span> <code>/v1/capture/stream</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">Payload shape is the CLI/UI contract (W258-BE-6): capture_id /</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Payload shape is the CLI/UI contract (W258-BE-6): capture_id / captured_at / namespace / model / provider / latency_us / status / prompt_head / response_head / x_kolm_capture_durable. The raw store row is shimmed here so the dashboard and `kolm tail captures` see the same shape without one of them having to translate.</p></details>
+  <p class="route-desc">Payload shape is the CLI/UI contract (-6): capture_id /</p>
+  <details class="route-detail"><summary>Full comment</summary><p>Payload shape is the CLI/UI contract (-6): capture_id / captured_at / namespace / model / provider / latency_us / status / prompt_head / response_head / x_kolm_capture_durable. The raw store row is shimmed here so the dashboard and `kolm tail captures` see the same shape without one of them having to translate.</p></details>
   <pre>CODE609</pre>
   <pre>CODE610</pre>
 </section>
@@ -1778,7 +1778,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="GET-v1-carbon-estimate">
   <h3><span class="m m-get">GET</span> <code>/v1/carbon/estimate</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">→ savingsReport envelope comparing local run vs frontier baseline.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>→ savingsReport envelope comparing local run vs frontier baseline. Auth required (same pattern as billing/breakdown). Every envelope carries methodology=&#39;public-research-estimate&#39; so a downstream consumer cannot mistake the estimate for a measured value. W786 no-silent-pass contract.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>→ savingsReport envelope comparing local run vs frontier baseline. Auth required (same pattern as billing/breakdown). Every envelope carries methodology=&#39;public-research-estimate&#39; so a downstream consumer cannot mistake the estimate for a measured value. no-silent-pass contract.</p></details>
   <pre>CODE644</pre>
   <pre>CODE645</pre>
 </section>
@@ -1816,8 +1816,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-changelog">
   <h3><span class="m m-get">GET</span> <code>/v1/changelog</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W456: public changelog – marketing surface, no auth, no tenant scoping.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W456: public changelog – marketing surface, no auth, no tenant scoping. Source of truth lives in src/changelog.js (a single static WAVES array).</p></details>
+  <p class="route-desc">: public changelog – marketing surface, no auth, no tenant scoping.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>: public changelog – marketing surface, no auth, no tenant scoping. Source of truth lives in src/changelog.js (a single static WAVES array).</p></details>
   <pre>CODE664</pre>
   <pre>CODE665</pre>
 </section>
@@ -1979,8 +1979,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="POST-v1-compile-cloud">
   <h3><span class="m m-post">POST</span> <code>/v1/compile/cloud</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">POST /v1/compile/cloud – W869 Persona B path: caller has no local GPU.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>POST /v1/compile/cloud – W869 Persona B path: caller has no local GPU. Dispatches a compile to a partner GPU (modal/runpod/vast/lambda) using server-side credentials (KOLM_RUNPOD_TOKEN / KOLM_MODAL_TOKEN in env). Body: { backend, namespace, spec?, confirm, budget_usd, base_model? }. Without confirm:true we return a quote so the caller sees the cost first.</p></details>
+  <p class="route-desc">POST /v1/compile/cloud – Persona B path: caller has no local GPU.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>POST /v1/compile/cloud – Persona B path: caller has no local GPU. Dispatches a compile to a partner GPU (modal/runpod/vast/lambda) using server-side credentials (KOLM_RUNPOD_TOKEN / KOLM_MODAL_TOKEN in env). Body: { backend, namespace, spec?, confirm, budget_usd, base_model? }. Without confirm:true we return a quote so the caller sees the cost first.</p></details>
   <pre>CODE741</pre>
   <pre>CODE742</pre>
 </section>
@@ -1992,7 +1992,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="POST-v1-compliance-ai-act-export">
   <h3><span class="m m-post">POST</span> <code>/v1/compliance/ai-act/export</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">* /governance-report runs the loop body with a per-row tenant re-check</p>
-  <details class="route-detail"><summary>Full comment</summary><p>* /governance-report runs the loop body with a per-row tenant re-check so a future schema bug cannot leak across tenants. Distinct from sibling W767-cert / W768-modelcard / W769-residency / W770-audit-export routes – no path collision possible.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>* /governance-report runs the loop body with a per-row tenant re-check so a future schema bug cannot leak across tenants. Distinct from sibling / / /-export routes – no path collision possible.</p></details>
   <pre>CODE748</pre>
   <pre>CODE749</pre>
 </section>
@@ -2181,8 +2181,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-deploy">
   <h3><span class="m m-post">POST</span> <code>/v1/deploy</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W888-D HTTP control plane: POST /v1/deploy + /v1/deploy/canary +</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W888-D HTTP control plane: POST /v1/deploy + /v1/deploy/canary + /v1/test-device + /v1/test-quants. All require auth (auth.js gates via PUBLIC_API allowlist; these paths are NOT in PUBLIC_API, so an unauth request returns 401 from the auth middleware). The handlers below simply do shape-validation + delegate to the same modules the CLI calls.</p></details>
+  <p class="route-desc">HTTP control plane: POST /v1/deploy + /v1/deploy/canary +</p>
+  <details class="route-detail"><summary>Full comment</summary><p>HTTP control plane: POST /v1/deploy + /v1/deploy/canary + /v1/test-device + /v1/test-quants. All require auth (auth.js gates via PUBLIC_API allowlist; these paths are NOT in PUBLIC_API, so an unauth request returns 401 from the auth middleware). The handlers below simply do shape-validation + delegate to the same modules the CLI calls.</p></details>
   <pre>CODE842</pre>
   <pre>CODE843</pre>
 </section>
@@ -2247,8 +2247,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-v1-devices-id">
   <h3><span class="m m-get">GET</span> <code>/v1/devices/:id</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">GET /v1/devices/:id – registry-first lookup; falls back to the W372</p>
-  <details class="route-detail"><summary>Full comment</summary><p>GET /v1/devices/:id – registry-first lookup; falls back to the W372 per-file store so existing dashboards stay working. NOTE: this is registered LAST so the more specific /v1/devices/detect, /v1/devices/list, /v1/devices/recommend, /v1/devices/installed routes above keep matching ahead of it.</p></details>
+  <p class="route-desc">GET /v1/devices/:id – registry-first lookup; falls back to the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>GET /v1/devices/:id – registry-first lookup; falls back to the per-file store so existing dashboards stay working. NOTE: this is registered LAST so the more specific /v1/devices/detect, /v1/devices/list, /v1/devices/recommend, /v1/devices/installed routes above keep matching ahead of it.</p></details>
   <pre>CODE874</pre>
   <pre>CODE875</pre>
 </section>
@@ -2318,8 +2318,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-v1-devices-list">
   <h3><span class="m m-get">GET</span> <code>/v1/devices/list</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">GET /v1/devices/list – list registered W888-C devices with filters</p>
-  <details class="route-detail"><summary>Full comment</summary><p>GET /v1/devices/list – list registered W888-C devices with filters ?type=&lt;t&gt;&amp;tag=&lt;t&gt;&amp;status=&lt;t&gt;&amp;includeRemoved=1</p></details>
+  <p class="route-desc">GET /v1/devices/list – list registered devices with filters</p>
+  <details class="route-detail"><summary>Full comment</summary><p>GET /v1/devices/list – list registered devices with filters ?type=&lt;t&gt;&amp;tag=&lt;t&gt;&amp;status=&lt;t&gt;&amp;includeRemoved=1</p></details>
   <pre>CODE904</pre>
   <pre>CODE905</pre>
 </section>
@@ -2340,8 +2340,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="POST-v1-devices-register">
   <h3><span class="m m-post">POST</span> <code>/v1/devices/register</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">POST /v1/devices/register – registers a new device in the W888-C registry.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>POST /v1/devices/register – registers a new device in the W888-C registry. Body matches DeviceRegistry.register() args: { id, name?, host?, port?, user?, type, keyPath?, tags?, hardware_hint? }</p></details>
+  <p class="route-desc">POST /v1/devices/register – registers a new device in the registry.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>POST /v1/devices/register – registers a new device in the registry. Body matches DeviceRegistry.register args: { id, name?, host?, port?, user?, type, keyPath?, tags?, hardware_hint? }</p></details>
   <pre>CODE913</pre>
   <pre>CODE914</pre>
 </section>
@@ -2380,15 +2380,15 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="GET-v1-distill-from-captures-preview">
   <h3><span class="m m-get">GET</span> <code>/v1/distill/from-captures/preview</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Commit (POST) picks recipe vs specialist by count (&lt;1000 vs &gt;=1000),</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Commit (POST) picks recipe vs specialist by count (&lt;1000 vs &gt;=1000), forwards to /v1/bridges/auto-synthesize (recipe) or KOLM_TRAINER_BRIDGE_URL (specialist). Errors surface as 503 (capture-store) / 400 (not_enough/ no_cluster). W364: specialist arm always returns 202 with job_id (either remote bridge or in-tree worker via src/distill-bridge.js).</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Commit (POST) picks recipe vs specialist by count (&lt;1000 vs &gt;=1000), forwards to /v1/bridges/auto-synthesize (recipe) or KOLM_TRAINER_BRIDGE_URL (specialist). Errors surface as 503 (capture-store) / 400 (not_enough/ no_cluster).: specialist arm always returns 202 with job_id (either remote bridge or in-tree worker via src/distill-bridge.js).</p></details>
   <pre>CODE933</pre>
   <pre>CODE934</pre>
 </section>
 
 <section class="api-route" id="POST-v1-distill-onpolicy">
   <h3><span class="m m-post">POST</span> <code>/v1/distill/onpolicy</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W480 - Run an on-policy distillation against a teacher-student pair via the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W480 - Run an on-policy distillation against a teacher-student pair via the tenant-installed trainer plug-in. Auth-gated. Body: { pairs_path, student_path, out_dir, namespace, max_steps }. Returns trainer envelope or no_trainer_installed.</p></details>
+  <p class="route-desc">- Run an on-policy distillation against a teacher-student pair via the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>- Run an on-policy distillation against a teacher-student pair via the tenant-installed trainer plug-in. Auth-gated. Body: { pairs_path, student_path, out_dir, namespace, max_steps }. Returns trainer envelope or no_trainer_installed.</p></details>
   <pre>CODE936</pre>
   <pre>CODE937</pre>
 </section>
@@ -2403,8 +2403,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="POST-v1-distill-preference">
   <h3><span class="m m-post">POST</span> <code>/v1/distill/preference</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W480 - Train a preference-pair objective (dpo/simpo/orpo/kto) via the tenant</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W480 - Train a preference-pair objective (dpo/simpo/orpo/kto) via the tenant installed trainer plug-in. Auth-gated. Body: { pairs_path, student_path, objective, out_dir, namespace, beta }. Returns trainer envelope.</p></details>
+  <p class="route-desc">- Train a preference-pair objective (dpo/simpo/orpo/kto) via the tenant</p>
+  <details class="route-detail"><summary>Full comment</summary><p>- Train a preference-pair objective (dpo/simpo/orpo/kto) via the tenant installed trainer plug-in. Auth-gated. Body: { pairs_path, student_path, objective, out_dir, namespace, beta }. Returns trainer envelope.</p></details>
   <pre>CODE942</pre>
   <pre>CODE943</pre>
 </section>
@@ -2500,15 +2500,15 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="POST-v1-drift-scan">
   <h3><span class="m m-post">POST</span> <code>/v1/drift/scan</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">unless config.auto_remediate_drift === true AND body.dry_run !== true.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>unless config.auto_remediate_drift === true AND body.dry_run !== true. dry_run defaults to TRUE so a misclick cannot kick off a re-distill. All five are tenant-fenced via req.tenant_record.id (W411 law).</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>unless config.auto_remediate_drift === true AND body.dry_run !== true. dry_run defaults to TRUE so a misclick cannot kick off a re-distill. All five are tenant-fenced via req.tenant_record.id.</p></details>
   <pre>CODE982</pre>
   <pre>CODE983</pre>
 </section>
 
 <section class="api-route" id="POST-v1-drift-snapshot">
   <h3><span class="m m-post">POST</span> <code>/v1/drift/snapshot</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">the 12-step compile→verify→run→drift→retrain loop. W434 exposes three</p>
-  <details class="route-detail"><summary>Full comment</summary><p>the 12-step compile→verify→run→drift→retrain loop. W434 exposes three tenant-scoped POST routes that wrap the existing pure functions. The routes are stateless (no server-side persistence) – the report&#39;s hash is verifiable client-side, so the round-trip is just &quot;validate my inputs + compute signals + return the report you can persist anywhere.&quot;</p></details>
+  <p class="route-desc">the 12-step compile→verify→run→drift→retrain loop. exposes three</p>
+  <details class="route-detail"><summary>Full comment</summary><p>the 12-step compile→verify→run→drift→retrain loop. exposes three tenant-scoped POST routes that wrap the existing pure functions. The routes are stateless (no server-side persistence) – the report&#39;s hash is verifiable client-side, so the round-trip is just &quot;validate my inputs + compute signals + return the report you can persist anywhere.&quot;</p></details>
   <pre>CODE985</pre>
   <pre>CODE986</pre>
 </section>
@@ -2527,7 +2527,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="GET-v1-drift-alert">
   <h3><span class="m m-get">GET</span> <code>/v1/drift-alert</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span> <span class="route-stub">array-literal expansion</span></h3>
   <p class="route-desc">:namespace path param. The dashboard pages call these endpoints without a</p>
-  <details class="route-detail"><summary>Full comment</summary><p>:namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404&#39;d. We forward to the existing :namespace handler with namespace=&#39;default&#39; so the account UI&lt;-&gt;server parity test (W409f #4) passes and the page renders an empty-state from a real envelope instead of a 404.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>:namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404&#39;d. We forward to the existing :namespace handler with namespace=&#39;default&#39; so the account UI&lt;-&gt;server parity test (#4) passes and the page renders an empty-state from a real envelope instead of a 404.</p></details>
   <pre>CODE995</pre>
   <pre>CODE996</pre>
 </section>
@@ -2541,8 +2541,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="POST-v1-drift-alert-snapshot">
   <h3><span class="m m-post">POST</span> <code>/v1/drift-alert/snapshot</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W709 tie-in: when shouldAlert() fires the route calls</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W709 tie-in: when shouldAlert() fires the route calls driftAlertStore.registerDriftWarning() so the NEXT W709 routing decision can stamp `drift_warning:true`. Plain fallback: if the W709 routing-events module is not loaded, the warning is still registered (it is in-memory) and the W709 hook simply never reads it.</p></details>
+  <p class="route-desc">tie-in: when shouldAlert fires the route calls</p>
+  <details class="route-detail"><summary>Full comment</summary><p>tie-in: when shouldAlert fires the route calls driftAlertStore.registerDriftWarning so the NEXT routing decision can stamp `drift_warning:true`. Plain fallback: if the routing-events module is not loaded, the warning is still registered (it is in-memory) and the hook simply never reads it.</p></details>
   <pre>CODE1001</pre>
   <pre>CODE1002</pre>
 </section>
@@ -2738,7 +2738,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="POST-v1-failure-modes-feed-active-learning">
   <h3><span class="m m-post">POST</span> <code>/v1/failure-modes/feed-active-learning</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Auth-gated via req.tenant_record. Tenant fence is forced from the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Auth-gated via req.tenant_record. Tenant fence is forced from the authenticated record - any body.tenant value is overridden so a caller cannot point this at another tenant&#39;s namespace. The namespace IS read from the body because a single tenant routinely operates many namespaces and W816 closes the loop per-namespace.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Auth-gated via req.tenant_record. Tenant fence is forced from the authenticated record - any body.tenant value is overridden so a caller cannot point this at another tenant&#39;s namespace. The namespace IS read from the body because a single tenant routinely operates many namespaces and closes the loop per-namespace.</p></details>
   <pre>CODE1095</pre>
   <pre>CODE1096</pre>
 </section>
@@ -2763,8 +2763,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-v1-federated-consortium">
   <h3><span class="m m-get">GET</span> <code>/v1/federated/consortium</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">/v1/federated/consortium – bare GET that points the TUI at the W830</p>
-  <details class="route-detail"><summary>Full comment</summary><p>/v1/federated/consortium – bare GET that points the TUI at the W830 members collection. The federated-consortium-routes module owns the tenant-scoped membership reads; here we add a no-query alias that returns the empty-state envelope when no consortium_id is supplied so the TUI view always has something to render.</p></details>
+  <p class="route-desc">/v1/federated/consortium – bare GET that points the TUI at the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>/v1/federated/consortium – bare GET that points the TUI at the members collection. The federated-consortium-routes module owns the tenant-scoped membership reads; here we add a no-query alias that returns the empty-state envelope when no consortium_id is supplied so the TUI view always has something to render.</p></details>
   <pre>CODE1108</pre>
   <pre>CODE1109</pre>
 </section>
@@ -2937,8 +2937,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-v1-gateway-mode">
   <h3><span class="m m-get">GET</span> <code>/v1/gateway/mode</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W742 – GET /v1/gateway/mode reports the current gateway mode + reachability.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W742 – GET /v1/gateway/mode reports the current gateway mode + reachability. Auth-gated (mounted after r.use(authMiddleware)). Probes both local backends with a 1-second HEAD timeout so a slow / unreachable backend never blocks the dashboard. The response surfaces the resolved mode (NOT the raw env value) so a callers sees what currentMode() actually decided.</p></details>
+  <p class="route-desc">– GET /v1/gateway/mode reports the current gateway mode + reachability.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– GET /v1/gateway/mode reports the current gateway mode + reachability. Auth-gated (mounted after r.use(authMiddleware)). Probes both local backends with a 1-second HEAD timeout so a slow / unreachable backend never blocks the dashboard. The response surfaces the resolved mode (NOT the raw env value) so a callers sees what currentMode actually decided.</p></details>
   <pre>CODE1187</pre>
   <pre>CODE1188</pre>
 </section>
@@ -3130,8 +3130,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-jobs-id">
   <h3><span class="m m-get">GET</span> <code>/v1/jobs/:id</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">Job status (used by HF / URL queued jobs + W229 on-disk job registry +</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Job status (used by HF / URL queued jobs + W229 on-disk job registry + W364 distill bridge). Order: corpus_jobs / specialists in-DB, then the src/jobs.js per-file on-disk registry.</p></details>
+  <p class="route-desc">Job status (used by HF / URL queued jobs + on-disk job registry +</p>
+  <details class="route-detail"><summary>Full comment</summary><p>Job status (used by HF / URL queued jobs + on-disk job registry + distill bridge). Order: corpus_jobs / specialists in-DB, then the src/jobs.js per-file on-disk registry.</p></details>
   <pre>CODE1284</pre>
   <pre>CODE1285</pre>
 </section>
@@ -3189,7 +3189,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="GET-v1-kolmbench-spec">
   <h3><span class="m m-get">GET</span> <code>/v1/kolmbench/spec</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">only + safe to cache. Both POST routes require auth via the standard</p>
-  <details class="route-detail"><summary>Full comment</summary><p>only + safe to cache. Both POST routes require auth via the standard middleware path; submit additionally requires body.confirm:true as a spend-protection gate (the W411 confirm-pattern). Loud-fail envelopes on every degraded path.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>only + safe to cache. Both POST routes require auth via the standard middleware path; submit additionally requires body.confirm:true as a spend-protection gate (the confirm-pattern). Loud-fail envelopes on every degraded path.</p></details>
   <pre>CODE1311</pre>
   <pre>CODE1312</pre>
 </section>
@@ -3214,8 +3214,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-label-queue-audit-event-id">
   <h3><span class="m m-get">GET</span> <code>/v1/label-queue/audit/:event_id</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W409o – full audit trail for a single event_id. Tests assert that every</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409o – full audit trail for a single event_id. Tests assert that every approval/reject/edit decision is recorded with reviewer + timestamp + before/after output. The legacy /v1/labels/:event_id returns the last label only; this endpoint returns the whole sequence.</p></details>
+  <p class="route-desc">full audit trail for a single event_id. Tests assert that every</p>
+  <details class="route-detail"><summary>Full comment</summary><p>full audit trail for a single event_id. Tests assert that every approval/reject/edit decision is recorded with reviewer + timestamp + before/after output. The legacy /v1/labels/:event_id returns the last label only; this endpoint returns the whole sequence.</p></details>
   <pre>CODE1324</pre>
   <pre>CODE1325</pre>
 </section>
@@ -3277,7 +3277,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="GET-v1-labels-synthesize-corpus">
   <h3><span class="m m-get">GET</span> <code>/v1/labels/synthesize-corpus</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Returns the captured (input, output) pairs for a namespace as JSONL or</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Returns the captured (input, output) pairs for a namespace as JSONL or a JSON envelope. This is what `kolm labels` downloads. Counts go to the status command so the customer can see &quot;ready to distill at 1000 pairs.&quot; W258-BE-1: reads via the durable capture-store (listCaptures) so the distillation corpus comes from the same backend the proxy writes to.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Returns the captured (input, output) pairs for a namespace as JSONL or a JSON envelope. This is what `kolm labels` downloads. Counts go to the status command so the customer can see &quot;ready to distill at 1000 pairs.&quot;-1: reads via the durable capture-store (listCaptures) so the distillation corpus comes from the same backend the proxy writes to.</p></details>
   <pre>CODE1352</pre>
   <pre>CODE1353</pre>
 </section>
@@ -3295,8 +3295,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-v1-lake-export">
   <h3><span class="m m-get">GET</span> <code>/v1/lake/export</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W409l – GET /v1/lake/export → bulk export of canonical events.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409l – GET /v1/lake/export → bulk export of canonical events. Supports format=jsonl (default) | json | csv. Streams the buffer back.</p></details>
+  <p class="route-desc">GET /v1/lake/export → bulk export of canonical events.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>GET /v1/lake/export → bulk export of canonical events. Supports format=jsonl (default) | json | csv. Streams the buffer back.</p></details>
   <pre>CODE1362</pre>
   <pre>CODE1363</pre>
 </section>
@@ -3304,7 +3304,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="POST-v1-lake-opt-in">
   <h3><span class="m m-post">POST</span> <code>/v1/lake/opt-in</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">GET /v1/lake/trends AUTH; rolled-up summary (no raw text, no identity)</p>
-  <details class="route-detail"><summary>Full comment</summary><p>GET /v1/lake/trends AUTH; rolled-up summary (no raw text, no identity) The W751 GET /v1/verticals/:id/fingerprint route already exists above; the W757 module is consumed via the new pattern-lake helpers. New code paths (CLI lake subverbs, the W757 docs page) call these routes directly.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>GET /v1/lake/trends AUTH; rolled-up summary (no raw text, no identity) The GET /v1/verticals/:id/fingerprint route already exists above; the module is consumed via the new pattern-lake helpers. New code paths (CLI lake subverbs, the docs page) call these routes directly.</p></details>
   <pre>CODE1365</pre>
   <pre>CODE1366</pre>
 </section>
@@ -3319,7 +3319,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="GET-v1-lake-repeated">
   <h3><span class="m m-get">GET</span> <code>/v1/lake/repeated</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Lake repeated - finds clusters of repeated workflow inputs in the event</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Lake repeated - finds clusters of repeated workflow inputs in the event store (the W384 &quot;repeated workflows&quot; surface). Returns up to ?limit (max 200, default 20) clusters with their representative input + member count.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Lake repeated - finds clusters of repeated workflow inputs in the event store (the &quot;repeated workflows&quot; surface). Returns up to ?limit (max 200, default 20) clusters with their representative input + member count.</p></details>
   <pre>CODE1371</pre>
   <pre>CODE1372</pre>
 </section>
@@ -3334,16 +3334,16 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-v1-lake-storage">
   <h3><span class="m m-get">GET</span> <code>/v1/lake/storage</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W409l – GET /v1/lake/storage → small env probe for the Account UI so the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409l – GET /v1/lake/storage → small env probe for the Account UI so the dashboard can show &quot;Local storage: ~/.kolm/events/events.sqlite (12 MB)&quot;. Returns the same envelope storeInfo() emits, plus a coarse byte total.</p></details>
+  <p class="route-desc">GET /v1/lake/storage → small env probe for the Account UI so the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>GET /v1/lake/storage → small env probe for the Account UI so the dashboard can show &quot;Local storage: ~/.kolm/events/events.sqlite (12 MB)&quot;. Returns the same envelope storeInfo() emits, plus a coarse byte total.</p></details>
   <pre>CODE1377</pre>
   <pre>CODE1378</pre>
 </section>
 
 <section class="api-route" id="GET-v1-lake-tail">
   <h3><span class="m m-get">GET</span> <code>/v1/lake/tail</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W409l – GET /v1/lake/tail → recent canonical events for the inbox UI.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409l – GET /v1/lake/tail → recent canonical events for the inbox UI. Reads directly from the event-store (NOT capture-store). Default limit 50, capped at 500. Returns newest first.</p></details>
+  <p class="route-desc">GET /v1/lake/tail → recent canonical events for the inbox UI.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>GET /v1/lake/tail → recent canonical events for the inbox UI. Reads directly from the event-store (NOT capture-store). Default limit 50, capped at 500. Returns newest first.</p></details>
   <pre>CODE1380</pre>
   <pre>CODE1381</pre>
 </section>
@@ -3445,8 +3445,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-v1-lingual-manifest">
   <h3><span class="m m-get">GET</span> <code>/v1/lingual/manifest</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">/v1/lingual/manifest – bare GET aliasing the W833 manifest collection.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>/v1/lingual/manifest – bare GET aliasing the W833 manifest collection. The shipped route is /v1/lingual/manifest/:artifact_id; without an artifact_id selected (the TUI default state) we return the tenant-wide language-mixture distribution so the view still renders.</p></details>
+  <p class="route-desc">/v1/lingual/manifest – bare GET aliasing the manifest collection.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>/v1/lingual/manifest – bare GET aliasing the manifest collection. The shipped route is /v1/lingual/manifest/:artifact_id; without an artifact_id selected (the TUI default state) we return the tenant-wide language-mixture distribution so the view still renders.</p></details>
   <pre>CODE1433</pre>
   <pre>CODE1434</pre>
 </section>
@@ -3498,8 +3498,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <details class="group-intro"><summary>About this group</summary><p>Public surface. No auth header required. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-loop-try">
   <h3><span class="m m-post">POST</span> <code>/v1/loop/try</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W313 – public anonymous &quot;try it&quot; demo of the capture-receipt shape.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W313 – public anonymous &quot;try it&quot; demo of the capture-receipt shape. No auth, no write side-effects; visitors on /value-loop POST a prompt+response and see the exact same receipt envelope a real authenticated /v1/bridges/observe would emit, with `demo:true` + `durable:false` so the body cannot lie.</p></details>
+  <p class="route-desc">– public anonymous &quot;try it&quot; demo of the capture-receipt shape.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– public anonymous &quot;try it&quot; demo of the capture-receipt shape. No auth, no write side-effects; visitors on /value-loop POST a prompt+response and see the exact same receipt envelope a real authenticated /v1/bridges/observe would emit, with `demo:true` + `durable:false` so the body cannot lie.</p></details>
   <pre>CODE1457</pre>
   <pre>CODE1458</pre>
 </section>
@@ -3524,8 +3524,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-v1-marketplace-slug-download">
   <h3><span class="m m-get">GET</span> <code>/v1/marketplace/:slug/download</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W339/W342 – install/download MUST refuse artifacts that don&#39;t pass</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W339/W342 – install/download MUST refuse artifacts that don&#39;t pass productionReady(). Same gate the marketplace pill uses, so a user who sees no &quot;Verified&quot; badge ALSO can&#39;t `kolm marketplace install` it. force allowed via ?force=true query for CI testing / canary debug, matching `kolm run --force` semantics.</p></details>
+  <p class="route-desc">/– install/download MUST refuse artifacts that don&#39;t pass</p>
+  <details class="route-detail"><summary>Full comment</summary><p>/– install/download MUST refuse artifacts that don&#39;t pass productionReady(). Same gate the marketplace pill uses, so a user who sees no &quot;Verified&quot; badge ALSO can&#39;t `kolm marketplace install` it. force allowed via ?force=true query for CI testing / canary debug, matching `kolm run --force` semantics.</p></details>
   <pre>CODE1470</pre>
   <pre>CODE1471</pre>
 </section>
@@ -3571,8 +3571,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-v1-marketplace-list">
   <h3><span class="m m-get">GET</span> <code>/v1/marketplace/list</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W342 – explicit list endpoint used by /marketplace.html client render.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W342 – explicit list endpoint used by /marketplace.html client render. Always returns { artifacts: [...] } with live verified flag.</p></details>
+  <p class="route-desc">– explicit list endpoint used by /marketplace.html client render.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– explicit list endpoint used by /marketplace.html client render. Always returns { artifacts: [...] } with live verified flag.</p></details>
   <pre>CODE1488</pre>
   <pre>CODE1489</pre>
 </section>
@@ -3676,15 +3676,15 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="POST-v1-media-redact-job">
   <h3><span class="m m-post">POST</span> <code>/v1/media/redact-job</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">envelope so the caller knows exactly what to install.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>envelope so the caller knows exactly what to install. Body: { media_uri | path, mime?, kind?, max_bytes?, model?, lang? } Sync mode (default): worker runs in-process via spawnSync. For long whisper passes, callers should pass {async:true} (deferred to W455).</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>envelope so the caller knows exactly what to install. Body: { media_uri | path, mime?, kind?, max_bytes?, model?, lang? } Sync mode (default): worker runs in-process via spawnSync. For long whisper passes, callers should pass {async:true} (deferred to).</p></details>
   <pre>CODE1531</pre>
   <pre>CODE1532</pre>
 </section>
 
 <section class="api-route" id="GET-v1-media-redact-job-doctor">
   <h3><span class="m m-get">GET</span> <code>/v1/media/redact-job/doctor</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W454 – worker self-doctor proxied through the API so `kolm media</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W454 – worker self-doctor proxied through the API so `kolm media doctor --remote` can ask the server which extractors are wired.</p></details>
+  <p class="route-desc">– worker self-doctor proxied through the API so `kolm media</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– worker self-doctor proxied through the API so `kolm media doctor --remote` can ask the server which extractors are wired.</p></details>
   <pre>CODE1534</pre>
   <pre>CODE1535</pre>
 </section>
@@ -3811,8 +3811,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-model-card-generate">
   <h3><span class="m m-post">POST</span> <code>/v1/model-card/generate</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">MUST regex-match (W604 anti-brittleness).</p>
-  <details class="route-detail"><summary>Full comment</summary><p>MUST regex-match (W604 anti-brittleness). Modules import lazily so cold daemons that never hit this surface don&#39;t pay for the schema/emitter trees.</p></details>
+  <p class="route-desc">MUST regex-match.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>MUST regex-match. Modules import lazily so cold daemons that never hit this surface don&#39;t pay for the schema/emitter trees.</p></details>
   <pre>CODE1605</pre>
   <pre>CODE1606</pre>
 </section>
@@ -3917,22 +3917,22 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="GET-v1-multimodal-pipeline">
   <h3><span class="m m-get">GET</span> <code>/v1/multimodal/pipeline</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">/v1/multimodal/pipeline – collection GET listing tenant multimodal</p>
-  <details class="route-detail"><summary>Full comment</summary><p>/v1/multimodal/pipeline – collection GET listing tenant multimodal capture pipeline state. Real W829 routes (/v1/captures/multimodal, /v1/vlm-distill/runs) live in src/multimodal-pipeline-routes.js; this bare GET aggregates them for the TUI surface.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>/v1/multimodal/pipeline – collection GET listing tenant multimodal capture pipeline state. Real routes (/v1/captures/multimodal, /v1/vlm-distill/runs) live in src/multimodal-pipeline-routes.js; this bare GET aggregates them for the TUI surface.</p></details>
   <pre>CODE1653</pre>
   <pre>CODE1654</pre>
 </section>
 
 <section class="api-route" id="POST-v1-multimodal-redact-audio">
   <h3><span class="m m-post">POST</span> <code>/v1/multimodal/redact-audio</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W464 – multimodal audio voiceprint scrub. Anonymizes the speaker&#39;s</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W464 – multimodal audio voiceprint scrub. Anonymizes the speaker&#39;s voiceprint while preserving content. Complementary to W462 image redact (faces/plates) and W454 audio transcript redact (text). Body: { media_uri | path, output_path?, strength?, max_bytes? }</p></details>
+  <p class="route-desc">– multimodal audio voiceprint scrub. Anonymizes the speaker&#39;s</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– multimodal audio voiceprint scrub. Anonymizes the speaker&#39;s voiceprint while preserving content. Complementary to image redact (faces/plates) and audio transcript redact (text). Body: { media_uri | path, output_path?, strength?, max_bytes? }</p></details>
   <pre>CODE1656</pre>
   <pre>CODE1657</pre>
 </section>
 
 <section class="api-route" id="GET-v1-multimodal-redact-audio-doctor">
   <h3><span class="m m-get">GET</span> <code>/v1/multimodal/redact-audio/doctor</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W464 – audio-redact worker self-doctor.</p>
+  <p class="route-desc">– audio-redact worker self-doctor.</p>
   <pre>CODE1659</pre>
   <pre>CODE1660</pre>
 </section>
@@ -3947,8 +3947,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-v1-multimodal-redact-image-doctor">
   <h3><span class="m m-get">GET</span> <code>/v1/multimodal/redact-image/doctor</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W462 – image-redact worker self-doctor, proxied so the CLI&#39;s</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W462 – image-redact worker self-doctor, proxied so the CLI&#39;s `kolm media image-doctor --remote` can ask the server.</p></details>
+  <p class="route-desc">– image-redact worker self-doctor, proxied so the CLI&#39;s</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– image-redact worker self-doctor, proxied so the CLI&#39;s `kolm media image-doctor --remote` can ask the server.</p></details>
   <pre>CODE1665</pre>
   <pre>CODE1666</pre>
 </section>
@@ -3963,8 +3963,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-v1-multimodal-tokenize-doctor">
   <h3><span class="m m-get">GET</span> <code>/v1/multimodal/tokenize/doctor</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W554 - multimodal sidecar tokenizer. API mirror of</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W554 - multimodal sidecar tokenizer. API mirror of `kolm media tokenize`: local-safe by default, hosted-disabled unless the operator explicitly allows server-side file access. Creates compile-ready Markdown sidecars using deterministic local feature tokens, with optional provider captions/transcripts when configured.</p></details>
+  <p class="route-desc">- multimodal sidecar tokenizer. API mirror of</p>
+  <details class="route-detail"><summary>Full comment</summary><p>- multimodal sidecar tokenizer. API mirror of `kolm media tokenize`: local-safe by default, hosted-disabled unless the operator explicitly allows server-side file access. Creates compile-ready Markdown sidecars using deterministic local feature tokens, with optional provider captions/transcripts when configured.</p></details>
   <pre>CODE1671</pre>
   <pre>CODE1672</pre>
 </section>
@@ -4108,7 +4108,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="POST-v1-numeric-eval">
   <h3><span class="m m-post">POST</span> <code>/v1/numeric/eval</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">contract – a stray request must not fire an evaluation by accident.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>contract – a stray request must not fire an evaluation by accident. Loud-fail envelope on every error path: ok:false + structured error + version stamp `w759-vN.M`. Consumers MUST version-pin via regex (/^w759-/), not literal equality (W604 anti-brittleness).</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>contract – a stray request must not fire an evaluation by accident. Loud-fail envelope on every error path: ok:false + structured error + version stamp `w759-vN.M`. Consumers MUST version-pin via regex (/^w759-/), not literal equality.</p></details>
   <pre>CODE1741</pre>
   <pre>CODE1742</pre>
 </section>
@@ -4172,8 +4172,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-opportunities">
   <h3><span class="m m-get">GET</span> <code>/v1/opportunities</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W419 – every opportunity surface must be tenant-scoped. Without auth the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W419 – every opportunity surface must be tenant-scoped. Without auth the engine would surface another tenant&#39;s pattern detections (cache_candidate request_hash, repeated prompt clusters, etc). 401s use the canonical {ok:false, error:&#39;auth required&#39;} envelope.</p></details>
+  <p class="route-desc">– every opportunity surface must be tenant-scoped. Without auth the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– every opportunity surface must be tenant-scoped. Without auth the engine would surface another tenant&#39;s pattern detections (cache_candidate request_hash, repeated prompt clusters, etc). 401s use the canonical {ok:false, error:&#39;auth required&#39;} envelope.</p></details>
   <pre>CODE1772</pre>
   <pre>CODE1773</pre>
 </section>
@@ -4203,8 +4203,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="POST-v1-opportunities-id-promote">
   <h3><span class="m m-post">POST</span> <code>/v1/opportunities/:id/promote</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W409m – POST /v1/opportunities/:id/promote → dataset.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409m – POST /v1/opportunities/:id/promote → dataset. Turns the opportunity into a real dataset by calling dataset-workbench createDataset() with the opportunity&#39;s namespace + provenance. Returns { ok, dataset_id, train_count, holdout_count, ... }. Marks the opportunity status=&#39;promoted&#39; so subsequent reads show the badge.</p></details>
+  <p class="route-desc">POST /v1/opportunities/:id/promote → dataset.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>POST /v1/opportunities/:id/promote → dataset. Turns the opportunity into a real dataset by calling dataset-workbench createDataset with the opportunity&#39;s namespace + provenance. Returns { ok, dataset_id, train_count, holdout_count, ... }. Marks the opportunity status=&#39;promoted&#39; so subsequent reads show the badge.</p></details>
   <pre>CODE1784</pre>
   <pre>CODE1785</pre>
 </section>
@@ -4269,8 +4269,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="POST-v1-pextract-redact-prompt">
   <h3><span class="m m-post">POST</span> <code>/v1/pextract/redact-prompt</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">Defense layering with W762 is intentional. W762&#39;s</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Defense layering with W762 is intentional. W762&#39;s classifyPromptAdversarial covers a broader red-team taxonomy; W765 is the system-prompt-extraction-specific guard. Overlapping matches (e.g. &quot;ignore previous instructions&quot;) are correct, not a bug – defense in depth is the point.</p></details>
+  <p class="route-desc">Defense layering with is intentional.&#39;s</p>
+  <details class="route-detail"><summary>Full comment</summary><p>Defense layering with is intentional.&#39;s classifyPromptAdversarial covers a broader red-team taxonomy; is the system-prompt-extraction-specific guard. Overlapping matches (e.g. &quot;ignore previous instructions&quot;) are correct, not a bug – defense in depth is the point.</p></details>
   <pre>CODE1817</pre>
   <pre>CODE1818</pre>
 </section>
@@ -4281,8 +4281,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-pipeline-compile">
   <h3><span class="m m-post">POST</span> <code>/v1/pipeline/compile</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W420 – tenant gate. The pipeline runs compileFull which reads from the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W420 – tenant gate. The pipeline runs compileFull which reads from the event store; without forcing tenant scope it would compile another tenant&#39;s corpus into the caller&#39;s artifact namespace. opts.tenant_id is injected from req.tenant_record.id and supersedes anything the body sent.</p></details>
+  <p class="route-desc">– tenant gate. The pipeline runs compileFull which reads from the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– tenant gate. The pipeline runs compileFull which reads from the event store; without forcing tenant scope it would compile another tenant&#39;s corpus into the caller&#39;s artifact namespace. opts.tenant_id is injected from req.tenant_record.id and supersedes anything the body sent.</p></details>
   <pre>CODE1824</pre>
   <pre>CODE1825</pre>
 </section>
@@ -4298,7 +4298,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="POST-v1-pipeline-full">
   <h3><span class="m m-post">POST</span> <code>/v1/pipeline/full</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">job_id. Phases are streamed via /v1/pipeline/jobs/:id/stream (SSE).</p>
-  <details class="route-detail"><summary>Full comment</summary><p>job_id. Phases are streamed via /v1/pipeline/jobs/:id/stream (SSE). W420 – same tenant gate as /v1/pipeline/compile. The caller&#39;s req.tenant_record.id is the only tenant scope that ever reaches compileFull from this route.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>job_id. Phases are streamed via /v1/pipeline/jobs/:id/stream (SSE). – same tenant gate as /v1/pipeline/compile. The caller&#39;s req.tenant_record.id is the only tenant scope that ever reaches compileFull from this route.</p></details>
   <pre>CODE1830</pre>
   <pre>CODE1831</pre>
 </section>
@@ -4425,8 +4425,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-poisoning-bind-teacher">
   <h3><span class="m m-post">POST</span> <code>/v1/poisoning/bind-teacher</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W761 – Model Poisoning Anomaly Detection routes. Distinct-named handlers so</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W761 – Model Poisoning Anomaly Detection routes. Distinct-named handlers so parallel wave agents on W760 + W762..W765 do not collide on the suffix. Builds on W808 capture-anomaly + W750-followup copyright-detector + the W761-3 teacher-response HMAC primitive.</p></details>
+  <p class="route-desc">– Model Poisoning Anomaly Detection routes. Distinct-named handlers so</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– Model Poisoning Anomaly Detection routes. Distinct-named handlers so parallel wave agents on +..do not collide on the suffix. Builds on capture-anomaly + copyright-detector + the-3 teacher-response HMAC primitive.</p></details>
   <pre>CODE1889</pre>
   <pre>CODE1890</pre>
 </section>
@@ -4679,8 +4679,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-ready-deep">
   <h3><span class="m m-get">GET</span> <code>/v1/ready/deep</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">/v1/ready/deep – /v1-prefixed alias of the W824 /ready/deep route so the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>/v1/ready/deep – /v1-prefixed alias of the W824 /ready/deep route so the TUI&#39;s k8s-readiness view stays on the /v1/* convention every other view uses. Forwards through the registered handler instead of duplicating logic so a single k8s-routes change updates both paths.</p></details>
+  <p class="route-desc">/v1/ready/deep – /v1-prefixed alias of the /ready/deep route so the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>/v1/ready/deep – /v1-prefixed alias of the /ready/deep route so the TUI&#39;s k8s-readiness view stays on the /v1/* convention every other view uses. Forwards through the registered handler instead of duplicating logic so a single k8s-routes change updates both paths.</p></details>
   <pre>CODE2008</pre>
   <pre>CODE2009</pre>
 </section>
@@ -4862,57 +4862,57 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-reg-classify-risk">
   <h3><span class="m m-post">POST</span> <code>/v1/reg/classify-risk</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W834-2 – POST /v1/reg/classify-risk</p>
+  <p class="route-desc">-2 – POST /v1/reg/classify-risk</p>
   <pre>CODE2095</pre>
   <pre>CODE2096</pre>
 </section>
 
 <section class="api-route" id="GET-v1-reg-data-governance">
   <h3><span class="m m-get">GET</span> <code>/v1/reg/data-governance</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W834-4 – GET /v1/reg/data-governance?namespace=X&amp;period=YYYY-MM</p>
+  <p class="route-desc">-4 – GET /v1/reg/data-governance?namespace=X&amp;period=YYYY-MM</p>
   <pre>CODE2098</pre>
   <pre>CODE2099</pre>
 </section>
 
 <section class="api-route" id="GET-v1-reg-eu-aiact-docs">
   <h3><span class="m m-get">GET</span> <code>/v1/reg/eu-aiact-docs</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">/v1/reg/eu-aiact-docs – GET counterpart to the W834 POST. POST runs the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>/v1/reg/eu-aiact-docs – GET counterpart to the W834 POST. POST runs the Annex IV generator; GET reads the most-recent generated packet (or an empty envelope if none has been produced yet) so the TUI view does not require the operator to first POST to view state.</p></details>
+  <p class="route-desc">/v1/reg/eu-aiact-docs – GET counterpart to the POST. POST runs the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>/v1/reg/eu-aiact-docs – GET counterpart to the POST. POST runs the Annex IV generator; GET reads the most-recent generated packet (or an empty envelope if none has been produced yet) so the TUI view does not require the operator to first POST to view state.</p></details>
   <pre>CODE2101</pre>
   <pre>CODE2102</pre>
 </section>
 
 <section class="api-route" id="POST-v1-reg-eu-aiact-docs">
   <h3><span class="m m-post">POST</span> <code>/v1/reg/eu-aiact-docs</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W834-1 – POST /v1/reg/eu-aiact-docs</p>
+  <p class="route-desc">-1 – POST /v1/reg/eu-aiact-docs</p>
   <pre>CODE2104</pre>
   <pre>CODE2105</pre>
 </section>
 
 <section class="api-route" id="POST-v1-reg-grc-export">
   <h3><span class="m m-post">POST</span> <code>/v1/reg/grc-export</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W834-6 – POST /v1/reg/grc-export</p>
+  <p class="route-desc">-6 – POST /v1/reg/grc-export</p>
   <pre>CODE2107</pre>
   <pre>CODE2108</pre>
 </section>
 
 <section class="api-route" id="GET-v1-reg-hil-threshold">
   <h3><span class="m m-get">GET</span> <code>/v1/reg/hil/threshold</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W834-3 – GET /v1/reg/hil/threshold?namespace=X</p>
+  <p class="route-desc">-3 – GET /v1/reg/hil/threshold?namespace=X</p>
   <pre>CODE2110</pre>
   <pre>CODE2111</pre>
 </section>
 
 <section class="api-route" id="POST-v1-reg-hil-threshold">
   <h3><span class="m m-post">POST</span> <code>/v1/reg/hil/threshold</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W834-3 – POST /v1/reg/hil/threshold</p>
+  <p class="route-desc">-3 – POST /v1/reg/hil/threshold</p>
   <pre>CODE2113</pre>
   <pre>CODE2114</pre>
 </section>
 
 <section class="api-route" id="POST-v1-reg-model-card">
   <h3><span class="m m-post">POST</span> <code>/v1/reg/model-card</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W834-5 – POST /v1/reg/model-card</p>
+  <p class="route-desc">-5 – POST /v1/reg/model-card</p>
   <pre>CODE2116</pre>
   <pre>CODE2117</pre>
 </section>
@@ -4937,8 +4937,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-v1-region-status">
   <h3><span class="m m-get">GET</span> <code>/v1/region/status</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">Cross-ref: W769 (data residency) is the per-capture tag; W780 is the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Cross-ref: W769 (data residency) is the per-capture tag; W780 is the request-routing gateway. The two are joined inside getRegionForCapture so a tenant who configures a namespace default region in W769 also pins the W780 capture routing for that namespace.</p></details>
+  <p class="route-desc">Cross-ref: (data residency) is the per-capture tag; is the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>Cross-ref: (data residency) is the per-capture tag; is the request-routing gateway. The two are joined inside getRegionForCapture so a tenant who configures a namespace default region in also pins the capture routing for that namespace.</p></details>
   <pre>CODE2129</pre>
   <pre>CODE2130</pre>
 </section>
@@ -5039,8 +5039,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="POST-v1-residency-tag-capture">
   <h3><span class="m m-post">POST</span> <code>/v1/residency/tag-capture</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">by country code – that&#39;s the perimeter geo-fence. W769 tags WHERE</p>
-  <details class="route-detail"><summary>Full comment</summary><p>by country code – that&#39;s the perimeter geo-fence. W769 tags WHERE DATA LIVES at capture time – that&#39;s the data-locality residency control. Both are required for a credible regulated-industry posture; they cover orthogonal threat models. The /compliance/data-residency landing surfaces the cross-reference explicitly.</p></details>
+  <p class="route-desc">by country code – that&#39;s the perimeter geo-fence. tags WHERE</p>
+  <details class="route-detail"><summary>Full comment</summary><p>by country code – that&#39;s the perimeter geo-fence. tags WHERE DATA LIVES at capture time – that&#39;s the data-locality residency control. Both are required for a credible regulated-industry posture; they cover orthogonal threat models. The /compliance/data-residency landing surfaces the cross-reference explicitly.</p></details>
   <pre>CODE2177</pre>
   <pre>CODE2178</pre>
 </section>
@@ -5144,7 +5144,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="GET-v1-runtime-placement">
   <h3><span class="m m-get">GET</span> <code>/v1/runtime/placement</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">/v1/runtime/placement – collection GET that emits the local placement</p>
-  <details class="route-detail"><summary>Full comment</summary><p>/v1/runtime/placement – collection GET that emits the local placement hierarchy snapshot. W826 ships detectMemoryHierarchy + placementDecision as pure functions; the TUI view needs a one-shot GET to read the hierarchy without staging an artifact size first.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>/v1/runtime/placement – collection GET that emits the local placement hierarchy snapshot. ships detectMemoryHierarchy + placementDecision as pure functions; the TUI view needs a one-shot GET to read the hierarchy without staging an artifact size first.</p></details>
   <pre>CODE2230</pre>
   <pre>CODE2231</pre>
 </section>
@@ -5188,8 +5188,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-savings">
   <h3><span class="m m-get">GET</span> <code>/v1/savings</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">/v1/savings – bare alias for the W835 summary endpoint so the TUI&#39;s</p>
-  <details class="route-detail"><summary>Full comment</summary><p>/v1/savings – bare alias for the W835 summary endpoint so the TUI&#39;s savings-tracker view has a stable collection-style URL. Forwards into the real /v1/savings/summary handler.</p></details>
+  <p class="route-desc">/v1/savings – bare alias for the summary endpoint so the TUI&#39;s</p>
+  <details class="route-detail"><summary>Full comment</summary><p>/v1/savings – bare alias for the summary endpoint so the TUI&#39;s savings-tracker view has a stable collection-style URL. Forwards into the real /v1/savings/summary handler.</p></details>
   <pre>CODE2253</pre>
   <pre>CODE2254</pre>
 </section>
@@ -5293,7 +5293,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="POST-v1-search">
   <h3><span class="m m-post">POST</span> <code>/v1/search</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Search - registry similarity search across the caller&#39;s tenant artifacts.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Search - registry similarity search across the caller&#39;s tenant artifacts. Returns top-k matches with embedding-distance scores. Body: { query (required), k=10, tag }. 500 errors are wrapped in {error, detail, matches:[]} so SDKs never see a raw 500 (W470 P0-2).</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Search - registry similarity search across the caller&#39;s tenant artifacts. Returns top-k matches with embedding-distance scores. Body: { query (required), k=10, tag }. 500 errors are wrapped in {error, detail, matches:} so SDKs never see a raw 500.</p></details>
   <pre>CODE2301</pre>
   <pre>CODE2302</pre>
 </section>
@@ -5305,7 +5305,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="GET-v1-seasonal">
   <h3><span class="m m-get">GET</span> <code>/v1/seasonal</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span> <span class="route-stub">array-literal expansion</span></h3>
   <p class="route-desc">:namespace path param. The dashboard pages call these endpoints without a</p>
-  <details class="route-detail"><summary>Full comment</summary><p>:namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404&#39;d. We forward to the existing :namespace handler with namespace=&#39;default&#39; so the account UI&lt;-&gt;server parity test (W409f #4) passes and the page renders an empty-state from a real envelope instead of a 404.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>:namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404&#39;d. We forward to the existing :namespace handler with namespace=&#39;default&#39; so the account UI&lt;-&gt;server parity test (#4) passes and the page renders an empty-state from a real envelope instead of a 404.</p></details>
   <pre>CODE2308</pre>
   <pre>CODE2309</pre>
 </section>
@@ -5372,8 +5372,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-v1-seeds-from-nl-health">
   <h3><span class="m m-get">GET</span> <code>/v1/seeds/from-nl/health</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W347 – GET /v1/seeds/from-nl/health. Lets the UI hide the NL-seeds</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W347 – GET /v1/seeds/from-nl/health. Lets the UI hide the NL-seeds button when no LLM backend is configured. Stable, no auth.</p></details>
+  <p class="route-desc">– GET /v1/seeds/from-nl/health. Lets the UI hide the NL-seeds</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– GET /v1/seeds/from-nl/health. Lets the UI hide the NL-seeds button when no LLM backend is configured. Stable, no auth.</p></details>
   <pre>CODE2340</pre>
   <pre>CODE2341</pre>
 </section>
@@ -5617,16 +5617,16 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-spec-decode">
   <h3><span class="m m-post">POST</span> <code>/v1/spec-decode</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W480 - Train a speculative-decoding draft head (eagle/eagle2/eagle3/medusa)</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W480 - Train a speculative-decoding draft head (eagle/eagle2/eagle3/medusa) via the tenant-installed trainer plug-in. Auth-gated. Body: { pairs_path, base_path, draft_kind, out_dir, namespace }. Returns trainer envelope.</p></details>
+  <p class="route-desc">- Train a speculative-decoding draft head (eagle/eagle2/eagle3/medusa)</p>
+  <details class="route-detail"><summary>Full comment</summary><p>- Train a speculative-decoding draft head (eagle/eagle2/eagle3/medusa) via the tenant-installed trainer plug-in. Auth-gated. Body: { pairs_path, base_path, draft_kind, out_dir, namespace }. Returns trainer envelope.</p></details>
   <pre>CODE2458</pre>
   <pre>CODE2459</pre>
 </section>
 
 <section class="api-route" id="GET-v1-spec-decode-doctor">
   <h3><span class="m m-get">GET</span> <code>/v1/spec-decode/doctor</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W480 - Speculative decoding draft-head trainer doctor (EAGLE-2/3, Medusa).</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W480 - Speculative decoding draft-head trainer doctor (EAGLE-2/3, Medusa). Reports whether $KOLM_SPECDECODE_TRAINER is resolvable; install_hint when not.</p></details>
+  <p class="route-desc">- Speculative decoding draft-head trainer doctor (EAGLE-2/3, Medusa).</p>
+  <details class="route-detail"><summary>Full comment</summary><p>- Speculative decoding draft-head trainer doctor (EAGLE-2/3, Medusa). Reports whether $KOLM_SPECDECODE_TRAINER is resolvable; install_hint when not.</p></details>
   <pre>CODE2461</pre>
   <pre>CODE2462</pre>
 </section>
@@ -5699,7 +5699,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="POST-v1-speculative-bench">
   <h3><span class="m m-post">POST</span> <code>/v1/speculative/bench</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Acceptance log query (workflow_id=&#39;speculative_teacher:log&#39;)</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Acceptance log query (workflow_id=&#39;speculative_teacher:log&#39;) Auth-gated via req.tenant_record. Tenant fence forced from session, never from request body. Distinct prefix /v1/speculative/* so parallel agents on W811/W812/W813/W815 cannot collide on these route paths.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Acceptance log query (workflow_id=&#39;speculative_teacher:log&#39;) Auth-gated via req.tenant_record. Tenant fence forced from session, never from request body. Distinct prefix /v1/speculative/* so parallel agents on///cannot collide on these route paths.</p></details>
   <pre>CODE2496</pre>
   <pre>CODE2497</pre>
 </section>
@@ -5717,8 +5717,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-sso-status">
   <h3><span class="m m-get">GET</span> <code>/v1/sso/status</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W869+ Persona D admin status aggregators.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W869+ Persona D admin status aggregators. Thin read-only composers for /account/enterprise. Each one stitches data from individual surfaces (sso/status, byoc/deployments, compliance/*, audit) into the shape the admin dashboard expects. Plain when state is missing: empty fields, no 404s.</p></details>
+  <p class="route-desc">+ Persona D admin status aggregators.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>+ Persona D admin status aggregators. Thin read-only composers for /account/enterprise. Each one stitches data from individual surfaces (sso/status, byoc/deployments, compliance/*, audit) into the shape the admin dashboard expects. Plain when state is missing: empty fields, no 404s.</p></details>
   <pre>CODE2506</pre>
   <pre>CODE2507</pre>
 </section>
@@ -5730,7 +5730,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="GET-v1-staleness">
   <h3><span class="m m-get">GET</span> <code>/v1/staleness</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span> <span class="route-stub">array-literal expansion</span></h3>
   <p class="route-desc">:namespace path param. The dashboard pages call these endpoints without a</p>
-  <details class="route-detail"><summary>Full comment</summary><p>:namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404&#39;d. We forward to the existing :namespace handler with namespace=&#39;default&#39; so the account UI&lt;-&gt;server parity test (W409f #4) passes and the page renders an empty-state from a real envelope instead of a 404.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>:namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404&#39;d. We forward to the existing :namespace handler with namespace=&#39;default&#39; so the account UI&lt;-&gt;server parity test (#4) passes and the page renders an empty-state from a real envelope instead of a 404.</p></details>
   <pre>CODE2513</pre>
   <pre>CODE2514</pre>
 </section>
@@ -5745,7 +5745,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="POST-v1-staleness-apply-ttl">
   <h3><span class="m m-post">POST</span> <code>/v1/staleness/apply-ttl</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Role gate: req.is_admin OR req.local_daemon OR req.tenant_record.kind === &#39;human&#39;</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Role gate: req.is_admin OR req.local_daemon OR req.tenant_record.kind === &#39;human&#39; (the tenant_record.kind sentinel – human tenants are workspace owners by construction in src/auth.js; anon/api_only/etc. are not). We do NOT reuse teams.requireRole here because the staleness scope is per-namespace inside a tenant, not per-team. Adding team scoping is a follow-up (W746+1).</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Role gate: req.is_admin OR req.local_daemon OR req.tenant_record.kind === &#39;human&#39; (the tenant_record.kind sentinel – human tenants are workspace owners by construction in src/auth.js; anon/api_only/etc. are not). We do NOT reuse teams.requireRole here because the staleness scope is per-namespace inside a tenant, not per-team. Adding team scoping is a follow-up (+1).</p></details>
   <pre>CODE2519</pre>
   <pre>CODE2520</pre>
 </section>
@@ -5764,7 +5764,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="POST-v1-stat-sig-test">
   <h3><span class="m m-post">POST</span> <code>/v1/stat-sig/test</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">GET /v1/stat-sig/gate?ab_test_id=X&amp;alpha=Y&amp;min_n=Z&amp;min_effect_size=W</p>
-  <details class="route-detail"><summary>Full comment</summary><p>GET /v1/stat-sig/gate?ab_test_id=X&amp;alpha=Y&amp;min_n=Z&amp;min_effect_size=W Returns: {ok, decision:&#39;pass&#39;|&#39;fail&#39;|&#39;insufficient&#39;, reasons:[], welch:{...}, version} Auth-gated. Pure-math welchT does not need tenant fence; gate() reads via W777 ab-router which forces tenant from session.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>GET /v1/stat-sig/gate?ab_test_id=X&amp;alpha=Y&amp;min_n=Z&amp;min_effect_size=W Returns: {ok, decision:&#39;pass&#39;|&#39;fail&#39;|&#39;insufficient&#39;, reasons:, welch:{...}, version} Auth-gated. Pure-math welchT does not need tenant fence; gate reads via ab-router which forces tenant from session.</p></details>
   <pre>CODE2529</pre>
   <pre>CODE2530</pre>
 </section>
@@ -5943,7 +5943,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="GET-v1-synthetic-coverage">
   <h3><span class="m m-get">GET</span> <code>/v1/synthetic/coverage</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span> <span class="route-stub">array-literal expansion</span></h3>
   <p class="route-desc">:namespace path param. The dashboard pages call these endpoints without a</p>
-  <details class="route-detail"><summary>Full comment</summary><p>:namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404&#39;d. We forward to the existing :namespace handler with namespace=&#39;default&#39; so the account UI&lt;-&gt;server parity test (W409f #4) passes and the page renders an empty-state from a real envelope instead of a 404.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>:namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404&#39;d. We forward to the existing :namespace handler with namespace=&#39;default&#39; so the account UI&lt;-&gt;server parity test (#4) passes and the page renders an empty-state from a real envelope instead of a 404.</p></details>
   <pre>CODE2617</pre>
   <pre>CODE2618</pre>
 </section>
@@ -5958,7 +5958,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="GET-v1-synthetic-gaps">
   <h3><span class="m m-get">GET</span> <code>/v1/synthetic/gaps</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span> <span class="route-stub">array-literal expansion</span></h3>
   <p class="route-desc">:namespace path param. The dashboard pages call these endpoints without a</p>
-  <details class="route-detail"><summary>Full comment</summary><p>:namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404&#39;d. We forward to the existing :namespace handler with namespace=&#39;default&#39; so the account UI&lt;-&gt;server parity test (W409f #4) passes and the page renders an empty-state from a real envelope instead of a 404.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>:namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404&#39;d. We forward to the existing :namespace handler with namespace=&#39;default&#39; so the account UI&lt;-&gt;server parity test (#4) passes and the page renders an empty-state from a real envelope instead of a 404.</p></details>
   <pre>CODE2623</pre>
   <pre>CODE2624</pre>
 </section>
@@ -5993,7 +5993,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="GET-health">
   <h3><span class="m m-get">GET</span> <code>/health</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Public /health – no provider-key leakage. Authenticated callers can</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Public /health – no provider-key leakage. Authenticated callers can hit /v1/health for the full snapshot including backend availability. W888-L: ok:true is the canonical liveness signal for ship-gate, status is preserved for older readers.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Public /health – no provider-key leakage. Authenticated callers can hit /v1/health for the full snapshot including backend availability.: ok:true is the canonical liveness signal for ship-gate, status is preserved for older readers.</p></details>
   <pre>CODE2637</pre>
   <pre>CODE2638</pre>
 </section>
@@ -6008,7 +6008,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-metrics-extended">
   <h3><span class="m m-get">GET</span> <code>/metrics/extended</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W824-3 – /metrics/extended</p>
+  <p class="route-desc">-3 – /metrics/extended</p>
   <pre>CODE2643</pre>
   <pre>CODE2644</pre>
 </section>
@@ -6037,7 +6037,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-ready-deep">
   <h3><span class="m m-get">GET</span> <code>/ready/deep</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W824-2 – /ready/deep</p>
+  <p class="route-desc">-2 – /ready/deep</p>
   <pre>CODE2655</pre>
   <pre>CODE2656</pre>
 </section>
@@ -6068,7 +6068,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="GET-v1-teacher-versions">
   <h3><span class="m m-get">GET</span> <code>/v1/teacher-versions</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span> <span class="route-stub">array-literal expansion</span></h3>
   <p class="route-desc">:namespace path param. The dashboard pages call these endpoints without a</p>
-  <details class="route-detail"><summary>Full comment</summary><p>:namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404&#39;d. We forward to the existing :namespace handler with namespace=&#39;default&#39; so the account UI&lt;-&gt;server parity test (W409f #4) passes and the page renders an empty-state from a real envelope instead of a 404.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>:namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404&#39;d. We forward to the existing :namespace handler with namespace=&#39;default&#39; so the account UI&lt;-&gt;server parity test (#4) passes and the page renders an empty-state from a real envelope instead of a 404.</p></details>
   <pre>CODE2672</pre>
   <pre>CODE2673</pre>
 </section>
@@ -6122,8 +6122,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-v1-team-invites">
   <h3><span class="m m-get">GET</span> <code>/v1/team/invites</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W409f – /v1/team/invites – team.html invite list / create endpoint.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409f – /v1/team/invites – team.html invite list / create endpoint. GET returns the calling tenant&#39;s outstanding invites; POST creates one.</p></details>
+  <p class="route-desc">/v1/team/invites – team.html invite list / create endpoint.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>/v1/team/invites – team.html invite list / create endpoint. GET returns the calling tenant&#39;s outstanding invites; POST creates one.</p></details>
   <pre>CODE2697</pre>
   <pre>CODE2698</pre>
 </section>
@@ -6342,7 +6342,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="GET-v1-trace-distill">
   <h3><span class="m m-get">GET</span> <code>/v1/trace/distill</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">/v1/trace/distill – collection GET listing tenant reasoning-trace distill</p>
-  <details class="route-detail"><summary>Full comment</summary><p>/v1/trace/distill – collection GET listing tenant reasoning-trace distill jobs. Real W828 wiring lives in src/trace-compile.js; this collection stub returns an empty envelope until a wave wires the distill queue through a dedicated route module.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>/v1/trace/distill – collection GET listing tenant reasoning-trace distill jobs. Real wiring lives in src/trace-compile.js; this collection stub returns an empty envelope until a wave wires the distill queue through a dedicated route module.</p></details>
   <pre>CODE2801</pre>
   <pre>CODE2802</pre>
 </section>
@@ -6467,8 +6467,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="GET-v1-verify-cid">
   <h3><span class="m m-get">GET</span> <code>/v1/verify/:cid</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W436 – DoD step 9 closer. If the registry row carries `manifest.hashes`,</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W436 – DoD step 9 closer. If the registry row carries `manifest.hashes`, recompute the CID from those hashes (cidFromManifestHashes) and refuse to return verified=true unless the recomputed CID matches the requested CID. Surfaces `manifest_hash_mismatch` envelope with both expected_cid and actual_cid so an auditor can diff the discrepancy without trusting us.</p></details>
+  <p class="route-desc">– DoD step 9 closer. If the registry row carries `manifest.hashes`,</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– DoD step 9 closer. If the registry row carries `manifest.hashes`, recompute the CID from those hashes (cidFromManifestHashes) and refuse to return verified=true unless the recomputed CID matches the requested CID. Surfaces `manifest_hash_mismatch` envelope with both expected_cid and actual_cid so an auditor can diff the discrepancy without trusting us.</p></details>
   <pre>CODE2863</pre>
   <pre>CODE2864</pre>
 </section>
@@ -6528,8 +6528,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <section class="api-route" id="POST-v1-video-capture-detect">
   <h3><span class="m m-post">POST</span> <code>/v1/video/capture-detect</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">Distinct paths from W771 vision-capture (/v1/vision/capture-detect,</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Distinct paths from W771 vision-capture (/v1/vision/capture-detect, /v1/vision/captures) and W772 audio capture (/v1/audio/speech, /v1/audio/transcriptions, /v1/audio/translations) so the three parallel wave agents do not collide.</p></details>
+  <p class="route-desc">Distinct paths from vision-capture (/v1/vision/capture-detect,</p>
+  <details class="route-detail"><summary>Full comment</summary><p>Distinct paths from vision-capture (/v1/vision/capture-detect, /v1/vision/captures) and audio capture (/v1/audio/speech, /v1/audio/transcriptions, /v1/audio/translations) so the three parallel wave agents do not collide.</p></details>
   <pre>CODE2892</pre>
   <pre>CODE2893</pre>
 </section>
@@ -6570,7 +6570,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="POST-v1-vision-capture-detect">
   <h3><span class="m m-post">POST</span> <code>/v1/vision/capture-detect</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">{ok, count, captures[]} envelope.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>{ok, count, captures[]} envelope. All three are tenant-fenced via req.tenant_record.id (W411). Loud-fail envelopes on bad input – no silent passthrough.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>{ok, count, captures} envelope. All three are tenant-fenced via req.tenant_record.id. Loud-fail envelopes on bad input – no silent passthrough.</p></details>
   <pre>CODE2911</pre>
   <pre>CODE2912</pre>
 </section>
@@ -6626,8 +6626,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-whoami">
   <h3><span class="m m-get">GET</span> <code>/v1/whoami</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W433 – /v1/whoami alias. SDKs (OpenAI/Anthropic/LangChain) follow the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W433 – /v1/whoami alias. SDKs (OpenAI/Anthropic/LangChain) follow the convention `GET /v1/whoami` (or `/v1/me`) for &quot;who is this key?&quot;. The canonical kolm endpoint is GET /v1/account, but /v1/whoami forwards to the same handler so SDKs probing the conventional path get an answer instead of a 404 + bad first-impression. Auth-gated identically.</p></details>
+  <p class="route-desc">– /v1/whoami alias. SDKs (OpenAI/Anthropic/LangChain) follow the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– /v1/whoami alias. SDKs (OpenAI/Anthropic/LangChain) follow the convention `GET /v1/whoami` (or `/v1/me`) for &quot;who is this key?&quot;. The canonical kolm endpoint is GET /v1/account, but /v1/whoami forwards to the same handler so SDKs probing the conventional path get an answer instead of a 404 + bad first-impression. Auth-gated identically.</p></details>
   <pre>CODE2941</pre>
   <pre>CODE2942</pre>
 </section>
@@ -6639,7 +6639,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="GET-v1-workflows-repeated">
   <h3><span class="m m-get">GET</span> <code>/v1/workflows/repeated</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">/v1/workflows/repeated – repeated-workflows.html surfaces the cluster</p>
-  <details class="route-detail"><summary>Full comment</summary><p>/v1/workflows/repeated – repeated-workflows.html surfaces the cluster summary from /v1/bridges/observations (the canonical W297 source) under a more discoverable URL. Returns {workflows:[{template,count,samples}]}.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>/v1/workflows/repeated – repeated-workflows.html surfaces the cluster summary from /v1/bridges/observations (the canonical source) under a more discoverable URL. Returns {workflows:[{template,count,samples}]}.</p></details>
   <pre>CODE2948</pre>
   <pre>CODE2949</pre>
 </section>
@@ -6670,7 +6670,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="POST-v1-xlang-balanced-sample">
   <h3><span class="m m-post">POST</span> <code>/v1/xlang/balanced-sample</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">* Hosted route has NO runOnArtifact/judge wired by default –</p>
-  <details class="route-detail"><summary>Full comment</summary><p>* Hosted route has NO runOnArtifact/judge wired by default – production injects via req.app.locals._w774_run_on_artifact + ._w774_judge. The loud-fail envelope on missing wiring is the contract, not a 500. * All four routes are W411 tenant-fenced.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>* Hosted route has NO runOnArtifact/judge wired by default – production injects via req.app.locals._w774_run_on_artifact +._w774_judge. The loud-fail envelope on missing wiring is the contract, not a 500. * All four routes are tenant-fenced.</p></details>
   <pre>CODE2965</pre>
   <pre>CODE2966</pre>
 </section>
@@ -6696,7 +6696,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <section class="api-route" id="POST-v1-yaml-validate">
   <h3><span class="m m-post">POST</span> <code>/v1/yaml/validate</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">* 200 + { ok:false, parsed, validation } on schema errors (parse</p>
-  <details class="route-detail"><summary>Full comment</summary><p>* 200 + { ok:false, parsed, validation } on schema errors (parse succeeded but the document violates the W732 schema – caller still gets the parsed tree so it can highlight the bad rows) * 400 + { ok:false, error:&#39;yaml_parse_failed&#39;, detail, line } on a parser error (couldn&#39;t even read the document)</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>* 200 + { ok:false, parsed, validation } on schema errors (parse succeeded but the document violates the schema – caller still gets the parsed tree so it can highlight the bad rows) * 400 + { ok:false, error:&#39;yaml_parse_failed&#39;, detail, line } on a parser error (couldn&#39;t even read the document)</p></details>
   <pre>CODE2978</pre>
   <pre>CODE2979</pre>
 </section>

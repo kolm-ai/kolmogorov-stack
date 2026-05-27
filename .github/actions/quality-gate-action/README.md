@@ -79,4 +79,4 @@ If any of the three fails, the gate exits non-zero and the workflow fails.
 
 ## License
 
-Apache-2.0. See [LICENSE](https://github.com/kolm-ai/kolmogorov-stack/blob/main/LICENSE).
+Apache-2.0. See [LICENSE](https://github.com/kolm-ai/kolm/blob/main/LICENSE).

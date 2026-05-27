@@ -54,7 +54,7 @@ h1{font-size:28px;font-weight:500;letter-spacing:-0.01em;margin:0 0 8px;color:va
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li><li><a href="/studio">Studio</a></li><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li>
     </ul>
@@ -80,10 +80,12 @@ h1{font-size:28px;font-weight:500;letter-spacing:-0.01em;margin:0 0 8px;color:va
   <div class="nstep">Step 1 of 3</div>
   <h2>Install the CLI.</h2>
   <p>The kolm CLI bundles the gateway, the local compiler, and the device manager. Node 20+ recommended.</p>
-  <pre><code>npm i -g github:kolm-ai/kolmogorov-stack
+  <pre><code>npm i -g github:kolm-ai/kolm
 kolm login --key YOUR_KS_KEY
 kolm doctor</code></pre>
-  <button class="copy-btn" data-copy="npm i -g github:kolm-ai/kolmogorov-stack&#10;kolm login --key YOUR_KS_KEY&#10;kolm doctor">Copy</button>
+  <button class="copy-btn" data-copy="npm i -g github:kolm-ai/kolm
+kolm login --key YOUR_KS_KEY
+kolm doctor">Copy</button>
   <button class="done-btn" data-mark="1">Mark step done</button>
 </section>
 
@@ -97,7 +99,9 @@ kolm gateway start
 # Then point any SDK at the same base URL
 export OPENAI_BASE_URL="http://127.0.0.1:8787/v1"
 export ANTHROPIC_BASE_URL="http://127.0.0.1:8787/v1"</code></pre>
-  <button class="copy-btn" data-copy="kolm gateway start&#10;export OPENAI_BASE_URL=&quot;http://127.0.0.1:8787/v1&quot;&#10;export ANTHROPIC_BASE_URL=&quot;http://127.0.0.1:8787/v1&quot;">Copy</button>
+  <button class="copy-btn" data-copy="kolm gateway start
+export OPENAI_BASE_URL=&quot;http://127.0.0.1:8787/v1&quot;
+export ANTHROPIC_BASE_URL=&quot;http://127.0.0.1:8787/v1&quot;">Copy</button>
   <button class="done-btn" data-mark="2">Mark step done</button>
 </section>
 
@@ -218,7 +222,7 @@ export ANTHROPIC_BASE_URL="http://127.0.0.1:8787/v1"</code></pre>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">

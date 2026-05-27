@@ -4,20 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Marketplace: signed .kolm artifacts · kolm.ai</title>
-<meta name="description" content="A curated, signed marketplace of compiled .kolm artifacts. Each entry ships sha256-pinned with a verified K-score, license, and compliance badges. Install with `kolm pull &lt;slug&gt;` - verify offline with `kolm">
+<meta name="description" content="A curated, signed marketplace of compiled .kolm artifacts. Each entry ships sha256-pinned with a verified K-score, license, and compliance badges. Install with `kolm pull <slug>` - verify offline with `kolm">
 <meta name="keywords" content="kolm marketplace, AI artifact registry, signed AI artifacts, HIPAA AI compiler, .kolm artifact catalog, compile your own AI">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
-<meta property="og:title" content="Marketplace: signed .kolm artifacts &middot; kolm.ai">
+<meta property="og:title" content="Marketplace: signed .kolm artifacts · kolm.ai">
 <meta property="og:description" content="A curated, signed marketplace of compiled .kolm artifacts. Each entry ships sha256-pinned with a verified K-score, license, and compliance badges.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/marketplace">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Marketplace: signed .kolm artifacts &middot; kolm.ai">
+<meta name="twitter:title" content="Marketplace: signed .kolm artifacts · kolm.ai">
 <meta name="twitter:description" content="A curated, signed marketplace of compiled .kolm artifacts. Each entry ships sha256-pinned with a verified K-score, license, and compliance badges.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/marketplace">
@@ -58,9 +58,7 @@
 }
 </script>
 <style>
-  /* W664: marketplace surface - adopts the W655 .home-receipts__row pattern.
-     No card chrome. Tabular hairline rows with mono numerals + per-row kolm pull CLI.
-     Filters trim the visible row set client-side; verified-pill hydrates from /v1/marketplace/list. */
+  
   .mk-page { padding: var(--ks-9) 0 var(--ks-10); }
   .mk-hero { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; margin-bottom: var(--ks-7); }
   .mk-hero__text { flex: 1 1 auto; min-width: 0; }
@@ -130,7 +128,7 @@
     .mk-row { grid-template-columns: 1fr; }
   }
 
-  /* Pull/verify CLI block - same primitive as W655 home-receipts__cli. */
+  
   .mk-cli { margin-top: var(--ks-6); padding: 14px 16px; background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.7; color: var(--ks-ink-2); overflow-x: auto; }
   .mk-cli .p { color: var(--ks-accent); }
   .mk-cli .c { color: var(--ks-ink); }
@@ -150,7 +148,7 @@
   .mk-section li b { color: var(--ks-ink); font-weight: 540; }
   .mk-section pre { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink-2); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: 14px 16px; overflow-x: auto; line-height: 1.65; margin: var(--ks-3) 0; }
 
-  /* See also - same spec-list look as W661. */
+  
   .mk-seealso { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--ks-3); margin-top: var(--ks-4); }
   .mk-seealso a { display: flex; flex-direction: column; gap: 6px; padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); text-decoration: none; transition: border-color 140ms, transform 140ms; }
   .mk-seealso a:hover { border-color: var(--ks-accent-edge); transform: translateY(-1px); text-decoration: none; }
@@ -165,18 +163,18 @@
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow" aria-hidden="true">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
@@ -184,7 +182,7 @@
     <a href="/studio">Studio</a>
     <a href="/pricing">Pricing</a>
     <a href="/docs">Docs</a>
-    <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a>
+    <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
     <a href="/signup?intent=login">Sign in</a>
     <a href="/signup">Get started &rarr;</a>
   </div>
@@ -192,13 +190,7 @@
 
 <main id="main" class="ks-wrap mk-page">
 
-  <!-- W889-10.1 — Premium marketplace teaser (early access).
-       The catalog below this section is the live curated seed catalog from
-       W664/W737. The teaser above announces the v2 premium marketplace
-       (publisher revenue share, K-Score comparability across tasks, signed
-       reviewer identities) and captures interest from operators who want
-       early access. Submissions POST to /v1/marketplace/interest which is
-       a public, IP-rate-limited route. -->
+  
   <section class="mk-teaser" aria-labelledby="mk-teaser-h" style="margin:8px 0 var(--ks-8);padding:24px 28px;border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md);background:rgba(255,255,255,0.02)">
     <header style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px">
       <div>
@@ -261,7 +253,6 @@
     </ul>
   </section>
   <script>
-  // W889-10.1 — Marketplace interest capture. Best-effort fetch; failure
   // modes (offline, 5xx) surface a soft hint without losing the typed email.
   (function(){
     var form = document.getElementById('mk-interest-form');
@@ -355,10 +346,7 @@
     <span class="mk-filters__count" id="mk-count" aria-live="polite"><strong>8</strong> of 8 artifacts</span>
   </div>
 
-  <!-- W342  - cards render dynamically from /v1/marketplace/list. Verified pill is
-       only painted when row.verified === true (a real productionReady() verdict
-       server-side). The static fallback grid below has Verified pills stripped so
-       they cannot show pre-fetch. -->
+  
   <div class="mk-table" id="cards" role="table" aria-label="Marketplace artifacts">
     <div class="mk-row mk-row--head" role="row">
       <span role="columnheader">Artifact</span>
@@ -482,7 +470,7 @@
 
   <div id="empty" class="mk-empty" hidden>No artifacts match this filter set. <a href="#" id="mk-clear">Clear filters</a>, or <a href="/build-your-own">compile your own</a>.</div>
 
-  <!-- Shared pull / verify / run flow, mirrors the W655 home-receipts__cli on the homepage. -->
+  
   <pre class="mk-cli" aria-label="Three commands to pull, verify, and run any marketplace artifact"><span class="p">$</span> <span class="c">kolm pull phi-redactor</span>  <span class="dim"># resumable, sha-checked as it streams</span>
 <span class="p">$</span> <span class="c">kolm verify ~/.kolm/artifacts/phi-redactor.kolm</span>
 <span class="ok">  &check; signature   Ed25519 over manifest.sha256
@@ -576,7 +564,7 @@ $ curl -s https://kolm.ai/v1/marketplace/catalog.json | jq .signature_algo
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">
@@ -587,13 +575,11 @@ $ curl -s https://kolm.ai/v1/marketplace/catalog.json | jq .signature_algo
 </footer>
 
 <script>
-// W342  - Verified pill gated on real productionReady() server-side check.
 // Cards ship with NO data-verified attribute and NO Verified badge in the
 // static HTML. On page load we fetch /v1/marketplace/list, and only paint a
 // Verified pill into a row when row.verified === true. data-verified is
 // set from the fetch response, never from the seed HTML.
 //
-// W664 - Hardware filter added; size filter expects data-size in {kb, mb, gb};
 // row-count chip on the right of the filter bar updates on every apply().
 (function(){
  var rows = Array.from(document.querySelectorAll('#cards .mk-row:not(.mk-row--head)'));
@@ -672,22 +658,15 @@ $ curl -s https://kolm.ai/v1/marketplace/catalog.json | jq .signature_algo
 })();
 </script>
 
-<!-- W737 — Artifact Marketplace Expansion: faceted search panel.
-     The existing W664 cards above remain the curated kolm.ai seed catalog.
-     The W737 panel below opens publisher submissions, faceted search by the
-     four W737-1 axes (vertical, task type, K-Score, hardware target), and a
-     deep-link into the publisher docs. The two surfaces co-exist by design:
-     curated seed catalog (above) + publisher-extensible scaffold (here).
-     Render is fetch + minimal inline JS so this surface degrades gracefully
-     when /v1/marketplace/search is unreachable (empty state below). -->
+
 <section id="w737-faceted" aria-labelledby="w737-faceted-title" style="margin:48px auto 0;max-width:1200px;padding:32px 24px 0;border-top:1px solid rgba(255,255,255,0.06)">
   <header style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px">
     <h2 id="w737-faceted-title" style="font-size:22px;font-weight:500;letter-spacing:-0.018em;margin:0;color:#e6e9ee">Browse publisher submissions</h2>
     <a href="/docs/marketplace/publish" style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;color:#9aa3a8;text-decoration:none;border-bottom:1px dashed rgba(255,255,255,0.12)">Publish your .kolm &rarr;</a>
   </header>
-  <p style="color:#9aa3a8;font-size:14px;margin:0 0 18px;max-width:760px">Faceted search by the W737-1 axes - vertical, task type, K-Score, and hardware target. The 70/30 publisher/platform revenue split is locked in the <a href="/docs/marketplace/publish#revenue-split" style="color:#111111">publisher TOS</a>. Empty results below means no publisher listings have been registered yet - <a href="/docs/marketplace/publish" style="color:#111111">be the first to publish?</a></p>
+  <p style="color:#9aa3a8;font-size:14px;margin:0 0 18px;max-width:760px">Faceted search by the-1 axes - vertical, task type, K-Score, and hardware target. The 70/30 publisher/platform revenue split is locked in the <a href="/docs/marketplace/publish#revenue-split" style="color:#111111">publisher TOS</a>. Empty results below means no publisher listings have been registered yet - <a href="/docs/marketplace/publish" style="color:#111111">be the first to publish?</a></p>
   <div style="display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:start" id="w737-grid">
-    <aside aria-label="W737 facet filters" style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12.5px;color:#cfd6d8">
+    <aside aria-label="facet filters" style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12.5px;color:#cfd6d8">
       <fieldset style="border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 14px;margin:0 0 14px">
         <legend style="padding:0 6px;color:#e6e9ee;font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">Vertical</legend>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-vertical" value="" checked> any</label>
@@ -726,7 +705,6 @@ $ curl -s https://kolm.ai/v1/marketplace/catalog.json | jq .signature_algo
   </div>
 </section>
 <script>
-// W737 — faceted search panel. Pure inline JS (no build step). Fetches
 // /v1/marketplace/search with the four facet axes; renders an artifact-card
 // grid OR the plain empty state when no listings have been registered.
 (function(){
@@ -808,14 +786,13 @@ $ curl -s https://kolm.ai/v1/marketplace/catalog.json | jq .signature_algo
 })();
 </script>
 
-<!-- W664 test anchors: keep W260 brand-anchor (above), expose explicit attribute hooks
-     for surface tests that scan for the marketplace receipts pattern. -->
+
 <div class="test-anchor" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden" aria-hidden="true">
   <span data-test="w664-marketplace-receipts-row">.home-receipts__row pattern</span>
   <span data-test="w664-marketplace-cli">kolm pull</span>
   <span data-test="w664-marketplace-filters">task size hardware license</span>
   <span data-test="w664-kscore-badge">median K-score 0.99</span>
-  <!-- W737 — faceted search axes + revenue split anchor. -->
+  
   <span data-test="w737-faceted-search">vertical task_type hardware_target min_kscore</span>
   <span data-test="w737-revenue-split">70/30 publisher platform</span>
   <span data-test="w737-empty-fallback">No artifacts match these filters yet. Be the first to publish?</span>

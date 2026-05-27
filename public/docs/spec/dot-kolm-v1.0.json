@@ -55,11 +55,22 @@
     },
     "artifact_class": {
       "type": "string",
-      "enum": ["rule", "synthesized_rule", "compiled_rule", "distilled_model"]
+      "enum": [
+        "rule",
+        "synthesized_rule",
+        "compiled_rule",
+        "distilled_model"
+      ]
     },
     "runtime_target": {
       "type": "string",
-      "enum": ["js", "gguf", "onnx", "wasm", "native"]
+      "enum": [
+        "js",
+        "gguf",
+        "onnx",
+        "wasm",
+        "native"
+      ]
     },
     "base_model": {
       "type": "string",
@@ -89,7 +100,12 @@
         },
         "comparator": {
           "type": "string",
-          "enum": ["exact", "judge", "structured", "script"]
+          "enum": [
+            "exact",
+            "judge",
+            "structured",
+            "script"
+          ]
         },
         "production_ready": {
           "type": "boolean"
@@ -104,16 +120,43 @@
     },
     "hashes": {
       "type": "object",
-      "required": ["passport_json", "weights"],
+      "required": [
+        "passport_json",
+        "weights"
+      ],
       "properties": {
-        "passport_json": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-        "weights":       { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-        "tokenizer":     { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-        "eval_set":      { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-        "receipts":      { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-        "evidence_dag":  { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-        "compile_args":  { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-        "runtime_passport": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        "passport_json": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "weights": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "tokenizer": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "eval_set": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "receipts": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "evidence_dag": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "compile_args": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "runtime_passport": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
       },
       "additionalProperties": {
         "type": "string",
@@ -133,7 +176,9 @@
       "properties": {
         "algorithm": {
           "type": "string",
-          "enum": ["ed25519"]
+          "enum": [
+            "ed25519"
+          ]
         },
         "public_key": {
           "type": "string",
@@ -158,36 +203,80 @@
       },
       "additionalProperties": true
     },
-    "weights_filename":  { "type": "string" },
-    "tokenizer_filename":{ "type": "string" },
-    "runtime_passports": { "type": "array",  "items": { "type": "object" } },
-    "eval_score":        { "type": "number", "minimum": 0, "maximum": 1 },
+    "weights_filename": {
+      "type": "string"
+    },
+    "tokenizer_filename": {
+      "type": "string"
+    },
+    "runtime_passports": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "eval_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
     "k_score": {
       "type": "object",
       "properties": {
-        "point": { "type": "number", "minimum": 0, "maximum": 1 },
+        "point": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
         "ci95": {
           "type": "array",
           "minItems": 2,
           "maxItems": 2,
-          "items": { "type": "number", "minimum": 0, "maximum": 1 }
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
         },
-        "calibration_pack_id": { "type": "string" }
+        "calibration_pack_id": {
+          "type": "string"
+        }
       },
       "additionalProperties": true
     },
-    "judge_id":   { "type": "string" },
-    "tier":       { "type": "string", "enum": ["recipe", "adapter", "specialist", "bundle"] },
-    "parent_cid": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "judge_id": {
+      "type": "string"
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "recipe",
+        "adapter",
+        "specialist",
+        "bundle"
+      ]
+    },
+    "parent_cid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
     "policy": {
       "type": "object",
       "properties": {
-        "require_ed25519": { "type": "boolean" },
-        "require_rekor":   { "type": "boolean" }
+        "require_ed25519": {
+          "type": "boolean"
+        },
+        "require_rekor": {
+          "type": "boolean"
+        }
       },
       "additionalProperties": true
     },
-    "compile_args": { "type": "object" },
-    "evidence_dag": { "type": "object" }
+    "compile_args": {
+      "type": "object"
+    },
+    "evidence_dag": {
+      "type": "object"
+    }
   }
 }

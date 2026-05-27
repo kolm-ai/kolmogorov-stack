@@ -2,7 +2,7 @@
   "spec": "kolm-wave887-wrapper-prod-benchmark-1",
   "ok": true,
   "generated_at": "2026-05-26T01:52:00.381Z",
-  "note": "Canonical mirror of the W887 production wrapper benchmark for X04 claim verification. Source-of-truth file is benchmarks/wave887-wrapper-prod-2026-05-26.json at the repo root; this checked-in copy lives in public/benchmarks/ so the X04 verifier walks the same rows[] shape it uses for sota-quantize-matrix. Numbers below are the exact mean/p50/p95 from the 10-call live run against https://kolm.ai with model=claude-haiku-4-5.",
+  "note": "Canonical mirror of the production wrapper benchmark for X04 claim verification. Source-of-truth file is benchmarks/wave887-wrapper-prod-2026-05-26.json at the repo root; this checked-in copy lives in public/benchmarks/ so the X04 verifier walks the same rows shape it uses for sota-quantize-matrix. Numbers below are the exact mean/p50/p95 from the 10-call live run against https://kolm.ai with model=claude-haiku-4-5.",
   "base": "https://kolm.ai",
   "model": "claude-haiku-4-5",
   "prompt": "In two short sentences, explain what an LLM gateway does.",
@@ -39,7 +39,7 @@
     },
     {
       "leg": "gateway_dispatch_local_projected",
-      "label": "Kolm gateway to local trinity-500 (projected from W869)",
+      "label": "Kolm gateway to local trinity-500 (projected from)",
       "ok": 10,
       "gateway_ran": 10,
       "upstream_unconfigured": 0,
@@ -49,7 +49,7 @@
       "in_tokens": 0,
       "out_tokens": 0,
       "cost_per_1k_usd": 0,
-      "note": "projected from W869 trinity-500 benchmark (n=57, mean 1.24s / 210 chars, $0 upstream)"
+      "note": "projected from trinity-500 benchmark (n=57, mean 1.24s / 210 chars, $0 upstream)"
     }
   ],
   "summary": {

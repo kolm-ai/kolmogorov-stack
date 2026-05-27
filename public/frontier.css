@@ -1,7 +1,4 @@
-/* frontier.css — W621 design system v2.
-   Frontier-research-lab × premium-engineering-tool aesthetic.
-   Loads AFTER design-tokens.css; supplements legacy layers (.ks-* / .home-*).
-   Naming: .fr-* prefix to avoid clashes. Mono-first. Spring physics. */
+
 
 :root {
   /* Typography stack */
@@ -95,7 +92,7 @@
   z-index: 0;
 }
 
-/* === Blueprint grid (W846 fix-the-site round 2: dot-grid killed per user) === */
+
 .fr-blueprint {
   position: relative;
   background-image: none;
@@ -309,8 +306,7 @@
   will-change: transform;
 }
 .fr-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.32); }
-/* W848: --fr-mint flips per theme; hardcoded dark text was invisible
-   on light-mode (dark) mint button. var(--surface-0) flips correctly. */
+
 .fr-btn--mint { background: var(--fr-mint); color: var(--surface-0, #f3f5f7); }
 .fr-btn--mint:hover { box-shadow: var(--fr-depth-glow-mint); }
 .fr-btn--ghost {
@@ -429,11 +425,7 @@
   .fr-btn, .fr-card, .fr-matrix__cell { transition: none; }
 }
 
-/* ============================================================
-   W622 aesthetic layer — lifts the page out of "bland" without
-   breaking any W621 layouts. Appended; never overrides core
-   .fr-* primitives, only enriches them.
-   ============================================================ */
+
 
 /* --- Section aurora: subtle two-color mesh gradient that breathes
    under content. Auto-applies to .fr-section every other section
@@ -562,8 +554,7 @@
 .fr-btn__arrow { display: inline-block; transition: transform var(--fr-duration-quick) var(--fr-spring-fast); }
 .fr-btn:hover .fr-btn__arrow { transform: translateX(3px); }
 
-/* --- Matrix cell accent variant (used in W622 banded matrix to mark
-   the "default" / sweet-spot row) --- */
+
 .fr-matrix__cell--accent {
   background:
     linear-gradient(180deg, rgba(17, 17, 17, 0.10) 0%, rgba(17, 17, 17, 0.02) 100%);
@@ -572,8 +563,7 @@
 }
 .fr-matrix__cell--accent .fr-matrix__key { color: var(--fr-mint); }
 
-/* --- W622 BUILD ANYTHING bands: large grouped sections with their
-   own micro-header (pill + h3 + sub) and a contained matrix grid. --- */
+
 .fr-target-stack {
   display: flex;
   flex-direction: column;
@@ -627,7 +617,7 @@
   background: linear-gradient(180deg, var(--fr-violet), transparent);
 }
 
-/* --- W622 explainer band (homepage "what the four numbers mean") --- */
+
 .fr-explain {
   position: relative;
   padding: clamp(28px, 3vw, 40px) clamp(20px, 3vw, 36px);
@@ -709,7 +699,7 @@
   position: relative;
 }
 
-/* --- W622 FAQ rows (premium accordion replaces .home-faq) --- */
+
 .fr-faq {
   display: flex;
   flex-direction: column;
@@ -736,10 +726,7 @@
   cursor: pointer;
   user-select: none;
   display: grid;
-  /* W847 — looser column for the number (44px) so the question doesn't
-     visually crowd the leading "01" / "02" / "03" prefix. Vertical pad
-     up to 22px for proper breathing room (user feedback: "Q&A spacing
-     mess"). */
+  
   grid-template-columns: 44px 1fr 32px;
   align-items: center;
   gap: 16px;
@@ -786,9 +773,7 @@
   color: var(--fr-mint);
 }
 .fr-faq__a {
-  /* W847 — answer indented to align with question column (60px = 44+16
-     from the summary grid), bottom pad bumped to match new summary
-     rhythm. */
+  
   padding: 4px 26px 24px 60px;
   font-family: var(--fr-font-sans);
   font-size: var(--fr-text-base);
@@ -836,11 +821,7 @@
   color: color-mix(in oklab, var(--fr-mint) 100%, white 16%);
 }
 
-/* ============================================================
-   W623 editorial primitives — answer to "90% boxy squares".
-   Five new shapes the page can use instead of yet another
-   .ks-grid of .ks-cards. Appended; never override prior layers.
-   ============================================================ */
+
 
 /* --- .fr-numbered-list ---
    Hanging-number prose list. Replaces a card-grid of "icon + h3
@@ -880,9 +861,7 @@
   align-self: start;
   padding-top: 6px;
 }
-/* W629: when an __k label is present (named-key variant), it replaces the
-   auto-counter — pricing.html uses Free / Pro / Team / Enterprise as keys
-   rather than 01/02/03/04 because the names are more meaningful. */
+
 .fr-numbered-list > li:has(.fr-numbered-list__k)::before { display: none; }
 .fr-numbered-list__k {
   grid-column: 1;
@@ -898,9 +877,7 @@
   line-height: 1.35;
   word-break: break-word;
 }
-/* W629: force all content children into the right column regardless of how
-   many flat siblings exist. Before this, a flat <li><span __k><h3 __h><p __p>
-   would land __h into the 88px gutter column and wrap mid-word. */
+
 .fr-numbered-list__h,
 .fr-numbered-list__p,
 .fr-numbered-list__meta,
@@ -1299,7 +1276,7 @@
   border: 0;
 }
 
-/* === W624 editorial table primitive ============================= */
+
 /* --- .fr-table ---
    Editorial comparison table. Removes the heavy admin-table feel
    by leaning on whitespace, mono section labels, and ink-on-bg
@@ -1375,9 +1352,7 @@
    horizontal and the dividing lines are hairlines. */
 .fr-tier-row {
   display: grid;
-  /* W847 — was 3 columns hard-coded; the homepage strip is 4 tiers now
-     (Free, Pro, Team, Business). auto-fit + minmax lets the same rule
-     gracefully handle 3, 4, or 5 tier variants. */
+  
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 0;
   margin: clamp(24px, 3vw, 36px) 0;
@@ -1494,10 +1469,7 @@
   border-top: 1px solid rgba(230, 233, 238, 0.06);
 }
 
-/* ============================================================
-   W627 editorial primitives — hairline rule-list + three-col,
-   replacing card grids in the quantize section.
-   ============================================================ */
+
 .fr-rule-list {
   list-style: none;
   margin: clamp(20px, 2.4vw, 28px) 0;
@@ -1589,13 +1561,7 @@
   .fr-three-col__col:last-child { padding-bottom: 0; }
 }
 
-/* --- .fr-precision-table (W631) ---
-   Editorial replacement for the 12-cell .fr-matrix grid that read as
-   cramped rectangles. Three-column scan: mono bit-width on the left,
-   recipe name + caption flowing in the middle, status pill on the
-   right. Hairline borders between rows; no card backgrounds. Lets
-   long captions breathe across the full content width instead of
-   wrapping inside a 180px cell. Used on /compile precisions section. */
+
 .fr-precision-table {
   margin: 32px 0 0;
   border-top: 1px solid rgba(230, 233, 238, 0.10);
@@ -1675,13 +1641,7 @@
   }
 }
 
-/* --- .fr-spec-list (W631) ---
-   Editorial replacement for 3-col card grids of long-named entities
-   (model students, SDK packages). Each row gets full content width
-   for the description, a baseline-aligned header with the long name
-   + a mono mint delta/version pill, and inline mono spec metadata.
-   Hairline borders between rows; no card backgrounds. Lets long
-   names like "DeepSeek-R1-Distill-Qwen-32B" sit without wrapping. */
+
 .fr-spec-list {
   list-style: none !important;
   list-style-type: none !important;

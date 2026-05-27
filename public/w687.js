@@ -1,6 +1,4 @@
-// W687: lightweight hero motion primitive.
 // Two effects, both gated on prefers-reduced-motion: no-preference AND pointer: fine
-// (per W604 trap — never apply pointer-reactive motion on touch devices):
 //   1. Mount fade-up on .kolm-hero-terminal via IntersectionObserver (one-shot).
 //   2. Subtle pointer-tracking parallax (~3px max) on .ks-hero__bg.
 // Total: <2KB minified. No deps. Idempotent — safe to load on every page.

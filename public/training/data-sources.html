@@ -118,22 +118,22 @@
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 <main id="main">
@@ -143,7 +143,7 @@
  <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; <a href="/training">training</a> &nbsp;/&nbsp; data-sources registry</p>
  <h1>A registry of reputable public training datasets, per task, with licenses, sources, and citations.</h1>
  <p class="lede">Every row is a <code style="font-family:var(--mono);background:var(--bg-elev);padding:2px 8px;border-radius:4px;color:var(--ink);font-size:14px">{task, dataset_name, size, license, source_url, citation, recommended_use}</code> tuple. Use it to seed a fresh <code style="font-family:var(--mono);background:var(--bg-elev);padding:2px 8px;border-radius:4px;color:var(--ink);font-size:14px">kolm seeds new</code> brief, import directly into <code style="font-family:var(--mono);background:var(--bg-elev);padding:2px 8px;border-radius:4px;color:var(--ink);font-size:14px">seeds.jsonl</code>, or pin a row as the external holdout your verifier compares against. kolm does not redistribute any of these; your customer-hosted compile bridge pulls them in your environment.</p>
- <p class="stamp">Wave 201 registry &middot; reviewed 2026-05-17 &middot; grounded in <a style="color:inherit;border-bottom:1px dashed var(--line)" href="/research/methods-2026-q2">/research/methods-2026-q2</a> (W196)</p>
+ <p class="stamp">Wave 201 registry &middot; reviewed 2026-05-17 &middot; grounded in <a style="color:inherit;border-bottom:1px dashed var(--line)" href="/research/methods-2026-q2">/research/methods-2026-q2</a></p>
  <div class="actions">
  <a class="btn primary" href="/quickstart">Compile your first .kolm &rarr;</a>
  <a class="btn" href="/training">Back to training tiers &rarr;</a>
@@ -156,14 +156,14 @@
  <div class="wrap">
  <h2>How to use this registry.</h2>
  <p class="body">Three paths in. (1) <b>Seed-brief mode</b>: paste a dataset row into the prompt for <code>kolm seeds new "&lt;task&gt;"</code> and the scaffolder will produce a spec.json that names the dataset as <code>seed_source.public_dataset</code>. (2) <b>Direct import</b>: download a slice of the dataset, transform to <code>{input, target}</code> JSONL, drop into your repo as <code>seeds.jsonl</code>. (3) <b>External holdout</b>: pin one of these as your residency-free correctness reference; the holdout hash bound into <code>artifact_hash_input.external_holdout_hash</code> means the verifier can re-run it against any later artifact and detect drift. Every row carries a license string a tenant can hand to procurement, and an author + year that a third-party auditor can chase to a primary source.</p>
- <p class="body">Caveats guard: licenses change. Verify the dataset's current license text on the source page before you ship; the values below were correct at the time of this review and are tagged with the review date in the page stamp. The W194 corpus-licensing-gate (<span class="pill warn">wave 194 roadmap</span>) will enforce license compatibility at compile time so a tenant cannot accidentally pin a research-only corpus as the external holdout of a commercial product.</p>
+ <p class="body">Caveats guard: licenses change. Verify the dataset's current license text on the source page before you ship; the values below were correct at the time of this review and are tagged with the review date in the page stamp. The corpus-licensing-gate (<span class="pill warn">wave 194 roadmap</span>) will enforce license compatibility at compile time so a tenant cannot accidentally pin a research-only corpus as the external holdout of a commercial product.</p>
  </div>
 </section>
 
 <section class="section">
  <div class="wrap">
  <h2>General-purpose instruction and preference datasets.</h2>
- <p class="lede">The Tulu-3 / LIMA / UltraFeedback triumvirate is the de-facto open baseline for the SFT then preference distillation pipeline (per <a href="/research/methods-2026-q2#data-creation" style="color:inherit;border-bottom:1px dashed var(--line)">W196 &sect;5</a>). LIMA is the anchor for "quality beats volume." UltraFeedback is the open preference corpus most papers cite. Tulu-3 ships the on-policy DPO mix that outperforms UltraFeedback-alone at 70B scale.</p>
+ <p class="lede">The Tulu-3 / LIMA / UltraFeedback triumvirate is the de-facto open baseline for the SFT then preference distillation pipeline (per <a href="/research/methods-2026-q2#data-creation" style="color:inherit;border-bottom:1px dashed var(--line)">&sect;5</a>). LIMA is the anchor for "quality beats volume." UltraFeedback is the open preference corpus most papers cite. Tulu-3 ships the on-policy DPO mix that outperforms UltraFeedback-alone at 70B scale.</p>
  <div class="tbl-wrap">
  <table class="tbl">
  <thead>
@@ -358,7 +358,7 @@
 <section class="section">
  <div class="wrap">
  <h2>Synthetic data generation methods.</h2>
- <p class="lede">Sometimes the right answer is "make the data." Four open methods from the 2026-Q2 sweep, each linking back to the primary citation block in <a href="/research/methods-2026-q2#data-creation" style="color:inherit;border-bottom:1px dashed var(--line)">W196 &sect;5</a>.</p>
+ <p class="lede">Sometimes the right answer is "make the data." Four open methods from the 2026-Q2 sweep, each linking back to the primary citation block in <a href="/research/methods-2026-q2#data-creation" style="color:inherit;border-bottom:1px dashed var(--line)">&sect;5</a>.</p>
  <div class="grid-4">
  <a class="card" href="/research/methods-2026-q2#data-creation" style="text-decoration:none;color:inherit">
  <span class="vt">method 01</span>
@@ -385,7 +385,7 @@
  <span class="cite">Chan et al., Tencent AI Lab, 2024 &middot; <a href="https://arxiv.org/abs/2406.20094" rel="noopener">arXiv:2406.20094</a></span>
  </a>
  </div>
- <p class="body" style="margin-top:24px">Composability: Magpie or Persona-Hub for diversity, Evol-Instruct for difficulty range, Self-Instruct as the baseline reproduction. Combine to cover topic breadth and difficulty depth simultaneously. The modal kolm narrow-task recipe is 20-100 hand seeds plus Evol-Instruct or Magpie expanding to 1k-10k pairs (per W196 &sect;5.3 practitioner range).</p>
+ <p class="body" style="margin-top:24px">Composability: Magpie or Persona-Hub for diversity, Evol-Instruct for difficulty range, Self-Instruct as the baseline reproduction. Combine to cover topic breadth and difficulty depth simultaneously. The modal kolm narrow-task recipe is 20-100 hand seeds plus Evol-Instruct or Magpie expanding to 1k-10k pairs (per &sect;5.3 practitioner range).</p>
  </div>
 </section>
 
@@ -412,22 +412,22 @@
  <h2>Where this fits in the wider stack.</h2>
  <div class="grid-4">
  <a class="card" href="/research/methods-2026-q2" style="text-decoration:none;color:inherit">
- <span class="vt">research &middot; W196</span>
+ <span class="vt">research &middot;</span>
  <h3>Frontier methods &middot; 2026-Q2 sweep</h3>
  <p>The seven-section research dump that grounds this registry: distillation, sample efficiency, base models, quantization, data creation, NL to recipe, rule of thumb.</p>
  </a>
  <a class="card" href="/training" style="text-decoration:none;color:inherit">
- <span class="vt">training &middot; W198</span>
+ <span class="vt">training &middot;</span>
  <h3>Six tiers, one CLI</h3>
  <p>The six-tier ladder from rule recipe to MoE bundle, with the per-recipe-class "how much data" grid the registry above is meant to fill.</p>
  </a>
  <a class="card" href="/quickstart/nl" style="text-decoration:none;color:inherit">
- <span class="vt">quickstart &middot; W200</span>
+ <span class="vt">quickstart &middot;</span>
  <h3>kolm nl &middot; natural-language scaffolder</h3>
  <p>Type a free-text task description; get a structured spec.json and seeds.jsonl scaffold. Air-gap deterministic. Pair with a registry row to point at a real dataset.</p>
  </a>
  <a class="card" href="/docs" style="text-decoration:none;color:inherit">
- <span class="vt">taxonomy &middot; W172</span>
+ <span class="vt">taxonomy &middot;</span>
  <h3>Recipe-class taxonomy</h3>
  <p>rule, synthesized_rule, compiled_rule, distilled_model. The taxonomy that determines how many seed pairs you need from the registry.</p>
  </a>
@@ -487,7 +487,7 @@
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">

@@ -217,7 +217,7 @@
 
   .mk-crosslink { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
 </style>
-<meta property="og:title" content="Artifact marketplace &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:title" content="Artifact marketplace · Open-source AI workbench · kolm.ai">
 <meta property="og:description" content="Browse signed .kolm distillations. Publishers receive 70 percent of paid downloads.">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta property="og:url" content="https://kolm.ai/marketplace">
@@ -230,13 +230,13 @@
 <div class="ks-nav-wrap">
   <header class="ks-nav">
     <div class="ks-wrap ks-nav__row">
-      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
       <nav class="ks-nav__links" aria-label="Primary">
         <a href="/wrapper">Wrapper</a>
         <a href="/studio">Studio</a>
         <a href="/pricing">Pricing</a>
         <a href="/docs">Docs</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
       </nav>
       <div class="ks-nav__cta">
         <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
@@ -349,7 +349,7 @@
       <a href="/verify-prod" class="fr-btn fr-btn--ghost">Verify an artifact</a>
     </div>
     <div class="mk-honesty">
-      <b>Revenue split.</b> Publishers receive 70 percent of paid downloads, net of payment processor fees. The remaining 30 percent funds marketplace hosting, signature verification, and dispute handling. <b>Forecast surface.</b> The W825 MVP exposes a payout-cycle endpoint that computes the per-listing split and writes an audit row. No real Stripe payout is wired yet. <b>Anti-gaming.</b> Submitting a rating requires an account age of at least 7 days AND at least one prior download of the listing.
+      <b>Revenue split.</b> Publishers receive 70 percent of paid downloads, net of payment processor fees. The remaining 30 percent funds marketplace hosting, signature verification, and dispute handling. <b>Forecast surface.</b> The MVP exposes a payout-cycle endpoint that computes the per-listing split and writes an audit row. No real Stripe payout is wired yet. <b>Anti-gaming.</b> Submitting a rating requires an account age of at least 7 days AND at least one prior download of the listing.
     </div>
   </div>
 </section>
@@ -410,14 +410,11 @@
 </footer>
 
 <script>
-// W825 — thin live fetcher for the marketplace listings grid.
 //
-// Calls GET /v1/marketplace/listings (the W825 route shipped in
 // src/marketplace-routes.js) and renders the rows. On an empty store we
 // render an plain empty-state instead of fabricated placeholder cards.
 //
 // The filter sidebar enums are pulled from GET /v1/marketplace/facets so the
-// UI never goes out of sync with src/marketplace-w825.js W825_* constants.
 (function w825Marketplace() {
   var $vertical = document.getElementById('w825-vertical');
   var $task = document.getElementById('w825-task-type');

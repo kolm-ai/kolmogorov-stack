@@ -8,13 +8,13 @@
 <meta name="description" content="Auto-generate Annex IV technical documentation, risk-classify task categories, configure human-in-the-loop review thresholds, and pull data governance reports from any compiled .kolm artifact. Open-source AI workbench.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="EU AI Act compliance toolkit &middot; kolm.ai">
+<meta property="og:title" content="EU AI Act compliance toolkit · kolm.ai">
 <meta property="og:description" content="Annex IV technical documentation auto-generated from .kolm artifacts. Risk classification, human-in-the-loop configuration, data governance reports.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/compliance/eu-ai-act">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="EU AI Act compliance toolkit &middot; kolm.ai">
+<meta name="twitter:title" content="EU AI Act compliance toolkit · kolm.ai">
 <meta name="twitter:description" content="Annex IV docs from a compiled artifact. Plain fields. No fabrication.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/compliance/eu-ai-act">
@@ -87,22 +87,22 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
@@ -115,11 +115,11 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="why">Why this exists</h2>
 <p>Regulation (EU) 2024/1689 (the EU AI Act) entered into force on 1 August 2024. The high-risk obligations kick in over a 24-to-36-month phase-in. Every system on the EU market in a high-risk category needs Annex IV technical documentation, a conformity assessment, declared post-market monitoring, and demonstrated human oversight per Article 14. Drafting Annex IV from scratch is a six-figure compliance project. Most of the fields, though, are already living in your .kolm manifest &mdash; the architecture, the training-data summary, the performance metrics, the cybersecurity attestations. We just need to extract them in the right shape.</p>
 
-<p>W766 is the extractor. It reads a manifest, derives the Annex IV envelope, and stamps every absent field as <code>not_yet_disclosed</code> so the gaps are obvious to a regulator. The fields are never fabricated. A field labeled <code>not_yet_disclosed</code> is a TODO for the builder, not a paper-over.</p>
+<p>is the extractor. It reads a manifest, derives the Annex IV envelope, and stamps every absent field as <code>not_yet_disclosed</code> so the gaps are obvious to a regulator. The fields are never fabricated. A field labeled <code>not_yet_disclosed</code> is a TODO for the builder, not a paper-over.</p>
 
 <h2 id="risk-classification" data-w766="risk-classification">Risk classification</h2>
 <div class="section-card" data-w766="risk-classification-card">
-  <p class="layer-tag">W766-2 &middot; risk scoring</p>
+  <p class="layer-tag">-2 &middot; risk scoring</p>
   <h3>Four risk categories. Manifest task_category maps to category per Annex III.</h3>
   <p>The catalog covers more than twenty task categories drawn from Annex III (high-risk list) and Article 5 (prohibited / unacceptable practices). Manifest field <code>task_category</code> wins; <code>vertical</code> is the fallback; <code>intended_use</code> goes through a regex classifier with confidence capped at 0.95. The floor when nothing matches is <code>minimal</code> &mdash; never null, never fabricated.</p>
 </div>
@@ -151,7 +151,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <h2 id="technical-documentation" data-w766="technical-documentation">Technical documentation export</h2>
 <div class="section-card" data-w766="technical-documentation-card">
-  <p class="layer-tag">W766-1 &middot; annex iv emitter</p>
+  <p class="layer-tag">-1 &middot; annex iv emitter</p>
   <h3>Nine Annex IV fields. JSON or markdown. Never fabricated.</h3>
   <p>The toolkit sources each Annex IV field from the manifest where present, and stamps <code>not_yet_disclosed</code> where it is not. A regulator reading the export can distinguish "the builder hasn't attested to X" from "X is empty by design". Both Node (<code>src/ai-act-export.js</code>) and Python (<code>apps/export/ai_act_docs.py</code>) implementations emit the same shape so a CI runner without Node can still produce docs.</p>
 </div>
@@ -172,18 +172,18 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <h2 id="human-in-loop" data-w766="human-in-loop">Human-in-the-loop configuration</h2>
 <div class="section-card" data-w766="human-in-loop-card">
-  <p class="layer-tag">W766-3 &middot; human review threshold</p>
+  <p class="layer-tag">-3 &middot; human review threshold</p>
   <h3>Per-namespace confidence threshold. Below the threshold, route to a human reviewer.</h3>
-  <p>Article 14 requires that high-risk systems "can be effectively overseen by natural persons". This subsystem is the runtime knob &mdash; for any (tenant, namespace), set a confidence threshold in nats. When the W709 runtime confidence router records a decision below the threshold, the row is tagged <code>human_in_loop_triggered</code> and surfaced for review. Threshold validated &isin; [0, 10] nats &mdash; out-of-range rejects loudly with an loud-fail envelope.</p>
+  <p>Article 14 requires that high-risk systems "can be effectively overseen by natural persons". This subsystem is the runtime knob &mdash; for any (tenant, namespace), set a confidence threshold in nats. When the runtime confidence router records a decision below the threshold, the row is tagged <code>human_in_loop_triggered</code> and surfaced for review. Threshold validated &isin; [0, 10] nats &mdash; out-of-range rejects loudly with an loud-fail envelope.</p>
 </div>
 
 <pre>CODE12</pre>
 
 <h2 id="governance-report" data-w766="governance-report">Data governance reports</h2>
 <div class="section-card" data-w766="governance-report-card">
-  <p class="layer-tag">W766-4 &middot; tenant-fenced aggregation</p>
+  <p class="layer-tag">-4 &middot; tenant-fenced aggregation</p>
   <h3>Per-tenant capture counts, high-risk volume, human-in-loop trigger rate, confidence distribution.</h3>
-  <p>The report pulls captures from the event store under a tenant-fenced query, then re-checks <code>row.tenant_id</code> on every row inside the aggregation loop (W411 defense-in-depth). A schema bug in future revisions cannot leak across tenants. Aggregates: <code>count_total</code>, <code>count_high_risk</code>, <code>count_human_in_loop_triggered</code>, <code>average_confidence_at_decision</code>, <code>oldest_capture_at</code>, <code>newest_capture_at</code>, plus a per-namespace breakdown.</p>
+  <p>The report pulls captures from the event store under a tenant-fenced query, then re-checks <code>row.tenant_id</code> on every row inside the aggregation loop. A schema bug in future revisions cannot leak across tenants. Aggregates: <code>count_total</code>, <code>count_high_risk</code>, <code>count_human_in_loop_triggered</code>, <code>average_confidence_at_decision</code>, <code>oldest_capture_at</code>, <code>newest_capture_at</code>, plus a per-namespace breakdown.</p>
 </div>
 
 <pre>CODE20</pre>
@@ -214,8 +214,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="related">
   <a href="/compliance/nist-ai-rmf"><b>NIST AI RMF mapping</b><span>How kolm artifacts and receipts map to the NIST framework.</span></a>
-  <a href="/security/sbom"><b>SBOM</b><span>Sibling W763 output &mdash; CycloneDX / SPDX bill of materials for every artifact.</span></a>
-  <a href="/security/membership-inference"><b>Membership inference defense</b><span>Sibling W764 module &mdash; capture forget and PII bakeoff scan.</span></a>
+  <a href="/security/sbom"><b>SBOM</b><span>Sibling output &mdash; CycloneDX / SPDX bill of materials for every artifact.</span></a>
+  <a href="/security/membership-inference"><b>Membership inference defense</b><span>Sibling module &mdash; capture forget and PII bakeoff scan.</span></a>
 </div>
 
 </div></main>

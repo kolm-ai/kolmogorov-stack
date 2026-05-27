@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>A/B tests - Account - kolm.ai</title>
-<meta name="description" content="W777 A/B testing dashboard: split traffic 50/50 between two artifact versions, watch the W778 Welch t-test gate decide pass/fail/insufficient, auto-rollback when arm B underperforms.">
+<meta name="description" content="A/B testing dashboard: split traffic 50/50 between two artifact versions, watch the Welch t-test gate decide pass/fail/insufficient, auto-rollback when arm B underperforms.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/ab-tests">
-<meta property="og:title" content="A/B tests &middot; Account &middot; kolm.ai">
-<meta property="og:description" content="W777 A/B testing dashboard: traffic splitting, Welch t-test statistical gate, automatic rollback.">
+<meta property="og:title" content="A/B tests · Account · kolm.ai">
+<meta property="og:description" content="A/B testing dashboard: traffic splitting, Welch t-test statistical gate, automatic rollback.">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/account/ab-tests">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"A/B tests - Account - kolm.ai","description":"W777 A/B testing dashboard.","url":"https://kolm.ai/account/ab-tests","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"A/B tests","item":"https://kolm.ai/account/ab-tests"}]}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"A/B tests - Account - kolm.ai","description":"A/B testing dashboard.","url":"https://kolm.ai/account/ab-tests","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"A/B tests","item":"https://kolm.ai/account/ab-tests"}]}}</script>
 <style>
 .acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
 #account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
@@ -73,7 +73,7 @@
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
@@ -95,13 +95,13 @@
 <nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured calls</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li><li><a href="/account/routing">Routing decisions</a></li><li><a href="/account/confidence">Confidence routing</a></li><li><a href="/account/failure-modes">Failure modes</a></li><li><a href="/account/active-learning">Active learning</a></li><li><a href="/account/ab-tests" aria-current="page">A/B tests</a></li></ul></nav>
 <section class="acct-content">
 
-<p class="eyebrow">W777 traffic splitting &middot; W778 statistical-significance gate</p>
+<p class="eyebrow">traffic splitting &middot; statistical-significance gate</p>
 <h1>A/B tests.</h1>
-<p class="lede">Split traffic deterministically (FNV-1a hash on <code>request_hash</code>) between two artifact versions, record the K-Score and latency on each outcome, then watch the W778 Welch t-test decide <code>pass</code> / <code>fail</code> / <code>insufficient</code>. Auto-rollback fires when the promoted arm B underperforms arm A on the gate. Every decision lands in the audit log under <code>workflow_id=w777:ab</code>. See <a href="/docs/releasing">/docs/releasing</a> for the release procedure.</p>
+<p class="lede">Split traffic deterministically (FNV-1a hash on <code>request_hash</code>) between two artifact versions, record the K-Score and latency on each outcome, then watch the Welch t-test decide <code>pass</code> / <code>fail</code> / <code>insufficient</code>. Auto-rollback fires when the promoted arm B underperforms arm A on the gate. Every decision lands in the audit log under <code>workflow_id=w777:ab</code>. See <a href="/docs/releasing">/docs/releasing</a> for the release procedure.</p>
 
 <div class="kpanel" id="w777-summary-panel">
-  <h2>Active tests <span style="font-family:var(--mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em;margin-left:8px">W777</span></h2>
-  <p class="pdesc">List of A/B tests for the authenticated tenant. Click a row to open the per-test panel with sample counts, K-Score means per arm, and the live Welch t-test envelope from W778.</p>
+  <h2>Active tests <span style="font-family:var(--mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em;margin-left:8px"></span></h2>
+  <p class="pdesc">List of A/B tests for the authenticated tenant. Click a row to open the per-test panel with sample counts, K-Score means per arm, and the live Welch t-test envelope from.</p>
   <div class="toolbar">
     <button id="w777-refresh" class="btn" type="button">Refresh</button>
     <a class="btn" href="/account/active-learning" rel="noopener">Active learning &rarr;</a>
@@ -163,7 +163,7 @@
 </div>
 
 <div class="note">
-  All routes auth-gated. Tenant fence forced from session (never from request body) per W411. The full API surface is documented at <a href="/docs/api">/docs/api</a> under <code>/v1/ab-tests/*</code> and <code>/v1/stat-sig/*</code>.
+ All routes auth-gated. Tenant fence forced from session (never from request body) per. The full API surface is documented at <a href="/docs/api">/docs/api</a> under <code>/v1/ab-tests/*</code> and <code>/v1/stat-sig/*</code>.
 </div>
 
 </section>
@@ -325,7 +325,7 @@
 })();
 </script>
 <div hidden data-w221-anchors="account" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
-    <!-- KOLM_NAV_BEGIN (W221) -->
+    
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
       <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
@@ -421,7 +421,7 @@
       </div>
     </div>
     </nav>
-    <!-- KOLM_NAV_END (W221) -->
+    
 </div>
 </body>
 </html>

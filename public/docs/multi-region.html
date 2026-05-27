@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Multi-region gateway | kolm.ai</title>
-<meta name="description" content="Three-region launch plan (US, EU, APAC). Region-aware capture routing wired through W769 data residency. Cloudflare Workers + Lambda@Edge adapters ship as starter templates.">
+<meta name="description" content="Three-region launch plan (US, EU, APAC). Region-aware capture routing wired through data residency. Cloudflare Workers + Lambda@Edge adapters ship as starter templates.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://kolm.ai/docs/multi-region">
-<meta property="og:title" content="Multi-region gateway &middot; kolm.ai">
+<meta property="og:title" content="Multi-region gateway · kolm.ai">
 <meta property="og:description" content="EU/US/APAC routing. Residency-aware. Loud-fail envelopes on unconfigured gateways. Cloudflare Workers + Lambda@Edge starters.">
 <meta property="og:url" content="https://kolm.ai/docs/multi-region">
 <meta property="og:type" content="article">
@@ -15,7 +15,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/ks.css">
-<!-- ds-shell W619 -->
+
 <link rel="stylesheet" href="/docs-shell.css">
     <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/docs-shell.js"></script>
@@ -49,29 +49,29 @@
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs" aria-current="page">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
 <main id="main" class="docs-main" data-w401f="docs-page" data-page="multi-region" data-w780="root">
 <nav aria-label="Breadcrumb" class="crumbs"><a href="/docs">Docs</a> / <span>multi-region</span></nav>
 <h1>Multi-region gateway</h1>
-<blockquote><p>Three-region launch plan (US, EU, APAC). Region-aware capture routing wired through W769 data residency. Cloudflare Workers + Lambda@Edge adapters ship as starter templates.</p></blockquote>
+<blockquote><p>Three-region launch plan (US, EU, APAC). Region-aware capture routing wired through data residency. Cloudflare Workers + Lambda@Edge adapters ship as starter templates.</p></blockquote>
 <span class="stamp">w780-v1</span>
 
 <h2 data-w780="launch-plan">Launch plan</h2>
@@ -84,10 +84,10 @@
 <tr><td>Asia Pacific (Singapore)</td><td><code>apac</code></td><td><code>ap-southeast-1</code></td><td><code>ap.kolm.ai</code></td></tr>
 </tbody>
 </table>
-<p>The apex record <code>kolm.ai</code> resolves to the closest region via GeoDNS. The W780 module honors this geo-routing decision and uses <code>$KOLM_REGION</code> as the runtime override for operators who need to pin a request to a specific gateway.</p>
+<p>The apex record <code>kolm.ai</code> resolves to the closest region via GeoDNS. The module honors this geo-routing decision and uses <code>$KOLM_REGION</code> as the runtime override for operators who need to pin a request to a specific gateway.</p>
 
 <h2 data-w780="dns-layout">DNS layout</h2>
-<p>The full DNS schema lives at <a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/infra/dns-schema.json"><code>infra/dns-schema.json</code></a>. It describes the Route53 + Cloudflare records required to launch:</p>
+<p>The full DNS schema lives at <a href="https://github.com/kolm-ai/kolm/blob/main/infra/dns-schema.json"><code>infra/dns-schema.json</code></a>. It describes the Route53 + Cloudflare records required to launch:</p>
 <ul>
 <li><strong>Apex GeoDNS</strong>  -  <code>kolm.ai</code> resolves to the closest region by client IP. Weight 100 per geo bucket (NA -&gt; us, EU/AF -&gt; eu, APAC/OCEANIA -&gt; apac).</li>
 <li><strong>Per-region hostnames</strong>  -  <code>us.kolm.ai</code>, <code>eu.kolm.ai</code>, <code>ap.kolm.ai</code>. Each terminates its own TLS cert (SAN-per-region by default; rotation is region-independent).</li>
@@ -105,19 +105,19 @@
 </table>
 
 <h2 data-w780="cloudflare-worker">Cloudflare Workers adapter</h2>
-<p>Starter template at <a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/tools/edge/cloudflare-worker.js"><code>tools/edge/cloudflare-worker.js</code></a>. Drop into a Workers project, wire the gateway map via <code>wrangler.toml</code> vars, deploy behind the per-region hostname.</p>
+<p>Starter template at <a href="https://github.com/kolm-ai/kolm/blob/main/tools/edge/cloudflare-worker.js"><code>tools/edge/cloudflare-worker.js</code></a>. Drop into a Workers project, wire the gateway map via <code>wrangler.toml</code> vars, deploy behind the per-region hostname.</p>
 <pre>CODE31</pre>
 <p>Routing decision honors <code>x-kolm-residency</code> as a HARD constraint (returns HTTP 451 when no matching gateway) and <code>x-kolm-prefer-region</code> as a soft hint. Response carries <code>x-kolm-routed-region</code> and <code>x-kolm-routed-reason</code> so downstream code can audit the decision.</p>
 
 <h2 data-w780="lambda-at-edge">Lambda@Edge adapter</h2>
-<p>Starter template at <a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/tools/edge/lambda-at-edge.js"><code>tools/edge/lambda-at-edge.js</code></a>. Attach as a viewer-request trigger so the routing decision lands at the edge POP closest to the user.</p>
+<p>Starter template at <a href="https://github.com/kolm-ai/kolm/blob/main/tools/edge/lambda-at-edge.js"><code>tools/edge/lambda-at-edge.js</code></a>. Attach as a viewer-request trigger so the routing decision lands at the edge POP closest to the user.</p>
 <p>Lambda@Edge does NOT support env vars at execution time. Bake the gateway map into the <code>GATEWAY_MAP</code> constant at deploy time. The handler rewrites <code>request.origin</code> so CloudFront proxies to the chosen region's backend without re-fetching the body.</p>
 
 <h2 data-w780="region-aware-capture">Region-aware capture routing</h2>
-<p>W780 joins with <a href="/compliance/data-residency">W769 data residency</a> to decide which region a capture should land in. The resolution ladder:</p>
+<p>joins with <a href="/compliance/data-residency">data residency</a> to decide which region a capture should land in. The resolution ladder:</p>
 <ol>
-<li>The W769 <strong>namespace default region</strong> (from <code>configureNamespaceRegion</code>)  -  if a namespace is pinned to <code>EU_WEST</code>, every capture in that namespace routes to <code>eu</code>.</li>
-<li>The W769 <strong>tenant inference</strong> from ISO country code  -  a tenant signed up from <code>DE</code> maps to <code>eu</code>.</li>
+<li>The <strong>namespace default region</strong> (from <code>configureNamespaceRegion</code>)  -  if a namespace is pinned to <code>EU_WEST</code>, every capture in that namespace routes to <code>eu</code>.</li>
+<li>The <strong>tenant inference</strong> from ISO country code  -  a tenant signed up from <code>DE</code> maps to <code>eu</code>.</li>
 <li>The runtime <strong>current region</strong> from <code>$KOLM_REGION</code>  -  the final fallback.</li>
 </ol>
 <p>The join logic is plain about each rung: the returned envelope carries <code>reason</code> (one of <code>w769_namespace_default</code>, <code>w769_tenant_inference</code>, <code>w769_global_uses_current_region</code>) so callers can audit which rung made the decision.</p>
@@ -132,11 +132,11 @@
 
 <h2 data-w780="see-also">See also</h2>
 <ul>
-<li><a href="/compliance/data-residency">/compliance/data-residency</a> &mdash; W769 per-capture residency tags + region taxonomy</li>
+<li><a href="/compliance/data-residency">/compliance/data-residency</a> &mdash; per-capture residency tags + region taxonomy</li>
 <li><a href="/airgap">/airgap</a> &mdash; air-gap deploy path for tenants who need no internet at all</li>
-<li><a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/infra/dns-schema.json"><code>infra/dns-schema.json</code></a> &mdash; full DNS schema (Route53 + Cloudflare records)</li>
-<li><a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/tools/edge/cloudflare-worker.js"><code>tools/edge/cloudflare-worker.js</code></a> &mdash; Cloudflare Workers adapter starter</li>
-<li><a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/tools/edge/lambda-at-edge.js"><code>tools/edge/lambda-at-edge.js</code></a> &mdash; AWS Lambda@Edge adapter starter</li>
+<li><a href="https://github.com/kolm-ai/kolm/blob/main/infra/dns-schema.json"><code>infra/dns-schema.json</code></a> &mdash; full DNS schema (Route53 + Cloudflare records)</li>
+<li><a href="https://github.com/kolm-ai/kolm/blob/main/tools/edge/cloudflare-worker.js"><code>tools/edge/cloudflare-worker.js</code></a> &mdash; Cloudflare Workers adapter starter</li>
+<li><a href="https://github.com/kolm-ai/kolm/blob/main/tools/edge/lambda-at-edge.js"><code>tools/edge/lambda-at-edge.js</code></a> &mdash; AWS Lambda@Edge adapter starter</li>
 </ul>
 
 </main>
@@ -187,7 +187,7 @@
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">

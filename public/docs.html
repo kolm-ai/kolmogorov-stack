@@ -7,7 +7,7 @@
 <meta name="description" content="Documentation for the kolm AI compiler. Quickstart, CLI reference, SDKs, runtime, K-score, security, integrations, deployment patterns. Everything you need to ship a signed .kolm artifact into production.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
-<meta property="og:title" content="Docs &middot; kolm.ai">
+<meta property="og:title" content="Docs · kolm.ai">
 <meta property="og:description" content="Documentation for the kolm AI compiler. Everything you need to ship a signed .kolm artifact into production.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/docs">
@@ -20,14 +20,7 @@
 <link rel="stylesheet" href="/surface-polish.css">
 <link rel="stylesheet" href="/warm-paper.css">
 <style>
-  /* W847: docs hub restructure (Stripe/Linear/Vercel 2026 pattern).
-     - Sticky left sidebar (280px) on desktop, collapses to top sheet on mobile.
-     - Card grid: 8 surface cards, 4-col on desktop, 2-col on tablet.
-     - Cmd-K modal: paper bg + faint slate top-border, ESC closes.
-     - Single-column body content max-width 760px, line-height 1.65.
-     All colors use literal Warm Paper hex (#f3f5f7 paper, #111111 ink,
-     #1f2937 cool slate) - NEVER var(--ink-1) which is TEXT not surface
-     (per W845-W846 lesson). */
+  
   .docs-shell { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: clamp(24px, 4vw, 64px); max-width: 1280px; margin: 0 auto; padding: 32px clamp(20px, 4vw, 48px) 96px; }
   @media (max-width: 900px) { .docs-shell { grid-template-columns: 1fr; padding-top: 16px; } }
   .docs-side { position: sticky; top: 84px; align-self: start; max-height: calc(100vh - 100px); overflow-y: auto; padding-right: 12px; font-size: 14px; line-height: 1.65; }
@@ -164,23 +157,23 @@
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs" aria-current="page">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true" style="font-size:0.78em;opacity:0.55;margin-left:3px;">&uarr;</span></a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true" style="font-size:0.78em;opacity:0.55;margin-left:3px;">&uarr;</span></a></li>
     </ul>
     <div class="ks-nav__right">
       <button type="button" class="ks-theme-toggle" id="ksThemeToggle" aria-label="Toggle theme" title="Toggle theme">
-        <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="theme-icon theme-icon--moon" viewbox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
+        <svg class="theme-icon theme-icon--sun" viewbox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /></svg>
       </button>
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
       <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
       </button>
     </div>
   </nav>
@@ -189,7 +182,7 @@
     <a href="/studio">Studio</a>
     <a href="/pricing">Pricing</a>
     <a href="/docs">Docs</a>
-    <a href="https://github.com/kolm-ai/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub &uarr;</a>
+    <a href="https://github.com/kolm-ai/kolm" target="_blank" rel="noopener noreferrer">GitHub &uarr;</a>
     <a href="/signup?intent=login">Sign in</a>
     <a href="/signup">Get started &rarr;</a>
   </div>
@@ -338,7 +331,7 @@
           <a href="/quickstart" class="docs-cta-primary">Open the quickstart <span aria-hidden="true">&rarr;</span></a>
           <a href="/k-score" class="docs-cta-ghost">K-score spec</a>
           <button type="button" class="docs-search-trigger" id="docsSearchTrigger" aria-label="Search documentation">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <svg width="14" height="14" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
             <span class="ph">Search docs&hellip;</span>
             <kbd id="docsSearchKbd">Ctrl K</kbd>
           </button>
@@ -351,14 +344,14 @@
         <div class="docs-card-grid" style="grid-template-columns: repeat(2, 1fr);">
           <a href="/quickstart" class="docs-card">
             <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7" /><polyline points="6 17 11 12 6 7" /></svg>
             </span>
             <h3>Quickstart</h3>
             <p>Install, route a call through the gateway, capture, distill, quantize, sign, and verify your first <code>.kolm</code> in 10 minutes on a developer laptop.</p>
           </a>
           <a href="/k-score" class="docs-card">
             <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
             </span>
             <h3>K-score gate spec</h3>
             <p>One number per artifact, composed from five deterministic axes. Embedded in the receipt. Same number on your laptop, in CI, and at your auditor's desk.</p>
@@ -372,56 +365,56 @@
         <div class="docs-card-grid">
           <a href="/quickstart" class="docs-card">
             <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>
+              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z" /></svg>
             </span>
             <h3>Get started</h3>
             <p>Quickstart, why kolm, compare against LoRAX / Predibase / OpenPipe, and the 35-recipe cookbook.</p>
           </a>
           <a href="/docs/cli/index" class="docs-card">
             <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5" /><line x1="12" y1="19" x2="20" y2="19" /></svg>
             </span>
             <h3>CLI reference</h3>
             <p>Every verb the <code>kolm</code> CLI accepts. Init, login, capture, distill, compile, score, verify, run, doctor, and the rest.</p>
           </a>
           <a href="/sdks" class="docs-card">
             <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" /></svg>
             </span>
             <h3>SDKs</h3>
             <p>Six first-class bindings: Node.js, Python, Rust, C single-header, MCP server, VS Code extension. Apache-2.0.</p>
           </a>
           <a href="/runtimes" class="docs-card">
             <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>
             </span>
             <h3>Runtimes</h3>
             <p>GGUF + llama.cpp for laptop, vLLM for production GPU, TensorRT-LLM for latency floor, MLX for Apple Silicon, ONNX for edge.</p>
           </a>
           <a href="/docs/rs-1" class="docs-card">
             <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>
             </span>
             <h3>Receipts &amp; verify</h3>
             <p>RS-1 receipt chain spec, the 24 verifier checks, Ed25519 signatures, dispatch via <code>/v1/run</code>, public lookup at <code>/v1/receipts/:hash/public</code>.</p>
           </a>
           <a href="/k-score" class="docs-card">
             <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21H3"/><polyline points="6 15 10 9 14 13 19 6"/></svg>
+              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21H3" /><polyline points="6 15 10 9 14 13 19 6" /></svg>
             </span>
             <h3>Eval &amp; K-score</h3>
             <p>The five axes, the composition math, authoring your own eval pack, signing it, and published benchmark scores.</p>
           </a>
           <a href="/enterprise" class="docs-card">
             <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22V8l10-6 10 6v14"/><path d="M9 22V12h6v10"/></svg>
+              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22V8l10-6 10 6v14" /><path d="M9 22V12h6v10" /></svg>
             </span>
             <h3>Deploy</h3>
             <p>SaaS multi-tenant, SaaS dedicated, BYOC, on-prem with DMZ broker, air-gap appliance. Helm + Terraform module included.</p>
           </a>
           <a href="/security" class="docs-card">
             <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
             </span>
             <h3>Security</h3>
             <p>SOC 2 Type I available, Type II in progress. HIPAA, BAA, encryption, key management, tenant isolation, pen-test summary.</p>
@@ -435,28 +428,28 @@
         <div class="docs-card-grid">
           <a href="/integrations" class="docs-card">
             <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
             </span>
             <h3>All adapters</h3>
             <p>CI, observability, EHR, EDI, identity, secrets, datastores. The full matrix.</p>
           </a>
           <a href="/docs/github-actions" class="docs-card">
             <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M14.31 8l5.74 9.94"/><path d="M9.69 8h11.48"/><path d="M7.38 12l5.74-9.94"/></svg>
+              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="M14.31 8l5.74 9.94" /><path d="M9.69 8h11.48" /><path d="M7.38 12l5.74-9.94" /></svg>
             </span>
             <h3>GitHub Actions</h3>
             <p>Drop-in action for <code>kolm score --min</code>. Below-floor artifacts fail the build.</p>
           </a>
           <a href="/integrations/litellm" class="docs-card">
             <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
             </span>
             <h3>LiteLLM / OpenAI</h3>
             <p>Drop-in proxy captures every call as a labeled row ready to distill.</p>
           </a>
           <a href="/docs/vscode" class="docs-card">
             <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>
             </span>
             <h3>VS Code</h3>
             <p>Status-bar K-score, inline distill commands, receipt explorer, CI integration.</p>
@@ -474,22 +467,19 @@
           </li>
           <li>
             <span class="date">2026-05-24</span>
-            <span><a href="/docs/cost-optimization">Cost optimization (W835)</a> <span class="blurb">&middot; savings-based pricing with 7-day baseline and plain insufficient-baseline envelope.</span></span>
+            <span><a href="/docs/cost-optimization">Cost optimization</a> <span class="blurb">&middot; savings-based pricing with 7-day baseline and plain insufficient-baseline envelope.</span></span>
           </li>
           <li>
             <span class="date">2026-05-24</span>
-            <span><a href="/docs/regulatory-toolkit">Regulatory toolkit (W834)</a> <span class="blurb">&middot; EU AI Act Annex IV generator, risk classifier, GRC export.</span></span>
+            <span><a href="/docs/regulatory-toolkit">Regulatory toolkit</a> <span class="blurb">&middot; EU AI Act Annex IV generator, risk classifier, GRC export.</span></span>
           </li>
         </ul>
       </section>
 
-      <!-- W846: embedded CLI chat (preserved from prior hub).
-           User mandate: SAME component pre and post auth. kolm-chat.js
-           auto-detects mode from cookies; pass nothing to keep behavior
-           consistent with the homepage and /account/overview mounts. -->
+      
       <div data-kolm-chat data-kolm-chat-heading="Ask the docs" data-kolm-chat-subtitle="plain English in. the CLI command, the why, and a deep-link out." style="margin-top: 48px;"></div>
 
-      <!-- Hidden test anchors retained for lock-in tests (W220/W260/W271/W335/W373) -->
+      
       <div class="test-anchor">
         <span data-test="w220-claim">kolm.ai</span>
         <span data-test="w260-trust">SOC 2 Type I</span>
@@ -503,11 +493,10 @@
 
 </main>
 
-<!-- W847: Cmd-K modal. Client-side fuzzy filter over an inline JSON index
-     built from the doc URL list. Keypress Ctrl/Meta + K opens; ESC closes. -->
+
 <div class="docs-cmdk-backdrop" id="docsCmdkBackdrop" role="dialog" aria-modal="true" aria-label="Search documentation">
   <div class="docs-cmdk">
-    <input type="text" id="docsCmdkInput" placeholder="Search docs by title or URL&hellip;" autocomplete="off" spellcheck="false">
+    <input type="text" id="docsCmdkInput" placeholder="Search docs by title or URL…" autocomplete="off" spellcheck="false">
     <div class="docs-cmdk-list" id="docsCmdkList"></div>
     <div class="docs-cmdk-foot">
       <span><kbd>&uarr;&darr;</kbd> Navigate</span>
@@ -663,12 +652,7 @@
 })();
 </script>
 
-<!-- W888-R: assistant-backed search layered on top of the W847 Cmd-K modal.
-     The inline IIFE above renders an immediate substring index for keyboard
-     navigation; docs-search-assistant.js overrides the list panel on every
-     `input` event with a two-column "Direct match + Assistant answer" view.
-     Natural-language queries (>= 3 words OR '?') POST /v1/assistant/chat-docs;
-     single-keyword queries stay Lunr-only (no network call). -->
+
 <script src="/assets/docs-search-assistant.js" defer></script>
 
 <footer class="ks-foot">
@@ -714,7 +698,7 @@
         <a href="/manifesto">Manifesto</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" target="_blank" rel="noopener noreferrer">GitHub &uarr;</a>
+        <a href="https://github.com/kolm-ai/kolm" target="_blank" rel="noopener noreferrer">GitHub &uarr;</a>
       </div>
     </div>
     <div class="ks-foot__base">
@@ -737,8 +721,7 @@
   })();
 </script>
 
-<!-- W806 lock-in anchors retained. Provides per-verb hrefs for the
-     W206 docs sidebar coverage tests + CLI verb taxonomy floor. -->
+
 <div hidden data-w806-anchors="wave206-docs-sidebar" aria-hidden="true">
 <a href="/docs/cli/nl">nl</a>
 <a href="/docs/cli/seeds">seeds</a>
@@ -814,12 +797,12 @@
 <a href="/signup">signup</a>
 <a href="/signin">signin</a>
 <span>kolm sdk - the JavaScript/Python SDK surface lives under sdk/ and is documented inline. kolm spec-decode - speculative decoding research path under /docs/inference/speculative-decoding. kolm package - alias for `kolm packages release-readiness`. kolm ns - alias for `kolm namespace`. kolm kolmbench - the canonical benchmark runner (alias for `kolm bench`). kolm kb - knowledge-base index alias for `kolm rag`. kolm vscode - VS Code installer (`kolm vscode install` writes the workspace MCP config). kolm savings - savings-opportunity report (alias for `kolm opportunities`).</span>
-<p>W206 docs floor recovery payload. The kolm docs are organized into the following content groups, each of which is locked by a per-group test in this wave family. Quickstart: the developer first-run path; from install to a signed artifact in under 60 seconds on a clean machine. CLI reference: every documented verb with a per-verb stub under /docs/cli/, including init, login, compile, run, inspect, verify, serve, install, doctor, tune, rag, nl, seeds, keys, quantize, improve. SDK reference: the JavaScript SDK at sdk/js/, the Python SDK at sdk/python/, the C SDK at sdk/c/, the Rust SDK at sdk/rust/. Runtime adapters: the runtime adapters at src/runtime/ for vLLM, SGLang, TGI, Anthropic, OpenAI, kolm-native. K-score: the artifact gate, composed from five axes (faith, cover, calibration, truthfulness, cost). Receipts: the receipt chain spec (RS-1), the verifier checks #1 through #24, the binder roster. Security: the air-gap mode (KOLM_AIRGAP), the BYOC pattern, the BAA + DPA + acceptable-use policy, the SOC 2 Type I report. Integrations: the wrapper for Claude Code, Cursor, Continue, Cline, VS Code. Deployment patterns: the multi-region pattern, the horizontal-scaling pattern, the gateway-mode pattern, the airgap-mode pattern, the BYOC pattern. Compliance: the compliance packs for HIPAA, FedRAMP, SOC 2 Type I, EU AI Act, GDPR, FERPA, PCI-DSS, GLBA. Migration: five one-page guides from LoRAX, Predibase, OpenPipe, the DIY LoRA stack, and hyperscaler fine-tuning to kolm. Cookbook: end-to-end recipes for common workflows (letter generation, classification, summarization, extraction, code generation, translation, multilingual, multimodal). Drift: the supersession ladder, the drift detection report, the lifecycle tiers. Numerical accuracy: the FP32 vs FP16 vs BF16 vs INT8 vs INT4 vs FP8 tradeoff matrix. Synthetic data: the seeds pipeline, the synth pipeline, the bakeoff pipeline. Verticals: the vertical packs for healthcare, health insurance, finance, fintech, defense, government, education.</p>
-<p>W206 docs floor recovery payload continued. The CLI verb taxonomy: the developer-facing verbs (init, login, compile, run, inspect, verify, serve, install, doctor, tune, rag, nl, seeds, keys, quantize, improve, ask, chat, repl, ls, list, eject, whoami, logs); the platform-module verbs (sigstore-attest, attest, test, drift, trace, ir, device, cc, fl); the persona-aliased verbs (key for keys, kb for rag, kolmbench for bench, ns for namespace, package for packages, savings for opportunities, spec-decode for the speculative decoding research path, sdk for the SDK surface, vscode for the VS Code installer); the post-auth verbs (account, dashboard, captures, teams, billing); the integration verbs (claude-code, cursor, continue, cline, vscode); the deployment verbs (cloud, airgap, tunnel, compute, hub); the workflow verbs (replay, runtime, sync, profile, services, checkpoint, import-chat, merge, bootstrap, proxy, remote, wrap, migrate, marketplace, loop, synth, sim, bakeoff, pipeline, make, ship, do, what, next, explain, fix); the device + data verbs (devices, install-device, dataset, label); the audit + settings verbs (audit, settings); the multimodal verbs (media); and the changelog verb (changelog).</p>
-<p>W206 docs floor recovery payload tail. Every CLI verb is documented through one of three substrates: a dedicated /docs/cli/<verb> stub under public/docs/cli/, a HELP.<verb> entry in cli/kolm.js (which is the source-of-truth for `kolm <verb> --help`), or an inbound reference from a /docs/ page that uses the verb in its prose. The W206 lock-in test asserts every verb in COMPLETION_VERBS has at least one inbound reference somewhere in /docs/* OR /docs.html (so meta verbs like help and version need not have their own page but should be mentioned at least once). The ALLOWED_GAPS set in the test enumerates the verbs that are intentionally without a /docs/ page (because they are aliases, sub-routes of existing pages, or have a dedicated public surface outside /docs/). The required-documented set is the load-bearing list: init, login, compile, run, inspect, verify, serve, install, doctor, tune, rag, nl, seeds, keys, quantize, improve.</p>
-<p>W206 docs floor recovery payload extension. The /docs/cli/nl.md stub documents the natural-language quickstart verb that scaffolds a recipe from a plain-English description. The /docs/cli/seeds.md stub documents the seed-corpus management verb (new, generate, list, bootstrap, validate). The /docs/cli/keys.md stub documents the Ed25519 signing-key management verb. The /docs/cli/quantize.md stub documents the quantization verb that emits an INT4 artifact from a BF16 base. Each stub carries a Usage section, an Examples or Flags section, a reference to `kolm verify`, and a cross-link to /spec/rs-1 (locked by W206 #19). The docs.html sidebar exposes these new stubs through the per-verb anchor list above; the W206 #20 test asserts at least the nl link plus three of the new CLI verb pages appear in the sidebar so the new pages are reachable from the docs index. The W206 #16 em-dash baseline is 0 across all audited docs; new prose must not regress, so any introduced em-dash gets scrubbed in the W206 close-out. The W206 #15 emoji baseline is also 0; the docs surface is intentionally text-only per the standing brand voice. The W206 #14 forbidden marketing-fluff phrase list (see tests/wave206-docs-audit.test.js FLUFF constant for the canonical set) has zero hits across all audited docs by design.</p>
-<p>W206 docs floor recovery payload final. The kolm docs surface reflects the kolm voice: every claim is grounded, every flag is verifiable against the installed CLI through `kolm <verb> --help`, every receipt can be replayed against `kolm verify`, every artifact carries a tenant-scoped binder roster row that the user can inspect through `kolm inspect`. The receipt chain is the integrity mechanism; the K-score gate is the verification mechanism; the binder roster is the lookup mechanism; the drift detection ladder is the supersession mechanism. The standing constraint is plain scope: every page distinguishes what kolm ships today from what its competitors ship from what is still in the planning wave. The plain-scope statement on every page is the brand contract.</p>
-<p>W206 docs extension. The receipt envelope (RS-1) defines the load-bearing fields that every captured prompt/response pair carries through the kolm gateway: receipt_id, tenant_id, namespace, recipe_version, corpus_hash, input_hash, output_hash, teacher_id, student_id, captured_at, captured_by, redaction_applied, redaction_profile, k_score, k_score_floor, supersession_block, drift_report, attestation_report, attestation_kind, confidential_compute_hash. The artifact bundle (.kolm) is a ZIP archive that carries the manifest, the receipt chain, the K-score floor, the quantization profile, the corpus hash, the recipe hash, the seed, and the signed model weights (or a model pointer when the artifact references a hosted weights store). The verifier checks #1 through #24 are documented at /spec/rs-1 and enforced by the `kolm verify` CLI verb; check #23 verifies the supersession block when present and check #24 verifies the drift report when present. The drift detection ladder M+1 through M+4 enumerates the four lifecycle tiers; the six SUPERSESSION_REASONS (corpus_drift, recipe_drift, K-score_floor_violation, evaluation_drift, hardware_target_drift, manual_override) and the seven default tolerances are documented at /drift. The kolm wrapper supports the OpenAI chat completion API, the Anthropic messages API, the Anthropic completions API, and the kolm-native invocation API; the wrapper writes every request/response pair through the gateway so the receipt chain is the source-of-truth for what shipped. The `kolm install` command provides one-shot installers for the four primary IDE assistants (Claude Code, Cursor, Continue, Cline), each of which adds a workspace MCP config that routes the assistant's model calls through the local kolm gateway. The `kolm serve` command starts the gateway in either MCP mode (for local assistants) or HTTP mode (for production workloads), with optional `--airgap` flag that refuses any upstream request and forces use of a locally-compiled artifact.</p>
+<p>docs floor recovery payload. The kolm docs are organized into the following content groups, each of which is locked by a per-group test in this wave family. Quickstart: the developer first-run path; from install to a signed artifact in under 60 seconds on a clean machine. CLI reference: every documented verb with a per-verb stub under /docs/cli/, including init, login, compile, run, inspect, verify, serve, install, doctor, tune, rag, nl, seeds, keys, quantize, improve. SDK reference: the JavaScript SDK at sdk/js/, the Python SDK at sdk/python/, the C SDK at sdk/c/, the Rust SDK at sdk/rust/. Runtime adapters: the runtime adapters at src/runtime/ for vLLM, SGLang, TGI, Anthropic, OpenAI, kolm-native. K-score: the artifact gate, composed from five axes (faith, cover, calibration, truthfulness, cost). Receipts: the receipt chain spec (RS-1), the verifier checks #1 through #24, the binder roster. Security: the air-gap mode (KOLM_AIRGAP), the BYOC pattern, the BAA + DPA + acceptable-use policy, the SOC 2 Type I report. Integrations: the wrapper for Claude Code, Cursor, Continue, Cline, VS Code. Deployment patterns: the multi-region pattern, the horizontal-scaling pattern, the gateway-mode pattern, the airgap-mode pattern, the BYOC pattern. Compliance: the compliance packs for HIPAA, FedRAMP, SOC 2 Type I, EU AI Act, GDPR, FERPA, PCI-DSS, GLBA. Migration: five one-page guides from LoRAX, Predibase, OpenPipe, the DIY LoRA stack, and hyperscaler fine-tuning to kolm. Cookbook: end-to-end recipes for common workflows (letter generation, classification, summarization, extraction, code generation, translation, multilingual, multimodal). Drift: the supersession ladder, the drift detection report, the lifecycle tiers. Numerical accuracy: the FP32 vs FP16 vs BF16 vs INT8 vs INT4 vs FP8 tradeoff matrix. Synthetic data: the seeds pipeline, the synth pipeline, the bakeoff pipeline. Verticals: the vertical packs for healthcare, health insurance, finance, fintech, defense, government, education.</p>
+<p>docs floor recovery payload continued. The CLI verb taxonomy: the developer-facing verbs (init, login, compile, run, inspect, verify, serve, install, doctor, tune, rag, nl, seeds, keys, quantize, improve, ask, chat, repl, ls, list, eject, whoami, logs); the platform-module verbs (sigstore-attest, attest, test, drift, trace, ir, device, cc, fl); the persona-aliased verbs (key for keys, kb for rag, kolmbench for bench, ns for namespace, package for packages, savings for opportunities, spec-decode for the speculative decoding research path, sdk for the SDK surface, vscode for the VS Code installer); the post-auth verbs (account, dashboard, captures, teams, billing); the integration verbs (claude-code, cursor, continue, cline, vscode); the deployment verbs (cloud, airgap, tunnel, compute, hub); the workflow verbs (replay, runtime, sync, profile, services, checkpoint, import-chat, merge, bootstrap, proxy, remote, wrap, migrate, marketplace, loop, synth, sim, bakeoff, pipeline, make, ship, do, what, next, explain, fix); the device + data verbs (devices, install-device, dataset, label); the audit + settings verbs (audit, settings); the multimodal verbs (media); and the changelog verb (changelog).</p>
+<p>docs floor recovery payload tail. Every CLI verb is documented through one of three substrates: a dedicated /docs/cli/<verb> stub under public/docs/cli/, a HELP.<verb> entry in cli/kolm.js (which is the source-of-truth for `kolm <verb> --help`), or an inbound reference from a /docs/ page that uses the verb in its prose. The lock-in test asserts every verb in COMPLETION_VERBS has at least one inbound reference somewhere in /docs/* OR /docs.html (so meta verbs like help and version need not have their own page but should be mentioned at least once). The ALLOWED_GAPS set in the test enumerates the verbs that are intentionally without a /docs/ page (because they are aliases, sub-routes of existing pages, or have a dedicated public surface outside /docs/). The required-documented set is the load-bearing list: init, login, compile, run, inspect, verify, serve, install, doctor, tune, rag, nl, seeds, keys, quantize, improve.</p>
+<p>docs floor recovery payload extension. The /docs/cli/nl.md stub documents the natural-language quickstart verb that scaffolds a recipe from a plain-English description. The /docs/cli/seeds.md stub documents the seed-corpus management verb (new, generate, list, bootstrap, validate). The /docs/cli/keys.md stub documents the Ed25519 signing-key management verb. The /docs/cli/quantize.md stub documents the quantization verb that emits an INT4 artifact from a BF16 base. Each stub carries a Usage section, an Examples or Flags section, a reference to `kolm verify`, and a cross-link to /spec/rs-1 (locked by #19). The docs.html sidebar exposes these new stubs through the per-verb anchor list above; the #20 test asserts at least the nl link plus three of the new CLI verb pages appear in the sidebar so the new pages are reachable from the docs index. The #16 em-dash baseline is 0 across all audited docs; new prose must not regress, so any introduced em-dash gets scrubbed in the close-out. The #15 emoji baseline is also 0; the docs surface is intentionally text-only per the standing brand voice. The #14 forbidden marketing-fluff phrase list (see tests/wave206-docs-audit.test.js FLUFF constant for the canonical set) has zero hits across all audited docs by design.</p>
+<p>docs floor recovery payload final. The kolm docs surface reflects the kolm voice: every claim is grounded, every flag is verifiable against the installed CLI through `kolm <verb> --help`, every receipt can be replayed against `kolm verify`, every artifact carries a tenant-scoped binder roster row that the user can inspect through `kolm inspect`. The receipt chain is the integrity mechanism; the K-score gate is the verification mechanism; the binder roster is the lookup mechanism; the drift detection ladder is the supersession mechanism. The standing constraint is plain scope: every page distinguishes what kolm ships today from what its competitors ship from what is still in the planning wave. The plain-scope statement on every page is the brand contract.</p>
+<p>docs extension. The receipt envelope (RS-1) defines the load-bearing fields that every captured prompt/response pair carries through the kolm gateway: receipt_id, tenant_id, namespace, recipe_version, corpus_hash, input_hash, output_hash, teacher_id, student_id, captured_at, captured_by, redaction_applied, redaction_profile, k_score, k_score_floor, supersession_block, drift_report, attestation_report, attestation_kind, confidential_compute_hash. The artifact bundle (.kolm) is a ZIP archive that carries the manifest, the receipt chain, the K-score floor, the quantization profile, the corpus hash, the recipe hash, the seed, and the signed model weights (or a model pointer when the artifact references a hosted weights store). The verifier checks #1 through #24 are documented at /spec/rs-1 and enforced by the `kolm verify` CLI verb; check #23 verifies the supersession block when present and check #24 verifies the drift report when present. The drift detection ladder M+1 through M+4 enumerates the four lifecycle tiers; the six SUPERSESSION_REASONS (corpus_drift, recipe_drift, K-score_floor_violation, evaluation_drift, hardware_target_drift, manual_override) and the seven default tolerances are documented at /drift. The kolm wrapper supports the OpenAI chat completion API, the Anthropic messages API, the Anthropic completions API, and the kolm-native invocation API; the wrapper writes every request/response pair through the gateway so the receipt chain is the source-of-truth for what shipped. The `kolm install` command provides one-shot installers for the four primary IDE assistants (Claude Code, Cursor, Continue, Cline), each of which adds a workspace MCP config that routes the assistant's model calls through the local kolm gateway. The `kolm serve` command starts the gateway in either MCP mode (for local assistants) or HTTP mode (for production workloads), with optional `--airgap` flag that refuses any upstream request and forces use of a locally-compiled artifact.</p>
 </div>
 </body>
 </html>

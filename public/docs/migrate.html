@@ -5,21 +5,21 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <title>Migrate &middot; from Ollama / LM Studio &middot; kolm.ai</title>
-<meta name="description" content="Bring your existing Ollama and LM Studio model libraries into kolm. Discovery is local-only; each model is wrapped through the W740 import path so the not_kolm_compiled truthfulness lock flows transitively.">
+<meta name="description" content="Bring your existing Ollama and LM Studio model libraries into kolm. Discovery is local-only; each model is wrapped through the import path so the not_kolm_compiled truthfulness lock flows transitively.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Migrate &middot; from Ollama / LM Studio &middot; kolm.ai">
+<meta property="og:title" content="Migrate · from Ollama / LM Studio · kolm.ai">
 <meta property="og:description" content="Bring your Ollama / LM Studio model libraries into kolm. Local-only discovery, plain not_kolm_compiled manifests.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/migrate">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Migrate &middot; from Ollama / LM Studio &middot; kolm.ai">
+<meta name="twitter:title" content="Migrate · from Ollama / LM Studio · kolm.ai">
 <meta name="twitter:description" content="Bring your Ollama / LM Studio model libraries into kolm. Local-only discovery, plain not_kolm_compiled manifests.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs/migrate">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Migrate from Ollama and LM Studio into kolm","description":"Bring your Ollama and LM Studio model libraries into kolm. Local-only discovery; each model is wrapped through the W740 import path so the not_kolm_compiled truthfulness lock flows transitively.","url":"https://kolm.ai/docs/migrate","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Migrate from Ollama and LM Studio into kolm","description":"Bring your Ollama and LM Studio model libraries into kolm. Local-only discovery; each model is wrapped through the import path so the not_kolm_compiled truthfulness lock flows transitively.","url":"https://kolm.ai/docs/migrate","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <link rel="stylesheet" href="/design-tokens.css">
 <style>
 :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:rgba(17, 17, 17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
@@ -66,7 +66,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </style>
 
 <link rel="stylesheet" href="/ks.css">
-<!-- ds-shell W619 -->
+
 <link rel="stylesheet" href="/docs-shell.css">
     <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/docs-shell.js"></script>
@@ -78,22 +78,22 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
@@ -102,7 +102,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / migrate</div>
 <p class="eyebrow">Open-source AI workbench</p>
 <h1>Frontier AI on your own infrastructure.</h1>
-<p class="lede">W743 brings the model libraries you already manage in <strong>Ollama</strong> and <strong>LM Studio</strong> into kolm without copying a single GGUF. Discovery walks the on-disk catalogs those tools maintain, then wraps each model through the W740 <code>kolm import</code> path so the <code>not_kolm_compiled:true</code> truthfulness lock flows transitively. Nothing leaves the box.</p>
+<p class="lede">brings the model libraries you already manage in <strong>Ollama</strong> and <strong>LM Studio</strong> into kolm without copying a single GGUF. Discovery walks the on-disk catalogs those tools maintain, then wraps each model through the <code>kolm import</code> path so the <code>not_kolm_compiled:true</code> truthfulness lock flows transitively. Nothing leaves the box.</p>
 
 <h2 id="ollama">From Ollama</h2>
 <p>Ollama writes its models in a content-addressed layout: a JSON manifest under <code>&lt;root&gt;/manifests/registry.ollama.ai/library/&lt;name&gt;/&lt;tag&gt;</code> points at GGUF blobs in <code>&lt;root&gt;/blobs/sha256-&lt;hex&gt;</code>. We read the manifest, pick the layer whose <code>mediaType</code> is <code>application/vnd.ollama.image.model</code> (or fall back to the largest layer on older builds), and resolve the blob path. The blob is the same GGUF that <code>ollama run</code> uses; we never modify it.</p>
@@ -139,7 +139,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <pre>CODE25</pre>
 
 <h2 id="honesty">Plain manifests, every time</h2>
-<p>A migrated model inherits the W740-2 truthfulness lock:</p>
+<p>A migrated model inherits the-2 truthfulness lock:</p>
 
 <pre>CODE26</pre>
 
@@ -175,16 +175,16 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
     <tr><td><code>lmstudio_root_missing</code></td><td>No default LM Studio root exists and no <code>--path</code> was supplied</td><td>5 (NOT_FOUND)</td></tr>
     <tr><td><code>ollama_library_missing</code></td><td>Root exists but <code>manifests/registry.ollama.ai/library/</code> is absent  -  run <code>ollama pull</code> first</td><td>5 (NOT_FOUND)</td></tr>
     <tr><td><code>model_not_found</code></td><td><code>--name</code> didn't match any discovered model</td><td>1 (BAD_ARGS)</td></tr>
-    <tr><td><code>python3_missing</code></td><td>No <code>python3</code> on PATH  -  the W740 GGUF parser needs it</td><td>3 (MISSING_PREREQ) / HTTP 503</td></tr>
+    <tr><td><code>python3_missing</code></td><td>No <code>python3</code> on PATH - the GGUF parser needs it</td><td>3 (MISSING_PREREQ) / HTTP 503</td></tr>
     <tr><td><code>invalid_source</code></td><td><code>source</code> was not <code>"ollama"</code> or <code>"lmstudio"</code></td><td>1 (BAD_ARGS) / HTTP 400</td></tr>
   </tbody>
 </table>
 
 <h2 id="next">Next steps</h2>
-<p>Read <a href="/docs/import">import</a> for the underlying W740 wrap contract, <a href="/docs/distill">distill</a> for how an imported model becomes a kolm-compiled artifact, and <a href="/docs/k-score-methodology">K-Score</a> for what the production-ready gate actually checks.</p>
+<p>Read <a href="/docs/import">import</a> for the underlying wrap contract, <a href="/docs/distill">distill</a> for how an imported model becomes a kolm-compiled artifact, and <a href="/docs/k-score-methodology">K-Score</a> for what the production-ready gate actually checks.</p>
 
 <div class="related">
-  <a href="/docs/import"><b>Import &rarr;</b><span>The W740 wrap contract that powers migration.</span></a>
+  <a href="/docs/import"><b>Import &rarr;</b><span>The wrap contract that powers migration.</span></a>
   <a href="/docs/distill"><b>Distill &rarr;</b><span>Turn a migrated model into a kolm-compiled artifact.</span></a>
   <a href="/docs/api"><b>API reference &rarr;</b><span>POST /v1/migrate/discover and /v1/migrate/wrap.</span></a>
 </div>
@@ -240,7 +240,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">

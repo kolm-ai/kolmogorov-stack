@@ -25,7 +25,7 @@
 <body>
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a class="skip-link" href="#main">Skip to content</a>
-    <!-- KOLM_NAV_BEGIN (W221) -->
+    
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
       <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
@@ -121,7 +121,7 @@
       </div>
     </div>
     </nav>
-    <!-- KOLM_NAV_END (W221) -->
+    
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="resume">
 <nav aria-label="Breadcrumb" class="crumbs">
   <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>resume</span>
@@ -139,7 +139,7 @@
   </div>
 </section>
 <h1>kolm resume</h1>
-<p>Re-attach to a detached compile, distill, eval, or serve session that was started with <code>--detach</code> (W233). The session keeps running inside a tmux target or background pty even after your terminal disconnects, and <code>kolm resume &lt;session-id&gt;</code> re-attaches the live stdout/stderr stream from the on-disk log.</p>
+<p>Re-attach to a detached compile, distill, eval, or serve session that was started with <code>--detach</code>. The session keeps running inside a tmux target or background pty even after your terminal disconnects, and <code>kolm resume &lt;session-id&gt;</code> re-attaches the live stdout/stderr stream from the on-disk log.</p>
 <h2>Usage</h2>
 <pre><code>
 kolm resume &lt;session-id&gt; [--tail N] [--follow] [--json]

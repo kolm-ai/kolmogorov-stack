@@ -1,30 +1,4 @@
-/* design-tokens.css — WF01 (W707 sprint) design-system v1.
-   Loads FIRST so every subsequent stylesheet cascades on top.
 
-   2026-05-24 REDESIGN v3 Monochrome: gutted both burnt-sienna (W836)
-   and ink-navy (W837). The product is a compiler; the page should
-   read as a typeset book, not a brand exercise. Pure monochrome:
-   one ink, one paper, hairline rules, no chromatic accent.
-
-   Token NAMES preserved per wavewf01-design-system test #2-#9
-   (presence-only). Token VALUES swapped site-wide; all pages
-   cascade from this file + ks.css without per-page rewrite.
-
-   Palette anchors:
-     . paper      #f3f5f7   cool slate paper (W850 binding — no warmth)
-     . card       #ffffff   pure card on paper
-     . ink        #111111   near-black
-     . mute       #6b6b66   secondary text
-     . hairline   rgba(17,17,17, 0.10)
-     . status     muted forest / neutral gray / oxblood (no orange/amber)
-
-   Accent discipline: there is no chromatic accent. Emphasis comes
-   from weight, scale, and hairline rules. The "brand color" tokens
-   resolve to ink itself.
-
-   Mode default: LIGHT. [data-theme="dark"] is opt-in.
-
-   CONTRAST: every text/surface pair below meets WCAG AA 4.5:1. */
 
 :root {
   /* ============================================================
@@ -42,9 +16,7 @@
   --brand-paper-strong: #000000;
   --brand-paper-dim: #3a3a38;
 
-  /* Semantic surface system - W850 cool slate paper (was warm cream).
-     User mandate: kill browns/beiges anywhere. Surface is now neutral
-     cool gray with grid backdrop carrying the visual interest. */
+  
   --surface-0: #f3f5f7;
   --surface-1: #ffffff;
   --surface-2: #e8ebef;
@@ -141,10 +113,7 @@
   --warn: var(--status-warn);
   --bad: var(--status-bad);
 
-  /* ============================================================
-     WF01 (W707 sprint) — DESIGN SYSTEM v1 TOKEN SCALE
-     New canonical names. Component CSS uses these exclusively.
-     ============================================================ */
+  
 
   /* --- Color: brand (monochrome — ink as brand) ----------- */
   --ks-color-brand-primary: #111111;
@@ -388,9 +357,7 @@
    ============================================================ */
 
 [data-theme="dark"] {
-  /* COOL SLATE DARK (W850) — reverted from W849 warm-espresso per direct
-     user mandate: "i dont like the browns beiges oranges anywhere".
-     Cool neutral slate. R = G slightly < B. No warm chroma. */
+  
   --brand-primary: #e6e9ee;
   --brand-primary-strong: #f3f5f8;
   --brand-primary-soft: rgba(230, 233, 238, 0.08);

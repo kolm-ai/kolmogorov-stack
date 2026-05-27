@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <title>Verticals &middot; 5 foundation students for legal, medical, code, finance,</title>
-<meta name="description" content="Five vertical foundation students: kolm-legal-7b, kolm-medical-7b, kolm-code-7b, kolm-finance-7b, kolm-support-7b. Pending W751-W755 compilation. Open-source AI workbench.">
+<meta name="description" content="Five vertical foundation students: kolm-legal-7b, kolm-medical-7b, kolm-code-7b, kolm-finance-7b, kolm-support-7b. Pending compilation. Open-source AI workbench.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Verticals &middot; 5 foundation students &middot; kolm.ai">
+<meta property="og:title" content="Verticals · 5 foundation students · kolm.ai">
 <meta property="og:description" content="Five vertical foundation students for legal, medical, code, finance, support  -  sortable target K-Score table.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/verticals">
@@ -69,13 +69,13 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -90,11 +90,11 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p class="brand-eyebrow">Open-source AI workbench</p>
 <h1>Frontier AI on your own infrastructure.</h1>
 
-<p class="lede">Five vertical foundation students &mdash; one per industry &mdash; each distilled to a 7B parameter base your team can run on a single GPU. <code>kolm-legal-7b</code>, <code>kolm-medical-7b</code>, <code>kolm-code-7b</code>, <code>kolm-finance-7b</code>, <code>kolm-support-7b</code>. Items <strong>3 + 4</strong> per vertical (marketplace listing + landing page) are live now. Items <strong>1 + 2</strong> (vertical fingerprint + pre-train) are blocked on W757 (fingerprinting) and W715 (cross-namespace transfer math) &mdash; the marketplace stubs register with <code>pending_distill:true</code> and <code>kscore:null</code> so we never paint a fake K-Score on an uncompiled student.</p>
+<p class="lede">Five vertical foundation students &mdash; one per industry &mdash; each distilled to a 7B parameter base your team can run on a single GPU. <code>kolm-legal-7b</code>, <code>kolm-medical-7b</code>, <code>kolm-code-7b</code>, <code>kolm-finance-7b</code>, <code>kolm-support-7b</code>. Items <strong>3 + 4</strong> per vertical (marketplace listing + landing page) are live now. Items <strong>1 + 2</strong> (vertical fingerprint + pre-train) are blocked on (fingerprinting) and (cross-namespace transfer math) &mdash; the marketplace stubs register with <code>pending_distill:true</code> and <code>kscore:null</code> so we never paint a fake K-Score on an uncompiled student.</p>
 
 <div style="margin:0 0 22px">
   <span class="pill-good">w751-v1</span>
-  <span class="status-pill" style="margin-left:8px">items 1+2 pending W757 + W715</span>
+  <span class="status-pill" style="margin-left:8px">items 1+2 pending +</span>
 </div>
 
 <h2 id="catalog">The 5 vertical foundation students</h2>
@@ -150,19 +150,19 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </table>
 
 <h2 id="how-it-works">How a foundation student becomes a team student</h2>
-<p>The foundation students are pre-trained on the merged W751 fingerprint of public + opt-in capture corpora for each vertical. When your team runs <code>kolm pull kolm-&lt;vertical&gt;-7b</code> and then distills against your own captured workload (via the W144 capture pipeline + W715 cross-namespace transfer), you get a team student that inherits the vertical's base competence and specialises on your specific terminology, conventions, and workflow.</p>
+<p>The foundation students are pre-trained on the merged fingerprint of public + opt-in capture corpora for each vertical. When your team runs <code>kolm pull kolm-&lt;vertical&gt;-7b</code> and then distills against your own captured workload (via the capture pipeline + cross-namespace transfer), you get a team student that inherits the vertical's base competence and specialises on your specific terminology, conventions, and workflow.</p>
 
-<p>The transfer math is W715 &mdash; cross-namespace transfer learning lets the team distill amortize across the foundation's pre-train, so you typically need <strong>10-100x fewer captures</strong> than distilling from scratch to hit the same K-Score on your team's eval set.</p>
+<p>The transfer math is &mdash; cross-namespace transfer learning lets the team distill amortize across the foundation's pre-train, so you typically need <strong>10-100x fewer captures</strong> than distilling from scratch to hit the same K-Score on your team's eval set.</p>
 
 <h2 id="honesty">Why we ship items 3+4 before items 1+2</h2>
-<p>Items 1+2 (per-vertical fingerprint pipeline + per-vertical foundation pre-train) require W757 (which ships the fingerprint primitive shared by all 5 verticals) and W715 (which ships the cross-namespace transfer math the foundation needs to be useful). Both are queued in the W707-W806 plan. Items 3+4 (marketplace stub listing + landing pages) are independently shippable and let teams:</p>
+<p>Items 1+2 (per-vertical fingerprint pipeline + per-vertical foundation pre-train) require (which ships the fingerprint primitive shared by all 5 verticals) and (which ships the cross-namespace transfer math the foundation needs to be useful). Both are queued in the plan. Items 3+4 (marketplace stub listing + landing pages) are independently shippable and let teams:</p>
 <ul>
   <li>see which verticals are coming and reserve interest via the marketplace stub</li>
   <li>start capturing per-vertical corpora <em>now</em> through the kolm wrapper so the eventual distill has the corpus it needs on day one</li>
   <li>get the case-study skeleton in place so first-mover teams have a publishing template ready</li>
 </ul>
 
-<p>We register the marketplace stubs with <code>pending_distill:true</code>, <code>not_kolm_compiled:true</code>, and <code>kscore:null</code>. The W737 marketplace surface treats <code>kscore:null</code> as "not yet measured" (it never returns a fake number). The status pill on every landing page reads <em>pending compilation</em>. When W757 + W715 land and the real distill runs, the marketplace listing flips atomically &mdash; the same slug, a real sha256 content hash, a real K-Score eval, and the case-study slot pre-wired.</p>
+<p>We register the marketplace stubs with <code>pending_distill:true</code>, <code>not_kolm_compiled:true</code>, and <code>kscore:null</code>. The marketplace surface treats <code>kscore:null</code> as "not yet measured" (it never returns a fake number). The status pill on every landing page reads <em>pending compilation</em>. When + land and the real distill runs, the marketplace listing flips atomically &mdash; the same slug, a real sha256 content hash, a real K-Score eval, and the case-study slot pre-wired.</p>
 
 <h2 id="api">API + CLI surface</h2>
 <table class="vtable">
@@ -237,7 +237,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">

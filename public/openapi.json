@@ -900,8 +900,8 @@
           "system"
         ],
         "operationId": "getMetricsExtended",
-        "summary": "W824-3 – /metrics/extended",
-        "description": "W824-3 – /metrics/extended",
+        "summary": "3 – /metrics/extended",
+        "description": "3 – /metrics/extended",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -956,8 +956,8 @@
           "system"
         ],
         "operationId": "getReadyDeep",
-        "summary": "W824-2 – /ready/deep",
-        "description": "W824-2 – /ready/deep",
+        "summary": "2 – /ready/deep",
+        "description": "2 – /ready/deep",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -1011,7 +1011,7 @@
         ],
         "operationId": "postV1AbtestsCreate",
         "summary": "Returns: {ok, ab_test_id, request_hash, arm, frozen, reason, version}",
-        "description": "Returns: {ok, ab_test_id, request_hash, arm, frozen, reason, version} Auth-gated via req.tenant_record. Tenant fence forced from session, never from request body. Distinct prefix /v1/ab-tests/* so parallel agents on W779-W783 cannot collide on these route paths.",
+        "description": "Returns: {ok, ab_test_id, request_hash, arm, frozen, reason, version} Auth-gated via req.tenant_record. Tenant fence forced from session, never from request body. Distinct prefix /v1/ab-tests/* so parallel agents on cannot collide on these route paths.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -1320,7 +1320,7 @@
         ],
         "operationId": "postV1AbFeedback",
         "summary": "thumb:'up'|'down'?, comment?, ab_test_id? }",
-        "description": "thumb:'up'|'down'?, comment?, ab_test_id? } Persists a row to the event-store under workflow_id=AB_FEEDBACK_WORKFLOW so ab-metrics.aggregate() can read it. Also fans the row to the W720 self-improvement queue when deps.selfImprovement.enqueue is wired.",
+        "description": "thumb:'up'|'down'?, comment?, ab_test_id? } Persists a row to the event-store under workflow_id=AB_FEEDBACK_WORKFLOW so ab-metrics.aggregate can read it. Also fans the row to the self-improvement queue when deps.selfImprovement.enqueue is wired.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -1480,8 +1480,8 @@
           "account"
         ],
         "operationId": "getV1AccountAuditlog",
-        "summary": "W409f – /v1/account/audit-log surfaces the audit ledger for the calling",
-        "description": "W409f – /v1/account/audit-log surfaces the audit ledger for the calling tenant. The audit-log.html page renders {entries:[{at,actor,op,payload}]}. W448 – added ?format=csv (defaults to json) so the page's export button and `kolm audit --format csv` CLI verb hit the same route. Also added ?since=<iso|epoch> filter so the CLI can scope to a recent window.",
+        "summary": "/v1/account/audit-log surfaces the audit ledger for the calling",
+        "description": "/v1/account/audit-log surfaces the audit ledger for the calling tenant. The audit-log.html page renders {entries:[{at,actor,op,payload}]}. added ?format=csv (defaults to json) so the page's export button and `kolm audit --format csv` CLI verb hit the same route. Also added ?since=<iso|epoch> filter so the CLI can scope to a recent window.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -1507,8 +1507,8 @@
           "account"
         ],
         "operationId": "getV1AccountAuditlogVerify",
-        "summary": "W409f – GET /v1/account/audit-log/verify – chain-verify the calling",
-        "description": "W409f – GET /v1/account/audit-log/verify – chain-verify the calling tenant's audit ledger (no body). Returns { ok, verified, chain_length, broken_at? } so the audit-log page can render a green/red state.",
+        "summary": "GET /v1/account/audit-log/verify – chain-verify the calling",
+        "description": "GET /v1/account/audit-log/verify – chain-verify the calling tenant's audit ledger (no body). Returns { ok, verified, chain_length, broken_at? } so the audit-log page can render a green/red state.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -2145,7 +2145,7 @@
         ],
         "operationId": "getV1AccountState",
         "summary": "/account/overview \"What's next\" engine reads. Returns artifact + capture",
-        "description": "/account/overview \"What's next\" engine reads. Returns artifact + capture + namespace counts, the age of the last artifact, age of the primary api key, plus a flat `signals` array each rule in whats-next.js matches on. Auth-gated (NOT in PUBLIC_API) – cross-tenant state leaks were what made /v1/intent/next add tenant_id scoping in W432.",
+        "description": "/account/overview \"What's next\" engine reads. Returns artifact + capture + namespace counts, the age of the last artifact, age of the primary api key, plus a flat `signals` array each rule in whats-next.js matches on. Auth-gated (NOT in PUBLIC_API) – cross-tenant state leaks were what made /v1/intent/next add tenant_id scoping in.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -2519,8 +2519,8 @@
           "agents"
         ],
         "operationId": "getV1Agents",
-        "summary": "W424 – agent telemetry routes fence on req.tenant_record and forward",
-        "description": "W424 – agent telemetry routes fence on req.tenant_record and forward req.tenant_record.id as tenant_id into the helper so cross-tenant rows never appear in the rollup. _tenantScope() returns null for admin (cross-tenant reads allowed) and the canonical tenant_id otherwise.",
+        "summary": "agent telemetry routes fence on req.tenant_record and forward",
+        "description": "agent telemetry routes fence on req.tenant_record and forward req.tenant_record.id as tenant_id into the helper so cross-tenant rows never appear in the rollup. _tenantScope returns null for admin (cross-tenant reads allowed) and the canonical tenant_id otherwise.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -2838,7 +2838,7 @@
         ],
         "operationId": "getV1AirgapJobs",
         "summary": "/v1/airgap/jobs – bare collection GET that lists tenant air-gapped",
-        "description": "/v1/airgap/jobs – bare collection GET that lists tenant air-gapped distill + sneakernet jobs. Each W831 job is keyed by run_id; the actual status route is /v1/airgap/distill/status/:id. This bare GET returns an empty envelope until a wave wires the per-tenant job index.",
+        "description": "/v1/airgap/jobs – bare collection GET that lists tenant air-gapped distill + sneakernet jobs. Each job is keyed by run_id; the actual status route is /v1/airgap/distill/status/:id. This bare GET returns an empty envelope until a wave wires the per-tenant job index.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -2944,8 +2944,8 @@
           "airgap"
         ],
         "operationId": "getV1AirgapStatus",
-        "summary": "All four auth-gate on req.tenant_record. W411 defense-in-depth: every",
-        "description": "All four auth-gate on req.tenant_record. W411 defense-in-depth: every route binds tenant into the args so a future schema change cannot leak across tenants.",
+        "summary": "All four auth-gate on req.tenant_record. defense-in-depth: every",
+        "description": "All four auth-gate on req.tenant_record. defense-in-depth: every route binds tenant into the args so a future schema change cannot leak across tenants.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -3779,8 +3779,8 @@
           "assistant"
         ],
         "operationId": "postV1AssistantChat",
-        "summary": "chat widget on every authed /account page. Routes through the W888-P",
-        "description": "chat widget on every authed /account page. Routes through the W888-P AssistantClient three-layer fallback (local GGUF -> api.kolm.ai -> gateway frontier). Tier-gated to paid plans; rate-limited to 60 calls/hour/tenant. Returns the W888-P envelope verbatim plus the canonical aliases (provider_used / latency_ms) the widget consumes.",
+        "summary": "chat widget on every authed /account page. Routes through the",
+        "description": "chat widget on every authed /account page. Routes through the AssistantClient three-layer fallback (local GGUF -> api.kolm.ai -> gateway frontier). Tier-gated to paid plans; rate-limited to 60 calls/hour/tenant. Returns the envelope verbatim plus the canonical aliases (provider_used / latency_ms) the widget consumes.",
         "requestBody": {
           "required": false,
           "content": {
@@ -3976,7 +3976,7 @@
         ],
         "operationId": "postV1AudioCapturedetect",
         "summary": "stamped by captureAudioMessage (NEVER the raw audio bytes).",
-        "description": "stamped by captureAudioMessage (NEVER the raw audio bytes). All three are tenant-fenced via req.tenant_record.id (W411). Honest envelopes on bad input – no silent passthrough.",
+        "description": "stamped by captureAudioMessage (NEVER the raw audio bytes). All three are tenant-fenced via req.tenant_record.id. Honest envelopes on bad input – no silent passthrough.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -4042,8 +4042,8 @@
           "audio"
         ],
         "operationId": "postV1AudioSpeech",
-        "summary": "W409k – audio routes. Real proxy when configured; fixture returns deterministic",
-        "description": "W409k – audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise honest 501 with a structured \"not yet supported\" envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.",
+        "summary": "audio routes. Real proxy when configured; fixture returns deterministic",
+        "description": "audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise honest 501 with a structured \"not yet supported\" envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -4149,8 +4149,8 @@
           "audio"
         ],
         "operationId": "postV1AudioTranscriptions",
-        "summary": "W409k – audio routes. Real proxy when configured; fixture returns deterministic",
-        "description": "W409k – audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise honest 501 with a structured \"not yet supported\" envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.",
+        "summary": "audio routes. Real proxy when configured; fixture returns deterministic",
+        "description": "audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise honest 501 with a structured \"not yet supported\" envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -4189,8 +4189,8 @@
           "audio"
         ],
         "operationId": "postV1AudioTranslations",
-        "summary": "W409k – audio routes. Real proxy when configured; fixture returns deterministic",
-        "description": "W409k – audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise honest 501 with a structured \"not yet supported\" envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.",
+        "summary": "audio routes. Real proxy when configured; fixture returns deterministic",
+        "description": "audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise honest 501 with a structured \"not yet supported\" envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -4364,8 +4364,8 @@
           "auth"
         ],
         "operationId": "getV1AuthGithub",
-        "summary": "W889-8.4 – short OAuth aliases: GET /v1/auth/github redirects to the",
-        "description": "W889-8.4 – short OAuth aliases: GET /v1/auth/github redirects to the canonical /v1/oauth/github/start (preserving any ?redirect= query). Same for /v1/auth/github/callback (forwards code+state to the canonical callback). When env vars are missing, the canonical route returns the operator-facing 503 oauth_not_configured envelope.",
+        "summary": "8.4 – short OAuth aliases: GET /v1/auth/github redirects to the",
+        "description": "8.4 – short OAuth aliases: GET /v1/auth/github redirects to the canonical /v1/oauth/github/start (preserving any ?redirect= query). Same for /v1/auth/github/callback (forwards code+state to the canonical callback). When env vars are missing, the canonical route returns the operator-facing 503 oauth_not_configured envelope.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -4542,8 +4542,8 @@
           "autopilot"
         ],
         "operationId": "postV1AutopilotEnable",
-        "summary": "All five are tenant-fenced via req.tenant_record.id (W411 law). The",
-        "description": "All five are tenant-fenced via req.tenant_record.id (W411 law). The route layer ALWAYS forces tenant_id from auth – body.tenant_id is ignored even if the client tries to pass one.",
+        "summary": "All five are tenant-fenced via req.tenant_record.id. The",
+        "description": "All five are tenant-fenced via req.tenant_record.id. The route layer ALWAYS forces tenant_id from auth – body.tenant_id is ignored even if the client tries to pass one.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -4746,7 +4746,7 @@
             "$ref": "#/components/responses/ServerError"
           }
         },
-        "description": "Bakeoffs run alias - SDK-friendly synonym for /v1/bakeoff/run with the added W411 tenant fence at the dataset boundary (cross-tenant dataset_id returns 404). Same body: { dataset_id, contestants, opts }.",
+        "description": "Bakeoffs run alias - SDK-friendly synonym for /v1/bakeoff/run with the added tenant fence at the dataset boundary (cross-tenant dataset_id returns 404). Same body: { dataset_id, contestants, opts }.",
         "requestBody": {
           "required": false,
           "content": {
@@ -4915,8 +4915,8 @@
           "billing"
         ],
         "operationId": "getV1BillingMeters",
-        "summary": "Returns the static catalog of legacy W384 meters merged with the W409y",
-        "description": "Returns the static catalog of legacy W384 meters merged with the W409y billing-unit catalog (10 units the auditor signed off on). The W409y entries carry tier_soft + tier_hard limits resolved from the caller's tenant plan when an authenticated key is present.",
+        "summary": "Returns the static catalog of legacy meters merged with the",
+        "description": "Returns the static catalog of legacy meters merged with the billing-unit catalog (10 units the auditor signed off on). The entries carry tier_soft + tier_hard limits resolved from the caller's tenant plan when an authenticated key is present.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -5115,7 +5115,7 @@
         ],
         "operationId": "postV1BridgesObserve",
         "summary": "POST /v1/bridges/observe – agents log a (model, prompt, response) tuple.",
-        "description": "POST /v1/bridges/observe – agents log a (model, prompt, response) tuple. After ≥4 calls with the same template signature we surface a synthesis suggestion. W258-BE-1: persists via insertCapture (durable contract). 503 on store failure – same envelope as the capture proxy handlers.",
+        "description": "POST /v1/bridges/observe – agents log a (model, prompt, response) tuple. After ≥4 calls with the same template signature we surface a synthesis suggestion.-1: persists via insertCapture (durable contract). 503 on store failure – same envelope as the capture proxy handlers.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -5208,8 +5208,8 @@
           "build"
         ],
         "operationId": "postV1BuildPreview",
-        "summary": "W347 – POST /v1/build/preview. Richer dry-run preview that powers the",
-        "description": "W347 – POST /v1/build/preview. Richer dry-run preview that powers the builder UI's results pane: returns k_score, first 3 train rows, first 3 holdout rows, production_ready verdict + gate reasons, and the synth metadata. Public + rate-limited; no artifact write, no charge. Accepts {spec, seeds_jsonl_text}. Errors map to 400 (validation) or 500.",
+        "summary": "POST /v1/build/preview. Richer dry-run preview that powers the",
+        "description": "POST /v1/build/preview. Richer dry-run preview that powers the builder UI's results pane: returns k_score, first 3 train rows, first 3 holdout rows, production_ready verdict + gate reasons, and the synth metadata. Public + rate-limited; no artifact write, no charge. Accepts {spec, seeds_jsonl_text}. Errors map to 400 (validation) or 500.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -5869,8 +5869,8 @@
           "capture"
         ],
         "operationId": "getV1CaptureBrowse",
-        "summary": "W409f – /v1/capture/browse / /v1/capture/bulk / /v1/capture/export – page",
-        "description": "W409f – /v1/capture/browse / /v1/capture/bulk / /v1/capture/export – page surface for the captures.html admin view. Browse paginates, bulk acts on a set of capture ids, export streams JSONL/CSV. Empty-tenant safe.",
+        "summary": "/v1/capture/browse / /v1/capture/bulk / /v1/capture/export – page",
+        "description": "/v1/capture/browse / /v1/capture/bulk / /v1/capture/export – page surface for the captures.html admin view. Browse paginates, bulk acts on a set of capture ids, export streams JSONL/CSV. Empty-tenant safe.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -6417,8 +6417,8 @@
           "capture"
         ],
         "operationId": "getV1CaptureStream",
-        "summary": "Payload shape is the CLI/UI contract (W258-BE-6): capture_id /",
-        "description": "Payload shape is the CLI/UI contract (W258-BE-6): capture_id / captured_at / namespace / model / provider / latency_us / status / prompt_head / response_head / x_kolm_capture_durable. The raw store row is shimmed here so the dashboard and `kolm tail captures` see the same shape without one of them having to translate.",
+        "summary": "Payload shape is the CLI/UI contract (-6): capture_id /",
+        "description": "Payload shape is the CLI/UI contract (-6): capture_id / captured_at / namespace / model / provider / latency_us / status / prompt_head / response_head / x_kolm_capture_durable. The raw store row is shimmed here so the dashboard and `kolm tail captures` see the same shape without one of them having to translate.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -6748,7 +6748,7 @@
         ],
         "operationId": "getV1CarbonEstimate",
         "summary": "→ savingsReport envelope comparing local run vs frontier baseline.",
-        "description": "→ savingsReport envelope comparing local run vs frontier baseline. Auth required (same pattern as billing/breakdown). Every envelope carries methodology='public-research-estimate' so a downstream consumer cannot mistake the estimate for a measured value. W786 honesty contract.",
+        "description": "→ savingsReport envelope comparing local run vs frontier baseline. Auth required (same pattern as billing/breakdown). Every envelope carries methodology='public-research-estimate' so a downstream consumer cannot mistake the estimate for a measured value. honesty contract.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -6879,8 +6879,8 @@
           "changelog"
         ],
         "operationId": "getV1Changelog",
-        "summary": "W456: public changelog – marketing surface, no auth, no tenant scoping.",
-        "description": "W456: public changelog – marketing surface, no auth, no tenant scoping. Source of truth lives in src/changelog.js (a single static WAVES array).",
+        "summary": "public changelog – marketing surface, no auth, no tenant scoping.",
+        "description": "public changelog – marketing surface, no auth, no tenant scoping. Source of truth lives in src/changelog.js (a single static WAVES array).",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -6973,8 +6973,8 @@
           "chat"
         ],
         "operationId": "postV1ChatCompletions",
-        "summary": "W411 – every inference passthrough is gated by __w411HostedAuthGate so the",
-        "description": "W411 – every inference passthrough is gated by __w411HostedAuthGate so the hosted server (KOLM_PRODUCTION=1 / Railway / Vercel / Lambda) rejects anonymous requests with 401 {error:'unauthorized'}. The local daemon (KOLM_LOCAL_DAEMON=1 or developer laptop) stays unauthenticated; the gate stamps req.tenant = 'local:<hostname>' so captures still carry a tenant.",
+        "summary": "every inference passthrough is gated by __w411HostedAuthGate so the",
+        "description": "every inference passthrough is gated by __w411HostedAuthGate so the hosted server (KOLM_PRODUCTION=1 / Railway / Vercel / Lambda) rejects anonymous requests with 401 {error:'unauthorized'}. The local daemon (KOLM_LOCAL_DAEMON=1 or developer laptop) stays unauthenticated; the gate stamps req.tenant = 'local:<hostname>' so captures still carry a tenant.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -7469,8 +7469,8 @@
           "compile"
         ],
         "operationId": "postV1CompileCloud",
-        "summary": "POST /v1/compile/cloud – W869 Persona B path: caller has no local GPU.",
-        "description": "POST /v1/compile/cloud – W869 Persona B path: caller has no local GPU. Dispatches a compile to a partner GPU (modal/runpod/vast/lambda) using server-side credentials (KOLM_RUNPOD_TOKEN / KOLM_MODAL_TOKEN in env). Body: { backend, namespace, spec?, confirm, budget_usd, base_model? }. Without confirm:true we return a quote so the caller sees the cost first.",
+        "summary": "POST /v1/compile/cloud – Persona B path: caller has no local GPU.",
+        "description": "POST /v1/compile/cloud – Persona B path: caller has no local GPU. Dispatches a compile to a partner GPU (modal/runpod/vast/lambda) using server-side credentials (KOLM_RUNPOD_TOKEN / KOLM_MODAL_TOKEN in env). Body: { backend, namespace, spec?, confirm, budget_usd, base_model? }. Without confirm:true we return a quote so the caller sees the cost first.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -7589,7 +7589,7 @@
         ],
         "operationId": "postV1ComplianceAiactExport",
         "summary": "* /governance-report runs the loop body with a per-row tenant re-check",
-        "description": "* /governance-report runs the loop body with a per-row tenant re-check so a future schema bug cannot leak across tenants. Distinct from sibling W767-cert / W768-modelcard / W769-residency / W770-audit-export routes – no path collision possible.",
+        "description": "* /governance-report runs the loop body with a per-row tenant re-check so a future schema bug cannot leak across tenants. Distinct from sibling / / /-export routes – no path collision possible.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -8372,8 +8372,8 @@
           "deploy"
         ],
         "operationId": "postV1Deploy",
-        "summary": "W888-D HTTP control plane: POST /v1/deploy + /v1/deploy/canary +",
-        "description": "W888-D HTTP control plane: POST /v1/deploy + /v1/deploy/canary + /v1/test-device + /v1/test-quants. All require auth (auth.js gates via PUBLIC_API allowlist; these paths are NOT in PUBLIC_API, so an unauth request returns 401 from the auth middleware). The handlers below simply do shape-validation + delegate to the same modules the CLI calls.",
+        "summary": "D HTTP control plane: POST /v1/deploy + /v1/deploy/canary +",
+        "description": "D HTTP control plane: POST /v1/deploy + /v1/deploy/canary + /v1/test-device + /v1/test-quants. All require auth (auth.js gates via PUBLIC_API allowlist; these paths are NOT in PUBLIC_API, so an unauth request returns 401 from the auth middleware). The handlers below simply do shape-validation + delegate to the same modules the CLI calls.",
         "requestBody": {
           "required": false,
           "content": {
@@ -8716,8 +8716,8 @@
           "devices"
         ],
         "operationId": "getV1DevicesList",
-        "summary": "GET /v1/devices/list – list registered W888-C devices with filters",
-        "description": "GET /v1/devices/list – list registered W888-C devices with filters ?type=<t>&tag=<t>&status=<t>&includeRemoved=1",
+        "summary": "GET /v1/devices/list – list registered devices with filters",
+        "description": "GET /v1/devices/list – list registered devices with filters ?type=<t>&tag=<t>&status=<t>&includeRemoved=1",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -8808,8 +8808,8 @@
           "devices"
         ],
         "operationId": "postV1DevicesRegister",
-        "summary": "POST /v1/devices/register – registers a new device in the W888-C registry.",
-        "description": "POST /v1/devices/register – registers a new device in the W888-C registry. Body matches DeviceRegistry.register() args: { id, name?, host?, port?, user?, type, keyPath?, tags?, hardware_hint? }",
+        "summary": "POST /v1/devices/register – registers a new device in the registry.",
+        "description": "POST /v1/devices/register – registers a new device in the registry. Body matches DeviceRegistry.register args: { id, name?, host?, port?, user?, type, keyPath?, tags?, hardware_hint? }",
         "requestBody": {
           "required": false,
           "content": {
@@ -8848,8 +8848,8 @@
           "devices"
         ],
         "operationId": "getV1DevicesId",
-        "summary": "GET /v1/devices/:id – registry-first lookup; falls back to the W372",
-        "description": "GET /v1/devices/:id – registry-first lookup; falls back to the W372 per-file store so existing dashboards stay working. NOTE: this is registered LAST so the more specific /v1/devices/detect, /v1/devices/list, /v1/devices/recommend, /v1/devices/installed routes above keep matching ahead of it.",
+        "summary": "GET /v1/devices/:id – registry-first lookup; falls back to the",
+        "description": "GET /v1/devices/:id – registry-first lookup; falls back to the per-file store so existing dashboards stay working. NOTE: this is registered LAST so the more specific /v1/devices/detect, /v1/devices/list, /v1/devices/recommend, /v1/devices/installed routes above keep matching ahead of it.",
         "parameters": [
           {
             "name": "id",
@@ -9343,7 +9343,7 @@
         ],
         "operationId": "getV1DistillFromcapturesPreview",
         "summary": "Commit (POST) picks recipe vs specialist by count (<1000 vs >=1000),",
-        "description": "Commit (POST) picks recipe vs specialist by count (<1000 vs >=1000), forwards to /v1/bridges/auto-synthesize (recipe) or KOLM_TRAINER_BRIDGE_URL (specialist). Errors surface as 503 (capture-store) / 400 (not_enough/ no_cluster). W364: specialist arm always returns 202 with job_id (either remote bridge or in-tree worker via src/distill-bridge.js).",
+        "description": "Commit (POST) picks recipe vs specialist by count (<1000 vs >=1000), forwards to /v1/bridges/auto-synthesize (recipe) or KOLM_TRAINER_BRIDGE_URL (specialist). Errors surface as 503 (capture-store) / 400 (not_enough/ no_cluster).: specialist arm always returns 202 with job_id (either remote bridge or in-tree worker via src/distill-bridge.js).",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -9369,7 +9369,7 @@
           "distill"
         ],
         "operationId": "postV1DistillOnpolicy",
-        "summary": "W480 - Run an on-policy distillation against a teacher-student pair via the",
+        "summary": "Run an on-policy distillation against a teacher-student pair via the",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -9387,7 +9387,7 @@
             "$ref": "#/components/responses/ServerError"
           }
         },
-        "description": "W480 - Run an on-policy distillation against a teacher-student pair via the tenant-installed trainer plug-in. Auth-gated. Body: { pairs_path, student_path, out_dir, namespace, max_steps }. Returns trainer envelope or no_trainer_installed.",
+        "description": "Run an on-policy distillation against a teacher-student pair via the tenant-installed trainer plug-in. Auth-gated. Body: { pairs_path, student_path, out_dir, namespace, max_steps }. Returns trainer envelope or no_trainer_installed.",
         "requestBody": {
           "required": false,
           "content": {
@@ -9409,8 +9409,8 @@
           "distill"
         ],
         "operationId": "getV1DistillOnpolicyDoctor",
-        "summary": "W480 - Thinking Machines on-policy distillation doctor. Reports whether",
-        "description": "W480 - Thinking Machines on-policy distillation doctor. Reports whether $KOLM_ONPOLICY_TRAINER is resolvable; returns install_hint when absent. No auth required so tooling can probe before signing in.",
+        "summary": "Thinking Machines on-policy distillation doctor. Reports whether",
+        "description": "Thinking Machines on-policy distillation doctor. Reports whether $KOLM_ONPOLICY_TRAINER is resolvable; returns install_hint when absent. No auth required so tooling can probe before signing in.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -9436,7 +9436,7 @@
           "distill"
         ],
         "operationId": "postV1DistillPreference",
-        "summary": "W480 - Train a preference-pair objective (dpo/simpo/orpo/kto) via the tenant",
+        "summary": "Train a preference-pair objective (dpo/simpo/orpo/kto) via the tenant",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -9454,7 +9454,7 @@
             "$ref": "#/components/responses/ServerError"
           }
         },
-        "description": "W480 - Train a preference-pair objective (dpo/simpo/orpo/kto) via the tenant installed trainer plug-in. Auth-gated. Body: { pairs_path, student_path, objective, out_dir, namespace, beta }. Returns trainer envelope.",
+        "description": "Train a preference-pair objective (dpo/simpo/orpo/kto) via the tenant installed trainer plug-in. Auth-gated. Body: { pairs_path, student_path, objective, out_dir, namespace, beta }. Returns trainer envelope.",
         "requestBody": {
           "required": false,
           "content": {
@@ -9476,7 +9476,7 @@
           "distill"
         ],
         "operationId": "getV1DistillPreferenceDoctor",
-        "summary": "W480 - Preference-pair trainer doctor (DPO / SimPO / KTO / ORPO). Reports",
+        "summary": "Preference-pair trainer doctor (DPO / SimPO / KTO / ORPO). Reports",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -9494,7 +9494,7 @@
             "$ref": "#/components/responses/ServerError"
           }
         },
-        "description": "W480 - Preference-pair trainer doctor (DPO / SimPO / KTO / ORPO). Reports whether $KOLM_PREFERENCE_TRAINER is resolvable; honest install_hint when not."
+        "description": "Preference-pair trainer doctor (DPO / SimPO / KTO / ORPO). Reports whether $KOLM_PREFERENCE_TRAINER is resolvable; honest install_hint when not."
       }
     },
     "/v1/distill/runs": {
@@ -9661,7 +9661,7 @@
         ],
         "operationId": "getV1Driftalert",
         "summary": ":namespace path param. The dashboard pages call these endpoints without a",
-        "description": ":namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404'd. We forward to the existing :namespace handler with namespace='default' so the account UI<->server parity test (W409f #4) passes and the page renders an empty-state from a real envelope instead of a 404.",
+        "description": ":namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404'd. We forward to the existing:namespace handler with namespace='default' so the account UI<->server parity test (#4) passes and the page renders an empty-state from a real envelope instead of a 404.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -9687,8 +9687,8 @@
           "drift-alert"
         ],
         "operationId": "postV1DriftalertSnapshot",
-        "summary": "W709 tie-in: when shouldAlert() fires the route calls",
-        "description": "W709 tie-in: when shouldAlert() fires the route calls driftAlertStore.registerDriftWarning() so the NEXT W709 routing decision can stamp `drift_warning:true`. Honest fallback: if the W709 routing-events module is not loaded, the warning is still registered (it is in-memory) and the W709 hook simply never reads it.",
+        "summary": "tie-in: when shouldAlert fires the route calls",
+        "description": "tie-in: when shouldAlert fires the route calls driftAlertStore.registerDriftWarning so the NEXT routing decision can stamp `drift_warning:true`. Honest fallback: if the routing-events module is not loaded, the warning is still registered (it is in-memory) and the hook simply never reads it.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -9993,7 +9993,7 @@
         ],
         "operationId": "postV1DriftScan",
         "summary": "unless config.auto_remediate_drift === true AND body.dry_run !== true.",
-        "description": "unless config.auto_remediate_drift === true AND body.dry_run !== true. dry_run defaults to TRUE so a misclick cannot kick off a re-distill. All five are tenant-fenced via req.tenant_record.id (W411 law).",
+        "description": "unless config.auto_remediate_drift === true AND body.dry_run !== true. dry_run defaults to TRUE so a misclick cannot kick off a re-distill. All five are tenant-fenced via req.tenant_record.id.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -10032,8 +10032,8 @@
           "drift"
         ],
         "operationId": "postV1DriftSnapshot",
-        "summary": "the 12-step compile→verify→run→drift→retrain loop. W434 exposes three",
-        "description": "the 12-step compile→verify→run→drift→retrain loop. W434 exposes three tenant-scoped POST routes that wrap the existing pure functions. The routes are stateless (no server-side persistence) – the report's hash is verifiable client-side, so the round-trip is just \"validate my inputs + compute signals + return the report you can persist anywhere.\"",
+        "summary": "the 12-step compile→verify→run→drift→retrain loop. exposes three",
+        "description": "the 12-step compile→verify→run→drift→retrain loop. exposes three tenant-scoped POST routes that wrap the existing pure functions. The routes are stateless (no server-side persistence) – the report's hash is verifiable client-side, so the round-trip is just \"validate my inputs + compute signals + return the report you can persist anywhere.\"",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -10730,7 +10730,7 @@
         ],
         "operationId": "postV1FailuremodesFeedactivelearning",
         "summary": "Auth-gated via req.tenant_record. Tenant fence is forced from the",
-        "description": "Auth-gated via req.tenant_record. Tenant fence is forced from the authenticated record - any body.tenant value is overridden so a caller cannot point this at another tenant's namespace. The namespace IS read from the body because a single tenant routinely operates many namespaces and W816 closes the loop per-namespace.",
+        "description": "Auth-gated via req.tenant_record. Tenant fence is forced from the authenticated record - any body.tenant value is overridden so a caller cannot point this at another tenant's namespace. The namespace IS read from the body because a single tenant routinely operates many namespaces and closes the loop per-namespace.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -10874,8 +10874,8 @@
           "federated"
         ],
         "operationId": "getV1FederatedConsortium",
-        "summary": "/v1/federated/consortium – bare GET that points the TUI at the W830",
-        "description": "/v1/federated/consortium – bare GET that points the TUI at the W830 members collection. The federated-consortium-routes module owns the tenant-scoped membership reads; here we add a no-query alias that returns the empty-state envelope when no consortium_id is supplied so the TUI view always has something to render.",
+        "summary": "/v1/federated/consortium – bare GET that points the TUI at the",
+        "description": "/v1/federated/consortium – bare GET that points the TUI at the members collection. The federated-consortium-routes module owns the tenant-scoped membership reads; here we add a no-query alias that returns the empty-state envelope when no consortium_id is supplied so the TUI view always has something to render.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -11610,8 +11610,8 @@
           "gateway"
         ],
         "operationId": "getV1GatewayMode",
-        "summary": "W742 – GET /v1/gateway/mode reports the current gateway mode + reachability.",
-        "description": "W742 – GET /v1/gateway/mode reports the current gateway mode + reachability. Auth-gated (mounted after r.use(authMiddleware)). Probes both local backends with a 1-second HEAD timeout so a slow / unreachable backend never blocks the dashboard. The response surfaces the resolved mode (NOT the raw env value) so a callers sees what currentMode() actually decided.",
+        "summary": "GET /v1/gateway/mode reports the current gateway mode + reachability.",
+        "description": "GET /v1/gateway/mode reports the current gateway mode + reachability. Auth-gated (mounted after r.use(authMiddleware)). Probes both local backends with a 1-second HEAD timeout so a slow / unreachable backend never blocks the dashboard. The response surfaces the resolved mode (NOT the raw env value) so a callers sees what currentMode actually decided.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -12386,8 +12386,8 @@
           "jobs"
         ],
         "operationId": "getV1JobsId",
-        "summary": "Job status (used by HF / URL queued jobs + W229 on-disk job registry +",
-        "description": "Job status (used by HF / URL queued jobs + W229 on-disk job registry + W364 distill bridge). Order: corpus_jobs / specialists in-DB, then the src/jobs.js per-file on-disk registry.",
+        "summary": "Job status (used by HF / URL queued jobs + on-disk job registry +",
+        "description": "Job status (used by HF / URL queued jobs + on-disk job registry + distill bridge). Order: corpus_jobs / specialists in-DB, then the src/jobs.js per-file on-disk registry.",
         "parameters": [
           {
             "name": "id",
@@ -12633,7 +12633,7 @@
         ],
         "operationId": "getV1KolmbenchSpec",
         "summary": "only + safe to cache. Both POST routes require auth via the standard",
-        "description": "only + safe to cache. Both POST routes require auth via the standard middleware path; submit additionally requires body.confirm:true as a spend-protection gate (the W411 confirm-pattern). Honest envelopes on every degraded path.",
+        "description": "only + safe to cache. Both POST routes require auth via the standard middleware path; submit additionally requires body.confirm:true as a spend-protection gate (the confirm-pattern). Honest envelopes on every degraded path.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -12739,8 +12739,8 @@
           "label-queue"
         ],
         "operationId": "getV1LabelqueueAuditEventid",
-        "summary": "W409o – full audit trail for a single event_id. Tests assert that every",
-        "description": "W409o – full audit trail for a single event_id. Tests assert that every approval/reject/edit decision is recorded with reviewer + timestamp + before/after output. The legacy /v1/labels/:event_id returns the last label only; this endpoint returns the whole sequence.",
+        "summary": "full audit trail for a single event_id. Tests assert that every",
+        "description": "full audit trail for a single event_id. Tests assert that every approval/reject/edit decision is recorded with reviewer + timestamp + before/after output. The legacy /v1/labels/:event_id returns the last label only; this endpoint returns the whole sequence.",
         "parameters": [
           {
             "name": "event_id",
@@ -12966,7 +12966,7 @@
         ],
         "operationId": "getV1LabelsSynthesizecorpus",
         "summary": "Returns the captured (input, output) pairs for a namespace as JSONL or",
-        "description": "Returns the captured (input, output) pairs for a namespace as JSONL or a JSON envelope. This is what `kolm labels` downloads. Counts go to the status command so the customer can see \"ready to distill at 1000 pairs.\" W258-BE-1: reads via the durable capture-store (listCaptures) so the distillation corpus comes from the same backend the proxy writes to.",
+        "description": "Returns the captured (input, output) pairs for a namespace as JSONL or a JSON envelope. This is what `kolm labels` downloads. Counts go to the status command so the customer can see \"ready to distill at 1000 pairs.\"-1: reads via the durable capture-store (listCaptures) so the distillation corpus comes from the same backend the proxy writes to.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -13070,8 +13070,8 @@
           "lake"
         ],
         "operationId": "getV1LakeExport",
-        "summary": "W409l – GET /v1/lake/export → bulk export of canonical events.",
-        "description": "W409l – GET /v1/lake/export → bulk export of canonical events. Supports format=jsonl (default) | json | csv. Streams the buffer back.",
+        "summary": "GET /v1/lake/export → bulk export of canonical events.",
+        "description": "GET /v1/lake/export → bulk export of canonical events. Supports format=jsonl (default) | json | csv. Streams the buffer back.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -13098,7 +13098,7 @@
         ],
         "operationId": "postV1LakeOptin",
         "summary": "GET /v1/lake/trends AUTH; rolled-up summary (no raw text, no identity)",
-        "description": "GET /v1/lake/trends AUTH; rolled-up summary (no raw text, no identity) The W751 GET /v1/verticals/:id/fingerprint route already exists above; the W757 module is consumed via the new pattern-lake helpers. New code paths (CLI lake subverbs, the W757 docs page) call these routes directly.",
+        "description": "GET /v1/lake/trends AUTH; rolled-up summary (no raw text, no identity) The GET /v1/verticals/:id/fingerprint route already exists above; the module is consumed via the new pattern-lake helpers. New code paths (CLI lake subverbs, the docs page) call these routes directly.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -13195,7 +13195,7 @@
             "$ref": "#/components/responses/ServerError"
           }
         },
-        "description": "Lake repeated - finds clusters of repeated workflow inputs in the event store (the W384 \"repeated workflows\" surface). Returns up to ?limit (max 200, default 20) clusters with their representative input + member count."
+        "description": "Lake repeated - finds clusters of repeated workflow inputs in the event store (the \"repeated workflows\" surface). Returns up to ?limit (max 200, default 20) clusters with their representative input + member count."
       }
     },
     "/v1/lake/stats": {
@@ -13231,8 +13231,8 @@
           "lake"
         ],
         "operationId": "getV1LakeStorage",
-        "summary": "W409l – GET /v1/lake/storage → small env probe for the Account UI so the",
-        "description": "W409l – GET /v1/lake/storage → small env probe for the Account UI so the dashboard can show \"Local storage: ~/.kolm/events/events.sqlite (12 MB)\". Returns the same envelope storeInfo() emits, plus a coarse byte total.",
+        "summary": "GET /v1/lake/storage → small env probe for the Account UI so the",
+        "description": "GET /v1/lake/storage → small env probe for the Account UI so the dashboard can show \"Local storage: ~/.kolm/events/events.sqlite (12 MB)\". Returns the same envelope storeInfo emits, plus a coarse byte total.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -13258,8 +13258,8 @@
           "lake"
         ],
         "operationId": "getV1LakeTail",
-        "summary": "W409l – GET /v1/lake/tail → recent canonical events for the inbox UI.",
-        "description": "W409l – GET /v1/lake/tail → recent canonical events for the inbox UI. Reads directly from the event-store (NOT capture-store). Default limit 50, capped at 500. Returns newest first.",
+        "summary": "GET /v1/lake/tail → recent canonical events for the inbox UI.",
+        "description": "GET /v1/lake/tail → recent canonical events for the inbox UI. Reads directly from the event-store (NOT capture-store). Default limit 50, capped at 500. Returns newest first.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -13642,8 +13642,8 @@
           "lingual"
         ],
         "operationId": "getV1LingualManifest",
-        "summary": "/v1/lingual/manifest – bare GET aliasing the W833 manifest collection.",
-        "description": "/v1/lingual/manifest – bare GET aliasing the W833 manifest collection. The shipped route is /v1/lingual/manifest/:artifact_id; without an artifact_id selected (the TUI default state) we return the tenant-wide language-mixture distribution so the view still renders.",
+        "summary": "/v1/lingual/manifest – bare GET aliasing the manifest collection.",
+        "description": "/v1/lingual/manifest – bare GET aliasing the manifest collection. The shipped route is /v1/lingual/manifest/:artifact_id; without an artifact_id selected (the TUI default state) we return the tenant-wide language-mixture distribution so the view still renders.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -13854,8 +13854,8 @@
           "loop"
         ],
         "operationId": "postV1LoopTry",
-        "summary": "W313 – public anonymous \"try it\" demo of the capture-receipt shape.",
-        "description": "W313 – public anonymous \"try it\" demo of the capture-receipt shape. No auth, no write side-effects; visitors on /value-loop POST a prompt+response and see the exact same receipt envelope a real authenticated /v1/bridges/observe would emit, with `demo:true` + `durable:false` so the body cannot lie.",
+        "summary": "public anonymous \"try it\" demo of the capture-receipt shape.",
+        "description": "public anonymous \"try it\" demo of the capture-receipt shape. No auth, no write side-effects; visitors on /value-loop POST a prompt+response and see the exact same receipt envelope a real authenticated /v1/bridges/observe would emit, with `demo:true` + `durable:false` so the body cannot lie.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -14093,8 +14093,8 @@
           "marketplace"
         ],
         "operationId": "getV1MarketplaceList",
-        "summary": "W342 – explicit list endpoint used by /marketplace.html client render.",
-        "description": "W342 – explicit list endpoint used by /marketplace.html client render. Always returns { artifacts: [...] } with live verified flag.",
+        "summary": "explicit list endpoint used by /marketplace.html client render.",
+        "description": "explicit list endpoint used by /marketplace.html client render. Always returns { artifacts: [...] } with live verified flag.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -14566,8 +14566,8 @@
           "marketplace"
         ],
         "operationId": "getV1MarketplaceSlugDownload",
-        "summary": "W339/W342 – install/download MUST refuse artifacts that don't pass",
-        "description": "W339/W342 – install/download MUST refuse artifacts that don't pass productionReady(). Same gate the marketplace pill uses, so a user who sees no \"Verified\" badge ALSO can't `kolm marketplace install` it. force allowed via ?force=true query for CI testing / canary debug, matching `kolm run --force` semantics.",
+        "summary": "/install/download MUST refuse artifacts that don't pass",
+        "description": "/install/download MUST refuse artifacts that don't pass productionReady. Same gate the marketplace pill uses, so a user who sees no \"Verified\" badge ALSO can't `kolm marketplace install` it. force allowed via ?force=true query for CI testing / canary debug, matching `kolm run --force` semantics.",
         "parameters": [
           {
             "name": "slug",
@@ -14645,7 +14645,7 @@
         ],
         "operationId": "postV1MediaRedactjob",
         "summary": "envelope so the caller knows exactly what to install.",
-        "description": "envelope so the caller knows exactly what to install. Body: { media_uri | path, mime?, kind?, max_bytes?, model?, lang? } Sync mode (default): worker runs in-process via spawnSync. For long whisper passes, callers should pass {async:true} (deferred to W455).",
+        "description": "envelope so the caller knows exactly what to install. Body: { media_uri | path, mime?, kind?, max_bytes?, model?, lang? } Sync mode (default): worker runs in-process via spawnSync. For long whisper passes, callers should pass {async:true} (deferred to).",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -14684,8 +14684,8 @@
           "media"
         ],
         "operationId": "getV1MediaRedactjobDoctor",
-        "summary": "W454 – worker self-doctor proxied through the API so `kolm media",
-        "description": "W454 – worker self-doctor proxied through the API so `kolm media doctor --remote` can ask the server which extractors are wired.",
+        "summary": "worker self-doctor proxied through the API so `kolm media",
+        "description": "worker self-doctor proxied through the API so `kolm media doctor --remote` can ask the server which extractors are wired.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -15152,8 +15152,8 @@
           "model-card"
         ],
         "operationId": "postV1ModelcardGenerate",
-        "summary": "MUST regex-match (W604 anti-brittleness).",
-        "description": "MUST regex-match (W604 anti-brittleness). Modules import lazily so cold daemons that never hit this surface don't pay for the schema/emitter trees.",
+        "summary": "MUST regex-match.",
+        "description": "MUST regex-match. Modules import lazily so cold daemons that never hit this surface don't pay for the schema/emitter trees.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -15525,7 +15525,7 @@
         ],
         "operationId": "getV1MultimodalPipeline",
         "summary": "/v1/multimodal/pipeline – collection GET listing tenant multimodal",
-        "description": "/v1/multimodal/pipeline – collection GET listing tenant multimodal capture pipeline state. Real W829 routes (/v1/captures/multimodal, /v1/vlm-distill/runs) live in src/multimodal-pipeline-routes.js; this bare GET aggregates them for the TUI surface.",
+        "description": "/v1/multimodal/pipeline – collection GET listing tenant multimodal capture pipeline state. Real routes (/v1/captures/multimodal, /v1/vlm-distill/runs) live in src/multimodal-pipeline-routes.js; this bare GET aggregates them for the TUI surface.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -15551,8 +15551,8 @@
           "multimodal"
         ],
         "operationId": "postV1MultimodalRedactaudio",
-        "summary": "W464 – multimodal audio voiceprint scrub. Anonymizes the speaker's",
-        "description": "W464 – multimodal audio voiceprint scrub. Anonymizes the speaker's voiceprint while preserving content. Complementary to W462 image redact (faces/plates) and W454 audio transcript redact (text). Body: { media_uri | path, output_path?, strength?, max_bytes? }",
+        "summary": "multimodal audio voiceprint scrub. Anonymizes the speaker's",
+        "description": "multimodal audio voiceprint scrub. Anonymizes the speaker's voiceprint while preserving content. Complementary to image redact (faces/plates) and audio transcript redact (text). Body: { media_uri | path, output_path?, strength?, max_bytes? }",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -15591,8 +15591,8 @@
           "multimodal"
         ],
         "operationId": "getV1MultimodalRedactaudioDoctor",
-        "summary": "W464 – audio-redact worker self-doctor.",
-        "description": "W464 – audio-redact worker self-doctor.",
+        "summary": "audio-redact worker self-doctor.",
+        "description": "audio-redact worker self-doctor.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -15658,8 +15658,8 @@
           "multimodal"
         ],
         "operationId": "getV1MultimodalRedactimageDoctor",
-        "summary": "W462 – image-redact worker self-doctor, proxied so the CLI's",
-        "description": "W462 – image-redact worker self-doctor, proxied so the CLI's `kolm media image-doctor --remote` can ask the server.",
+        "summary": "image-redact worker self-doctor, proxied so the CLI's",
+        "description": "image-redact worker self-doctor, proxied so the CLI's `kolm media image-doctor --remote` can ask the server.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -15725,8 +15725,8 @@
           "multimodal"
         ],
         "operationId": "getV1MultimodalTokenizeDoctor",
-        "summary": "W554 - multimodal sidecar tokenizer. API mirror of",
-        "description": "W554 - multimodal sidecar tokenizer. API mirror of `kolm media tokenize`: local-safe by default, hosted-disabled unless the operator explicitly allows server-side file access. Creates compile-ready Markdown sidecars using deterministic local feature tokens, with optional provider captions/transcripts when configured.",
+        "summary": "multimodal sidecar tokenizer. API mirror of",
+        "description": "multimodal sidecar tokenizer. API mirror of `kolm media tokenize`: local-safe by default, hosted-disabled unless the operator explicitly allows server-side file access. Creates compile-ready Markdown sidecars using deterministic local feature tokens, with optional provider captions/transcripts when configured.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -16387,7 +16387,7 @@
         ],
         "operationId": "postV1NumericEval",
         "summary": "contract – a stray request must not fire an evaluation by accident.",
-        "description": "contract – a stray request must not fire an evaluation by accident. Honest envelope on every error path: ok:false + structured error + version stamp `w759-vN.M`. Consumers MUST version-pin via regex (/^w759-/), not literal equality (W604 anti-brittleness).",
+        "description": "contract – a stray request must not fire an evaluation by accident. Honest envelope on every error path: ok:false + structured error + version stamp `w759-vN.M`. Consumers MUST version-pin via regex (/^w759-/), not literal equality.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -16647,8 +16647,8 @@
           "opportunities"
         ],
         "operationId": "getV1Opportunities",
-        "summary": "W419 – every opportunity surface must be tenant-scoped. Without auth the",
-        "description": "W419 – every opportunity surface must be tenant-scoped. Without auth the engine would surface another tenant's pattern detections (cache_candidate request_hash, repeated prompt clusters, etc). 401s use the canonical {ok:false, error:'auth required'} envelope.",
+        "summary": "every opportunity surface must be tenant-scoped. Without auth the",
+        "description": "every opportunity surface must be tenant-scoped. Without auth the engine would surface another tenant's pattern detections (cache_candidate request_hash, repeated prompt clusters, etc). 401s use the canonical {ok:false, error:'auth required'} envelope.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -16827,8 +16827,8 @@
           "opportunities"
         ],
         "operationId": "postV1OpportunitiesIdPromote",
-        "summary": "W409m – POST /v1/opportunities/:id/promote → dataset.",
-        "description": "W409m – POST /v1/opportunities/:id/promote → dataset. Turns the opportunity into a real dataset by calling dataset-workbench createDataset() with the opportunity's namespace + provenance. Returns { ok, dataset_id, train_count, holdout_count, ... }. Marks the opportunity status='promoted' so subsequent reads show the badge.",
+        "summary": "POST /v1/opportunities/:id/promote → dataset.",
+        "description": "POST /v1/opportunities/:id/promote → dataset. Turns the opportunity into a real dataset by calling dataset-workbench createDataset with the opportunity's namespace + provenance. Returns { ok, dataset_id, train_count, holdout_count,... }. Marks the opportunity status='promoted' so subsequent reads show the badge.",
         "parameters": [
           {
             "name": "id",
@@ -17090,8 +17090,8 @@
           "pextract"
         ],
         "operationId": "postV1PextractRedactprompt",
-        "summary": "Defense layering with W762 is intentional. W762's",
-        "description": "Defense layering with W762 is intentional. W762's classifyPromptAdversarial covers a broader red-team taxonomy; W765 is the system-prompt-extraction-specific guard. Overlapping matches (e.g. \"ignore previous instructions\") are correct, not a bug – defense in depth is the point.",
+        "summary": "Defense layering with is intentional.'s",
+        "description": "Defense layering with is intentional.'s classifyPromptAdversarial covers a broader red-team taxonomy; is the system-prompt-extraction-specific guard. Overlapping matches (e.g. \"ignore previous instructions\") are correct, not a bug – defense in depth is the point.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -17130,8 +17130,8 @@
           "pipeline"
         ],
         "operationId": "postV1PipelineCompile",
-        "summary": "W420 – tenant gate. The pipeline runs compileFull which reads from the",
-        "description": "W420 – tenant gate. The pipeline runs compileFull which reads from the event store; without forcing tenant scope it would compile another tenant's corpus into the caller's artifact namespace. opts.tenant_id is injected from req.tenant_record.id and supersedes anything the body sent.",
+        "summary": "tenant gate. The pipeline runs compileFull which reads from the",
+        "description": "tenant gate. The pipeline runs compileFull which reads from the event store; without forcing tenant scope it would compile another tenant's corpus into the caller's artifact namespace. opts.tenant_id is injected from req.tenant_record.id and supersedes anything the body sent.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -17211,7 +17211,7 @@
         ],
         "operationId": "postV1PipelineFull",
         "summary": "job_id. Phases are streamed via /v1/pipeline/jobs/:id/stream (SSE).",
-        "description": "job_id. Phases are streamed via /v1/pipeline/jobs/:id/stream (SSE). W420 – same tenant gate as /v1/pipeline/compile. The caller's req.tenant_record.id is the only tenant scope that ever reaches compileFull from this route.",
+        "description": "job_id. Phases are streamed via /v1/pipeline/jobs/:id/stream (SSE). same tenant gate as /v1/pipeline/compile. The caller's req.tenant_record.id is the only tenant scope that ever reaches compileFull from this route.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -17764,8 +17764,8 @@
           "poisoning"
         ],
         "operationId": "postV1PoisoningBindteacher",
-        "summary": "W761 – Model Poisoning Anomaly Detection routes. Distinct-named handlers so",
-        "description": "W761 – Model Poisoning Anomaly Detection routes. Distinct-named handlers so parallel wave agents on W760 + W762..W765 do not collide on the suffix. Builds on W808 capture-anomaly + W750-followup copyright-detector + the W761-3 teacher-response HMAC primitive.",
+        "summary": "Model Poisoning Anomaly Detection routes. Distinct-named handlers so",
+        "description": "Model Poisoning Anomaly Detection routes. Distinct-named handlers so parallel wave agents on +..do not collide on the suffix. Builds on capture-anomaly + copyright-detector + the-3 teacher-response HMAC primitive.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -18732,8 +18732,8 @@
           "ready"
         ],
         "operationId": "getV1ReadyDeep",
-        "summary": "/v1/ready/deep – /v1-prefixed alias of the W824 /ready/deep route so the",
-        "description": "/v1/ready/deep – /v1-prefixed alias of the W824 /ready/deep route so the TUI's k8s-readiness view stays on the /v1/* convention every other view uses. Forwards through the registered handler instead of duplicating logic so a single k8s-routes change updates both paths.",
+        "summary": "/v1/ready/deep – /v1-prefixed alias of the /ready/deep route so the",
+        "description": "/v1/ready/deep – /v1-prefixed alias of the /ready/deep route so the TUI's k8s-readiness view stays on the /v1/* convention every other view uses. Forwards through the registered handler instead of duplicating logic so a single k8s-routes change updates both paths.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -19528,8 +19528,8 @@
           "reg"
         ],
         "operationId": "postV1RegClassifyrisk",
-        "summary": "W834-2 – POST /v1/reg/classify-risk",
-        "description": "W834-2 – POST /v1/reg/classify-risk",
+        "summary": "2 – POST /v1/reg/classify-risk",
+        "description": "2 – POST /v1/reg/classify-risk",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -19568,8 +19568,8 @@
           "reg"
         ],
         "operationId": "getV1RegDatagovernance",
-        "summary": "W834-4 – GET /v1/reg/data-governance?namespace=X&period=YYYY-MM",
-        "description": "W834-4 – GET /v1/reg/data-governance?namespace=X&period=YYYY-MM",
+        "summary": "4 – GET /v1/reg/data-governance?namespace=X&period=YYYY-MM",
+        "description": "4 – GET /v1/reg/data-governance?namespace=X&period=YYYY-MM",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -19595,8 +19595,8 @@
           "reg"
         ],
         "operationId": "getV1RegEuaiactdocs",
-        "summary": "/v1/reg/eu-aiact-docs – GET counterpart to the W834 POST. POST runs the",
-        "description": "/v1/reg/eu-aiact-docs – GET counterpart to the W834 POST. POST runs the Annex IV generator; GET reads the most-recent generated packet (or an empty envelope if none has been produced yet) so the TUI view does not require the operator to first POST to view state.",
+        "summary": "/v1/reg/eu-aiact-docs – GET counterpart to the POST. POST runs the",
+        "description": "/v1/reg/eu-aiact-docs – GET counterpart to the POST. POST runs the Annex IV generator; GET reads the most-recent generated packet (or an empty envelope if none has been produced yet) so the TUI view does not require the operator to first POST to view state.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -19620,8 +19620,8 @@
           "reg"
         ],
         "operationId": "postV1RegEuaiactdocs",
-        "summary": "W834-1 – POST /v1/reg/eu-aiact-docs",
-        "description": "W834-1 – POST /v1/reg/eu-aiact-docs",
+        "summary": "1 – POST /v1/reg/eu-aiact-docs",
+        "description": "1 – POST /v1/reg/eu-aiact-docs",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -19660,8 +19660,8 @@
           "reg"
         ],
         "operationId": "postV1RegGrcexport",
-        "summary": "W834-6 – POST /v1/reg/grc-export",
-        "description": "W834-6 – POST /v1/reg/grc-export",
+        "summary": "6 – POST /v1/reg/grc-export",
+        "description": "6 – POST /v1/reg/grc-export",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -19700,8 +19700,8 @@
           "reg"
         ],
         "operationId": "getV1RegHilThreshold",
-        "summary": "W834-3 – GET /v1/reg/hil/threshold?namespace=X",
-        "description": "W834-3 – GET /v1/reg/hil/threshold?namespace=X",
+        "summary": "3 – GET /v1/reg/hil/threshold?namespace=X",
+        "description": "3 – GET /v1/reg/hil/threshold?namespace=X",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -19725,8 +19725,8 @@
           "reg"
         ],
         "operationId": "postV1RegHilThreshold",
-        "summary": "W834-3 – POST /v1/reg/hil/threshold",
-        "description": "W834-3 – POST /v1/reg/hil/threshold",
+        "summary": "3 – POST /v1/reg/hil/threshold",
+        "description": "3 – POST /v1/reg/hil/threshold",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -19765,8 +19765,8 @@
           "reg"
         ],
         "operationId": "postV1RegModelcard",
-        "summary": "W834-5 – POST /v1/reg/model-card",
-        "description": "W834-5 – POST /v1/reg/model-card",
+        "summary": "5 – POST /v1/reg/model-card",
+        "description": "5 – POST /v1/reg/model-card",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -19872,8 +19872,8 @@
           "region"
         ],
         "operationId": "getV1RegionStatus",
-        "summary": "Cross-ref: W769 (data residency) is the per-capture tag; W780 is the",
-        "description": "Cross-ref: W769 (data residency) is the per-capture tag; W780 is the request-routing gateway. The two are joined inside getRegionForCapture so a tenant who configures a namespace default region in W769 also pins the W780 capture routing for that namespace.",
+        "summary": "Cross-ref: (data residency) is the per-capture tag; is the",
+        "description": "Cross-ref: (data residency) is the per-capture tag; is the request-routing gateway. The two are joined inside getRegionForCapture so a tenant who configures a namespace default region in also pins the capture routing for that namespace.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -20330,8 +20330,8 @@
           "residency"
         ],
         "operationId": "postV1ResidencyTagcapture",
-        "summary": "by country code – that's the perimeter geo-fence. W769 tags WHERE",
-        "description": "by country code – that's the perimeter geo-fence. W769 tags WHERE DATA LIVES at capture time – that's the data-locality residency control. Both are required for a credible regulated-industry posture; they cover orthogonal threat models. The /compliance/data-residency landing surfaces the cross-reference explicitly.",
+        "summary": "by country code – that's the perimeter geo-fence. tags WHERE",
+        "description": "by country code – that's the perimeter geo-fence. tags WHERE DATA LIVES at capture time – that's the data-locality residency control. Both are required for a credible regulated-industry posture; they cover orthogonal threat models. The /compliance/data-residency landing surfaces the cross-reference explicitly.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -20722,7 +20722,7 @@
         ],
         "operationId": "getV1RuntimePlacement",
         "summary": "/v1/runtime/placement – collection GET that emits the local placement",
-        "description": "/v1/runtime/placement – collection GET that emits the local placement hierarchy snapshot. W826 ships detectMemoryHierarchy + placementDecision as pure functions; the TUI view needs a one-shot GET to read the hierarchy without staging an artifact size first.",
+        "description": "/v1/runtime/placement – collection GET that emits the local placement hierarchy snapshot. ships detectMemoryHierarchy + placementDecision as pure functions; the TUI view needs a one-shot GET to read the hierarchy without staging an artifact size first.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -20880,8 +20880,8 @@
           "savings"
         ],
         "operationId": "getV1Savings",
-        "summary": "/v1/savings – bare alias for the W835 summary endpoint so the TUI's",
-        "description": "/v1/savings – bare alias for the W835 summary endpoint so the TUI's savings-tracker view has a stable collection-style URL. Forwards into the real /v1/savings/summary handler.",
+        "summary": "/v1/savings – bare alias for the summary endpoint so the TUI's",
+        "description": "/v1/savings – bare alias for the summary endpoint so the TUI's savings-tracker view has a stable collection-style URL. Forwards into the real /v1/savings/summary handler.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -21283,7 +21283,7 @@
             "$ref": "#/components/responses/ServerError"
           }
         },
-        "description": "Search - registry similarity search across the caller's tenant artifacts. Returns top-k matches with embedding-distance scores. Body: { query (required), k=10, tag }. 500 errors are wrapped in {error, detail, matches:[]} so SDKs never see a raw 500 (W470 P0-2).",
+        "description": "Search - registry similarity search across the caller's tenant artifacts. Returns top-k matches with embedding-distance scores. Body: { query (required), k=10, tag }. 500 errors are wrapped in {error, detail, matches:} so SDKs never see a raw 500.",
         "requestBody": {
           "required": false,
           "content": {
@@ -21306,7 +21306,7 @@
         ],
         "operationId": "getV1Seasonal",
         "summary": ":namespace path param. The dashboard pages call these endpoints without a",
-        "description": ":namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404'd. We forward to the existing :namespace handler with namespace='default' so the account UI<->server parity test (W409f #4) passes and the page renders an empty-state from a real envelope instead of a 404.",
+        "description": ":namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404'd. We forward to the existing:namespace handler with namespace='default' so the account UI<->server parity test (#4) passes and the page renders an empty-state from a real envelope instead of a 404.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -21518,8 +21518,8 @@
           "seeds"
         ],
         "operationId": "postV1SeedsFromnl",
-        "summary": "W347 – POST /v1/seeds/from-nl. Fan out a single seed (or short prompt)",
-        "description": "W347 – POST /v1/seeds/from-nl. Fan out a single seed (or short prompt) into N variations via the configured LLM. Returns 501 with a documented error code when no backend is configured, so the UI can degrade gracefully and the operator sees the exact env var to set.",
+        "summary": "POST /v1/seeds/from-nl. Fan out a single seed (or short prompt)",
+        "description": "POST /v1/seeds/from-nl. Fan out a single seed (or short prompt) into N variations via the configured LLM. Returns 501 with a documented error code when no backend is configured, so the UI can degrade gracefully and the operator sees the exact env var to set.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -21558,8 +21558,8 @@
           "seeds"
         ],
         "operationId": "getV1SeedsFromnlHealth",
-        "summary": "W347 – GET /v1/seeds/from-nl/health. Lets the UI hide the NL-seeds",
-        "description": "W347 – GET /v1/seeds/from-nl/health. Lets the UI hide the NL-seeds button when no LLM backend is configured. Stable, no auth.",
+        "summary": "GET /v1/seeds/from-nl/health. Lets the UI hide the NL-seeds",
+        "description": "GET /v1/seeds/from-nl/health. Lets the UI hide the NL-seeds button when no LLM backend is configured. Stable, no auth.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -22377,7 +22377,7 @@
           "spec-decode"
         ],
         "operationId": "postV1Specdecode",
-        "summary": "W480 - Train a speculative-decoding draft head (eagle/eagle2/eagle3/medusa)",
+        "summary": "Train a speculative-decoding draft head (eagle/eagle2/eagle3/medusa)",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -22395,7 +22395,7 @@
             "$ref": "#/components/responses/ServerError"
           }
         },
-        "description": "W480 - Train a speculative-decoding draft head (eagle/eagle2/eagle3/medusa) via the tenant-installed trainer plug-in. Auth-gated. Body: { pairs_path, base_path, draft_kind, out_dir, namespace }. Returns trainer envelope.",
+        "description": "Train a speculative-decoding draft head (eagle/eagle2/eagle3/medusa) via the tenant-installed trainer plug-in. Auth-gated. Body: { pairs_path, base_path, draft_kind, out_dir, namespace }. Returns trainer envelope.",
         "requestBody": {
           "required": false,
           "content": {
@@ -22417,7 +22417,7 @@
           "spec-decode"
         ],
         "operationId": "getV1SpecdecodeDoctor",
-        "summary": "W480 - Speculative decoding draft-head trainer doctor (EAGLE-2/3, Medusa).",
+        "summary": "Speculative decoding draft-head trainer doctor (EAGLE-2/3, Medusa).",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -22435,7 +22435,7 @@
             "$ref": "#/components/responses/ServerError"
           }
         },
-        "description": "W480 - Speculative decoding draft-head trainer doctor (EAGLE-2/3, Medusa). Reports whether $KOLM_SPECDECODE_TRAINER is resolvable; install_hint when not."
+        "description": "Speculative decoding draft-head trainer doctor (EAGLE-2/3, Medusa). Reports whether $KOLM_SPECDECODE_TRAINER is resolvable; install_hint when not."
       }
     },
     "/v1/spec/governance-packet": {
@@ -22840,7 +22840,7 @@
         ],
         "operationId": "postV1SpeculativeBench",
         "summary": "Acceptance log query (workflow_id='speculative_teacher:log')",
-        "description": "Acceptance log query (workflow_id='speculative_teacher:log') Auth-gated via req.tenant_record. Tenant fence forced from session, never from request body. Distinct prefix /v1/speculative/* so parallel agents on W811/W812/W813/W815 cannot collide on these route paths.",
+        "description": "Acceptance log query (workflow_id='speculative_teacher:log') Auth-gated via req.tenant_record. Tenant fence forced from session, never from request body. Distinct prefix /v1/speculative/* so parallel agents on///cannot collide on these route paths.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -22917,8 +22917,8 @@
           "sso"
         ],
         "operationId": "getV1SsoStatus",
-        "summary": "W869+ Persona D admin status aggregators.",
-        "description": "W869+ Persona D admin status aggregators. Thin read-only composers for /account/enterprise. Each one stitches data from individual surfaces (sso/status, byoc/deployments, compliance/*, audit) into the shape the admin dashboard expects. Honest when state is missing: empty fields, no 404s.",
+        "summary": "+ Persona D admin status aggregators.",
+        "description": "+ Persona D admin status aggregators. Thin read-only composers for /account/enterprise. Each one stitches data from individual surfaces (sso/status, byoc/deployments, compliance/*, audit) into the shape the admin dashboard expects. Honest when state is missing: empty fields, no 404s.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -22945,7 +22945,7 @@
         ],
         "operationId": "getV1Staleness",
         "summary": ":namespace path param. The dashboard pages call these endpoints without a",
-        "description": ":namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404'd. We forward to the existing :namespace handler with namespace='default' so the account UI<->server parity test (W409f #4) passes and the page renders an empty-state from a real envelope instead of a 404.",
+        "description": ":namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404'd. We forward to the existing:namespace handler with namespace='default' so the account UI<->server parity test (#4) passes and the page renders an empty-state from a real envelope instead of a 404.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -22972,7 +22972,7 @@
         ],
         "operationId": "postV1StalenessApplyttl",
         "summary": "Role gate: req.is_admin OR req.local_daemon OR req.tenant_record.kind === 'human'",
-        "description": "Role gate: req.is_admin OR req.local_daemon OR req.tenant_record.kind === 'human' (the tenant_record.kind sentinel – human tenants are workspace owners by construction in src/auth.js; anon/api_only/etc. are not). We do NOT reuse teams.requireRole here because the staleness scope is per-namespace inside a tenant, not per-team. Adding team scoping is a follow-up (W746+1).",
+        "description": "Role gate: req.is_admin OR req.local_daemon OR req.tenant_record.kind === 'human' (the tenant_record.kind sentinel – human tenants are workspace owners by construction in src/auth.js; anon/api_only/etc. are not). We do NOT reuse teams.requireRole here because the staleness scope is per-namespace inside a tenant, not per-team. Adding team scoping is a follow-up (+1).",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -23077,7 +23077,7 @@
         ],
         "operationId": "postV1StatsigTest",
         "summary": "GET /v1/stat-sig/gate?ab_test_id=X&alpha=Y&min_n=Z&min_effect_size=W",
-        "description": "GET /v1/stat-sig/gate?ab_test_id=X&alpha=Y&min_n=Z&min_effect_size=W Returns: {ok, decision:'pass'|'fail'|'insufficient', reasons:[], welch:{...}, version} Auth-gated. Pure-math welchT does not need tenant fence; gate() reads via W777 ab-router which forces tenant from session.",
+        "description": "GET /v1/stat-sig/gate?ab_test_id=X&alpha=Y&min_n=Z&min_effect_size=W Returns: {ok, decision:'pass'|'fail'|'insufficient', reasons:, welch:{...}, version} Auth-gated. Pure-math welchT does not need tenant fence; gate reads via ab-router which forces tenant from session.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -23797,7 +23797,7 @@
         ],
         "operationId": "getV1SyntheticCoverage",
         "summary": ":namespace path param. The dashboard pages call these endpoints without a",
-        "description": ":namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404'd. We forward to the existing :namespace handler with namespace='default' so the account UI<->server parity test (W409f #4) passes and the page renders an empty-state from a real envelope instead of a 404.",
+        "description": ":namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404'd. We forward to the existing:namespace handler with namespace='default' so the account UI<->server parity test (#4) passes and the page renders an empty-state from a real envelope instead of a 404.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -23862,7 +23862,7 @@
         ],
         "operationId": "getV1SyntheticGaps",
         "summary": ":namespace path param. The dashboard pages call these endpoints without a",
-        "description": ":namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404'd. We forward to the existing :namespace handler with namespace='default' so the account UI<->server parity test (W409f #4) passes and the page renders an empty-state from a real envelope instead of a 404.",
+        "description": ":namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404'd. We forward to the existing:namespace handler with namespace='default' so the account UI<->server parity test (#4) passes and the page renders an empty-state from a real envelope instead of a 404.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -23967,7 +23967,7 @@
         ],
         "operationId": "getV1Teacherversions",
         "summary": ":namespace path param. The dashboard pages call these endpoints without a",
-        "description": ":namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404'd. We forward to the existing :namespace handler with namespace='default' so the account UI<->server parity test (W409f #4) passes and the page renders an empty-state from a real envelope instead of a 404.",
+        "description": ":namespace path param. The dashboard pages call these endpoints without a selected namespace before the user picks one; previously they 404'd. We forward to the existing:namespace handler with namespace='default' so the account UI<->server parity test (#4) passes and the page renders an empty-state from a real envelope instead of a 404.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -24294,8 +24294,8 @@
           "team"
         ],
         "operationId": "getV1TeamInvites",
-        "summary": "W409f – /v1/team/invites – team.html invite list / create endpoint.",
-        "description": "W409f – /v1/team/invites – team.html invite list / create endpoint. GET returns the calling tenant's outstanding invites; POST creates one.",
+        "summary": "/v1/team/invites – team.html invite list / create endpoint.",
+        "description": "/v1/team/invites – team.html invite list / create endpoint. GET returns the calling tenant's outstanding invites; POST creates one.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -25281,7 +25281,7 @@
         ],
         "operationId": "getV1TraceDistill",
         "summary": "/v1/trace/distill – collection GET listing tenant reasoning-trace distill",
-        "description": "/v1/trace/distill – collection GET listing tenant reasoning-trace distill jobs. Real W828 wiring lives in src/trace-compile.js; this collection stub returns an empty envelope until a wave wires the distill queue through a dedicated route module.",
+        "description": "/v1/trace/distill – collection GET listing tenant reasoning-trace distill jobs. Real wiring lives in src/trace-compile.js; this collection stub returns an empty envelope until a wave wires the distill queue through a dedicated route module.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -26155,8 +26155,8 @@
           "video"
         ],
         "operationId": "postV1VideoCapturedetect",
-        "summary": "Distinct paths from W771 vision-capture (/v1/vision/capture-detect,",
-        "description": "Distinct paths from W771 vision-capture (/v1/vision/capture-detect, /v1/vision/captures) and W772 audio capture (/v1/audio/speech, /v1/audio/transcriptions, /v1/audio/translations) so the three parallel wave agents do not collide.",
+        "summary": "Distinct paths from vision-capture (/v1/vision/capture-detect,",
+        "description": "Distinct paths from vision-capture (/v1/vision/capture-detect, /v1/vision/captures) and audio capture (/v1/audio/speech, /v1/audio/transcriptions, /v1/audio/translations) so the three parallel wave agents do not collide.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -26330,7 +26330,7 @@
         ],
         "operationId": "postV1VisionCapturedetect",
         "summary": "{ok, count, captures[]} envelope.",
-        "description": "{ok, count, captures[]} envelope. All three are tenant-fenced via req.tenant_record.id (W411). Honest envelopes on bad input – no silent passthrough.",
+        "description": "{ok, count, captures} envelope. All three are tenant-fenced via req.tenant_record.id. Honest envelopes on bad input – no silent passthrough.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -26530,8 +26530,8 @@
           "whoami"
         ],
         "operationId": "getV1Whoami",
-        "summary": "W433 – /v1/whoami alias. SDKs (OpenAI/Anthropic/LangChain) follow the",
-        "description": "W433 – /v1/whoami alias. SDKs (OpenAI/Anthropic/LangChain) follow the convention `GET /v1/whoami` (or `/v1/me`) for \"who is this key?\". The canonical kolm endpoint is GET /v1/account, but /v1/whoami forwards to the same handler so SDKs probing the conventional path get an answer instead of a 404 + bad first-impression. Auth-gated identically.",
+        "summary": "/v1/whoami alias. SDKs (OpenAI/Anthropic/LangChain) follow the",
+        "description": "/v1/whoami alias. SDKs (OpenAI/Anthropic/LangChain) follow the convention `GET /v1/whoami` (or `/v1/me`) for \"who is this key?\". The canonical kolm endpoint is GET /v1/account, but /v1/whoami forwards to the same handler so SDKs probing the conventional path get an answer instead of a 404 + bad first-impression. Auth-gated identically.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -26558,7 +26558,7 @@
         ],
         "operationId": "getV1WorkflowsRepeated",
         "summary": "/v1/workflows/repeated – repeated-workflows.html surfaces the cluster",
-        "description": "/v1/workflows/repeated – repeated-workflows.html surfaces the cluster summary from /v1/bridges/observations (the canonical W297 source) under a more discoverable URL. Returns {workflows:[{template,count,samples}]}.",
+        "description": "/v1/workflows/repeated – repeated-workflows.html surfaces the cluster summary from /v1/bridges/observations (the canonical source) under a more discoverable URL. Returns {workflows:[{template,count,samples}]}.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -26665,7 +26665,7 @@
         ],
         "operationId": "postV1XlangBalancedsample",
         "summary": "* Hosted route has NO runOnArtifact/judge wired by default –",
-        "description": "* Hosted route has NO runOnArtifact/judge wired by default – production injects via req.app.locals._w774_run_on_artifact + ._w774_judge. The honest envelope on missing wiring is the contract, not a 500. * All four routes are W411 tenant-fenced.",
+        "description": "* Hosted route has NO runOnArtifact/judge wired by default – production injects via req.app.locals._w774_run_on_artifact +._w774_judge. The honest envelope on missing wiring is the contract, not a 500. * All four routes are tenant-fenced.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -26772,7 +26772,7 @@
         ],
         "operationId": "postV1YamlValidate",
         "summary": "* 200 + { ok:false, parsed, validation } on schema errors (parse",
-        "description": "* 200 + { ok:false, parsed, validation } on schema errors (parse succeeded but the document violates the W732 schema – caller still gets the parsed tree so it can highlight the bad rows) * 400 + { ok:false, error:'yaml_parse_failed', detail, line } on a parser error (couldn't even read the document)",
+        "description": "* 200 + { ok:false, parsed, validation } on schema errors (parse succeeded but the document violates the schema – caller still gets the parsed tree so it can highlight the bad rows) * 400 + { ok:false, error:'yaml_parse_failed', detail, line } on a parser error (couldn't even read the document)",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"

@@ -11,7 +11,7 @@ const fs = require('fs');
 const path = require('path');
 
 const root = path.resolve(__dirname, '..', 'public');
-const KOLM_GITHUB_URL = process.env.KOLM_GITHUB_URL || 'https://github.com/kolm-ai/kolmogorov-stack';
+const KOLM_GITHUB_URL = process.env.KOLM_GITHUB_URL || 'https://github.com/kolm-ai/kolm';
 
 function walk(dir) {
   const out = [];

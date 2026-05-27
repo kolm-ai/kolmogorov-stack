@@ -55,7 +55,7 @@
   .pact dd { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink); }
   @media (max-width: 900px) { .pact dl { grid-template-columns: 1fr; gap: var(--ks-1) var(--ks-3); } .pact dt { padding-top: 0; } .pact dd { margin-bottom: var(--ks-3); } }
 </style>
-  <meta property="og:title" content="Roadmap &middot; kolm.ai">
+  <meta property="og:title" content="Roadmap · kolm.ai">
   <meta property="og:description" content="What kolm is building next. Now, Next, Later, Researching. Items move between columns as evidence arrives, not as press releases ship.">
   <meta property="og:image" content="https://kolm.ai/og/roadmap.svg">
   <meta property="og:url" content="https://kolm.ai/roadmap">
@@ -89,13 +89,13 @@
 <div class="ks-nav-wrap">
   <header class="ks-nav">
     <div class="ks-wrap ks-nav__row">
-      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
       <nav class="ks-nav__links" aria-label="Primary">
         <a href="/wrapper">Wrapper</a>
         <a href="/studio">Studio</a>
         <a href="/pricing">Pricing</a>
         <a href="/docs">Docs</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
       </nav>
       <div class="ks-nav__cta">
         <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
@@ -229,7 +229,7 @@
       <div class="card">
         <div class="row"><span class="tag">federated</span><span class="st wip">Next</span></div>
         <h3>Federated learning gradient aggregation v1</h3>
-        <p class="why">Build on the W461 approval-row sharing path: aggregate quantized gradient updates across tenants who opt in. Differential-privacy budget is per-tenant; no raw gradients cross the tenant boundary.</p>
+        <p class="why">Build on the approval-row sharing path: aggregate quantized gradient updates across tenants who opt in. Differential-privacy budget is per-tenant; no raw gradients cross the tenant boundary.</p>
         <dl>
           <dt>Why</dt><dd>Healthcare and finance teams want the K-score floor lift that federation can produce without exposing data.</dd>
           <dt>Ships</dt><dd>POST /v1/federated/aggregate-gradients route plus a CLI sub-command.</dd>
@@ -332,7 +332,7 @@
       <div class="card">
         <div class="row"><span class="tag">enclave</span><span class="st wip">Later</span></div>
         <h3>Multi-tenant trusted enclave reference deployment</h3>
-        <p class="why">The W460 TEE attestation embed wave landed the receipt half. The deployment half (a reference Terraform that spins a multi-tenant SNP or TDX enclave with measured boot pinned into the receipt) is bigger work.</p>
+        <p class="why">The TEE attestation embed wave landed the receipt half. The deployment half (a reference Terraform that spins a multi-tenant SNP or TDX enclave with measured boot pinned into the receipt) is bigger work.</p>
         <dl>
           <dt>Why</dt><dd>Defense and pharma teams want the enclave as a deployable, not as documentation.</dd>
           <dt>Blocked on</dt><dd>Stable measured-boot artifact for SNP and TDX in upstream cloud images.</dd>
@@ -441,7 +441,7 @@
       <div class="card">
         <h3>Engineer or developer</h3>
         <p class="why">Install the CLI and reproduce the most recent shipped wave on your own hardware; then open an issue on the public repo for the wave you want next.</p>
-        <p class="why"><a href="/quickstart">/quickstart</a> &middot; <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></p>
+        <p class="why"><a href="/quickstart">/quickstart</a> &middot; <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></p>
       </div>
       <div class="card">
         <h3>Procurement or compliance</h3>
@@ -508,7 +508,7 @@
         <a href="/manifesto">Manifesto</a>
         <a href="/community">Community</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub &rarr;</a>
       </div>
     </div>
     <div class="ks-foot__base">

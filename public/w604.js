@@ -1,7 +1,4 @@
-/* w604.js — interactive layer for W604 homepage.
-   ONE wow per surface: cursor-reactive ambient orb + magnetic CTAs + 3D-tilt cards.
-   All effects respect prefers-reduced-motion AND pointer:fine, so touch
-   devices and keyboard-only users get a calm static surface. Zero deps. */
+
 (function () {
   'use strict';
   if (typeof window === 'undefined' || typeof document === 'undefined') return;

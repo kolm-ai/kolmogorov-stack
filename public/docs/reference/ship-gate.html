@@ -8,7 +8,7 @@
 <meta name="description" content="The 52-check ship gate. Every check by surface, what passing means, and how to fix when failing. The launch contract for kolm.ai.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Ship gate &middot; kolm.ai">
+<meta property="og:title" content="Ship gate · kolm.ai">
 <meta property="og:description" content="The 52-check ship gate that wraps release-verify before a kolm.ai launch.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/reference/ship-gate">
@@ -61,13 +61,13 @@ td.col-id{white-space:nowrap;color:var(--accent);font-family:var(--mono);font-si
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -212,7 +212,7 @@ npm run ship:gate -- --only=run</code></pre>
   <thead><tr><th>Id</th><th>Surface</th><th>Passing means</th><th>Fix when failing</th></tr></thead>
   <tbody>
     <tr><td class="col-id">doc.no-forbidden</td><td>docs</td><td>No FORBIDDEN_PUBLIC_PATTERNS hits in <code>public/</code>.</td><td>Scrub the printed paths.</td></tr>
-    <tr><td class="col-id">doc.run-pages</td><td>docs</td><td>All 10 <code>/docs/run/*</code> pages return 200.</td><td>Add missing page from the W888-K list.</td></tr>
+    <tr><td class="col-id">doc.run-pages</td><td>docs</td><td>All 10 <code>/docs/run/*</code> pages return 200.</td><td>Add missing page from the list.</td></tr>
     <tr><td class="col-id">doc.reference-pages</td><td>docs</td><td>All 3 <code>/docs/reference/*</code> pages return 200.</td><td>Add missing page; re-run.</td></tr>
     <tr><td class="col-id">doc.cli-coverage</td><td>docs</td><td>Every CLI verb has a <code>/docs/cli/&lt;verb&gt;</code> page.</td><td>Run <code>scripts/build-cli-docs.cjs</code>.</td></tr>
     <tr><td class="col-id">doc.terms</td><td>docs</td><td>No banned terms appear in the diff.</td><td>Replace per <code>scripts/build-changelog.cjs</code> BANNED_REPLACE.</td></tr>
@@ -297,7 +297,7 @@ npm run ship:gate -- --only=run</code></pre>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">

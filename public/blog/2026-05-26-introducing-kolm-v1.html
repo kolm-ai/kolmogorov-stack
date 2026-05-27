@@ -8,7 +8,7 @@
 <meta name="description" content="V1 ships three surfaces that share one disk format. The Wrapper routes calls and signs receipts. Studio distills local artifacts. Run and Govern deploys, monitors, and exports evidence.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Introducing kolm v1 &middot; kolm.ai blog">
+<meta property="og:title" content="Introducing kolm v1 · kolm.ai blog">
 <meta property="og:description" content="V1 ships three surfaces that share one disk format. Wrapper, Studio, Run and Govern.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/blog/2026-05-26-introducing-kolm-v1">
@@ -140,7 +140,7 @@ kolm compile --target gguf-q4km --target ollama-modelfile</code></pre>
 <ul>
   <li><b>One disk format.</b> The <code>.kolm</code> file carries the weights, the runtime passport, the evidence DAG, the K-Score evaluation block, and the Ed25519 signature in one tarball. Same file works on a Mac for prototyping, a server for production, and an air-gapped device for compliance.</li>
   <li><b>Receipts are mandatory.</b> Every Wrapper call gets one, success or failure. You cannot opt out of the audit trail; you can verify it for free at <code>/v1/verify/&lt;receipt_id&gt;</code> with no auth.</li>
-  <li><b>Apache-2.0.</b> The whole stack (Wrapper, Studio, runtime adapters, SDKs in Node, Python, Rust, C, and MCP) is on GitHub at <a href="https://github.com/kolm-ai/kolmogorov-stack">kolm-ai/kolmogorov-stack</a>. Self-host with one command.</li>
+  <li><b>Apache-2.0.</b> The whole stack (Wrapper, Studio, runtime adapters, SDKs in Node, Python, Rust, C, and MCP) is on GitHub at <a href="https://github.com/kolm-ai/kolm">kolm-ai/kolm</a>. Self-host with one command.</li>
   <li><b>No managed-only features.</b> Everything on the managed kolm.ai also runs in your BYOC (bring your own cluster) on Modal, RunPod, Colab, or a 5090 under your desk.</li>
 </ul>
 

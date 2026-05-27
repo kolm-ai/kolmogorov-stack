@@ -1,16 +1,6 @@
-/* w706.css — homepage v706 rebuild.
-   Goals (per user 2026-05-24 reject of W705):
-   - Lead with PRODUCT, not one DeepSeek demo
-   - Kill the W705 4-stat proof rail; replace with capability rail
-   - Replace static <pre> hero terminal with an animated SOTA demo
-   - Demote receipts to "examples"; up-weight product story
-   - Move mini-compare to a tiny strip below the finale CTA
-   - Fix the random-white-blur inconsistency by retuning aurora opacities
-   - Break the uniform repeat(auto-fit) grid pattern with asymmetric layouts
-   Loads AFTER w687.css; never overrides /design-tokens.css or /frontier.css
-   primitives — only adds .w706-* classes the homepage opts into. */
 
-/* === W706 hero demo — animated frontier-compile visualization ============ */
+
+
 .w706-demo {
   position: relative;
   background: linear-gradient(180deg, #0c0f15 0%, #06080c 100%);
@@ -278,7 +268,7 @@
   .w706-stream__line:first-child { opacity: 1; }
 }
 
-/* === W706 capability rail — replaces W705 4-stat proof rail =============== */
+
 /* Asymmetric, editorial — not a uniform stat grid */
 .w706-cap {
   display: grid;
@@ -362,7 +352,7 @@
   .w706-cap__cell--lead .w706-cap__v { font-size: 24px; }
 }
 
-/* === W706 flow — pipeline visual replaces fr-flowpipe chip-chain ========== */
+
 .w706-flow {
   margin: 36px 0 0;
   border: 1px solid rgba(230, 233, 238, 0.08);
@@ -428,7 +418,7 @@
   .w706-flow__step:last-child { border-bottom: 0; }
 }
 
-/* === W706 anatomy expansion — file tree + manifest + receipt verify ====== */
+
 .w706-anatomy {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
@@ -479,7 +469,7 @@
 .w706-anatomy__body .tok-ok { color: var(--ink-1); font-weight: 500; }
 .w706-anatomy__body .tok-warn { color: #b8c8a8; }
 
-/* === W706 bottom mini-compare — compact 2-row strip below finale CTA ===== */
+
 .w706-bot-cmp {
   margin-top: 40px;
   padding: 24px 0 0;
@@ -527,7 +517,7 @@
   .w706-bot-cmp__row > div.l { padding-top: 8px; font-weight: 500; }
 }
 
-/* === W706 aurora retune — kills the "random white blurring" complaint ==== */
+
 /* The .fr-section::before aurora was set at opacity:0.9 with light-mint
    blooms in inconsistent positions; on the homepage that read as random
    white smudges. Retune to a quieter, deterministic top-only aurora. */
@@ -549,7 +539,7 @@ body:has(.w706-demo) .fr-card {
   -webkit-backdrop-filter: none;
 }
 
-/* === W706 product spotlight — replaces "ks-proof-rail" up-top ============ */
+
 .w706-product {
   margin-top: 38px;
   display: grid;
@@ -580,11 +570,7 @@ body:has(.w706-demo) .fr-card {
 }
 .w706-product__body p + p { margin-top: 12px; }
 
-/* === W706 aesthetic uplevel — kills "uniform grid / children's hackathon" ==
-   The complaint is real: 4-up grids with equal cells and flat surfaces read
-   as a wireframe. These rules break the symmetry on the highest-trafficked
-   sections (Why kolm, Pricing, FAQ) without touching the underlying card or
-   tier components on other pages. */
+
 
 /* Why-kolm 2x2: stagger the right column 18px down for editorial offset. */
 body:has(.w706-demo) #why .why-grid > .why-cell:nth-child(2),

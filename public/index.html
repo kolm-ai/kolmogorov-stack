@@ -49,14 +49,14 @@
 <script defer src="/kolm-chat.js"></script>
 <script src="/sentry-init.js" defer></script>
 <style>
-  /* W626: scalpel-cut dead CSS  -  kept only what visible sections still use. */
+  
   .kolm-media-caption { margin-top: var(--ks-3); padding: 10px 12px; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); background: var(--ks-bg-1); color: var(--ks-ink-2); font-family: var(--ks-mono); font-size: 11.5px; line-height: 1.55; }
   .test-anchor { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
-  /* W626: ration mint  -  body links/text rely on ink hierarchy; accent reserved for CTAs + numerals. */
+  
   main p a:not(.ks-btn):not(.fr-btn):not(.fr-numbered-list__link) { color: var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge); transition: border-color 140ms; }
   main p a:not(.ks-btn):not(.fr-btn):not(.fr-numbered-list__link):hover { border-bottom-color: var(--ks-accent); }
 
-  /* W647: product-surface manifest under the hero  -  4 dense rows, no card chrome, no rectangle look. */
+  
   .kolm-surfaces { margin-top: 18px; padding: 0; list-style: none; }
   .kolm-surfaces__row { display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: baseline; padding: 9px 0; border-bottom: 1px dashed var(--ks-line-1); }
   .kolm-surfaces__row:last-child { border-bottom: 0; }
@@ -70,7 +70,7 @@
     .kolm-surfaces__detail { font-size: 12px; }
   }
 
-  /* W648: editorial "why"  -  2x2 magazine spread, no numbered list, no card chrome. */
+  
   .why-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 56px; row-gap: 40px; margin-top: 44px; }
   .why-cell { padding: 0; }
   .why-cell__h { font-family: var(--ks-sans); font-size: clamp(20px, 2.4vw, 26px); font-weight: 520; letter-spacing: -0.012em; line-height: 1.22; color: var(--ks-ink); margin: 0 0 12px 0; }
@@ -79,14 +79,14 @@
   .why-cell__p a:hover { border-bottom-color: var(--ks-accent); }
   @media (max-width: 760px) { .why-grid { grid-template-columns: 1fr; column-gap: 0; row-gap: 30px; margin-top: 32px; } }
 
-  /* W648: narrative prose blocks between sections  -  editorial, not bulleted. */
+  
   .home-prose { max-width: 62ch; font-family: var(--ks-sans); font-size: 17px; line-height: 1.72; color: var(--ks-ink-2); margin: 28px 0 0 0; }
   .home-prose code { background: rgba(17, 17, 17, 0.06); color: var(--ks-ink); padding: 1px 6px; border-radius: 4px; font-family: var(--ks-mono); font-size: 0.92em; }
   .home-prose strong { color: var(--ks-ink); font-weight: 540; }
   .home-prose a { color: var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge); transition: border-color 140ms; }
   .home-prose a:hover { border-bottom-color: var(--ks-accent); }
 
-  /* W647: ROI calc, brought back from W623 (calculator moved off-home was the wrong call). */
+  
   .home-roi-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: var(--ks-8); align-items: stretch; margin-top: 36px; }
   @media (max-width: 920px) { .home-roi-grid { grid-template-columns: 1fr; gap: var(--ks-5); } }
   .home-roi-form { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); padding: var(--ks-6); }
@@ -106,9 +106,7 @@
   .home-roi-preset.is-active { border-color: var(--ks-accent); color: var(--ks-accent); background: color-mix(in srgb, var(--ks-accent) 8%, transparent); }
   .home-roi-mult { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-accent); padding: 4px 9px; border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-pill); background: var(--ks-accent-soft); }
 
-  /* W655: real compile receipts  -  first-principles proof band. Four real artifacts from the proven quantize matrix.
-     No card chrome, no marketing chips. Tabular hairline rows with mono numerals. The page should read
-     like a build log, not a brochure. */
+  
   .home-receipts { margin-top: 36px; border-top: 1px solid rgba(230, 233, 238,0.10); }
   .home-receipts__row { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--ks-5); align-items: baseline; padding: 18px 0; border-bottom: 1px solid rgba(230, 233, 238,0.08); }
   .home-receipts__row--head { padding: 10px 0; border-bottom: 1px solid rgba(230, 233, 238,0.10); }
@@ -137,7 +135,7 @@
     .home-receipts__time::before { content: "compile · "; color: var(--ks-ink-faint); font-size: 0.85em; }
     .home-receipts__hash { grid-column: 1 / -1; padding-top: 4px; }
   }
-  /* W658: receipts section head  -  flex with K-score badge to the right. */
+  
   .home-receipts__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; margin-bottom: 24px; }
   .home-receipts__head-text { flex: 1 1 auto; min-width: 0; }
   .home-receipts__badge-wrap { flex: 0 0 220px; display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: 6px; }
@@ -151,8 +149,7 @@
     .home-receipts__head-text { text-align: left; }
     .home-receipts__badge-wrap { flex: initial; }
   }
-  /* W659: .kolm anatomy 2-column split  -  illustration left, annotated file tree right.
-     Same illustration that renders on /hub via data-kolm-illustration="artifact-anatomy". */
+  
   .kolm-anatomy-split { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 40px; align-items: start; margin-top: 32px; }
   .kolm-anatomy-split__illu { display: flex; justify-content: center; }
   .kolm-anatomy-split__illu svg { width: 100%; max-width: 320px; height: auto; display: block; }
@@ -162,9 +159,7 @@
     .kolm-anatomy-split__illu svg { max-width: 280px; }
   }
 
-  /* W657: hero persona switcher  -  CSS-only radio + sibling-selector tabs.
-     Three personas (Platform Eng, ML Eng, Founder/CTO) each show a tailored
-     4-command flow. No JS state. Radios are visually hidden but keyboard-focusable. */
+  
   .hp-switcher { position: relative; width: 100%; max-width: 560px; margin: 0 auto; }
   .hp-radio { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }
   .hp-tabs { display: flex; gap: 0; margin: 0 0 -1px 0; border-bottom: 1px solid var(--ks-line-2); position: relative; z-index: 1; }
@@ -192,11 +187,7 @@
   }
 </style>
 
-<!-- ================== W868: typography + rhythm + motion polish.
-     Scoped, additive. No existing rules clobbered. All motion gated
-     on prefers-reduced-motion. Tabular nums on numerics. Reveal stagger
-     on direct children of any .fr-reveal section, capped at 6 children
-     so long lists don't snake in for 600ms. ================== -->
+
 <style>
   /* --- Heading rhythm: tighten the visible H2 scale + tracking. Existing
          clamp lives in frontier.css; this is a per-page calibration so
@@ -339,7 +330,7 @@
 <!-- ================== Nav ================== -->
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
@@ -349,13 +340,13 @@
     </ul>
     <div class="ks-nav__right">
       <button type="button" class="ks-theme-toggle" id="ksThemeToggle" aria-label="Toggle theme" title="Toggle theme">
-        <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="theme-icon theme-icon--moon" viewbox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
+        <svg class="theme-icon theme-icon--sun" viewbox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /></svg>
       </button>
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow" aria-hidden="true">&rarr;</span></a>
       <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
       </button>
     </div>
   </nav>
@@ -370,9 +361,7 @@
   </div>
 </div>
 
-<!-- W845: theme toggle behavior - pre-baked so it works on first paint even
-     if nav.js bails (homepage has no <header class="site-header">). Honors
-     the pre-paint bootstrap script above which has already set data-theme. -->
+
 <script>
 (function(){
   var btn = document.getElementById('ksThemeToggle');
@@ -405,24 +394,14 @@
   <div class="ks-hero__wrap">
     <div>
       <span class="ks-eyebrow" data-w220="category-claim">Evidence-to-artifact compiler</span>
-      <!-- W221 #2 (W207 a11y): single H1 carrying both visible claim AND the
-           W271/W335/W373 lock-in tokens. Hidden tokens are offscreen + aria-
-           hidden so screen readers skip them. The visible .h1-claim is what
-           the user sees. heroSlice() in tests/wave271 matches the FIRST h1
-           tag, which is this one. -->
+      
       <h1 class="ks-hero__h1 fr-h1--hero" data-w271="pain-h1">
         <span class="h1-claim">Compile your AI workload into a model you own.</span>
         <span class="stop w335-h1-sub" hidden aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">Stop renting intelligence.</span>
         <span class="pain w335-h1-sub" hidden aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">Stop paying per token for prompts you already own.</span>
         <span class="w373-h1-main" hidden aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">Frontier AI on your own infrastructure. The AI compiler. Compile your own AI. Own the AI loop. owned AI. Route any model. Distill specialists. Run on any device. OpenAI-compatible gateway.</span>
       </h1>
-      <!-- W220/W260/W271/W335/W373 hidden hero anchors. These tokens were
-           lifted into the visible H1 by the W604 first-principles homepage
-           rebuild and the W706 cinematic demo; the older test suites pin
-           specific markers in the hero region. Block stays inside the hero
-           <section data-w271="hero"> so the heroSlice(N) helpers still find
-           every token. Screen readers skip via hidden + aria-hidden +
-           offscreen positioning. -->
+      
       <span data-w271="seo-chip" hidden aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">kolm.ai - the AI compiler</span>
       <div hidden aria-hidden="true" data-w260-anchors="hero-h1-region" data-w373="hero-h1" class="hero-quant hero-artifact" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
         <span>Frontier AI on your own infrastructure. kolm.ai - the AI compiler. Route any model. Distill specialists. Run on any device. OpenAI-compatible gateway.</span>
@@ -449,32 +428,20 @@
         <a class="ks-btn ks-btn--ghost ks-btn--lg" href="#chat">Try it without signing up</a>
         <span class="test-anchor" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;"><a href="/verify-prod">Verify a receipt</a><a href="#how">See how it works</a></span>
       </div>
-      <!-- W848: .ks-hero__proof rail + .ks-hero__sub line REMOVED per
-           direct user feedback ("remove this already $8K/mo ... github →").
-           Hidden test-anchor preserves any lock-in selectors. -->
+      
       <span class="test-anchor" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
         <ul class="ks-hero__proof"><li><b>$8K/mo</b></li><li><b>~$140/mo</b></li><li><b>125s</b></li><li><b>17.9 GB</b></li></ul>
         <p class="ks-hero__sub">Apache-2.0 &middot; self-hostable &middot; air-gapped &middot; 6 SDKs</p>
       </span>
     </div>
 
-    <!-- W864: hero column 2 "Drop in / Compile / Own forever" mini-card removed
-         per user audit ("Cut 2 of 3 pipeline explanations on homepage - keep
-         architecture diagram"). The kolm-arch-band full-width SVG below the
-         hero is now the single authoritative walk of the path. -->
+    
   </div>
 </section>
 
-<!-- W847: W846 signpost band removed - user feedback flagged it as
-     useless filler ("hero signpost band is useless - remove"). The four
-     claims are surfaced in the dedicated trust strip near the footer and
-     in the kolm-arch-band's monochrome labels. -->
 
-<!-- W847: "What is kolm" intro - user feedback: "need section under hero
-     showing what product IS." Three plain-English noun-phrase sentences,
-     no diagram, no card chrome. Sits between the hero and the kolm-arch
-     diagram so a 10-second visitor has a working mental model before they
-     hit the architectural detail. -->
+
+
 <section class="kolm-whatis" aria-label="What kolm is">
   <div class="kolm-whatis__inner">
     <p class="kolm-whatis__eye">In plain English</p>
@@ -492,11 +459,7 @@
       OpenAI-compatible, no vendor lock-in.
     </p>
 
-    <!-- W848: wrapper + studio mini-cards. The compiler is the core, but
-         two surfaces sit on top of it: the wrapper (the runtime gateway
-         that produces captures) and the studio (the browser GUI that
-         drives the compile loop without the CLI). Naming both here makes
-         the kolm path visible in plain prose, not just the SVG below. -->
+    
     <div class="kolm-whatis__surfaces" aria-label="kolm surfaces">
       <a class="kolm-whatis__surface" href="/wrapper">
         <span class="kolm-whatis__surface-tag">wrapper</span>
@@ -512,11 +475,7 @@
   </div>
 </section>
 
-<!-- W844: full-width architecture band. The hero used to wedge this into
-     column 2 at half size; user feedback said "i cant see it". Now it sits
-     directly under the hero at full container width with monochrome labels
-     "Drop in / Compile / Own forever" instead of the dorky INPUTS / PROCESSING
-     / OUTPUTS triplet. -->
+
 <section class="kolm-arch-band" aria-label="kolm architecture">
   <div class="kolm-arch-band__inner">
     <header class="kolm-arch-band__head">
@@ -524,7 +483,7 @@
       <h2 class="kolm-arch-band__h">Your traffic walks in. A model you own walks out.</h2>
     </header>
     <figure class="kolm-arch kolm-arch--full hero-artifact" data-w260="lede-beats" aria-label="kolm architecture: drop in, compile, own forever">
-      <svg class="kolm-arch__svg" viewBox="0 0 960 420" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="kolmArchTitle kolmArchDesc">
+      <svg class="kolm-arch__svg" viewbox="0 0 960 420" preserveaspectratio="xMidYMid meet" role="img" aria-labelledby="kolmArchTitle kolmArchDesc">
         <title id="kolmArchTitle">kolm architecture diagram</title>
         <desc id="kolmArchDesc">Existing LLM clients route through the kolm compiler stages (capture, distill, quantize, sign) and produce a signed .kolm artifact that runs on your hardware forever.</desc>
 
@@ -534,53 +493,50 @@
         <text x="810" y="28" class="kolm-arch__h" text-anchor="middle">03 - Own forever</text>
 
         <!-- header underlines (hairlines) -->
-        <line x1="60"  y1="40" x2="240" y2="40" class="kolm-arch__rule"/>
-        <line x1="340" y1="40" x2="620" y2="40" class="kolm-arch__rule"/>
-        <line x1="720" y1="40" x2="900" y2="40" class="kolm-arch__rule"/>
+        <line x1="60" y1="40" x2="240" y2="40" class="kolm-arch__rule" />
+        <line x1="340" y1="40" x2="620" y2="40" class="kolm-arch__rule" />
+        <line x1="720" y1="40" x2="900" y2="40" class="kolm-arch__rule" />
 
-        <!-- W848: surface labels under each column header so the user can
-             see WHICH PRODUCT SURFACE owns each band: wrapper handles
-             drop-in, studio + CLI both drive compile, runtime owns
-             ownership. Same compiler, three surfaces. -->
+        
         <text x="150" y="58" class="kolm-arch__surf" text-anchor="middle">wrapper</text>
         <text x="480" y="58" class="kolm-arch__surf" text-anchor="middle">CLI &middot; studio</text>
         <text x="810" y="58" class="kolm-arch__surf" text-anchor="middle">runtime</text>
 
         <!-- DROP IN column: client SDKs -->
         <g class="kolm-arch__col">
-          <rect x="60" y="76"  width="180" height="38" class="kolm-arch__chip"/>
+          <rect x="60" y="76" width="180" height="38" class="kolm-arch__chip" />
           <text x="150" y="100" class="kolm-arch__chipt">OpenAI SDK</text>
-          <rect x="60" y="124" width="180" height="38" class="kolm-arch__chip"/>
+          <rect x="60" y="124" width="180" height="38" class="kolm-arch__chip" />
           <text x="150" y="148" class="kolm-arch__chipt">Anthropic SDK</text>
-          <rect x="60" y="172" width="180" height="38" class="kolm-arch__chip"/>
+          <rect x="60" y="172" width="180" height="38" class="kolm-arch__chip" />
           <text x="150" y="196" class="kolm-arch__chipt">LangChain &middot; Vercel AI</text>
-          <rect x="60" y="220" width="180" height="38" class="kolm-arch__chip"/>
+          <rect x="60" y="220" width="180" height="38" class="kolm-arch__chip" />
           <text x="150" y="244" class="kolm-arch__chipt">Cursor &middot; Claude Code</text>
-          <rect x="60" y="268" width="180" height="38" class="kolm-arch__chip"/>
+          <rect x="60" y="268" width="180" height="38" class="kolm-arch__chip" />
           <text x="150" y="292" class="kolm-arch__chipt">vLLM &middot; SGLang &middot; TGI</text>
           <text x="150" y="338" class="kolm-arch__note">Your traffic, unchanged.</text>
           <text x="150" y="358" class="kolm-arch__note">One env var.</text>
         </g>
 
         <!-- arrows: inputs -> compile -->
-        <line x1="240" y1="195" x2="340" y2="195" class="kolm-arch__line"/>
-        <path d="M 334 189 L 340 195 L 334 201" class="kolm-arch__arrow"/>
+        <line x1="240" y1="195" x2="340" y2="195" class="kolm-arch__line" />
+        <path d="M 334 189 L 340 195 L 334 201" class="kolm-arch__arrow" />
 
         <!-- COMPILE column: the four stages -->
         <g class="kolm-arch__col">
-          <rect x="340" y="76"  width="280" height="48" class="kolm-arch__stage"/>
+          <rect x="340" y="76" width="280" height="48" class="kolm-arch__stage" />
           <text x="480" y="100" class="kolm-arch__staget">Capture</text>
           <text x="480" y="116" class="kolm-arch__stagen">approve · redact · hash-chain</text>
 
-          <rect x="340" y="136" width="280" height="48" class="kolm-arch__stage"/>
+          <rect x="340" y="136" width="280" height="48" class="kolm-arch__stage" />
           <text x="480" y="160" class="kolm-arch__staget">Distill</text>
           <text x="480" y="176" class="kolm-arch__stagen">teacher &rarr; student &middot; 5 strategies</text>
 
-          <rect x="340" y="196" width="280" height="48" class="kolm-arch__stage"/>
+          <rect x="340" y="196" width="280" height="48" class="kolm-arch__stage" />
           <text x="480" y="220" class="kolm-arch__staget">Quantize</text>
           <text x="480" y="236" class="kolm-arch__stagen">10 methods &middot; INT4 / FP4 / NVFP4 / dyn</text>
 
-          <rect x="340" y="256" width="280" height="48" class="kolm-arch__stage"/>
+          <rect x="340" y="256" width="280" height="48" class="kolm-arch__stage" />
           <text x="480" y="280" class="kolm-arch__staget">Sign</text>
           <text x="480" y="296" class="kolm-arch__stagen">Ed25519 receipt &middot; K-Score gate</text>
 
@@ -589,14 +545,14 @@
         </g>
 
         <!-- arrow: compile -> own -->
-        <line x1="620" y1="195" x2="720" y2="195" class="kolm-arch__line"/>
-        <path d="M 714 189 L 720 195 L 714 201" class="kolm-arch__arrow"/>
+        <line x1="620" y1="195" x2="720" y2="195" class="kolm-arch__line" />
+        <path d="M 714 189 L 720 195 L 714 201" class="kolm-arch__arrow" />
 
         <!-- OWN column: the .kolm artifact + reach -->
         <g class="kolm-arch__col">
-          <rect x="720" y="76" width="180" height="150" class="kolm-arch__artifact"/>
+          <rect x="720" y="76" width="180" height="150" class="kolm-arch__artifact" />
           <text x="810" y="110" class="kolm-arch__artt">.kolm</text>
-          <line x1="740" y1="124" x2="880" y2="124" class="kolm-arch__rule kolm-arch__rule--in"/>
+          <line x1="740" y1="124" x2="880" y2="124" class="kolm-arch__rule kolm-arch__rule--in" />
           <text x="810" y="148" class="kolm-arch__artn">weights &middot; spec.toml</text>
           <text x="810" y="166" class="kolm-arch__artn">eval split &middot; receipts</text>
           <text x="810" y="184" class="kolm-arch__artn">Ed25519 signature</text>
@@ -613,11 +569,7 @@
   </div>
 </section>
 
-<!-- W844: live chat (free tier pre-auth). This is not a screenshot; it is
-     the actual /v1/free/chat endpoint, which is the SAME pipe that powers
-     the post-auth console UX at /account. 20 free messages per IP per day
-     when no key is present; with a key the route promotes to a tenant
-     snapshot. You can tinker before signing up. -->
+
 <section class="ks-cli-chat" id="chat" aria-label="Try kolm before signing up">
   <div class="ks-cli-chat__inner">
     <div class="ks-cli-chat__copy">
@@ -644,22 +596,13 @@
 </section>
 
 
-<!-- ================== W868: section dedup.
-     We had three back-to-back explanations of the same pipeline:
-       1. .kolm-arch-band (SVG, kept - visual story)
-       2. .kolm-deep (4 per-outcome cards - CUT in W868)
-       3. .ks-three-surface (3 columns × surface - kept, has the substance)
-     The arch-band already shows the four stages; .ks-three-surface
-     already covers per-surface outcomes with substance. The 4 deep
-     cards were a third re-explanation. Cut, keep the receipt artifact
-     as the focal proof for this section. ================== -->
+
 <section class="fr-section fr-reveal" id="how">
   <div class="fr-container">
     <h2 class="fr-h2">The receipt is the proof.</h2>
     <p class="fr-lede">Every <code>.kolm</code> artifact ships its own offline verifier. The receipt below is byte-for-byte what <code>kolm verify support.kolm --json</code> prints - no phone-home, no trust in our service required.</p>
 
-    <!-- W846: real receipt JSON inline - devs want to SEE what "signed
-         artifact" actually means, not just read a card. -->
+    
     <div class="kolm-receipt-strip" aria-label="Real receipt example">
       <pre>CODE28</pre>
       <div class="kolm-receipt-strip__copy">
@@ -675,19 +618,15 @@
     </p>
 
 
-<!-- W626: artifact-contract manifesto band cut  -  the ASCII anatomy band below already shows the .kolm contract diagrammatically. -->
-
-<!-- W626: 6-card frontier-recipes grid cut  -  full gallery lives at /recipes. -->
-
-<!-- W626: decorative quote band cut  -  manifesto link lives in footer. -->
 
 
 
-<!-- ================== W850 three-surface section: Route & Capture / Distill
-     & Compile / Run & Govern. Per user redline: the homepage needs a
-     concrete "what kolm actually does" explainer in three columns, not a
-     wall of features. Also folds in the Teacher Council and confidence
-     routing lines the redline called out. ================== -->
+
+
+
+
+
+
 <div class="fr-rule--major" role="separator" aria-hidden="true"><span class="fr-rule--major__mark">01 / Three surfaces, one product</span></div>
 
 <section class="fr-section fr-section--tight fr-reveal" aria-labelledby="three-surface-h">
@@ -749,10 +688,7 @@
   </div>
 </section>
 
-<!-- ================== W837-lift: .kolm anatomy as an architectural diagram.
-     Replaces the W837 text-only specimen-sheet (which replaced the W706
-     ASCII tree). Now a hand-drawn SVG section drawing of the bundle paired
-     with a spec-sheet sidebar. Editorial quality, not a typeset list. -->
+
 <div class="fr-rule--major" role="separator" aria-hidden="true"><span class="fr-rule--major__mark">02 / Inside the file</span></div>
 
 <section class="fr-section fr-section--cinema fr-reveal" aria-label="Inside a kolm artifact">
@@ -763,22 +699,22 @@
 
     <div class="kolm-diagram">
       <figure class="kolm-diagram__schematic" aria-label="Architectural diagram of the .kolm artifact bundle">
-        <svg viewBox="0 0 640 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="kolm-diagram-title kolm-diagram-desc">
+        <svg viewbox="0 0 640 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="kolm-diagram-title kolm-diagram-desc">
           <title id="kolm-diagram-title">Architectural diagram of support.kolm</title>
           <desc id="kolm-diagram-desc">A 5.2 GB signed ZIP containing spec.toml, weights, frozen eval, K-Score bakeoff, hash-chained receipts, manifest, and Ed25519 sidecar.</desc>
           <defs>
-            <linearGradient id="kolm-page" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#faf6ec"/>
-              <stop offset="100%" stop-color="#f0eadd"/>
-            </linearGradient>
-            <pattern id="kolm-hatch" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)">
-              <line x1="0" y1="0" x2="0" y2="4" stroke="#111111" stroke-width="0.5" stroke-opacity="0.18"/>
+            <lineargradient id="kolm-page" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#faf6ec" />
+              <stop offset="100%" stop-color="#f0eadd" />
+            </lineargradient>
+            <pattern id="kolm-hatch" patternunits="userSpaceOnUse" width="4" height="4" patterntransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="4" stroke="#111111" stroke-width="0.5" stroke-opacity="0.18" />
             </pattern>
           </defs>
 
           <!-- Outer bundle (the .kolm zip) -->
-          <rect x="40" y="40" width="560" height="440" rx="3" fill="url(#kolm-page)" stroke="#111111" stroke-width="1.4"/>
-          <line x1="40" y1="78" x2="600" y2="78" stroke="#111111" stroke-width="0.5" stroke-opacity="0.32"/>
+          <rect x="40" y="40" width="560" height="440" rx="3" fill="url(#kolm-page)" stroke="#111111" stroke-width="1.4" />
+          <line x1="40" y1="78" x2="600" y2="78" stroke="#111111" stroke-width="0.5" stroke-opacity="0.32" />
 
           <!-- Header band -->
           <text x="58" y="64" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="14" font-weight="600">support.kolm</text>
@@ -787,8 +723,8 @@
           <!-- 7 entries as stacked card rows -->
           <!-- 1. spec.toml -->
           <g>
-            <rect x="58" y="98" width="524" height="44" rx="2" fill="#ffffff" stroke="#111111" stroke-width="0.6" stroke-opacity="0.30"/>
-            <rect x="58" y="98" width="6" height="44" fill="#111111"/>
+            <rect x="58" y="98" width="524" height="44" rx="2" fill="#ffffff" stroke="#111111" stroke-width="0.6" stroke-opacity="0.30" />
+            <rect x="58" y="98" width="6" height="44" fill="#111111" />
             <text x="80" y="120" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">spec.toml</text>
             <text x="80" y="136" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">teacher · student · quant recipe</text>
             <text x="568" y="128" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" text-anchor="end">2.1 KB</text>
@@ -796,8 +732,8 @@
 
           <!-- 2. weights/ -->
           <g>
-            <rect x="58" y="150" width="524" height="68" rx="2" fill="url(#kolm-hatch)" stroke="#111111" stroke-width="0.6" stroke-opacity="0.30"/>
-            <rect x="58" y="150" width="6" height="68" fill="#111111"/>
+            <rect x="58" y="150" width="524" height="68" rx="2" fill="url(#kolm-hatch)" stroke="#111111" stroke-width="0.6" stroke-opacity="0.30" />
+            <rect x="58" y="150" width="6" height="68" fill="#111111" />
             <text x="80" y="172" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">weights/</text>
             <text x="80" y="188" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">q4_0.safetensors · NF4 + double</text>
             <text x="80" y="204" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">q4_0.metadata · runtime-neutral</text>
@@ -806,8 +742,8 @@
 
           <!-- 3. eval.frozen.jsonl -->
           <g>
-            <rect x="58" y="226" width="524" height="40" rx="2" fill="#ffffff" stroke="#111111" stroke-width="0.6" stroke-opacity="0.30"/>
-            <rect x="58" y="226" width="6" height="40" fill="#111111"/>
+            <rect x="58" y="226" width="524" height="40" rx="2" fill="#ffffff" stroke="#111111" stroke-width="0.6" stroke-opacity="0.30" />
+            <rect x="58" y="226" width="6" height="40" fill="#111111" />
             <text x="80" y="246" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">eval.frozen.jsonl</text>
             <text x="80" y="261" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">240 rows · hash-pinned · immutable</text>
             <text x="568" y="254" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" text-anchor="end">88 KB</text>
@@ -815,8 +751,8 @@
 
           <!-- 4. bakeoff/ -->
           <g>
-            <rect x="58" y="274" width="524" height="40" rx="2" fill="#ffffff" stroke="#111111" stroke-width="0.6" stroke-opacity="0.30"/>
-            <rect x="58" y="274" width="6" height="40" fill="#111111"/>
+            <rect x="58" y="274" width="524" height="40" rx="2" fill="#ffffff" stroke="#111111" stroke-width="0.6" stroke-opacity="0.30" />
+            <rect x="58" y="274" width="6" height="40" fill="#111111" />
             <text x="80" y="294" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">bakeoff/k_score.summary</text>
             <text x="80" y="309" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">K = 0.91 (gate ≥ 0.85) · per-row vs teacher</text>
             <text x="568" y="302" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="700" text-anchor="end">0.91</text>
@@ -824,8 +760,8 @@
 
           <!-- 5. receipts/ -->
           <g>
-            <rect x="58" y="322" width="524" height="40" rx="2" fill="url(#kolm-hatch)" stroke="#111111" stroke-width="0.6" stroke-opacity="0.30"/>
-            <rect x="58" y="322" width="6" height="40" fill="#111111"/>
+            <rect x="58" y="322" width="524" height="40" rx="2" fill="url(#kolm-hatch)" stroke="#111111" stroke-width="0.6" stroke-opacity="0.30" />
+            <rect x="58" y="322" width="6" height="40" fill="#111111" />
             <text x="80" y="342" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">receipts/chain.sha256</text>
             <text x="80" y="357" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">47,392 captures · root bf8a3d1c…</text>
             <text x="568" y="350" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" text-anchor="end">1.4 GB</text>
@@ -833,8 +769,8 @@
 
           <!-- 6. manifest.json -->
           <g>
-            <rect x="58" y="370" width="524" height="40" rx="2" fill="#ffffff" stroke="#111111" stroke-width="0.6" stroke-opacity="0.30"/>
-            <rect x="58" y="370" width="6" height="40" fill="#111111"/>
+            <rect x="58" y="370" width="524" height="40" rx="2" fill="#ffffff" stroke="#111111" stroke-width="0.6" stroke-opacity="0.30" />
+            <rect x="58" y="370" width="6" height="40" fill="#111111" />
             <text x="80" y="390" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">manifest.json</text>
             <text x="80" y="405" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">sha256 of every path · K-Score breakdown</text>
             <text x="568" y="398" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11" text-anchor="end">22 KB</text>
@@ -842,9 +778,9 @@
 
           <!-- 7. sidecar.ed25519 (wax-seal treatment) -->
           <g>
-            <rect x="58" y="418" width="524" height="48" rx="2" fill="#f3f5f7" stroke="#111111" stroke-width="1.2"/>
-            <rect x="58" y="418" width="6" height="48" fill="#111111"/>
-            <circle cx="552" cy="442" r="14" fill="#111111" stroke="#111111" stroke-width="0.6"/>
+            <rect x="58" y="418" width="524" height="48" rx="2" fill="#f3f5f7" stroke="#111111" stroke-width="1.2" />
+            <rect x="58" y="418" width="6" height="48" fill="#111111" />
+            <circle cx="552" cy="442" r="14" fill="#111111" stroke="#111111" stroke-width="0.6" />
             <text x="552" y="446" fill="#f3f5f7" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="9" font-weight="700" text-anchor="middle">Ed25519</text>
             <text x="80" y="438" fill="#111111" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="13" font-weight="600">sidecar.ed25519</text>
             <text x="80" y="455" fill="#6b6960" font-family="ui-monospace, 'JetBrains Mono', monospace" font-size="11">64-byte signature over manifest.sha256</text>
@@ -880,29 +816,24 @@
 </section>
 
 
-<!-- W626: 8-item "will not do" principles rail cut  -  full list lives at /principles. -->
 
-<!-- ================== W621 creators strip, removed W622 ================== -->
 
-<!-- W626: 6-card frontier methods row cut  -  the W271 frontier-methods anchor stays in the hidden test-anchor block; full surface lives at /frontier-stack. -->
 
-<!-- ================== W706: visible mini-compare cut from this position.
-     User: "you repeated this from under the hero, i think it should be super
-     small just at the very bottom of the page under the CTA". Hidden anchor
-     preserved so the #vs link target and existing inbound links still resolve;
-     the tiny compact strip lives below the finale CTA. ================== -->
+
+
+
+
 <section class="test-anchor" aria-hidden="true" id="vs" style="display:none;">
   <a href="/compare">Full compare moved to /compare. Tiny strip below CTA.</a>
 </section>
 
-<!-- W837: why-grid relocated to after the finale CTA per user direction
-     ("not so important keep it as smaller text at the end not so big"). -->
+
 <section class="test-anchor" aria-hidden="true" id="why" style="display:none;">
   <a href="#why-footnote">Why kolm moved to end of page</a>
 </section>
 <span id="why-footnote" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">end-of-page footnote anchor</span>
 
-<!-- ================== W647: ROI calculator  -  restored on home; full 3-yr model still at /roi ================== -->
+
 <section class="fr-section fr-section--tight fr-reveal" id="roi" aria-labelledby="roi-h">
   <div class="fr-container">
     <div class="fr-section__head">
@@ -976,7 +907,7 @@
   </div>
 </section>
 
-<!-- ================== W626: Pricing  -  magazine-spread tier row, no card grid ================== -->
+
 <section class="fr-section fr-section--tight fr-reveal" id="pricing" aria-labelledby="pricing-h">
   <div class="fr-container">
     <div class="fr-section__head">
@@ -1050,13 +981,13 @@
   </div>
 </section>
 
-<!-- W850 redline: "Moved to /compare" 40-row block deleted; thin anchor only. -->
+
 <section class="test-anchor" aria-hidden="true" id="compare" data-mobile-hide style="display:none;">
   <a href="/compare" class="ks-accent">Full 40-row teardown at /compare</a>
   <span class="home-cmp kolm-col">anchor</span>
 </section>
 
-<!-- W626: scenarios band cut  -  full case-study set lives at /use-cases. -->
+
 
 <!-- ================== Reference architectures ================== -->
 
@@ -1068,7 +999,7 @@
 
 <!-- ================== K-score / drift ================== -->
 
-<!-- W626: migrate band cut from visible flow  -  the gateway-drop-in line is already covered by the trust strip above; full walkthroughs at /migrate. -->
+
 
 <!-- ================== What's new ================== -->
 
@@ -1090,11 +1021,11 @@
 
 <!-- ================== Ecosystem ================== -->
 
-<!-- W620: stats bar removed; numbers folded into Trust/Why sections inline. -->
 
-<!-- W626: pre-FAQ prose-band cut  -  the FAQ stands on its own. -->
 
-<!-- ================== FAQ, W622 visual rebuild on .fr-card details ================== -->
+
+
+
 <section class="fr-section fr-reveal" id="faq" aria-labelledby="faq-h">
   <div class="fr-container fr-container--tight">
     <div class="fr-section__head">
@@ -1159,7 +1090,7 @@
 <!-- ================== Verified transcript ================== -->
 
 <!-- ============================================================ -->
-<!-- W404 numbers strip                                            -->
+
 <!-- ============================================================ -->
 <section class="ks-section" data-w404="numbers-strip" aria-label="kolm by the numbers">
   <div class="ks-wrap">
@@ -1179,7 +1110,7 @@
 </section>
 
 <!-- ============================================================ -->
-<!-- W410 loop strip - 8 canonical steps from capture to run       -->
+
 <!-- ============================================================ -->
 <section class="ks-section" data-w410="loop-strip" aria-label="The kolm loop, end to end">
   <div class="ks-wrap">
@@ -1234,7 +1165,7 @@
 </section>
 
 <!-- ============================================================ -->
-<!-- W410 integrations strip - links to 9 W409z recipes + hub      -->
+
 <!-- ============================================================ -->
 <section class="ks-section" data-w410="integrations-strip" aria-label="Drop-in integrations">
   <div class="ks-wrap">
@@ -1260,7 +1191,7 @@
   </div>
 </section>
 
-<!-- ================== W888-S meta-demo callout ================== -->
+
 <section class="ks-section" data-section="meta-demo" id="meta-demo" style="padding:var(--ks-8,48px) 0;border-top:1px solid var(--ks-line-2);background:var(--ks-bg-0)">
   <div class="ks-wrap" style="max-width:980px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:var(--ks-4,12px)">
@@ -1326,10 +1257,7 @@
 </section>
 
 
-<!-- ================== W706: tiny vendor-compare strip  -  moved here from #vs.
-     User: "should be super small just at the very bottom of the page under the
-     CTA". Three rows max, kolm column highlighted; no "X rows" framing,
-     no random numbers. Full teardown still lives at /compare. ================== -->
+
 <section class="fr-section fr-section--tight" aria-label="kolm vs hosted gateways" style="padding-top:0;">
   <div class="fr-container">
     <div class="w706-bot-cmp">
@@ -1370,9 +1298,7 @@
 
 <!-- ================== Community ================== -->
 
-<!-- W373 marker block: visually hidden DOM anchors so lock-in tests can find
-     the W373/W271/W260 markers without disrupting the visual design. The
-     primary nav (W221 5-item) and pain hero remain canonical chrome. -->
+
 <div data-w373="hidden-markers" aria-hidden="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">
   <nav data-w373="hero-nav" aria-label="Marketing nav">
     <a data-w373="nav-product" href="/product">Product</a>
@@ -1466,7 +1392,7 @@
   })();
 </script>
 
-<!-- W647: ROI calc JS  -  restored on home; runs entirely client-side. -->
+
 <script>
   (function(){
     var $ = function(id){ return document.getElementById(id); };

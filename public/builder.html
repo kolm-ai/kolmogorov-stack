@@ -250,22 +250,22 @@
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
@@ -335,9 +335,7 @@
  </div>
  </div>
 
- <!-- W347: NL fan-out. Hidden by default; revealed if /v1/seeds/from-nl/health
- reports backend available. We do not stub a "soon" badge here; if no
- backend is configured the button never appears. -->
+ 
  <div id="nl-seeds-strip" style="display:none;margin-top:12px;padding:12px;border:1px dashed var(--line);border-radius:8px;background:var(--bg-card)">
  <div style="font-family:var(--mono);text-transform:uppercase;font-size:12px;color:var(--ink-faint);letter-spacing:0.04em;margin-bottom:6px">Generate from one seed</div>
  <p style="margin:0 0 8px;font-size:13px;color:var(--ink-mute)">Add one input/output pair above, then ask the configured LLM to fan it out into <code id="nl-count-pill">10</code> variations.</p>
@@ -366,9 +364,7 @@
  </div>
 
  <div id="preview-out" style="display:none">
- <!-- W347: production_ready verdict ribbon. Green when ships, amber
- when gated; reasons list the failing gates so the visitor can
- fix them before paying for compile. -->
+ 
  <div id="verdict-ribbon" style="margin:14px 0 0;padding:12px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg-card);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
  <span id="verdict-dot" aria-hidden="true" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--ink-mute)"></span>
  <strong id="verdict-text" style="font-family:var(--mono)">checking</strong>
@@ -378,7 +374,7 @@
  <h3 style="margin:20px 0 8px;font-size:14px;color:var(--ink-faint);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.04em">K-score breakdown</h3>
  <div class="ks-grid" id="ks-grid"></div>
 
- <!-- W347: sample train + holdout rows. Caller already capped to 3 per side. -->
+ 
  <h3 style="margin:20px 0 8px;font-size:14px;color:var(--ink-faint);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.04em">Train sample <span id="train-count-pill" style="color:var(--ink-mute);font-weight:normal"></span></h3>
  <table class="ex-table" id="train-tbl"><thead><tr><th style="width:50%">Input</th><th>Output</th></tr></thead><tbody></tbody></table>
 
@@ -547,7 +543,6 @@
  renderExamples();
  });
 
- // ---- Preview (W347: richer payload via /v1/build/preview) ----
  // We POST {spec, seeds_jsonl_text}; the server runs synthesize + split
  // + production_ready and returns k_score, train/holdout samples and the
  // gate verdict. Falls back to the legacy /v1/builder/preview only on
@@ -674,7 +669,6 @@
  }
  function fmt(n) { return (typeof n === 'number') ? n.toFixed(4) : '-'; }
 
- // ---- W347: NL fan-out from a single seed ----
  // Probe /v1/seeds/from-nl/health on load; if available, reveal the strip.
  fetch('/v1/seeds/from-nl/health', { cache: 'no-store' })
  .then(function(r){ return r.json(); })
@@ -841,7 +835,7 @@
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">

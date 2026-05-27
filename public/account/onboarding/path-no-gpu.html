@@ -56,7 +56,7 @@ h1{font-size:28px;font-weight:500;letter-spacing:-0.01em;margin:0 0 8px;color:va
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li><li><a href="/studio">Studio</a></li><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li>
     </ul>
@@ -83,10 +83,12 @@ h1{font-size:28px;font-weight:500;letter-spacing:-0.01em;margin:0 0 8px;color:va
   <div class="nstep">Step 1 of 4</div>
   <h2>Install the CLI.</h2>
   <p>Same install everywhere. <code>kolm doctor</code> reports your environment as CPU-only and surfaces the right cloud path.</p>
-  <pre><code>npm i -g github:kolm-ai/kolmogorov-stack
+  <pre><code>npm i -g github:kolm-ai/kolm
 kolm login --key YOUR_KS_KEY
 kolm doctor</code></pre>
-  <button class="copy-btn" data-copy="npm i -g github:kolm-ai/kolmogorov-stack&#10;kolm login --key YOUR_KS_KEY&#10;kolm doctor">Copy</button>
+  <button class="copy-btn" data-copy="npm i -g github:kolm-ai/kolm
+kolm login --key YOUR_KS_KEY
+kolm doctor">Copy</button>
   <button class="done-btn" data-mark="1">Mark step done</button>
 </section>
 
@@ -96,7 +98,8 @@ kolm doctor</code></pre>
   <p>Capture every call locally before any compile decision. Your SDK doesn't need to know.</p>
   <pre><code>kolm gateway start
 export OPENAI_BASE_URL="http://127.0.0.1:8787/v1"</code></pre>
-  <button class="copy-btn" data-copy="kolm gateway start&#10;export OPENAI_BASE_URL=&quot;http://127.0.0.1:8787/v1&quot;">Copy</button>
+  <button class="copy-btn" data-copy="kolm gateway start
+export OPENAI_BASE_URL=&quot;http://127.0.0.1:8787/v1&quot;">Copy</button>
   <button class="done-btn" data-mark="2">Mark step done</button>
 </section>
 
@@ -113,14 +116,19 @@ export OPENAI_BASE_URL="http://127.0.0.1:8787/v1"</code></pre>
     <pre><code>export RUNPOD_API_KEY="rp_..."
 kolm test cloud --provider runpod
 kolm compile spec.toml --cloud runpod --gpu A100</code></pre>
-    <button class="copy-btn" data-copy="export RUNPOD_API_KEY=&quot;rp_...&quot;&#10;kolm test cloud --provider runpod&#10;kolm compile spec.toml --cloud runpod --gpu A100">Copy</button>
+    <button class="copy-btn" data-copy="export RUNPOD_API_KEY=&quot;rp_...&quot;
+kolm test cloud --provider runpod
+kolm compile spec.toml --cloud runpod --gpu A100">Copy</button>
   </div>
   <div class="tab-panel" data-tab-panel="modal">
     <pre><code>export MODAL_TOKEN_ID="ak-..."
 export MODAL_TOKEN_SECRET="as-..."
 kolm test cloud --provider modal
 kolm compile spec.toml --cloud modal</code></pre>
-    <button class="copy-btn" data-copy="export MODAL_TOKEN_ID=&quot;ak-...&quot;&#10;export MODAL_TOKEN_SECRET=&quot;as-...&quot;&#10;kolm test cloud --provider modal&#10;kolm compile spec.toml --cloud modal">Copy</button>
+    <button class="copy-btn" data-copy="export MODAL_TOKEN_ID=&quot;ak-...&quot;
+export MODAL_TOKEN_SECRET=&quot;as-...&quot;
+kolm test cloud --provider modal
+kolm compile spec.toml --cloud modal">Copy</button>
   </div>
   <div class="tab-panel" data-tab-panel="colab">
     <p>No card, no setup. Open the notebook, paste your API key, run all cells. The compiled <code>.kolm</code> downloads to your machine when done.</p>
@@ -239,7 +247,7 @@ https://kolm.ai/colab</code></pre>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">

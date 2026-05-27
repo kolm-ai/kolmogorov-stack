@@ -25,7 +25,7 @@
 <body>
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a class="skip-link" href="#main">Skip to content</a>
-    <!-- KOLM_NAV_BEGIN (W221) -->
+    
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
       <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
@@ -121,7 +121,7 @@
       </div>
     </div>
     </nav>
-    <!-- KOLM_NAV_END (W221) -->
+    
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="distill">
 <nav aria-label="Breadcrumb" class="crumbs">
   <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>distill</span>
@@ -145,27 +145,27 @@
 # Capture-driven distillation (the common path)
 kolm distill --from-captures --namespace &lt;n&gt; [--base-model &lt;name&gt;] [--target &lt;size&gt;]
 
-# Multi-teacher council (W718): per-capture best-of with attribution
+# Multi-teacher council: per-capture best-of with attribution
 kolm distill --teachers &lt;a,b,c&gt; --weights &lt;auto|equal|domain&gt; --namespace &lt;n&gt; [--base-model &lt;name&gt;]
 
-# W711-W719 advanced recipes (mix-and-match with --from-captures)
-kolm distill --from-captures --namespace &lt;n&gt; --importance-weighted              # W711
-kolm distill --from-captures --namespace &lt;n&gt; --progressive                      # W712
-kolm distill --from-captures --namespace &lt;n&gt; --reasoning-trace-loss-weight 0.5  # W713
-kolm distill --from-captures --namespace &lt;n&gt; --contrastive                      # W714
-kolm distill --from-captures --namespace &lt;n&gt; --curriculum                       # W717
-kolm distill --from-captures --namespace &lt;n&gt; --auto-arch                        # W716 TAAS
-kolm distill --from-captures --namespace &lt;n&gt; --mixed-precision auto             # W719 DAQ
+# Advanced recipes (mix-and-match with --from-captures)
+kolm distill --from-captures --namespace &lt;n&gt; --importance-weighted
+kolm distill --from-captures --namespace &lt;n&gt; --progressive
+kolm distill --from-captures --namespace &lt;n&gt; --reasoning-trace-loss-weight 0.5
+kolm distill --from-captures --namespace &lt;n&gt; --contrastive
+kolm distill --from-captures --namespace &lt;n&gt; --curriculum
+kolm distill --from-captures --namespace &lt;n&gt; --auto-arch                        # TAAS
+kolm distill --from-captures --namespace &lt;n&gt; --mixed-precision auto             # DAQ
 
-# Reinforcement-learning subverbs (W480)
+# Reinforcement-learning subverbs
 kolm distill onpolicy   --namespace &lt;n&gt; [--grader &lt;vendor:model&gt;]
 kolm distill preference --namespace &lt;n&gt;
 kolm distill dpo        --namespace &lt;n&gt;
 kolm distill simpo      --namespace &lt;n&gt;
 
 # Attention / KV optimization subverbs
-kolm distill sparse-attention --namespace &lt;n&gt;                                   # W721 TSAC
-kolm distill itkv             --namespace &lt;n&gt;                                   # W722 importance-tiered KV
+kolm distill sparse-attention --namespace &lt;n&gt;                                   # TSAC
+kolm distill itkv             --namespace &lt;n&gt;                                   # importance-tiered KV
 
 # Lower-level: spec/seeds local worker
 kolm distill --local-worker --spec &lt;file&gt; --seeds &lt;file&gt; --out &lt;dir&gt;
@@ -181,9 +181,9 @@ kolm distill --local-worker --spec &lt;file&gt; --seeds &lt;file&gt; --out &lt;d
 # Subverbs
 kolm distill --local-worker --list-catalog
 kolm distill strategy   [--task ...] [--simulate ...]
-kolm distill efficiency [--namespace &lt;n&gt;]                                       # W787
-kolm distill improve    [--namespace &lt;n&gt;]                                       # W720 self-improve
-kolm distill runs       [--namespace &lt;n&gt;] [--limit N]                           # W455 history
+kolm distill efficiency [--namespace &lt;n&gt;]
+kolm distill improve    [--namespace &lt;n&gt;]                                       # self-improve
+kolm distill runs       [--namespace &lt;n&gt;] [--limit N]                           # history
 </code></pre>
 <h2>Flags</h2>
 <div class="table-wrap"><table>
@@ -195,17 +195,17 @@ kolm distill runs       [--namespace &lt;n&gt;] [--limit N]                     
 <tr><td><code>--from-captures</code></td><td>off</td><td>use captured (prompt, completion) pairs as training data</td></tr>
 <tr><td><code>--base-model &lt;name&gt;</code></td><td><code>Qwen/Qwen2.5-3B-Instruct</code></td><td>base / student model id</td></tr>
 <tr><td><code>--target &lt;size&gt;</code></td><td><code>phi-3-mini</code></td><td>target artifact size</td></tr>
-<tr><td><code>--teachers &lt;csv&gt;</code></td><td>none</td><td>**W718** comma-list of teacher model ids (e.g. <code>claude-opus-4-7,gpt-4o,deepseek-v4-pro</code>). Requires <code>--weights</code>.</td></tr>
-<tr><td><code>--weights &lt;m&gt;</code></td><td>none</td><td>**W718** teacher weighting: <code>auto</code> (per-capture best-of), <code>equal</code>, or <code>domain</code> (route by capture metadata)</td></tr>
-<tr><td><code>--importance-weighted</code></td><td>off</td><td>**W711** weight training pairs by capture rarity / surprise score</td></tr>
-<tr><td><code>--progressive</code></td><td>off</td><td>**W712** 3-pass curriculum: easy → medium → hard</td></tr>
-<tr><td><code>--curriculum</code></td><td>off</td><td>**W717** sort training pairs by difficulty before SFT</td></tr>
-<tr><td><code>--contrastive</code></td><td>off</td><td>**W714** add a contrastive loss term on positive / negative response pairs</td></tr>
-<tr><td><code>--auto-arch</code></td><td>off</td><td>**W716** TAAS searches student-architecture + merge recipe</td></tr>
-<tr><td><code>--mixed-precision &lt;m&gt;</code></td><td>off</td><td>**W719** DAQ: per-layer bit budget. Values: <code>auto</code>, <code>int4</code>, <code>int8</code>, <code>bitnet158</code></td></tr>
-<tr><td><code>--reasoning-trace-loss-weight &lt;w&gt;</code></td><td><code>0.0</code></td><td>**W713** weight ∈ [0,1] on the CE loss over <code>&lt;think&gt;...&lt;/think&gt;</code> spans</td></tr>
-<tr><td><code>--no-cot</code></td><td>off</td><td>**W713** force <code>response_only</code> mode (don&#39;t include reasoning trace)</td></tr>
-<tr><td><code>--mtp &lt;N&gt;</code></td><td>off</td><td>**W722** multi-token-prediction student head (predict N tokens / step)</td></tr>
+<tr><td><code>--teachers &lt;csv&gt;</code></td><td>none</td><td>**** comma-list of teacher model ids (e.g. <code>claude-opus-4-7,gpt-4o,deepseek-v4-pro</code>). Requires <code>--weights</code>.</td></tr>
+<tr><td><code>--weights &lt;m&gt;</code></td><td>none</td><td>**** teacher weighting: <code>auto</code> (per-capture best-of), <code>equal</code>, or <code>domain</code> (route by capture metadata)</td></tr>
+<tr><td><code>--importance-weighted</code></td><td>off</td><td>**** weight training pairs by capture rarity / surprise score</td></tr>
+<tr><td><code>--progressive</code></td><td>off</td><td>**** 3-pass curriculum: easy → medium → hard</td></tr>
+<tr><td><code>--curriculum</code></td><td>off</td><td>**** sort training pairs by difficulty before SFT</td></tr>
+<tr><td><code>--contrastive</code></td><td>off</td><td>**** add a contrastive loss term on positive / negative response pairs</td></tr>
+<tr><td><code>--auto-arch</code></td><td>off</td><td>**** TAAS searches student-architecture + merge recipe</td></tr>
+<tr><td><code>--mixed-precision &lt;m&gt;</code></td><td>off</td><td>**** DAQ: per-layer bit budget. Values: <code>auto</code>, <code>int4</code>, <code>int8</code>, <code>bitnet158</code></td></tr>
+<tr><td><code>--reasoning-trace-loss-weight &lt;w&gt;</code></td><td><code>0.0</code></td><td>**** weight ∈ [0,1] on the CE loss over <code>&lt;think&gt;...&lt;/think&gt;</code> spans</td></tr>
+<tr><td><code>--no-cot</code></td><td>off</td><td>**** force <code>response_only</code> mode (don&#39;t include reasoning trace)</td></tr>
+<tr><td><code>--mtp &lt;N&gt;</code></td><td>off</td><td>**** multi-token-prediction student head (predict N tokens / step)</td></tr>
 <tr><td><code>--local-worker</code></td><td>off</td><td>run the in-tree distill worker, no cloud bridge</td></tr>
 <tr><td><code>--spec &lt;file&gt;</code></td><td>none</td><td>spec.json describing the recipe</td></tr>
 <tr><td><code>--seeds &lt;file&gt;</code></td><td>none</td><td>jsonl seed pairs</td></tr>
@@ -237,27 +237,27 @@ kolm distill runs       [--namespace &lt;n&gt;] [--limit N]                     
 # Simple capture-driven distill (after kolm capture has filled the namespace)
 kolm distill --from-captures --namespace tickets --base-model Qwen/Qwen2.5-7B-Instruct
 
-# W718 Teacher Council: three teachers, per-capture best-of, attribution preserved
+# Teacher Council: three teachers, per-capture best-of, attribution preserved
 kolm distill --teachers claude-opus-4-7,gpt-4o,deepseek-v4-pro --weights auto \
   --namespace support --base-model Qwen/Qwen2.5-14B-Instruct
 
-# W713 Reasoning-trace distill: student inherits the &lt;think&gt; spans, not just the answer
+# Reasoning-trace distill: student inherits the &lt;think&gt; spans, not just the answer
 kolm distill --from-captures --namespace math \
   --base-model Qwen/Qwen2.5-7B-Instruct \
   --reasoning-trace-loss-weight 0.5
 
-# W480 On-policy: student rolls out, an external grader scores, only positives flow back
+# On-policy: student rolls out, an external grader scores, only positives flow back
 kolm distill onpolicy --namespace support --grader anthropic:claude-opus-4-7 \
   --base-model Qwen/Qwen2.5-7B-Instruct
 
-# W711 + W712 + W717 stacked: importance-weighted + progressive + curriculum
+# Stacked: importance-weighted + progressive + curriculum
 kolm distill --from-captures --namespace support \
   --importance-weighted --progressive --curriculum
 
-# W716 TAAS: search student architecture and merge recipe
+# TAAS: search student architecture and merge recipe
 kolm distill --from-captures --namespace support --auto-arch
 
-# W719 DAQ: mixed-precision auto-budget (heavy layers FP16, attention INT4, embedding INT8)
+# DAQ: mixed-precision auto-budget (heavy layers FP16, attention INT4, embedding INT8)
 kolm distill --from-captures --namespace support --mixed-precision auto
 
 # Background run (detach + watch)
@@ -274,7 +274,7 @@ kolm distill --local-worker \
 # Inspect the catalog
 kolm distill --local-worker --list-catalog
 
-# Distill history (W455)
+# Distill history
 kolm distill runs --namespace support --limit 20
 </code></pre>
 <h2>Notes</h2>

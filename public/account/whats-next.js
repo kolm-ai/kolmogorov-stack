@@ -1,4 +1,3 @@
-// W889-7.2 — "What's next" contextual action engine.
 //
 // Reads /v1/account/state, applies the rules table below, renders the top-N
 // next actions into #whats-next-body. The route is auth-gated; if the user

@@ -7,7 +7,7 @@
 <meta name="description" content="Six shipped kolm bindings — Node, Python, MCP, VS Code, single-header C, Rust — plus Swift and Kotlin in progress. Apache-2.0. One gateway, one verifier, one receipt schema.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
-<meta property="og:title" content="SDKs &middot; kolm.ai">
+<meta property="og:title" content="SDKs · kolm.ai">
 <meta property="og:description" content="Bindings for the kolm AI compiler. Six shipped today; mobile in progress.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/sdks">
@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/frontier.js"></script>
 <style>
-  /* W644 helpers — fr-spec-list scaffolding for sdks.html */
+  
   .sk-list .fr-spec-list__delta { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.04em; }
   .sk-list .fr-spec-list__delta--envelope { color: var(--fr-mint, #6cbf8d); }
   .sk-list .fr-spec-list__delta--auth     { color: #c39bf8; border-color: rgba(195,155,248,0.45); }
@@ -111,13 +111,13 @@
 <div class="ks-nav-wrap">
   <header class="ks-nav">
     <div class="ks-wrap ks-nav__row">
-      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
       <nav class="ks-nav__links" aria-label="Primary">
         <a href="/wrapper">Wrapper</a>
         <a href="/studio">Studio</a>
         <a href="/pricing">Pricing</a>
         <a href="/docs">Docs</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
       </nav>
       <div class="ks-nav__cta">
         <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
@@ -137,7 +137,7 @@
     <div class="cta-row" style="display:flex;flex-wrap:wrap;gap:var(--ks-3)">
       <a href="/quickstart" class="fr-btn fr-btn--mint">Install the CLI &rarr;</a>
       <a href="/api" class="fr-btn fr-btn--ghost">REST reference</a>
-      <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener" class="fr-btn fr-btn--ghost">Source on GitHub</a>
+      <a href="https://github.com/kolm-ai/kolm" rel="noopener" class="fr-btn fr-btn--ghost">Source on GitHub</a>
     </div>
     <div class="fr-grid-3" style="margin-top:var(--ks-7)">
       <div class="fr-num"><span class="fr-num--mid">6</span><span class="fr-num--unit">shipped SDKs</span></div>
@@ -192,7 +192,7 @@
           <span class="fr-spec-list__delta">@kolm/kolm-sdk v0.2.0 &middot; Apache-2.0 &middot; shipped</span>
         </div>
         <p class="fr-spec-list__p">The reference binding. Promise-based, typed, OAuth + API key auth, streaming responses, retry policies with exponential backoff. The VS Code extension sits on top of it. Install from source today; npm publish in flight.</p>
-        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> npm install github:kolm-ai/kolmogorov-stack<span class="fr-cli__flag">#path:sdk/node</span>
+        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> npm install github:kolm-ai/kolm<span class="fr-cli__flag">#path:sdk/node</span>
 <span class="fr-cli__comment"># npm pending: npm install @kolm/kolm-sdk</span></pre>
         <div class="fr-spec-list__specs" style="margin-top:10px"><span><strong>Runtime</strong>node &gt;= 18</span><span><strong>Module</strong>esm + cjs</span><span><strong>Types</strong>typescript</span><span><strong>Coverage</strong>all /v1/*</span></div>
         <a href="/api" class="fr-spec-list__cta">/api reference</a>
@@ -204,8 +204,8 @@
           <span class="fr-spec-list__delta">kolm-py &middot; Apache-2.0 &middot; shipped</span>
         </div>
         <p class="fr-spec-list__p">Sync and async clients in one package. Type-stubbed. Pytest fixtures included. Used inside the distill runner itself. Install from source today; PyPI publish in flight.</p>
-        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> pip install git+https://github.com/kolm-ai/kolmogorov-stack@main<span class="fr-cli__flag">#subdirectory=sdk/python</span>
-<span class="fr-cli__comment"># PyPI pending: pip install git+https://github.com/kolm-ai/kolmogorov-stack@main#subdirectory=sdk/python</span></pre>
+        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> pip install git+https://github.com/kolm-ai/kolm@main<span class="fr-cli__flag">#subdirectory=sdk/python</span>
+<span class="fr-cli__comment"># PyPI pending: pip install git+https://github.com/kolm-ai/kolm@main#subdirectory=sdk/python</span></pre>
         <div class="fr-spec-list__specs" style="margin-top:10px"><span><strong>Runtime</strong>python &gt;= 3.10</span><span><strong>Modes</strong>sync + async</span><span><strong>Testing</strong>pytest plugin</span></div>
         <a href="/api" class="fr-spec-list__cta">/api reference</a>
       </li>
@@ -216,7 +216,7 @@
           <span class="fr-spec-list__delta">@kolm/recipe-mcp v0.2.0 &middot; Apache-2.0 &middot; shipped</span>
         </div>
         <p class="fr-spec-list__p">For Claude Desktop and any IDE that speaks MCP. Exposes the kolm verbs as MCP tools so a Claude-resident developer can capture, distill, compile, score, and verify without leaving the editor. Install from source today; npm publish in flight.</p>
-        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> npm install <span class="fr-cli__flag">-g</span> github:kolm-ai/kolmogorov-stack<span class="fr-cli__flag">#path:sdk/mcp</span>
+        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> npm install <span class="fr-cli__flag">-g</span> github:kolm-ai/kolm<span class="fr-cli__flag">#path:sdk/mcp</span>
 <span class="fr-cli__comment"># then register it in your MCP host config</span>
 <span class="fr-cli__comment"># npm pending: npm install -g @kolm/recipe-mcp</span></pre>
         <div class="fr-spec-list__specs" style="margin-top:10px"><span><strong>Runtime</strong>node &gt;= 18</span><span><strong>Transport</strong>stdio</span><span><strong>Hosts</strong>Claude Desktop, IDE Claude</span></div>
@@ -242,10 +242,10 @@
           <span class="fr-spec-list__delta">sdk/c &middot; stb-style &middot; Apache-2.0 &middot; shipped</span>
         </div>
         <p class="fr-spec-list__p">One header file, <code>kolm.h</code>. Define <code>KOLM_IMPLEMENTATION</code> in exactly one translation unit. libcurl-backed. No JSON parser bundled &mdash; pair with cJSON. Built for embedded contexts and integrators who don't want a runtime.</p>
-        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> curl <span class="fr-cli__flag">-L -o</span> kolm.h https://github.com/kolm-ai/kolmogorov-stack/raw/main/sdk/c/kolm.h
+        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> curl <span class="fr-cli__flag">-L -o</span> kolm.h https://github.com/kolm-ai/kolm/raw/main/sdk/c/kolm.h
 <span class="fr-cli__comment"># in one .c file: #define KOLM_IMPLEMENTATION before #include "kolm.h"</span></pre>
         <div class="fr-spec-list__specs" style="margin-top:10px"><span><strong>Standard</strong>c99</span><span><strong>Deps</strong>libcurl</span><span><strong>Scope</strong>verify-first</span></div>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack/tree/main/sdk/c" rel="noopener" class="fr-spec-list__cta">sdk/c/ on GitHub</a>
+        <a href="https://github.com/kolm-ai/kolm/tree/main/sdk/c" rel="noopener" class="fr-spec-list__cta">sdk/c/ on GitHub</a>
       </li>
 
       <li id="rust">
@@ -254,11 +254,11 @@
           <span class="fr-spec-list__delta">kolm v0.2.0 &middot; Apache-2.0 &middot; shipped</span>
         </div>
         <p class="fr-spec-list__p">The <code>kolm</code> crate v0.2.0. ureq-sync transport, no async runtime required. Raw error envelope: no <code>is_success()</code> sugar hides a 4xx; raw status and body surface to the caller. Install from the git source today; crates.io publish in flight.</p>
-        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> cargo add kolm <span class="fr-cli__flag">--git</span> https://github.com/kolm-ai/kolmogorov-stack
-<span class="fr-cli__comment"># or in Cargo.toml: kolm = { git = "https://github.com/kolm-ai/kolmogorov-stack", branch = "main" }</span>
+        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> cargo add kolm <span class="fr-cli__flag">--git</span> https://github.com/kolm-ai/kolm
+<span class="fr-cli__comment"># or in Cargo.toml: kolm = { git = "https://github.com/kolm-ai/kolm", branch = "main" }</span>
 <span class="fr-cli__comment"># crates.io pending: cargo add kolm</span></pre>
         <div class="fr-spec-list__specs" style="margin-top:10px"><span><strong>Toolchain</strong>rust stable</span><span><strong>Transport</strong>ureq sync</span><span><strong>Example</strong>examples/whoami.rs</span></div>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack/tree/main/sdk/rust" rel="noopener" class="fr-spec-list__cta">sdk/rust/ on GitHub</a>
+        <a href="https://github.com/kolm-ai/kolm/tree/main/sdk/rust" rel="noopener" class="fr-spec-list__cta">sdk/rust/ on GitHub</a>
       </li>
 
     </ol>
@@ -434,7 +434,7 @@ kolm verify ./cm-claims-v4.kolm</pre>
     <ul class="fr-spec-list sk-list" style="margin-top:var(--ks-6)">
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>GitHub source</h3><span class="fr-spec-list__delta fr-spec-list__delta--repo">MONOREPO &middot; Apache-2.0</span></div>
-        <p class="fr-spec-list__p">Node, Python, MCP, VS Code, C, and Rust live under <code>sdk/*</code>. All Apache-2.0. <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">github.com/kolm-ai/kolmogorov-stack &rarr;</a></p>
+        <p class="fr-spec-list__p">Node, Python, MCP, VS Code, C, and Rust live under <code>sdk/*</code>. All Apache-2.0. <a href="https://github.com/kolm-ai/kolm" rel="noopener">github.com/kolm-ai/kolm &rarr;</a></p>
       </li>
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>REST routes the SDKs wrap</h3><span class="fr-spec-list__delta fr-spec-list__delta--rest">/v1/* &middot; 355+ routes</span></div>
@@ -504,7 +504,7 @@ kolm verify ./cm-claims-v4.kolm</pre>
         <a href="/manifesto">Manifesto</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub &rarr;</a>
       </div>
     </div>
     <div class="ks-foot__base">

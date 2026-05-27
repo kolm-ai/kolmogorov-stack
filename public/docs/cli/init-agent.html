@@ -25,7 +25,7 @@
 <body>
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a class="skip-link" href="#main">Skip to content</a>
-    <!-- KOLM_NAV_BEGIN (W221) -->
+    
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
       <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
@@ -121,7 +121,7 @@
       </div>
     </div>
     </nav>
-    <!-- KOLM_NAV_END (W221) -->
+    
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="init-agent">
 <nav aria-label="Breadcrumb" class="crumbs">
   <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>init-agent</span>
@@ -139,7 +139,7 @@
   </div>
 </section>
 <h1>kolm init-agent</h1>
-<p>Script-first project scaffolder (W238). Creates a complete kolm agent project directory you can <code>cd</code> into and run with <code>./run.sh</code>. No config wizards, no globals, just plain-text files you can hand-edit and commit to git.</p>
+<p>Script-first project scaffolder. Creates a complete kolm agent project directory you can <code>cd</code> into and run with <code>./run.sh</code>. No config wizards, no globals, just plain-text files you can hand-edit and commit to git.</p>
 <h2>Usage</h2>
 <pre><code>
 kolm init-agent &lt;name&gt; [dir] [--template chatbot|redactor|classifier|extraction|agent]
@@ -152,7 +152,7 @@ kolm init-agent &lt;name&gt; [dir] [--template chatbot|redactor|classifier|extra
 <li><code>redactor</code> - rule class, no model bytes</li>
 <li><code>classifier</code> - Qwen 2.5 0.5B distilled student</li>
 <li><code>extraction</code> - Qwen 2.5 3B, JSON output target</li>
-<li><code>agent</code> - Hermes 4.3 36B with a self-growing blueprint (W236 link)</li>
+<li><code>agent</code> - Hermes 4.3 36B with a self-growing blueprint</li>
 </ul>
 <h2>Examples</h2>
 <pre><code>
@@ -166,7 +166,7 @@ kolm init-agent demo --template extraction --json # machine-readable
 &lt;dir&gt;/
  spec.json kolm compile spec
  seeds.jsonl one seed pair per line (one stub example)
- blueprint.json self-growing agent blueprint (W236)
+ blueprint.json self-growing agent blueprint
  run.sh / run.ps1 compile + serve scripts
  watch.sh / watch.ps1 capture + auto-distill watchers
  tmux.conf optional 3-pane session layout

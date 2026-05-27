@@ -36,13 +36,13 @@
 <div class="ks-nav-wrap">
   <header class="ks-nav">
     <div class="ks-wrap ks-nav__row">
-      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
       <nav class="ks-nav__links" aria-label="Primary">
         <a href="/wrapper">Wrapper</a>
         <a href="/studio">Studio</a>
         <a href="/pricing">Pricing</a>
         <a href="/docs">Docs</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
       </nav>
       <div class="ks-nav__cta">
         <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
@@ -66,7 +66,7 @@
   <div class="ks-wrap">
     <h2>Helm chart location</h2>
     <p class="sub">The reference chart lives in the kolm repository at <code>tools/helm/kolm/</code>. Clone the repo or vendor the chart into your platform repo; helm registry hosting is on the roadmap but not live today.</p>
-    <div class="code-card"><pre>git clone https://github.com/kolm-ai/kolmogorov-stack
+    <div class="code-card"><pre>git clone https://github.com/kolm-ai/kolm
 cd kolmogorov-stack/tools/helm/kolm
 helm install kolm . --namespace kolm-runtime --create-namespace --values my-values.yaml</pre></div>
     <p>The chart is intentionally small. It ships a Deployment, a Service, a ConfigMap for the runtime config, an HPA template, a ServiceMonitor for Prometheus Operator (optional, behind a feature flag), and the init container that fetches the artifact. No CRDs, no operators, no custom controllers; the chart targets standard upstream Kubernetes.</p>
@@ -250,7 +250,7 @@ terminationGracePeriodSeconds: 60</pre></div>
         <a href="/enterprise">Enterprise</a>
         <a href="/manifesto">Manifesto</a>
         <a href="mailto:rodneyyesep@gmail.com">rodneyyesep@gmail.com</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub &rarr;</a>
       </div>
     </div>
     <div class="ks-foot__base">

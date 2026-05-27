@@ -1,55 +1,78 @@
 {
- "@context": "https://kolm.ai/well-known/ai-context.json",
- "@type": "AiContext",
- "version": "1.0",
- "name": "kolm",
- "tagline": "Route models. Distill specialists. Run on any device.",
- "description": "Kolm is the OpenAI-compatible gateway, distillation workflow, and signed runtime for production AI teams. It routes OpenAI, Anthropic, Gemini, OpenRouter, local, and internal models through one gateway, writes approved traces into a local event lake, turns reviewed examples into datasets, holdouts, bakeoffs, distill runs, and signed .kolm artifacts, then runs those artifacts across cloud, browser, edge, device, CLI/TUI, and air-gapped targets. Production artifacts carry public-key Ed25519 receipt evidence and verifier state.",
- "company": "Kolm, Inc.",
- "binary": "kolm",
- "fileFormat": ".kolm",
- "specification": "RS-1",
- "license": "MIT (code), CC-BY-4.0 (text)",
- "primaryUrl": "https://kolm.ai",
- "endpoints": {
- "signup": "https://kolm.ai/v1/signup",
- "signin": "https://kolm.ai/v1/signin",
- "wrap": "https://kolm.ai/v1/wrap/verified",
- "captureAnthropic": "https://kolm.ai/v1/capture/anthropic",
- "captureOpenai": "https://kolm.ai/v1/capture/openai",
- "captureOpenRouter": "https://kolm.ai/v1/capture/openrouter",
- "datasets": "https://kolm.ai/v1/datasets",
- "labels": "https://kolm.ai/v1/labels/synthesize-corpus",
- "distill": "https://kolm.ai/v1/specialists/auto-distill",
- "recipes": "https://kolm.ai/v1/recipes",
- "artifacts": "https://kolm.ai/v1/artifacts",
- "models": "https://kolm.ai/v1/models",
- "marketplace": "https://kolm.ai/v1/marketplace",
- "oauth": ["https://kolm.ai/v1/oauth/google/start", "https://kolm.ai/v1/oauth/github/start"]
- },
- "concepts": {
- "kolm-artifact": "A signed .kolm artifact package containing manifest, receipt, credential, evaluator, recipe or runtime target metadata, train/holdout provenance, and optional model-weight exports such as GGUF, ONNX, MLX, Core ML, or TensorRT when the build provides them.",
- "k-score": "A held-out eval gate over the artifact's actual outputs, speed, size, cost, determinism, coverage, and optional expanded axes. It is an artifact readiness signal, not a claim of general intelligence.",
- "receipt-chain": "Public-key Ed25519 receipt evidence over the artifact and verifier outputs, with optional Sigstore/Rekor anchoring. Verifiers treat public-key signatures and receipt lineage as the production trust surface.",
- "rent-vs-buy": "Frontier and local model calls captured through the gateway become reviewed training and eval data. Repeated workflows can then be routed to local rules, small models, or compiled artifacts instead of paying the frontier API forever."
- },
- "provenanceProof": {
- "headline": "SWE-bench Lite harness ships at kolm bench --reproduce swebench-lite-n150, seed=42, Opus-4.7, swebench 4.1.0 evaluator. Headline lift lands when the first end-to-end signed run completes; no point estimate is published before then.",
- "reproduce": "kolm bench --reproduce swebench-lite-n150",
- "methodology": "https://kolm.ai/articles/how-we-benchmark"
- },
- "pricingTiers": [
- {"name": "Free", "price": 0, "currency": "USD", "billing": "monthly"},
- {"name": "Pro", "price": 49, "currency": "USD", "billing": "monthly"},
- {"name": "Team", "price": 499, "currency": "USD", "billing": "monthly"},
- {"name": "Enterprise", "price": null, "currency": "USD", "billing": "custom"}
- ],
- "byokeyPolicy": "All tiers bring their own frontier-API key. kolm never resells tokens.",
- "repository": "https://kolm.ai/download",
- "install": "See https://kolm.ai/quickstart",
- "contact": {
- "press": "press@kolm.ai",
- "security": "https://kolm.ai/.well-known/security.txt",
- "general": "https://kolm.ai/contact"
- }
+  "@context": "https://kolm.ai/well-known/ai-context.json",
+  "@type": "AiContext",
+  "version": "1.0",
+  "name": "kolm",
+  "tagline": "Route models. Distill specialists. Run on any device.",
+  "description": "Kolm is the OpenAI-compatible gateway, distillation workflow, and signed runtime for production AI teams. It routes OpenAI, Anthropic, Gemini, OpenRouter, local, and internal models through one gateway, writes approved traces into a local event lake, turns reviewed examples into datasets, holdouts, bakeoffs, distill runs, and signed .kolm artifacts, then runs those artifacts across cloud, browser, edge, device, CLI/TUI, and air-gapped targets. Production artifacts carry public-key Ed25519 receipt evidence and verifier state.",
+  "company": "Kolm, Inc.",
+  "binary": "kolm",
+  "fileFormat": ".kolm",
+  "specification": "RS-1",
+  "license": "MIT (code), CC-BY-4.0 (text)",
+  "primaryUrl": "https://kolm.ai",
+  "endpoints": {
+    "signup": "https://kolm.ai/v1/signup",
+    "signin": "https://kolm.ai/v1/signin",
+    "wrap": "https://kolm.ai/v1/wrap/verified",
+    "captureAnthropic": "https://kolm.ai/v1/capture/anthropic",
+    "captureOpenai": "https://kolm.ai/v1/capture/openai",
+    "captureOpenRouter": "https://kolm.ai/v1/capture/openrouter",
+    "datasets": "https://kolm.ai/v1/datasets",
+    "labels": "https://kolm.ai/v1/labels/synthesize-corpus",
+    "distill": "https://kolm.ai/v1/specialists/auto-distill",
+    "recipes": "https://kolm.ai/v1/recipes",
+    "artifacts": "https://kolm.ai/v1/artifacts",
+    "models": "https://kolm.ai/v1/models",
+    "marketplace": "https://kolm.ai/v1/marketplace",
+    "oauth": [
+      "https://kolm.ai/v1/oauth/google/start",
+      "https://kolm.ai/v1/oauth/github/start"
+    ]
+  },
+  "concepts": {
+    "kolm-artifact": "A signed .kolm artifact package containing manifest, receipt, credential, evaluator, recipe or runtime target metadata, train/holdout provenance, and optional model-weight exports such as GGUF, ONNX, MLX, Core ML, or TensorRT when the build provides them.",
+    "k-score": "A held-out eval gate over the artifact's actual outputs, speed, size, cost, determinism, coverage, and optional expanded axes. It is an artifact readiness signal, not a claim of general intelligence.",
+    "receipt-chain": "Public-key Ed25519 receipt evidence over the artifact and verifier outputs, with optional Sigstore/Rekor anchoring. Verifiers treat public-key signatures and receipt lineage as the production trust surface.",
+    "rent-vs-buy": "Frontier and local model calls captured through the gateway become reviewed training and eval data. Repeated workflows can then be routed to local rules, small models, or compiled artifacts instead of paying the frontier API forever."
+  },
+  "provenanceProof": {
+    "headline": "SWE-bench Lite harness ships at kolm bench --reproduce swebench-lite-n150, seed=42, Opus-4.7, swebench 4.1.0 evaluator. Headline lift lands when the first end-to-end signed run completes; no point estimate is published before then.",
+    "reproduce": "kolm bench --reproduce swebench-lite-n150",
+    "methodology": "https://kolm.ai/articles/how-we-benchmark"
+  },
+  "pricingTiers": [
+    {
+      "name": "Free",
+      "price": 0,
+      "currency": "USD",
+      "billing": "monthly"
+    },
+    {
+      "name": "Pro",
+      "price": 49,
+      "currency": "USD",
+      "billing": "monthly"
+    },
+    {
+      "name": "Team",
+      "price": 499,
+      "currency": "USD",
+      "billing": "monthly"
+    },
+    {
+      "name": "Enterprise",
+      "price": null,
+      "currency": "USD",
+      "billing": "custom"
+    }
+  ],
+  "byokeyPolicy": "All tiers bring their own frontier-API key. kolm never resells tokens.",
+  "repository": "https://kolm.ai/download",
+  "install": "See https://kolm.ai/quickstart",
+  "contact": {
+    "press": "press@kolm.ai",
+    "security": "https://kolm.ai/.well-known/security.txt",
+    "general": "https://kolm.ai/contact"
+  }
 }

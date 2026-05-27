@@ -100,22 +100,22 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
@@ -165,13 +165,13 @@ $ kolm run claims-redactor &lt; claim.txt</pre>
 <a class="cta-alt" href="/build-your-own?template=claims-redactor">Compile your own variant &rarr;</a>
 
 <h2>How it works</h2>
-<p>A rule-class recipe authored as a sandbox-safe mirror of <code>src/phi-redactor.js</code> (single-source-of-truth pattern, W295/W258-ML-4). The artifact is a single .kolm zip containing the recipe source, an ed25519 receipt chain, and an evaluation block measured against a held-out slice of 60 synthetic-but-realistic claims notes. The recipe is deterministic: the same note always returns the same redacted output with the same token-to-original map. Tokens preserve structure so a downstream teacher API never sees the raw PHI, and <code>reinject()</code> on the teacher response restores fidelity.</p>
+<p>A rule-class recipe authored as a sandbox-safe mirror of <code>src/phi-redactor.js</code> (single-source-of-truth pattern,/-4). The artifact is a single.kolm zip containing the recipe source, an ed25519 receipt chain, and an evaluation block measured against a held-out slice of 60 synthetic-but-realistic claims notes. The recipe is deterministic: the same note always returns the same redacted output with the same token-to-original map. Tokens preserve structure so a downstream teacher API never sees the raw PHI, and <code>reinject()</code> on the teacher response restores fidelity.</p>
 
 <h2>Classes covered (all 18 HIPAA Safe Harbor + 3 kolm extensions)</h2>
 <ul>
  <li><b>NAME, GEO, DATE, PHONE, FAX, EMAIL, SSN, MRN, HPID, ACCT, LIC, VEH, DEV, URL, IP, BIO, OTHER</b>, the Safe Harbor 17 (plus general "BIO" coverage).</li>
  <li><b>NPI, DEA, MEDICAID</b>, healthcare-provider identifiers required for claims submission but not technically PHI under 45 CFR 164.514(b)(2).</li>
- <li><b>Bare names + bare addresses</b>, W343 additions so unlabeled claims narratives still mask "Sandra Pham" and "415 Oak St" without a "Patient:" or "Address:" prefix.</li>
+ <li><b>Bare names + bare addresses</b>, additions so unlabeled claims narratives still mask "Sandra Pham" and "415 Oak St" without a "Patient:" or "Address:" prefix.</li>
 </ul>
 
 <h2>Sample input / output</h2>
@@ -260,7 +260,7 @@ $ kolm run claims-redactor &lt; claim.txt</pre>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">

@@ -5,21 +5,21 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <title>Releasing &middot; A/B test, gate, promote, auto-rollback &middot; kolm.ai</title>
-<meta name="description" content="W777 + W778 release procedure: split traffic between two artifact versions, run the Welch t-test gate, promote the winner, auto-rollback when the promoted arm underperforms. Open-source AI workbench.">
+<meta name="description" content="+ release procedure: split traffic between two artifact versions, run the Welch t-test gate, promote the winner, auto-rollback when the promoted arm underperforms. Open-source AI workbench.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Releasing &middot; A/B test, gate, promote, auto-rollback &middot; kolm.ai">
-<meta property="og:description" content="W777 + W778 release procedure: split traffic, Welch t-test gate, promote winner, auto-rollback regressions.">
+<meta property="og:title" content="Releasing · A/B test, gate, promote, auto-rollback · kolm.ai">
+<meta property="og:description" content="+ release procedure: split traffic, Welch t-test gate, promote winner, auto-rollback regressions.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/releasing">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Releasing &middot; A/B test + auto-rollback &middot; kolm.ai">
+<meta name="twitter:title" content="Releasing · A/B test + auto-rollback · kolm.ai">
 <meta name="twitter:description" content="Split traffic, Welch t-test gate, promote, auto-rollback.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs/releasing">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Releasing: A/B test, gate, promote, auto-rollback","description":"W777 + W778 release procedure: deterministic traffic splitting between two artifact versions, Welch t-test gate, automatic rollback on regression.","url":"https://kolm.ai/docs/releasing","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Releasing: A/B test, gate, promote, auto-rollback","description":"+ release procedure: deterministic traffic splitting between two artifact versions, Welch t-test gate, automatic rollback on regression.","url":"https://kolm.ai/docs/releasing","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <link rel="stylesheet" href="/design-tokens.css">
 <style>
 :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:rgba(17, 17, 17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
@@ -72,13 +72,13 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -90,9 +90,9 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <main id="main" tabindex="-1"><div class="wrap">
 
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / releasing</div>
-<p class="brand-eyebrow">Open-source AI workbench &middot; W777 + W778</p>
+<p class="brand-eyebrow">Open-source AI workbench &middot; +</p>
 <h1>Releasing.</h1>
-<p class="lede">Release a new artifact version the way every plain release engineer wishes they could: split production traffic 50/50 between the old and new artifact, let the W778 Welch t-test decide whether the new version is actually better, promote the winner, and let the auto-rollback hook revert any promotion the gate later turns against. Two CLI verbs, two modules, four route prefixes, one audit log.</p>
+<p class="lede">Release a new artifact version the way every plain release engineer wishes they could: split production traffic 50/50 between the old and new artifact, let the Welch t-test decide whether the new version is actually better, promote the winner, and let the auto-rollback hook revert any promotion the gate later turns against. Two CLI verbs, two modules, four route prefixes, one audit log.</p>
 
 <h2 id="why">Why an explicit release path</h2>
 <p>Every team eventually invents this pipeline themselves: a feature flag, a logging table, a stats script, a Slack alert, a runbook. kolm packages the loop directly because every artifact build SHOULD see traffic before it sees all traffic, and every promotion SHOULD have a reversible audit row. <code>kolm ab</code> is the orchestrator. <code>kolm stat-sig</code> is the math. Together they replace ~400 lines of glue code per release pipeline.</p>
@@ -107,11 +107,11 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <pre>CODE6</pre>
 
 <h2 id="outcomes">Recording outcomes</h2>
-<p>Outcomes feed the gate. Every time you finish serving a request from arm A or arm B, record the K-Score and latency so the W778 gate can score it later. The outcome event lands in the canonical event-store under <code>workflow_id="w777:ab"</code>; W411 tenant fence enforces ownership.</p>
+<p>Outcomes feed the gate. Every time you finish serving a request from arm A or arm B, record the K-Score and latency so the gate can score it later. The outcome event lands in the canonical event-store under <code>workflow_id="w777:ab"</code>; tenant fence enforces ownership.</p>
 
 <pre>CODE8</pre>
 
-<h2 id="gate">The gate (W778)</h2>
+<h2 id="gate">The gate</h2>
 <p>The gate combines three checks. All three must pass to return <code>decision:"pass"</code>:</p>
 
 <table>
@@ -156,11 +156,11 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
     <tr><td>POST</td><td><code>/v1/ab-tests/:id/rollback</code></td><td>Trigger the auto-rollback check</td></tr>
     <tr><td>POST</td><td><code>/v1/ab-tests/:id/stop</code></td><td>Mark stopped (no future assignments)</td></tr>
     <tr><td>POST</td><td><code>/v1/stat-sig/test</code></td><td>Welch t-test on raw <code>samples_a</code> + <code>samples_b</code></td></tr>
-    <tr><td>GET</td><td><code>/v1/stat-sig/gate?ab_test_id=X</code></td><td>Gate decision pulling samples from W777</td></tr>
+    <tr><td>GET</td><td><code>/v1/stat-sig/gate?ab_test_id=X</code></td><td>Gate decision pulling samples from</td></tr>
   </tbody>
 </table>
 
-<p>All routes auth-gated. Tenant fence forced from session (never from request body) per W411 conventions.</p>
+<p>All routes auth-gated. Tenant fence forced from session (never from request body) per conventions.</p>
 
 <h2 id="related">Related</h2>
 <div class="related">

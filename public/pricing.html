@@ -32,8 +32,7 @@
 <script defer src="/supplement.js"></script>
 <style>
   /* Pricing-page additions on top of ks.css */
-  /* Wave4 stripe-fix: 6 columns to mirror homepage tier row exactly
-     (Free / Indie $29 / Pro $49 / Team $99 / Business $499 / Enterprise Contact Sales — W889-6.1). */
+  
   .pr-tiers { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--ks-3); align-items: stretch; }
   @media (max-width: 1380px) { .pr-tiers { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ks-4); } }
   @media (max-width: 1000px) { .pr-tiers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -69,7 +68,7 @@
     .pr-cmp { font-size: 12px; }
     .pr-cmp th, .pr-cmp td { padding: 10px 8px; }
   }
-  /* W650: per-tier deep-dive  -  strip card chrome, hairline-separated magazine spread */
+  
   .pr-tierdeep { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--ks-7); row-gap: var(--ks-5); padding: var(--ks-7) 0; background: transparent; border: 0; border-top: 1px solid rgba(230, 233, 238,0.08); border-radius: 0; margin: 0; }
   .pr-tierdeep:first-of-type { border-top: 0; padding-top: var(--ks-5); }
   @media (max-width: 820px) { .pr-tierdeep { grid-template-columns: 1fr; column-gap: 0; row-gap: var(--ks-4); padding: var(--ks-5) 0; } }
@@ -86,7 +85,7 @@
   .pr-tierdeep .pr-codecard { background: var(--ks-bg-0); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: 18px 20px; font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink-2); line-height: 1.7; overflow-x: auto; }
   .pr-tierdeep .pr-codecard .c { color: var(--ks-ink-3); }
   .pr-tierdeep .pr-codecard .k { color: var(--ks-accent); }
-  /* W650: Scenario costs  -  strip card chrome, three-column magazine spread with mono math block */
+  
   .pr-scenarios { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ks-6) var(--ks-7); }
   @media (max-width: 920px) { .pr-scenarios { grid-template-columns: 1fr; gap: var(--ks-5); } }
   .pr-scenario { background: transparent; border: 0; border-top: 1px solid rgba(230, 233, 238,0.08); border-radius: 0; padding: var(--ks-5) 0 0; display: flex; flex-direction: column; gap: var(--ks-3); }
@@ -98,7 +97,7 @@
   .pr-scenario .pr-math .row { display: flex; justify-content: space-between; padding: 3px 0; }
   .pr-scenario .pr-math .row.tot { border-top: 1px dashed var(--ks-line-1); margin-top: 6px; padding-top: 8px; color: var(--ks-accent); font-weight: 580; }
   .pr-scenario .pr-pick { font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-accent); letter-spacing: 0.04em; text-align: left; padding: 0; background: transparent; border: 0; border-radius: 0; }
-  /* W653: inline kolm-vs-frontier cost-comparison bars  -  visual proof under each scenario */
+  
   .pr-vs { margin-top: 2px; padding: 12px 0 4px; border-top: 1px dashed rgba(230, 233, 238,0.08); display: flex; flex-direction: column; gap: 6px; }
   .pr-vs__row { display: grid; grid-template-columns: 88px 1fr 92px; align-items: center; gap: 10px; font-family: var(--ks-mono); font-size: 11px; line-height: 1.2; }
   .pr-vs__label { color: var(--ks-ink-3); letter-spacing: 0.04em; text-transform: uppercase; }
@@ -110,7 +109,7 @@
   .pr-vs__val--frontier { color: var(--ks-ink-2); text-decoration: line-through; text-decoration-color: rgba(184,108,114,0.6); text-decoration-thickness: 1px; }
   .pr-vs__foot { font-family: var(--ks-mono); font-size: 10.5px; color: var(--ks-ink-3); letter-spacing: 0.04em; padding-top: 4px; }
   .pr-vs__foot b { color: var(--ks-accent); font-weight: 540; }
-  /* W650: Add-ons  -  editorial spec-list rows, no card chrome */
+  
   .pr-addons { display: grid; grid-template-columns: 1fr; gap: 0; border-top: 1px solid rgba(230, 233, 238,0.08); }
   .pr-addon { background: transparent; border: 0; border-bottom: 1px solid rgba(230, 233, 238,0.08); border-radius: 0; padding: var(--ks-5) 0; display: grid; grid-template-columns: 1fr 2fr; gap: var(--ks-3) var(--ks-6); align-items: start; }
   @media (max-width: 820px) { .pr-addon { grid-template-columns: 1fr; gap: var(--ks-2); padding: var(--ks-4) 0; } }
@@ -152,7 +151,7 @@
   .pr-savings { display: inline-block; padding: 2px 8px; margin-left: 8px; background: var(--ks-accent-soft); color: var(--ks-accent); font-family: var(--ks-mono); font-size: 10.5px; border-radius: var(--ks-r-pill); letter-spacing: 0.04em; border: 1px solid var(--ks-accent-edge); }
   .test-anchor { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
 
-  /* W663 sticky tier nav + currency selector */
+  
   .pr-stick { position: sticky; top: 0; z-index: 40; background: rgba(7,9,12,0.94); backdrop-filter: saturate(150%) blur(8px); -webkit-backdrop-filter: saturate(150%) blur(8px); border-bottom: 1px solid var(--ks-line-2); }
   .pr-stick__row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ks-3); justify-content: space-between; padding: 10px 0; }
   .pr-stick__jump { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -170,7 +169,7 @@
     .pr-stick__cx-label { display: none; }
     .pr-cx-note { display: none; }
   }
-  /* W663 ROI per-tier payback row */
+  
   .pr-roi-tiers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 20px; padding-top: 18px; border-top: 1px solid rgba(230, 233, 238,0.08); }
   @media (max-width: 760px) { .pr-roi-tiers { grid-template-columns: 1fr; } }
   .pr-roi-tier { padding: 14px 16px; background: rgba(0,0,0,0.18); border: 1px solid rgba(230, 233, 238,0.08); border-radius: 10px; }
@@ -259,18 +258,18 @@
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
@@ -278,7 +277,7 @@
     <a href="/studio">Studio</a>
     <a href="/pricing">Pricing</a>
     <a href="/docs">Docs</a>
-    <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a>
+    <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
     <a href="/signup?intent=login">Sign in</a>
     <a href="/signup">Get started &rarr;</a>
   </div>
@@ -286,9 +285,7 @@
 
 <main id="main">
 
-<!-- W267 hidden nonprofits-strip anchor (first block inside <main>, before
-     the hero). Offscreen + aria-hidden + hidden so screen readers skip;
-     visible W267 strip lives lower in the page via a separate callout. -->
+
 <aside hidden aria-hidden="true" data-w267="nonprofits-strip" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
   <a href="/nonprofits">Free Pro tier for non-profits and academia</a>
 </aside>
@@ -309,8 +306,8 @@
   </div>
 </section>
 
-<!-- W663 sticky tier nav + currency selector -->
-<div class="pr-stick" data-w663="sticky-nav" role="navigation" aria-label="Tier and currency">
+
+<div class="pr-stick" data-pr="sticky-nav" role="navigation" aria-label="Tier and currency">
   <div class="ks-wrap pr-stick__row">
     <div class="pr-stick__jump">
       <a href="#tier-free">Free</a>
@@ -322,7 +319,7 @@
       <a href="#roi">ROI</a>
       <a href="#compare">Compare</a>
     </div>
-    <div class="pr-stick__cx" data-w663="currency-selector">
+    <div class="pr-stick__cx" data-pr="currency-selector">
       <span class="pr-stick__cx-label">Currency</span>
       <div class="pr-cx" role="radiogroup" aria-label="Currency selector">
         <button class="on" type="button" data-cx="USD" aria-pressed="true">USD</button>
@@ -415,11 +412,7 @@
         <div class="ctaWrap"><a class="ks-btn ks-btn--ghost" style="width: 100%; justify-content: center;" href="/signup?plan=team">Start Team</a></div>
       </div>
 
-      <!-- Wave4 stripe-fix: Business is a first-class self-serve row at $499
-           (was previously aliased to Enterprise pre-wave4). Mirrors the
-           homepage tier grid. Enterprise stays sales-led for regulated orgs
-           that need SAML + BAA + named SRE; per W889-6.1 the price is now
-           "Contact Sales" with /book-demo as the entry point. -->
+      
       <div class="pr-tier pr-tier--biz" data-tier="business" id="tier-business" data-w273="business-contract">
         <span style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">Business is a first-class self-serve tier at $499 monthly with 25 million gateway calls, 20 seats included, private artifact registry, audit exports, and priority support for scaled product teams that are past the 5-seat Team cap but not yet ready for the sales-led Enterprise process.</span>
         <h3>Business</h3>
@@ -526,46 +519,45 @@
         <div>
           <span style="font-family:var(--fr-font-mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:6px;">Monthly savings</span>
           <span id="w273-savings" style="font-family:var(--fr-font-display);font-size:36px;font-weight:520;color:var(--fr-mint);">$1,440</span>
-          <span id="w663-savings-cx" class="pr-roi-cx-sub"></span>
+          <span id="roi-savings-cx" class="pr-roi-cx-sub"></span>
         </div>
         <div>
           <span style="font-family:var(--fr-font-mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:6px;">Payback on Pro (months)</span>
           <span id="w273-payback" style="font-family:var(--fr-font-display);font-size:36px;font-weight:520;color:var(--fr-mint);">1.0</span>
         </div>
       </div>
-      <div class="pr-roi-tiers" data-w663="roi-tier-grid" aria-label="Payback period on every tier">
+      <div class="pr-roi-tiers" data-pr="roi-tier-grid" aria-label="Payback period on every tier">
         <div class="pr-roi-tier">
           <div class="pr-roi-tier__name">Pro &middot; $49 / mo</div>
-          <div class="pr-roi-tier__pay" id="w663-pay-pro"> - </div>
-          <div class="pr-roi-tier__sub" id="w663-pay-pro-sub">covers 50 compiles + 500K calls</div>
+          <div class="pr-roi-tier__pay" id="roi-pay-pro"> - </div>
+          <div class="pr-roi-tier__sub" id="roi-pay-pro-sub">covers 50 compiles + 500K calls</div>
         </div>
         <div class="pr-roi-tier">
           <div class="pr-roi-tier__name">Team &middot; $99 / mo</div>
-          <div class="pr-roi-tier__pay" id="w663-pay-team"> - </div>
-          <div class="pr-roi-tier__sub" id="w663-pay-team-sub">covers 250 compiles + 5M calls</div>
+          <div class="pr-roi-tier__pay" id="roi-pay-team"> - </div>
+          <div class="pr-roi-tier__sub" id="roi-pay-team-sub">covers 250 compiles + 5M calls</div>
         </div>
         <div class="pr-roi-tier">
           <div class="pr-roi-tier__name">Enterprise &middot; Custom</div>
-          <div class="pr-roi-tier__pay" id="w663-pay-ent"> - </div>
-          <div class="pr-roi-tier__sub" id="w663-pay-ent-sub">BYOC + air-gap + SSO + SLA</div>
+          <div class="pr-roi-tier__pay" id="roi-pay-ent"> - </div>
+          <div class="pr-roi-tier__sub" id="roi-pay-ent-sub">BYOC + air-gap + SSO + SLA</div>
         </div>
       </div>
       <script>
         (function(){
           function $(id){return document.getElementById(id);}
-          // W663 currency rates  -  manual snapshot 2026-05-23, billed in USD.
-          var W663_RATES = { USD: 1.00, EUR: 0.92, GBP: 0.79, JPY: 148 };
-          var W663_SYM   = { USD: '$',  EUR: '€', GBP: '£', JPY: '¥' };
-          var W663_DEC   = { USD: 0,    EUR: 0,        GBP: 0,        JPY: 0 };
-          var w663Cx = 'USD';
+          var FX_RATES = { USD: 1.00, EUR: 0.92, GBP: 0.79, JPY: 148 };
+          var FX_SYM   = { USD: '$',  EUR: '€', GBP: '£', JPY: '¥' };
+          var FX_DEC   = { USD: 0,    EUR: 0,        GBP: 0,        JPY: 0 };
+          var fxCx = 'USD';
           function fmt(usd) {
-            var rate = W663_RATES[w663Cx]; var sym = W663_SYM[w663Cx]; var dec = W663_DEC[w663Cx];
+            var rate = FX_RATES[fxCx]; var sym = FX_SYM[fxCx]; var dec = FX_DEC[fxCx];
             var v = usd * rate;
             return sym + (v >= 1 ? Math.round(v).toLocaleString(undefined, { maximumFractionDigits: dec }) : v.toFixed(2));
           }
           function fmtBoth(usd) {
-            if (w663Cx === 'USD') return '';
-            return '≈ ' + fmt(usd) + ' / mo (' + w663Cx + ', snapshot)';
+            if (fxCx === 'USD') return '';
+            return '≈ ' + fmt(usd) + ' / mo (' + fxCx + ', snapshot)';
           }
           function paybackText(usd, cost) {
             if (usd <= 0) return 'no payback yet';
@@ -589,12 +581,12 @@
             var payback = savings > 0 ? Math.max(0.1, kolmProCost / savings) : 0;
             $('w273-savings').textContent = fmt(savings);
             $('w273-payback').textContent = payback ? payback.toFixed(1) : '0.0';
-            var cxSub = $('w663-savings-cx'); if (cxSub) cxSub.textContent = fmtBoth(savings);
+            var cxSub = $('roi-savings-cx'); if (cxSub) cxSub.textContent = fmtBoth(savings);
             // Three-tier payback view: same monthly savings vs each tier's flat cost.
             var TIERS = [
-              { id: 'pro',  cost: 49,    el: $('w663-pay-pro') },
-              { id: 'team', cost: 99,    el: $('w663-pay-team') },
-              { id: 'ent',  cost: 5000,  el: $('w663-pay-ent') }
+              { id: 'pro',  cost: 49,    el: $('roi-pay-pro') },
+              { id: 'team', cost: 99,    el: $('roi-pay-team') },
+              { id: 'ent',  cost: 5000,  el: $('roi-pay-ent') }
             ];
             TIERS.forEach(function(t){
               if (!t.el) return;
@@ -605,11 +597,10 @@
           ['w273-compiles','w273-perprompt','w273-prompts','w273-churn'].forEach(function(id){
             var el = $(id); if (el) el.addEventListener('input', recalc);
           });
-          // W663 currency selector wiring
           var cxButtons = document.querySelectorAll('.pr-cx button');
           cxButtons.forEach(function(b){
             b.addEventListener('click', function(){
-              w663Cx = b.getAttribute('data-cx') || 'USD';
+              fxCx = b.getAttribute('data-cx') || 'USD';
               cxButtons.forEach(function(x){
                 var on = x === b;
                 x.classList.toggle('on', on);
@@ -619,7 +610,7 @@
             });
           });
           recalc();
-          window.kolmROI = { recalc: recalc, setCurrency: function(c){ w663Cx = c; recalc(); } };
+          window.kolmROI = { recalc: recalc, setCurrency: function(c){ fxCx = c; recalc(); } };
         })();
       </script>
     </div>
@@ -1142,15 +1133,15 @@ all changes mirrored from Okta in &lt; 60s
 <!-- Hidden test anchors -->
 <div class="test-anchor">developer engineer procurement compliance data architect security regulated HIPAA SOC2 enterprise install CLI model distill distillation verify plain real</div>
 <div class="test-anchor" aria-hidden="true">
-  <span data-test="w663-sticky-nav">Tier and currency sticky nav</span>
-  <span data-test="w663-currency-selector">USD EUR GBP JPY currency selector with 2026-05-23 snapshot rates</span>
-  <span data-test="w663-roi-tier-grid">Three-tier ROI payback grid (Pro $49 / Team $99 / Enterprise Custom)</span>
+  <span data-test="roi-sticky-nav">Tier and currency sticky nav</span>
+  <span data-test="roi-currency-selector">USD EUR GBP JPY currency selector with 2026-05-23 snapshot rates</span>
+  <span data-test="roi-roi-tier-grid">Three-tier ROI payback grid (Pro $49 / Team $99 / Enterprise Custom)</span>
   <span data-test="w335-pricing-pro">Pro $49</span>
   <span data-test="w335-pricing-team">Team $99</span>
   <span data-test="w335-pricing-enterprise">Enterprise custom</span>
 </div>
 
-<!-- W244 hidden distillation anchor — declares distillation as a product category with full scale range. -->
+
 <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);" data-w244="distillation-category">
   <h2>Distillation</h2>
   <p>kolm distill covers all 4 recipe classes (rule, synthesized_rule, compiled_rule, distilled_model) at every scale from 0.5B to 1.6T parameters.</p>
@@ -1159,7 +1150,7 @@ all changes mirrored from Okta in &lt; 60s
   <span data-w244="recipe-set">all 4 recipe classes shipped</span>
 </div>
 
-<!-- W260 + W273 hidden contract anchors (kept here so visible UI stays clean; mappings: starter=alias-for-Pro, business=alias-for-Enterprise) -->
+
 <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);" data-w273="contract-anchor">
   <h2>Three ways to use kolm</h2>
   <span data-w260="three-tier-overview" data-w273="tier-list">free starter pro team business enterprise. Pro $49 / mo. Team $99 / mo. local CLI + runtime is free under Apache-2.0 (also covered by MIT for SDK shims). Enterprise is BAA + self-hosted with HIPAA mapping.</span>
@@ -1192,7 +1183,7 @@ all changes mirrored from Okta in &lt; 60s
       <div class="ks-foot__col"><h4>Product</h4><a href="/gateway">Gateway</a><a href="/capture">Capture</a><a href="/distill">Distill</a><a href="/compile">Compile</a><a href="/runtimes">Runtime</a><a href="/registry">Registry</a></div>
       <div class="ks-foot__col"><h4>Build</h4><a href="/quickstart">Quickstart</a><a href="/docs">Docs</a><a href="/sdks">SDKs</a><a href="/models">Models</a><a href="/benchmarks">Benchmarks</a><a href="/blog">Blog</a><a href="/faq">FAQ</a><a href="/changelog">Changelog</a></div>
       <div class="ks-foot__col"><h4>Trust</h4><a href="/security">Security</a><a href="/soc2">SOC 2</a><a href="/hipaa-mapping">HIPAA</a><a href="/baa">BAA</a><a href="/privacy">Privacy</a><a href="/subprocessors">Subprocessors</a><a href="/verify-prod">Verify a .kolm</a></div>
-      <div class="ks-foot__col"><h4>Company</h4><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a><a href="/manifesto">Manifesto</a><a href="/why-kolm">Why kolm</a><a href="/press">Press</a><a href="/contact">Contact</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub &rarr;</a></div>
+      <div class="ks-foot__col"><h4>Company</h4><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a><a href="/manifesto">Manifesto</a><a href="/why-kolm">Why kolm</a><a href="/press">Press</a><a href="/contact">Contact</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub &rarr;</a></div>
     </div>
     <div class="ks-foot__base">
       <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>

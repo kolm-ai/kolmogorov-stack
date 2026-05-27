@@ -8,13 +8,13 @@
 <meta name="description" content="Export tenant-fenced audit events as RFC 4180 CSV, ArcSight CEF v0, QRadar LEEF v2.0, or Splunk-ready JSONL. Open-source AI workbench.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Audit export &middot; CSV, CEF, LEEF, JSONL &middot; kolm.ai">
-<meta property="og:description" content="One audit-event source. Four export formats. Tenant-fenced with defense-in-depth (W411 law). Loud-fail envelope on bad format - no silent passthrough.">
+<meta property="og:title" content="Audit export · CSV, CEF, LEEF, JSONL · kolm.ai">
+<meta property="og:description" content="One audit-event source. Four export formats. Tenant-fenced with defense-in-depth. Loud-fail envelope on bad format - no silent passthrough.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/audit-export">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Audit export &middot; CSV, CEF, LEEF, JSONL &middot; kolm.ai">
+<meta name="twitter:title" content="Audit export · CSV, CEF, LEEF, JSONL · kolm.ai">
 <meta name="twitter:description" content="Stream audit events into ArcSight, QRadar, Splunk, or any spreadsheet. Stamped w770-v1.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs/audit-export">
@@ -86,22 +86,22 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
@@ -113,7 +113,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p class="lede">Stream the tenant-fenced audit ledger to your SIEM in the format it speaks natively &mdash; ArcSight CEF, QRadar LEEF, Splunk JSONL, or RFC 4180 CSV for spreadsheet review.</p>
 
 <h2 id="why">Why four formats</h2>
-<p>Audit events live in one source: <code>audit_events</code>, append-only and HMAC-chained per tenant. Operators consume them in four different shapes. Rather than force every operator to write a converter, W770 ships four canonical emitters that share one tenant-fence and one schema mapping. Bad format returns an loud-fail envelope. Cross-tenant reads return zero rows under W411 defense-in-depth.</p>
+<p>Audit events live in one source: <code>audit_events</code>, append-only and HMAC-chained per tenant. Operators consume them in four different shapes. Rather than force every operator to write a converter, ships four canonical emitters that share one tenant-fence and one schema mapping. Bad format returns an loud-fail envelope. Cross-tenant reads return zero rows under defense-in-depth.</p>
 
 <h2 id="formats">Format support</h2>
 <div class="format-grid" data-w770="formats">
@@ -152,7 +152,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   <div class="siem-card">
     <p class="siem-tag">arcsight</p>
     <h3>CEF v0</h3>
-    <p>The W770 CEF emitter follows the ArcSight CEF Implementation Standard exactly. SmartConnectors auto-detect the <code>CEF:0|</code> header. Severity ladder (5/8/10) maps onto ArcSight's 1-10 scale without further translation.</p>
+    <p>The CEF emitter follows the ArcSight CEF Implementation Standard exactly. SmartConnectors auto-detect the <code>CEF:0|</code> header. Severity ladder (5/8/10) maps onto ArcSight's 1-10 scale without further translation.</p>
   </div>
   <div class="siem-card">
     <p class="siem-tag">qradar</p>
@@ -183,7 +183,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <pre>CODE33</pre>
 
-<h2 id="tenant-fence">Tenant fence (W411 defense-in-depth)</h2>
+<h2 id="tenant-fence">Tenant fence</h2>
 <div class="honesty">
   <p>Every export reads <code>audit_events</code> via <code>store.all()</code> and then applies a per-row <code>r.tenant_id !== tenant_id</code> filter before encoding. The naive shortcut &mdash; <code>findByTenant('audit_events', tenant_id)</code> &mdash; would silently return zero rows because the index is keyed on the <code>tenant</code> field and <code>audit_events</code> rows carry <code>tenant_id</code>. The explicit per-row filter is the defense.</p>
   <p>Cross-tenant audit-row leakage is a P0 security incident. The export module refuses to run without an explicit <code>tenant_id</code> argument, returning the loud-fail envelope <code>{ok:false, error:'tenant_id_required'}</code>.</p>
@@ -217,7 +217,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <div class="related">
   <a href="/account/audit"><b>Audit log</b><span>The interactive per-tenant ledger view. The export button on this page hits the same routes documented here.</span></a>
   <a href="/security"><b>Security overview</b><span>End-to-end security posture, including the audit-chain HMAC design that feeds this export.</span></a>
-  <a href="/docs/api"><b>API reference</b><span>Full route catalog. The three W770 routes live under <code>/v1/audit/export*</code>.</span></a>
+  <a href="/docs/api"><b>API reference</b><span>Full route catalog. The three routes live under <code>/v1/audit/export*</code>.</span></a>
 </div>
 
 </div></main>

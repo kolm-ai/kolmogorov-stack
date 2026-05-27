@@ -8,13 +8,13 @@
 <meta name="description" content="Compute-efficiency knobs for kolm distill: mixed-precision training (FP16/BF16), gradient checkpointing for large students on limited VRAM, and early stopping when the K-Score plateaus.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Distill compute efficiency &middot; kolm.ai">
+<meta property="og:title" content="Distill compute efficiency · kolm.ai">
 <meta property="og:description" content="Compute-efficiency knobs for kolm distill: mixed-precision training, gradient checkpointing, and early stopping.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/efficiency">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Distill compute efficiency &middot; kolm.ai">
+<meta name="twitter:title" content="Distill compute efficiency · kolm.ai">
 <meta name="twitter:description" content="Mixed-precision, gradient checkpointing, and K-Score plateau early stopping for kolm distill runs.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs/efficiency">
@@ -70,13 +70,13 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -123,7 +123,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
  </tbody>
 </table>
 
-<h2 id="precision">Mixed-precision training <span class="pill ok">W787-2</span></h2>
+<h2 id="precision">Mixed-precision training <span class="pill ok">-2</span></h2>
 <p>The trainer accepts five precision modes via <code>--precision</code>:</p>
 <table>
  <thead><tr><th>Mode</th><th>Memory</th><th>Best on</th><th>Notes</th></tr></thead>
@@ -136,7 +136,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
  </tbody>
 </table>
 
-<h2 id="grad">Gradient checkpointing <span class="pill ok">W787-3</span></h2>
+<h2 id="grad">Gradient checkpointing <span class="pill ok">-3</span></h2>
 <p>Gradient checkpointing re-computes activations on the backward pass instead of caching them on the forward pass. The trade is ~30% slower wall-clock for ~50% lower peak VRAM during back-prop. Pays off when:</p>
 <ul>
   <li>Student model is &ge; 7B parameters and you are training on a single 24 GB or 16 GB GPU.</li>
@@ -145,7 +145,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </ul>
 <p>Skip it when VRAM is not the bottleneck; the recompute cost is pure overhead.</p>
 
-<h2 id="early">Early stopping when K-Score plateaus <span class="pill ok">W787-1</span></h2>
+<h2 id="early">Early stopping when K-Score plateaus <span class="pill ok">-1</span></h2>
 <p>The distill pipeline tracks K-Score per training step. When the last <code>patience+1</code> samples vary by less than <code>delta_kscore</code>, the run signals plateau and stops.</p>
 <p>Defaults: <code>patience=3</code>, <code>delta_kscore=0.005</code>, <code>min_steps=50</code>. Override the patience window with <code>--early-stop-patience N</code>.</p>
 <p>The Python trainer wires <code>transformers.EarlyStoppingCallback</code> when <code>KOLM_EARLY_STOP=1</code> is set on the worker env. The Node-side <code>shouldStopEarly()</code> helper is also available for post-hoc analysis of a completed run's <code>progress.jsonl</code>.</p>

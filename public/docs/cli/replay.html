@@ -25,7 +25,7 @@
 <body>
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a class="skip-link" href="#main">Skip to content</a>
-    <!-- KOLM_NAV_BEGIN (W221) -->
+    
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
       <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
@@ -121,7 +121,7 @@
       </div>
     </div>
     </nav>
-    <!-- KOLM_NAV_END (W221) -->
+    
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="replay">
 <nav aria-label="Breadcrumb" class="crumbs">
   <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>replay</span>
@@ -142,12 +142,12 @@
 <blockquote><p>Replay captured prompts from the durable capture store against a compiled artifact. Emits per-row diff (upstream vs local) with jaccard K-score, latency-delta, and cost-delta.</p></blockquote>
 <h2>Usage</h2>
 <pre><code>
-# cloud replay (W216)
+# cloud replay
 kolm replay &lt;concept_or_version_id&gt; [--namespace ns] [--limit N] [--preview] [--json]
 kolm replay --concept-id &lt;id&gt; [--namespace ns] [--limit N]
 kolm replay --version-id &lt;ver_...&gt; [--namespace ns] [--limit N]
 
-# local replay (W371)
+# local replay
 kolm replay trace &lt;trace_id&gt; --against &lt;artifact|model&gt; [--json]
 kolm replay namespace &lt;namespace&gt; --against &lt;artifact|model&gt; [--limit N] [--json]
 kolm replay dataset &lt;dataset_id&gt; --against &lt;artifact|model&gt; [--json]

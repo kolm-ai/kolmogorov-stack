@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>GitHub Actions integration &middot; Open-source AI workbench &middot; kolm.ai</title>
-<meta name="description" content="Wire kolm into your CI: K-Score gate on push, auto re-distill on regression, publish .kolm to GitHub Releases, diff quality between versions. W820.">
+<meta name="description" content="Wire kolm into your CI: K-Score gate on push, auto re-distill on regression, publish.kolm to GitHub Releases, diff quality between versions.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="GitHub Actions integration &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:title" content="GitHub Actions integration · Open-source AI workbench · kolm.ai">
 <meta property="og:description" content="K-Score gate on push, auto re-distill on regression, publish .kolm to GitHub Releases.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/github-actions">
@@ -68,7 +68,7 @@ No-silent-pass contract: the action only runs when the <code>KOLM_API_KEY</code>
 
 <section id="template">
 <h2>Template</h2>
-<p>A reference-only template ships in the kolm repo at <a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/.github/workflows/kolm.yml" style="color:var(--accent)"><code>.github/workflows/kolm.yml</code></a>. It is intentionally guarded with <code>if: false</code> on the distill job so the file does not run unintended CI minutes. Flip the guard and configure the secret to enable it.</p>
+<p>A reference-only template ships in the kolm repo at <a href="https://github.com/kolm-ai/kolm/blob/main/.github/workflows/kolm.yml" style="color:var(--accent)"><code>.github/workflows/kolm.yml</code></a>. It is intentionally guarded with <code>if: false</code> on the distill job so the file does not run unintended CI minutes. Flip the guard and configure the secret to enable it.</p>
 <p>Copy the template into your repo and commit. The template is self-documented with comments explaining each section.</p>
 </section>
 
@@ -123,7 +123,7 @@ No-silent-pass contract: the action only runs when the <code>KOLM_API_KEY</code>
 <section id="publish-releases">
 <h2>Publish .kolm to GitHub Releases</h2>
 <p>With <code>publish_release: true</code>, the action attaches the produced <code>.kolm</code> to a release tagged <code>kolm-distill-&lt;commit-sha&gt;</code>. Downstream consumers can pin to a specific commit:</p>
-<pre>kolm pull github://kolm-ai/kolmogorov-stack@abc1234</pre>
+<pre>kolm pull github://kolm-ai/kolm@abc1234</pre>
 <p>The release body includes the K-Score, the teacher used, the namespace, and the commit range that changed since the last release. The artifact is also pushed to the kolm hosted registry so the same <code>kolm://sha256-...</code> URI resolves regardless of GitHub's availability.</p>
 </section>
 
@@ -164,7 +164,7 @@ jobs:
       - name: Fail merge on K-Score regression
         if: steps.kolm.outputs.kscore_passed != 'true'
         run: exit 1</pre>
-<p>For the full annotated reference, see <a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/.github/workflows/kolm.yml" style="color:var(--accent)"><code>.github/workflows/kolm.yml</code></a> in the repo and the <a href="https://github.com/kolm-ai/kolmogorov-stack/tree/main/tools/github-actions-kolm" style="color:var(--accent)">tools/github-actions-kolm/README.md</a> for the Action's input / output reference.</p>
+<p>For the full annotated reference, see <a href="https://github.com/kolm-ai/kolm/blob/main/.github/workflows/kolm.yml" style="color:var(--accent)"><code>.github/workflows/kolm.yml</code></a> in the repo and the <a href="https://github.com/kolm-ai/kolm/tree/main/tools/github-actions-kolm" style="color:var(--accent)">tools/github-actions-kolm/README.md</a> for the Action's input / output reference.</p>
 </section>
 
 <footer class="page">

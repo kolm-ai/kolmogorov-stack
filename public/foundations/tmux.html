@@ -84,22 +84,22 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
@@ -113,7 +113,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 
 <h2>Why pair them</h2>
 <p>kolm compiles and distills are CPU + GPU intensive jobs that block a terminal. Without tmux, every time you close the laptop or the SSH socket times out, the job dies (or worse, half-dies and leaves a corrupted artifact). With tmux, the job runs in a named session on the remote box; the SSH connection is just a window into it.</p>
-<p>The W229 <code>kolm jobs</code> registry and <code>kolm watch</code> verb make this even cleaner: the compile records itself to <code>~/.kolm/jobs.jsonl</code> with its log path; if you reattach to the tmux pane, the log is still scrolling; if you connect from a totally new box, <code>kolm watch &lt;job-id&gt;</code> tails the same log file from outside the tmux session.</p>
+<p>The <code>kolm jobs</code> registry and <code>kolm watch</code> verb make this even cleaner: the compile records itself to <code>~/.kolm/jobs.jsonl</code> with its log path; if you reattach to the tmux pane, the log is still scrolling; if you connect from a totally new box, <code>kolm watch &lt;job-id&gt;</code> tails the same log file from outside the tmux session.</p>
 
 <h2>One-time setup</h2>
 <ol>
@@ -154,7 +154,7 @@ ssh box "kolm watch job-9f3a1c4b8e72"
 <div class="warn">tmux is not a kolm dependency. Anything that gives you a detachable session works: screen, dtach, byobu, zellij. We pick tmux because it is the one in every distro, on every Mac via Homebrew, and the keybindings are muscle memory for most fleet operators.</div>
 
 <h2>Failure modes worth knowing</h2>
-<p><b>Server reboot.</b> tmux sessions do not survive a host reboot. If you want the job to restart, write a systemd unit or a cron <code>@reboot</code> hook that calls <code>tmux new -d -s kolm "&lt;command&gt;"</code>. The W229 jobs registry remembers the previous run's record either way.</p>
+<p><b>Server reboot.</b> tmux sessions do not survive a host reboot. If you want the job to restart, write a systemd unit or a cron <code>@reboot</code> hook that calls <code>tmux new -d -s kolm "&lt;command&gt;"</code>. The jobs registry remembers the previous run's record either way.</p>
 <p><b>Lost session name.</b> <code>tmux ls</code> shows every active session. If you forgot what you called it, <code>tmux ls</code> from the host gives the answer in one line.</p>
 <p><b>tmux pane size mismatch.</b> When two clients with different window sizes attach to the same session, tmux shrinks to the smaller. <code>ctrl-b D</code> (capital D) lets you detach all other clients before you attach.</p>
 
@@ -215,7 +215,7 @@ ssh box "kolm watch job-9f3a1c4b8e72"
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">

@@ -10,19 +10,12 @@
    - Density: airy. Single accent. Mono only for code + numerics.
    ============================================================================ */
 
-/* W681: load Geist + Geist Mono via Google Fonts. The font-family stack already
-   names "Geist" first but no @font-face was ever shipped — every page fell back
-   to system-ui (San Francisco / Segoe UI), which reads as generic startup. This
-   is the single highest-leverage premium fix: Geist + Geist Mono is what Vercel
-   ships, and on the kolm dark canvas at weight 500 with negative tracking it
-   carries Pentagram-level authority for zero engineering cost. */
+
 @import url('https://fonts.bunny.net/css?family=geist:300,400,500,600,700|geist-mono:400,500,600&display=swap');
 
 /* ----- 1. Tokens ---------------------------------------------------------- */
 :root {
-  /* Canvas — W850 cool slate (2026-05-25). Reverted from Warm Paper:
-     user rejected cream/beige/brown/sienna anywhere. Light is the
-     default; dark mode opts in via [data-theme="dark"]. */
+  
   --ks-bg:          #f3f5f7;
   --ks-bg-1:        #ffffff;
   --ks-bg-2:        #e8ebef;
@@ -37,10 +30,7 @@
   --ks-ink-3:       #828892;
   --ks-ink-4:       #b6bcc4;
 
-  /* Accent — W850 reverted to near-ink (no chromatic accent). User
-     mandate kills all warm hues. Variables retained so consuming pages
-     keep their selectors; values resolve to ink, so emphasis comes
-     from weight + scale + hairline rules. */
+  
   --ks-accent:      #111111;
   --ks-accent-2:    #000000;
   --ks-accent-soft: rgba(17, 17, 17,0.05);
@@ -138,9 +128,7 @@
   --ks-accent-warm: #111111;
 }
 
-/* Dark mode = cool slate (W850, 2026-05-25). Reverted from warm
-   candlelit / espresso palette per explicit user mandate. Reads as
-   paper-on-desk in dim light, no chromatic accent. */
+
 [data-theme="dark"] {
   --ks-bg:          #0e1116;
   --ks-bg-1:        #161a20;
@@ -184,13 +172,7 @@ html, body { margin: 0; padding: 0; max-width: 100vw; overflow-x: hidden; }
 .ks pre, .ks code { max-width: 100%; }
 .ks pre { white-space: pre; }
 
-/* ============================================================
-   W628 global atmosphere — ambient warm/cool radial bloom +
-   subtle grain texture overlay. Fixed to viewport, beneath all
-   content, off on prefers-reduced-motion-safe? no, the layer is
-   static so it stays for everyone. Adds material depth so the
-   page no longer feels like a flat-black slab.
-   ============================================================ */
+
 body { position: relative; }
 .ks::before,
 .ks::after {
@@ -201,8 +183,7 @@ body { position: relative; }
   z-index: 0;
 }
 .ks::before {
-  /* W850 atmosphere: subtle cool slate vignette. Reads as
-     paper-on-desk, not glow. No warm chroma. */
+  
   background:
     radial-gradient(ellipse 1100px 820px at 100% 108%, rgba(31, 41, 55, 0.030), transparent 56%);
 }
@@ -263,8 +244,7 @@ body { position: relative; }
   gap: var(--ks-2);
   margin: 0 0 var(--ks-4);
 }
-/* W613: eyebrow dash was mint @ 0.6 — reads as monocolor. Now neutral ink-3
-   so the eyebrow signals "category" without burning the limited-accent budget. */
+
 .ks-eyebrow::before {
   content: "";
   display: inline-block;
@@ -315,8 +295,7 @@ body { position: relative; }
   max-width: 62ch;
 }
 .ks-lede b { color: var(--ks-ink); font-weight: 580; }
-/* W613: prose code is neutral ink, NOT mint. Inline code competing with
-   action links was the loudest amateur tell. */
+
 .ks-lede code, .ks-prose code {
   font-family: var(--ks-mono);
   font-size: 0.88em;
@@ -335,7 +314,7 @@ body { position: relative; }
 .ks-mono   { font-family: var(--ks-mono); font-feature-settings: "tnum"; }
 .ks-accent { color: var(--ks-accent); }
 .ks-warm   { color: var(--ks-accent-warm); font-variant-numeric: tabular-nums; }
-.ks-cool   { color: var(--ks-accent); } /* W683: aliased to mint — lavender retired site-wide */
+.ks-cool   { color: var(--ks-accent); } 
 .ks-num    { font-variant-numeric: tabular-nums lining-nums; font-feature-settings: "tnum"; }
 .ks-em     { font-family: var(--ks-sans); font-style: normal; font-weight: 500; color: var(--ks-ink); }
 .ks-dim    { color: var(--ks-ink-3); }
@@ -367,10 +346,7 @@ body { position: relative; }
 }
 .ks-btn:active { transform: translateY(1px); }
 
-/* W848: --ks-accent flips dark/cream per theme, but `color: #07090c`
-   was hardcoded near-black — invisible in light mode where bg is
-   already #111111. Use var(--surface-0) so text auto-inverts: cream
-   on dark button in light mode, dark on cream button in dark mode. */
+
 .ks-btn--primary {
   background: var(--ks-accent);
   color: var(--surface-0, #f3f5f7);
@@ -525,7 +501,7 @@ body { position: relative; }
   line-height: 1.05;
   font-variant-numeric: tabular-nums;
 }
-/* W613: numeric data uses warm-amber, NOT mint. Mint is action-only. */
+
 .ks-stat__val .accent { color: var(--ks-accent-warm); }
 .ks-stat__val small  { font-size: 0.45em; font-weight: 500; color: var(--ks-ink-3); margin-left: 4px; letter-spacing: 0; }
 .ks-stat__sub { font-size: 12.5px; color: var(--ks-ink-3); line-height: 1.4; }
@@ -561,10 +537,10 @@ body { position: relative; }
 .ks-table tbody tr:last-child td, .ks-table tbody tr:last-child th { border-bottom: 0; }
 .ks-table tbody tr:hover { background: var(--ks-bg-2); }
 .ks-table .num { color: var(--ks-ink); font-variant-numeric: tabular-nums; }
-/* W613: table accents are numeric — use warm-amber, not mint. */
+
 .ks-table .accent { color: var(--ks-accent-warm); font-weight: 580; font-variant-numeric: tabular-nums; }
 .ks-table .accent-mint { color: var(--ks-accent); font-weight: 580; }
-.ks-table .accent-cool { color: var(--ks-accent); font-weight: 580; font-family: var(--ks-mono); } /* W683: aliased to mint */
+.ks-table .accent-cool { color: var(--ks-accent); font-weight: 580; font-family: var(--ks-mono); } 
 @media (max-width: 880px) {
   .ks-table thead { display: none; }
   .ks-table tbody tr { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; padding: 16px; }
@@ -600,14 +576,7 @@ body { position: relative; }
   align-items: center;
   gap: var(--ks-6);
 }
-/* W630: alias classes — 30 pages (api, baa, benchmarks, capture, changelog,
-   community, compare, compile, distill, faq, forge, hipaa-mapping,
-   integrations, k-score, manifesto, models, privacy, recipes, registry,
-   roadmap, runtimes, sdks, security, self-host, soc2, subprocessors, terms,
-   verify-prod, why-kolm, 404) use .ks-nav__row / __links / __cta class
-   names that had no rules — nav collapsed to a centered vertical stack.
-   These aliases make the canonical horizontal nav layout work for both
-   class-name variants without touching any HTML. */
+
 .ks-nav__row {
   display: flex;
   align-items: center;
@@ -785,8 +754,7 @@ body { position: relative; }
   flex-wrap: wrap;
 }
 
-/* W609 aliases: bulk-migration script injects .ks-footer markup; map it onto
-   the canonical .ks-foot rules above so 501 migrated pages render correctly. */
+
 .ks-footer {
   border-top: 1px solid var(--ks-line-1);
   background: var(--ks-bg-1);
@@ -851,10 +819,7 @@ body { position: relative; }
   padding: clamp(56px, 8vw, 120px) 0 clamp(48px, 6vw, 88px);
   overflow: hidden;
 }
-/* W682: atmosphere collapsed from 2 blooms (mint + warm) to ONE mint bloom.
-   The dual-color hero was the "rainbow tell" the user flagged — Vercel, Linear,
-   Stripe ship with at most one atmospheric pin. Mint at top-right is enough to
-   signal brand without painting marketing decoration into the hero. */
+
 .ks-hero__bg {
   position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background-image:
@@ -884,11 +849,7 @@ body { position: relative; }
   text-wrap: balance;
   max-width: 14ch;
 }
-/* W613: dropped text gradient + glow (Stripe-2020 cliche). Replaced with
-   editorial italic-serif emphasis — does the same job (signal which phrase
-   carries the headline's weight) without the gradient amateur tell.
-   .grad is kept as an alias so legacy <span class="grad"> markup still
-   resolves; new copy should prefer <em class="ks-em"> for semantics. */
+
 .ks-hero__h1 .grad,
 .ks-hero__h1 .ks-em,
 .ks-hero__h1 em {
@@ -914,9 +875,7 @@ body { position: relative; }
   max-width: 58ch;
 }
 .ks-hero__lede b { color: var(--ks-ink); font-weight: 580; }
-/* W613: was accent-soft + accent.  Now neutral ink-on-line so code in prose
-   doesn't compete with CTAs for the eye. Cool-hue accent is reserved for
-   syntax highlighting inside <pre> blocks, not inline. */
+
 .ks-hero__lede code {
   font-family: var(--ks-mono);
   font-size: 0.88em;
@@ -940,9 +899,7 @@ body { position: relative; }
 .ks-hero__meta b { color: var(--ks-ink); font-weight: 500; }
 
 /* ----- 14. Inline-link bar (logo-row replacement) ---------------------- */
-/* W688: tightened vertical rhythm (16-24px) + tactile hover micro-lift
-   (translateY -1px) + tracked eye column (0.09em) for stronger editorial
-   feel. Chips no longer feel like body text. */
+
 .ks-logorow {
   border-top: 1px solid var(--ks-line-1);
   border-bottom: 1px solid var(--ks-line-1);
@@ -991,9 +948,7 @@ body { position: relative; }
   transform: translateY(-1px);
 }
 
-/* W689: footer trust ribbon. Single-line strip above the existing footer
-   on every page. Replaces scattered trust signals throughout the site
-   with one consistent rail. Injected by nav.js; styled here. */
+
 .ks-trust-ribbon {
   border-top: 1px solid var(--ks-line-1);
   border-bottom: 1px solid var(--ks-line-1);
@@ -1146,17 +1101,7 @@ body { position: relative; }
 .ks .demo-anchor,
 .ks .provider-strip { display: none !important; }
 
-/* ----- 18. W612 Mobile compression + bleed fix ----------------------------
-   Goals:
-   - Aggressively tighten vertical rhythm on mobile so pages don't feel
-     "shockingly long" when long-form content stacks vertically.
-   - Block all color bleed by giving every section explicit bg.
-   - Hide tertiary sections behind data-mobile-hide on phones so the page
-     reads as the 8-10 sections the narrative was designed around, not
-     the 40 sections it grew into.
-   - Make the prod-stickynav (anywhere it appears) hide on phones — on
-     mobile it competes with the main ks-nav and creates an overlap.
-------------------------------------------------------------------------- */
+
 
 /* Every ks-section gets explicit bg so no transparent stacking bleed. */
 .ks .ks-section,
@@ -1167,11 +1112,7 @@ body { position: relative; }
 .ks .prod-section,
 .ks .prod-hero { background-color: var(--ks-bg); position: relative; }
 
-/* W616: Hide tertiary sections on DESKTOP too. The narrative was designed
-   around 8-10 sections; the 30 extra grew there by accretion. Sections
-   marked [data-mobile-hide] are now hidden everywhere so the homepage
-   reads as the intentional spine, not the archeological dig. Lock-in test
-   anchors still resolve because the markup is present, just not painted. */
+
 .ks [data-mobile-hide] { display: none !important; }
 
 /* Section alternation (subtle): odd elevations on bg-1 to break monotony. */
@@ -1231,23 +1172,9 @@ body { position: relative; }
   :root { --ks-section-y: 72px; }
 }
 
-/* ============================================================================
-   W665 — First-principles aesthetic upgrade (2026-05-23)
-   - Brand mark goes monochrome (logo black + white only)
-   - Wordmark "ai" no longer wears the mint accent
-   - Typography pushed for a more editorial, bigger-air feel
-   - Cards layered with multi-stop depth (inner highlight + outer shadow)
-   - Hero gets a wider, slower atmospheric bloom
-   - Buttons get tactile press with finer border stroke
-   - Optional `.ks-kinetic` headline class — variable-weight glide on scroll
-   This layer ALWAYS LOADS LAST so it wins over every prior rule via cascade
-   order. No !important needed.
-   ============================================================================ */
 
-/* -- 1. Three-bars brand mark (W838) ---------------------------------------
-   Descending bars (h=20/14/8) carry the wordmark. Pure currentColor — the
-   bars are ink in light mode and warm-bone in dark mode. The legacy "k" tile
-   is gone. .ks-nav__mark is now an SVG wrapper, not a chip. */
+
+
 .ks-nav__mark {
   width: 26px;
   height: 26px;
@@ -1371,8 +1298,7 @@ body { position: relative; }
   transform: translateY(-1px);
 }
 
-/* -- 5. Hero — W682: single mint bloom, slow drift. Warm + cool blooms cut
-   (the W665 3-bloom stack was the rainbow tell premium B2B sites never do). */
+
 .ks-hero__bg {
   background-image:
     radial-gradient(900px circle at 78% 8%, var(--ks-accent-glow) 0%, transparent 66%);

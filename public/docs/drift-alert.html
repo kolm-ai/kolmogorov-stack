@@ -5,21 +5,21 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <title>Drift alert &middot; distribution-shift live alerter &middot; kolm.ai</title>
-<meta name="description" content="Compare training capture distribution to live production distribution using KL/JS divergence. Webhook delivery + W709 routing-decision tie-in + plain-English shift suggestions. Open-source AI workbench.">
+<meta name="description" content="Compare training capture distribution to live production distribution using KL/JS divergence. Webhook delivery + routing-decision tie-in + plain-English shift suggestions. Open-source AI workbench.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Drift alert &middot; distribution-shift live alerter &middot; kolm.ai">
-<meta property="og:description" content="KL/JS divergence between training + production token sketches. Webhooks + W709 fallback-to-teacher. Open-source AI workbench.">
+<meta property="og:title" content="Drift alert · distribution-shift live alerter · kolm.ai">
+<meta property="og:description" content="KL/JS divergence between training + production token sketches. Webhooks + fallback-to-teacher. Open-source AI workbench.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/drift-alert">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Drift alert &middot; distribution-shift live alerter &middot; kolm.ai">
-<meta name="twitter:description" content="Compare training vs production distribution. KL/JS divergence + webhook delivery + W709 router fallback.">
+<meta name="twitter:title" content="Drift alert · distribution-shift live alerter · kolm.ai">
+<meta name="twitter:description" content="Compare training vs production distribution. KL/JS divergence + webhook delivery + router fallback.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs/drift-alert">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Drift alert: distribution-shift live alerter","description":"Compare training to live production distribution; alert via webhook when divergence crosses threshold; stamp drift_warning on next W709 routing decision.","url":"https://kolm.ai/docs/drift-alert","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Drift alert: distribution-shift live alerter","description":"Compare training to live production distribution; alert via webhook when divergence crosses threshold; stamp drift_warning on next routing decision.","url":"https://kolm.ai/docs/drift-alert","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <link rel="stylesheet" href="/design-tokens.css">
 <style>
 :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:rgba(17, 17, 17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
@@ -69,7 +69,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </style>
 
 <link rel="stylesheet" href="/ks.css">
-<!-- ds-shell W619 -->
+
 <link rel="stylesheet" href="/docs-shell.css">
     <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/docs-shell.js"></script>
@@ -81,22 +81,22 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
@@ -105,7 +105,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / drift-alert</div>
 <p class="brand-eyebrow">Open-source AI workbench</p>
 <h1>Frontier AI on your own infrastructure.</h1>
-<p class="lede">Drift alert compares the token distribution of your training captures against the token distribution of live production traffic. When the two diverge past a threshold, the route fires registered webhooks and stamps <code>drift_warning:true</code> onto the next W709 routing decision &mdash; the small student model can then fall back to the teacher on novel queries. Same envelope is returned by <code>POST /v1/drift-alert/snapshot</code>, <code>GET /v1/drift-alert/:namespace</code>, and the <code>kolm drift-alert</code> CLI path.</p>
+<p class="lede">Drift alert compares the token distribution of your training captures against the token distribution of live production traffic. When the two diverge past a threshold, the route fires registered webhooks and stamps <code>drift_warning:true</code> onto the next routing decision &mdash; the small student model can then fall back to the teacher on novel queries. Same envelope is returned by <code>POST /v1/drift-alert/snapshot</code>, <code>GET /v1/drift-alert/:namespace</code>, and the <code>kolm drift-alert</code> CLI path.</p>
 
 <h2 id="why">Why distribution-shift matters more than accuracy</h2>
 <p>A distilled student that scored 0.94 K-Score on your training captures last month is now answering 15% more billing queries than it ever saw at training time. The K-Score on production is silently dropping &mdash; but you will not know until either a customer escalation lands or the next bake-off runs. Drift alert closes that gap: it compares the <strong>shape of the workload</strong> in real time, not the quality of any individual answer. When the shape moves, you find out the same day, not the same quarter.</p>
@@ -142,8 +142,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <p><strong>Best-effort, no retries.</strong> Delivery uses a 5-second <code>AbortController</code> timeout and fires once. The route does not block the response on webhook completion &mdash; the per-webhook fetch runs in a fire-and-forget async IIFE. If your endpoint is down, the alert is dropped. The durable signal lives in the snapshot ledger; the webhook is the optional push channel.</p>
 
-<h2 id="w709">W709 routing-decision tie-in</h2>
-<p>When <code>shouldAlert</code> fires, drift-alert calls <code>registerDriftWarning(tenant_id, namespace, {jsd})</code> &mdash; an in-memory Map keyed by <code>tenant_id|namespace</code>. The next time the W709 router records a routing decision for that tenant + namespace via <code>recordRoutingDecision</code> in <code>src/routing-events.js</code>, it consumes the warning (one-shot semantics: read + clear) and stamps the row with:</p>
+<h2 id="w709">routing-decision tie-in</h2>
+<p>When <code>shouldAlert</code> fires, drift-alert calls <code>registerDriftWarning(tenant_id, namespace, {jsd})</code> &mdash; an in-memory Map keyed by <code>tenant_id|namespace</code>. The next time the router records a routing decision for that tenant + namespace via <code>recordRoutingDecision</code> in <code>src/routing-events.js</code>, it consumes the warning (one-shot semantics: read + clear) and stamps the row with:</p>
 
 <table>
   <thead><tr><th>Row field</th><th>Value</th></tr></thead>
@@ -156,7 +156,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <p>The pragmatic use: when you see <code>drift_warning:true</code> on a routing decision, escalate to the teacher (or to a more conservative student) for that one query. The signal does not re-fire until the next <code>GET /v1/drift-alert/:namespace</code> pulls a fresh compare that crosses threshold. It is intentionally a soft signal whose value decays quickly &mdash; the durable record is the snapshot ledger, the in-memory bridge is just the cross-module hop from "alert tripped" to "next decision sees it."</p>
 
-<p><strong>Plain fallback:</strong> if <code>src/drift-alert-store.js</code> fails to import (future refactor decouples the modules), the W709 path silently continues without the warning. The warning is best-effort &mdash; never load-bearing.</p>
+<p><strong>Plain fallback:</strong> if <code>src/drift-alert-store.js</code> fails to import (future refactor decouples the modules), the path silently continues without the warning. The warning is best-effort &mdash; never load-bearing.</p>
 
 <h2 id="suggestions">Plain-English shift suggestions</h2>
 <p>When <code>shouldAlert</code> fires, the envelope includes a <code>suggestions</code> array &mdash; up to <strong>3</strong> actionable strings (configurable via <code>top_n</code>). Each suggestion follows a fixed template, so a downstream dashboard can pattern-match on it if needed:</p>
@@ -181,8 +181,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   </tbody>
 </table>
 
-<h2 id="vs-w813">How this differs from W813 drift-detector</h2>
-<p>Both surfaces use the same KL/JSD math, but they answer different questions. <a href="/docs/drift-detector">W813 drift-detector</a> compares a baseline window against a current window <em>within</em> the live capture stream &mdash; it tells you "the last 24 hours look different from the prior week." W747 drift-alert compares a long-lived <strong>training</strong> sketch against a live <strong>production</strong> sketch &mdash; it tells you "production looks different from what you trained on." Use W813 for intra-day anomaly detection; use W747 for "is my distilled model still fit for purpose."</p>
+<h2 id="vs-w813">How this differs from drift-detector</h2>
+<p>Both surfaces use the same KL/JSD math, but they answer different questions. <a href="/docs/drift-detector">drift-detector</a> compares a baseline window against a current window <em>within</em> the live capture stream &mdash; it tells you "the last 24 hours look different from the prior week." drift-alert compares a long-lived <strong>training</strong> sketch against a live <strong>production</strong> sketch &mdash; it tells you "production looks different from what you trained on." Use for intra-day anomaly detection; use for "is my distilled model still fit for purpose."</p>
 
 <h2 id="next">Next steps</h2>
 <p>Run <code>kolm drift-alert snapshot &lt;ns&gt; --kind training</code> right after a fresh distill to anchor the baseline, then <code>kolm drift-alert snapshot &lt;ns&gt; --kind production</code> on a cron (hourly is plenty) to keep the production sketch current. Register a webhook with <code>kolm drift-alert webhooks</code>. Read <a href="/docs/diagnose">diagnose</a> for the per-category breakdown that drift-alert points you toward when production starts shifting.</p>
@@ -244,7 +244,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">

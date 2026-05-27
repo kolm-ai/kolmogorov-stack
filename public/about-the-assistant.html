@@ -127,13 +127,13 @@ section li strong{color:var(--ink);font-weight:540}
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -192,7 +192,7 @@ section li strong{color:var(--ink);font-weight:540}
     <div class="ata-card">
       <span class="num">204</span>
       <span class="lab">Holdout rows held out from training</span>
-      <p>Deterministic SHA-256 stratified split (W888-N). Same 204 rows score every candidate build so K-Score deltas are apples-to-apples across re-distills.</p>
+      <p>Deterministic SHA-256 stratified split. Same 204 rows score every candidate build so K-Score deltas are apples-to-apples across re-distills.</p>
     </div>
     <div class="ata-card">
       <span class="num">~1.0 GB</span>
@@ -242,30 +242,30 @@ section li strong{color:var(--ink);font-weight:540}
 <section id="fallback-chain">
   <h2>The three-layer fallback chain.</h2>
   <p class="lede">The same assistant answers in your CLI, on your docs page, and inside your authenticated account. Layer 1 wins on latency, layer 2 keeps the experience online when you don't have the weights yet, and layer 3 is a frontier escape hatch capped at one cent per turn.</p>
-  <svg class="ata-fallback-svg" viewBox="0 0 760 220" aria-label="Fallback chain diagram">
-    <rect class="box" x="20" y="60" width="200" height="100" rx="8"/>
+  <svg class="ata-fallback-svg" viewbox="0 0 760 220" aria-label="Fallback chain diagram">
+    <rect class="box" x="20" y="60" width="200" height="100" rx="8" />
     <text class="lab" x="120" y="78" text-anchor="middle">Layer 1</text>
     <text x="120" y="106" text-anchor="middle">local GGUF</text>
     <text x="120" y="128" text-anchor="middle" style="font-size:11.5px;fill:var(--ink-mute)">~/.kolm/models/</text>
     <text x="120" y="146" text-anchor="middle" style="font-size:11.5px;fill:var(--ink-mute)">cost: $0</text>
 
-    <rect class="box" x="280" y="60" width="200" height="100" rx="8"/>
+    <rect class="box" x="280" y="60" width="200" height="100" rx="8" />
     <text class="lab" x="380" y="78" text-anchor="middle">Layer 2</text>
     <text x="380" y="106" text-anchor="middle">api.kolm.ai</text>
     <text x="380" y="128" text-anchor="middle" style="font-size:11.5px;fill:var(--ink-mute)">hosted weights</text>
     <text x="380" y="146" text-anchor="middle" style="font-size:11.5px;fill:var(--ink-mute)">cost: $0 (free tier)</text>
 
-    <rect class="box" x="540" y="60" width="200" height="100" rx="8"/>
+    <rect class="box" x="540" y="60" width="200" height="100" rx="8" />
     <text class="lab" x="640" y="78" text-anchor="middle">Layer 3</text>
     <text x="640" y="106" text-anchor="middle">gateway frontier</text>
     <text x="640" y="128" text-anchor="middle" style="font-size:11.5px;fill:var(--ink-mute)">Claude / GPT-4o</text>
     <text x="640" y="146" text-anchor="middle" style="font-size:11.5px;fill:var(--ink-mute)">cap: $0.01 / turn</text>
 
-    <path class="arrow" d="M 222 110 L 276 110" marker-end="url(#arrowhead)"/>
-    <path class="arrow" d="M 482 110 L 536 110" marker-end="url(#arrowhead)"/>
+    <path class="arrow" d="M 222 110 L 276 110" marker-end="url(#arrowhead)" />
+    <path class="arrow" d="M 482 110 L 536 110" marker-end="url(#arrowhead)" />
     <defs>
-      <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-        <path d="M 0 0 L 8 4 L 0 8 z" fill="var(--ink-mute)"/>
+      <marker id="arrowhead" markerwidth="8" markerheight="8" refx="6" refy="4" orient="auto">
+        <path d="M 0 0 L 8 4 L 0 8 z" fill="var(--ink-mute)" />
       </marker>
     </defs>
 
@@ -355,7 +355,7 @@ section li strong{color:var(--ink);font-weight:540}
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">

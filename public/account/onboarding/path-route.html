@@ -58,7 +58,7 @@ h1{font-size:28px;font-weight:500;letter-spacing:-0.01em;margin:0 0 8px;color:va
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li><li><a href="/studio">Studio</a></li><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li>
     </ul>
@@ -114,7 +114,10 @@ const r = await openai.chat.completions.create({
   messages: [{ role: "user", content: "hello kolm" }],
 });
 console.log(r.choices[0].message.content);</code></pre>
-    <button class="copy-btn" data-copy='import OpenAI from "openai";&#10;const openai = new OpenAI({ baseURL: "https://api.kolm.ai/v1", apiKey: process.env.KOLM_API_KEY });&#10;const r = await openai.chat.completions.create({ model: "gpt-4o-mini", messages: [{ role: "user", content: "hello kolm" }] });&#10;console.log(r.choices[0].message.content);'>Copy</button>
+    <button class="copy-btn" data-copy="import OpenAI from &quot;openai&quot;;
+const openai = new OpenAI({ baseURL: &quot;https://api.kolm.ai/v1&quot;, apiKey: process.env.KOLM_API_KEY });
+const r = await openai.chat.completions.create({ model: &quot;gpt-4o-mini&quot;, messages: [{ role: &quot;user&quot;, content: &quot;hello kolm&quot; }] });
+console.log(r.choices[0].message.content);">Copy</button>
   </div>
   <div class="tab-panel" data-tab-panel="py">
     <pre><code>from openai import OpenAI
@@ -130,7 +133,11 @@ r = client.chat.completions.create(
     messages=[{"role": "user", "content": "hello kolm"}],
 )
 print(r.choices[0].message.content)</code></pre>
-    <button class="copy-btn" data-copy='from openai import OpenAI&#10;import os&#10;client = OpenAI(base_url="https://api.kolm.ai/v1", api_key=os.environ["KOLM_API_KEY"])&#10;r = client.chat.completions.create(model="gpt-4o-mini", messages=[{"role": "user", "content": "hello kolm"}])&#10;print(r.choices[0].message.content)'>Copy</button>
+    <button class="copy-btn" data-copy="from openai import OpenAI
+import os
+client = OpenAI(base_url=&quot;https://api.kolm.ai/v1&quot;, api_key=os.environ[&quot;KOLM_API_KEY&quot;])
+r = client.chat.completions.create(model=&quot;gpt-4o-mini&quot;, messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;hello kolm&quot;}])
+print(r.choices[0].message.content)">Copy</button>
   </div>
   <div class="tab-panel" data-tab-panel="curl">
     <pre><code>curl https://api.kolm.ai/v1/chat/completions \
@@ -261,7 +268,7 @@ kolm verify rcpt_01... --json</code></pre>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">

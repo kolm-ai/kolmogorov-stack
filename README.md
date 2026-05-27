@@ -3,7 +3,7 @@
 The AI compiler. Compile a task into a signed `.kolm` artifact you own, run it offline on any device, verify every output.
 
 ```bash
-npm i -g github:kolm-ai/kolm-stack
+npm i -g github:kolm-ai/kolm
 kolm build my-redactor --from redactor --yes     # one-shot: scaffold + seeds + compile + verify
 kolm run my-redactor.kolm '{"text":"call 555-1212"}'
 ```
@@ -20,17 +20,17 @@ You bring your own frontier API key. kolm uses it once, during compile. The resu
 
 If you'd rather talk to the CLI, `kolm chat` opens an interactive session that maps natural-language asks to real verbs — "make me a redactor recipe" runs `kolm new --from redactor`, "anonymize my customer data" runs `kolm seeds generate --strategy redact-pii-templated`, "upgrade kolm" runs `kolm update`. Add `--airgap` to keep it narration-only on disconnected boxes. `kolm anonymize <file>.jsonl` is a first-class shortcut for the same PII-templated seeds path with no LLM and no network.
 
-## What ships in v0.2 (wave 144)
+## What ships in v0.2
 
 Four new pillars land in this release. Each one is real code with a passing test file you can run today; nothing is a roadmap claim.
 
-- **`kolm moe compose`** — combine N expert `.kolm` files into a single composite with a deterministic router (keyword regex, `intent_field`, or `first_match`). The Kimi/Qwen MoE pattern, applied to compiled recipes: small experts, cheap routing, one signed artifact. Per-expert sha256 + recipe source hash + router spec live in `training_stats.moe` so the receipt chain captures the composition exactly. `kolm moe inspect <composite.kolm>` reads the block back. Tests: `tests/wave144-moe-compose.test.js`.
+- **`kolm moe compose`** — combine N expert `.kolm` files into a single composite with a deterministic router (keyword regex, `intent_field`, or `first_match`). The Kimi/Qwen MoE pattern, applied to compiled recipes: small experts, cheap routing, one signed artifact. Per-expert sha256 + recipe source hash + router spec live in `training_stats.moe` so the receipt chain captures the composition exactly. `kolm moe inspect <composite.kolm>` reads the block back.
 
-- **`kolm tokenize {train,encode,decode,inspect}`** — pure-JS byte-level BPE tokenizer (spec id `kolm-tokenizer-1`). Trains on a JSONL/text corpus, round-trips any UTF-8 input (the byte-level fallback guarantees it), serialises to a single `tokenizer.json` you can ship inside the `.kolm`. `kolm compile --tokenizer tokenizer.json` embeds it into the artifact and the manifest records `tokenizer.spec`, `tokenizer.vocab_size`, and `tokenizer.sha256`. No native deps. Tests: `tests/wave144-tokenizer.test.js`, `tests/wave144-tokenizer-artifact.test.js`.
+- **`kolm tokenize {train,encode,decode,inspect}`** — pure-JS byte-level BPE tokenizer (spec id `kolm-tokenizer-1`). Trains on a JSONL/text corpus, round-trips any UTF-8 input (the byte-level fallback guarantees it), serialises to a single `tokenizer.json` you can ship inside the `.kolm`. `kolm compile --tokenizer tokenizer.json` embeds it into the artifact and the manifest records `tokenizer.spec`, `tokenizer.vocab_size`, and `tokenizer.sha256`. No native deps.
 
-- **`kolm extract <file>`** — pure-JS text extraction front door for `.kolm` pipelines. Handles plain text, JSON/JSONL flatten, HTML tag strip with paragraph breaks, and a built-in PDF text-layer extractor that inflates `FlateDecode` content streams and walks `BT`/`ET`/`Tj`/`TJ`/`'`/`"` operators. Images require `--ocr` (shells out to `tesseract` if installed) or `--vision` (Anthropic vision API, needs `ANTHROPIC_API_KEY`); without one of those flags an image input fails with a clear error rather than silently producing empty text. Output ships `{ kind, text, pages?, source, sha256, warnings[] }`. Tests: `tests/wave144-extract.test.js`.
+- **`kolm extract <file>`** — pure-JS text extraction front door for `.kolm` pipelines. Handles plain text, JSON/JSONL flatten, HTML tag strip with paragraph breaks, and a built-in PDF text-layer extractor that inflates `FlateDecode` content streams and walks `BT`/`ET`/`Tj`/`TJ`/`'`/`"` operators. Images require `--ocr` (shells out to `tesseract` if installed) or `--vision` (Anthropic vision API, needs `ANTHROPIC_API_KEY`); without one of those flags an image input fails with a clear error rather than silently producing empty text. Output ships `{ kind, text, pages?, source, sha256, warnings[] }`.
 
-- **`kolm doc check <file> --type <spec>`** — multimodal document completeness gate. Five built-in specs (`claim-packet`, `denial-letter`, `pa-request`, `eob`, `appeal-letter`) cover the common health-insurance document classes; `kolm doc types` lists them. Custom specs are JSON conforming to `kolm-docspec-1` with `required_patterns`, `forbidden_patterns`, `required_sections`, and word-count gates. Verdict is `pass` / `warn` / `fail`; the CLI exits `0` on pass-or-warn and `2` on fail so it composes with shell pipes and CI gates. Score is `(required_passed + 0.5 * warn_passed) / total`. Tests: `tests/wave144-doc-check.test.js`.
+- **`kolm doc check <file> --type <spec>`** — multimodal document completeness gate. Five built-in specs (`claim-packet`, `denial-letter`, `pa-request`, `eob`, `appeal-letter`) cover the common health-insurance document classes; `kolm doc types` lists them. Custom specs are JSON conforming to `kolm-docspec-1` with `required_patterns`, `forbidden_patterns`, `required_sections`, and word-count gates. Verdict is `pass` / `warn` / `fail`; the CLI exits `0` on pass-or-warn and `2` on fail so it composes with shell pipes and CI gates. Score is `(required_passed + 0.5 * warn_passed) / total`.
 
 All four ship in pure JavaScript. None of them require a C, Rust, or Python toolchain. Heavy ML deps (real LoRA training, ONNX export, INT4 quantization) remain explicitly **roadmap** in the gates list below; this release does not pretend one class is another.
 
@@ -48,12 +48,12 @@ This repository currently ships:
 
 - Public website, docs, pricing, articles, benchmarks, security, privacy, and account flows.
 - HTTP API for signup/signin, synthesis, compile jobs, artifacts, receipts, registry export, recall, telemetry, and admin operations.
-- Signed `.kolm` artifact packaging with `manifest.json`, `recipes.json`, `evals.json`, `receipt.json`, `signature.sig`, optional `tokenizer.json` (wave 144), and optional `moe.json` for composite artifacts (wave 144).
+- Signed `.kolm` artifact packaging with `manifest.json`, `recipes.json`, `evals.json`, `receipt.json`, `signature.sig`, optional `tokenizer.json`, and optional `moe.json` for composite artifacts.
 - Verified-inference and verified-wrap endpoints behind authentication and rate limits.
 - JSON-backed single-node store with `KOLM_DATA_DIR` support for safe test isolation.
 - Production hardening for admin keys, receipt secrets, proxy handling, security headers, and public health redaction.
 
-Honest implementation note: `.kolm` artifacts in v0.2 carry compiled JavaScript recipe code, the seed corpus, the evaluator, the receipt chain, and (when produced via `kolm tokenize` + `kolm compile --tokenizer`) a deterministic byte-level BPE tokenizer. They do **not** carry trained LoRA weights, ONNX graphs, INT4-quantized tensors, or sqlite-vec indexes — those remain explicit roadmap items. Where the code does its job today is rule-class transforms (redaction, normalization, classification with deterministic comparators), MoE composition of those recipes, and document completeness checks. The four wave-144 features above are real and tested; the model-class artifacts named in the "Product Gates" section are not in this release.
+Implementation note: `.kolm` artifacts in v0.2 carry compiled JavaScript recipe code, the seed corpus, the evaluator, the receipt chain, and (when produced via `kolm tokenize` + `kolm compile --tokenizer`) a deterministic byte-level BPE tokenizer. They do **not** carry trained LoRA weights, ONNX graphs, INT4-quantized tensors, or sqlite-vec indexes — those remain explicit roadmap items. Where the code does its job today is rule-class transforms (redaction, normalization, classification with deterministic comparators), MoE composition of those recipes, and document completeness checks. The four features above are real and tested; the model-class artifacts named in the "Product Gates" section are not in this release.
 
 ## Local Setup
 
@@ -83,7 +83,7 @@ Open:
 ### CLI install (any OS)
 
 ```bash
-npm i -g github:kolm-ai/kolm-stack
+npm i -g github:kolm-ai/kolm
 kolm version
 ```
 
@@ -93,7 +93,7 @@ with no auth. If the install hangs silently:
 
 1. Re-run with `--verbose` to see what npm is stuck on:
    ```bash
-   npm i -g github:kolm-ai/kolm-stack --verbose
+   npm i -g github:kolm-ai/kolm --verbose
    ```
 2. Use the explicit HTTPS URL (skips git-protocol negotiation on some networks):
    ```bash

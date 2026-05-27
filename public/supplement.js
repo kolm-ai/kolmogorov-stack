@@ -1,6 +1,4 @@
-/* W707 supplement bundle (frontend) — WF02 mega-menu, WF03 mobile-nav overlay, WF04 sticky-scroll,
-   WF05 Cmd+K, WF06 breadcrumbs, WF25 cookie, WF26 announce.
-   Load order: after nav.js. Idempotent — re-invocations are safe. */
+
 (function () {
   'use strict';
   if (window.__kolmSupplementLoaded) return;
@@ -37,11 +35,7 @@
   function storeGet(key) { try { return window.localStorage.getItem(key); } catch (_) { return null; } }
   function storeSet(key, val) { try { window.localStorage.setItem(key, val); } catch (_) {} }
 
-  /* ──────────────── WF26 announcement bar — disabled W838 ────────────────
-     User killed the "Kolm v1.0 / DeepSeek-R1 32B distilled to INT4 in 125s"
-     banner. The page is the message; no banner needed above it.
-     The dismiss-persistence helper is kept (called by future banners) so the
-     storage contract stays stable across re-enable cycles. */
+  
   function dismissAnnouncement(reason) { storeSet(ANNOUNCE_KEY, String(reason || '1')); }
   function installAnnouncementBar() { /* no-op; dismissAnnouncement available */ }
 
@@ -281,7 +275,6 @@
   /* Listens for clicks on nav items annotated with [data-kolm-mega] and renders a panel.
      Falls back gracefully if those triggers don't exist. */
   function installMegaMenu() {
-    // W848: KILLED — user reports duplicate dropdowns on the homepage nav.
     // installMegaMenu used to inject .kolm-mega panels whenever a nav item
     // had [data-kolm-mega]. Now stubbed because dropdowns duplicate the
     // already-visible top-level nav links and add no information.
@@ -439,7 +432,6 @@
     doc.documentElement.style.overflow = '';
   }
   function installMobileNav() {
-    // W848: KILLED — second dropdown user reported. The mobile-nav trigger
     // was injecting a hamburger button onto every page (including desktop
     // homepage), then opening a full-screen overlay menu that duplicated
     // the static .ks-nav links already visible. On desktop, two stacked

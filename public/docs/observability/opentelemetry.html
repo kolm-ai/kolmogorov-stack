@@ -8,13 +8,13 @@
 <meta name="description" content="Export kolm token-confidence, routing decisions, K-Score, and a queue/load/prefill/decode timeline into your OTel collector. Plain no-op when no tracer is registered.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="OpenTelemetry semantic conventions &middot; kolm.ai">
+<meta property="og:title" content="OpenTelemetry semantic conventions · kolm.ai">
 <meta property="og:description" content="Export kolm token-confidence, routing decisions, K-Score, and a queue/load/prefill/decode timeline into your OTel collector.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/observability/opentelemetry">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="OpenTelemetry semantic conventions &middot; kolm.ai">
+<meta name="twitter:title" content="OpenTelemetry semantic conventions · kolm.ai">
 <meta name="twitter:description" content="Export kolm token-confidence, routing decisions, K-Score, and a queue/load/prefill/decode timeline into your OTel collector.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs/observability/opentelemetry">
@@ -68,7 +68,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </style>
 
 <link rel="stylesheet" href="/ks.css">
-<!-- ds-shell W619 -->
+
 <link rel="stylesheet" href="/docs-shell.css">
     <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/docs-shell.js"></script>
@@ -80,22 +80,22 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
@@ -119,7 +119,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
     <tr>
       <td><code>kolm.routing.decision</code></td>
       <td>string</td>
-      <td>One of <code>student</code>, <code>teacher</code>, <code>mixed</code>. Reflects the W709 confidence-router outcome for the span.</td>
+      <td>One of <code>student</code>, <code>teacher</code>, <code>mixed</code>. Reflects the confidence-router outcome for the span.</td>
     </tr>
     <tr>
       <td><code>kolm.routing.entropy_nats</code></td>
@@ -139,7 +139,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
     <tr>
       <td><code>kolm.artifact.cid</code></td>
       <td>string</td>
-      <td>Content-id of the compiled artifact (immutable). Use it to join spans to the W144 receipt store.</td>
+      <td>Content-id of the compiled artifact (immutable). Use it to join spans to the receipt store.</td>
     </tr>
     <tr>
       <td><code>kolm.tenant.id_hash</code></td>
@@ -158,8 +158,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p>Every <code>/v1/route/chat/completions</code> request emits one parent <code>kolm.inference</code> span plus four child sub-spans laid out on a monotonic timeline. Buyers see this as a stacked horizontal bar in any OTel UI:</p>
 
 <div class="timeline">parent span ── kolm.inference                                    [POST /v1/route/chat/completions]
-├── kolm.inference.queue        <span style="color:#111111">▇</span>           (W729 load-queue wait time)
-├── kolm.inference.load            <span style="color:#111111">▇</span>        (model paged into VRAM, or 0 if cached)
+├── kolm.inference.queue        <span style="color:#111111">▇</span>
+├── kolm.inference.load <span style="color:#111111">▇</span>        (model paged into VRAM, or 0 if cached)
 ├── kolm.inference.prefill            <span style="color:#111111">▇▇▇</span>   (prompt &rarr; KV cache compute)
 └── kolm.inference.decode                <span style="color:#111111">▇▇▇▇▇▇▇</span> (KV cache &rarr; output tokens)</div>
 
@@ -168,10 +168,10 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <table>
   <thead><tr><th>Span name</th><th>Phase</th><th>Notes</th></tr></thead>
   <tbody>
-    <tr><td><code>kolm.inference.queue</code></td><td>Queue wait</td><td>Time spent in the W729 load queue before the request was picked up. Sustained non-zero means the runtime is GPU-bound &mdash; provision more capacity.</td></tr>
+    <tr><td><code>kolm.inference.queue</code></td><td>Queue wait</td><td>Time spent in the load queue before the request was picked up. Sustained non-zero means the runtime is GPU-bound &mdash; provision more capacity.</td></tr>
     <tr><td><code>kolm.inference.load</code></td><td>Model load</td><td>Time to page the artifact into VRAM. 0 ms on cache hit. Watch this on cold starts to size your warm pool.</td></tr>
     <tr><td><code>kolm.inference.prefill</code></td><td>Prefill</td><td>Prompt &rarr; KV cache compute. Scales with prompt length. Spike here means the caller is overpaying for token budget &mdash; consider prompt distillation.</td></tr>
-    <tr><td><code>kolm.inference.decode</code></td><td>Decode</td><td>KV cache &rarr; output tokens. Scales with output length. The W727 speculative-decoding kernel shrinks this when accept-rate is high.</td></tr>
+    <tr><td><code>kolm.inference.decode</code></td><td>Decode</td><td>KV cache &rarr; output tokens. Scales with output length. The speculative-decoding kernel shrinks this when accept-rate is high.</td></tr>
   </tbody>
 </table>
 
@@ -180,7 +180,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <pre>CODE25</pre>
 
-<p>kolm also honors <code>@opentelemetry/api</code> if you install it for your own instrumentation &mdash; we don't bundle it, but if your process has a tracer registered via <code>trace.setGlobalTracerProvider(...)</code>, kolm uses it to emit the W733 attributes and timeline through your existing pipeline. The two paths coexist: install nothing extra and you get our native OTLP export; install <code>@opentelemetry/api</code> and you get both.</p>
+<p>kolm also honors <code>@opentelemetry/api</code> if you install it for your own instrumentation &mdash; we don't bundle it, but if your process has a tracer registered via <code>trace.setGlobalTracerProvider(...)</code>, kolm uses it to emit the attributes and timeline through your existing pipeline. The two paths coexist: install nothing extra and you get our native OTLP export; install <code>@opentelemetry/api</code> and you get both.</p>
 
 <p>Inspect the runtime state from the CLI:</p>
 
@@ -262,7 +262,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">

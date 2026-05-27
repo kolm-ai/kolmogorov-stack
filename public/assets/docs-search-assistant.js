@@ -1,4 +1,3 @@
-// W888-R — docs-search-assistant.js
 //
 // Replaces the static Cmd-K substring filter in /docs with an assistant-backed
 // experience. Two execution paths live behind one input:
@@ -18,7 +17,6 @@
 // Lunr-only fallback runs whenever the assistant returns
 // not_yet_routed / budget_exceeded / 429 / any non-2xx. The Lunr column
 // stays visible alongside the assistant column so the user never sees an
-// empty panel — same contract as W844 free-chat.
 
 (function(){
   // Bail if we're not on the docs entry page (the wire-in script below is
@@ -188,7 +186,6 @@
   }
 
   // ─── Inline CSS ──────────────────────────────────────────────────────────
-  // Cool slate dark mode only (W850). Match docs.html paper palette.
   var DSA_CSS = [
     '.dsa-results{display:grid;grid-template-columns:1fr 1.5fr;gap:18px;padding:14px 16px;border-top:1px solid #dde1e7;max-height:50vh;overflow-y:auto;}',
     '@media (max-width:780px){.dsa-results{grid-template-columns:1fr;}}',
@@ -321,7 +318,6 @@
   }
 
   // ─── Bootstrap ───────────────────────────────────────────────────────────
-  // Hook the W847 Cmd-K modal: replace the inline-rendered list with our
   // two-column rendering while leaving the modal shell + keyboard handlers
   // alone. We do this by attaching a higher-priority `input` listener AFTER
   // DOMContentLoaded so the inline handler runs first (and is overridden by

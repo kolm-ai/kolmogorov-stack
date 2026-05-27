@@ -7,8 +7,8 @@
 <meta name="description" content="A/B test two artifacts head-to-head. Chi-square + bootstrap significance, automatic promote on K-Score uplift, automatic rollback on regression. Tenant-fenced /v1/ab/* routes, kolm ab CLI, /account/ab-tests dashboard.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
-<meta property="og:title" content="A/B testing &middot; kolm.ai">
-<meta property="og:description" content="Two variants, one namespace, plain statistics. Auto-promote when bootstrap p &lt; 0.05 and K-Score lifts &gt;= 0.02. Auto-rollback on fallback or latency regression.">
+<meta property="og:title" content="A/B testing · kolm.ai">
+<meta property="og:description" content="Two variants, one namespace, plain statistics. Auto-promote when bootstrap p < 0.05 and K-Score lifts >= 0.02. Auto-rollback on fallback or latency regression.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/docs/ab-testing">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -53,13 +53,13 @@
 <div class="ks-nav-wrap">
   <header class="ks-nav">
     <div class="ks-wrap ks-nav__row">
-      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
       <nav class="ks-nav__links" aria-label="Primary">
         <a href="/wrapper">Wrapper</a>
         <a href="/studio">Studio</a>
         <a href="/pricing">Pricing</a>
         <a href="/docs">Docs</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
       </nav>
       <div class="ks-nav__cta">
         <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
@@ -141,7 +141,7 @@
       <tbody>
         <tr><td><code>POST /v1/ab/configure</code></td><td>Set up an A/B test: <code>{namespace, version_a, version_b, split?, idempotency_key?}</code>. Returns the config; idempotent on key.</td></tr>
         <tr><td><code>GET /v1/ab/status</code></td><td>Latest config + sample counts + metrics for a namespace; without <code>?namespace=X</code> returns the rollup across the tenant.</td></tr>
-        <tr><td><code>POST /v1/ab/feedback</code></td><td>Record one outcome: <code>{namespace, variant, request_id?, k_score?, latency_ms?, thumb?, comment?}</code>. Also fans the row to the W720 self-improvement queue.</td></tr>
+        <tr><td><code>POST /v1/ab/feedback</code></td><td>Record one outcome: <code>{namespace, variant, request_id?, k_score?, latency_ms?, thumb?, comment?}</code>. Also fans the row to the self-improvement queue.</td></tr>
         <tr><td><code>POST /v1/ab/promote</code></td><td>Run the decision gate. <code>{namespace, force?, thresholds?}</code>. With <code>force:true</code> skips the gate and flips to B; otherwise returns one of promote/rollback/hold.</td></tr>
         <tr><td><code>GET /v1/ab/metrics</code></td><td>Aggregated per-variant rollup: <code>{a: {count, k_score_mean, latency_p95, fallback_rate, ...}, b: {...}}</code>.</td></tr>
       </tbody>
@@ -251,7 +251,7 @@ kolm ab promote abt_a1b2c3 --arm b --reason "p=0.018, K-Score lift +3.4%"</pre><
         <a href="/enterprise">Enterprise</a>
         <a href="/manifesto">Manifesto</a>
         <a href="mailto:rodneyyesep@gmail.com">rodneyyesep@gmail.com</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub &rarr;</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub &rarr;</a>
       </div>
     </div>
     <div class="ks-foot__base">

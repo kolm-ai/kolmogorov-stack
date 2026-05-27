@@ -110,18 +110,16 @@ test('W456 #5 build-changelog.cjs is in-place auto-block mode (preserves W221+W3
   assert.match(script, /existing\.slice\(0, beginAt\)/, 'build must slice prefix before AUTO_BEGIN');
 });
 
-test('W456 #6 public/changelog.html has fresh markers + the latest waves rendered', () => {
+test('W456 #6 public/changelog.html has script markers + curated narrative + nav', () => {
   const html = readFileSync(join(ROOT, 'public', 'changelog.html'), 'utf8');
+  // The build script slices between these markers; the page now ships a hand-curated
+  // narrative changelog (no atomic per-wave dump), so the markers can sit empty.
   assert.match(html, /<!-- CHANGELOG_AUTO_BEGIN -->/, 'AUTO_BEGIN marker present');
   assert.match(html, /<!-- CHANGELOG_AUTO_END -->/, 'AUTO_END marker present');
-  // The auto-block must contain at least one wave >= W411 (the audit-finish loop start).
-  const recentMatches = html.match(/<span class="cl-tag">W(\d+)/g) || [];
-  const recentNums = recentMatches.map((s) => parseInt(s.match(/\d+/)[0], 10));
-  const maxWave = Math.max(0, ...recentNums);
-  assert.ok(maxWave >= 411, 'changelog must reflect at least one wave >= W411 (got max=' + maxWave + ')');
-  // W221+W399 nav must still be present (preserved by in-place build).
-  assert.match(html, /<!-- KOLM_NAV_BEGIN \(W221\) -->/, 'nav-block start preserved');
-  assert.match(html, /class="mega-menu"/, 'W399 mega-menu nav still in place');
+  // The curated narrative must include at least the current month bucket.
+  assert.match(html, /id="may-2026"/, 'May 2026 narrative section must be present');
+  // Site-wide mega-menu nav must still be injected (replaces the older inline nav block).
+  assert.match(html, /class="mega-menu"/, 'mega-menu nav still in place');
 });
 
 test('W456 #7 public/roadmap.html eyebrow stamp no longer says "wave 159"', () => {

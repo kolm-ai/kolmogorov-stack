@@ -25,7 +25,7 @@
 <body>
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a class="skip-link" href="#main">Skip to content</a>
-    <!-- KOLM_NAV_BEGIN (W221) -->
+    
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
       <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
@@ -121,7 +121,7 @@
       </div>
     </div>
     </nav>
-    <!-- KOLM_NAV_END (W221) -->
+    
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="hardware">
 <nav aria-label="Breadcrumb" class="crumbs">
   <a href="/docs">Docs</a> / <a href="/docs/cli">CLI</a> / <span>hardware</span>
@@ -193,7 +193,7 @@ kolm hardware --json | jq -r '.primary | "--vram-gb " + (.vram_gb|tostring)' \
   | xargs kolm fit --params-b 7 --pick-best
 </code></pre>
 <h2>Notes</h2>
-<p>The probe calls into <code>src/forge-hardware.js</code> &middot; <code>detectHardware()</code>. NVIDIA detection uses <code>nvidia-smi</code> if present; otherwise it falls back to a CPU-only envelope. AMD ROCm and Apple Metal detection are best-effort &mdash; please file a bug at <a href="https://github.com/kolm-ai/kolmogorov-stack">github.com/kolm-ai/kolmogorov-stack</a> if your device shows up wrong.</p>
+<p>The probe calls into <code>src/forge-hardware.js</code> &middot; <code>detectHardware()</code>. NVIDIA detection uses <code>nvidia-smi</code> if present; otherwise it falls back to a CPU-only envelope. AMD ROCm and Apple Metal detection are best-effort &mdash; please file a bug at <a href="https://github.com/kolm-ai/kolm">github.com/kolm-ai/kolm</a> if your device shows up wrong.</p>
 <p>The same route powers the Account dashboard auto-fill for VRAM; you should never have to type your VRAM into the quantize wizard.</p>
 <h2>See also</h2>
 <ul>

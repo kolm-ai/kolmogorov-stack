@@ -213,22 +213,22 @@
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 <main id="main">
@@ -258,25 +258,25 @@
  <div class="wrap">
  <h2>The training ladder</h2>
  <p class="lede">Each rung is a tier. The CLI is the same. The artifact gets bigger; the trust chain gets longer; the K-score gets calibrated against an ever-larger holdout.</p>
- <svg class="ladder-svg" viewBox="0 0 1000 460" role="img" aria-label="Training ladder from rule recipe to MoE bundle">
+ <svg class="ladder-svg" viewbox="0 0 1000 460" role="img" aria-label="Training ladder from rule recipe to MoE bundle">
  <defs>
- <linearGradient id="lad-grad" x1="0" y1="0" x2="1" y2="0">
- <stop offset="0%" stop-color="#e6e9ee"/>
- <stop offset="33%" stop-color="#b89cf7"/>
- <stop offset="66%" stop-color="#f3b15a"/>
- <stop offset="100%" stop-color="#f29bbb"/>
- </linearGradient>
- <radialGradient id="lad-glow" cx="0.5" cy="0.5" r="0.5">
- <stop offset="0%" stop-color="rgba(230, 233, 238,0.55)"/>
- <stop offset="100%" stop-color="rgba(230, 233, 238,0)"/>
- </radialGradient>
+ <lineargradient id="lad-grad" x1="0" y1="0" x2="1" y2="0">
+ <stop offset="0%" stop-color="#e6e9ee" />
+ <stop offset="33%" stop-color="#b89cf7" />
+ <stop offset="66%" stop-color="#f3b15a" />
+ <stop offset="100%" stop-color="#f29bbb" />
+ </lineargradient>
+ <radialgradient id="lad-glow" cx="0.5" cy="0.5" r="0.5">
+ <stop offset="0%" stop-color="rgba(230, 233, 238,0.55)" />
+ <stop offset="100%" stop-color="rgba(230, 233, 238,0)" />
+ </radialgradient>
  <filter id="lad-soft" x="-20%" y="-20%" width="140%" height="140%">
- <feGaussianBlur stdDeviation="2"/>
+ <fegaussianblur stddeviation="2" />
  </filter>
  </defs>
- <rect x="0" y="0" width="1000" height="460" fill="transparent"/>
- <line x1="80" y1="380" x2="940" y2="380" stroke="url(#lad-grad)" stroke-width="2" opacity="0.55"/>
- <line x1="80" y1="380" x2="80" y2="60" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
+ <rect x="0" y="0" width="1000" height="460" fill="transparent" />
+ <line x1="80" y1="380" x2="940" y2="380" stroke="url(#lad-grad)" stroke-width="2" opacity="0.55" />
+ <line x1="80" y1="380" x2="80" y2="60" stroke="rgba(255,255,255,0.10)" stroke-width="1" />
 
  <!-- y-axis tick labels -->
  <text x="62" y="380" text-anchor="end" font-family="ui-monospace, monospace" font-size="10" fill="#6a727c">0%</text>
@@ -288,49 +288,49 @@
  <!-- ladder rungs -->
  <g>
  <!-- tier 0 -->
- <circle cx="160" cy="340" r="28" fill="rgba(230, 233, 238,0.08)" stroke="#e6e9ee" stroke-width="1.5"/>
+ <circle cx="160" cy="340" r="28" fill="rgba(230, 233, 238,0.08)" stroke="#e6e9ee" stroke-width="1.5" />
  <text x="160" y="345" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#e6e9ee">0</text>
  <text x="160" y="408" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">5 ex.</text>
  <text x="160" y="424" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">rule</text>
  <text x="160" y="320" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#e6e9ee">A=0.72</text>
 
  <!-- tier 1 -->
- <circle cx="300" cy="298" r="28" fill="rgba(184,156,247,0.10)" stroke="#b89cf7" stroke-width="1.5"/>
+ <circle cx="300" cy="298" r="28" fill="rgba(184,156,247,0.10)" stroke="#b89cf7" stroke-width="1.5" />
  <text x="300" y="303" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#b89cf7">1</text>
  <text x="300" y="408" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">50 ex.</text>
  <text x="300" y="424" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">synth-rule</text>
  <text x="300" y="278" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#b89cf7">A=0.86</text>
 
  <!-- tier 2 -->
- <circle cx="440" cy="240" r="30" fill="rgba(243,177,90,0.10)" stroke="#f3b15a" stroke-width="1.5"/>
+ <circle cx="440" cy="240" r="30" fill="rgba(243,177,90,0.10)" stroke="#f3b15a" stroke-width="1.5" />
  <text x="440" y="246" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#f3b15a">2</text>
  <text x="440" y="408" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">500 ex.</text>
  <text x="440" y="424" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">distill 0.5B</text>
  <text x="440" y="218" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#f3b15a">A=0.90 A/T=0.92</text>
 
  <!-- tier 3 -->
- <circle cx="580" cy="184" r="32" fill="rgba(243,177,90,0.12)" stroke="#f3b15a" stroke-width="1.5"/>
+ <circle cx="580" cy="184" r="32" fill="rgba(243,177,90,0.12)" stroke="#f3b15a" stroke-width="1.5" />
  <text x="580" y="190" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#f3b15a">3</text>
  <text x="580" y="408" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">5,000 ex.</text>
  <text x="580" y="424" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">distill 1B</text>
  <text x="580" y="160" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#f3b15a">A=0.94 A/T=0.96</text>
 
  <!-- tier 4 -->
- <circle cx="720" cy="128" r="34" fill="rgba(243,177,90,0.14)" stroke="#f3b15a" stroke-width="1.5"/>
+ <circle cx="720" cy="128" r="34" fill="rgba(243,177,90,0.14)" stroke="#f3b15a" stroke-width="1.5" />
  <text x="720" y="134" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#f3b15a">4</text>
  <text x="720" y="408" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">50,000 ex.</text>
  <text x="720" y="424" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">distill 7B</text>
  <text x="720" y="100" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#f3b15a">A=0.96 A/T=0.98</text>
 
  <!-- tier 5 (MoE) -->
- <circle cx="860" cy="82" r="36" fill="rgba(242,155,187,0.14)" stroke="#f29bbb" stroke-width="1.5"/>
+ <circle cx="860" cy="82" r="36" fill="rgba(242,155,187,0.14)" stroke="#f29bbb" stroke-width="1.5" />
  <text x="860" y="88" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" fill="#f29bbb">5</text>
  <text x="860" y="408" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">4 experts</text>
  <text x="860" y="424" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">MoE bundle</text>
  <text x="860" y="52" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#f29bbb">composite</text>
 
  <!-- connecting curve through rungs -->
- <path d="M160 340 Q230 320, 300 298 T440 240 Q510 220, 580 184 T720 128 Q790 100, 860 82" stroke="url(#lad-grad)" stroke-width="2" fill="none" opacity="0.7"/>
+ <path d="M160 340 Q230 320, 300 298 T440 240 Q510 220, 580 184 T720 128 Q790 100, 860 82" stroke="url(#lad-grad)" stroke-width="2" fill="none" opacity="0.7" />
  </g>
 
  <!-- axis label -->
@@ -635,90 +635,90 @@ kolm verify dist/denial-code-classifier.kolm
  <h2>What happens when you run <code>kolm distill</code></h2>
  <p class="lede">The pipeline is the same shape at tier 2, 3, and 4. The boxes get bigger, the wall-clock time grows, the receipt chain never changes.</p>
  <div class="pipeline-svg-wrap">
- <svg viewBox="0 0 1120 360" role="img" aria-label="Distillation pipeline diagram">
+ <svg viewbox="0 0 1120 360" role="img" aria-label="Distillation pipeline diagram">
  <defs>
- <linearGradient id="pl-grad-teacher" x1="0" y1="0" x2="1" y2="1">
- <stop offset="0%" stop-color="#b89cf7" stop-opacity="0.18"/>
- <stop offset="100%" stop-color="#b89cf7" stop-opacity="0.04"/>
- </linearGradient>
- <linearGradient id="pl-grad-student" x1="0" y1="0" x2="1" y2="1">
- <stop offset="0%" stop-color="#f3b15a" stop-opacity="0.20"/>
- <stop offset="100%" stop-color="#f3b15a" stop-opacity="0.05"/>
- </linearGradient>
- <linearGradient id="pl-grad-ship" x1="0" y1="0" x2="1" y2="1">
- <stop offset="0%" stop-color="#e6e9ee" stop-opacity="0.22"/>
- <stop offset="100%" stop-color="#e6e9ee" stop-opacity="0.05"/>
- </linearGradient>
- <marker id="pl-arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="strokeWidth">
- <path d="M0,0 L0,9 L9,4.5 z" fill="#6a727c"/>
+ <lineargradient id="pl-grad-teacher" x1="0" y1="0" x2="1" y2="1">
+ <stop offset="0%" stop-color="#b89cf7" stop-opacity="0.18" />
+ <stop offset="100%" stop-color="#b89cf7" stop-opacity="0.04" />
+ </lineargradient>
+ <lineargradient id="pl-grad-student" x1="0" y1="0" x2="1" y2="1">
+ <stop offset="0%" stop-color="#f3b15a" stop-opacity="0.20" />
+ <stop offset="100%" stop-color="#f3b15a" stop-opacity="0.05" />
+ </lineargradient>
+ <lineargradient id="pl-grad-ship" x1="0" y1="0" x2="1" y2="1">
+ <stop offset="0%" stop-color="#e6e9ee" stop-opacity="0.22" />
+ <stop offset="100%" stop-color="#e6e9ee" stop-opacity="0.05" />
+ </lineargradient>
+ <marker id="pl-arrow" markerwidth="9" markerheight="9" refx="7" refy="4.5" orient="auto" markerunits="strokeWidth">
+ <path d="M0,0 L0,9 L9,4.5 z" fill="#6a727c" />
  </marker>
  </defs>
 
  <!-- step 1: seeds -->
  <g transform="translate(20, 70)">
- <rect x="0" y="0" width="150" height="220" rx="14" fill="#0e1314" stroke="rgba(255,255,255,0.10)"/>
+ <rect x="0" y="0" width="150" height="220" rx="14" fill="#0e1314" stroke="rgba(255,255,255,0.10)" />
  <text x="75" y="28" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">STEP 1</text>
  <text x="75" y="52" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" fill="#e6e9ee" font-weight="500">seeds.jsonl</text>
  <text x="75" y="78" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">your captured I/O</text>
- <line x1="20" y1="100" x2="130" y2="100" stroke="rgba(255,255,255,0.08)"/>
+ <line x1="20" y1="100" x2="130" y2="100" stroke="rgba(255,255,255,0.08)" />
  <text x="75" y="124" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#e6e9ee">80% train</text>
  <text x="75" y="146" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#b89cf7">20% holdout</text>
  <text x="75" y="174" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#6a727c">split by row hash</text>
  <text x="75" y="190" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#6a727c">train &cap; holdout = &empty;</text>
  </g>
- <line x1="180" y1="180" x2="218" y2="180" stroke="#6a727c" stroke-width="1.5" marker-end="url(#pl-arrow)"/>
+ <line x1="180" y1="180" x2="218" y2="180" stroke="#6a727c" stroke-width="1.5" marker-end="url(#pl-arrow)" />
 
  <!-- step 2: redactor + teacher -->
  <g transform="translate(228, 70)">
- <rect x="0" y="0" width="200" height="220" rx="14" fill="url(#pl-grad-teacher)" stroke="#b89cf7" stroke-opacity="0.4"/>
+ <rect x="0" y="0" width="200" height="220" rx="14" fill="url(#pl-grad-teacher)" stroke="#b89cf7" stroke-opacity="0.4" />
  <text x="100" y="28" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">STEP 2</text>
  <text x="100" y="52" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" fill="#e6e9ee" font-weight="500">redact &rarr; teacher</text>
  <text x="100" y="78" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">PHI tokens out</text>
- <line x1="20" y1="100" x2="180" y2="100" stroke="rgba(255,255,255,0.08)"/>
+ <line x1="20" y1="100" x2="180" y2="100" stroke="rgba(255,255,255,0.08)" />
  <text x="100" y="124" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#b89cf7">claude opus / sonnet</text>
  <text x="100" y="142" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#b89cf7">gpt-5 / o3</text>
  <text x="100" y="160" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#b89cf7">gemini 2.5 pro/flash</text>
  <text x="100" y="178" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#b89cf7">grok-3 / local</text>
  <text x="100" y="206" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#6a727c">reinject after call</text>
  </g>
- <line x1="438" y1="180" x2="476" y2="180" stroke="#6a727c" stroke-width="1.5" marker-end="url(#pl-arrow)"/>
+ <line x1="438" y1="180" x2="476" y2="180" stroke="#6a727c" stroke-width="1.5" marker-end="url(#pl-arrow)" />
 
  <!-- step 3: student train -->
  <g transform="translate(486, 70)">
- <rect x="0" y="0" width="200" height="220" rx="14" fill="url(#pl-grad-student)" stroke="#f3b15a" stroke-opacity="0.42"/>
+ <rect x="0" y="0" width="200" height="220" rx="14" fill="url(#pl-grad-student)" stroke="#f3b15a" stroke-opacity="0.42" />
  <text x="100" y="28" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">STEP 3</text>
  <text x="100" y="52" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" fill="#e6e9ee" font-weight="500">LoRA / QLoRA</text>
  <text x="100" y="78" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">small open-weight base</text>
- <line x1="20" y1="100" x2="180" y2="100" stroke="rgba(255,255,255,0.08)"/>
+ <line x1="20" y1="100" x2="180" y2="100" stroke="rgba(255,255,255,0.08)" />
  <text x="100" y="124" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#f3b15a">smollm2 / qwen2.5</text>
  <text x="100" y="142" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#f3b15a">llama-3.2 / phi-3.5</text>
  <text x="100" y="160" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#f3b15a">gemma-2 / mistral-7b</text>
  <text x="100" y="178" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#f3b15a">deepseek / glm-4 / yi</text>
  <text x="100" y="206" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#6a727c">adapter weights only</text>
  </g>
- <line x1="696" y1="180" x2="734" y2="180" stroke="#6a727c" stroke-width="1.5" marker-end="url(#pl-arrow)"/>
+ <line x1="696" y1="180" x2="734" y2="180" stroke="#6a727c" stroke-width="1.5" marker-end="url(#pl-arrow)" />
 
  <!-- step 4: quantize -->
  <g transform="translate(744, 70)">
- <rect x="0" y="0" width="160" height="220" rx="14" fill="#0e1314" stroke="rgba(255,255,255,0.10)"/>
+ <rect x="0" y="0" width="160" height="220" rx="14" fill="#0e1314" stroke="rgba(255,255,255,0.10)" />
  <text x="80" y="28" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">STEP 4</text>
  <text x="80" y="52" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" fill="#e6e9ee" font-weight="500">quantize</text>
  <text x="80" y="78" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">INT4 / INT8</text>
- <line x1="20" y1="100" x2="140" y2="100" stroke="rgba(255,255,255,0.08)"/>
+ <line x1="20" y1="100" x2="140" y2="100" stroke="rgba(255,255,255,0.08)" />
  <text x="80" y="124" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#cccccc">GPTQ</text>
  <text x="80" y="146" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#cccccc">AWQ</text>
  <text x="80" y="168" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#cccccc">bitsandbytes</text>
  <text x="80" y="200" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#6a727c">GGUF / ONNX export</text>
  </g>
- <line x1="914" y1="180" x2="952" y2="180" stroke="#6a727c" stroke-width="1.5" marker-end="url(#pl-arrow)"/>
+ <line x1="914" y1="180" x2="952" y2="180" stroke="#6a727c" stroke-width="1.5" marker-end="url(#pl-arrow)" />
 
  <!-- step 5: ship -->
  <g transform="translate(962, 70)">
- <rect x="0" y="0" width="140" height="220" rx="14" fill="url(#pl-grad-ship)" stroke="#e6e9ee" stroke-opacity="0.44"/>
+ <rect x="0" y="0" width="140" height="220" rx="14" fill="url(#pl-grad-ship)" stroke="#e6e9ee" stroke-opacity="0.44" />
  <text x="70" y="28" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#6a727c">STEP 5</text>
  <text x="70" y="52" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" fill="#e6e9ee" font-weight="500">.kolm</text>
  <text x="70" y="78" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#aab0b8">one signed file</text>
- <line x1="20" y1="100" x2="120" y2="100" stroke="rgba(255,255,255,0.08)"/>
+ <line x1="20" y1="100" x2="120" y2="100" stroke="rgba(255,255,255,0.08)" />
  <text x="70" y="124" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#e6e9ee">manifest</text>
  <text x="70" y="142" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#e6e9ee">model.gguf</text>
  <text x="70" y="160" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#e6e9ee">receipt chain</text>
@@ -728,7 +728,7 @@ kolm verify dist/denial-code-classifier.kolm
 
  <!-- footer band -->
  <g transform="translate(20, 310)">
- <rect x="0" y="0" width="1080" height="32" rx="6" fill="rgba(230, 233, 238,0.06)" stroke="rgba(230, 233, 238,0.20)"/>
+ <rect x="0" y="0" width="1080" height="32" rx="6" fill="rgba(230, 233, 238,0.06)" stroke="rgba(230, 233, 238,0.20)" />
  <text x="20" y="20" font-family="ui-monospace, monospace" font-size="11" fill="#e6e9ee">receipt chain extends across every step: seeds_hash &rarr; split_seed &rarr; redaction_map_hash &rarr; teacher_call_log_hash &rarr; reinjection_log_hash &rarr; train_hash &rarr; recipe_hash &rarr; binary_hash &rarr; eval_result_hash &rarr; signature</text>
  </g>
  </svg>
@@ -857,54 +857,54 @@ kolm verify dist/denial-code-classifier.kolm
  <h2>The receipt chain, same shape at every tier</h2>
  <p class="lede">Each box hashes the box before it. The verifier walks the chain backward and refuses on any break. Wave 156 made the build step itself reproducible; <code>kolm verify --rebuild</code> recompiles from the recorded toolchain and confirms <code>binary_hash</code> matches.</p>
  <div class="receipt-svg-wrap">
- <svg viewBox="0 0 1080 240" role="img" aria-label="Receipt chain diagram">
+ <svg viewbox="0 0 1080 240" role="img" aria-label="Receipt chain diagram">
  <defs>
- <marker id="rc-arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="strokeWidth">
- <path d="M0,0 L0,9 L9,4.5 z" fill="#e6e9ee"/>
+ <marker id="rc-arrow" markerwidth="9" markerheight="9" refx="7" refy="4.5" orient="auto" markerunits="strokeWidth">
+ <path d="M0,0 L0,9 L9,4.5 z" fill="#e6e9ee" />
  </marker>
  </defs>
  <g font-family="ui-monospace, monospace" font-size="11.5" fill="#e6e9ee">
- <rect x="20" y="40" width="130" height="80" rx="10" fill="#0e1314" stroke="rgba(230, 233, 238,0.4)"/>
+ <rect x="20" y="40" width="130" height="80" rx="10" fill="#0e1314" stroke="rgba(230, 233, 238,0.4)" />
  <text x="85" y="68" text-anchor="middle">seeds_hash</text>
  <text x="85" y="88" text-anchor="middle" font-size="10" fill="#6a727c">sha256(seeds.jsonl)</text>
  <text x="85" y="106" text-anchor="middle" font-size="10" fill="#6a727c">+ split_seed</text>
 
- <line x1="155" y1="80" x2="195" y2="80" stroke="#e6e9ee" stroke-width="1.4" marker-end="url(#rc-arrow)"/>
+ <line x1="155" y1="80" x2="195" y2="80" stroke="#e6e9ee" stroke-width="1.4" marker-end="url(#rc-arrow)" />
 
- <rect x="200" y="40" width="130" height="80" rx="10" fill="#0e1314" stroke="rgba(184,156,247,0.4)"/>
+ <rect x="200" y="40" width="130" height="80" rx="10" fill="#0e1314" stroke="rgba(184,156,247,0.4)" />
  <text x="265" y="68" text-anchor="middle">redaction_map</text>
  <text x="265" y="88" text-anchor="middle" font-size="10" fill="#6a727c">+ teacher_call_log</text>
  <text x="265" y="106" text-anchor="middle" font-size="10" fill="#6a727c">+ reinjection_log</text>
 
- <line x1="335" y1="80" x2="375" y2="80" stroke="#e6e9ee" stroke-width="1.4" marker-end="url(#rc-arrow)"/>
+ <line x1="335" y1="80" x2="375" y2="80" stroke="#e6e9ee" stroke-width="1.4" marker-end="url(#rc-arrow)" />
 
- <rect x="380" y="40" width="130" height="80" rx="10" fill="#0e1314" stroke="rgba(243,177,90,0.4)"/>
+ <rect x="380" y="40" width="130" height="80" rx="10" fill="#0e1314" stroke="rgba(243,177,90,0.4)" />
  <text x="445" y="68" text-anchor="middle">train_hash</text>
  <text x="445" y="88" text-anchor="middle" font-size="10" fill="#6a727c">+ holdout_hash</text>
  <text x="445" y="106" text-anchor="middle" font-size="10" fill="#6a727c">disjoint check</text>
 
- <line x1="515" y1="80" x2="555" y2="80" stroke="#e6e9ee" stroke-width="1.4" marker-end="url(#rc-arrow)"/>
+ <line x1="515" y1="80" x2="555" y2="80" stroke="#e6e9ee" stroke-width="1.4" marker-end="url(#rc-arrow)" />
 
- <rect x="560" y="40" width="130" height="80" rx="10" fill="#0e1314" stroke="rgba(243,177,90,0.4)"/>
+ <rect x="560" y="40" width="130" height="80" rx="10" fill="#0e1314" stroke="rgba(243,177,90,0.4)" />
  <text x="625" y="68" text-anchor="middle">recipe_hash</text>
  <text x="625" y="88" text-anchor="middle" font-size="10" fill="#6a727c">trained on train only</text>
 
- <line x1="695" y1="80" x2="735" y2="80" stroke="#e6e9ee" stroke-width="1.4" marker-end="url(#rc-arrow)"/>
+ <line x1="695" y1="80" x2="735" y2="80" stroke="#e6e9ee" stroke-width="1.4" marker-end="url(#rc-arrow)" />
 
- <rect x="740" y="40" width="130" height="80" rx="10" fill="#0e1314" stroke="rgba(243,177,90,0.4)"/>
+ <rect x="740" y="40" width="130" height="80" rx="10" fill="#0e1314" stroke="rgba(243,177,90,0.4)" />
  <text x="805" y="68" text-anchor="middle">binary_hash</text>
  <text x="805" y="88" text-anchor="middle" font-size="10" fill="#6a727c">+ toolchain pin</text>
  <text x="805" y="106" text-anchor="middle" font-size="10" fill="#6a727c">+ source_kind</text>
 
- <line x1="875" y1="80" x2="915" y2="80" stroke="#e6e9ee" stroke-width="1.4" marker-end="url(#rc-arrow)"/>
+ <line x1="875" y1="80" x2="915" y2="80" stroke="#e6e9ee" stroke-width="1.4" marker-end="url(#rc-arrow)" />
 
- <rect x="920" y="40" width="130" height="80" rx="10" fill="#0e1314" stroke="rgba(230, 233, 238,0.4)"/>
+ <rect x="920" y="40" width="130" height="80" rx="10" fill="#0e1314" stroke="rgba(230, 233, 238,0.4)" />
  <text x="985" y="68" text-anchor="middle">eval_result</text>
  <text x="985" y="88" text-anchor="middle" font-size="10" fill="#6a727c">+ K-score axes</text>
  <text x="985" y="106" text-anchor="middle" font-size="10" fill="#6a727c">+ A/T ratio</text>
 
  <!-- bottom signed band -->
- <rect x="20" y="170" width="1030" height="44" rx="8" fill="rgba(230, 233, 238,0.06)" stroke="rgba(230, 233, 238,0.30)"/>
+ <rect x="20" y="170" width="1030" height="44" rx="8" fill="rgba(230, 233, 238,0.06)" stroke="rgba(230, 233, 238,0.30)" />
  <text x="535" y="198" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" fill="#e6e9ee">all hashes Ed25519-signed by tenant key &middot; sigstore transparency entry optional</text>
  </g>
  </svg>
@@ -1024,7 +1024,7 @@ kolm inspect &lt;file&gt;.kolm # full manifest pretty-print</pre>
  <div class="row"><div class="k">lower bound</div><div class="v"><b>0 examples</b>. Deterministic transform; <code>seeds.jsonl</code> can be empty.</div></div>
  <div class="row"><div class="k">sweet spot</div><div class="v"><b>10 to 30 examples</b> just for eval cases (regression detection on the holdout).</div></div>
  <div class="row"><div class="k">upper bound</div><div class="v"><b>100 examples</b> = comprehensive eval suite; more does not change the rule, only the K-score precision.</div></div>
- <p class="worked"><b>Worked example.</b> An EDI 837 parser or an MLR-rebate calculator (W184): 0 seed examples because the transform is deterministic. <code>pack.rules</code> covers the IG dictionary; the holdout exists only to catch regressions.</p>
+ <p class="worked"><b>Worked example.</b> An EDI 837 parser or an MLR-rebate calculator: 0 seed examples because the transform is deterministic. <code>pack.rules</code> covers the IG dictionary; the holdout exists only to catch regressions.</p>
  </div>
 
  <div class="howmuch-card" id="howmuch-synthesized">
@@ -1033,7 +1033,7 @@ kolm inspect &lt;file&gt;.kolm # full manifest pretty-print</pre>
  <div class="row"><div class="k">lower bound</div><div class="v"><b>30 to 100 examples</b>. Enough to cover the edge cases the teacher must satisfy during synthesis; Magpie or Evol-Instruct can grow these if the human seed is small.</div></div>
  <div class="row"><div class="k">sweet spot</div><div class="v"><b>200 to 500 examples</b>. HEDIS measures and CMS Star contributors land here; AST validation + verifier loop catches mistakes the seeds did not.</div></div>
  <div class="row"><div class="k">upper bound</div><div class="v"><b>2,000 examples</b>. Past this, you are mostly fuzzing coverage on coded combinations the teacher already handles.</div></div>
- <p class="worked"><b>Worked example.</b> The HEDIS CBP measure (W182) and the CMS Star contributor extractor (W184): teacher emits a JS rule, AST-validated against the constrained DSL, K-score-gated on the holdout. No weights ever materialize.</p>
+ <p class="worked"><b>Worked example.</b> The HEDIS CBP measure and the CMS Star contributor extractor: teacher emits a JS rule, AST-validated against the constrained DSL, K-score-gated on the holdout. No weights ever materialize.</p>
  </div>
 
  <div class="howmuch-card" id="howmuch-compiled">
@@ -1051,7 +1051,7 @@ kolm inspect &lt;file&gt;.kolm # full manifest pretty-print</pre>
  <div class="row"><div class="k">lower bound</div><div class="v"><b>1,000 high-quality examples</b>. The LIMA finding (Meta, NeurIPS 2023) is the floor for getting meaningful capability via fine-tune; sub-1k drifts into few-shot territory.</div></div>
  <div class="row"><div class="k">sweet spot</div><div class="v"><b>10,000 to 50,000 examples</b>. UltraFeedback (OpenBMB, ~64k preference pairs) and Tulu-3 (Allen AI, ~939k SFT) bracket the production-grade range.</div></div>
  <div class="row"><div class="k">upper bound</div><div class="v"><b>1M examples</b>. Past this, base-model selection and data quality matter more than raw volume; you are paying teacher tokens for diminishing K-score gains.</div></div>
- <p class="worked"><b>Worked example.</b> A denial-appeal-letter or prior-auth-letter generator (W183), or the phi-redactor companion: LoRA on teacher pairs, INT4-quantized, GGUF-exported, shipped as one signed <code>.kolm</code>.</p>
+ <p class="worked"><b>Worked example.</b> A denial-appeal-letter or prior-auth-letter generator, or the phi-redactor companion: LoRA on teacher pairs, INT4-quantized, GGUF-exported, shipped as one signed <code>.kolm</code>.</p>
  </div>
 
  </div>
@@ -1127,7 +1127,7 @@ kolm inspect &lt;file&gt;.kolm # full manifest pretty-print</pre>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">

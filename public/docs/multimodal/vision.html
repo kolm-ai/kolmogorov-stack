@@ -8,13 +8,13 @@
 <meta name="description" content="Capture vision content blocks (OpenAI image_url, Anthropic image, Google fileData), distill a smaller VLM student, replay through a bake-off. Open-source AI workbench.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Vision-language distillation &middot; kolm.ai">
+<meta property="og:title" content="Vision-language distillation · kolm.ai">
 <meta property="og:description" content="End-to-end pipeline: capture vision turns, distill a smaller VLM student, bake-off-replay. Stamped w771-v1.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/multimodal/vision">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Vision-language distillation &middot; kolm.ai">
+<meta name="twitter:title" content="Vision-language distillation · kolm.ai">
 <meta name="twitter:description" content="Capture image_url blocks, distill a VLM student, bake-off replay through your .kolm artifact. Stamped w771-v1.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs/multimodal/vision">
@@ -86,22 +86,22 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
@@ -170,7 +170,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </div>
 
 <h2 id="bakeoff">Bake-off</h2>
-<p>Once the .kolm artifact is built, replay captured vision turns through it via <code>src/vlm-bakeoff.js</code>. The replay is tenant-fenced under W411 defense-in-depth (per-row <code>tenant_id</code> filter), scores by Jaccard token overlap by default (heuristic judge), and groups results by image_kind (photo, screenshot, diagram, chart, other). A callable judge can be wired through the <code>opts.judge</code> DI seam for embedding-similarity scoring without changing the bake-off envelope.</p>
+<p>Once the .kolm artifact is built, replay captured vision turns through it via <code>src/vlm-bakeoff.js</code>. The replay is tenant-fenced under defense-in-depth (per-row <code>tenant_id</code> filter), scores by Jaccard token overlap by default (heuristic judge), and groups results by image_kind (photo, screenshot, diagram, chart, other). A callable judge can be wired through the <code>opts.judge</code> DI seam for embedding-similarity scoring without changing the bake-off envelope.</p>
 
 <table data-w771="bakeoff-shape">
   <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
@@ -184,7 +184,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </table>
 
 <h2 id="cli">CLI</h2>
-<p>The <code>kolm vlm</code> verb (alias: <code>kolm vision</code>) wraps the three auth-gated routes. Bake-off requires <code>--confirm</code> &mdash; matches the W411 spend-protection pattern so a misclick or stray curl cannot fire the replay against every captured row.</p>
+<p>The <code>kolm vlm</code> verb (alias: <code>kolm vision</code>) wraps the three auth-gated routes. Bake-off requires <code>--confirm</code> &mdash; matches the spend-protection pattern so a misclick or stray curl cannot fire the replay against every captured row.</p>
 
 <pre>CODE41</pre>
 
@@ -194,11 +194,11 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   <tbody>
     <tr><td><code>POST /v1/vision/capture-detect</code></td><td>Pure detector: body <code>{message}</code> returns <code>{is_vision, image_url_blocks, base64_blocks, total_images}</code>. No persistence.</td></tr>
     <tr><td><code>POST /v1/vision/bakeoff</code></td><td>Replays vision captures through the named .kolm artifact. <code>confirm:true</code> REQUIRED. Returns the bake-off envelope.</td></tr>
-    <tr><td><code>GET /v1/vision/captures</code></td><td>Lists vision captures for the tenant. Query <code>namespace</code>, <code>limit</code> (max 1000). W411 tenant-fenced.</td></tr>
+    <tr><td><code>GET /v1/vision/captures</code></td><td>Lists vision captures for the tenant. Query <code>namespace</code>, <code>limit</code> (max 1000). tenant-fenced.</td></tr>
   </tbody>
 </table>
 
-<h2 id="tenant-fence">Tenant fence (W411 defense-in-depth)</h2>
+<h2 id="tenant-fence">Tenant fence</h2>
 <div class="honesty">
   <p>Every vision read does <code>store.all('observations').filter(r =&gt; r.tenant === tenant_id || r.tenant_id === tenant_id)</code> rather than the shortcut <code>findByTenant</code>. The defense-in-depth filter runs even after the all() read so a future store schema change cannot silently flip "no leak" to "all leak". The captureVisionMessage row stamps BOTH <code>tenant</code> and <code>tenant_id</code> fields so the fence fires no matter which key the index ends up using.</p>
 </div>
@@ -209,9 +209,9 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </div>
 
 <div class="related">
-  <a href="/docs/multimodal/audio"><b>Audio distillation</b><span>Sibling W772 module &mdash; speech-language capture + distill.</span></a>
-  <a href="/docs/multimodal/video"><b>Video distillation</b><span>Sibling W773 module &mdash; frame-language capture + distill.</span></a>
-  <a href="/docs/api"><b>API reference</b><span>Full route catalog. The three W771 routes live under <code>/v1/vision/*</code>.</span></a>
+  <a href="/docs/multimodal/audio"><b>Audio distillation</b><span>Sibling module &mdash; speech-language capture + distill.</span></a>
+  <a href="/docs/multimodal/video"><b>Video distillation</b><span>Sibling module &mdash; frame-language capture + distill.</span></a>
+  <a href="/docs/api"><b>API reference</b><span>Full route catalog. The three routes live under <code>/v1/vision/*</code>.</span></a>
 </div>
 
 </div></main>

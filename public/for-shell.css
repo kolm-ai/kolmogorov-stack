@@ -1,7 +1,4 @@
-/* for-shell.css — W660 shared shell for the six persona / vertical pages under /for/.
-   Pages: healthcare, fintech, support-automation, agents, edge-ai, government-defense.
-   Each page wires <link rel=stylesheet href=/for-shell.css> alongside /ks.css.
-   No JS. All sections degrade to single column under 800px. */
+
 
 /* ---------- container + section rhythm ---------- */
 .for-page { max-width: 1120px; margin: 0 auto; padding: 0 var(--ks-5); }
@@ -43,7 +40,7 @@
 .for-recipe__cmd .c { color: var(--ks-ink); }
 .for-recipe__cmd .o { color: var(--ks-ink-3); }
 
-/* ---------- cost-vs-frontier bar (mirrors W653 .pr-vs but lives sitewide here) ---------- */
+
 .for-vs { margin-top: 8px; padding: 14px 0 4px; border-top: 1px dashed rgba(230, 233, 238,0.10); display: flex; flex-direction: column; gap: 8px; max-width: 640px; }
 .for-vs__row { display: grid; grid-template-columns: 92px 1fr 100px; align-items: center; gap: 12px; font-family: var(--ks-mono); font-size: 11px; line-height: 1.2; }
 .for-vs__label { color: var(--ks-ink-3); letter-spacing: 0.04em; text-transform: uppercase; }

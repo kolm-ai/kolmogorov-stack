@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/active-learning">
-<meta property="og:title" content="Active learning &middot; Account &middot; kolm.ai">
+<meta property="og:title" content="Active learning · Account · kolm.ai">
 <meta property="og:description" content="Captures the student couldn't handle locally become next round's training signal.">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta property="og:type" content="website">
@@ -71,7 +71,7 @@
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
@@ -94,9 +94,9 @@
 <nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured calls</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li><li><a href="/account/routing">Routing decisions</a></li><li><a href="/account/active-learning" aria-current="page">Active learning</a></li></ul></nav>
 <section class="acct-content">
 
-<p class="eyebrow">Active learning loop (W710 queue + W815 coverage gaps)</p>
+<p class="eyebrow">Active learning loop</p>
 <h1>Active learning loop.</h1>
-<p class="lede">Captures the student couldn't handle locally become next round's training signal. The router escalates to the teacher, the row lands in the queue below, and the next distill picks it up via <code>kolm distill --resume-from-active-queue</code>. Below the queue, the W815 coverage-gap heatmap surfaces topic clusters that are under-represented vs production traffic, so the next distill can fill the gap.</p>
+<p class="lede">Captures the student couldn't handle locally become next round's training signal. The router escalates to the teacher, the row lands in the queue below, and the next distill picks it up via <code>kolm distill --resume-from-active-queue</code>. Below the queue, the coverage-gap heatmap surfaces topic clusters that are under-represented vs production traffic, so the next distill can fill the gap.</p>
 
 <div class="toolbar">
   <label for="ns-input" style="color:var(--ink-faint);font-family:var(--mono);font-size:11px">Namespace</label>
@@ -118,7 +118,7 @@
   <h2>Enqueue rate (last 24 hours)</h2>
   <p class="pdesc">One bar per hour, oldest on the left. Bar height = rows enqueued in that hour.</p>
   <div class="sparkbox">
-    <svg id="spark" viewBox="0 0 600 60" preserveAspectRatio="none" aria-label="Enqueue rate per hour, last 24 hours"></svg>
+    <svg id="spark" viewbox="0 0 600 60" preserveaspectratio="none" aria-label="Enqueue rate per hour, last 24 hours"></svg>
     <div class="legend">
       <span><span class="dot" style="background:var(--accent,#7fbf3f)"></span>enqueued per hour</span>
     </div>
@@ -133,15 +133,15 @@
     <tbody id="recent-rows"></tbody>
   </table>
   <div id="recent-empty" class="empty" hidden>
-    <strong>No enqueues yet.</strong> When the W709 router escalates a request to the teacher, the failing capture lands here. Send traffic through <code>/v1/route/chat/completions</code> and rows will appear within a few seconds.
+    <strong>No enqueues yet.</strong> When the router escalates a request to the teacher, the failing capture lands here. Send traffic through <code>/v1/route/chat/completions</code> and rows will appear within a few seconds.
   </div>
 </div>
 
 <div class="kpanel" id="w815-coverage-gaps">
-  <h2>Coverage-gap heatmap (W815 active-learning loop)</h2>
+  <h2>Coverage-gap heatmap</h2>
   <p class="pdesc">Topic clusters under-represented relative to the corpus median, ranked by <code>gap_score = shortfall × demand_proxy</code>. A red cell means the cluster is far below median; size encodes recommended capture count. Needs at least <code>30</code> captures in the namespace; below that we report an explicit <code>insufficient_captures_for_coverage</code> envelope.</p>
   <div class="sparkbox" id="w815-heatmap-box">
-    <svg id="w815-heatmap" viewBox="0 0 600 100" preserveAspectRatio="none" aria-label="Coverage gap heatmap"></svg>
+    <svg id="w815-heatmap" viewbox="0 0 600 100" preserveaspectratio="none" aria-label="Coverage gap heatmap"></svg>
     <div class="legend">
       <span><span class="dot" style="background:var(--bad,#cf4f3a)"></span>severe gap (score &gt; 0.6)</span>
       <span><span class="dot" style="background:var(--warn,#d9a020)"></span>moderate (0.3 - 0.6)</span>
@@ -151,7 +151,7 @@
 </div>
 
 <div class="kpanel" id="w815-recommendations">
-  <h2>Recommended next captures (W815)</h2>
+  <h2>Recommended next captures</h2>
   <p class="pdesc">Top gap clusters, with a sample prompt from each so you can recognize the capture pattern. Feed them into the next distill cycle via <code>kolm active-learn --top 10 --json | kolm distill --resume-from-active-queue</code>.</p>
   <table class="ktable">
     <thead><tr><th>Topic cluster</th><th>Gap score</th><th>Current count</th><th>Recommended</th><th>Sample prompt</th></tr></thead>
@@ -163,7 +163,7 @@
 </div>
 
 <div class="note">
-  <strong>Caveat.</strong> Continuous distillation scaffold arrives in W775. Today: queue + manual <code>kolm distill --resume-from-active-queue</code>. The <code>kolm pipeline run --continuous</code> scaffold in this build runs a single foreground loop and emits one structured JSON line per iteration; it does NOT fork a background daemon. Active-learning gap detection (W815) is wired into the W720 self-improvement loop via <code>active_learning_gap:true</code> event-store rows.
+  <strong>Caveat.</strong> Continuous distillation scaffold arrives in. Today: queue + manual <code>kolm distill --resume-from-active-queue</code>. The <code>kolm pipeline run --continuous</code> scaffold in this build runs a single foreground loop and emits one structured JSON line per iteration; it does NOT fork a background daemon. Active-learning gap detection is wired into the self-improvement loop via <code>active_learning_gap:true</code> event-store rows.
 </div>
 
 </section>
@@ -291,7 +291,6 @@ function load(){
 }
 
 // --------------------------------------------------------------------------
-// W815 coverage-gap heatmap + recommended-captures table.
 // --------------------------------------------------------------------------
 function paintW815Heatmap(gaps){
   var svg=document.getElementById("w815-heatmap");if(!svg)return;
@@ -365,7 +364,6 @@ function loadW815Coverage(ns){
       paintW815RecTable([]);
     }
   }).catch(function(){
-    // Endpoint may not be wired yet (W775-style scaffold) — render empty
     // panel so the page never blanks.
     paintW815Heatmap([]);
     paintW815RecTable([]);
@@ -434,7 +432,7 @@ load();
 </footer>
 
 <div hidden data-w221-anchors="account" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
-    <!-- KOLM_NAV_BEGIN (W221) -->
+    
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
       <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
@@ -530,7 +528,7 @@ load();
       </div>
     </div>
     </nav>
-    <!-- KOLM_NAV_END (W221) -->
+    
 </div>
 </body>
 </html>

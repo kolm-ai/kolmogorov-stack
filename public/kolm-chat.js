@@ -1,22 +1,10 @@
-/*  W844 — kolm-chat.js
- *  Pre-auth + post-auth chat console. Mounts to any [data-kolm-chat] element.
- *
- *  Pre-auth: anonymous, talks to POST /v1/free/chat (IP rate-limited 20/day).
- *  Post-auth: same endpoint; the route soft-auths the cookie/header and
- *  upgrades to a tenant-scoped snapshot when a real key is attached.
- *
- *  The component is intentionally framework-free — it ships alongside the
- *  static site (kolm.ai/index.html) and the post-auth dashboard. Same pipe,
- *  same DOM contract, so the chat box on the homepage IS the chat box in
- *  /account.
- */
+
 (function () {
   'use strict';
   if (typeof document === 'undefined') return;
   if (window.__kolmChatBooted) return;
   window.__kolmChatBooted = true;
 
-  // W845: user feedback on W844 chips — "verify the receipt on this artifact"
   // and "show me my opportunities" were dropped. Both leaned on internal
   // jargon (CIDs, opportunity-detection) that a first-time visitor can't
   // act on. Replaced with concrete user-pain prompts where the next CLI is
@@ -32,7 +20,6 @@
     'how do I self-host this air-gapped?'
   ];
 
-  // W854 — safe verbs are runnable inline. Mirrors the server-side allowlist
   // in src/router.js. Used to decide which workflow steps get a "▶ run" button.
   var RUNNABLE_VERBS = {
     whoami: true, doctor: true, version: true, '--version': true,
@@ -156,7 +143,6 @@
     host.appendChild(hint);
 
     var busy = false;
-    // W848 — last workflow returned from the server. POSTed back as
     // previous_workflow on every subsequent turn so the classifier's
     // FOLLOWUP_AFFIRM_RE pre-pass can resolve "ok do it" / "run that"
     // against the recipe the user just saw. Cleared on low-confidence
@@ -167,19 +153,16 @@
 
     function renderResponse(data) {
       var wrap = el('div', { class: 'ks-cli-chat__resp' });
-      // W848 — if the classifier resolved via the affirmative-followup
       // path, tell the user explicitly so they don't think we hallucinated
       // a command out of "ok".
       if (data.source === 'followup') {
         wrap.appendChild(el('p', { class: 'ks-cli-chat__followup', html: '<b>got it.</b> running the previous recipe:' }));
       }
-      // W848 — if the classifier fell through every layer and came back
       // below the confidence floor, we route to 'ask' and surface a soft
       // "i'm not sure" rather than pretending a substring match is real.
       if (data.source === 'low_confidence') {
         wrap.appendChild(el('p', { class: 'ks-cli-chat__softfail', html: '<b>i’m not sure what you meant.</b> closest guesses below; try rephrasing or pick one:' }));
       }
-      // W847 — if the server returned a workflow recipe (multi-step), render
       // that INSTEAD of a single bare command. This is what makes "compile a
       // model to blur porn" useful: 4 numbered steps the user can actually run.
       if (data.workflow && data.workflow.steps && data.workflow.steps.length > 1) {
@@ -194,7 +177,6 @@
           var pre = el('pre', { class: 'ks-cli-chat__cmd' });
           pre.textContent = '$ ' + step.cmd;
           cmdRow.appendChild(pre);
-          // W854 — actual CLI execution button for safe read-only verbs.
           // Anything else (distill, capture, compile, run) stays a
           // copy-and-paste suggestion because it would change tenant state.
           if (isRunnableCmd(step.cmd)) {
@@ -271,7 +253,6 @@
       return wrap;
     }
 
-    // W854 — render real stdout/stderr from /v1/free/cli into the chat log.
     function renderCliResult(data) {
       var wrap = el('div', { class: 'ks-cli-chat__resp ks-cli-chat__resp--cli' });
       var meta = el('p', { class: 'ks-cli-chat__cli-meta' });
@@ -303,7 +284,6 @@
       return wrap;
     }
 
-    // W854 — execute a kolm command directly via /v1/free/cli. The button is
     // only emitted next to safe verbs; the server enforces the allowlist
     // independently so a forged client can't escalate.
     function runCli(cmdText, mountInto, btn) {
@@ -349,7 +329,6 @@
       // remove chips after first send
       if (chips.parentNode) chips.parentNode.removeChild(chips);
       input.value = '';
-      // W854 — if the input is already a kolm command, skip the classifier
       // and execute it directly. This is what makes the chat box an actual
       // terminal rather than just a command synthesizer.
       if (/^kolm\s+/i.test(q)) {
@@ -358,7 +337,6 @@
       }
       setBusy(true);
       var placeholder = addMsg('kolm', '<span class="ks-cli-chat__thinking">thinking…</span>');
-      // W848 — thread the previous workflow back to the server so the
       // classifier's followup pre-pass can resolve bare affirmatives.
       var payload = { question: q };
       if (lastWorkflow) payload.previous_workflow = lastWorkflow;
@@ -373,11 +351,9 @@
       }).then(function (out) {
         placeholder.parentNode.removeChild(placeholder);
         if (out.status >= 200 && out.status < 300 && out.data && out.data.ok) {
-          // W848 — retain the workflow for the next turn UNLESS the
           // classifier itself flagged low confidence (in which case the
           // user is probably changing topic and a stale "yes" should not
           // re-fire the last recipe).
-          // W852 — belt-and-suspenders: when the server returned a usable
           // command but didn't ship a workflow envelope (older router build
           // or future skinny-response opt-in), synth a one-step workflow
           // from data.command so the FOLLOWUP_AFFIRM_RE pre-pass on the

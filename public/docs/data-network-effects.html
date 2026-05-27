@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <title>Data network effects &middot; Opt-in pattern lake &middot; kolm.ai</title>
-<meta name="description" content="W757 cross-namespace anonymized pattern lake. Hash-only contributions, opt-in by namespace, Laplace-noised aggregates, differential privacy floor of epsilon 0.1. No raw text crosses tenant boundaries.">
+<meta name="description" content="cross-namespace anonymized pattern lake. Hash-only contributions, opt-in by namespace, Laplace-noised aggregates, differential privacy floor of epsilon 0.1. No raw text crosses tenant boundaries.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Data network effects &middot; Opt-in pattern lake &middot; kolm.ai">
-<meta property="og:description" content="W757 cross-namespace anonymized pattern lake. Hash-only contributions, Laplace-noised aggregates.">
+<meta property="og:title" content="Data network effects · Opt-in pattern lake · kolm.ai">
+<meta property="og:description" content="cross-namespace anonymized pattern lake. Hash-only contributions, Laplace-noised aggregates.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/data-network-effects">
 <link rel="canonical" href="https://kolm.ai/docs/data-network-effects">
@@ -61,13 +61,13 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -82,7 +82,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p class="brand-eyebrow">Open-source AI workbench</p>
 <h1>Data network effects &mdash; opt-in pattern lake.</h1>
 
-<p class="lede">Every kolm installation produces signal about how AI is used in the real world. The W757 pattern lake lets opted-in installations contribute that signal back as <strong>hash-only bigram fingerprints</strong>, never raw text. The collective fingerprint helps the W751-W755 vertical foundation students (<code>kolm-legal-7b</code>, <code>kolm-medical-7b</code>, <code>kolm-code-7b</code>, <code>kolm-finance-7b</code>, <code>kolm-support-7b</code>) learn the shape of each industry without anyone shipping prompts off-prem.</p>
+<p class="lede">Every kolm installation produces signal about how AI is used in the real world. The pattern lake lets opted-in installations contribute that signal back as <strong>hash-only bigram fingerprints</strong>, never raw text. The collective fingerprint helps the vertical foundation students (<code>kolm-legal-7b</code>, <code>kolm-medical-7b</code>, <code>kolm-code-7b</code>, <code>kolm-finance-7b</code>, <code>kolm-support-7b</code>) learn the shape of each industry without anyone shipping prompts off-prem.</p>
 
 <div style="margin:0 0 22px">
   <span class="pill-good">w757-v1</span>
@@ -91,7 +91,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <h2 id="why">1. Why a hash-only lake (privacy by design)</h2>
 <p>The classic "network effect" pitch &mdash; everyone benefits when everyone contributes data &mdash; collapses the moment privacy enters the room. Most enterprise prompts contain PII, contract drafts, patient summaries, or proprietary code. Shipping those to a central aggregator is a non-starter.</p>
-<p>The W757 lake takes the opposite shape: it never sees raw text. The only payload that crosses your tenant boundary is a list of <code>sha256(bigram)</code> hashes &mdash; a one-way fingerprint that lets the aggregator count how often a given two-word pattern appears across opted-in installations, without ever being able to reverse the hash back to the prompt.</p>
+<p>The lake takes the opposite shape: it never sees raw text. The only payload that crosses your tenant boundary is a list of <code>sha256(bigram)</code> hashes &mdash; a one-way fingerprint that lets the aggregator count how often a given two-word pattern appears across opted-in installations, without ever being able to reverse the hash back to the prompt.</p>
 <div class="callout" data-w757="consent-flow">
   <b>Consent is binding.</b> Every contribution must carry an explicit <code>consent:true</code> flag. The lake throws <code>consent_not_granted</code> on missing consent and refuses the write. There is no default-on path; opting in is an explicit operator action, per namespace.
 </div>
@@ -114,7 +114,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </div>
 <p>A separate, stronger privacy claim &mdash; the hash-only contribution surface above &mdash; means the DP layer is the belt over the suspenders. The lake's primary guarantee is that raw text never crosses the tenant boundary; DP is the second-order protection against count-based reconstruction attacks.</p>
 
-<h2 id="verticals">5. How vertical fingerprints unlock W751-W755</h2>
+<h2 id="verticals">5. How vertical fingerprints unlock</h2>
 <p>The five vertical foundation students each need a fingerprint of how their industry actually uses AI &mdash; what bigrams dominate in legal prompts versus medical prompts versus support prompts. With the lake disabled, the fingerprint surface returns an plain <code>insufficient_lake_data</code> envelope. With the lake enabled and at least 5 opted-in contributors per vertical, the fingerprint surface returns the top-K bigram hashes the vertical's student should learn to predict.</p>
 <pre>CODE17</pre>
 <p>See <a href="/docs/verticals">/docs/verticals</a> for the five vertical foundation students, their target K-Scores, and the marketplace stubs that flip from <code>pending_distill:true</code> once the fingerprint pipeline produces real compiles.</p>
@@ -126,7 +126,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <h2 id="related">Related docs</h2>
 <div class="related">
-  <a href="/docs/verticals"><b>Verticals catalog</b><span>The five W751-W755 foundation students this lake unblocks.</span></a>
+  <a href="/docs/verticals"><b>Verticals catalog</b><span>The five foundation students this lake unblocks.</span></a>
   <a href="/docs/api"><b>API reference</b><span>POST /v1/lake/opt-in, GET /v1/lake/trends, GET /v1/verticals/:id/fingerprint.</span></a>
   <a href="/docs/quickstart"><b>Quickstart</b><span>From signup to first capture in under two minutes.</span></a>
 </div>

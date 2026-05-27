@@ -8,7 +8,7 @@
 <meta name="description" content="410 council pairs from Claude, GPT-4o, and DeepSeek-R1. 79 seconds of LoRA on a 5090. 96.5% asks-one-question, 100% on-policy, half the chars of gpt-4o-mini. Here is how Trinity-500 was built.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Trinity-500: a 7B that beats Haiku and ties gpt-4o-mini &middot; kolm.ai blog">
+<meta property="og:title" content="Trinity-500: a 7B that beats Haiku and ties gpt-4o-mini · kolm.ai blog">
 <meta property="og:description" content="410 council pairs, 79s LoRA, 96.5% asks-1Q, 100% on-policy. The full distillation story.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/blog/2026-05-26-trinity-500-distill-story">
@@ -140,7 +140,7 @@ kolm distill --local-worker --mode=collect \
 
 <p>500 seeds produced 410 valid pairs. The 82% yield is normal: some teacher responses came back as content-policy refusals (gift card fraud edge cases), some local DeepSeek runs OOM'd mid-generation, a handful of proxy 5xx errors. The merge step concats all three jsonl files, tags every row with provenance, and writes <code>merged/training-pairs.jsonl</code>.</p>
 
-<p>One trap worth flagging: the kolm proxy was the only auth we needed. No local <code>ANTHROPIC_API_KEY</code> or <code>OPENAI_API_KEY</code> anywhere; the W870 teacher-chat proxy auto-injects from the kolm bearer. The whole council pipeline runs on a fresh laptop with one kolm key.</p>
+<p>One trap worth flagging: the kolm proxy was the only auth we needed. No local <code>ANTHROPIC_API_KEY</code> or <code>OPENAI_API_KEY</code> anywhere; the teacher-chat proxy auto-injects from the kolm bearer. The whole council pipeline runs on a fresh laptop with one kolm key.</p>
 
 <h2>Step 3: the LoRA</h2>
 
@@ -229,7 +229,7 @@ kolm serve trinity-500.kolm --port 8080</code></pre>
 
 <h2>What changed between the pilot and the scale-up</h2>
 
-<p>The W869 pilot was 12 training pairs and 36 steps; this scale-up is 410 pairs and one epoch. Three things moved from "works in the lab" to "works in production":</p>
+<p>The pilot was 12 training pairs and 36 steps; this scale-up is 410 pairs and one epoch. Three things moved from "works in the lab" to "works in production":</p>
 
 <ol>
   <li><b>External seed slicing.</b> The local distill worker does not support <code>--seed-offset</code>, so multi-teacher runs need the seeds pre-sliced into per-teacher files. The <code>trinity-500-split-seeds.mjs</code> script does that.</li>
@@ -241,7 +241,7 @@ kolm serve trinity-500.kolm --port 8080</code></pre>
 
 <p>A 2000-pair Trinity v2 is collecting in the background (700 Claude + 700 GPT-4o + 600 DeepSeek). Same recipe, more pairs, same teacher mix. The hypothesis is the LoRA learns the long tail better but the latency and length numbers stay the same. We will publish the comparison when it lands.</p>
 
-<p>The artifact, the training data slice (the parts that are not under teacher TOS), the eval set, and the full reproduce script live at <a href="https://github.com/kolm-ai/kolmogorov-stack">the kolm GitHub</a>. The HF page is <a href="https://huggingface.co/kolm-ai/trinity-support-7b">kolm-ai/trinity-support-7b</a>.</p>
+<p>The artifact, the training data slice (the parts that are not under teacher TOS), the eval set, and the full reproduce script live at <a href="https://github.com/kolm-ai/kolm">the kolm GitHub</a>. The HF page is <a href="https://huggingface.co/kolm-ai/trinity-support-7b">kolm-ai/trinity-support-7b</a>.</p>
 
 <div class="endnote">
 <b>Limitations.</b> Trinity-500 is one domain (e-commerce customer support, English-only) and one base model (Qwen2.5-7B). The "beats Haiku" result is specifically on a narrow rubric Haiku was not built for; on broad benchmarks the comparison flips. The 96.5% asks-1Q number is rule-based regex on response shape, not semantic correctness (the judge axes catch that separately). The judge is claude-opus-4-5; LLM judges have known biases toward terse responses, which may flatter shorter models like Trinity-500 and gpt-4o-mini. Reproduce the holdout yourself with <code>kolm bench --models trinity-500.kolm,claude-haiku-4-5,gpt-4o-mini --eval public/benchmarks/trinity-500-holdout.jsonl</code> to confirm.

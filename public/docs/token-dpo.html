@@ -7,7 +7,7 @@
 <meta name="description" content="Token-level DPO from preference pairs. One-pass training, no separate reward model, drop-in alongside SFT, works on any LoRA adapter, ships with K-Score gates.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
-<meta property="og:title" content="Token-level DPO &middot; kolm.ai">
+<meta property="og:title" content="Token-level DPO · kolm.ai">
 <meta property="og:description" content="Per-token preference loss instead of one DPO term per sequence. Gradient lands on the exact tokens that mattered, not the whole completion.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/docs/token-dpo">
@@ -53,13 +53,13 @@
 <div class="ks-nav-wrap">
   <header class="ks-nav">
     <div class="ks-wrap ks-nav__row">
-      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
       <nav class="ks-nav__links" aria-label="Primary">
         <a href="/wrapper">Wrapper</a>
         <a href="/studio">Studio</a>
         <a href="/pricing">Pricing</a>
         <a href="/docs">Docs</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
       </nav>
       <div class="ks-nav__cta">
         <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
@@ -116,7 +116,7 @@
 <section class="doc-section" id="captured-format">
   <div class="ks-wrap">
     <h2>Captured input format</h2>
-    <p class="sub">A token-level DPO run reads a captured.kolm artifact whose rows pair a preferred and rejected completion. The simplest source is the W458 approvals queue: every thumbs-up is the preferred response, every thumbs-down is rejected, the input is shared.</p>
+    <p class="sub">A token-level DPO run reads a captured.kolm artifact whose rows pair a preferred and rejected completion. The simplest source is the approvals queue: every thumbs-up is the preferred response, every thumbs-down is rejected, the input is shared.</p>
     <p>Each row in the JSONL stream must carry an <code>input</code> (the shared prompt), a <code>preferred</code> string, and a <code>rejected</code> string. The trainer tokenizes both completions, pads to the longest, builds an attention mask, and packs into the DPO batch. Rows without both arms are dropped at preprocessing time.</p>
     <h3>Minimal row</h3>
     <div class="code-card"><pre>{
@@ -176,7 +176,7 @@ python bench_contrastive_token.py --batch 8 --seq 64 --marked-position 47
   <div class="ks-wrap">
     <h2>HTTP and TUI surface</h2>
     <p class="sub">Token-DPO runs surface in two places: the bare HTTP collection at <code>GET /v1/training/token-dpo</code> and the TUI view bound to hotkey <code>T</code> (or commands <code>:dpo</code> / <code>:token-dpo</code>).</p>
-    <p>The HTTP endpoint returns an loud-fail envelope today: until the trainer queue is mounted through the daemon, the response is <code>{ok:true, view:'token-dpo', status:'pending', items:[]}</code> with a note pointing at the trainer module. The endpoint is still useful as a probe in dashboards (so a tenant can poll for "is the W827 trainer wired yet?" without parsing source).</p>
+    <p>The HTTP endpoint returns an loud-fail envelope today: until the trainer queue is mounted through the daemon, the response is <code>{ok:true, view:'token-dpo', status:'pending', items:[]}</code> with a note pointing at the trainer module. The endpoint is still useful as a probe in dashboards (so a tenant can poll for "is the trainer wired yet?" without parsing source).</p>
     <p>The TUI view (hotkey <code>T</code>) is the operator surface. It will list completed runs once the queue is wired; today it shares the same pending envelope so the view always renders.</p>
   </div>
 </section>
@@ -198,7 +198,7 @@ python bench_contrastive_token.py --batch 8 --seq 64 --marked-position 47
   <div class="ks-wrap">
     <div class="ks-foot__grid">
       <div class="ks-foot__brand">
-        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+        <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
         <p class="ks-foot__tag">Open-source AI workbench. Distill, compile, deploy.</p>
       </div>
       <div class="ks-foot__col">
@@ -215,7 +215,7 @@ python bench_contrastive_token.py --batch 8 --seq 64 --marked-position 47
       </div>
       <div class="ks-foot__col">
         <h4>Company</h4>
-        <a href="/contact">Contact</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a>
+        <a href="/contact">Contact</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
       </div>
     </div>
     <div class="ks-foot__bottom"><span>&copy; 2026 kolm.ai</span><span>Apache-2.0</span></div>

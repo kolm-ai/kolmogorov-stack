@@ -8,13 +8,13 @@
 <meta name="description" content="Three-layer prompt-extraction defense: build-time system-prompt redaction with four strategies, runtime detection over ten-plus extraction-attempt pattern families, and four policy decisions that never silent-pass a">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Prompt extraction defense &middot; kolm.ai">
-<meta property="og:description" content="Distilled models can leak system prompts because training imprints literal text into weights. W765 redacts at build time AND guards at runtime AND logs novel patterns.">
+<meta property="og:title" content="Prompt extraction defense · kolm.ai">
+<meta property="og:description" content="Distilled models can leak system prompts because training imprints literal text into weights. redacts at build time AND guards at runtime AND logs novel patterns.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/security/prompt-extraction">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Prompt extraction defense &middot; kolm.ai">
+<meta name="twitter:title" content="Prompt extraction defense · kolm.ai">
 <meta name="twitter:description" content="Three-layer defense: build-time redactor + runtime detector + policy guard. Caveats-first: no defense is 100 percent.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/security/prompt-extraction">
@@ -97,22 +97,22 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
@@ -121,7 +121,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/security">security</a> / prompt-extraction</div>
 <p class="brand-eyebrow">Open-source AI workbench</p>
 <h1>Prompt extraction defense &mdash; protect system prompts in distilled artifacts.</h1>
-<p class="lede">A distilled student inherits the literal text of its training prompts. If your system prompt contains an API key, a partner name, a customer list, or an internal policy in literal form, every one of those tokens lives inside the student's weights and can be recovered by a sufficiently motivated attacker. W765 ships a three-layer defense: build-time redaction of system prompts before distillation, runtime detection across ten-plus extraction-attempt pattern families, and four policy decisions that NEVER silent-pass a matched attack. Stamped <code>w765-v1</code>.</p>
+<p class="lede">A distilled student inherits the literal text of its training prompts. If your system prompt contains an API key, a partner name, a customer list, or an internal policy in literal form, every one of those tokens lives inside the student's weights and can be recovered by a sufficiently motivated attacker. ships a three-layer defense: build-time redaction of system prompts before distillation, runtime detection across ten-plus extraction-attempt pattern families, and four policy decisions that NEVER silent-pass a matched attack. Stamped <code>w765-v1</code>.</p>
 
 <h2 id="why">Why distilled models leak system prompts</h2>
 <p>Distillation works by training a smaller student to mimic the teacher's outputs on a fixed prompt. If that prompt is exactly the same on every training example &mdash; which is the common case for system prompts &mdash; the student memorizes it. Not "approximately." Literally. The weight updates that minimize KL-divergence to the teacher converge fastest when the student replays the prompt verbatim, because the verbatim prompt is the single best predictor of the teacher's output distribution.</p>
@@ -202,7 +202,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <p>Confidence scales with the number of distinct families that fire: one match returns 0.6, two returns 0.8, three or more returns 0.95. Confidence caps at 0.95 deliberately &mdash; even a three-family hit is not ground truth because a sophisticated attacker can craft novel patterns we do not yet recognize. We never report 1.0.</p>
 
-<p>Defense layering with the W762 adversarial red-team framework is intentional. W762's <code>classifyPromptAdversarial</code> covers a broader taxonomy (prompt injection, jailbreak, role confusion, encoding smuggling, tool hijack); W765 is the system-prompt-extraction-specific guard. Overlapping matches on shared patterns like "ignore previous instructions" are correct &mdash; both modules catching it is defense in depth, not a bug.</p>
+<p>Defense layering with the adversarial red-team framework is intentional.'s <code>classifyPromptAdversarial</code> covers a broader taxonomy (prompt injection, jailbreak, role confusion, encoding smuggling, tool hijack); is the system-prompt-extraction-specific guard. Overlapping matches on shared patterns like "ignore previous instructions" are correct &mdash; both modules catching it is defense in depth, not a bug.</p>
 
 <h2 id="four-policies">Four guard policies</h2>
 <div class="policy-grid">
@@ -255,7 +255,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <div class="related">
   <a href="/docs/guardrails"><b>Guardrails</b><span>Runtime safety rails, input sanitization, and prompt-injection refusal patterns.</span></a>
   <a href="/security/halborn-2026-04"><b>Security audit</b><span>Independent Halborn audit of the kolm.ai stack.</span></a>
-  <a href="/security/model-poisoning"><b>Model poisoning</b><span>The sibling W761 defense: cryptographic binding of captures to verified teacher responses.</span></a>
+  <a href="/security/model-poisoning"><b>Model poisoning</b><span>The sibling defense: cryptographic binding of captures to verified teacher responses.</span></a>
 </div>
 
 </div></main>

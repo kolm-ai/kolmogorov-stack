@@ -781,9 +781,7 @@ body {
  font-family: var(--kolm-mono) !important;
 }
 
-/* W847 — user explicitly flagged "ugly grid background is back, replace with
-   non-grid." The hero now carries the generated paper-blueprint background
-   (warm-paper.css → .ks-hero); body just keeps the warm cream wash. */
+
 html:not([data-theme="light"]) body {
  background: linear-gradient(180deg, #08090c 0%, #0b0d11 42%, #08090c 100%) !important;
  color: var(--kolm-ink-0) !important;
@@ -1124,8 +1122,7 @@ body > .site-nav {
  padding: 28px var(--kolm-page-pad) 34px;
  border-top: 1px solid var(--kolm-rule-1);
  border-bottom: 1px solid var(--kolm-rule-1);
- /* W683: single-hue mint atmosphere. Golden second stop removed to stop
-    cross-page color bleed; per-route variants below are also unified. */
+ 
  background:
  linear-gradient(90deg, rgba(230, 233, 238,0.04), transparent 60%),
  rgba(8, 9, 12, 0.28);
@@ -1311,9 +1308,7 @@ body > .site-nav {
  text-transform: none;
 }
 
-/* W683: per-route surface-media variants unified to brand mint.
-   Pre-W683 they were cyan / golden / pink which read as three different
-   sites. Single hue tightens the brand and stops cross-page bleeding. */
+
 .kolm-surface-media--training .ksm-step span,
 .kolm-surface-media--training .ksm-kicker { color: var(--ks-accent, #e6e9ee) !important; }
 .kolm-surface-media--training .ksm-stats span { background: rgba(230, 233, 238,0.045); }
@@ -1804,7 +1799,7 @@ h6:not(#kolm-noop) {
 .kolm-product-spine a:hover,
 .kolm-product-spine a:focus-visible {
  border-color: rgba(230, 233, 238,0.38) !important;
- /* W683: single mint gradient — golden second stop removed. */
+ 
  background:
   linear-gradient(135deg, rgba(230, 233, 238,0.13), rgba(230, 233, 238,0.04)),
   rgba(255,255,255,0.045) !important;
@@ -1834,7 +1829,7 @@ h6:not(#kolm-noop) {
 /* Post-auth command center. Account pages should feel like the product
    operating console, not a generic settings area. */
 body.kolm-account-surface {
- /* W683: single mint pin — second warm radial removed. */
+ 
  background:
   linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
   linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px),
@@ -2063,11 +2058,7 @@ body.kolm-account-surface #account-sidebar a[aria-current="page"] {
  color: var(--kolm-ink-0) !important;
 }
 
-/* W840: job-based sidebar — collapsible <details>/<summary> groups.
- Replaces the old flat 6-section <h2>+<ul> layout with semantic
- disclosure widgets so every account/*.html page is reachable in <=2
- clicks (one to expand the section, one to click the link). Open by
- default + open whenever the active route lives inside the group. */
+
 body.kolm-account-surface #account-sidebar .kac-side-nav {
  display: block !important;
 }
@@ -2886,9 +2877,7 @@ body:has(.w373-pricing-block) .plans-header .sec-lede {
  }
 }
 
-/* W560: final shared product UI shell.
-   A single visual contract for nav, buttons, cards, generated product media,
-   and post-auth account pages. Concise, dense, enterprise-grade. */
+
 :root {
  --kolm-page-max: 1180px;
  --kolm-radius: 8px;
@@ -3418,9 +3407,7 @@ html.kolm-sota-ui-v560 main:has(> .kolm-surface-media[aria-label="kolm CLI comma
  }
 }
 
-/* W562: premium product-site finish.
-   One interaction language across nav, docs, pricing, enterprise, and account.
-   No underline nav states, no oversized ops headings, no empty first viewport. */
+
 html.kolm-sota-ui-v560 {
  --kolm-panel-bg: rgba(14, 18, 22, 0.84);
  --kolm-panel-bg-2: rgba(18, 23, 28, 0.92);
@@ -3848,8 +3835,7 @@ html.kolm-sota-ui-v560 body.kolm-account-surface :where(#account-sidebar a[aria-
  }
 }
 
-/* W562 mobile repair: keep the product spine as a compact scroll rail and
-   collapse pricing hero grids before they squeeze paragraphs into columns. */
+
 @media (max-width: 920px) {
  html.kolm-sota-ui-v560 :where(.kolm-product-spine) {
   display: flex !important;
@@ -3903,8 +3889,7 @@ html.kolm-sota-ui-v560 body.kolm-account-surface :where(#account-sidebar a[aria-
  }
 }
 
-/* W562 pricing conversion: on desktop the pricing page must show the
-   commercial architecture, not a long billboard before the cards. */
+
 @media (min-width: 921px) {
  html.kolm-sota-ui-v560 body:has(.w373-pricing-block) section.hero {
   padding-top: 16px !important;
@@ -4306,7 +4291,7 @@ html.kolm-sota-ui-v597 :where(.kolm-product-spine a[aria-current="page"],
 .kolm-product-spine a:hover,
 .kolm-product-spine a:focus-visible) {
  border-color: rgba(230, 233, 238,0.34) !important;
- /* W683: single mint gradient — golden second stop removed. */
+ 
  background:
   linear-gradient(135deg, rgba(230, 233, 238,0.13), rgba(230, 233, 238,0.04)),
   rgba(255,255,255,0.045) !important;

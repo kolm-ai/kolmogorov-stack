@@ -1,4 +1,3 @@
-// W619 docs reorg: shared shell loaded by every page under /docs.
 // Builds the categorized left rail, on-this-page TOC, breadcrumbs, and
 // prev/next pagination from /docs-manifest.json. The shell is purely
 // additive — page content is preserved as-is and wrapped in a grid.

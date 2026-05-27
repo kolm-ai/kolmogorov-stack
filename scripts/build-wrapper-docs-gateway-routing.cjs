@@ -82,7 +82,7 @@ function pageShell({ slug, family, title, description, eyebrow, h1, lede, sectio
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
@@ -738,7 +738,7 @@ const GATEWAY_PAGES = [
       {
         h2: 'Where to file a bug',
         paragraphs: [
-          'Include the receipt CID (visible in <code>X-Kolm-Receipt-CID</code>) and the output of <code>kolm doctor --gateway --json</code>. Open an issue at <a href="https://github.com/kolm-ai/kolmogorov-stack/issues">github.com/kolm-ai/kolmogorov-stack/issues</a>.',
+          'Include the receipt CID (visible in <code>X-Kolm-Receipt-CID</code>) and the output of <code>kolm doctor --gateway --json</code>. Open an issue at <a href="https://github.com/kolm-ai/kolm/issues">github.com/kolm-ai/kolm/issues</a>.',
         ],
       },
     ],

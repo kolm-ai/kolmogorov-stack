@@ -8,13 +8,13 @@
 <meta name="description" content="Threat model for the kolm.ai Open-source AI workbench. Asset inventory, adversary model, threats by asset, mitigation per cell, out-of-scope assumptions, and open questions. Plain about what we defend, what we trust,">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Threat model &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:title" content="Threat model · Open-source AI workbench · kolm.ai">
 <meta property="og:description" content="Threat model: assets, adversaries, threats per asset with mitigations, out-of-scope assumptions, and open questions.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/security/threat-model">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Threat model &middot; Open-source AI workbench &middot; kolm.ai">
+<meta name="twitter:title" content="Threat model · Open-source AI workbench · kolm.ai">
 <meta name="twitter:description" content="Asset inventory, adversaries, threats, mitigations, out-of-scope, and open questions.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/security/threat-model">
@@ -85,22 +85,22 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
@@ -137,7 +137,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
   <li class="public">
     <b class="kind">Source code &middot; public</b>
-    The kolm stack at <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">github.com/kolm-ai/kolmogorov-stack</a>. Apache-2.0. Source disclosure is by design &mdash; the same code an auditor reviews is the code that runs. The risk to manage here is supply-chain on the build pipeline, not source-reading.
+    The kolm stack at <a href="https://github.com/kolm-ai/kolm" rel="noopener">github.com/kolm-ai/kolm</a>. Apache-2.0. Source disclosure is by design &mdash; the same code an auditor reviews is the code that runs. The risk to manage here is supply-chain on the build pipeline, not source-reading.
   </li>
 </ul>
 
@@ -168,19 +168,19 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       <td>Captures</td>
       <td>Low-priv tenant user (cross-tenant)</td>
       <td>Tenant A user crafts a request with tenant B's tenant ID, namespace, or row ID and attempts to read captures owned by tenant B.</td>
-      <td>W411 tenant fence + per-row defense in depth</td>
+      <td>tenant fence + per-row defense in depth</td>
     </tr>
     <tr>
       <td>Distilled artifacts</td>
       <td>External attacker / insider</td>
       <td>Tamper with the bytes of a deployed <code>.kolm</code> artifact (swap weights, rewrite K-score, swap eval pack) and ship the same signed receipt.</td>
-      <td>W460 artifact_hash binding in receipt</td>
+      <td>artifact_hash binding in receipt</td>
     </tr>
     <tr>
       <td>Distilled artifacts</td>
       <td>Low-priv tenant user (cross-tenant)</td>
       <td>Tenant A user fetches tenant B's <code>.kolm</code> artifact by CID guess or registry probe.</td>
-      <td>W411 tenant fence on registry reads + per-row tenant check</td>
+      <td>tenant fence on registry reads + per-row tenant check</td>
     </tr>
     <tr>
       <td>API keys</td>
@@ -204,25 +204,25 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       <td>Event-store rows</td>
       <td>Regulator</td>
       <td>Cannot produce evidence that an action happened at the claimed time.</td>
-      <td>W770 append-only sink + SBOM + signed-receipt chain</td>
+      <td>append-only sink + SBOM + signed-receipt chain</td>
     </tr>
     <tr>
       <td>Source code &middot; build pipeline</td>
       <td>Compromised dependency</td>
       <td>Transitive npm / pypi / cargo / actions dep ships a backdoor that taints the released binary.</td>
-      <td>W763 SBOM + lockfile pinning + <code>--ignore-scripts</code> + Dependabot</td>
+      <td>SBOM + lockfile pinning + <code>--ignore-scripts</code> + Dependabot</td>
     </tr>
     <tr>
       <td>Captures &middot; data residency</td>
       <td>Regulator (GDPR / EU-AI)</td>
       <td>Cannot prove a tenant's captures stayed in the contracted region.</td>
-      <td>W769 region-pinned data plane + DPA + SCC</td>
+      <td>region-pinned data plane + DPA + SCC</td>
     </tr>
     <tr>
       <td>Captures &middot; PHI</td>
       <td>Regulator (HIPAA-shaped)</td>
       <td>PHI in captures leaves the tenant boundary by accident.</td>
-      <td>On-premise data plane (W742) + storage-layer encryption</td>
+      <td>On-premise data plane + storage-layer encryption</td>
     </tr>
   </tbody>
 </table>
@@ -242,7 +242,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p>Things we are still figuring out. Each item is a real engineering question we have not yet resolved to a signed proof; we list them on the public site so a security reviewer can challenge our current reasoning.</p>
 
 <ul>
-  <li><b>Cross-tenant model-leak via fine-tune.</b> If tenant A's captures train a distilled artifact, and tenant B later runs a fine-tune that includes membership-inference probes against the same artifact, can tenant B recover capture content from tenant A? We believe the W411 tenant fence + per-row defense-in-depth holds because tenant A's artifacts are not reachable by tenant B in the first place &mdash; but the formal proof against membership-inference under a shared base-model assumption is still in progress. See <a href="/security/membership-inference">/security/membership-inference</a> for the in-progress write-up.</li>
+  <li><b>Cross-tenant model-leak via fine-tune.</b> If tenant A's captures train a distilled artifact, and tenant B later runs a fine-tune that includes membership-inference probes against the same artifact, can tenant B recover capture content from tenant A? We believe the tenant fence + per-row defense-in-depth holds because tenant A's artifacts are not reachable by tenant B in the first place &mdash; but the formal proof against membership-inference under a shared base-model assumption is still in progress. See <a href="/security/membership-inference">/security/membership-inference</a> for the in-progress write-up.</li>
   <li><b>Receipt forgery under a quantum-capable adversary.</b> Ed25519 receipts are signed today. A quantum-capable adversary in the future could break Ed25519 retroactively. The forward path is post-quantum signing (Dilithium / SPHINCS+); we have not yet shipped a PQC migration. Open question: at what point do we migrate, and how do we keep historical receipts verifiable through the migration?</li>
   <li><b>Eval-pack poisoning.</b> If a tenant publishes an eval pack that the wider ecosystem references, can a malicious tenant craft an eval pack that grades unsafe outputs as high-K-score? The K-score gate is a tenant-chosen contract; a malicious tenant can grade their own artifact however they like. The open question is whether public-registry eval packs need a separate trust signal beyond the CID hash.</li>
   <li><b>Compromised teacher detection.</b> Today we trust the configured teacher (see <a href="#oos">Out of scope</a>). Open question: should the distill worker run a sanity check on teacher output (e.g. canary-prompt detection) and refuse to compile if the teacher fails it? We have not yet shipped this and have not yet decided on the policy.</li>
@@ -305,7 +305,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">

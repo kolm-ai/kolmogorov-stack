@@ -8,7 +8,7 @@
 <meta name="description" content="KolmBench v1: open-source benchmark for compiled models. Public spec, leaderboard, submission CI workflow. Open-source AI workbench.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="KolmBench v1 &middot; open benchmark for compiled models &middot; kolm.ai">
+<meta property="og:title" content="KolmBench v1 · open benchmark for compiled models · kolm.ai">
 <meta property="og:description" content="Axis-by-axis K-Score over reasoning, coding, writing, analysis, support, math, tool_use. CC-BY-4.0. Reference entry pending external submissions.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/bench/kolmbench-v1">
@@ -83,7 +83,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       <a href="/use-cases">Use cases</a>
       <a href="/pricing">Pricing</a>
       <a href="/docs">Docs</a>
-      <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a>
+      <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
       <a href="/signup?intent=login">Sign in</a>
       <a href="/signup">Get started &rarr;</a>
     </nav>
@@ -98,10 +98,10 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div style="margin:0 0 22px" data-w756="kolmbench-spec">
   <span class="pill-good">w756-v1</span>
-  <span class="status-pill">submissions opening W807</span>
+  <span class="status-pill">submissions opening</span>
 </div>
 
-<p class="lede">An open, axis-by-axis benchmark for compiled models. Submit a JSONL of responses, get a K-Score per axis plus a composite. Licensed CC-BY-4.0 so anyone can re-run, re-score, and re-publish. Reference entry is the kolm-3b-base internal smoke test; the leaderboard opens for external submissions on the W807 reviewer-bot ship.</p>
+<p class="lede">An open, axis-by-axis benchmark for compiled models. Submit a JSONL of responses, get a K-Score per axis plus a composite. Licensed CC-BY-4.0 so anyone can re-run, re-score, and re-publish. Reference entry is the kolm-3b-base internal smoke test; the leaderboard opens for external submissions on the reviewer-bot ship.</p>
 
 <div class="cta-row">
   <a href="#leaderboard" class="cta cta--primary">See the leaderboard &rarr;</a>
@@ -144,7 +144,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p>Per-category scores roll up by averaging the composite over each category&apos;s tasks, then projecting the seven category scores back through the same harmonic-mean composite to give a single number you can rank against. Sortable on every column in the leaderboard table below.</p>
 
 <h2 id="submit">3. How to submit</h2>
-<p>Submissions go through a GitHub Actions CI workflow that calls <code>validateSubmission()</code> from <code>src/kolmbench.js</code> on every PR that touches the <code>submissions/</code> directory. The workflow comments validation pass/fail back on the PR; until the W807 reviewer-bot ships, human review is required to merge a submission into the leaderboard.</p>
+<p>Submissions go through a GitHub Actions CI workflow that calls <code>validateSubmission()</code> from <code>src/kolmbench.js</code> on every PR that touches the <code>submissions/</code> directory. The workflow comments validation pass/fail back on the PR; until the reviewer-bot ships, human review is required to merge a submission into the leaderboard.</p>
 
 <h3>JSONL submission row schema</h3>
 <pre>{
@@ -156,11 +156,11 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p>Required: <code>task_id</code> + <code>response</code>. Optional: <code>model</code> (defaults to the submitter handle) + <code>artifact_cid_or_null</code> (sha256:&lt;hex64&gt; or <code>pending_&lt;id&gt;</code> or null). Each <code>task_id</code> may appear at most once per submission.</p>
 
 <h3>Submit a run</h3>
-<pre># 1. fork github.com/kolm-ai/kolmogorov-stack
+<pre># 1. fork github.com/kolm-ai/kolm
 # 2. add your run at submissions/&lt;your-handle&gt;-&lt;date&gt;.jsonl
 # 3. open a PR; the workflow at .github/workflows/kolmbench-submission.yml
 #    will validate the shape and comment results back on the PR
-# 4. human reviewer merges (until W807 reviewer-bot ships)
+# 4. human reviewer merges
 </pre>
 <p>CLI: <code>kolm kolmbench validate &lt;jsonl&gt;</code> runs the same validator locally. <code>kolm kolmbench submit &lt;jsonl&gt; --confirm</code> posts to the auth-gated <code>POST /v1/kolmbench/submit</code> endpoint (requires <code>confirm:true</code> as a spend-protection gate).</p>
 
@@ -214,19 +214,19 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <h2 id="honesty">6. Caveats note</h2>
 <div class="note-honest">
-  <b>Reference entry is internal smoke test.</b> The <code>kolm-reference</code>/<code>kolm-3b-base</code> entry in the leaderboard is an internal smoke-test row that proves the read/write contract works end-to-end. The leaderboard opens for external submissions on the W807 reviewer-bot ship; until then submissions land via PR review.
+  <b>Reference entry is internal smoke test.</b> The <code>kolm-reference</code>/<code>kolm-3b-base</code> entry in the leaderboard is an internal smoke-test row that proves the read/write contract works end-to-end. The leaderboard opens for external submissions on the reviewer-bot ship; until then submissions land via PR review.
 </div>
 <div class="note-honest">
-  <b>v2 seed dataset is W757/W766-blocked.</b> The curated "most-challenging captures, anonymized, with consent" v2 seed dataset is blocked on the W757 cross-namespace lake AND the W766 consent toolkit. <code>getV2SeedTaskCandidates()</code> returns an plain <code>kolmbench_v2_consent_pipeline_not_shipped</code> envelope &mdash; we never silently fake a v2 seed set.
+  <b>v2 seed dataset is/.</b> The curated "most-challenging captures, anonymized, with consent" v2 seed dataset is blocked on the cross-namespace lake AND the consent toolkit. <code>getV2SeedTaskCandidates()</code> returns an plain <code>kolmbench_v2_consent_pipeline_not_shipped</code> envelope &mdash; we never silently fake a v2 seed set.
 </div>
 <div class="note-honest">
-  <b>Auto-scoring is offline pending the pack.</b> <code>scoreSubmission()</code> currently returns <code>k_score:null</code> with <code>reason:'kolmbench_v1_scoring_offline_pending_pack'</code>. The reference-judge pack lands with the W807 reviewer-bot wave. Submissions before that are accepted with <code>verified:false</code> and require a self-hosted Ed25519 receipt or human review to enter the leaderboard.
+  <b>Auto-scoring is offline pending the pack.</b> <code>scoreSubmission()</code> currently returns <code>k_score:null</code> with <code>reason:'kolmbench_v1_scoring_offline_pending_pack'</code>. The reference-judge pack lands with the reviewer-bot wave. Submissions before that are accepted with <code>verified:false</code> and require a self-hosted Ed25519 receipt or human review to enter the leaderboard.
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-  kolm.ai &middot; <a href="/manifesto">manifesto</a> &middot; <a href="/docs">docs</a> &middot; <a href="/changelog">changelog</a> &middot; <a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/.github/workflows/kolmbench-submission.yml" rel="nofollow noopener">submission workflow</a>
+  kolm.ai &middot; <a href="/manifesto">manifesto</a> &middot; <a href="/docs">docs</a> &middot; <a href="/changelog">changelog</a> &middot; <a href="https://github.com/kolm-ai/kolm/blob/main/.github/workflows/kolmbench-submission.yml" rel="nofollow noopener">submission workflow</a>
 </div></footer>
 
 </body>

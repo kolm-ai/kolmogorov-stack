@@ -8,13 +8,13 @@
 <meta name="description" content="Hugging Face Model Card v0.3 generated for every .kolm artifact. Intended use, limitations, training-data summary, eval results, ethical considerations, environmental impact. Embeddable in OneTrust, ServiceNow AI">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Model card auto-generation &middot; kolm.ai">
+<meta property="og:title" content="Model card auto-generation · kolm.ai">
 <meta property="og:description" content="Every .kolm artifact ships with an auto-generated Hugging Face Model Card v0.3. 10 sections, plain 'not_yet_disclosed' sentinels for missing fields, embeddable in OneTrust / ServiceNow AI Governance / IBM OpenPages.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/model-card">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Model card auto-generation &middot; kolm.ai">
+<meta name="twitter:title" content="Model card auto-generation · kolm.ai">
 <meta name="twitter:description" content="HF Model Card v0.3 for every .kolm artifact. Embeddable in OneTrust, ServiceNow, OpenPages.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs/model-card">
@@ -79,22 +79,22 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
@@ -106,7 +106,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p class="lede">Every <code>kolm compile</code> emits a fresh Hugging Face Model Card (v0.3) alongside the artifact. Ten sections covering intended use, limitations, training data summary, eval results, ethical considerations, and environmental impact &mdash; built from the same manifest that signs the receipt, so the card and the bytes can never drift. Fields that the manifest does not yet carry come through as the plain sentinel <code>not_yet_disclosed</code>: an auditor can grep for the exact gap. Stamped <code>w768-v1</code>. Built by <code>src/model-card-emit.js</code>, <code>src/model-card-schema.js</code>, and <code>apps/export/model_card.py</code>.</p>
 
 <h2 id="why">Why a model card for every artifact</h2>
-<p>A signed receipt proves a <code>.kolm</code> artifact's bytes match what was minted. A model card is what a procurement, legal, or compliance team needs <em>before</em> they will deploy those bytes inside a regulated workflow. The HF Model Card v0.3 schema is the de facto standard for that description; OneTrust, ServiceNow AI Governance, and IBM OpenPages all consume some variant of it. W768 generates the card on demand from the manifest, so it stays in lockstep with the artifact you just built &mdash; no out-of-band Word document to keep up to date.</p>
+<p>A signed receipt proves a <code>.kolm</code> artifact's bytes match what was minted. A model card is what a procurement, legal, or compliance team needs <em>before</em> they will deploy those bytes inside a regulated workflow. The HF Model Card v0.3 schema is the de facto standard for that description; OneTrust, ServiceNow AI Governance, and IBM OpenPages all consume some variant of it. generates the card on demand from the manifest, so it stays in lockstep with the artifact you just built &mdash; no out-of-band Word document to keep up to date.</p>
 
 <h2 id="sections">Ten sections (HF Model Card v0.3)</h2>
 <p>The card renders these ten sections in canonical order. Byte-stability matters: downstream tools diff sequential card emissions, and we never reorder without bumping the <code>w768-v1</code> stamp.</p>
@@ -162,7 +162,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p>Every emission carries two stamps that prevent the estimate from being mistaken for a measurement:</p>
 <ul>
   <li><code>methodology: "static_grid_average_w768_v1"</code> &mdash; surfaces the methodology version so a future revision can be diffed.</li>
-  <li><code>honest_caveat: "estimate_not_measured"</code> &mdash; the W411 loud-fail envelope value, so downstream tooling and auditors can never confuse the static estimate with a measured datacenter bill.</li>
+  <li><code>honest_caveat: "estimate_not_measured"</code> &mdash; the loud-fail envelope value, so downstream tooling and auditors can never confuse the static estimate with a measured datacenter bill.</li>
 </ul>
 <p>Known GPU classes today: <code>a100</code>, <code>h100</code>, <code>h200</code>, <code>b200</code>, <code>rtx-5090</code>, <code>rtx-4090</code>, <code>l40s</code>, <code>mi300x</code>, <code>tpu-v5p</code>. When the manifest's <code>gpu_class</code> is unknown to us, <code>estimated_co2_kg</code> is set to <code>not_yet_disclosed</code> with a <code>reason: "unknown_gpu_class"</code> field and the full list of known classes in <code>known_gpu_classes</code>. We never silently fall back to a different class.</p>
 
@@ -274,8 +274,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <h2 id="related">Related</h2>
 <div class="related">
-  <a href="/security/sbom"><b>SBOM &amp; supply chain</b><span>CycloneDX 1.5 + SPDX 2.3 for every artifact (W763).</span></a>
-  <a href="/compliance/eu-ai-act"><b>EU AI Act</b><span>Annex IV technical documentation generation (W766).</span></a>
+  <a href="/security/sbom"><b>SBOM &amp; supply chain</b><span>CycloneDX 1.5 + SPDX 2.3 for every artifact.</span></a>
+  <a href="/compliance/eu-ai-act"><b>EU AI Act</b><span>Annex IV technical documentation generation.</span></a>
   <a href="/security"><b>Security overview</b><span>Receipts, signing, capture redaction, supply chain.</span></a>
 </div>
 

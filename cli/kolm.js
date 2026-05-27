@@ -97,14 +97,14 @@ const EXIT = {
 process.on('unhandledRejection', (reason) => {
   const msg = (reason && reason.message) ? reason.message : String(reason);
   console.error('error: unhandled async failure —', msg);
-  console.error('what to do: rerun with KOLM_DEBUG=1 for a stack trace, then file a bug at https://github.com/kolm-ai/kolmogorov-stack/issues');
+  console.error('what to do: rerun with KOLM_DEBUG=1 for a stack trace, then file a bug at https://github.com/kolm-ai/kolm/issues');
   if (process.env.KOLM_DEBUG && reason && reason.stack) console.error(reason.stack);
   process.exit(EXIT.EXECUTION);
 });
 process.on('uncaughtException', (err) => {
   const msg = (err && err.message) ? err.message : String(err);
   console.error('error: uncaught exception —', msg);
-  console.error('what to do: rerun with KOLM_DEBUG=1 for a stack trace, then file a bug at https://github.com/kolm-ai/kolmogorov-stack/issues');
+  console.error('what to do: rerun with KOLM_DEBUG=1 for a stack trace, then file a bug at https://github.com/kolm-ai/kolm/issues');
   if (process.env.KOLM_DEBUG && err && err.stack) console.error(err.stack);
   process.exit(EXIT.EXECUTION);
 });
@@ -1517,7 +1517,7 @@ EXAMPLES
   kolm export job_xy.kolm --preview --device m3-pro --quant int4
   kolm export --preview --device pi5-4 --quant int4 --base llama-3.2-3b
 `,
-  import: `kolm import - W740 symmetric counterpart to "kolm export". Wraps a
+  import: `kolm import - symmetric counterpart to "kolm export". Wraps a
 runtime-native binary (GGUF / safetensors / ONNX) as a partial manifest tagged
 not_kolm_compiled:true so it can ride through catalog/inspect/signature flows
 without ever being silently treated as a kolm-compiled artifact.
@@ -8223,7 +8223,7 @@ async function cmdCompile(args) {
       if (ti >= 0) args[ti + 1] = 'safetensors';
     }
     if (resolvedTargetFlag && !['gguf', 'onnx', 'safetensors', 'coreml', 'mlx', 'executorch', 'tensorrt', 'native-c', 'native-rust', 'c', 'rust', 'wasm'].includes(resolvedTargetFlag)) {
-      console.error(`error: --target must be one of: gguf, onnx, safetensors, coreml, mlx, executorch, tensorrt, native-c (alias c), native-rust (alias rust), wasm, all, OR a W866 quant shortcut (gguf-q4km, gguf-iq4xs, exl2-Nbpw, gptq-4bit, awq-4bit, nvfp4, fp8, mlx-4bit, hqq) — got '${targetFlag}'`);
+      console.error(`error: --target must be one of: gguf, onnx, safetensors, coreml, mlx, executorch, tensorrt, native-c (alias c), native-rust (alias rust), wasm, all, OR a quant shortcut (gguf-q4km, gguf-iq4xs, exl2-Nbpw, gptq-4bit, awq-4bit, nvfp4, fp8, mlx-4bit, hqq) — got '${targetFlag}'`);
       process.exit(EXIT.BAD_ARGS);
     }
     // S-1 — `kolm compile --target gguf-q4km --dry-run` short-circuit. Prints
@@ -9633,7 +9633,7 @@ async function cmdBenchmark(args) {
     }
     if (out.k_contrastive_score != null) {
       console.log('');
-      console.log(`  K_contrastive (W714, opt-in informational axis — not in composite)`);
+      console.log(`  K_contrastive (opt-in informational axis — not in composite)`);
       console.log(`    score = ${out.k_contrastive_score.toFixed(4)}   axis_version = ${out.k_contrastive_axis_version}`);
     }
     if (out.warnings.length) {
@@ -11796,7 +11796,7 @@ async function cmdTestShipGate(args) {
   if (args && (args.includes('--help') || args.includes('-h'))) {
     console.log('kolm test ship-gate [--json] [--report <path>] [--failures-only] [--skip=<ids>]');
     console.log('');
-    console.log('Runs the 52-check W888-I ship gate orchestrator.');
+    console.log('Runs the 52-check ship gate orchestrator.');
     console.log('Each check belongs to one surface: wrapper(10), studio(10), run(10),');
     console.log('cross(5), infra(12), account(3), perf(2).');
     console.log('');
@@ -11858,7 +11858,7 @@ async function cmdTestE2E(args) {
   if (args && (args.includes('--help') || args.includes('-h'))) {
     console.log('kolm test e2e [--persona <indie|enterprise|no-gpu>] [--full] [--json] [--smoke]');
     console.log('');
-    console.log('Runs the W888-H end-to-end persona loops.');
+    console.log('Runs the end-to-end persona loops.');
     console.log('');
     console.log('Personas:');
     console.log('  indie        signup -> route -> 50 calls -> approve -> compile -> serve -> savings');
@@ -12036,8 +12036,8 @@ async function cmdAssistant(args) {
     console.log('  compile   distill -> quantize -> bench -> hallu-check -> gate -> publish');
     console.log('  run       one-shot natural-language router (alias: kolm "<nl>")');
     console.log('  chat      interactive REPL (alias: kolm chat)');
-    console.log('  bench     (W888-R) re-bench a published artifact against a fresh holdout');
-    console.log('  publish   (W888-R) re-publish an existing build dir to HuggingFace');
+    console.log('  bench     re-bench a published artifact against a fresh holdout');
+    console.log('  publish   re-publish an existing build dir to HuggingFace');
     console.log('');
     console.log('flags (apply to run + chat):');
     console.log('  --json          machine-readable envelope (run only)');
@@ -12089,7 +12089,7 @@ async function cmdAssistant(args) {
   }
 
   if (sub === 'bench' || sub === 'publish') {
-    console.log(`kolm assistant ${sub} — placeholder, lands in W888-R`);
+    console.log(`kolm assistant ${sub} — placeholder (not yet shipped)`);
     console.log('available today:  kolm assistant compile  |  kolm assistant run  |  kolm assistant chat');
     return;
   }
@@ -15542,7 +15542,7 @@ async function cmdRuntime(args) {
 
   console.error('unknown runtime subcommand:', sub);
   console.error('try: kolm runtime targets|info|doctor|build-from-source');
-  console.error('     kolm runtime start|status|policy|install|decisions|stats   (W372 policy ladder)');
+  console.error('     kolm runtime start|status|policy|install|decisions|stats   (policy ladder)');
   const err = new Error('unknown runtime subcommand'); err.exitCode = EXIT.BAD_ARGS; throw err;
 }
 
@@ -16443,7 +16443,7 @@ async function cmdW816Loop(args) {
     const env = {
       ok: false,
       error: 'missing_namespace',
-      hint: 'pass --namespace <ns> - W816 refuses to default this so the feed cannot land in the wrong namespace',
+      hint: 'pass --namespace <ns> - this verb refuses to default the namespace so the feed cannot land in the wrong one',
       version: 'w816-v1',
     };
     if (wantJson) console.log(JSON.stringify(env, null, 2));
@@ -16501,7 +16501,7 @@ async function cmdW816Loop(args) {
   }
   console.log('failure-to-capture-loop (tenant=' + tenantId + ', namespace=' + namespace + ')');
   console.log('  failing clusters projected: ' + (envelope.gaps ? envelope.gaps.length : 0));
-  console.log('  gap rows fed to W815:       ' + (envelope.fed_count || 0)
+  console.log('  gap rows fed to active-learning queue: ' + (envelope.fed_count || 0)
     + ' / ' + (envelope.attempted || 0));
   if (envelope.hint) console.log('  note: ' + envelope.hint);
   const gaps = envelope.gaps || [];
@@ -16628,7 +16628,7 @@ async function cmdFailureModes(args) {
   }
   if (emitResult) {
     console.log('');
-    if (emitResult.ok) console.log('  emitted ' + emitResult.emitted.length + ' weakness signal(s) into W720 (skipped=' + (emitResult.skipped || 0) + ')');
+    if (emitResult.ok) console.log('  emitted ' + emitResult.emitted.length + ' weakness signal(s) into distill improvement queue (skipped=' + (emitResult.skipped || 0) + ')');
     else console.log('  emit failed: ' + (emitResult.error || 'unknown'));
   }
 }
@@ -18704,7 +18704,7 @@ async function cmdWrap(args) {
   }
   if (!inPath) {
     console.error('usage: kolm wrap <config-or-script> --out <wrap.spec.json>');
-    console.error('  agent: kolm wrap <agent-cmd> [args...]   (W384 env-injection)');
+    console.error('  agent: kolm wrap <agent-cmd> [args...]   (env-injection)');
     process.exit(EXIT.BAD_ARGS);
   }
   if (!fs.existsSync(inPath)) {
@@ -19257,14 +19257,14 @@ async function cmdDrift(args) {
     console.error('  kolm drift detect <current.kolm> --baseline <baseline.kolm> [--out report.json]');
     console.error('  kolm drift cron --baseline <path> --current <path> --cadence "<cron-expr>"');
     console.error('  kolm drift verify <report.json>');
-    console.error('  (W813 namespace mode: kolm drift scan|status|configure|alerts|auto-remediate)');
+    console.error('  (namespace mode: kolm drift scan|status|configure|alerts|auto-remediate)');
     process.exit(EXIT.BAD_ARGS);
   }
   if (sub === 'detect') return cmdDriftDetect(rest);
   if (sub === 'cron')   return cmdDriftCron(rest);
   if (sub === 'verify') return cmdDriftVerify(rest);
   console.error(`unknown subcommand: kolm drift ${sub}`);
-  console.error('try: kolm drift detect | cron | verify (or W813: scan/status/configure/alerts/auto-remediate)');
+  console.error('try: kolm drift detect | cron | verify (or namespace mode: scan/status/configure/alerts/auto-remediate)');
   process.exit(EXIT.BAD_ARGS);
 }
 
@@ -19284,7 +19284,7 @@ async function cmdDriftDetect(args) {
   const wantJson = args.includes('--json');
   if (!currentPath || !baselinePath) {
     console.error('usage: kolm drift detect <current.kolm> --baseline <baseline.kolm> [--out report.json] [--json] [--tolerances <file>]');
-    console.error('   or: kolm drift detect --namespace <ns> [--tenant <id>] [--json]   (W813 traffic drift)');
+    console.error('   or: kolm drift detect --namespace <ns> [--tenant <id>] [--json]   (traffic drift)');
     process.exit(EXIT.BAD_ARGS);
   }
   if (!fs.existsSync(currentPath)) { console.error(`no such artifact: ${currentPath}`); process.exit(EXIT.NOT_FOUND); }
@@ -30539,7 +30539,7 @@ async function cmdDeploy(args) {
 //     [--auto-install] [--dry-run] [--rolling] [--canary] [--json]
 // =============================================================================
 function _w888dDeployHelp() {
-  console.log('kolm deploy <artifact.kolm> --device <id> [options]   # W888-D remote deploy');
+  console.log('kolm deploy <artifact.kolm> --device <id> [options]   # remote deploy');
   console.log('');
   console.log('Run the full SSH+upload+serve+smoke pipeline on a registered device.');
   console.log('');
@@ -30662,7 +30662,7 @@ async function _cmdDeployToDevice_w888d(args) {
 // =============================================================================
 
 function _w888eFleetHelp() {
-  console.log('kolm fleet <verb> [options]   # W888-E fleet management');
+  console.log('kolm fleet <verb> [options]   # fleet management');
   console.log('');
   console.log('Verbs:');
   console.log('  status     [--tag X] [--namespace Y] [--json]');
@@ -30686,7 +30686,7 @@ function _w888eFleetHelp() {
 }
 
 function _w888eNamespaceUpdatesHelp() {
-  console.log('kolm namespace updates <verb> [options]   # W888-E OTA policy');
+  console.log('kolm namespace updates <verb> [options]   # OTA policy');
   console.log('');
   console.log('Verbs:');
   console.log('  policy    --namespace X --policy manual|notify|canary|rolling|immediate');
@@ -31893,8 +31893,8 @@ async function cmdTeamLocal(args) {
     return;
   }
   // unknown — should never get here because cmdTeam pre-filters.
-  if (wantJson) { jsonErr('unknown team subcommand (W384 local): ' + sub, 'bad_args'); process.exit(EXIT.BAD_ARGS); }
-  console.error('unknown team subcommand (W384 local): ' + sub);
+  if (wantJson) { jsonErr('unknown team subcommand (local): ' + sub, 'bad_args'); process.exit(EXIT.BAD_ARGS); }
+  console.error('unknown team subcommand (local): ' + sub);
   process.exit(EXIT.BAD_ARGS);
 }
 
@@ -32090,7 +32090,7 @@ async function cmdPipeline(args) {
     if (!args.includes('--continuous')) {
       if (wantJson) { jsonErr('usage: kolm pipeline run --continuous [--namespace ns] [--interval-ms 60000] [--once]', 'bad_args'); process.exit(EXIT.BAD_ARGS); }
       console.error('usage: kolm pipeline run --continuous [--namespace ns] [--interval-ms 60000] [--once]');
-      console.error('note: scaffold for continuous distillation. production daemon arrives in W775.');
+      console.error('note: scaffold for continuous distillation. production daemon not yet shipped.');
       process.exit(EXIT.BAD_ARGS);
     }
     const namespace = pickFlag(rest, '--namespace') || pickFlagEq(rest, '--namespace') || null;
@@ -32188,7 +32188,6 @@ async function cmdPipeline(args) {
                   consumed_count: consumed.length,
                   max_per_trigger: maxPerTrigger,
                   scaffold: true,
-                  daemon_wave: 'W775',
                 }),
               });
             } catch (_) {} // deliberate: cleanup
@@ -32402,8 +32401,8 @@ async function cmdWrapAgent(args) {
     childArgs.push(a);
   }
   if (childArgs.length === 0) {
-    if (wantJson) { jsonErr('usage: kolm wrap <agent-cmd> [args...]  (W384 env-injection)', 'bad_args'); process.exit(EXIT.BAD_ARGS); }
-    console.error('usage: kolm wrap <agent-cmd> [args...]  (W384 env-injection)');
+    if (wantJson) { jsonErr('usage: kolm wrap <agent-cmd> [args...]  (env-injection)', 'bad_args'); process.exit(EXIT.BAD_ARGS); }
+    console.error('usage: kolm wrap <agent-cmd> [args...]  (env-injection)');
     process.exit(EXIT.BAD_ARGS);
   }
   const cmd = childArgs[0];
@@ -35386,13 +35385,13 @@ async function cmdTrace(args) {
       '  kolm trace stats <trace_id>\n' +
       '  kolm trace chain <trace_id>\n' +
       '  kolm trace export <trace_id>      print all spans as JSON\n' +
-      '  kolm trace compile <trace_id>     W463 — trace -> seeded IR for replay\n' +
-      '  kolm trace verify <trace_id>      W463 — replay-vs-original match check\n' +
-      '  kolm trace translate <trace_id>   W467 — rewrite vendor+model on LLM nodes\n' +
+      '  kolm trace compile <trace_id>     trace -> seeded IR for replay\n' +
+      '  kolm trace verify <trace_id>      replay-vs-original match check\n' +
+      '  kolm trace translate <trace_id>   rewrite vendor+model on LLM nodes\n' +
       '                                    flags: --from <p> --to <p> [--strict] [--remote] [--json]\n' +
       '                                    providers: anthropic | openai | generic\n' +
-      '  kolm trace providers              W467 — list known translator providers\n' +
-      '  kolm trace detect <trace_id>      W467 — sniff predominant vendor from spans\n' +
+      '  kolm trace providers              list known translator providers\n' +
+      '  kolm trace detect <trace_id>      sniff predominant vendor from spans\n' +
       '  kolm trace new                    generate a new trace_id (32 hex)\n' +
       '  kolm trace span                   generate a new span_id (16 hex)\n\n' +
       'EXAMPLES\n' +
@@ -36264,7 +36263,7 @@ async function cmdFederated(args) {
       '  kolm federated share --namespace=<ns> [--since=<iso>]\n' +
       '  kolm federated aggregate --local=<rows.json> --peers=<rows.json> [--epsilon=1.0]\n' +
       '  kolm federated audit [--limit=N]\n' +
-      '  kolm federated consortium <verify-mia|audit-epsilon|status> [args]   (W830)\n\n' +
+      '  kolm federated consortium <verify-mia|audit-epsilon|status> [args]\n\n' +
       'Honest scope: hash-only sharing + Laplace-DP-noised aggregates. Network\n' +
       'transport + peer authentication are the caller responsibility.');
     return;
@@ -36709,7 +36708,7 @@ async function cmdNamespace(args) {
   const eventStore = await import('../src/event-store.js');
   if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
     const wmod = await import('../src/wrapper-cli.js');
-    console.log('kolm namespace — privacy-safe fingerprint (W715) + wrapper deploy (W-F)\n\n' +
+    console.log('kolm namespace — privacy-safe fingerprint + wrapper deploy\n\n' +
       'USAGE\n' +
       '  kolm namespace create <slug> [--display-name "..."] [--capture-mode mode]\n' +
       '                               [--redact-mode mode] [--route-chain a,b,c]\n' +
@@ -36736,10 +36735,10 @@ async function cmdNamespace(args) {
   if (sub === 'verticals') {
     const out = {
       verticals: Object.keys(fp.VERTICAL_STUBS),
-      note: 'scaffold for W751-W755 vertical warm-start libraries',
+      note: 'scaffold for vertical warm-start libraries',
     };
     if (jsonOut) return _printJson(out);
-    console.log('verticals (scaffold for W751-W755):');
+    console.log('verticals (scaffold):');
     for (const v of out.verticals) console.log('  ' + v);
     return;
   }
@@ -40665,7 +40664,7 @@ async function cmdW733OtelStatus(args) {
     return;
   }
   console.error('usage: kolm otel <status|attributes>');
-  console.error('  status      — print W733 OTel status (version + tracer detection)');
+  console.error('  status      — print OTel status (version + tracer detection)');
   console.error('  attributes  — emit kolm.* attribute namespace + span names as JSON');
   process.exit(EXIT.BAD_ARGS);
 }
@@ -41394,7 +41393,7 @@ async function cmdW737Marketplace(args) {
   }
 
   // ---- unknown subcommand ----
-  console.error('usage: kolm marketplace <search|publish|review> [W737 sub-flags]');
+  console.error('usage: kolm marketplace <search|publish|review> [sub-flags]');
   console.error('  search   --vertical <v> --task <t> --hardware <h> --min-kscore <n>');
   console.error('  publish  --cid <cid> --vertical <v> --task <t> --hardware <h> [--price <usd>]');
   console.error('  review   --cid <cid> --stars <1-5> --text "<review text>"');
@@ -42033,7 +42032,7 @@ async function cmdW740Import(args) {
   // ──────────────────────── unknown subcommand ───────────────────────────────
   console.error('usage: kolm import <inspect|wrap|doctor> [args]');
   console.error('  inspect <file>                  - print parsed-metadata envelope (gguf|safetensors|onnx)');
-  console.error('  wrap    <file> [--out path]     - emit not_kolm_compiled manifest (W740-2 provenance lock)');
+  console.error('  wrap    <file> [--out path]     - emit not_kolm_compiled manifest (provenance lock)');
   console.error('  doctor                          - check python3 + supported formats');
   console.error('');
   console.error('symmetric export: kolm export <artifact.kolm> --backend gguf|onnx|safetensors|coreml|mlx|executorch|tensorrt');
@@ -42171,7 +42170,7 @@ async function cmdW739Diff(args) {
   if (!aPath || !bPath) {
     console.error('usage: kolm diff <a.kolm> <b.kolm> [--json]');
     console.error('  Side-by-side delta across k_score, capture_count, teacher, student_arch, param_count, bench_pass_rate, signed.');
-    console.error('  Also surfaces the W739 lineage relation + roll-back recommendation.');
+    console.error('  Also surfaces the lineage relation + roll-back recommendation.');
     process.exit(EXIT.BAD_ARGS);
     return;
   }
@@ -43028,7 +43027,7 @@ function _renderW745FailureModes(envelope, opts) {
     console.log('');
   }
   if (envelope.diagnostic_link) {
-    console.log(c.dim('Next: pivot to W741 diagnostic at ' + envelope.diagnostic_link));
+    console.log(c.dim('Next: pivot to diagnostic at ' + envelope.diagnostic_link));
     console.log('');
   }
 }
@@ -44017,7 +44016,7 @@ async function cmdW751Verticals(args) {
     console.error('  list                       — table of all 5 verticals');
     console.error('  show <id>                  — detail card for one vertical');
     console.error('  register-stubs             — bulk-register marketplace stubs (owner-only)');
-    console.error('  fingerprint <id>           — explicit W757-blocked envelope');
+    console.error('  fingerprint <id>           — blocked envelope (vertical fingerprint pipeline not yet shipped)');
     process.exit(EXIT.BAD_ARGS);
     return;
   }
@@ -44135,8 +44134,8 @@ async function cmdW751Verticals(args) {
     // Print a human-readable hint so users see the path forward.
     if (body && body.error === 'w757_not_shipped') {
       console.log('');
-      console.log(`Vertical fingerprint for "${id}" is blocked by W757 (vertical fingerprint pipeline).`);
-      console.log('Until W757 ships:');
+      console.log(`Vertical fingerprint for "${id}" is blocked (vertical fingerprint pipeline not yet shipped).`);
+      console.log('Until the pipeline ships:');
       console.log('  - capture per-namespace via /v1/capture/log');
       console.log('  - distill through /v1/distill');
       console.log('  - watch /docs/verticals for the live status pill');
@@ -44150,7 +44149,7 @@ async function cmdW751Verticals(args) {
   console.error('  list                       — table of all 5 verticals');
   console.error('  show <id>                  — detail card for one vertical');
   console.error('  register-stubs             — bulk-register marketplace stubs (owner-only)');
-  console.error('  fingerprint <id>           — explicit W757-blocked envelope');
+  console.error('  fingerprint <id>           — blocked envelope (vertical fingerprint pipeline not yet shipped)');
   process.exit(EXIT.BAD_ARGS);
 }
 
@@ -45471,7 +45470,7 @@ async function cmdW814Bench(args) {
     || (args || []).includes('-h')
     || sub === 'help'
   ) {
-    console.log('kolm bench speculative — Speculative Decoding bench (W814)');
+    console.log('kolm bench speculative — Speculative Decoding bench');
     console.log('');
     console.log('USAGE');
     console.log('  kolm bench speculative --artifact <id> [--against <teacher>] [--tenant <id>]');
@@ -50047,8 +50046,8 @@ async function cmdW772Audio(args) {
     console.error('  detect                                    # reads chat-message JSON from stdin');
     console.error('  bakeoff <artifact_path> [--namespace ns] [--max N] --confirm');
     console.error('  captures [--namespace ns] [--limit N]');
-    console.error('  tokenize <path|uri> [--model NAME] [--with-mel] [--with-text-tokens] [--json]   # W772b');
-    console.error('  tokenize-doctor [--json]                                                          # W772b');
+    console.error('  tokenize <path|uri> [--model NAME] [--with-mel] [--with-text-tokens] [--json]');
+    console.error('  tokenize-doctor [--json]');
     process.exit(EXIT.BAD_ARGS);
     return;
   }
@@ -50772,7 +50771,7 @@ async function cmdW813Drift(args) {
     console.error('  configure      --namespace <ns> [--kl-threshold N] [--fallback-rate-lift N] [--auto-remediate true|false] --confirm');
     console.error('  alerts         [--namespace <ns>] [--limit N] [--json]');
     console.error('  auto-remediate --namespace <ns> [--dry-run|--live]');
-    console.error('  (legacy W167)  detect | cron | verify');
+    console.error('  (legacy)  detect | cron | verify');
     process.exit(EXIT.BAD_ARGS);
     return;
   }

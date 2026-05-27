@@ -8,13 +8,13 @@
 <meta name="description" content="Each .kolm references its parent artifact via the manifest parent_cid field. Walk the chain with `kolm lineage <cid>`. Diff two versions and roll back with `kolm diff <a.kolm> <b.kolm>`. Lineage tracking baked into the">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Lineage &middot; model lineage tracking &middot; kolm.ai">
+<meta property="og:title" content="Lineage · model lineage tracking · kolm.ai">
 <meta property="og:description" content="parent_cid baked into the .kolm file format. Walk, diff, roll back without leaving the operator's terminal.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/lineage">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Lineage &middot; model lineage tracking &middot; kolm.ai">
+<meta name="twitter:title" content="Lineage · model lineage tracking · kolm.ai">
 <meta name="twitter:description" content="parent_cid baked into the .kolm file format. Walk, diff, roll back.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs/lineage">
@@ -66,7 +66,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </style>
 
 <link rel="stylesheet" href="/ks.css">
-<!-- ds-shell W619 -->
+
 <link rel="stylesheet" href="/docs-shell.css">
     <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/docs-shell.js"></script>
@@ -78,22 +78,22 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
@@ -107,7 +107,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="why">Why lineage ships inside the file</h2>
 <p>Most ML platforms record lineage in a separate metadata service: a database somewhere remembers that model v3.2.1 descended from v3.2.0. The footgun is obvious  -  when the metadata service goes down or the row gets corrupted, lineage is gone. kolm.ai bakes the parent pointer into the manifest itself, so the file IS the source of truth. The chain is verifiable offline; the chain is verifiable years after the metadata service was decommissioned; the chain is verifiable on an air-gapped reproducer who has never heard of your control plane.</p>
 
-<p>The W460 byte-stability law is preserved: artifacts that do not declare a parent (root / first-of-line) carry NO <code>parent_cid</code> key, so their bytes are byte-identical to pre-W739 artifacts rebuilt today. Only artifacts that explicitly descend from a parent carry the new field  -  and when they do, the parent_cid is folded into <code>artifact_hash_input</code> immediately adjacent to <code>guardrails_hash</code>, so swapping the pointer post-build breaks the receipt chain loudly.</p>
+<p>The byte-stability law is preserved: artifacts that do not declare a parent (root / first-of-line) carry NO <code>parent_cid</code> key, so their bytes are byte-identical to pre-artifacts rebuilt today. Only artifacts that explicitly descend from a parent carry the new field - and when they do, the parent_cid is folded into <code>artifact_hash_input</code> immediately adjacent to <code>guardrails_hash</code>, so swapping the pointer post-build breaks the receipt chain loudly.</p>
 
 <h2 id="parent_cid">The parent_cid field</h2>
 <p>The field is a string: 64 lowercase hex characters (a sha256 digest) or absent. There is no third option  -  a partial cid, an upper-case cid, or a non-hex string throws at build time so a malformed lineage pointer never reaches a deployed artifact. The validator lives in <code>src/artifact-lineage.js#setParentCid</code> and the build-time guard lives in <code>src/artifact.js#buildPayload</code>.</p>
@@ -115,7 +115,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <table>
   <thead><tr><th>State</th><th>manifest.parent_cid</th><th>artifact_hash_input.parent_cid</th></tr></thead>
   <tbody>
-    <tr><td>Root artifact (no parent)</td><td>absent</td><td>absent (W460 byte-stability)</td></tr>
+    <tr><td>Root artifact (no parent)</td><td>absent</td><td>absent</td></tr>
     <tr><td>Descended from another .kolm</td><td><code>"&lt;64-hex&gt;"</code></td><td><code>"&lt;64-hex&gt;"</code> (binds into receipt chain)</td></tr>
     <tr><td>Malformed (rejected at build)</td><td>throws</td><td>throws</td></tr>
   </tbody>
@@ -184,7 +184,7 @@ pinned: f1a2b3c4d5e6...  (now active for tenant_id=...)
 <p>The roll-back has zero downtime because the pinned artifact is already in the registry  -  there is no rebuild, no redeploy, no compile job. Forward-fixing the regression follows the same loop: distill a new candidate, <code>kolm diff</code> against the pinned baseline, and <code>kolm pin</code> the new cid when the recommendation flips back to <code>promote</code>.</p>
 
 <h2 id="ab">A/B testing</h2>
-<p>The W777 routing fabric wires <code>kolm pin</code> into a percentage-weighted A/B split: pin <code>{cid_a: 80, cid_b: 20}</code> and the runtime serves the new build to 20% of traffic. The lineage chain is what makes the A/B safe  -  both arms are content-addressed, both are signed, both descend from the same parent so a per-axis K-Score delta is the right measurement. For W739 the chain + diff land first; the routing fabric ships in W777.</p>
+<p>The routing fabric wires <code>kolm pin</code> into a percentage-weighted A/B split: pin <code>{cid_a: 80, cid_b: 20}</code> and the runtime serves the new build to 20% of traffic. The lineage chain is what makes the A/B safe - both arms are content-addressed, both are signed, both descend from the same parent so a per-axis K-Score delta is the right measurement. For the chain + diff land first; the routing fabric ships in.</p>
 
 <h2 id="api">API + CLI</h2>
 <table>
@@ -198,7 +198,7 @@ pinned: f1a2b3c4d5e6...  (now active for tenant_id=...)
 </table>
 
 <h2 id="next">Next steps</h2>
-<p>Read <a href="/docs/pipelines">pipelines</a> for how to compose specialist artifacts; the pipeline yaml's <code>parent_cids</code> array is the W739 lineage chain entry-point. Read <a href="/docs/k-score-methodology">K-Score</a> for how the per-axis numbers in the diff envelope are computed, and <a href="/docs/api">/docs/api</a> for the full wire contracts for both new routes.</p>
+<p>Read <a href="/docs/pipelines">pipelines</a> for how to compose specialist artifacts; the pipeline yaml's <code>parent_cids</code> array is the lineage chain entry-point. Read <a href="/docs/k-score-methodology">K-Score</a> for how the per-axis numbers in the diff envelope are computed, and <a href="/docs/api">/docs/api</a> for the full wire contracts for both new routes.</p>
 
 <div class="related">
   <a href="/docs/pipelines"><b>Pipelines &rarr;</b><span>Compose specialist artifacts; parent_cids is the chain entry-point.</span></a>
@@ -257,7 +257,7 @@ pinned: f1a2b3c4d5e6...  (now active for tenant_id=...)
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
     <div class="ks-foot__base">

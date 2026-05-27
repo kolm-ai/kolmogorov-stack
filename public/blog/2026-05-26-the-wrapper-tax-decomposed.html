@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <title>The wrapper tax, decomposed &middot; kolm.ai blog</title>
-<meta name="description" content="W887 production benchmark: 703 ms of overhead on a 2478 ms call, broken down by phase. PII scan plus chain resolve plus Ed25519 sign plus capture write plus Vercel hop, with the cost of the audit trail isolated.">
+<meta name="description" content="production benchmark: 703 ms of overhead on a 2478 ms call, broken down by phase. PII scan plus chain resolve plus Ed25519 sign plus capture write plus Vercel hop, with the cost of the audit trail isolated.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="The wrapper tax, decomposed &middot; kolm.ai blog">
+<meta property="og:title" content="The wrapper tax, decomposed · kolm.ai blog">
 <meta property="og:description" content="703 ms of overhead on a 2478 ms call, broken down by phase, measured live against kolm.ai.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/blog/2026-05-26-the-wrapper-tax-decomposed">
@@ -69,7 +69,7 @@ table.tabular td:not(:first-child){text-align:right}
 <a href="/blog" class="back">&larr; kolm.ai blog</a>
 
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/blog">blog</a> / the-wrapper-tax-decomposed</div>
-<p class="eyebrow">Benchmark &middot; W887</p>
+<p class="eyebrow">Benchmark &middot;</p>
 <h1>The wrapper tax, decomposed.</h1>
 <p class="meta">2026-05-26 &middot; ~10 minute read</p>
 
@@ -185,27 +185,27 @@ TOTAL kolm pipeline       ~203  (the part the wrapper adds)
 
 <h2>What is next</h2>
 
-<p>The W888 follow-up wave instruments every dispatch with a per-phase <code>latency_breakdown</code> attached to the receipt as an additive top-level field (not covered by the signature, so existing receipts still verify clean). Once that ships to production, the table above moves from "estimated from the leg total" to "measured per call". The two prod-deployed dashboards (gateway and bench) will show the breakdown live.</p>
+<p>The follow-up wave instruments every dispatch with a per-phase <code>latency_breakdown</code> attached to the receipt as an additive top-level field (not covered by the signature, so existing receipts still verify clean). Once that ships to production, the table above moves from "estimated from the leg total" to "measured per call". The two prod-deployed dashboards (gateway and bench) will show the breakdown live.</p>
 
 <p>Two follow-ups we expect to ship inside V1:</p>
 
 <ul>
   <li><b>Railway-direct as a managed option.</b> Customers who would rather we hold the provider key on the same host (and skip the hop) can flip a switch and lose the 400 ms. The tradeoff is the same key now sits on Railway too; some compliance teams prefer that, some do not.</li>
-  <li><b>Receipt batching.</b> When the gateway sees a burst of calls inside a few milliseconds, it can sign one receipt that covers the batch with a Merkle root over the individual call hashes. The per-call sign cost falls toward zero. The first version of this is in the W889 draft.</li>
+  <li><b>Receipt batching.</b> When the gateway sees a burst of calls inside a few milliseconds, it can sign one receipt that covers the batch with a Merkle root over the individual call hashes. The per-call sign cost falls toward zero. The first version of this is in the draft.</li>
 </ul>
 
 <h2>Raw data</h2>
 
-<p>The full per-call timings, receipt ids, and the W888 instrumentation diff are public:</p>
+<p>The full per-call timings, receipt ids, and the instrumentation diff are public:</p>
 
 <ul>
-  <li><a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/benchmarks/wave887-wrapper-prod-2026-05-26.md">wave887 wrapper-prod benchmark (10 calls, 3 legs)</a></li>
-  <li><a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/benchmarks/wave888-wrapper-tax-decomposed-2026-05-26.md">wave888 wrapper-tax decomposition (per-phase plan)</a></li>
+  <li><a href="https://github.com/kolm-ai/kolm/blob/main/benchmarks/wave887-wrapper-prod-2026-05-26.md">wave887 wrapper-prod benchmark (10 calls, 3 legs)</a></li>
+  <li><a href="https://github.com/kolm-ai/kolm/blob/main/benchmarks/wave888-wrapper-tax-decomposed-2026-05-26.md">wave888 wrapper-tax decomposition (per-phase plan)</a></li>
   <li><a href="/docs/gateway-bench">/docs/gateway-bench</a> &mdash; the live, regenerated benchmark page</li>
 </ul>
 
 <div class="endnote">
-<b>Constraints.</b> The numbers above are from a single 10-prompt run against one model (claude-haiku-4-5) at one time. Latency varies by region, time of day, prompt length, and provider load. The Vercel cold-start p95 spike is real but rare; resident-function samples cluster much lower. Your overhead will track the table to within 10 to 20 percent in either direction. The decomposition table will firm up once W888 ships per-call breakdown to production receipts.
+<b>Constraints.</b> The numbers above are from a single 10-prompt run against one model (claude-haiku-4-5) at one time. Latency varies by region, time of day, prompt length, and provider load. The Vercel cold-start p95 spike is real but rare; resident-function samples cluster much lower. Your overhead will track the table to within 10 to 20 percent in either direction. The decomposition table will firm up once ships per-call breakdown to production receipts.
 </div>
 
 </article>

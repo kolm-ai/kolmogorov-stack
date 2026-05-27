@@ -8,18 +8,18 @@
 <meta name="description" content="Capture rows carry a season + active-event tag so you can train winter, summer, and black-friday variants without re-deriving the calendar at query time. The recommendation engine auto-picks today's variant from the">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Seasonal &middot; capture tagging, variants, auto-select &middot; kolm.ai">
+<meta property="og:title" content="Seasonal · capture tagging, variants, auto-select · kolm.ai">
 <meta property="og:description" content="Per-row season + event tag, seasonal-variant namespaces, calendar-aware recommendation. Built for the Open-source AI workbench.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/seasonal">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Seasonal &middot; capture tagging, variants, auto-select &middot; kolm.ai">
+<meta name="twitter:title" content="Seasonal · capture tagging, variants, auto-select · kolm.ai">
 <meta name="twitter:description" content="Per-row season + event tag, seasonal-variant namespaces, calendar-aware recommendation.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs/seasonal">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Seasonal: capture tagging, variants, auto-select","description":"Per-row season + event tag, seasonal-variant namespaces, calendar-aware recommendation - the W748 seasonal primitives.","url":"https://kolm.ai/docs/seasonal","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Seasonal: capture tagging, variants, auto-select","description":"Per-row season + event tag, seasonal-variant namespaces, calendar-aware recommendation - the seasonal primitives.","url":"https://kolm.ai/docs/seasonal","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <link rel="stylesheet" href="/design-tokens.css">
 <style>
 :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:rgba(17, 17, 17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
@@ -76,22 +76,22 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/wrapper">Wrapper</a></li>
       <li><a href="/studio">Studio</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
     </ul>
     <div class="ks-nav__right">
       <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
       <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
@@ -102,7 +102,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h1>Seasonal: capture tagging, variants, auto-select</h1>
 <p class="lede">A capture from black-friday week and a capture from a sleepy Tuesday in March are answering the same prompt against very different distributions. Seasonal gives you three primitives to put numbers on that fact: a <strong>per-row season + event tag</strong> stamped at capture time, a <strong>variant registry</strong> (<code>support/seasonal-black-friday</code>) so you can distill specialised students, and an <strong>auto-recommendation</strong> engine that picks the right variant from the calendar at query time. Frontier AI on your own infrastructure.</p>
 
-<div class="warn"><strong>N-hemisphere default.</strong> The four-season carve-up is biased toward meteorological convention (Dec-Feb winter, Mar-May spring, etc.). Tenants in the southern hemisphere flip via a per-tenant setting in a W748 follow-up. The envelope always echoes <code>hemisphere:'north'</code> so callers can detect the bias. Likewise the event registry (<code>black-friday</code>, <code>cyber-monday</code>, <code>tax-season-us</code>, <code>back-to-school</code>) is US-retail anchored on purpose &mdash; it is not exhaustive, and per-region overrides are a follow-up rather than more hardcoded ranges in the module.</div>
+<div class="warn"><strong>N-hemisphere default.</strong> The four-season carve-up is biased toward meteorological convention (Dec-Feb winter, Mar-May spring, etc.). Tenants in the southern hemisphere flip via a per-tenant setting in a follow-up. The envelope always echoes <code>hemisphere:'north'</code> so callers can detect the bias. Likewise the event registry (<code>black-friday</code>, <code>cyber-monday</code>, <code>tax-season-us</code>, <code>back-to-school</code>) is US-retail anchored on purpose &mdash; it is not exhaustive, and per-region overrides are a follow-up rather than more hardcoded ranges in the module.</div>
 
 <h2 id="why">Why the calendar belongs in the capture row</h2>
 <p>The student is trying to learn today's conditional distribution. When today is in a tight calendar window (the holiday rush, tax season, back-to-school), the conditional distribution shifts &mdash; query mix, expected response style, latency tolerance &mdash; and the same student model that handles "sleepy Tuesday" is the wrong instrument. Two routes out: (1) train one big student on the union and hope the loss averages well, or (2) distill a variant per window and route queries to the variant whose calendar matches.</p>
@@ -116,10 +116,10 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <pre>CODE19</pre>
 
-<p>Tagging is <strong>idempotent</strong>. A row that already carries a non-empty <code>season</code> string is left alone &mdash; the closer-to-source value always wins (matches W746 teacher-version contract).</p>
+<p>Tagging is <strong>idempotent</strong>. A row that already carries a non-empty <code>season</code> string is left alone &mdash; the closer-to-source value always wins (matches teacher-version contract).</p>
 
 <h3>Byte-stability safety hatch</h3>
-<p>If a deploy needs to fall back to pre-W748 capture behavior in a hotfix, set <code>KOLM_W748_SEASONAL_TAGGING=off</code>. With the flag off, <code>POST /v1/capture/log</code> writes rows without <code>season</code> or <code>seasonal_events</code> &mdash; byte-stable with the W747 shape. Default is on.</p>
+<p>If a deploy needs to fall back to pre-capture behavior in a hotfix, set <code>KOLM_W748_SEASONAL_TAGGING=off</code>. With the flag off, <code>POST /v1/capture/log</code> writes rows without <code>season</code> or <code>seasonal_events</code> &mdash; byte-stable with the shape. Default is on.</p>
 
 <h2 id="events">Event registry</h2>
 <p>Events are tight calendar windows where the conditional distribution shifts hard. The registry is small on purpose &mdash; it exists so the recommendation engine has SOMETHING to match against on day 1, not so we replicate every public holiday catalog. Cross-year ranges (holiday: Dec 15 - Jan 5) are honoured.</p>
@@ -180,15 +180,15 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <h2 id="related">Related</h2>
 <div class="related">
-  <a href="/docs/staleness"><b>Staleness</b><span>Capture decay, TTL, teacher-version drift (W746).</span></a>
-  <a href="/docs/drift-alert"><b>Drift alert</b><span>JSD between training + production token distributions (W747).</span></a>
+  <a href="/docs/staleness"><b>Staleness</b><span>Capture decay, TTL, teacher-version drift.</span></a>
+  <a href="/docs/drift-alert"><b>Drift alert</b><span>JSD between training + production token distributions.</span></a>
   <a href="/account/seasonal"><b>Seasonal dashboard</b><span>Time-series viz + variant management + recommendation.</span></a>
 </div>
 
 </div></main>
 
 <footer><div class="wrap">
-kolm.ai &mdash; <a href="/">home</a> &middot; <a href="/docs">docs</a> &middot; <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">github</a>
+kolm.ai &mdash; <a href="/">home</a> &middot; <a href="/docs">docs</a> &middot; <a href="https://github.com/kolm-ai/kolm" rel="noopener">github</a>
 </div></footer>
 
 </body>

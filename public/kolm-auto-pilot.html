@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Auto pilot · Open-source AI workbench · kolm.ai</title>
-<meta name="description" content="Continuous background distill. Opt in once. The autopilot daemon polls coverage gaps, gates on drift, and silently re-distills when local quality can replace teacher calls. W775.">
+<meta name="description" content="Continuous background distill. Opt in once. The autopilot daemon polls coverage gaps, gates on drift, and silently re-distills when local quality can replace teacher calls.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Auto pilot &middot; Open-source AI workbench &middot; kolm.ai">
+<meta property="og:title" content="Auto pilot · Open-source AI workbench · kolm.ai">
 <meta property="og:description" content="Continuous background distill. Opt in once; the autopilot does the rest. Loud-fail envelopes, drift-gated, never silent.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/kolm-auto-pilot">
@@ -90,7 +90,7 @@ td code{font-size:12px}
 <a href="/use-cases" style="color:inherit;text-decoration:none;margin-right:16px">Use cases</a>
 <a href="/pricing" style="color:inherit;text-decoration:none;margin-right:16px">Pricing</a>
 <a href="/docs" style="color:inherit;text-decoration:none;margin-right:16px">Docs</a>
-<a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener" style="color:inherit;text-decoration:none;margin-right:16px">GitHub</a>
+<a href="https://github.com/kolm-ai/kolm" rel="noopener" style="color:inherit;text-decoration:none;margin-right:16px">GitHub</a>
 <a href="/signup?intent=login" style="color:inherit;text-decoration:none;margin-right:16px">Sign in</a>
 <a href="/signup" style="color:var(--accent);text-decoration:none">Get started &rarr;</a>
 </nav>
@@ -102,10 +102,9 @@ td code{font-size:12px}
 <p class="crumbs"><a href="/">kolm.ai</a> &rsaquo; auto pilot</p>
 <p class="brand-eyebrow" data-w775="brand-eyebrow">Open-source AI workbench</p>
 <h1 data-w775="h1">Frontier AI on your own infrastructure.</h1>
-<p class="lede" data-w775="lede">Auto pilot is the continuous-background-distill daemon. Opt in once; it polls W815 coverage gaps, gates on W813 drift, and silently re-distills when local quality can replace teacher calls. Every decision lands as a durable ledger row &mdash; the daemon never silently retrains on bad data.</p>
+<p class="lede" data-w775="lede">Auto pilot is the continuous-background-distill daemon. Opt in once; it polls coverage gaps, gates on drift, and silently re-distills when local quality can replace teacher calls. Every decision lands as a durable ledger row &mdash; the daemon never silently retrains on bad data.</p>
 
-<div class="honest-note" data-w775="honest-note">
-W775 no-silent-pass contract: <code>action:'redistilled'</code> is never emitted unless W815 returns ok AND the W813 drift gate is green AND the top gap_score crosses the <code>REDISTILL_THRESHOLD</code> (0.25). When any gate trips, the daemon writes a <code>holding_pattern</code> row with the reason so the operator can see WHY the autopilot held. Stamped <code>w775-v1</code>.
+<div class="honest-note" data-w775="honest-note"> no-silent-pass contract: <code>action:'redistilled'</code> is never emitted unless returns ok AND the drift gate is green AND the top gap_score crosses the <code>REDISTILL_THRESHOLD</code> (0.25). When any gate trips, the daemon writes a <code>holding_pattern</code> row with the reason so the operator can see WHY the autopilot held. Stamped <code>w775-v1</code>.
 </div>
 
 <section data-w775="opt-in">
@@ -138,7 +137,7 @@ W775 no-silent-pass contract: <code>action:'redistilled'</code> is never emitted
 
 <section data-w775="savings">
 <h2>Savings telemetry</h2>
-<p>Conservative dollar savings &mdash; sums teacher cost AVOIDED on every routing decision where the W807 router stayed local. Baseline is what the workload would have cost at the teacher rate observed during the window.</p>
+<p>Conservative dollar savings &mdash; sums teacher cost AVOIDED on every routing decision where the router stayed local. Baseline is what the workload would have cost at the teacher rate observed during the window.</p>
 <div class="metric-grid">
   <div class="metric-card"><div class="label">Saved (window)</div><div class="value" data-w775="saved-value" id="m-saved-value">$0.00</div><div class="delta">teacher cost avoided</div></div>
   <div class="metric-card"><div class="label">Baseline (window)</div><div class="value" data-w775="baseline-value" id="m-baseline-value">$0.00</div><div class="delta">what teacher-only would have cost</div></div>
@@ -146,7 +145,7 @@ W775 no-silent-pass contract: <code>action:'redistilled'</code> is never emitted
   <div class="metric-card"><div class="label">Window</div><div class="value" data-w775="window-value" id="m-window-value">30 d</div><div class="delta">rolling days</div></div>
 </div>
 <div class="sparkbox" data-w775="savings-spark">
-  <svg viewBox="0 0 600 60" preserveAspectRatio="none" aria-label="Daily savings sparkline">
+  <svg viewbox="0 0 600 60" preserveaspectratio="none" aria-label="Daily savings sparkline">
     <polyline id="savings-poly" fill="none" stroke="var(--accent)" stroke-width="1.5" points=""></polyline>
   </svg>
   <div class="legend"><span><span style="display:inline-block;width:10px;height:2px;background:var(--accent);margin-right:6px"></span>saved per day (linear)</span></div>
@@ -159,10 +158,10 @@ W775 no-silent-pass contract: <code>action:'redistilled'</code> is never emitted
 <p>One tick = one pass through the gate sequence. The daemon writes EXACTLY one ledger row per tick (or zero if disabled).</p>
 <div class="flow-card">
 <div class="flow-step"><div class="n">1.</div><div class="body"><h4>Disabled gate</h4><p>If the latest disabled-row newer than the latest enabled-row, returns <code>action:'disabled'</code>. No event written.</p></div></div>
-<div class="flow-step"><div class="n">2.</div><div class="body"><h4>W815 readiness check</h4><p>Calls <code>getCoverageGapsForNamespace(namespace, {tenant_id})</code>. If the helper returns <code>error:'insufficient_captures_for_coverage'</code>, the daemon writes <code>autopilot:holding</code> with reason <code>insufficient_captures</code>.</p></div></div>
-<div class="flow-step"><div class="n">3.</div><div class="body"><h4>W813 drift gate</h4><p>Reads <code>listRecentAlerts({tenant_id, namespace, limit:1})</code>. If the latest alert is <code>drift_detected:true</code> with severity in {moderate, severe}, the daemon holds with <code>reason:'drift_red'</code>.</p></div></div>
+<div class="flow-step"><div class="n">2.</div><div class="body"><h4>readiness check</h4><p>Calls <code>getCoverageGapsForNamespace(namespace, {tenant_id})</code>. If the helper returns <code>error:'insufficient_captures_for_coverage'</code>, the daemon writes <code>autopilot:holding</code> with reason <code>insufficient_captures</code>.</p></div></div>
+<div class="flow-step"><div class="n">3.</div><div class="body"><h4>drift gate</h4><p>Reads <code>listRecentAlerts({tenant_id, namespace, limit:1})</code>. If the latest alert is <code>drift_detected:true</code> with severity in {moderate, severe}, the daemon holds with <code>reason:'drift_red'</code>.</p></div></div>
 <div class="flow-step"><div class="n">4.</div><div class="body"><h4>Gain threshold</h4><p>If the top gap_score &lt; <code>REDISTILL_THRESHOLD</code> (0.25), the daemon emits <code>action:'no_op'</code>. The cost + risk of swapping artifacts doesn't clear the bar.</p></div></div>
-<div class="flow-step"><div class="n">5.</div><div class="body"><h4>Orchestrate</h4><p>Calls <code>orchestrateImprovement({tenant_id, namespace, candidates, opts:{skip_spawn:true}})</code>, writes <code>autopilot:redistilled</code> with the orchestrate envelope. Worker spawn is left to the W720 daemon &mdash; the tick never blocks on training.</p></div></div>
+<div class="flow-step"><div class="n">5.</div><div class="body"><h4>Orchestrate</h4><p>Calls <code>orchestrateImprovement({tenant_id, namespace, candidates, opts:{skip_spawn:true}})</code>, writes <code>autopilot:redistilled</code> with the orchestrate envelope. Worker spawn is left to the daemon &mdash; the tick never blocks on training.</p></div></div>
 </div>
 </section>
 

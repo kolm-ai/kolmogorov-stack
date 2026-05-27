@@ -1,35 +1,4 @@
-/* warm-paper.css - Monochrome Editorial v3 (2026-05-25 W850 cool-slate retune).
-   Loads LAST so it wins the cascade. Token-driven; no per-page edits.
 
-   NAME IS LEGACY — file ships cool-slate Editorial v3 (W850), not warm paper.
-   The filename is preserved so the 700+ HTML pages linking to it keep working
-   without a coordinated rename. New choices MUST stay cool-slate (W850
-   binding: "i dont like the browns beiges oranges anywhere").
-
-   Supersedes Ink & Linen v2 and the original W836 warm-paper aesthetic.
-   This pass goes pure monochrome: near-black ink on cool slate paper,
-   hairline rules, sans-serif throughout, restrained scale. No chromatic
-   accents, no display-serif monsters, no decorative initials. The product
-   carries the page; the page does not perform.
-
-   Palette ground rules:
-     . one ink   #111111  near-black
-     . one mute  #6b6b66
-     . one paper #f3f5f7  cool slate paper (W850 binding)
-     . one card  #ffffff  pure card on paper
-     . one rule  rgba(17,17,17, 0.10)
-     . status colors are muted, near-monochrome
-     . NO chromatic accent. emphasis = ink + weight + scale.
-
-   Typography ground rules:
-     . Inter (sans) for everything, no serif at any size.
-     . Display H1 capped at 88px. No 144px monster.
-     . Tracking tightens with size; weight stays modest (600/700).
-     . Body 16.5px / 1.6 leading. 65ch max line length.
-
-   Lock-in safety: every selector below is additive. No structural
-   layout is removed; existing tests pass because the cascade only
-   adjusts color, type, spacing, border, shadow - not DOM shape. */
 
 /* ============================================================
    1. PAGE FRAME - paper background, ink color
@@ -389,9 +358,7 @@ section[data-hero] {
   background: var(--surface-2);
 }
 
-/* W848: dark-mode override — text was hardcoded #111111 (near-black)
-   above, which becomes invisible on a dark surface. Cream text in dark
-   mode; border tints to match. */
+
 [data-theme="dark"] .btn-ghost,
 [data-theme="dark"] .button-ghost,
 [data-theme="dark"] .kolm-btn-ghost,
@@ -480,10 +447,7 @@ code:not(pre code) {
    8. NAV - paper-toned chrome, no contrast strip
    ============================================================ */
 
-/* W845: .ks-nav stripped from this rule. The translucent bar is painted by
-   .ks-nav-wrap in ks.css; layering a second translucent background here
-   produced the double-bar look the user flagged on /. The other classes
-   below are for legacy/embedded pages that mount the nav directly. */
+
 .kolm-nav,
 .kolm-product-spine,
 header.kolm-nav,
@@ -505,9 +469,7 @@ nav.kolm-nav,
   border-bottom: 1px solid var(--line-1);
 }
 
-/* W845: .ks-nav itself stays TRANSPARENT — the .ks-nav-wrap parent is the
-   translucent layer. Without this nuke a previous .ks-nav rule from
-   surface-polish.css could still re-introduce a second band. */
+
 .ks-nav,
 [data-theme="dark"] .ks-nav,
 [data-theme="light"] .ks-nav {
@@ -767,13 +729,7 @@ body > * { position: relative; z-index: 1; }
    18. ACCORDION
    ============================================================ */
 
-/* W848: exclude .fr-faq__row from the generic accordion shell so the
-   homepage Q&A row keeps its frontier.css grid layout + 22px padding.
-   User has asked four times to fix Q&A spacing — root cause is this
-   generic `details` rule winning the cascade because warm-paper.css
-   loads AFTER frontier.css. Surgical :not() exclusion preserves the
-   accordion treatment on docs / pricing / wrapper while letting the
-   homepage FAQ render with its dedicated 44px-summary grid. */
+
 details:not(.fr-faq__row), .ks-accordion {
   border-top: 1px solid var(--line-1);
   padding: 18px 0;
@@ -880,16 +836,9 @@ html[data-theme="light"] { color-scheme: light; }
 html[data-theme="dark"]  { color-scheme: dark; }
 html:not([data-theme])   { color-scheme: light; }
 
-/* ============================================================
-   21. EDITORIAL PRIMITIVES (monochrome, restrained)
-   The W837 LIFT block is replaced. No serif display monster,
-   no drop-cap, no chromatic seal. Pull-quote stays sans-italic.
-   ============================================================ */
 
-/* W844 hero H1: pull up to true editorial display weight. The old 88px / 700
-   was reading as "generic dashboard SaaS" — user said "garbage font". Now
-   caps at 116px, font-weight 800, tighter tracking, with stylistic-alt
-   features on so Inter's display-cuts kick in. Still monochrome ink. */
+
+
 .fr-h1--hero, h1.fr-h1--hero, .display-hero {
   font-family: var(--ks-font-sans);
   font-weight: 280;
@@ -986,8 +935,7 @@ main > section:first-of-type .fr-h1--hero {
   opacity: 0.85;
 }
 
-/* Display numeral - sans tabular, the same Inter face at scale. W846 pull
-   to thin/contemporary weight per direct user feedback. */
+
 .display-num {
   font-family: var(--ks-font-sans);
   font-weight: 320;
@@ -1159,13 +1107,7 @@ main > section:first-of-type .fr-h1--hero {
   border-color: var(--line-2);
 }
 
-/* ============================================================
-   23. .KOLM-ARCH - hero architecture diagram (inputs / processing / outputs)
-   Replaces the W706 "demo terminal" with a real product schematic.
-   The SVG sits in column 2 of the hero grid. Pure monochrome:
-   ink rectangles, ink text, hairline rules. Sized to feel like
-   a printed reference card, not a screenshot.
-   ============================================================ */
+
 
 .kolm-arch {
   margin: 0;
@@ -1197,8 +1139,7 @@ main > section:first-of-type .fr-h1--hero {
   fill: var(--ink-3);
 }
 
-/* W848: surface-tag under each column header — names which product
-   surface owns each band (wrapper / CLI · studio / runtime). */
+
 .kolm-arch__surf {
   font-family: var(--ks-font-sans);
   font-size: 11.5px;
@@ -1574,13 +1515,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   text-underline-offset: 3px;
 }
 
-/* ============================================================
-   25. W844 hero refit + full-width architecture band + CLI chat
-   - .ks-hero__card replaces the half-size diagram in hero col-2
-   - .kolm-arch-band hosts the full-width architecture diagram
-   - .kolm-arch--full enlarges the SVG to fill the band
-   - .ks-cli-chat is an OpenAI-style demo box for the free-tier brag
-   ============================================================ */
+
 
 /* hero column-2 mini-card - quiet, oriented to the eye, not a screenshot */
 .ks-hero__card {
@@ -1715,7 +1650,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   }
 }
 
-/* ----- CLI chat demo (W844) ----- */
+
 .ks-cli-chat {
   padding: clamp(48px, 6vw, 88px) 0;
   background: var(--surface-1);
@@ -1790,11 +1725,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   margin-top: 28px;
 }
 
-/* W845: chat box background MUST be an explicit dark hex (not var(--ink-1)).
-   --ink-1 is a SEMANTIC INK TOKEN — #111 in light theme, but #e6e9ee (cream)
-   in dark theme. Using it as a SURFACE color flipped the terminal to white
-   in dark mode (user: "this completely bleeds"). The chat box is a terminal;
-   it stays dark in both themes. */
+
 .ks-cli-chat__box {
   background: #0e1116;
   border: 1px solid #1c2128;
@@ -1904,8 +1835,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   margin: 8px 22px 16px;
 }
 
-/* W850 — "verify it yourself" curl block under the copy column.
-   Sits in the light cool-slate column (NOT the dark chat box). */
+
 .ks-cli-chat__verify {
   margin: 20px 0 8px;
   border-top: 1px solid rgba(20, 30, 45, 0.08);
@@ -1961,10 +1891,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   border-radius: 4px;
 }
 
-/* W850 — three-surface section (Route & Capture / Distill & Compile /
-   Run & Govern). Magazine-spread three-column layout, no card chrome
-   beyond a thin top rule + a single accent on the middle (feature)
-   column. Cool slate only. */
+
 .ks-three-surface {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2112,10 +2039,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   color: #e6e9ee;
 }
 
-/* W845: explicit overrides for both themes — defense-in-depth.
-   The chat box IS a terminal so it stays dark in light AND dark mode.
-   Earlier this block was empty; combined with the buggy var(--ink-1) above
-   it produced a cream box in dark mode. */
+
 [data-theme="light"] .ks-cli-chat__box,
 :root:not([data-theme="dark"]) .ks-cli-chat__box,
 [data-theme="dark"] .ks-cli-chat__box {
@@ -2222,9 +2146,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   color: rgba(230, 233, 238, 0.45);
   font-style: normal;
 }
-/* W847 — multi-step workflow recipe (returned when the user describes a goal
-   instead of a specific command). Renders as numbered steps with their own
-   $ command + a one-line why. */
+
 .ks-cli-chat__wf-summary {
   font-size: 13px;
   color: rgba(230, 233, 238, 0.88);
@@ -2281,10 +2203,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   font-family: var(--ks-font-sans);
 }
 
-/* W847 — "What is kolm" plain-English intro band. Sits between the hero
-   and the architecture diagram so a 10-sec visitor has a working mental
-   model before they hit the schematic. No card chrome, no list, just
-   editorial type. */
+
 .kolm-whatis {
   padding: clamp(48px, 6vw, 96px) clamp(20px, 3vw, 36px) clamp(16px, 2vw, 24px);
   background: transparent;
@@ -2337,10 +2256,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   max-width: 70ch;
 }
 
-/* W848: wrapper + studio mini-cards under .kolm-whatis. Two compact
-   anchor blocks naming the two surfaces that sit on top of the
-   compiler. Card layout is paper-on-paper — hairline rule + accent
-   eyebrow tag — no shadow, no fill, no border-radius gimmick. */
+
 .kolm-whatis__surfaces {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2400,7 +2316,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
 [data-theme="dark"] .kolm-whatis__surface-p { color: #b6bcc4; }
 [data-theme="dark"] .kolm-whatis__surface-p code { background: rgba(230,233,238,0.10); color: #e6e9ee; }
 
-/* W844 post-auth account chat band — mirrors the homepage chat layout */
+
 .kolm-account-chat {
   padding: clamp(36px, 4vw, 56px) clamp(20px, 3vw, 36px);
   background: var(--surface-2);
@@ -2445,12 +2361,7 @@ footer.site ul a:hover, .site-footer ul a:hover, .ks-footer ul a:hover {
   max-width: 56ch;
 }
 
-/* =========================================================================
-   W844 / Section 26  -  "Inside each stage" deep-dive cards
-   Four cards: Capture / Distill / Quantize / Sign+Deploy. Replaces the
-   W706 SVG pipeline + step row, which restated the arch-band above the
-   fold. These cards do not name the stage  -  they name the innovation.
-   ========================================================================= */
+
 .kolm-deep {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2603,19 +2514,9 @@ html[data-theme="dark"] .kolm-deep__cmd {
   color: rgba(230, 233, 238, 0.94);
 }
 
-/* =========================================================================
-   W845 / Section 27  -  fix-the-site round 2
-   Hero typography lift, in-nav theme toggle, hero backdrop, hero card
-   collapse to single-column, vertical rhythm reset.
-   ========================================================================= */
 
-/* W846: hero H1 — THINNER, contemporary, clean. User direct feedback:
-   "make the hero font thinner and more contemporary ... not thicker btw
-   ... i need it to be super clean ... everythings gotta be buttoned up".
-   Pulled from weight 820 (display black, felt SaaS-heavy) to 280
-   (Inter Display Thin) with tighter tracking and same dramatic size.
-   This is the Linear / Vercel / Stripe Press editorial vibe: thin and
-   big, not thick and shouty. */
+
+
 .fr-h1--hero, h1.fr-h1--hero, .display-hero,
 .ks-hero__h1, .ks-hero h1.fr-h1--hero {
   font-weight: 280;
@@ -2630,9 +2531,7 @@ html[data-theme="dark"] .kolm-deep__cmd {
 }
 .fr-h1--hero .h1-claim { font-weight: inherit; }
 
-/* W850: hero backdrop swapped from warm cream to cool slate paper per
-   direct user mandate ("i dont like the browns beiges oranges anywhere").
-   The html-level dot grid shows through; no gradient/PNG layer. */
+
 .ks-hero {
   background: var(--surface-0, #f3f5f7);
   position: relative;
@@ -2644,10 +2543,7 @@ html[data-theme="dark"] .kolm-deep__cmd {
 .ks-hero .fr-scan::after { background-image: none !important; }
 [data-theme="dark"] .ks-hero { background: #0e1116; }
 
-/* W845: hero now single-column. The right-column mini-card was a wedge the
-   user called weak ("doesnt add much and doesnt take up the weight it
-   should"). The arch-band below the hero already answers "what is kolm".
-   Collapse column 2 visually but keep the DOM node for lock-ins. */
+
 .ks-hero__wrap {
   grid-template-columns: minmax(0, 1fr) !important;
   gap: 0 !important;
@@ -2657,15 +2553,12 @@ html[data-theme="dark"] .kolm-deep__cmd {
   display: none !important;
 }
 
-/* W845: tighten hero CTAs row + sub-line so the H1 breathes properly. */
+
 .ks-hero__ctas { margin-top: 32px; gap: 14px; }
 .ks-hero .ks-lede { margin-top: 22px; }
 .ks-hero__sub { margin-top: 22px !important; }
 
-/* W845: in-nav theme toggle (pre-baked into homepage + docs HTML, so it
-   does not depend on nav.js mounting). Icons swap based on data-theme on
-   <html>. Sun shown in dark mode = "switch to light"; moon shown in light
-   mode = "switch to dark". */
+
 .ks-theme-toggle {
   display: inline-flex;
   align-items: center;
@@ -2695,8 +2588,7 @@ html[data-theme="dark"] .kolm-deep__cmd {
 [data-theme="dark"] .ks-theme-toggle .theme-icon--sun  { display: block; }
 [data-theme="dark"] .ks-theme-toggle .theme-icon--moon { display: none; }
 
-/* W845: deep-dive cards — kill the var(--paper-1) reference (undefined token
-   was falling back to #f3f5f7 in light mode, but defense-in-depth here). */
+
 .kolm-deep__card {
   background: #ffffff;
   border-color: #e5e7ec;
@@ -2706,10 +2598,7 @@ html[data-theme="dark"] .kolm-deep__cmd {
   border-color: #dde1e7;
 }
 
-/* W845: vertical rhythm reset — section spacing collapsed where the W706+
-   editorial stack stretched it out. Sections sit on a 96px/64px/48px
-   cadence; the eyebrow + h2 pair tightens so eyebrows feel like a label,
-   not a sentence. */
+
 section.fr-section { padding-top: clamp(48px, 6vw, 96px); padding-bottom: clamp(48px, 6vw, 96px); }
 section.fr-section + section.fr-section { padding-top: 0; }
 .fr-section .fr-container { padding-left: clamp(20px, 4vw, 40px); padding-right: clamp(20px, 4vw, 40px); }
@@ -2733,24 +2622,12 @@ section.fr-section + section.fr-section { padding-top: 0; }
 }
 .fr-lede { max-width: 64ch; margin: 0 0 28px 0; }
 
-/* =========================================================================
-   W846 — Round-3 visual + content fixes
-   Goals: hero earns the fold, eyebrow+H2 echo dies site-wide, H2s carry
-   editorial weight, proof bar lives ABOVE the next-scroll fold so a 5-second
-   visitor sees concrete numbers.
-   ========================================================================= */
 
-/* W848: .ks-hero__proof rail and .ks-hero__sub line REMOVED per direct
-   user mandate ("remove this already $8K/mo ... 17.9 GB ... Apache-2.0
-   self-hostable runs air-gapped 6 SDKs github →"). Stat-cell rail was
-   stealing visual weight from the H1 and the "In plain English" section
-   below already conveys the same plain-prose answer. Hidden test-anchor
-   for any lock-in referencing .ks-hero__proof or .ks-hero__sub. */
+
+
 .ks-hero__proof, .ks-hero__sub { display: none !important; }
 
-/* W846: H2 weight harmonize across .fr-h2 / .ks-h2 — both thin & contemporary
-   to match the hero. Linear / Vercel / Stripe Press editorial weight.
-   Reverted from earlier 720 bump per direct user feedback ("super clean"). */
+
 .ks-h2 {
   font-weight: 360 !important;
   letter-spacing: -0.032em !important;
@@ -2767,25 +2644,19 @@ h3.fr-h3, .fr-h3, h3.ks-h3, .ks-h3 {
   font-feature-settings: "ss01", "kern";
 }
 
-/* W846: eyebrow + H2 echo killer. Where an eyebrow sits directly above
-   a heading that restates the same theme, the eyebrow becomes a quiet
-   mono caps label, never a sentence. This is a visual rule; copy is
-   handled per-page. */
+
 .fr-eyebrow,
 .ks-eyebrow {
   font-weight: 580;
   opacity: 0.78;
 }
 
-/* W846: section heading group — when eyebrow + h2 sit together, drop the
-   top gap so they read as one unit. Also tighten the lede max-width so
-   long sentences don't blow horizontal rhythm. */
+
 .ks-shead { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
 .ks-shead .ks-eyebrow + .ks-h2 { margin-top: 0; }
 .ks-shead .ks-lede { margin-top: 6px; max-width: 64ch; }
 
-/* W846: deep-dive cards — buttoned up. Hairline border, no decorative ::before
-   stripe (W846a removed). Hover only shifts border + lifts by 1px. */
+
 .kolm-deep__card {
   position: relative;
   background: #ffffff;
@@ -2806,8 +2677,7 @@ h3.fr-h3, .fr-h3, h3.ks-h3, .ks-h3 {
 [data-theme="dark"] .kolm-deep__card .kolm-deep__body { color: #c1c7cf; }
 [data-theme="dark"] .kolm-deep__card .kolm-deep__head { border-bottom-color: rgba(230,233,238,0.08); }
 
-/* W846: receipt JSON inline strip — give devs a real artifact preview
-   above the next scroll fold, not just a file-list visual. */
+
 .kolm-receipt-strip {
   margin: 26px 0 0 0;
   display: grid;
@@ -2858,9 +2728,7 @@ h3.fr-h3, .fr-h3, h3.ks-h3, .ks-h3 {
 [data-theme="dark"] .kolm-receipt-strip h4 { color: #e6e9ee; }
 [data-theme="dark"] .kolm-receipt-strip p { color: #c1c7cf; }
 
-/* W846: signpost banner — pinned reassurance band that sits between hero
-   and arch-band. One line. "Open source. Self-host or use kolm.ai cloud.
-   No vendor lock-in." Honest scope. */
+
 .ks-signpost {
   display: flex;
   align-items: center;
@@ -2883,15 +2751,7 @@ h3.fr-h3, .fr-h3, h3.ks-h3, .ks-h3 {
 [data-theme="dark"] .ks-signpost { border-color: rgba(238, 241, 245,0.10); color: var(--ink-3, #9e978b); }
 [data-theme="dark"] .ks-signpost b { color: var(--ink-1, #e6e9ee); }
 
-/* ============================================================
-   W850 GRID BACKDROP — restored cool-slate dot grid per user
-   mandate "i like the color scheme we had before edits with the
-   greys and the grid background". No PNG, no extra HTTP request.
-   ::before paints surface + faint corner vignette; ::after paints
-   the dot grid via CSS radial-gradient (no SVG noise). Both light
-   and dark. Pure decoration under html so it can never intercept
-   pointer events. Respects prefers-reduced-transparency.
-   ============================================================ */
+
 
 html {
   position: relative;
