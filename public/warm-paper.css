@@ -1440,12 +1440,19 @@ pre code {
   font-variant-numeric: tabular-nums;
 }
 
-/* 24i. Reveal stagger - each fr-reveal child eases up on enter */
+/* 24i. Reveal stagger - progressive enhancement: visible by default,
+   JS adds .fr-reveal--prep to hide-then-animate. Prevents invisible content
+   when JS / IntersectionObserver doesn't fire (no-JS, prefers-reduced-motion,
+   Playwright animations:disabled, slow networks). */
 .fr-reveal {
-  opacity: 0;
-  transform: translateY(6px);
+  opacity: 1;
+  transform: none;
   transition: opacity 480ms cubic-bezier(0.2, 0.7, 0.2, 1),
               transform 480ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.fr-reveal.fr-reveal--prep:not(.is-visible):not([data-visible="true"]) {
+  opacity: 0;
+  transform: translateY(6px);
 }
 .fr-reveal.is-visible,
 .fr-reveal[data-visible="true"] {
@@ -1453,7 +1460,8 @@ pre code {
   transform: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .fr-reveal {
+  .fr-reveal,
+  .fr-reveal.fr-reveal--prep {
     opacity: 1;
     transform: none;
     transition: none;

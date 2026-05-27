@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,initial-scale=1">
+<title>kolm &mdash; 90-second product demo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1920px; height: 1080px;
+    background: #0e1116; color: #e6edf3;
+    font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+    overflow: hidden;
+  }
+  body { position: relative; }
+
+  /* ====== STAGES (full-screen overlays that cross-fade) ====== */
+  .stage {
+    position: absolute; inset: 0;
+    opacity: 0; transition: opacity 600ms ease;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .stage.on { opacity: 1; }
+
+  /* ====== TITLE / CLOSING CARDS ====== */
+  .card {
+    text-align: center;
+  }
+  .card .logo {
+    font-size: 192px; font-weight: 600; letter-spacing: -0.04em;
+    color: #e6edf3;
+    text-shadow: 0 0 80px rgba(184, 188, 196, 0.35);
+    line-height: 1;
+  }
+  .card .tagline {
+    font-size: 28px; color: #8b949e; margin-top: 28px;
+    letter-spacing: 0.02em;
+  }
+  .card .accent-line {
+    width: 120px; height: 2px; background: #b8bcc4;
+    margin: 40px auto 0; opacity: 0.5;
+  }
+  .card .cta {
+    font-size: 36px; color: #b8bcc4; margin-top: 40px;
+    font-weight: 500;
+  }
+  .card .meta {
+    font-size: 18px; color: #6e7681; margin-top: 16px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ====== TERMINAL ====== */
+  .terminal-wrap {
+    width: 1400px;
+    background: #161b22;
+    border-radius: 16px;
+    border: 1px solid #30363d;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+    overflow: hidden;
+  }
+  .terminal-chrome {
+    display: flex; align-items: center; gap: 8px;
+    padding: 18px 24px;
+    background: #1c2128;
+    border-bottom: 1px solid #30363d;
+  }
+  .dot { width: 14px; height: 14px; border-radius: 50%; }
+  .dot.red { background: #ff5f57; }
+  .dot.yellow { background: #febc2e; }
+  .dot.green { background: #28c840; }
+  .terminal-title {
+    margin-left: 24px; color: #6e7681; font-size: 16px;
+  }
+  .terminal-body {
+    padding: 36px 40px;
+    font-size: 22px; line-height: 1.7;
+    min-height: 700px; max-height: 850px;
+    overflow: hidden;
+  }
+  .prompt { color: #b8bcc4; }
+  .command { color: #e6edf3; }
+  .comment { color: #6e7681; font-style: italic; }
+  .success { color: #3fb950; }
+  .accent { color: #79c0ff; }
+  .output { color: #8b949e; }
+  .warn { color: #d29922; }
+  .cursor {
+    display: inline-block; width: 12px; height: 24px;
+    background: #b8bcc4; margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: blink 1s steps(2, end) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ====== SECTION BADGE ====== */
+  .section-badge {
+    position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
+    padding: 12px 28px;
+    background: rgba(184, 188, 196, 0.08);
+    border: 1px solid rgba(184, 188, 196, 0.3);
+    border-radius: 999px;
+    font-size: 18px; color: #b8bcc4;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    opacity: 0; transition: opacity 400ms ease;
+  }
+  .section-badge.on { opacity: 1; }
+
+  /* ====== CAPTION ====== */
+  .caption {
+    position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
+    font-size: 24px; color: rgba(232, 237, 243, 0.7);
+    text-align: center; letter-spacing: 0.02em;
+    opacity: 0; transition: opacity 400ms ease;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 300;
+  }
+  .caption.on { opacity: 1; }
+
+  /* ====== TITLE CARD ANIMATIONS ====== */
+  .title-card .logo {
+    animation: fadeUp 800ms cubic-bezier(0.2, 0.8, 0.2, 1) 200ms backwards;
+  }
+  .title-card .tagline {
+    animation: fadeUp 800ms cubic-bezier(0.2, 0.8, 0.2, 1) 600ms backwards;
+  }
+  .title-card .accent-line {
+    animation: expandLine 600ms cubic-bezier(0.2, 0.8, 0.2, 1) 1000ms backwards;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes expandLine {
+    from { width: 0; opacity: 0; }
+    to { width: 120px; opacity: 0.5; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TITLE STAGE -->
+<div class="stage title-card" id="stage-title">
+  <div class="card">
+    <div class="logo">kolm</div>
+    <div class="tagline">Compile your AI workload into a model you own.</div>
+    <div class="accent-line"></div>
+  </div>
+</div>
+
+<!-- TERMINAL STAGE -->
+<div class="stage" id="stage-terminal">
+  <div class="section-badge" id="badge"></div>
+  <div class="terminal-wrap">
+    <div class="terminal-chrome">
+      <div class="dot red"></div>
+      <div class="dot yellow"></div>
+      <div class="dot green"></div>
+      <div class="terminal-title">~/projects/support &mdash; zsh</div>
+    </div>
+    <div class="terminal-body" id="terminal"></div>
+  </div>
+  <div class="caption" id="caption"></div>
+</div>
+
+<!-- CLOSING STAGE -->
+<div class="stage" id="stage-closing">
+  <div class="card">
+    <div class="logo" style="font-size: 144px;">kolm.ai</div>
+    <div class="accent-line" style="margin-top: 32px;"></div>
+    <div class="cta">Start free &rarr;</div>
+    <div class="meta">Apache-2.0 &middot; Self-hostable &middot; No credit card</div>
+  </div>
+</div>
+
+<script>
+const stages = {
+  title:    document.getElementById('stage-title'),
+  terminal: document.getElementById('stage-terminal'),
+  closing:  document.getElementById('stage-closing'),
+};
+const terminal = document.getElementById('terminal');
+const badge    = document.getElementById('badge');
+const caption  = document.getElementById('caption');
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function showStage(name) {
+  for (const [k, el] of Object.entries(stages)) {
+    el.classList.toggle('on', k === name);
+  }
+}
+function setBadge(text) {
+  badge.textContent = text;
+  badge.classList.toggle('on', !!text);
+}
+function setCaption(text) {
+  caption.textContent = text;
+  caption.classList.toggle('on', !!text);
+}
+function clearTerminal() {
+  terminal.innerHTML = '';
+}
+
+async function typeLine(text, cls, charDelay = 22) {
+  const span = document.createElement('div');
+  span.className = cls || '';
+  terminal.appendChild(span);
+  for (const ch of text) {
+    span.textContent += ch;
+    await sleep(charDelay);
+  }
+}
+
+function addLine(text, cls) {
+  const div = document.createElement('div');
+  div.className = cls || '';
+  div.textContent = text;
+  terminal.appendChild(div);
+}
+
+function addHTML(html) {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  terminal.appendChild(div);
+}
+
+async function prompt(cmd) {
+  const wrap = document.createElement('div');
+  const p = document.createElement('span');
+  p.className = 'prompt';
+  p.textContent = '$ ';
+  wrap.appendChild(p);
+  const c = document.createElement('span');
+  c.className = 'command';
+  wrap.appendChild(c);
+  terminal.appendChild(wrap);
+  for (const ch of cmd) {
+    c.textContent += ch;
+    await sleep(24);
+  }
+}
+
+async function animateProgress(label, finalScore, durationMs = 1500) {
+  const div = document.createElement('div');
+  div.className = 'output';
+  terminal.appendChild(div);
+  const steps = 40;
+  const stepMs = durationMs / steps;
+  for (let i = 0; i <= steps; i++) {
+    const pct = Math.round((i / steps) * 100);
+    const filled = Math.floor((i / steps) * 30);
+    const bar = '█'.repeat(filled) + '░'.repeat(30 - filled);
+    div.textContent = `  ${label}  [${bar}] ${pct}%`;
+    await sleep(stepMs);
+  }
+  div.innerHTML = `  <span class="success">${label}  &check; K-Score ${finalScore}</span>`;
+}
+
+// ====== DEMO SEQUENCE ======
+async function runDemo() {
+  // 0:00 - 0:03  TITLE
+  showStage('title');
+  await sleep(3000);
+
+  // 0:03 - 0:25  SECTION 1: ROUTE
+  showStage('terminal');
+  setBadge('01 · Route & Capture');
+  setCaption('One URL. Every provider. Signed receipts.');
+  await sleep(400);
+
+  await typeLine('# Point your existing OpenAI client at kolm. One env var.', 'comment');
+  await sleep(800);
+
+  await prompt('export OPENAI_BASE_URL=https://api.kolm.ai/v1');
+  await sleep(800);
+  await prompt('export KOLM_API_KEY=ks_demo_4b7bc3b...');
+  await sleep(600);
+  addLine('');
+
+  await typeLine('# Every call routes through kolm. Same response. Signed receipt per call.', 'comment');
+  await sleep(800);
+
+  await prompt('kolm call --model claude-sonnet-4-6 \\\n      "What ICD-10 code applies to type 2 diabetes?"');
+  await sleep(900);
+
+  addLine('  "Type 2 diabetes mellitus maps to ICD-10-CM code E11.9', 'output');
+  addLine('   (without complications) or E11.65 (with hyperglycemia)."', 'output');
+  await sleep(500);
+  addHTML('  <span class="success">&check;</span> <span class="output">receipt: rcpt_01KZBX...DCW3 · Ed25519 · verified</span>');
+  addHTML('  <span class="success">&check;</span> <span class="output">captured: cap_7f3a... · PHI redacted · 1.24s · $0.0021</span>');
+  await sleep(2500);
+
+  await prompt('kolm verify rcpt_01KZBX...DCW3 --offline');
+  await sleep(600);
+  addHTML('  <span class="accent">cid:</span>      bafkreih... (sha-256)');
+  addHTML('  <span class="accent">signer:</span>   tenant_f33c240034c5');
+  addHTML('  <span class="accent">policy:</span>   redact-phi-v3 · region-lock-us-east');
+  addHTML('  <span class="success">&check; verified — no trust in our service required</span>');
+  await sleep(3500);
+
+  // 0:25 - 0:55  SECTION 2: COMPILE
+  clearTerminal();
+  setBadge('02 · Distill & Compile');
+  setCaption('Teacher Council blends Claude + GPT-4 + DeepSeek.');
+  await sleep(400);
+
+  await typeLine('# After capturing traffic, compile it into a model you own.', 'comment');
+  await typeLine('# One command. Trinity teacher council. Frozen eval gate.', 'comment');
+  await sleep(800);
+
+  await prompt('kolm compile --namespace support \\\n      --teachers claude,gpt4,deepseek \\\n      --target gguf-q4km');
+  await sleep(800);
+
+  addLine('  Capturing 41,802 events from namespace support ...', 'output');
+  await sleep(700);
+  addHTML('  <span class="success">&check;</span> <span class="output">410 council pairs after dedup + frozen-eval holdout</span>');
+  await sleep(600);
+
+  await animateProgress('Pass 1 · format learning ', '0.94', 1400);
+  await animateProgress('Pass 2 · reasoning chain ', '0.91', 1500);
+  await animateProgress('Pass 3 · edge cases     ', '0.91', 1300);
+  await sleep(400);
+
+  addLine('  Quantizing: INT4 NF4 + double-quant ...', 'output');
+  await sleep(900);
+  addHTML('  <span class="success">&check;</span> <span class="output">support.kolm · 5.2 GB · Ed25519-signed · K-Score 0.91</span>');
+  await sleep(1500);
+
+  await prompt('kolm inspect support.kolm --passport');
+  await sleep(700);
+  addHTML('  <span class="accent">artifact:</span>  support.kolm · gguf-q4km · 5.2 GB');
+  addHTML('  <span class="accent">teachers:</span>  claude-sonnet-4-6, gpt-4o, deepseek-v3');
+  addHTML('  <span class="accent">student:</span>   qwen2.5-7b-instruct');
+  addHTML('  <span class="accent">eval:</span>      asks-1Q 96.5% · judge-on-policy 100% · n=57');
+  addHTML('  <span class="accent">license:</span>   Apache-2.0 (compatible with all teachers)');
+  addHTML('  <span class="success">&check; portable · reproducible · yours</span>');
+  await sleep(4500);
+
+  // 0:55 - 1:20  SECTION 3: RUN
+  clearTerminal();
+  setBadge('03 · Run & Verify');
+  setCaption('Your hardware. $0 per token. Verify offline.');
+  await sleep(400);
+
+  await typeLine('# Serve it locally. Same OpenAI API. $0 per token.', 'comment');
+  await sleep(800);
+
+  await prompt('kolm serve support.kolm --port 8080');
+  await sleep(800);
+  addHTML('  <span class="success">&check;</span> <span class="output">loaded · llama.cpp · RTX 5090 · shard 10× KV-cache</span>');
+  addHTML('  <span class="success">&check;</span> <span class="output">serving on http://localhost:8080  (warm-up 1.8s)</span>');
+  await sleep(1800);
+
+  await prompt('curl localhost:8080/v1/chat/completions \\\n      -d \'{"messages":[{"role":"user","content":"How do I reset my password?"}]}\'');
+  await sleep(900);
+  addLine('  "To reset your password, go to Settings > Security >', 'output');
+  addLine('   Reset Password. You will receive a verification email."', 'output');
+  await sleep(500);
+  addHTML('  <span class="success">&check;</span> <span class="output">45.2 tok/s · 824 ms · <span class="accent">$0.00</span> · your hardware</span>');
+  await sleep(3000);
+
+  await prompt('kolm savings --vs claude-sonnet-4-6 --monthly');
+  await sleep(700);
+  addHTML('  <span class="accent">monthly volume:</span>  1.2M tokens');
+  addHTML('  <span class="accent">via claude:</span>      $4,140.00 / mo');
+  addHTML('  <span class="accent">via kolm local:</span>  $0.00 / mo (+ $14.20 GPU hours)');
+  addHTML('  <span class="success">&check; savings: $4,125.80 / mo · 100% sovereignty</span>');
+  await sleep(4500);
+
+  // 1:20 - 1:30  CLOSING
+  showStage('closing');
+  await sleep(10000);
+
+  // signal "done" to the recorder
+  document.body.setAttribute('data-demo-done', '1');
+}
+
+// auto-start
+runDemo();
+</script>
+</body>
+</html>
