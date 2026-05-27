@@ -222,9 +222,12 @@
 }
 
 body {
- background: #0a0c10 !important;
+ background: #f3f5f7 !important;
  background-image: none !important;
  color: var(--fg) !important;
+}
+[data-theme="dark"] body {
+ background: #0a0c10 !important;
 }
 
 .bg-stage {
@@ -238,9 +241,12 @@ body {
 }
 
 .bg-stage::after {
+ background: transparent !important;
+ background-size: auto !important;
+}
+[data-theme="dark"] .bg-stage::after {
  background:
  linear-gradient(180deg, rgba(8,9,11,0) 0%, rgba(8,9,11,.6) 70%, rgba(8,9,11,.9) 100%) !important;
- background-size: auto !important;
 }
 
 .aurora,
@@ -260,18 +266,27 @@ body {
 header.site,
 .site-header,
 nav.top {
- background: rgba(11,13,16,.92) !important;
+ background: rgba(246,247,249,.92) !important;
  border-bottom: 1px solid var(--line) !important;
  backdrop-filter: saturate(160%) blur(16px) !important;
  -webkit-backdrop-filter: saturate(160%) blur(16px) !important;
 }
+[data-theme="dark"] header.site,
+[data-theme="dark"] .site-header,
+[data-theme="dark"] nav.top {
+ background: rgba(11,13,16,.92) !important;
+}
 @media (max-width: 720px) {
  /* Phones often render backdrop-filter inconsistently; lock to opaque so menu
- * never bleeds the page below into the bar. Fixes the "bleedy white on gray"
- * complaint on iOS/Android Chrome. */
+ * never bleeds the page below into the bar. */
  header.site,
  .site-header,
  nav.top {
+ background: rgba(246,247,249,.97) !important;
+ }
+ [data-theme="dark"] header.site,
+ [data-theme="dark"] .site-header,
+ [data-theme="dark"] nav.top {
  background: rgba(8,10,13,.97) !important;
  }
 }
@@ -3922,8 +3937,8 @@ footer.site-footer .footer-tag {
 [data-theme=light] footer.site-footer .footer-tag { border-top-color: rgba(0,0,0,0.04) !important; }
 
 /* MOVE 4 . Body pure tonal background, sitewide. */
-body { background: var(--bg-1, #0a0c10) !important; }
-[data-theme=light] body { background: #f6f3eb !important; }
+body { background: #f3f5f7 !important; }
+[data-theme="dark"] body { background: #0a0c10 !important; }
 
 /* MOVE 5 . Cards radius + interior unified. */
 .compile-anatomy .ca-step,

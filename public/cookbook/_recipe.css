@@ -1,10 +1,16 @@
 :root {
+ --bg: #f3f5f7; --bg-elev: #ffffff; --bg-card: #ffffff;
+ --line: rgba(17,17,17,0.06); --line-strong: rgba(17,17,17,0.12);
+ --ink: #111111; --ink-mute: #56606c; --ink-faint: #a8b3c2;
+ --accent: #1f2937; --accent-strong: #111111; --good: #2d5a37; --bad: #7f2121;
+ --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+ --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+}
+[data-theme="dark"] {
  --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
  --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
  --ink: #e6e9ee; --ink-mute: #aab0b8; --ink-faint: #6a727c;
  --accent: #e6e9ee; --accent-strong: #e6e9ee; --good: #e6e9ee; --bad: #ff6b91;
- --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
- --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }

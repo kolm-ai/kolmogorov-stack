@@ -10,26 +10,25 @@
      (document.head || document.documentElement).appendChild(s);
    } catch (e) {}
  })();
- // Warm Paper theme bootstrap: pages now default to LIGHT (data-theme
- // attribute absent on <html>). Honor a previously-saved 'dark' choice
- // before first paint to avoid a flash. If no saved choice, fall back to
- // prefers-color-scheme. This runs once per page load, as early as
- // possible in the nav.js IIFE.
+ // Theme bootstrap: default to LIGHT cool slate on every page. Dark mode
+ // is opt-in only via the theme toggle (writes localStorage 'kolm-theme').
+ // We do NOT honor prefers-color-scheme — too many users have OS-level dark
+ // mode and were getting a black site they never asked for. Saved preference
+ // wins; absent that, force light explicitly so [data-theme="light"] rules
+ // override any stray dark-mode styling.
  (function bootstrapTheme() {
  try {
  var saved = null;
  try { saved = localStorage.getItem('kolm-theme'); } catch (e) {}
  var html = document.documentElement;
- if (saved === 'dark' || saved === 'light') {
- html.setAttribute('data-theme', saved);
- } else if (!html.hasAttribute('data-theme')) {
- try {
- if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+ if (saved === 'dark') {
  html.setAttribute('data-theme', 'dark');
+ } else {
+ html.setAttribute('data-theme', 'light');
  }
- } catch (e) {}
+ } catch (e) {
+ try { document.documentElement.setAttribute('data-theme', 'light'); } catch (_) {}
  }
- } catch (e) {}
  })();
 
  function installSurfaceGuard() {

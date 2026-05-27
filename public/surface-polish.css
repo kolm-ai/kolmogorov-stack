@@ -5,6 +5,20 @@
  */
 
 :root {
+ color-scheme: light;
+ --kolm-focus: #1f2937;
+ --kolm-focus-ink: #ffffff;
+ --kolm-code-bg: rgba(17, 17, 17, 0.04);
+ --kolm-code-border: rgba(17, 17, 17, 0.10);
+ --kolm-line: rgba(17, 17, 17, 0.10);
+ --kolm-ink: #111111;
+ --kolm-muted: #56606c;
+ --kolm-faint: #a8b3c2;
+ --kolm-panel: rgba(17, 17, 17, 0.03);
+ --kolm-panel-hover: rgba(17, 17, 17, 0.05);
+ --kolm-ease: cubic-bezier(.2, .8, .2, 1);
+}
+[data-theme="dark"] {
  color-scheme: dark;
  --kolm-focus: #9cffb8;
  --kolm-focus-ink: #06120b;
@@ -16,7 +30,6 @@
  --kolm-faint: #6a727c;
  --kolm-panel: rgba(255, 255, 255, 0.035);
  --kolm-panel-hover: rgba(255, 255, 255, 0.055);
- --kolm-ease: cubic-bezier(.2, .8, .2, 1);
 }
 
 *,

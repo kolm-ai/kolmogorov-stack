@@ -136,16 +136,22 @@
   (function(){
     try {
       var t = localStorage.getItem('kolm-theme');
-      if (t === 'light') {
-        document.documentElement.setAttribute('data-theme','light');
-        document.documentElement.style.background = '#f3f5f7';
-        document.documentElement.style.colorScheme = 'light';
-      } else if (t === 'dark') {
+      if (t === 'dark') {
         document.documentElement.setAttribute('data-theme','dark');
         document.documentElement.style.background = '#0e1116';
         document.documentElement.style.colorScheme = 'dark';
+      } else {
+        document.documentElement.setAttribute('data-theme','light');
+        document.documentElement.style.background = '#f3f5f7';
+        document.documentElement.style.colorScheme = 'light';
       }
-    } catch(e){}
+    } catch(e){
+      try {
+        document.documentElement.setAttribute('data-theme','light');
+        document.documentElement.style.background = '#f3f5f7';
+        document.documentElement.style.colorScheme = 'light';
+      } catch(_){}
+    }
   })();
 </script>
 <script defer src="/nav.js"></script>
