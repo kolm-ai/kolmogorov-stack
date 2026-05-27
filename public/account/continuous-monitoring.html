@@ -63,7 +63,7 @@ code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg
 .pill.red{color:var(--bad);border-color:var(--bad);background:var(--bad-soft)}
 .pill.unknown{color:var(--unk);border-color:var(--unk);background:var(--unk-soft)}
 @media(max-width:720px){.ctrl-row{grid-template-columns:1fr 1fr;gap:6px}.ctrl-row .id{grid-column:1/2}.ctrl-row .status{grid-column:2/3;text-align:right}.ctrl-row .name{grid-column:1/-1}.ctrl-row .signal{grid-column:1/-1}}
-.honesty{border:1px solid var(--accent);border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
+.caveat-callout{border:1px solid var(--accent);border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
 table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
 th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
 th{color:var(--ink);font-weight:500}
@@ -127,8 +127,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   <div class="summary-card unknown"><span class="label">Unknown</span><span class="count">15</span></div>
 </div>
 
-<div class="honesty">
-  <p><strong>Unknown is never green.</strong> When the underlying signal source is offline, the snapshot returns <code>status: 'unknown'</code> with <code>current_value: null</code> for that control. A dashboard that fabricates a green pill to hide a probe outage is worse than no dashboard. The honesty invariant is enforced inside <code>src/continuous-monitoring.js</code> <code>_grade()</code> &mdash; null in, unknown out, always.</p>
+<div class="caveat-callout">
+  <p><strong>Unknown is never green.</strong> When the underlying signal source is offline, the snapshot returns <code>status: 'unknown'</code> with <code>current_value: null</code> for that control. A dashboard that fabricates a green pill to hide a probe outage is worse than no dashboard. The invariant is enforced inside <code>src/continuous-monitoring.js</code> <code>_grade()</code> &mdash; null in, unknown out, always.</p>
 </div>
 
 <h2 id="controls" data-w767="monitoring-controls">Fifteen controls under continuous monitoring</h2>

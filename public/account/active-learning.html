@@ -139,7 +139,7 @@
 
 <div class="kpanel" id="w815-coverage-gaps">
   <h2>Coverage-gap heatmap (W815 active-learning loop)</h2>
-  <p class="pdesc">Topic clusters under-represented relative to the corpus median, ranked by <code>gap_score = shortfall × demand_proxy</code>. A red cell means the cluster is far below median; size encodes recommended capture count. Needs at least <code>30</code> captures in the namespace; below that we report an honest <code>insufficient_captures_for_coverage</code> envelope.</p>
+  <p class="pdesc">Topic clusters under-represented relative to the corpus median, ranked by <code>gap_score = shortfall × demand_proxy</code>. A red cell means the cluster is far below median; size encodes recommended capture count. Needs at least <code>30</code> captures in the namespace; below that we report an explicit <code>insufficient_captures_for_coverage</code> envelope.</p>
   <div class="sparkbox" id="w815-heatmap-box">
     <svg id="w815-heatmap" viewBox="0 0 600 100" preserveAspectRatio="none" aria-label="Coverage gap heatmap"></svg>
     <div class="legend">
@@ -163,7 +163,7 @@
 </div>
 
 <div class="note">
-  <strong>Honesty note.</strong> Continuous distillation scaffold arrives in W775. Today: queue + manual <code>kolm distill --resume-from-active-queue</code>. The <code>kolm pipeline run --continuous</code> scaffold in this build runs a single foreground loop and emits one structured JSON line per iteration; it does NOT fork a background daemon. Active-learning gap detection (W815) is wired into the W720 self-improvement loop via <code>active_learning_gap:true</code> event-store rows.
+  <strong>Caveat.</strong> Continuous distillation scaffold arrives in W775. Today: queue + manual <code>kolm distill --resume-from-active-queue</code>. The <code>kolm pipeline run --continuous</code> scaffold in this build runs a single foreground loop and emits one structured JSON line per iteration; it does NOT fork a background daemon. Active-learning gap detection (W815) is wired into the W720 self-improvement loop via <code>active_learning_gap:true</code> event-store rows.
 </div>
 
 </section>

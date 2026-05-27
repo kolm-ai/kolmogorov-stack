@@ -79,8 +79,8 @@
     margin: 6px 0;
   }
 
-  .sla-honesty { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-top: 20px; }
-  .sla-honesty b { color: var(--ink-1); font-weight: 580; }
+  .sla-caveat { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-top: 20px; }
+  .sla-caveat b { color: var(--ink-1); font-weight: 580; }
 
   .sla-crosslink { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
 </style>
@@ -142,7 +142,7 @@
     <div class="fr-section__head">
       <span class="fr-eyebrow">Per-surface uptime</span>
       <h2 class="fr-h2">30-day and 90-day rolling.</h2>
-      <p class="fr-lede">Each surface is measured independently. The aggregate "kolm.ai uptime" is the worst-of-surfaces, not an average. That is the honest read for a tenant whose workload depends on a single surface being up.</p>
+      <p class="fr-lede">Each surface is measured independently. The aggregate "kolm.ai uptime" is the worst-of-surfaces, not an average. That is the accurate read for a tenant whose workload depends on a single surface being up.</p>
     </div>
     <table class="sla-table" aria-label="Per-surface uptime over last 30 and 90 days">
       <thead>
@@ -323,8 +323,8 @@
         </tr>
       </tbody>
     </table>
-    <div class="sla-honesty">
-      <b>Honest contract.</b> Numbers on this page are sourced live from the <code>/v1/sla/series</code> route. Until the backend is wired, every field renders as <code>--</code> with a "Connecting..." pill. We do not seed the page with marketing-grade rounding while waiting for real data. If you need contractual SLA evidence today, email rodneyyesep@gmail.com and we will ship a signed report from the underlying event store.
+    <div class="sla-caveat">
+      <b>Operating contract.</b> Numbers on this page are sourced live from the <code>/v1/sla/series</code> route. Until the backend is wired, every field renders as <code>--</code> with a "Connecting..." pill. We do not seed the page with marketing-grade rounding while waiting for real data. If you need contractual SLA evidence today, email rodneyyesep@gmail.com and we will ship a signed report from the underlying event store.
     </div>
     <div class="sla-crosslink">
       <a href="/pricing" class="fr-btn fr-btn--mint">See plans</a>
@@ -394,7 +394,7 @@
 /* W788-3 live binding — fetch /v1/sla/dashboard and replace the placeholder
    `--` cells with real percentile and uptime numbers. When the endpoint
    returns status='no_samples_in_window' for a surface, we keep `--` and
-   render an honest pill instead of zeros. */
+   render an explicit pill instead of zeros. */
 (function () {
   'use strict';
   var WINDOW_HOURS = 24 * 30; /* 30-day default to match the page copy */
@@ -457,7 +457,7 @@
           if (lat.status === 'ok' || up.status === 'ok') anyRealData = true;
           /* Uptime table has two columns: 30d, 90d — we only have one window
              so we render the same uptime in both cells until rolling-window
-             rollups land. Honest "--" stays when there are no samples. */
+             rollups land. Explicit "--" stays when there are no samples. */
           findSurfaceRows(label).forEach(function (row, idx) {
             if (idx === 0) bindRow(row, lat, up, ['uptime', 'uptime']);
             else if (idx === 1) bindRow(row, lat, up, ['p50', 'p95', 'p99']);

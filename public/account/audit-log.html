@@ -318,7 +318,7 @@ kolm audit --verify
  document.getElementById("btn-export-jsonl").addEventListener("click",function(){ exportAs('jsonl','jsonl'); });
 
  // W862 — hash-chain integrity check. Calls /v1/account/audit-log/verify
- // (admin only); honest envelope on either side so the operator sees if
+ // (admin only); explicit envelope on either side so the operator sees if
  // tampering broke the chain.
  document.getElementById("btn-verify").addEventListener("click",function(){
  if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}

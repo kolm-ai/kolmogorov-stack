@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Your sustainability dashboard &middot; Open-source AI workbench &middot;</title>
-<meta name="description" content="Your sustainability dashboard. CO2 estimate per recent distillation run, cumulative CO2 saved running .kolm locally vs round-tripping to cloud. Honest estimates plus or minus 30 percent error.">
+<meta name="description" content="Your sustainability dashboard. CO2 estimate per recent distillation run, cumulative CO2 saved running .kolm locally vs round-tripping to cloud. Estimates with plus or minus 30 percent error labeled on every value.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://kolm.ai/account/sustainability">
@@ -24,8 +24,8 @@
   th,td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line-1); vertical-align: top; color: var(--ink-2); }
   th { color: var(--ink-1); font-weight: 500; }
   code { font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size: 13px; background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; }
-  .su-honest { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-size: 13.5px; color: var(--ink-2); line-height: 1.55; margin: 20px 0; max-width: 76ch; }
-  .su-honest b { color: var(--ink-1); font-weight: 580; }
+  .su-caveat { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-size: 13.5px; color: var(--ink-2); line-height: 1.55; margin: 20px 0; max-width: 76ch; }
+  .su-caveat b { color: var(--ink-1); font-weight: 580; }
   .su-chart { width: 100%; max-width: 760px; height: 220px; background: #06080a; border: 1px solid var(--line-1); border-radius: 8px; margin: 16px 0 24px; display: flex; align-items: center; justify-content: center; color: var(--ink-3); font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size: 12.5px; }
   .su-empty { padding: 22px; border: 1px solid var(--line-1); border-radius: 8px; background: rgba(255,255,255,0.015); max-width: 760px; }
   .su-empty b { color: var(--ink-1); font-weight: 580; }
@@ -87,8 +87,8 @@
       <b>No data yet.</b> The dashboard fills in once your tenant has at least one distillation run and one inference receipt. Until then, this page is a layout preview only.
     </div>
 
-    <div class="su-honest">
-      <b>Honesty pill.</b> CO2 numbers on this page are estimates with roughly plus or minus 30 percent error. They do not include embedded carbon from GPU manufacturing, datacenter PUE variance, or grid-intensity intraday swings. We will <b>never</b> claim "carbon-neutral" without published offset receipts. Treat these numbers as directional.
+    <div class="su-caveat">
+      <b>Caveat pill.</b> CO2 numbers on this page are estimates with roughly plus or minus 30 percent error. They do not include embedded carbon from GPU manufacturing, datacenter PUE variance, or grid-intensity intraday swings. We will <b>never</b> claim "carbon-neutral" without published offset receipts. Treat these numbers as directional.
     </div>
 
     <p class="muted" style="margin-top:48px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:var(--ink-3)">See also: <a href="/sustainability">public sustainability page</a> &middot; <a href="/docs/hardware">hardware compatibility</a> &middot; <a href="/account/captures">your captures</a></p>

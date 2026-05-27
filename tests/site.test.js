@@ -399,7 +399,7 @@ test('node SDK package presents the current kolm brand', () => {
 
   assert.equal(pkg.name, '@kolm/kolm-sdk');
   assert.equal(pkg.homepage, 'https://kolm.ai');
-  assert.equal(pkg.repository.url, 'git+https://github.com/sneaky-hippo/kolm-stack.git');
+  assert.equal(pkg.repository.url, 'git+https://github.com/kolm-ai/kolm-stack.git');
   assert.match(readme, /KOLM_API_KEY/);
   assert.match(esm, /const DEFAULT_BASE = "https:\/\/kolm\.ai"/);
   assert.match(cjs, /const DEFAULT_BASE = "https:\/\/kolm\.ai"/);

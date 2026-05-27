@@ -16199,8 +16199,8 @@ res.json({
     // Skip paths with an extension (let express.static handle those).
     if (/\.[a-z0-9]+$/i.test(p)) return next();
     const rel = p.slice(1);
-    // Conservative: lowercase, digits, dashes, underscores, slashes only.
-    if (!/^[a-z0-9][a-z0-9_\-\/]*$/i.test(rel)) return next();
+    // Conservative: lowercase, digits, dashes, underscores, slashes, dots only.
+    if (!/^[a-z0-9][a-z0-9_\-\/\.]*$/i.test(rel)) return next();
     const direct = path.join(STATIC_PUBLIC_DIR, rel + '.html');
     if (fs.existsSync(direct)) {
       res.set('Cache-Control', 'public, max-age=60, must-revalidate');

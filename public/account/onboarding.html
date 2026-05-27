@@ -120,7 +120,7 @@
     document.getElementById("ob-progress-path").textContent=pathLabel;
     document.getElementById("ob-progress-step").textContent="Step "+saved.step+" of "+(saved.total||3);
     var btn=document.getElementById("ob-progress-resume");
-    btn.href="/account/onboarding/path-"+saved.path+".html";
+    btn.setAttribute("href","/account/onboarding/path-"+saved.path+".html");
     bar.hidden=false;
     var card=document.querySelector('[data-path="'+saved.path+'"]');
     if(card)card.setAttribute("data-resume","true");

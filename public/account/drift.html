@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Drift detection &middot; Open-source AI workbench &middot; kolm.ai">
-<meta property="og:description" content="KL divergence + fallback-rate lift. Honest envelopes. Auto-remediate is opt-in (never silent).">
+<meta property="og:description" content="KL divergence + fallback-rate lift. Explicit envelopes. Auto-remediate is opt-in (never silent).">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/account/drift">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -58,7 +58,7 @@ td code{font-size:12px}
 .metric-card .label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin-bottom:6px}
 .metric-card .value{font-size:22px;font-weight:600;font-family:var(--mono);color:var(--ink)}
 .metric-card .delta{font-size:11.5px;color:var(--ink-mute);margin-top:4px}
-.honest-note{font-size:12.5px;color:var(--ink-faint);font-style:italic;border-left:2px solid var(--accent);padding:4px 10px;margin:14px 0;max-width:780px}
+.caveat-note{font-size:12.5px;color:var(--ink-faint);font-style:italic;border-left:2px solid var(--accent);padding:4px 10px;margin:14px 0;max-width:780px}
 </style>
 </head>
 <body class="kolm-account-surface">
@@ -82,8 +82,8 @@ td code{font-size:12px}
 <h1 data-w813="h1">Drift detection &mdash; your traffic vs your training distribution.</h1>
 <p class="lede" data-w813="lede">Compare live embeddings against the training distribution via KL divergence; pair with fallback-rate lift; act when either crosses threshold. Auto-remediate is opt-in.</p>
 
-<div class="honest-note" data-w813="honest-note">
-W813 honesty contract: <code>drift_detected</code> is never true without crossing a numeric threshold. Auto-remediate never fires unless <code>auto_remediate_drift</code> is explicitly enabled per namespace AND <code>dry_run:false</code> is sent on the trigger call. Stamped <code>w813-v1</code>.
+<div class="caveat-note" data-w813="caveat-note">
+W813 operating contract: <code>drift_detected</code> is never true without crossing a numeric threshold. Auto-remediate never fires unless <code>auto_remediate_drift</code> is explicitly enabled per namespace AND <code>dry_run:false</code> is sent on the trigger call. Stamped <code>w813-v1</code>.
 </div>
 
 <section data-w813="current-status">
@@ -174,7 +174,7 @@ kolm drift auto-remediate --namespace prod --live</pre>
 </section>
 
 <footer style="margin-top:48px;padding-top:24px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">
-  <span data-w813="version-stamp">w813-v1</span> &middot; tenant-fenced via W411 defense-in-depth &middot; honest envelopes &middot; auto-remediate opt-in
+  <span data-w813="version-stamp">w813-v1</span> &middot; tenant-fenced via W411 defense-in-depth &middot; explicit envelopes &middot; auto-remediate opt-in
 </footer>
 
 </div>

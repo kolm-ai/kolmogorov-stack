@@ -309,7 +309,7 @@ function load(){
   window.kfetch("/v1/captures/analytics?namespace="+encodeURIComponent(ns)).then(function(j){
     render(j);
   }).catch(function(err){
-    // Honest empty-state: HTTP surface may be offline; fall through to CLI.
+    // Explicit empty-state: HTTP surface may be offline; fall through to CLI.
     status.textContent="HTTP unavailable";status.className="pill warn";
     document.getElementById("empty-state").hidden=false;
     document.getElementById("empty-state").innerHTML="<strong>The /v1/captures/analytics HTTP surface is unavailable from this browser.</strong> The W811 capture-analytics code is shipped; use the CLI to inspect locally: <code>kolm captures analytics --namespace "+window.kesc(ns)+" --json</code>.";

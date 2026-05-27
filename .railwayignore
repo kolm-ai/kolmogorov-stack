@@ -1,0 +1,67 @@
+# Exclude local dev artifacts that don't belong in the Railway container.
+# The /app/data volume on Railway is mounted separately at runtime.
+
+# Local data + reports + tmp (gigabytes; never needed in prod container)
+# Root-anchored so src/data/ (real source) is NOT excluded.
+/data/
+/reports/
+/tmp/
+/tmp-screenshots/
+/screenshots/
+/audit-shots/
+/_audit/
+/qa/
+/md-links-test/
+/archive/
+/.cache/
+
+# Model weights + ML artifacts (multi-GB binaries)
+**/*.gguf
+**/*.bin
+**/*.safetensors
+**/*.pth
+**/*.pt
+**/*.onnx
+**/*.ckpt
+**/*.h5
+
+# Build inputs that get regenerated server-side
+node_modules/
+.git/
+
+# SDK source trees (Rust/C/Python build artifacts can be huge)
+sdk/rust/target/
+sdk/c/build/
+sdk/python/dist/
+sdk/python/build/
+sdk/python/*.egg-info/
+sdk/python/.venv/
+**/__pycache__/
+
+# Trinity + distill training scratch
+trinity-*/
+distill-*/
+
+# Local dev configs
+.env
+.env.*
+*.local
+.DS_Store
+Thumbs.db
+
+# Test fixtures over 10 MB are not needed for runtime
+**/*.traineddata
+
+# Local Python virtualenvs
+.venv/
+venv/
+env/
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Large simulation outputs (regenerated on demand)
+sim-*.json

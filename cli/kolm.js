@@ -1532,7 +1532,7 @@ FORMATS
   safetensors  HuggingFace weight format       (u64 header_size + JSON)
   onnx         ONNX Runtime                    (protobuf; partial parse only)
 
-HONESTY CONTRACT
+OPERATING CONTRACT
   Imports are flagged not_kolm_compiled:true. There is no K-Score, no holdout,
   no production-ready verdict on a wrapped artifact. To claim a model is
   kolm-compiled, run it through "kolm distill" again.
@@ -1657,7 +1657,7 @@ EXAMPLES
   kolm keys fingerprint
   kolm keys export --kms=vault --json
 
-HONEST SCOPE
+SCOPE
   kolm emits the rotation receipt; the customer's KMS hook applies the wrapping. kolm
   does not call AWS KMS, GCP KMS, Azure Key Vault, or HashiCorp Vault APIs. The wrap
   intent block records the native API command + import format the customer wrapper
@@ -2672,7 +2672,7 @@ NOTES
   Each input line is parsed shell-style and dispatched via withErrorContext; an
   error in one verb does not exit the REPL. Use Ctrl+C to abort gracefully.
 
-HONEST SCOPE
+SCOPE
   No history persistence, no completion, no fancy keybindings. The single goal
   is "give me a prompt where I can run several kolm verbs without paying the
   cold-start cost each time". Add features in later waves only after demand.
@@ -3081,7 +3081,7 @@ USAGE
 ROLES
   coordinator, inference, capture, mentor, auditor
 
-HONEST SCOPE
+SCOPE
   kolm emits the plan + manifests. We do not maintain the cluster, fork a daemon,
   or attempt to be a service mesh. The plan is the contract; tenant owns the runtime
   (tailnet | kubectl | helm | terraform).
@@ -3209,7 +3209,7 @@ EXAMPLES
   kolm seeds bootstrap --task phi-redactor
   kolm seeds list
 
-HONESTY
+CAVEATS
   We never hallucinate data from thin air. Every strategy requires seeds as input
   (except bootstrap which ships public-domain data). Provenance is recorded on every
   row. Determinism: same --from + --strategy + --seed-rng -> identical bytes.
@@ -3947,7 +3947,7 @@ FLAGS
   --output-tokens <N>  completion-side tokens for the recorded call
   --json               JSON envelope for scripts
 
-HONESTY
+CAVEATS
   status='no_baseline_started'   no baseline window started yet
   status='insufficient_baseline' <7 days observed; refuses to claim phony savings
   regression=true                post > baseline; fee_usd is 0 (no fee on regressions)
@@ -4253,7 +4253,7 @@ VERBS
   tick       GET  /v1/autopilot/tick     - force one tick (cron normally drives)
   disable    alias for stop
 
-HONEST DISCLOSURE
+DISCLOSURE
   System-tray integration (taskbar widget, OS-level start-on-boot) is on the
   roadmap but not yet shipped. The current daemon is cron-driven via
   /v1/autopilot/tick; the CLI 'tick' verb is the manual-trigger equivalent.
@@ -4306,7 +4306,7 @@ function paintWelcomeBanner() {
   const t = termSupports();
   const dim   = t.color ? '\x1b[2m'  : '';
   const reset = t.color ? '\x1b[0m'  : '';
-  const accent= t.color ? '\x1b[38;5;208m' : ''; // burnt sienna
+  const accent= t.color ? '\x1b[38;5;117m' : ''; // cool slate blue
   const ink   = t.color ? '\x1b[38;5;250m' : '';
   if (t.unicode) {
     console.log('');
@@ -5446,7 +5446,7 @@ async function cmdBuild(args) {
     console.log('');
     console.log('** PLACEHOLDER SIGNAL: this K-score was computed on starter rows scaffolded');
     console.log('   by kolm seeds new, not your real data. Replace the rows in seeds.jsonl');
-    console.log('   with YOUR examples (>= 5) and rebuild for an honest K-score.');
+    console.log('   with YOUR examples (>= 5) and rebuild for a representative K-score.');
   }
   console.log('');
   console.log('iterate:');
@@ -9006,7 +9006,7 @@ async function cmdCompile(args) {
     const total = state.evals_summary.total;
     const auto = state.evals_summary.auto_synthesized || 0;
     if (total > 0 && auto === total) {
-      console.log('  evals:     ' + total + ' auto-synthesized (no user examples) — add real cases for honest signal');
+      console.log('  evals:     ' + total + ' auto-synthesized (no user examples) — add real cases for representative signal');
     } else if (auto > 0) {
       console.log('  evals:     ' + (total - auto) + ' user / ' + auto + ' auto-synthesized');
     } else if (total > 0) {
@@ -13858,7 +13858,7 @@ async function cmdSdk(args) {
     console.log('');
     console.log('details:  kolm sdk show <lang>         e.g. kolm sdk show python');
     console.log('check:    kolm sdk doctor              # local wiring report');
-    console.log('honesty:  registry packages may not be published yet; source path always works from a repo checkout.');
+    console.log('caveat:   registry packages may not be published yet; source path always works from a repo checkout.');
     return;
   }
   if (sub === 'show') {
@@ -14714,7 +14714,7 @@ async function cmdKeys(args) {
       console.log('  new_key_path:        ' + receipt.wrap_intent.new_key_path);
     }
     console.log('');
-    console.log('honest scope: kolm emits rotation receipt; customer KMS hook applies the wrapping.');
+    console.log('scope: kolm emits rotation receipt; customer KMS hook applies the wrapping.');
     return;
   }
 
@@ -14774,7 +14774,7 @@ async function cmdKeys(args) {
     console.log('  api_status:    ' + intent.api_status);
     console.log('  fingerprint:   ' + (intent.key_fingerprint ? intent.key_fingerprint.slice(0, 32) : '(no active key)'));
     console.log('');
-    console.log('honest scope: kolm emits export intent; customer KMS hook performs the import.');
+    console.log('scope: kolm emits export intent; customer KMS hook performs the import.');
     return;
   }
 
@@ -25289,7 +25289,7 @@ async function cmdNl(args) {
     console.log('      to opt into the hosted-LLM drafter. See `kolm nl --help`.');
     console.log('');
   }
-  console.log('honest scope: scaffolds are starting points. refine + verify before compile.');
+  console.log('scope: scaffolds are starting points. refine + verify before compile.');
 }
 
 async function cmdMoeCompose(args) {
@@ -32607,7 +32607,7 @@ async function cmdModels(args) {
             const verify = R.verifyEntry(entry);
             if (jsonOut) { console.log(JSON.stringify({ entry, verify }, null, 2)); return; }
             console.log(`added candidate: ${entry.id}`);
-            console.log(`  verified: ${verify.ok ? 'YES' : 'NO (amber-pill — call kolm models verify before ship)'}`);
+            console.log(`  verified: ${verify.ok ? 'YES' : 'NO (caution — call kolm models verify before ship)'}`);
             if (!verify.ok) console.log(`  reason: ${verify.reason}`);
             return;
         }
@@ -33722,7 +33722,7 @@ async function cmdSeedsNew(args) {
   console.log(`  3. verify:  kolm verify ${artHint}`);
   console.log(`  4. (more)   kolm seeds generate --from ${path.basename(outPath)} --count 200   # expand via deterministic mutation`);
   console.log('');
-  console.log('honesty: these starter rows are PLACEHOLDERS, not training data.');
+  console.log('caveat: these starter rows are PLACEHOLDERS, not training data.');
   console.log('         replace them with examples you actually want the model to learn from.');
   console.log('         K-score against placeholders means nothing; K-score against your real');
   console.log('         examples is the only number that should drive ship/no-ship decisions.');
@@ -33799,7 +33799,7 @@ async function cmdSeedsNewFromBrief(args) {
     console.log(`  k-score gate:    ${result.gate_suggestion}`);
     console.log(`  network status:  ${result.network_status}`);
     console.log('');
-    console.log('honest scope: these are CANDIDATES, not labels. Run `kolm seeds split`');
+    console.log('scope: these are CANDIDATES, not labels. Run `kolm seeds split`');
     console.log('              + `kolm eval` to score against your K-score gate before');
     console.log('              promoting any row to ground truth (scaffold, not ship).');
     return;
@@ -33844,7 +33844,7 @@ async function cmdSeedsNewFromBrief(args) {
     console.log('      re-run without --air-gap to use the networked path.');
     console.log('');
   }
-  console.log('honest scope: these are CANDIDATES, not labels — this is a scaffold,');
+  console.log('scope: these are CANDIDATES, not labels — this is a scaffold,');
   console.log('              not a finished dataset. Run `kolm seeds split` + `kolm eval`');
   console.log('              to score against your K-score gate before promotion.');
 }
@@ -33983,7 +33983,7 @@ async function cmdSeedsGenerate(args) {
   console.log(`  provenance tags written: yes (every row has source + from_seed)`);
   console.log(`  determinism: --seed-rng ${rngSeed} (reproducible)`);
   console.log('');
-  console.log('honest reporting: when you train with this file, K-score reports will');
+  console.log('reporting: when you train with this file, K-score reports will');
   console.log("distinguish 'K on user seeds' vs 'K on " + (strategy === 'local-llm' ? 'local-llm' : 'templated') + " rows'. Templated rows");
   console.log('test for robustness, not ground truth.');
 }
@@ -36453,7 +36453,7 @@ async function cmdCarbon(args) {
       '                       --provider <p> --tokens <n> [--model-size <c>]\n' +
       '  kolm carbon gpus     # list known GPU SKUs + published TDP\n' +
       '  kolm carbon regions  # list known grid regions + carbon intensity\n\n' +
-      'HONESTY\n' +
+      'CAVEATS\n' +
       '  Every output carries methodology=public-research-estimate. These are\n' +
       '  MODELED estimates from public vendor TDP and IEA grid intensities, NEVER\n' +
       '  measured. +/- 30 percent error bar applies to every number.\n');
@@ -36508,7 +36508,7 @@ async function cmdCarbon(args) {
       console.log('  kWh            : ' + out.kwh);
       console.log('  kg CO2         : ' + out.kg_co2);
       console.log('  methodology    : ' + out.methodology + ' (' + out.methodology_version + ')');
-      console.log('  honest_caveat  : ' + out.honest_caveat + ' (+/- ' + out.error_bar_pct + '%)');
+      console.log('  caveat         : ' + out.honest_caveat + ' (+/- ' + out.error_bar_pct + '%)');
       return;
     }
     if (gpu && hours != null) {
@@ -36562,7 +36562,7 @@ async function cmdCarbon(args) {
     console.log('Saved CO2    : ' + savings.saved_kg_co2 + ' kg (local_is_greener=' + savings.local_is_greener + ')');
     console.log('');
     console.log('methodology: ' + savings.methodology + ' (' + savings.methodology_version + ')');
-    console.log('honest_caveat: ' + savings.honest_caveat + ' (+/- ' + savings.error_bar_pct + '%)');
+    console.log('caveat: ' + savings.honest_caveat + ' (+/- ' + savings.error_bar_pct + '%)');
     console.log('note: ' + savings.methodology_note);
     return;
   }
@@ -41159,7 +41159,7 @@ async function cmdW735ToolPatterns(args) {
   // ---- unknown subcommand ----
   console.error('usage: kolm tool <patterns|acceptance|status>');
   console.error('  patterns    — JSON top-N most-called tools per namespace');
-  console.error('  acceptance  — local_handling_rate + Wilson CI (honest null when sample_size <100)');
+  console.error('  acceptance  — local_handling_rate + Wilson CI (explicit null when sample_size <100)');
   console.error('  status      — TOOL_USE_VERSION + TOOL_RUNTIME_VERSION + local capture-row count');
   process.exit(EXIT.BAD_ARGS);
 }
@@ -42033,7 +42033,7 @@ async function cmdW740Import(args) {
   // ──────────────────────── unknown subcommand ───────────────────────────────
   console.error('usage: kolm import <inspect|wrap|doctor> [args]');
   console.error('  inspect <file>                  - print parsed-metadata envelope (gguf|safetensors|onnx)');
-  console.error('  wrap    <file> [--out path]     - emit not_kolm_compiled manifest (W740-2 honesty lock)');
+  console.error('  wrap    <file> [--out path]     - emit not_kolm_compiled manifest (W740-2 provenance lock)');
   console.error('  doctor                          - check python3 + supported formats');
   console.error('');
   console.error('symmetric export: kolm export <artifact.kolm> --backend gguf|onnx|safetensors|coreml|mlx|executorch|tensorrt');
@@ -44017,7 +44017,7 @@ async function cmdW751Verticals(args) {
     console.error('  list                       — table of all 5 verticals');
     console.error('  show <id>                  — detail card for one vertical');
     console.error('  register-stubs             — bulk-register marketplace stubs (owner-only)');
-    console.error('  fingerprint <id>           — honest W757-blocked envelope');
+    console.error('  fingerprint <id>           — explicit W757-blocked envelope');
     process.exit(EXIT.BAD_ARGS);
     return;
   }
@@ -44150,7 +44150,7 @@ async function cmdW751Verticals(args) {
   console.error('  list                       — table of all 5 verticals');
   console.error('  show <id>                  — detail card for one vertical');
   console.error('  register-stubs             — bulk-register marketplace stubs (owner-only)');
-  console.error('  fingerprint <id>           — honest W757-blocked envelope');
+  console.error('  fingerprint <id>           — explicit W757-blocked envelope');
   process.exit(EXIT.BAD_ARGS);
 }
 
@@ -45480,7 +45480,7 @@ async function cmdW814Bench(args) {
     console.log('                             [--task-cluster <c>] [--artifact <id>] [--limit 100] [--json]');
     console.log('  kolm bench speculative doctor [--json]');
     console.log('');
-    console.log('HONESTY CONTRACT');
+    console.log('OPERATING CONTRACT');
     console.log('  - missing artifact     → ok:false, error:"artifact_not_found"');
     console.log('  - missing teacher      → ok:false, error:"no_teacher_configured"');
     console.log('                            set KOLM_W814_TEACHER_CMD to a JSON array');
@@ -48294,7 +48294,7 @@ async function cmdW767Cert(args) {
     console.error('  soc2-checklist                     — print the SOC 2 Type II readiness checklist');
     console.error('  iso27001-controls                  — print the ISO 27001:2022 Annex A controls map');
     console.error('  audit-retention-status             — print this tenant\'s audit-retention policy');
-    console.error('  audit-retention-set <days> --confirm  — request a tenant retention override (honest awaiting_operator_hook)');
+    console.error('  audit-retention-set <days> --confirm  — request a tenant retention override (returns awaiting_operator_hook)');
     console.error('  monitoring-snapshot                — print the continuous-monitoring snapshot');
     process.exit(EXIT.BAD_ARGS);
     return;
@@ -48944,8 +48944,8 @@ async function cmdW830FederatedConsortium(args) {
   function _usage() {
     console.error('usage: kolm federated consortium <verify-mia|audit-epsilon|status> [args]');
     console.error('  verify-mia    --contrib-id <id>         - POST /v1/federated/consortium/verify-mia');
-    console.error('  audit-epsilon --epsilon <float>         - honest awaiting_operator_hook (no hosted route)');
-    console.error('  status        [--consortium-id ID]      - honest awaiting_operator_hook (stitch members+budget+aggregations)');
+    console.error('  audit-epsilon --epsilon <float>         - returns awaiting_operator_hook (no hosted route)');
+    console.error('  status        [--consortium-id ID]      - returns awaiting_operator_hook (stitch members+budget+aggregations)');
   }
 
   if (sub === '' || sub === 'help' || sub === '--help' || sub === '-h') {

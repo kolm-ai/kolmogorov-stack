@@ -443,9 +443,9 @@ app.get('*', (req, res, next) => {
   if (req.method !== 'GET') return next();
   const p = req.path;
   if (!p || p === '/' || p.startsWith('/v1') || p === '/health' || p === '/ready' || p.includes('..')) return next();
-  if (/\.[a-z0-9]+$/i.test(p)) return next();
+  if (/\.[a-z][a-z0-9]*$/i.test(p)) return next();
   const rel = p.slice(1);
-  if (!/^[a-z0-9][a-z0-9_\-\/]*$/i.test(rel)) return next();
+  if (!/^[a-z0-9][a-z0-9_\-\/\.]*$/i.test(rel)) return next();
   const direct = path.join(__dirname, 'public', rel + '.html');
   if (fs.existsSync(direct)) {
     res.set('Cache-Control', 'public, max-age=60, must-revalidate');

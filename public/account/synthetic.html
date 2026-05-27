@@ -121,7 +121,7 @@
 <section class="acct-content">
 <p class="brand-eyebrow">Open-source AI workbench</p>
 <h1>Synthetic augmentation.</h1>
-<p class="lede">Frontier AI on your own infrastructure. Coverage report + Gini coefficient, rare-bucket up-weighting, and teacher-driven synthetic gap-fill &mdash; every generated row honestly tagged <code>kolm_synthetic:true</code>. Built by <code>src/synthetic-augment.js</code> (W749). See <a href="/docs/synthetic">/docs/synthetic</a> for the math, honesty contract, and spend warning.</p>
+<p class="lede">Frontier AI on your own infrastructure. Coverage report + Gini coefficient, rare-bucket up-weighting, and teacher-driven synthetic gap-fill &mdash; every generated row explicitly tagged <code>kolm_synthetic:true</code>. Built by <code>src/synthetic-augment.js</code> (W749). See <a href="/docs/synthetic">/docs/synthetic</a> for the math, operating contract, and spend warning.</p>
 
 <div class="toolbar">
   <input id="syn-ns" type="text" placeholder="namespace (default)" style="min-width:280px;flex:1">
@@ -130,7 +130,7 @@
     <option value="keyword">strategy: keyword</option>
   </select>
   <button class="btn primary" id="syn-refresh" type="button">Refresh coverage</button>
-  <a class="btn" href="/docs/synthetic">Math &amp; honesty &rarr;</a>
+  <a class="btn" href="/docs/synthetic">Math &amp; caveats &rarr;</a>
 </div>
 
 <div id="syn-header" hidden>

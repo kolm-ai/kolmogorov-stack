@@ -269,7 +269,7 @@ function load(){
     ingest(list);
     status.textContent=list.length+" staged";status.className="pill ok";
   }).catch(function(err){
-    // Honest empty-state: HTTP surface unavailable in this browser session;
+    // Explicit empty-state: HTTP surface unavailable in this browser session;
     // fall through to the CLI path.
     status.textContent="HTTP unavailable";status.className="pill warn";
     rows.innerHTML="";

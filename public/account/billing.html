@@ -240,7 +240,7 @@ window.kfetch("/v1/billing/usage").catch(function(){
       if(d.status==="insufficient_baseline"){
         setPill("warming up","warn");
         meta.textContent="Baseline started "+(d.baseline_start||"")+" - "+(d.elapsed_days||0)+"/"+(d.min_baseline_days||7)+" days.";
-        showMessage("<strong>Honesty check:</strong> "+window.kesc(d.message||"")+" We refuse to claim phony savings on thin data.");
+        showMessage("<strong>Heads-up:</strong> "+window.kesc(d.message||"")+" We refuse to claim phony savings on thin data.");
         savedV.textContent="$0.00"; feeV.textContent="$0.00"; netV.textContent="$0.00";
         savedD.textContent="-"; netD.textContent="-";
         return;

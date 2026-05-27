@@ -105,7 +105,7 @@
 <!-- W745 — Artifact-keyed cluster dashboard (bridges to W741 diagnostic) -->
 <div class="kpanel" id="w745-panel" style="border-color:rgba(17, 17, 17,0.25)">
   <h2>Artifact-keyed clusters <span style="font-family:var(--mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em;margin-left:8px">W745</span></h2>
-  <p class="pdesc">Paste an <code>artifact_cid</code> below. We call <code>/v1/failure-modes/&lt;cid&gt;</code> and render the top-regression panel plus the per-cluster K-Score table. Clustering is <code>heuristic_keyword_v1</code> &mdash; honest about the W757 fingerprinting placeholder. Each row links to the W741 diagnostic envelope at <code>/account/diagnose?cid=&lt;cid&gt;</code>.</p>
+  <p class="pdesc">Paste an <code>artifact_cid</code> below. We call <code>/v1/failure-modes/&lt;cid&gt;</code> and render the top-regression panel plus the per-cluster K-Score table. Clustering is <code>heuristic_keyword_v1</code> &mdash; explicitly labeled; W757 fingerprinting is still a placeholder. Each row links to the W741 diagnostic envelope at <code>/account/diagnose?cid=&lt;cid&gt;</code>.</p>
   <div class="toolbar">
     <input id="w745-cid" type="text" placeholder="artifact_cid (bafk...)" style="min-width:520px;flex:1">
     <button id="w745-run" class="btn" type="button">Run</button>
@@ -150,7 +150,7 @@
     </table>
   </div>
   <div id="w745-empty" class="empty">
-    <strong>Paste an artifact_cid above</strong> to run the W745 report. If the artifact has no bakeoff yet, the envelope returns the honest <code>no_bakeoff_results_yet</code> response with a hint to run <code>kolm bakeoff</code> first.
+    <strong>Paste an artifact_cid above</strong> to run the W745 report. If the artifact has no bakeoff yet, the envelope returns the explicit <code>no_bakeoff_results_yet</code> response with a hint to run <code>kolm bakeoff</code> first.
   </div>
   <div id="w745-error" class="empty" hidden style="border-color:#dc2626;color:#dc2626"><strong>Request failed.</strong> <span id="w745-errmsg"></span></div>
 </div>
@@ -210,7 +210,7 @@
 </div>
 
 <div class="note">
-  <strong>Honesty note.</strong> Clusters are a CHEAP heuristic (char-3-gram + length bucket + vendor class) — not a learned embedding. If you need finer-grained topics, run <code>workers/failure-clustering/</code> (W812 isolation pattern). Each top-regression cluster emits a <em>weakness signal</em> into the W720 self-improvement loop with <code>capture_candidate:true</code> + <code>weakness_signal:true</code> stamped on the canonical event.
+  <strong>Caveat.</strong> Clusters are a CHEAP heuristic (char-3-gram + length bucket + vendor class) — not a learned embedding. If you need finer-grained topics, run <code>workers/failure-clustering/</code> (W812 isolation pattern). Each top-regression cluster emits a <em>weakness signal</em> into the W720 self-improvement loop with <code>capture_candidate:true</code> + <code>weakness_signal:true</code> stamped on the canonical event.
 </div>
 
 </section>
