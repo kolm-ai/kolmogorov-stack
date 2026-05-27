@@ -212,8 +212,8 @@
     margin: 6px 0;
   }
 
-  .mk-honesty { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-top: 20px; }
-  .mk-honesty b { color: var(--ink-1); font-weight: 580; }
+  .mk-truthfulness { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-top: 20px; }
+  .mk-truthfulness b { color: var(--ink-1); font-weight: 580; }
 
   .mk-crosslink { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
 </style>
@@ -225,7 +225,6 @@
 </head>
 <body class="ks">
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
@@ -260,7 +259,7 @@
       <a href="#featured" class="fr-btn fr-btn--ghost">Browse listings</a>
     </div>
     <div class="meta-row">
-      <span class="mk-beta-pill">Listings load live from /v1/marketplace/listings. Empty store renders an honest empty-state.</span>
+      <span class="mk-beta-pill">Listings load live from /v1/marketplace/listings. Empty store renders an plain empty-state.</span>
     </div>
     <div class="meta-row" style="margin-top:12px">
       <span class="fr-status"><span class="fr-status__dot"></span>Publishers receive 70 percent of paid downloads</span>
@@ -415,7 +414,7 @@
 //
 // Calls GET /v1/marketplace/listings (the W825 route shipped in
 // src/marketplace-routes.js) and renders the rows. On an empty store we
-// render an honest empty-state instead of fabricated placeholder cards.
+// render an plain empty-state instead of fabricated placeholder cards.
 //
 // The filter sidebar enums are pulled from GET /v1/marketplace/facets so the
 // UI never goes out of sync with src/marketplace-w825.js W825_* constants.

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <title>OpenTelemetry semantic conventions &middot; kolm.ai</title>
-<meta name="description" content="Export kolm token-confidence, routing decisions, K-Score, and a queue/load/prefill/decode timeline into your OTel collector. Honest no-op when no tracer is registered.">
+<meta name="description" content="Export kolm token-confidence, routing decisions, K-Score, and a queue/load/prefill/decode timeline into your OTel collector. Plain no-op when no tracer is registered.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="OpenTelemetry semantic conventions &middot; kolm.ai">
@@ -103,7 +103,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / observability / opentelemetry</div>
 <h1>OpenTelemetry semantic conventions</h1>
-<p class="lede">kolm emits a stable set of <code>kolm.*</code> OpenTelemetry attributes and a four-phase inference span timeline (queue &rarr; load &rarr; prefill &rarr; decode) so token-confidence, routing decisions, and K-Score drift show up natively in Honeycomb, Grafana Tempo, Datadog, and Jaeger. The exporter version is pinned by <code>OTEL_W733_VERSION</code> (currently <code>w733-v1</code>). When no OTel tracer is registered, kolm is an honest no-op &mdash; it never blocks the request path on tracing.</p>
+<p class="lede">kolm emits a stable set of <code>kolm.*</code> OpenTelemetry attributes and a four-phase inference span timeline (queue &rarr; load &rarr; prefill &rarr; decode) so token-confidence, routing decisions, and K-Score drift show up natively in Honeycomb, Grafana Tempo, Datadog, and Jaeger. The exporter version is pinned by <code>OTEL_W733_VERSION</code> (currently <code>w733-v1</code>). When no OTel tracer is registered, kolm is an plain no-op &mdash; it never blocks the request path on tracing.</p>
 
 <h2 id="attributes">Attributes</h2>
 <p>Every kolm inference span carries a subset of the table below. Names are namespaced under <code>kolm.*</code> per the OTel semantic-conventions guidance for vendor-specific attributes. None of these collide with the public OTel <code>http.*</code> or <code>llm.*</code> namespaces.</p>
@@ -178,25 +178,13 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="exporter-setup">Exporter setup</h2>
 <p>kolm ships a kolm-native OTLP/HTTP exporter (no SDK dependency, ~200 LOC) that sends to an OTel collector. Enable it with two env vars:</p>
 
-<pre><code>export KOLM_OTEL=1
-export OTEL_EXPORTER_OTLP_ENDPOINT=https://otel-collector.example.com:4318
-# Optional auth headers (comma-separated key=value pairs).
-export OTEL_EXPORTER_OTLP_HEADERS="x-api-key=abc123,x-team=eval"
-# Optional service-name override (default 'kolm').
-export OTEL_SERVICE_NAME=kolm-prod
-# Optional extra resource attributes.
-export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=prod,service.version=2.11.0"
-</code></pre>
+<pre>CODE25</pre>
 
 <p>kolm also honors <code>@opentelemetry/api</code> if you install it for your own instrumentation &mdash; we don't bundle it, but if your process has a tracer registered via <code>trace.setGlobalTracerProvider(...)</code>, kolm uses it to emit the W733 attributes and timeline through your existing pipeline. The two paths coexist: install nothing extra and you get our native OTLP export; install <code>@opentelemetry/api</code> and you get both.</p>
 
 <p>Inspect the runtime state from the CLI:</p>
 
-<pre><code>kolm otel status
-# Prints {ok, version, otel_api_detected, tracer_registered, native_enabled}.
-kolm otel attributes
-# Prints the kolm.* attribute namespace as JSON for codegen / docs sync.
-</code></pre>
+<pre>CODE29</pre>
 
 <h2 id="privacy">Privacy note</h2>
 <div class="privacy">
@@ -205,7 +193,7 @@ kolm otel attributes
 
 <p>The same contract applies to capture content: kolm OTel spans carry the artifact CID and the routing decision, but never the raw prompt or response text. Capture-level inspection lives in <a href="/account/captures">/account/captures</a>, which is auth-gated and tenant-scoped &mdash; OTel is for telemetry, not for log replay.</p>
 
-<h2 id="honesty">Honesty contract</h2>
+<h2 id="honesty">No-silent-pass contract</h2>
 <ul>
   <li>If no tracer is registered (<code>globalThis.__OTEL_TRACER__</code> missing AND <code>@opentelemetry/api</code> not importable), <code>createInferenceSpans</code> and <code>setRoutingAttributes</code> are no-ops &mdash; they return <code>false</code>, never throw, and never block the request path.</li>
   <li><code>KOLM_OTEL=0</code> (the default) keeps the native OTLP exporter disabled. Setting it to <code>1</code> starts a 5-second flush loop that posts spans + metrics in OTLP/HTTP JSON to <code>OTEL_EXPORTER_OTLP_ENDPOINT</code>.</li>

@@ -111,40 +111,10 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p>The two first-party SDKs ship a <code>captureWithContext</code> helper. Both encode the retrieved array as base64 JSON onto the <code>kolm-retrieved-context</code> request header so structured chunks survive HTTP escaping.</p>
 
 <h3 id="python">Python</h3>
-<pre><code>from kolm.client import Kolm
-
-client = Kolm()  # picks up KOLM_KEY from env
-
-retrieved = [
-    {"source": "kolm.ai/docs/refunds", "text": "Refunds are issued within 30 days of purchase.", "score": 0.94},
-    {"source": "kolm.ai/docs/refunds#partial", "text": "Partial refunds for unused months.", "score": 0.81},
-]
-
-client.capture_with_context(
-    prompt="Can I get a refund after 45 days?",
-    retrieved=retrieved,
-    response="Refunds are issued within 30 days of purchase, so after 45 days a refund is not available.",
-    namespace="customer-support",
-)
-</code></pre>
+<pre>CODE6</pre>
 
 <h3 id="javascript">JavaScript / Node</h3>
-<pre><code>import { RecipeClient } from "@kolm/kolm-sdk";
-
-const client = new RecipeClient();
-
-const retrieved = [
-  { source: "kolm.ai/docs/refunds", text: "Refunds are issued within 30 days of purchase.", score: 0.94 },
-  { source: "kolm.ai/docs/refunds#partial", text: "Partial refunds for unused months.", score: 0.81 },
-];
-
-await client.captureWithContext({
-  prompt: "Can I get a refund after 45 days?",
-  retrieved,
-  response: "Refunds are issued within 30 days of purchase, so after 45 days a refund is not available.",
-  namespace: "customer-support",
-});
-</code></pre>
+<pre>CODE7</pre>
 
 <h2 id="header">Header format</h2>
 <p>The SDK helpers serialize <code>retrieved</code> as JSON and base64-encode it onto the <code>kolm-retrieved-context</code> request header. If you are calling the API from a custom client, the contract is:</p>
@@ -163,36 +133,18 @@ await client.captureWithContext({
 
 <p>Example raw payload before base64 encoding:</p>
 
-<pre><code>[
-  {"source": "kolm.ai/docs/refunds", "text": "Refunds are issued within 30 days.", "score": 0.94},
-  {"source": "kolm.ai/docs/refunds#partial", "text": "Partial refunds for unused months."}
-]
-</code></pre>
+<pre>CODE15</pre>
 
-<p>On a malformed header the server returns HTTP 400 with the honest envelope:</p>
+<p>On a malformed header the server returns HTTP 400 with the loud-fail envelope:</p>
 
-<pre><code>{
-  "ok": false,
-  "error": "invalid_retrieved_context_header",
-  "hint": "must be base64 JSON array of {source, text, score?}"
-}
-</code></pre>
+<pre>CODE16</pre>
 
 <p>Absence is <strong>not</strong> an error &mdash; non-RAG requests skip the header and the capture row stores <code>retrieved_context: null</code>. The training-data formatter falls through to the legacy <code>USER: ... ASSISTANT: ...</code> shape for those rows, so existing distill flows keep working untouched.</p>
 
 <h2 id="training-format">Training-data format</h2>
 <p>At distill time, <code>formatCaptureForTraining(capture)</code> emits one row per capture. When <code>retrieved_context</code> is present each chunk is rendered as a <code>&lt;RETRIEVED&gt;</code> block before the USER / ASSISTANT turn:</p>
 
-<pre><code>&lt;RETRIEVED source=kolm.ai/docs/refunds score=0.94&gt;
-Refunds are issued within 30 days of purchase.
-&lt;/RETRIEVED&gt;
-&lt;RETRIEVED source=kolm.ai/docs/refunds#partial score=0.81&gt;
-Partial refunds for unused months.
-&lt;/RETRIEVED&gt;
-
-USER: Can I get a refund after 45 days?
-ASSISTANT: Refunds are issued within 30 days of purchase, so after 45 days a refund is not available.
-</code></pre>
+<pre>CODE22</pre>
 
 <p>The student sees the retrieved chunks in the same shape at every training step, which teaches it to attend to whatever you place between the <code>&lt;RETRIEVED&gt;</code> tags at inference time. At serve time you wrap real retriever output in the same tags &mdash; the student generalises across new corpus versions because it learned the structural pattern, not the specific text.</p>
 
@@ -205,19 +157,19 @@ ASSISTANT: Refunds are issued within 30 days of purchase, so after 45 days a ref
     <tr><td><code>1.0</code></td><td>Every response token appears in the retrieved chunks &mdash; maximally grounded.</td></tr>
     <tr><td><code>0.5</code></td><td>Half the response tokens are grounded; the rest are model priors or hallucinations.</td></tr>
     <tr><td><code>0.0</code></td><td>No grounding &mdash; the response ignores the retrieved chunks entirely.</td></tr>
-    <tr><td><code>null</code></td><td>Honest absence. The captures had no retrieved_context, so the axis does not apply. Distinct from <code>0</code>.</td></tr>
+    <tr><td><code>null</code></td><td>Plain absence. The captures had no retrieved_context, so the axis does not apply. Distinct from <code>0</code>.</td></tr>
   </tbody>
 </table>
 
-<h3 id="bakeoff-honest">Honest limits</h3>
+<h3 id="bakeoff-honest">Plain limits</h3>
 <ul>
-  <li>This is a <strong>token-presence</strong> heuristic. It rewards "the response says words that appeared in the chunks" &mdash; not semantic agreement. A model that paraphrases honestly will score lower than one that quotes verbatim, even if the paraphrase is more faithful.</li>
+  <li>This is a <strong>token-presence</strong> heuristic. It rewards "the response says words that appeared in the chunks" &mdash; not semantic agreement. A model that paraphrases frankly will score lower than one that quotes verbatim, even if the paraphrase is more faithful.</li>
   <li>Token comparison is case-folded, punctuation-stripped, and drops tokens shorter than 3 characters so stop-words like <code>"a / an / of / to / the"</code> don't dominate the score.</li>
   <li>Semantic faithfulness (sentence-transformers cosine similarity) is on the roadmap and will be a sibling axis &mdash; not a replacement &mdash; so operators can read both signals.</li>
-  <li>Honest null when no call carried retrieved_context. The bakeoff display and recommendation logic distinguish <code>null</code> from <code>0</code> &mdash; null means "axis not applicable", not "model failed".</li>
+  <li>Plain null when no call carried retrieved_context. The bakeoff display and recommendation logic distinguish <code>null</code> from <code>0</code> &mdash; null means "axis not applicable", not "model failed".</li>
 </ul>
 
-<h2 id="honesty">Honesty contract</h2>
+<h2 id="honesty">No-silent-pass contract</h2>
 <ul>
   <li>Header absence is a no-op, never an error &mdash; non-RAG requests still capture cleanly.</li>
   <li>Malformed header returns HTTP 400 with <code>error:'invalid_retrieved_context_header'</code> so misconfigured callers fail loud.</li>

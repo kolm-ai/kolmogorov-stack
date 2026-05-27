@@ -139,13 +139,9 @@
   </div>
 </section>
 <h1>kolm fit</h1>
-<blockquote><p>Will it fit? Estimate the weight + KV-cache + total VRAM footprint of a model at a given quant target. Pure compute, no GPU touch &mdash; the honest answer before you queue the job.</p></blockquote>
+<blockquote><p>Will it fit? Estimate the weight + KV-cache + total VRAM footprint of a model at a given quant target. Pure compute, no GPU touch &mdash; the direct answer before you queue the job.</p></blockquote>
 <h2>Usage</h2>
-<pre><code>
-kolm fit --params-b &lt;N&gt; --quant &lt;target&gt; --vram-gb &lt;N&gt; [--context &lt;N&gt;] [--batch &lt;N&gt;]
-kolm fit --params-b &lt;N&gt; --pick-best --vram-gb &lt;N&gt;          # auto-pick the best target
-kolm fit --artifact &lt;path.kolm&gt; --quant &lt;target&gt; --vram-gb &lt;N&gt;  # infer params from artifact
-</code></pre>
+<pre>CODE2</pre>
 <h2>Flags</h2>
 <div class="table-wrap"><table>
 <thead>
@@ -165,36 +161,9 @@ kolm fit --artifact &lt;path.kolm&gt; --quant &lt;target&gt; --vram-gb &lt;N&gt;
 </table></div>
 <p>* <code>--quant</code> is required unless you pass <code>--pick-best</code>.</p>
 <h2>Response shape</h2>
-<pre><code>
-{
-  "ok":              true,
-  "quant":           "gguf-q4km",
-  "bytes_per_param": 4.0,
-  "est_weights_gb":  5.2,
-  "est_kv_gb":       3.4,
-  "est_total_gb":    8.6,
-  "headroom_gb":     +23.4,
-  "fits":            true,
-  "tight":           false
-}
-</code></pre>
+<pre>CODE23</pre>
 <h2>Examples</h2>
-<pre><code>
-# will a 7B fit at GGUF Q4_K_M on a 24 GB card?
-kolm fit --params-b 7 --quant gguf-q4km --vram-gb 24
-
-# auto-pick the best target for 7B on a 24 GB card.
-kolm fit --params-b 7 --vram-gb 24 --pick-best
-
-# infer params from an artifact, then pick the best target.
-kolm fit --artifact qwen-7b.kolm --vram-gb 24 --pick-best
-
-# longer context blows up the KV cache.
-kolm fit --params-b 7 --quant gguf-q4km --vram-gb 24 --context 32768
-
-# JSON output for CI.
-kolm fit --params-b 7 --quant gguf-q4km --vram-gb 24 --json | jq '.fits'
-</code></pre>
+<pre>CODE24</pre>
 <h2>Notes</h2>
 <p><code>kolm fit</code> is pure compute; it never touches a GPU. The numbers are estimates: real-world memory depends on framework overhead (vLLM vs llama.cpp vs TRT-LLM), activation memory, and CUDA kernel choice. The <code>tight</code> flag flips to <code>true</code> when headroom drops below 2 GB &mdash; you might fit on paper but you&rsquo;ll OOM the first time someone sends a long prompt.</p>
 <p><code>--pick-best</code> walks the canonical 19-target quality order (fp16 &rarr; gguf-iq2xs) and returns the first target that fits with comfortable headroom. The Account bench wizard at <a href="/account/bench">/account/bench</a> shows the full matrix and highlights the same row.</p>

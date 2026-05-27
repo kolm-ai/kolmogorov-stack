@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="K-Score calibration methodology &middot; kolm.ai">
-<meta property="og:description" content="Bradley-Terry over pairwise human prefs. Per-category calibration mapping. Honest by construction.">
+<meta property="og:description" content="Bradley-Terry over pairwise human prefs. Per-category calibration mapping. Plain by construction.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/k-score-calibration">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -104,7 +104,7 @@
         <div style="margin-top: var(--ks-5); padding-top: var(--ks-5); border-top: 1px solid var(--ks-line-1); display: flex; flex-wrap: wrap; gap: var(--ks-4); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-3);">
           <span><span style="color: var(--ks-accent);">Bradley-Terry.</span> Latent skill from pairwise prefs. Pure JS.</span>
           <span><span style="color: var(--ks-accent);">Per category.</span> Coding, writing, analysis, support. Never pooled silently.</span>
-          <span><span style="color: var(--ks-accent);">Honest gate.</span> Below 500 pairs in a category, we publish insufficient_data verbatim.</span>
+          <span><span style="color: var(--ks-accent);">Plain gate.</span> Below 500 pairs in a category, we publish insufficient_data verbatim.</span>
         </div>
       </div>
 
@@ -272,7 +272,7 @@ mapping_ci95(K)      = [expit(low * logit(K) + intercept),
 <section class="ks-section" id="contract">
   <div class="ks-wrap">
     <div class="ks-shead">
-      <span class="ks-eyebrow">Honest contract</span>
+      <span class="ks-eyebrow">Plain contract</span>
       <h2 class="ks-h2">What the envelope says, line by line.</h2>
       <p class="ks-lede">Calibration is a separate axis from the K-Score itself. Never silently substituted, never inflated, always typed.</p>
     </div>

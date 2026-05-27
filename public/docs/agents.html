@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <title>Agent / tool-use distillation &middot; kolm.ai</title>
-<meta name="description" content="Capture tool-use traces, teach the student when and how to call external tools, then run the distilled agent locally. Capture format, runtime adapter, and the honest 90 percent acceptance target.">
+<meta name="description" content="Capture tool-use traces, teach the student when and how to call external tools, then run the distilled agent locally. Capture format, runtime adapter, and the plain 90 percent acceptance target.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Agent / tool-use distillation &middot; kolm.ai">
@@ -60,7 +60,7 @@ td code{font-size:12px}
 .metric-card{border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:14px 0;background:var(--bg-elev)}
 .metric-card h3{margin:0 0 6px}
 .metric-card .meta{font-family:var(--mono);font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
-.honest-note{padding:14px 18px;border:1px solid var(--accent-soft);border-left:3px solid var(--accent);border-radius:8px;background:var(--accent-soft);color:var(--ink);margin:14px 0;max-width:780px;font-size:14px;line-height:1.6}
+.plain-note{padding:14px 18px;border:1px solid var(--accent-soft);border-left:3px solid var(--accent);border-radius:8px;background:var(--accent-soft);color:var(--ink);margin:14px 0;max-width:780px;font-size:14px;line-height:1.6}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
@@ -111,11 +111,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="capture">Capture format</h2>
 <p>At distill time, <code>formatToolUseCapture(capture)</code> emits one row per capture. When <code>tool_calls</code> is present, each call is rendered as a paired <code>ASSISTANT_TOOL_CALL</code> + <code>TOOL_RESULT</code> block before the final <code>ASSISTANT</code> line:</p>
 
-<pre><code>USER: What's the weather in San Francisco?
-ASSISTANT_TOOL_CALL: {"name":"get_weather","arguments":{"city":"SF"}}
-TOOL_RESULT: {"temp_f":62,"conditions":"foggy"}
-ASSISTANT: The weather in San Francisco is 62 degrees Fahrenheit and foggy.
-</code></pre>
+<pre>CODE15</pre>
 
 <p>When the capture has no <code>tool_calls</code>, the formatter falls through to the legacy <code>USER:</code> / <code>ASSISTANT:</code> format. This is the additive, non-breaking contract &mdash; non-agent captures keep looking exactly like W734 / pre-W735 rows. The student model can be fine-tuned on a mixed corpus (plain Q&amp;A + RAG + tool-use) without the formatter switching contracts mid-stream.</p>
 
@@ -124,29 +120,7 @@ ASSISTANT: The weather in San Francisco is 62 degrees Fahrenheit and foggy.
 <h2 id="runtime">Runtime adapter</h2>
 <p>The W735-3 scaffold ships <code>src/tool-runtime.js</code>. kolm.ai does <strong>not</strong> ship a built-in tool registry &mdash; the tenant registers their own tools with their own auth. This is a security and scope decision (we don't want to be the one who breaks your Stripe key by shipping a buggy adapter; you don't want to wait for us to add the SaaS API you actually need).</p>
 
-<pre><code>import { registerTool, executeToolCall } from 'kolm/tool-runtime';
-
-const tools = new Map();
-
-registerTool(tools, {
-  name: 'get_weather',
-  handler: async ({ arguments: args, auth_context }) =&gt; {
-    const r = await fetch(`https://api.weather.example/v1/current?city=${encodeURIComponent(args.city)}`, {
-      headers: { authorization: `Bearer ${auth_context.weather_api_key}` },
-    });
-    return await r.json();
-  },
-  auth_schema: { required: ['weather_api_key'] },
-});
-
-// At inference time, parse the student's response, then execute each call:
-const out = await executeToolCall({
-  tool_call: { name: 'get_weather', arguments: { city: 'SF' } },
-  tool_registry: tools,
-  auth_context: { weather_api_key: process.env.WEATHER_KEY },
-});
-// out =&gt; {ok: true, result: {temp_f: 62, conditions: 'foggy'}}
-</code></pre>
+<pre>CODE22</pre>
 
 <p>Every <code>executeToolCall</code> returns a discriminated-union envelope and never throws. Handler exceptions are caught and surfaced as <code>tool_threw</code>:</p>
 
@@ -161,29 +135,20 @@ const out = await executeToolCall({
   </tbody>
 </table>
 
-<h2 id="acceptance">Honest acceptance target</h2>
+<h2 id="acceptance">Plain acceptance target</h2>
 <div class="honest-note">
-The W735-4 spec target is <strong>"distilled agent handles 90% of tool-calling patterns locally"</strong>. We measure this honestly. When the observed sample size is &lt;100 captures, <code>local_handling_rate</code> is reported as <code>null</code> with <code>reason:'insufficient_signal_n&lt;100'</code> &mdash; we do <em>not</em> extrapolate from a tiny sample. Below 100 calls, any rate you compute is noise.
+The W735-4 spec target is <strong>"distilled agent handles 90% of tool-calling patterns locally"</strong>. We measure this frankly. When the observed sample size is &lt;100 captures, <code>local_handling_rate</code> is reported as <code>null</code> with <code>reason:'insufficient_signal_n&lt;100'</code> &mdash; we do <em>not</em> extrapolate from a tiny sample. Below 100 calls, any rate you compute is noise.
 </div>
 
 <p>The measurement function <code>accumulateAcceptanceMetrics</code> returns the local-handling rate plus a Wilson 95% confidence band when the sample size is large enough:</p>
 
-<pre><code>{
-  sample_size: 142,
-  n_handled_locally: 128,
-  n_escalated_to_teacher: 14,
-  target: 0.90,
-  local_handling_rate: 0.901,
-  honest_acceptance: 0.901,
-  confidence_band_95: { lo: 0.842, hi: 0.940 }
-}
-</code></pre>
+<pre>CODE38</pre>
 
 <table>
   <thead><tr><th>Value</th><th>Meaning</th></tr></thead>
   <tbody>
     <tr><td><code>local_handling_rate &ge; 0.90</code></td><td>The distilled agent met the W735-4 spec target on this sample.</td></tr>
-    <tr><td><code>local_handling_rate &lt; 0.90</code></td><td>Honest miss &mdash; do not ship as "agent-grade" yet. Capture more before re-measuring.</td></tr>
+    <tr><td><code>local_handling_rate &lt; 0.90</code></td><td>Plain miss &mdash; do not ship as "agent-grade" yet. Capture more before re-measuring.</td></tr>
     <tr><td><code>local_handling_rate: null</code></td><td>Sample size &lt;100. Insufficient signal. Keep capturing.</td></tr>
     <tr><td><code>confidence_band_95: null</code></td><td>Sample size &lt;30. The Wilson normal approximation isn't reliable yet.</td></tr>
   </tbody>
@@ -191,9 +156,7 @@ The W735-4 spec target is <strong>"distilled agent handles 90% of tool-calling p
 
 <p>You can run the local report at any time:</p>
 
-<pre><code>kolm tool acceptance --namespace customer-support
-kolm tool patterns   --namespace customer-support
-</code></pre>
+<pre>CODE43</pre>
 
 <h2 id="limitations">Limitations</h2>
 <ul>

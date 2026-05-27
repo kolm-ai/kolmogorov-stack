@@ -109,7 +109,7 @@
 
 <section class="sec-hero">
   <div class="ks-wrap">
-    <div class="eyebrow">Roadmap &middot; honest signal &middot; not a press release</div>
+    <div class="eyebrow">Roadmap &middot; plain signal &middot; not a press release</div>
     <h1>What we are <b>building next.</b></h1>
     <p class="lede">An engineer, an architect, or a procurement reviewer can read this page and decide whether to bet on kolm for a quarter that has not started yet. Items move between Now, Next, Later, and Researching as evidence arrives. We do not commit to dates we cannot keep, and we do not list anything in Now that does not already have an open pull request.</p>
     <div class="cta-row">
@@ -134,12 +134,12 @@
       <div class="card">
         <div class="row"><span class="tag">column</span><span class="st wip">Next</span></div>
         <h3>Next: this quarter</h3>
-        <p class="why">Scoped, sized, and ordered. The honest scope note on each card explains what shipping looks like. A card moves up to Now only after design review and a paired engineer commit.</p>
+        <p class="why">Scoped, sized, and ordered. The plain scope note on each card explains what shipping looks like. A card moves up to Now only after design review and a paired engineer commit.</p>
       </div>
       <div class="card">
         <div class="row"><span class="tag">column</span><span class="st wip">Later</span></div>
         <h3>Later: this year</h3>
-        <p class="why">Believed in. Not yet sized. The card lists the hardware, the regulatory dependency, or the upstream library that has to ship for the work to start. Honest signal, not a commitment.</p>
+        <p class="why">Believed in. Not yet sized. The card lists the hardware, the regulatory dependency, or the upstream library that has to ship for the work to start. Plain signal, not a commitment.</p>
       </div>
     </div>
     <div class="col-row" style="margin-top:var(--ks-3)">
@@ -174,7 +174,7 @@
         <dl>
           <dt>Why</dt><dd>Procurement at regulated payors will not move past pilot without Type II.</dd>
           <dt>Ships</dt><dd>Final Type II report under NDA, ETA Q4 2026.</dd>
-          <dt>Scope</dt><dd>Honest scope: observation only; pre-audit gap remediations land as separate waves.</dd>
+          <dt>Scope</dt><dd>Plain scope: observation only; pre-audit gap remediations land as separate waves.</dd>
         </dl>
       </div>
       <div class="card">
@@ -194,7 +194,7 @@
         <dl>
           <dt>Why</dt><dd>Federal procurement requires Moderate before a contract clock can start.</dd>
           <dt>Ships</dt><dd>Pilot evidence package, then an SSP draft.</dd>
-          <dt>Scope</dt><dd>Honest scope: pilot, not authorized. We will say so until the ATO is in hand.</dd>
+          <dt>Scope</dt><dd>Plain scope: pilot, not authorized. We will say so until the ATO is in hand.</dd>
         </dl>
       </div>
     </div>
@@ -221,7 +221,7 @@
         <h3>Apple Silicon MLX quantize matrix</h3>
         <p class="why">A second quantize matrix backed by MLX for the M-series GPU, parallel to the bitsandbytes matrix on x86 plus CUDA. The matrix lists the same four sizes (0.5B, 3B, 7B, 32B) with M-series wall-clock and tok/s numbers.</p>
         <dl>
-          <dt>Why</dt><dd>Engineers on Apple Silicon want the same honest matrix as RTX 5090 users.</dd>
+          <dt>Why</dt><dd>Engineers on Apple Silicon want the same plain matrix as RTX 5090 users.</dd>
           <dt>Ships</dt><dd>scripts/quantize-matrix-mlx.sh with output JSON.</dd>
           <dt>Scope</dt><dd>M2 Pro through M4 Max. M1 family on best-effort.</dd>
         </dl>
@@ -250,10 +250,10 @@
       </div>
       <div class="card">
         <div class="row"><span class="tag">distill</span><span class="st wip">Next</span></div>
-        <h3>Self-hosted teacher honest fallback</h3>
-        <p class="why">The distill loop already supports a teacher chain (Anthropic, OpenAI, your vLLM). This wave makes the fallback honest end to end: if a teacher returns a refusal or a malformed structured output, the row is annotated and skipped instead of poisoning the dataset.</p>
+        <h3>Self-hosted teacher plain fallback</h3>
+        <p class="why">The distill loop already supports a teacher chain (Anthropic, OpenAI, your vLLM). This wave makes the fallback plain end to end: if a teacher returns a refusal or a malformed structured output, the row is annotated and skipped instead of poisoning the dataset.</p>
         <dl>
-          <dt>Why</dt><dd>A bad teacher row poisons the student model in silence. The honest path is to skip and log.</dd>
+          <dt>Why</dt><dd>A bad teacher row poisons the student model in silence. The plain path is to skip and log.</dd>
           <dt>Ships</dt><dd>distill_skip_reason field in every row that did not survive teacher inference.</dd>
           <dt>Scope</dt><dd>Refusal, malformed structured output, rate-limit timeout.</dd>
         </dl>
@@ -284,7 +284,7 @@
         <dl>
           <dt>Why</dt><dd>An engineer with H100 access deserves the same one-line script as a 5090 owner.</dd>
           <dt>Blocked on</dt><dd>H100 reservation calendar.</dd>
-          <dt>Honest</dt><dd>We will not pre-announce a date.</dd>
+          <dt>Plain</dt><dd>We will not pre-announce a date.</dd>
         </dl>
       </div>
       <div class="card">
@@ -294,7 +294,7 @@
         <dl>
           <dt>Why</dt><dd>Smaller weight format means more model fits per dollar of GPU.</dd>
           <dt>Blocked on</dt><dd>Stable FP4 kernels in upstream inference engines.</dd>
-          <dt>Honest</dt><dd>No date until kernels are upstream.</dd>
+          <dt>Plain</dt><dd>No date until kernels are upstream.</dd>
         </dl>
       </div>
       <div class="card">
@@ -304,7 +304,7 @@
         <dl>
           <dt>Why</dt><dd>EU customers under GDPR want a tier without an SCC redline.</dd>
           <dt>Blocked on</dt><dd>EU-region observability stack parity.</dd>
-          <dt>Honest</dt><dd>No date until parity is in CI.</dd>
+          <dt>Plain</dt><dd>No date until parity is in CI.</dd>
         </dl>
       </div>
     </div>
@@ -316,7 +316,7 @@
         <dl>
           <dt>Why</dt><dd>A team paying for outcome should pay for outcome, not for input.</dd>
           <dt>Blocked on</dt><dd>Bake-off per-request budget below 50 ms.</dd>
-          <dt>Honest</dt><dd>The unit-economics math is not yet in our favor on small models.</dd>
+          <dt>Plain</dt><dd>The unit-economics math is not yet in our favor on small models.</dd>
         </dl>
       </div>
       <div class="card">
@@ -326,7 +326,7 @@
         <dl>
           <dt>Why</dt><dd>A developer wants a demo that works offline in a browser.</dd>
           <dt>Blocked on</dt><dd>Wasm SIMD performance ceiling.</dd>
-          <dt>Honest</dt><dd>Bigger models will not fit in a tab; this is the small-model path.</dd>
+          <dt>Plain</dt><dd>Bigger models will not fit in a tab; this is the small-model path.</dd>
         </dl>
       </div>
       <div class="card">
@@ -336,7 +336,7 @@
         <dl>
           <dt>Why</dt><dd>Defense and pharma teams want the enclave as a deployable, not as documentation.</dd>
           <dt>Blocked on</dt><dd>Stable measured-boot artifact for SNP and TDX in upstream cloud images.</dd>
-          <dt>Honest</dt><dd>Pilot-grade only until a cloud vendor ships a measured-boot SLA.</dd>
+          <dt>Plain</dt><dd>Pilot-grade only until a cloud vendor ships a measured-boot SLA.</dd>
         </dl>
       </div>
     </div>
@@ -363,7 +363,7 @@
         <p class="why">SpQR adds sparse outlier preservation on top of an INT4 base. Single-pass quality numbers look better than NF4+double on 7B math. Has not been verified on 32B or on tool-use tasks.</p>
         <dl>
           <dt>Why</dt><dd>Better K-score at the same weight budget is the prize.</dd>
-          <dt>Open Q</dt><dd>Does the SpQR sparse layer stay honest under speculative decoding?</dd>
+          <dt>Open Q</dt><dd>Does the SpQR sparse layer stay plain under speculative decoding?</dd>
         </dl>
       </div>
       <div class="card">
@@ -383,7 +383,7 @@
         <p class="why">Beyond the single-tenant SNP/TDX deployment, we are tracking research on sealed multi-tenant enclaves with per-tenant key separation that survives a host compromise.</p>
         <dl>
           <dt>Why</dt><dd>Co-tenancy with regulator-friendly isolation lowers per-tenant cost.</dd>
-          <dt>Open Q</dt><dd>How do we honest-scope "per-tenant key" against a side-channel attacker?</dd>
+          <dt>Open Q</dt><dd>How do we plain-scope "per-tenant key" against a side-channel attacker?</dd>
         </dl>
       </div>
       <div class="card">
@@ -411,15 +411,15 @@
 <section class="sec-section" id="commit">
   <div class="ks-wrap">
     <h2>How we commit (and how we do not)</h2>
-    <p class="sub">The roadmap is one of the things we are most honest about. The rules below are not aspirations; they are enforced by the same release-verify gates that block a shipped wave.</p>
+    <p class="sub">The roadmap is one of the things we are most plain about. The rules below are not aspirations; they are enforced by the same release-verify gates that block a shipped wave.</p>
     <div class="pact">
       <h3>What we commit to</h3>
       <dl>
         <dt>Every shipped wave</dt><dd>Carries a signed .kolm receipt; the receipt CID is on the changelog entry.</dd>
-        <dt>Honest column scope</dt><dd>A Now card has an open pull request; a Next card has a sized issue; a Later card has a named dependency.</dd>
+        <dt>Plain column scope</dt><dd>A Now card has an open pull request; a Next card has a sized issue; a Later card has a named dependency.</dd>
         <dt>Slip annotation</dt><dd>If a card slips a column, the slip is annotated with the reason and a target window.</dd>
-        <dt>Honest scope on every card</dt><dd>The "Scope" line on each card tells you what is in and what is out so you do not over-buy.</dd>
-        <dt>Honest path to verify</dt><dd>A developer can reproduce any shipped wave from the public repo. A reviewer can verify any signed receipt offline.</dd>
+        <dt>Plain scope on every card</dt><dd>The "Scope" line on each card tells you what is in and what is out so you do not over-buy.</dd>
+        <dt>Plain path to verify</dt><dd>A developer can reproduce any shipped wave from the public repo. A reviewer can verify any signed receipt offline.</dd>
       </dl>
     </div>
     <div class="pact" style="margin-top:var(--ks-4)">
@@ -427,7 +427,7 @@
       <dl>
         <dt>Dates we cannot keep</dt><dd>A "Q4 2026" on a Later card is the target window of the engineering review, not a commitment to a customer.</dd>
         <dt>Vapor features</dt><dd>If a feature is not in Now, Next, Later, or Researching, it is not on the roadmap. The roadmap is exhaustive for the things we are willing to publish.</dd>
-        <dt>Roadmap rewrites</dt><dd>We do not rewrite this page to make a missed wave look like a planned one. The honest history lives in the changelog and in the git log.</dd>
+        <dt>Roadmap rewrites</dt><dd>We do not rewrite this page to make a missed wave look like a planned one. The plain history lives in the changelog and in the git log.</dd>
       </dl>
     </div>
   </div>
@@ -435,7 +435,7 @@
 
 <section class="sec-section" id="cta">
   <div class="ks-wrap">
-    <h2>Suggest a wave, fix a card, or ask for an honest scope review</h2>
+    <h2>Suggest a wave, fix a card, or ask for an plain scope review</h2>
     <p class="sub">The fastest way to move a card is to file the receipt for the work already done. Two good next steps depending on who you are.</p>
     <div class="col-row">
       <div class="card">
@@ -445,7 +445,7 @@
       </div>
       <div class="card">
         <h3>Procurement or compliance</h3>
-        <p class="why">Email <a href="mailto:trust@kolm.ai" style="color:var(--ks-accent)">trust@kolm.ai</a> with the regulatory dependency you need lifted. We will scope it honestly against the columns above.</p>
+        <p class="why">Email <a href="mailto:trust@kolm.ai" style="color:var(--ks-accent)">trust@kolm.ai</a> with the regulatory dependency you need lifted. We will scope it frankly against the columns above.</p>
         <p class="why"><a href="/trust">/trust</a> &middot; <a href="/enterprise">/enterprise</a></p>
       </div>
       <div class="card">

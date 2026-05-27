@@ -499,7 +499,7 @@
       <li><b>ed25519 receipt chain.</b> Every recipe inside the <code>.kolm</code> carries the spec, seeds, train, eval, and recipe receipts. <code>kolm verify</code> walks the chain offline.</li>
       <li><b>License.</b> Apache-2.0 for every kolm-verified artifact. Third-party submissions declare their own license; the catalog filter respects it. Every license cell links to <a href="/license">the parseable license page</a>.</li>
       <li><b>K-score.</b> Measured against the artifact&rsquo;s holdout set at compile time. The number on this page is the same number the verifier sees.</li>
-      <li><b>Honest badges.</b> <em>HIPAA</em> / <em>BAA</em> / <em>GDPR</em> appear only where the artifact&rsquo;s design supports the claim. A redactor that strips PHI gets HIPAA; a classifier that touches PII does not. <em>Verified</em> paints only when the live <code>/v1/marketplace/list</code> production gate confirms it.</li>
+      <li><b>Plain badges.</b> <em>HIPAA</em> / <em>BAA</em> / <em>GDPR</em> appear only where the artifact&rsquo;s design supports the claim. A redactor that strips PHI gets HIPAA; a classifier that touches PII does not. <em>Verified</em> paints only when the live <code>/v1/marketplace/list</code> production gate confirms it.</li>
     </ul>
   </section>
 
@@ -728,7 +728,7 @@ $ curl -s https://kolm.ai/v1/marketplace/catalog.json | jq .signature_algo
 <script>
 // W737 — faceted search panel. Pure inline JS (no build step). Fetches
 // /v1/marketplace/search with the four facet axes; renders an artifact-card
-// grid OR the honest empty state when no listings have been registered.
+// grid OR the plain empty state when no listings have been registered.
 (function(){
   var $ = function(s){ return document.querySelector(s); };
   var grid  = $('#w737-results');

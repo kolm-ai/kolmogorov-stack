@@ -111,7 +111,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p class="lede">Numerical content is the failure mode where a distilled model most often regresses against its teacher. <code>23 * 7 = 162</code> is one token away from <code>23 * 7 = 161</code> and the language model has no incentive to choose one over the other &mdash; the loss function does not know which is correct. The W759 surface gives you (1) a pure recursive-descent calculator that <strong>cannot run arbitrary code</strong>, (2) an extractor that pulls numbers out of model outputs in the seven shapes that actually appear in production captures, (3) a namespace warning flag so a distillation run on numeric-heavy traffic gets the calculator tool wired in before it starts. Version stamp: <code>w759-v1</code>.</p>
 
 <div class="disclaimer">
-  <p style="margin:0 0 8px"><strong>Honesty note.</strong> The calculator runs ONLY pure <code>+ - * /</code> arithmetic with parentheses &mdash; <span class="muted">(no eval, no Function, no vm)</span> no <code>eval</code>, no <code>new Function()</code>, no <code>vm.runInNewContext</code>, no <code>**</code>, no <code>%</code>, no bitwise operators, no identifiers, no function calls. Anything else is rejected at the tokenizer with <code>error:'unsupported_operator'</code>. Use <code>kolm numeric calc &lt;expr&gt;</code> to verify the boundary &mdash; <code>kolm numeric calc "process.exit(1)"</code> exits with <code>syntax_error</code>, not with the running process exiting.</p>
+  <p style="margin:0 0 8px"><strong>Caveats note.</strong> The calculator runs ONLY pure <code>+ - * /</code> arithmetic with parentheses &mdash; <span class="muted">(no eval, no Function, no vm)</span> no <code>eval</code>, no <code>new Function()</code>, no <code>vm.runInNewContext</code>, no <code>**</code>, no <code>%</code>, no bitwise operators, no identifiers, no function calls. Anything else is rejected at the tokenizer with <code>error:'unsupported_operator'</code>. Use <code>kolm numeric calc &lt;expr&gt;</code> to verify the boundary &mdash; <code>kolm numeric calc "process.exit(1)"</code> exits with <code>syntax_error</code>, not with the running process exiting.</p>
   <p style="margin:0"><strong>Not a proof of correctness.</strong> A passing W759 eval means the response contained no numbers, OR the numbers/equations the response did contain were arithmetically consistent. It does NOT mean the response is true. A model that confidently says <em>"The Eiffel Tower is 12345 feet tall"</em> passes W759 because there is no equation to verify; the truth of the claim is the caller's problem.</p>
 </div>
 
@@ -141,62 +141,23 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <h2 id="calculator-spec" data-w759="calculator-spec">Calculator tool integration (W735-compatible spec)</h2>
 <p>The <code>CALCULATOR_TOOL_SPEC</code> exported from <code>src/calculator-tool.js</code> matches the W735 tool-use distillation contract verbatim. Register it by reference; no adapter shim is required.</p>
-<pre><code>// src/calculator-tool.js
-export const CALCULATOR_TOOL_SPEC = Object.freeze({
-  name: 'calculator',
-  description: 'Pure arithmetic only: + - * / parentheses. Returns numeric value.',
-  input_schema: {
-    type: 'object',
-    properties: {
-      expression: {
-        type: 'string',
-        description: 'An arithmetic expression using only + - * / and parentheses.'
-      }
-    },
-    required: ['expression']
-  },
-  version: 'w759-v1'
-});
-</code></pre>
+<pre>CODE52</pre>
 <p>The W735 distillation path consumes the spec, prompts the teacher to emit <code>&lt;tool&gt;calculator&lt;/tool&gt;</code> invocations on its scratchpad, evaluates each invocation through <code>evalSafeArithmetic()</code>, and trains the student on the resulting tool-call traces. The student model never sees the calculator; it learns the call shape, and the runtime middleware intercepts the calls and routes them through the same safe evaluator at inference time.</p>
 
 <h3>Runtime middleware</h3>
 <p><code>runtimeCalculatorMiddleware({ response_text, auto_eval })</code> finds <code>&lt;lhs&gt; = &lt;rhs&gt;</code> patterns in a response, evaluates the LHS through the safe evaluator, and either (a) appends correction notes when the RHS disagrees, or (b) returns the expression list for the caller to surface in the UI:</p>
-<pre><code>const { runtimeCalculatorMiddleware } = require('./src/calculator-tool.js');
-
-const r = runtimeCalculatorMiddleware({
-  response_text: 'The order total is 23 * 7 = 162 dollars.',
-  auto_eval: true,
-});
-
-// r.corrections = [
-//   { expr: '23 * 7', claimed: 162, computed: 161, correction: '23 * 7 = 161' }
-// ]
-// r.augmented_text = 'The order total is 23 * 7 = 162 dollars.\n\n[calc: 23 * 7 = 162 -> 161 (correction)]'
-</code></pre>
+<pre>CODE57</pre>
 
 <h2 id="namespace-flag" data-w759="namespace-flag-docs">Namespace warning flag &mdash; when distillation is high-risk</h2>
 <p>Before you start a distillation run, you usually want to know: <em>is this namespace numeric-heavy enough that I need the calculator tool</em>? The W759 namespace flag answers that with a single call:</p>
-<pre><code>kolm numeric flag-namespace --namespace pricing-quote --threshold 0.10
-# {
-#   "ok": true,
-#   "namespace": "pricing-quote",
-#   "mean_ratio": 0.182,
-#   "threshold": 0.10,
-#   "flagged": true,
-#   "sample_n": 100,
-#   "captures_seen": 4327,
-#   "hint": "Distillation of numerical content requires calculator tool  -  see W759 docs",
-#   "version": "w759-v1"
-# }
-</code></pre>
+<pre>CODE58</pre>
 <p>The implementation in <code>flagHighNumericNamespace()</code>:</p>
 <ol>
   <li>Loads up to <code>sample_n</code> captures from the namespace via <code>findByTenant('observations', tenant_id)</code> with a defense-in-depth tenant fence inside the loop (never trust the upstream table filter alone &mdash; W465 trap).</li>
   <li>For each capture, concatenates <code>prompt + response</code> and runs <code>numericContentRatio()</code> &mdash; the fraction of whitespace-separated tokens that match the numeric-token regex.</li>
   <li>Averages the per-capture ratios. Compares against the threshold. Returns <code>flagged:true</code> when the mean is above the threshold.</li>
 </ol>
-<p>Empty-namespace handling is the standard W462/W464 honest-envelope pattern: when no captures exist we return <code>ok:true</code> with <code>captures_seen:0</code> and a <code>note:'empty_namespace'</code> field. The caller distinguishes "no data" from "low-numeric" via <code>captures_seen</code>, not via the <code>flagged</code> flag.</p>
+<p>Empty-namespace handling is the standard W462/W464 plain-envelope pattern: when no captures exist we return <code>ok:true</code> with <code>captures_seen:0</code> and a <code>note:'empty_namespace'</code> field. The caller distinguishes "no data" from "low-numeric" via <code>captures_seen</code>, not via the <code>flagged</code> flag.</p>
 
 <table>
   <thead><tr><th>mean_ratio</th><th>UI signal</th><th>Recommended action</th></tr></thead>
@@ -225,20 +186,7 @@ const r = runtimeCalculatorMiddleware({
 
 <h2 id="envelope">Envelope shape</h2>
 <p>Same envelope is returned by <code>POST /v1/numeric/eval</code> and the <code>kolm numeric eval</code> CLI path. Field stability is part of the contract.</p>
-<pre><code>{
-  "ok": true,
-  "has_numbers": true,
-  "numbers": [
-    { "value": 23, "raw": "23", "span": [4, 6], "unit": null, "kind": "int" },
-    { "value": 7,  "raw": "7",  "span": [9, 10], "unit": null, "kind": "int" },
-    { "value": 161,"raw": "161","span": [13, 16],"unit": null, "kind": "int" }
-  ],
-  "equations_found": 1,
-  "equations_verified": 1,
-  "errors": [],
-  "version": "w759-v1"
-}
-</code></pre>
+<pre>CODE98</pre>
 
 <h2 id="api">API + CLI surface</h2>
 <table>
@@ -252,28 +200,10 @@ const r = runtimeCalculatorMiddleware({
     <tr><td>API (namespace flag)</td><td><code>GET /v1/numeric/namespace-flag/:namespace</code></td></tr>
   </tbody>
 </table>
-<p>CLI exit codes are honest: <code>0</code> when the eval passes (no mismatches, namespace not flagged), <code>3</code> when a mismatch is found OR the namespace is flagged (informational &mdash; the operator should look), <code>2</code> on real errors (auth missing, bad arguments, network failure, syntax error in <code>kolm numeric calc</code>). The mismatch-found path is intentionally <strong>not</strong> exit-1 so CI can keep "review needed" separate from "build failed".</p>
+<p>CLI exit codes are plain: <code>0</code> when the eval passes (no mismatches, namespace not flagged), <code>3</code> when a mismatch is found OR the namespace is flagged (informational &mdash; the operator should look), <code>2</code> on real errors (auth missing, bad arguments, network failure, syntax error in <code>kolm numeric calc</code>). The mismatch-found path is intentionally <strong>not</strong> exit-1 so CI can keep "review needed" separate from "build failed".</p>
 
 <h2 id="quickstart">Quickstart</h2>
-<pre><code># Local arithmetic check &mdash; no network, no auth.
-kolm numeric calc "23 * 7"
-# &rarr; {"ok":true,"value":161,"version":"w759-v1"}
-
-# Same expression with the unsupported `**` operator &mdash; rejected at tokenize.
-kolm numeric calc "2 ** 10"
-# &rarr; {"ok":false,"error":"unsupported_operator",
-#         "detail":"unexpected_character:\"*\"",...}
-
-# Eval a model response against an expected answer.
-kolm numeric eval --text "23 * 7 = 162" --expected 161
-# &rarr; {"ok":false,"equations_found":1,"equations_verified":0,
-#         "errors":[{"kind":"equation_mismatch","lhs_value":161,"rhs_value":162,...}],
-#         "match_with_expected":true, ...}
-# exits 3 (mismatch found, informational)
-
-# Flag a namespace as numeric-heavy before launching distillation.
-kolm numeric flag-namespace --namespace pricing-quote --threshold 0.10
-</code></pre>
+<pre>CODE111</pre>
 
 <p>Pair this with <a href="/docs/distill">distill</a> for tool-use-aware distillation runs and with <a href="/docs/k-score-methodology">K-Score methodology</a> for the full E-axis story. Read <a href="/docs/quickstart">quickstart</a> for the broader capture-distill-deploy pipeline.</p>
 

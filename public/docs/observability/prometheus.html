@@ -105,21 +105,9 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="scrape-config">Scrape config</h2>
 <p>Add a job to your <code>prometheus.yml</code>. The endpoint speaks <code>text/plain; version=0.0.4</code> so Prometheus 2.x and 3.x both scrape it natively without exporters.</p>
 
-<pre><code>scrape_configs:
-  - job_name: 'kolm'
-    metrics_path: '/metrics'
-    scrape_interval: 15s
-    static_configs:
-      - targets: ['kolm.example.com:443']
-    scheme: https
-    # Optional: if you set KOLM_METRICS_BEARER on the kolm side, send the
-    # matching bearer here so 401s don't pollute your scrape errors.
-    authorization:
-      type: Bearer
-      credentials: 'your-shared-bearer-token-here'
-</code></pre>
+<pre>CODE4</pre>
 
-<p>To gate the endpoint, set <code>KOLM_METRICS_BEARER=&lt;random-token&gt;</code> on the kolm process. The honest dev-default is no auth so local <code>curl localhost:8080/metrics</code> just works. On a missing or mismatched bearer the endpoint returns HTTP 401 with <code>{ok:false, error:'invalid_metrics_bearer'}</code> so a misconfigured scraper fails loud.</p>
+<p>To gate the endpoint, set <code>KOLM_METRICS_BEARER=&lt;random-token&gt;</code> on the kolm process. The plain dev-default is no auth so local <code>curl localhost:8080/metrics</code> just works. On a missing or mismatched bearer the endpoint returns HTTP 401 with <code>{ok:false, error:'invalid_metrics_bearer'}</code> so a misconfigured scraper fails loud.</p>
 
 <h2 id="available-metrics">Available metrics</h2>
 <p>Six metrics are pre-registered at boot. They emit <code># HELP</code> and <code># TYPE</code> lines even when no samples have been written yet, so a fresh scrape never returns a blank page.</p>
@@ -168,11 +156,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <p>You can also list the registered shape from the CLI:</p>
 
-<pre><code>kolm metrics list
-# Prints JSON with every metric's name, type, label names, and bucket array.
-kolm metrics show
-# Pipes renderMetrics() to stdout. Useful for cron + log shipping.
-</code></pre>
+<pre>CODE25</pre>
 
 <h2 id="grafana">Grafana dashboard import</h2>
 <p>The repo ships a ready-to-import Grafana dashboard at <code>dashboards/kolm-runtime.json</code>. It targets schema v38 (Grafana 10) and contains six panels &mdash; one per metric above.</p>
@@ -221,7 +205,7 @@ kolm metrics show
   <p><code>histogram_quantile(0.95, rate(kolm_http_request_duration_seconds_bucket[5m])) by (route)</code>. Tail latency per route, for SLO conformance. Spikes localized to one route usually point to an upstream-provider regression.</p>
 </div>
 
-<h2 id="honesty">Honesty contract</h2>
+<h2 id="honesty">No-silent-pass contract</h2>
 <ul>
   <li>A registered metric with zero samples still emits <code>HELP</code> and <code>TYPE</code> lines &mdash; this is Prometheus-correct (the scraper reports <code>absent()</code> and the metric stays in the registry).</li>
   <li>Histogram observations are non-negative finite numbers only. NaN, Infinity, and negatives raise at the callsite, not silently corrupt the wire format.</li>

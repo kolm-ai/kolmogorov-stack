@@ -141,18 +141,7 @@
 <h1>kolm sync</h1>
 <blockquote><p>Cloud-sync state and a legacy git-mirror push / pull. The cloud-sync subverbs (<code>status</code>, <code>enable</code>, <code>disable</code>) drive the modern cloud-sync path; passing a git URL falls back to the legacy bundle pusher.</p></blockquote>
 <h2>Usage</h2>
-<pre><code>
-# cloud-sync (W384)
-kolm sync status
-kolm sync enable [--state &lt;s&gt;] [--base &lt;url&gt;] [--namespace &lt;ns&gt;] [--block &lt;cls&gt;]
-kolm sync disable
-kolm sync push # uses cloud-sync once enabled
-kolm sync pull
-
-# legacy git-mirror
-kolm sync push &lt;git-url&gt; [--branch main] [--bundle &lt;dir&gt;]
-kolm sync pull &lt;git-url&gt; [--branch main] [--bundle &lt;dir&gt;]
-</code></pre>
+<pre>CODE3</pre>
 <h2>Flags</h2>
 <div class="table-wrap"><table>
 <thead>
@@ -168,18 +157,10 @@ kolm sync pull &lt;git-url&gt; [--branch main] [--bundle &lt;dir&gt;]
 </tbody>
 </table></div>
 <h2>Examples</h2>
-<pre><code>
-kolm sync status
-kolm sync enable --namespace claims-router --block phi
-kolm sync push
-kolm sync disable
-
-# legacy git mirror
-kolm sync push git@github.com:acme/kolm-artifacts.git --branch main
-</code></pre>
+<pre>CODE15</pre>
 <h2>Notes</h2>
 <p>Cloud-sync routes through <code>src/cloud-sync.js</code>. State, namespace scope, and privacy-membrane blocks live in <code>~/.kolm/sync.json</code>.</p>
-<p>The legacy git-mirror path uses <code>spawnSync(&#39;git&#39;, ...)</code> only - no new dependencies. Honest failure modes: missing git, no remote, non-clean working copy. The bundle dir holds the artifact, manifest, and receipt-chain files; each <code>push</code> commits the diff and force-pushes to the named branch.</p>
+<p>The legacy git-mirror path uses <code>spawnSync(&#39;git&#39;, ...)</code> only - no new dependencies. Plain failure modes: missing git, no remote, non-clean working copy. The bundle dir holds the artifact, manifest, and receipt-chain files; each <code>push</code> commits the diff and force-pushes to the named branch.</p>
 <h2>See also</h2>
 <ul>
 <li><a href="/quickstart">Quickstart</a></li>

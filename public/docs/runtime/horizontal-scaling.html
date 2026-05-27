@@ -112,7 +112,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="queue-depth">Queue depth as load signal</h2>
 <p>The W729 load queue is the load signal you autoscale on. Every inference route checks in with the queue before doing work; if a slot is free the request runs immediately, if all slots are busy the request waits in a priority lane. Enterprise traffic dequeues before business, business before starter, starter before free. Within a lane the order is strict FIFO.</p>
 <p>Read the queue depth from any worker with <code>kolm load queue --stats</code>. The output is a single JSON snapshot with <code>depth</code> (waiting + in-flight), <code>capacity</code> (configured slot count), and a <code>by_priority</code> breakdown so an operator can see whether the contention is concentrated in one tier. The same numbers are exposed on the server as the source of truth  -  every worker reports them identically because the queue is per-worker, not shared.</p>
-<p>Saturation has two failure modes, both honest. A request that waits past its <code>timeout_ms</code> resolves to HTTP 429 with <code>Retry-After</code> set to a value the SDK respects on retry. A request that arrives when the queue is already at four times capacity (the hard backstop against unbounded memory growth) immediately returns 429 with <code>queue_full</code>. The client sees one envelope shape in both cases: <code>{ok:false, error:'queue_full'|'queue_timeout', retry_after_seconds, queue_depth}</code>.</p>
+<p>Saturation has two failure modes, both plain. A request that waits past its <code>timeout_ms</code> resolves to HTTP 429 with <code>Retry-After</code> set to a value the SDK respects on retry. A request that arrives when the queue is already at four times capacity (the hard backstop against unbounded memory growth) immediately returns 429 with <code>queue_full</code>. The client sees one envelope shape in both cases: <code>{ok:false, error:'queue_full'|'queue_timeout', retry_after_seconds, queue_depth}</code>.</p>
 
 <h2 id="autoscale">Horizontal autoscale playbook</h2>
 <p>Wire the queue depth into your orchestrator's autoscale signal. On Kubernetes, an HPA reading the <code>queue_depth / capacity</code> ratio works well: scale up when the ratio crosses 0.7 sustained for thirty seconds, scale down when it stays below 0.3 for two minutes. On a fleet manager, the same metric drives a worker-count target. Pin the lower bound at two workers so a single restart never empties the pool, and the upper bound at whatever your inference budget allows.</p>
@@ -141,7 +141,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   </tbody>
 </table>
 
-<h2 id="honesty">Honesty contract</h2>
+<h2 id="honesty">No-silent-pass contract</h2>
 <ul>
   <li>The queue never silently drops. Timeouts and full-queue conditions both surface a structured 429 envelope with <code>Retry-After</code> so the SDK can back off correctly.</li>
   <li>The queue is per-worker. Stats reported from one process do not reflect the fleet; aggregate at the load balancer or push <code>queue_depth</code> into your observability stack to see the fleet view.</li>

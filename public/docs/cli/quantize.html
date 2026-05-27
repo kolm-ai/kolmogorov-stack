@@ -112,8 +112,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p class="lede">Run a local worker to quantize a model checkpoint to int4, int8, GPTQ, or AWQ. The CLI verb is a thin shell over <code>workers/quantize/quantize.mjs</code>; the worker calls a Python virtual environment for the heavy lifting.</p>
 
 <h2 id="usage">Usage</h2>
-<pre><code>kolm quantize --local-worker [--method &lt;m&gt;] [--in &lt;dir&gt;] [--out &lt;dir&gt;] [--json]
-kolm quantize --local-worker --doctor</code></pre>
+<pre>CODE1</pre>
 
 <h2 id="flags">Flags</h2>
 <table>
@@ -129,16 +128,11 @@ kolm quantize --local-worker --doctor</code></pre>
 </table>
 
 <h2 id="examples">Examples</h2>
-<pre><code>kolm quantize --local-worker --doctor
-kolm quantize --local-worker --method int4 --in ./qwen2.5-7b --out ./qwen2.5-7b-int4
-kolm quantize --local-worker --method gptq --in ./llama-3.1-8b --out ./llama-3.1-8b-gptq</code></pre>
+<pre>CODE13</pre>
 
 <h2 id="setup">Worker setup</h2>
 <p>The CLI verb invokes the local worker; the worker is a Node plus Python bridge under <code>workers/quantize/</code>. Install it once:</p>
-<pre><code>cd workers/quantize
-npm install
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt</code></pre>
+<pre>CODE15</pre>
 <p>Without the worker the verb prints a scaffolding message and exits cleanly. Run <code>kolm quantize --local-worker --doctor</code> after install to confirm Python, torch, and bitsandbytes are wired up correctly.</p>
 
 <h2 id="methods">Method picker</h2>
@@ -152,7 +146,7 @@ python3 -m venv .venv
  </tbody>
 </table>
 
-<h2 id="honest">Honest scope</h2>
+<h2 id="honest">Plain scope</h2>
 <p>Verify the output before ship: round-trip the quantized weights through <code>kolm compile</code> and re-check the K-score gate. Quantization can move accuracy by multiple points depending on the model and the eval set. The <code>kolm quantize</code> verb does not run the eval pass for you; that is the job of <code>kolm verify</code> on the compiled artifact.</p>
 
 <h2 id="see">Related</h2>

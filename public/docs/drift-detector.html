@@ -29,7 +29,6 @@
 </head>
 <body class="ks">
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
@@ -74,7 +73,7 @@
       <tbody>
         <tr><td><code>kl_threshold</code></td><td>0.10</td><td>Fires alert when baseline-vs-current KL divergence exceeds this value.</td></tr>
         <tr><td><code>fallback_rate_lift</code></td><td>0.20</td><td>Fires alert when current-window fallback rate exceeds baseline by this absolute lift.</td></tr>
-        <tr><td><code>min_baseline_captures</code></td><td>200</td><td>Below this floor the detector emits an honest <code>{insufficient_baseline:true}</code> envelope and does not fire.</td></tr>
+        <tr><td><code>min_baseline_captures</code></td><td>200</td><td>Below this floor the detector emits an plain <code>{insufficient_baseline:true}</code> envelope and does not fire.</td></tr>
       </tbody>
     </table>
 
@@ -91,7 +90,7 @@ kolm drift get --namespace prod-coding --json</pre>
 
     <pre>kolm namespace settings set prod-coding auto_remediate_drift true</pre>
 
-    <h2>Honest constraints</h2>
+    <h2>Plain constraints</h2>
     <ul>
       <li>The detector uses the same KL/JSD math as <a href="/docs/drift-alert">W747 drift-alert</a> but answers a different question. W813 compares baseline-vs-current windows <i>within</i> the live capture stream. W747 compares the training sketch against the live production sketch.</li>
       <li>Below <code>min_baseline_captures</code> the detector returns <code>insufficient_baseline:true</code> and stays quiet. We never fire alerts on small-sample noise.</li>

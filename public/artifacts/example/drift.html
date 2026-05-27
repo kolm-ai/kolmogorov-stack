@@ -299,7 +299,7 @@ verdict within</pre>
  <div class="card">
  <span class="vt warn">verdict drift</span>
  <h3>Schedule a re-distillation against current traffic.</h3>
- <p>Movement past the warn band but inside the fail band. The artifact can keep shipping; check #24 emits WARN pass. The honest action is to capture a fresh seed batch and rebuild before the next cadence interval, so the new artifact is anchored to the current distribution rather than racing the fail band.</p>
+ <p>Movement past the warn band but inside the fail band. The artifact can keep shipping; check #24 emits WARN pass. The plain action is to capture a fresh seed batch and rebuild before the next cadence interval, so the new artifact is anchored to the current distribution rather than racing the fail band.</p>
  <pre class="cmd">$ <b>kolm distill --reuse-seeds</b> \
  --baseline acme-jan.kolm \
  --capture ./captures/may.jsonl \

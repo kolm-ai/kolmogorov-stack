@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Hardware probe · what your box can run · kolm.ai</title>
-<meta name="description" content="What your GPU can actually run. Live probe of VRAM, native dtypes, supported quants, vendor + driver. Backed by /v1/hardware. The honest answer before you spend a GPU-hour on the wrong target.">
+<meta name="description" content="What your GPU can actually run. Live probe of VRAM, native dtypes, supported quants, vendor + driver. Backed by /v1/hardware. The direct answer before you spend a GPU-hour on the wrong target.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Hardware probe &middot; kolm.ai">
@@ -99,7 +99,7 @@
     <div style="max-width: 880px;">
       <span class="ks-eyebrow">Hardware probe &middot; the W866 operator</span>
       <h1 class="ks-hero__h1" style="max-width: 22ch;">What your box <span class="grad">can actually run.</span></h1>
-      <p class="ks-hero__lede">Live VRAM, native dtypes, supported quants, vendor + driver. Pulled from <code>GET /v1/hardware</code> &mdash; the same call the CLI makes when you type <code>kolm hardware</code> and the same call the Account dashboard makes when it auto-fills your VRAM. The honest answer before you spend a GPU-hour on the wrong target.</p>
+      <p class="ks-hero__lede">Live VRAM, native dtypes, supported quants, vendor + driver. Pulled from <code>GET /v1/hardware</code> &mdash; the same call the CLI makes when you type <code>kolm hardware</code> and the same call the Account dashboard makes when it auto-fills your VRAM. The direct answer before you spend a GPU-hour on the wrong target.</p>
       <p class="ks-hero__lede" style="margin-top: 12px; font-family: var(--ks-mono); font-size: 14px; color: var(--ks-ink-3);">$ kolm hardware</p>
       <div class="ks-hero__ctas">
         <a class="ks-btn ks-btn--primary ks-btn--lg" href="/account/hardware">Open dashboard &rarr;</a>
@@ -117,7 +117,7 @@
       <div>
         <p class="num">01 &middot; live probe</p>
         <h3>This page just called the API.</h3>
-        <p>The card on the right is <i>not</i> a screenshot. It is a live <code>fetch('/v1/hardware')</code> from this page &mdash; the same envelope the CLI sees. If this server has GPUs, you&rsquo;ll see them; if it&rsquo;s a CPU-only frontend, you&rsquo;ll see that honestly. No mock data.</p>
+        <p>The card on the right is <i>not</i> a screenshot. It is a live <code>fetch('/v1/hardware')</code> from this page &mdash; the same envelope the CLI sees. If this server has GPUs, you&rsquo;ll see them; if it&rsquo;s a CPU-only frontend, you&rsquo;ll see that frankly. No mock data.</p>
         <ul>
           <li>Same route the CLI calls</li>
           <li>Same envelope the Account dashboard renders</li>

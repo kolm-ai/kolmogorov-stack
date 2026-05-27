@@ -156,7 +156,7 @@
  <div class="wrap">
  <h2>How to use this registry.</h2>
  <p class="body">Three paths in. (1) <b>Seed-brief mode</b>: paste a dataset row into the prompt for <code>kolm seeds new "&lt;task&gt;"</code> and the scaffolder will produce a spec.json that names the dataset as <code>seed_source.public_dataset</code>. (2) <b>Direct import</b>: download a slice of the dataset, transform to <code>{input, target}</code> JSONL, drop into your repo as <code>seeds.jsonl</code>. (3) <b>External holdout</b>: pin one of these as your residency-free correctness reference; the holdout hash bound into <code>artifact_hash_input.external_holdout_hash</code> means the verifier can re-run it against any later artifact and detect drift. Every row carries a license string a tenant can hand to procurement, and an author + year that a third-party auditor can chase to a primary source.</p>
- <p class="body">Honesty guard: licenses change. Verify the dataset's current license text on the source page before you ship; the values below were correct at the time of this review and are tagged with the review date in the page stamp. The W194 corpus-licensing-gate (<span class="pill warn">wave 194 roadmap</span>) will enforce license compatibility at compile time so a tenant cannot accidentally pin a research-only corpus as the external holdout of a commercial product.</p>
+ <p class="body">Caveats guard: licenses change. Verify the dataset's current license text on the source page before you ship; the values below were correct at the time of this review and are tagged with the review date in the page stamp. The W194 corpus-licensing-gate (<span class="pill warn">wave 194 roadmap</span>) will enforce license compatibility at compile time so a tenant cannot accidentally pin a research-only corpus as the external holdout of a commercial product.</p>
  </div>
 </section>
 
@@ -293,7 +293,7 @@
 <section class="section">
  <div class="wrap">
  <h2>Domain-specific datasets.</h2>
- <p class="lede">Domain datasets are typically credentialed, research-only, or commercial-restricted. Every row in this section carries a <span class="pill warn">legal review</span> pill because per-tenant legal review is the only honest framing. kolm does not redistribute these; the tenant pulls them under their own credential in their own environment.</p>
+ <p class="lede">Domain datasets are typically credentialed, research-only, or commercial-restricted. Every row in this section carries a <span class="pill warn">legal review</span> pill because per-tenant legal review is the only plain framing. kolm does not redistribute these; the tenant pulls them under their own credential in their own environment.</p>
  <div class="legend">
  <span><span class="pill warn">legal review</span> per-tenant legal review required</span>
  <span><span class="pill bad">research-only</span> non-commercial use only</span>
@@ -350,7 +350,7 @@
  </table>
  </div>
  <div class="takeaway">
- <p style="margin:0;font-size:14.5px;color:var(--ink-mute)"><b>Why amber on every row.</b> Domain corpora are the most license-heterogeneous data class. A dataset that ships "Apache-2.0 code" almost always pulls non-Apache source data underneath: case law, EHRs, filings, news. The honest framing for any regulated tenant is "verify the full license stack before pinning as your external holdout or distilling into your shipped artifact." kolm gives you the citation; your counsel gives you the green light.</p>
+ <p style="margin:0;font-size:14.5px;color:var(--ink-mute)"><b>Why amber on every row.</b> Domain corpora are the most license-heterogeneous data class. A dataset that ships "Apache-2.0 code" almost always pulls non-Apache source data underneath: case law, EHRs, filings, news. The plain framing for any regulated tenant is "verify the full license stack before pinning as your external holdout or distilling into your shipped artifact." kolm gives you the citation; your counsel gives you the green light.</p>
  </div>
  </div>
 </section>
@@ -398,7 +398,7 @@
 
 <section class="section">
  <div class="wrap">
- <h2>Honest scope: licensing and redistribution.</h2>
+ <h2>Plain scope: licensing and redistribution.</h2>
  <div class="scope-block">
  <p>Not every "open" dataset is commercial-redistributable. Read the license per dataset before pinning as your external holdout or distilling into your shipped artifact. <b>CC-BY-NC</b> means no commercial use; <b>CC-BY-SA</b> means derivative works inherit the share-alike clause; <b>ODC-BY</b> is commercial-friendly but requires attribution; <b>research-only</b> licenses (MIMIC, i2b2, n2c2) require credentialing and data-use agreements per institution. License strings drift; verify the dataset's current license text on the source page on the day you ship.</p>
  <p>kolm does <b>not</b> redistribute any of the datasets named on this page. Your customer-hosted compile bridge pulls them in your environment under your credentials. The kolm artifact records the <code>external_holdout_hash</code> of the byte-stable slice you used; the verifier re-derives that hash on demand. No raw corpus data is bundled into the <code>.kolm</code> file.</p>

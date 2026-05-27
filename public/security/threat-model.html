@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <title>Threat model &middot; Open-source AI workbench &middot; kolm.ai</title>
-<meta name="description" content="Threat model for the kolm.ai Open-source AI workbench. Asset inventory, adversary model, threats by asset, mitigation per cell, out-of-scope assumptions, and open questions. Honest about what we defend, what we trust,">
+<meta name="description" content="Threat model for the kolm.ai Open-source AI workbench. Asset inventory, adversary model, threats by asset, mitigation per cell, out-of-scope assumptions, and open questions. Plain about what we defend, what we trust,">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Threat model &middot; Open-source AI workbench &middot; kolm.ai">
@@ -50,7 +50,7 @@ th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vert
 th{color:var(--ink);font-weight:500;background:var(--bg-elev)}
 td code{font-size:12px}
 .warn{border:1px solid var(--warn);border-left:4px solid var(--warn);background:rgba(82, 90, 100,0.07);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
-.honesty{border:1px solid var(--accent);border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
+.truthfulness{border:1px solid var(--accent);border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
 .asset-list{list-style:none;padding:0;margin:14px 0 18px;max-width:920px}
 .asset-list li{padding:14px 18px;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;background:var(--bg-elev);margin:8px 0;color:var(--ink-mute);font-size:14.5px;line-height:1.6}
 .asset-list li b{display:block;color:var(--ink);font-family:var(--mono);font-size:11.5px;letter-spacing:0.10em;text-transform:uppercase;margin-bottom:6px}
@@ -109,7 +109,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/security">security</a> / threat model</div>
 <p class="brand-eyebrow">Open-source AI workbench</p>
 <h1>Threat model.</h1>
-<p class="lede">The honest version of a threat model. We name every asset, every adversary, every threat, and every mitigation &mdash; and we name the parts we have not yet proven. The point of this page is to make it cheap for a security reviewer to find the gaps and challenge them, not to assert a defended boundary we have not built. See <a href="/security/posture">/security/posture</a> for the controls inventory and <a href="/security">/security</a> for the overview.</p>
+<p class="lede">The plain version of a threat model. We name every asset, every adversary, every threat, and every mitigation &mdash; and we name the parts we have not yet proven. The point of this page is to make it cheap for a security reviewer to find the gaps and challenge them, not to assert a defended boundary we have not built. See <a href="/security/posture">/security/posture</a> for the controls inventory and <a href="/security">/security</a> for the overview.</p>
 
 <h2 id="assets">Asset inventory</h2>
 <p>The things worth protecting on the kolm.ai stack. Anything not on this list is either out of scope or downstream of one of these.</p>
@@ -228,7 +228,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </table>
 
 <h2 id="oos">Out of scope</h2>
-<p>Threats we do not defend against on this stack. We list them honestly so a downstream operator can decide whether their environment closes the gap.</p>
+<p>Threats we do not defend against on this stack. We list them frankly so a downstream operator can decide whether their environment closes the gap.</p>
 
 <ul>
   <li><b>Physical-server compromise.</b> An attacker with physical access to the host running the hosted control plane is out of scope &mdash; we depend on the hosting infrastructure (data-center physical controls, hardware tamper-evidence, on-premise customer controls) for that boundary. The same applies to on-premise deployments: the operator owns physical security of their hardware.</li>

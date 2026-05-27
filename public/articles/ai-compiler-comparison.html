@@ -156,7 +156,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 <p>You already have LoRA adapters (from any source) and you need multi-tenant serving throughput with adapter swapping in a single process. LoRAX is not a competitor; it is a complement. kolm.ai compiles an artifact and (optionally) exports a LoRA suitable for LoRAX serving. See <a href="/how-vs-lorax">/how-vs-lorax</a> for the stack diagram.</p>
 
 <h3>DIY is the right answer when</h3>
-<p>You have a research team that wants total control of the training loop and the existing tools (LLaMA-Factory, Axolotl, Unsloth, TRL, PEFT) are already in your environment. The price of total control is you own everything kolm.ai automates: the eval gate, the redactor, the receipt chain, the drift detection, the supersession discipline, the cross-vendor teacher mediation. If your team has the capacity for that, DIY is honest. See <a href="/how-vs-diy">/how-vs-diy</a>.</p>
+<p>You have a research team that wants total control of the training loop and the existing tools (LLaMA-Factory, Axolotl, Unsloth, TRL, PEFT) are already in your environment. The price of total control is you own everything kolm.ai automates: the eval gate, the redactor, the receipt chain, the drift detection, the supersession discipline, the cross-vendor teacher mediation. If your team has the capacity for that, DIY is plain. See <a href="/how-vs-diy">/how-vs-diy</a>.</p>
 
 <h3>kolm.ai is the right answer when</h3>
 <p>You want capture-to-artifact-to-audit-to-deploy as one tool, with the artifact under your control, the audit posture good enough for regulated buyers, and the lifecycle (eval gate + drift + supersession) operated by the same tool. The shape kolm.ai was built for: regulated workloads, edge / on-device, ship-to-customer hardware, defense, and procurement contexts where the buyer needs to verify the model without trusting any third party.</p>
@@ -180,7 +180,7 @@ kolm import safetensors ./checkpoint --recipe ./recipe.toml --eval ./frozen-eval
 kolm compile --tier=3090
 kolm verify my-namespace.kolm</pre>
 
-<div class="warn"><b>Honest framing.</b> "kolm wins on 8 of 10 axes" is true on the matrix above; the matrix axes were chosen because they are the axes regulated and on-device buyers ask about. A different audience (a SaaS team picking the cheapest hosted fine-tune for an internal experiment) cares about different axes and would draw a different conclusion. Use the right-answer section above as the honest read.</p>
+<div class="warn"><b>Plain framing.</b> "kolm wins on 8 of 10 axes" is true on the matrix above; the matrix axes were chosen because they are the axes regulated and on-device buyers ask about. A different audience (a SaaS team picking the cheapest hosted fine-tune for an internal experiment) cares about different axes and would draw a different conclusion. Use the right-answer section above as the plain read.</p>
 
 <h2>Related reading</h2>
 <ul>

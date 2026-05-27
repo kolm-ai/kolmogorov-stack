@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>kolm deploy CLI reference &middot; Open-source AI workbench &middot; kolm.ai</title>
-<meta name="description" content="kolm deploy CLI reference: deploy a signed .kolm artifact to docker, kubernetes, or systemd targets. Pre-flight signature verify and memory probe. Honest envelope on unknown target.">
+<meta name="description" content="kolm deploy CLI reference: deploy a signed .kolm artifact to docker, kubernetes, or systemd targets. Pre-flight signature verify and memory probe. Loud-fail envelope on unknown target.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://kolm.ai/docs/cli/deploy">
@@ -22,13 +22,12 @@
   .cli-body p, .cli-body li { font-size: 15px; line-height: 1.7; color: var(--ink-2); max-width: 76ch; }
   pre { background: #06080a; border: 1px solid var(--line-1); border-radius: 8px; padding: 16px 18px; overflow-x: auto; font: 12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color: #e9eef3; max-width: 760px; }
   code { font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size: 13px; background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; }
-  .cli-honest { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-size: 13.5px; color: var(--ink-2); line-height: 1.55; margin: 20px 0; max-width: 76ch; }
-  .cli-honest b { color: var(--ink-1); font-weight: 580; }
+  .cli-plain { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-size: 13.5px; color: var(--ink-2); line-height: 1.55; margin: 20px 0; max-width: 76ch; }
+  .cli-plain b { color: var(--ink-1); font-weight: 580; }
 </style>
 </head>
 <body class="ks">
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
@@ -95,7 +94,7 @@ kolm deploy ./my-distill.kolm --dry-run --json</pre>
       <li><b>Memory probe.</b> Reads the artifact's <code>resource_requirements.memory_mb</code> field and checks available host memory. If host memory is below the threshold deploy exits 66 (<code>insufficient_memory</code>) with the gap printed in the envelope.</li>
     </ul>
 
-    <h2>Honest envelope</h2>
+    <h2>Loud-fail envelope</h2>
     <div class="cli-honest">
       <b>Unknown target.</b> If <code>--target</code> is set to a string outside the known set the CLI exits 64 with <code>{ok:false, error:'unknown_target', hint:'expected one of: docker, kubernetes, systemd'}</code>. We never silently fall back to a default target -- silent fall-back has historically caused deploys to land in the wrong cluster.
     </div>

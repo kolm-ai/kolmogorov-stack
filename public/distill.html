@@ -32,7 +32,7 @@
   .ds-mode-list .fr-cli__flag { color: var(--ks-accent); }
   .ds-mode-list .fr-cli__comment { color: var(--ks-ink-4); display: block; margin-top: 4px; }
   .ds-syn-list .fr-spec-list__delta--disclosed { color: var(--fr-mint, #6cbf8d); }
-  .ds-syn-list .fr-spec-list__delta--honesty   { color: #e8a86a; border-color: rgba(232,168,106,0.45); }
+  .ds-syn-list .fr-spec-list__delta--truthfulness   { color: #e8a86a; border-color: rgba(232,168,106,0.45); }
   .ds-syn-list .fr-cli { margin-top: 12px; font-family: var(--ks-mono); font-size: 12px; line-height: 1.6; padding: 10px 12px; background: #050607; border: 1px solid var(--ks-line-1); border-radius: 6px; color: var(--ks-ink); }
   .ds-syn-list .fr-cli__prompt { color: var(--ks-accent); user-select: none; }
   .ds-syn-list .fr-cli__flag { color: var(--ks-accent); }
@@ -206,7 +206,7 @@ verified    kolm verify support-triage.kolm</pre>
         <tr><td>tgi://&lt;host&gt;</td><td>Your network</td><td>Self-hosted Text Generation Inference endpoint from Hugging Face.</td></tr>
       </tbody>
     </table>
-    <p class="sub" style="margin-top:var(--ks-4)">A regulated team running on-prem can chain <code>--teacher vllm://gpu-01</code> to a vLLM server hosting Llama-3.3-70B locally; no Anthropic or OpenAI call ever fires. The teacher honesty contract is the same either way: every label is attributed in the receipt with the endpoint, the model id, and the request hash.</p>
+    <p class="sub" style="margin-top:var(--ks-4)">A regulated team running on-prem can chain <code>--teacher vllm://gpu-01</code> to a vLLM server hosting Llama-3.3-70B locally; no Anthropic or OpenAI call ever fires. The teacher no-silent-pass contract is the same either way: every label is attributed in the receipt with the endpoint, the model id, and the request hash.</p>
   </div>
 </section>
 
@@ -294,7 +294,7 @@ verified    kolm verify support-triage.kolm</pre>
         <p class="fr-spec-list__p">If the primary teacher refuses (rate limit, 503, malformed response), the runner walks <code>KOLM_DISTILL_TEACHER</code> in order. Every attempt is recorded in <code>teacher_attempts[]</code> in the run receipt so audit can see exactly which teacher labeled which row.</p>
       </li>
       <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Real eval, not aspirational</h3><span class="fr-spec-list__delta fr-spec-list__delta--live">HONEST-SCOPE &middot; reproducible</span></div>
+        <div class="fr-spec-list__head"><h3>Real eval, not aspirational</h3><span class="fr-spec-list__delta fr-spec-list__delta--live">PLAIN SCOPE &middot; reproducible</span></div>
         <p class="fr-spec-list__p">The K-score is computed against a real frozen holdout that the runner constructs from your captures. The split is deterministic; the score in the receipt is the number a third party would reproduce on the same seed.</p>
       </li>
       <li class="fr-spec-list__row">
@@ -328,7 +328,7 @@ verified    kolm verify support-triage.kolm</pre>
   <div class="fr-container">
     <span class="fr-eyebrow">MODES</span>
     <h2 class="fr-h2">Every mode you'd reach for. Stackable.</h2>
-    <p class="fr-lede">Pick one, pick several. The compiler composes them into a single signed artifact with a reproducible spec. Each mode is honest about its research lineage; nothing here is invented by us alone.</p>
+    <p class="fr-lede">Pick one, pick several. The compiler composes them into a single signed artifact with a reproducible spec. Each mode is plain about its research lineage; nothing here is invented by us alone.</p>
     <ul class="fr-spec-list ds-mode-list">
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>Reasoning / CoT trace distillation</h3><span class="fr-spec-list__delta fr-spec-list__delta--reasoning">REASONING &middot; Hinton 2015 / R1</span></div>
@@ -389,7 +389,7 @@ verified    kolm verify support-triage.kolm</pre>
 <section class="fr-section fr-reveal" id="synthetic">
   <div class="fr-container">
     <span class="fr-eyebrow">SYNTHETIC BOOSTER</span>
-    <h2 class="fr-h2">When captures are sparse, augment honestly.</h2>
+    <h2 class="fr-h2">When captures are sparse, augment frankly.</h2>
     <ul class="fr-spec-list ds-syn-list">
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>Teacher-generated traces, flagged</h3><span class="fr-spec-list__delta fr-spec-list__delta--disclosed">DISCLOSED IN RECEIPT &middot; synthetic_ratio</span></div>
@@ -400,7 +400,7 @@ verified    kolm verify support-triage.kolm</pre>
         </div>
       </li>
       <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>No silent passthrough</h3><span class="fr-spec-list__delta fr-spec-list__delta--honesty">HONESTY CONTRACT &middot; off by default</span></div>
+        <div class="fr-spec-list__head"><h3>No silent passthrough</h3><span class="fr-spec-list__delta fr-spec-list__delta--honesty">NO-SILENT-PASS &middot; off by default</span></div>
         <p class="fr-spec-list__p">The booster refuses to run if the augmentation would push the synthetic share above <code>--max-synthetic-ratio</code> (default 0.5). A run that exceeds the cap aborts before the teacher pass, so you do not pay for tokens you would not be able to ship. If you need a fully real corpus, set <code>--no-synthetic</code> and the runner falls back to refusing thin namespaces below the <code>--min-pairs</code> floor.</p>
         <div class="fr-status">
           <span class="fr-status__dot"></span>

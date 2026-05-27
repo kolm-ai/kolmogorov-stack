@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Diagnose &middot; per-category K-Score breakdown &middot; kolm.ai">
-<meta property="og:description" content="Per-category K-Score breakdown + deterministic fix recommendations. Wilson 95% CI when n>=30; honest null when n<30.">
+<meta property="og:description" content="Per-category K-Score breakdown + deterministic fix recommendations. Wilson 95% CI when n>=30; plain null when n<30.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/diagnose">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -113,72 +113,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="envelope">Diagnostic envelope shape</h2>
 <p>The same envelope is returned by <code>POST /v1/diagnose</code>, <code>GET /v1/diagnose/:cid</code>, and the <code>kolm diagnose --json</code> CLI path. Field stability is part of the contract &mdash; downstream dashboards and CI gates can rely on it.</p>
 
-<pre><code>{
-  "ok": true,
-  "diagnostic_version": "w741-v1",
-  "artifact_cid": "bafkreigh2akiscaildc3xy7p4nntwvjp7m5kw5kbsmm5kkkkkkkkkkkkkk",
-  "overall_k_score": 0.7234,
-  "per_category": [
-    {
-      "name": "multi-turn",
-      "n": 47,
-      "k_score": 0.6204,
-      "k_score_ci_lo": 0.5117,
-      "k_score_ci_hi": 0.7224,
-      "k_score_stddev": 0.1834,
-      "worst_sample_cids": ["847", "1203", "1567"]
-    },
-    {
-      "name": "tool-use",
-      "n": 22,
-      "k_score": 0.8101,
-      "k_score_ci_lo": null,
-      "k_score_ci_hi": null,
-      "k_score_stddev": 0.0921,
-      "worst_sample_cids": ["1882", "2017", "2103"]
-    },
-    {
-      "name": "general",
-      "n": 312,
-      "k_score": 0.9412,
-      "k_score_ci_lo": 0.9118,
-      "k_score_ci_hi": 0.9613,
-      "k_score_stddev": 0.0612,
-      "worst_sample_cids": ["91", "204", "778"]
-    }
-  ],
-  "worst_categories": [
-    { "name": "multi-turn", "k_score": 0.6204, "n": 47 },
-    { "name": "tool-use",   "k_score": 0.8101, "n": 22 },
-    { "name": "general",    "k_score": 0.9412, "n": 312 }
-  ],
-  "recommendations": [
-    {
-      "action": "capture_more",
-      "category": "multi-turn",
-      "target_count": 153,
-      "priority": "high",
-      "reason": "k_score 0.6204 &lt; threshold 0.85"
-    },
-    {
-      "action": "capture_more",
-      "category": "tool-use",
-      "target_count": 178,
-      "priority": "high",
-      "reason": "k_score 0.8101 &lt; threshold 0.85"
-    },
-    {
-      "action": "adjust_temperature",
-      "category": "multi-turn",
-      "from": 0.7,
-      "to": 0.4,
-      "priority": "medium",
-      "reason": "high variance in multi-turn category (stddev 0.1834 &gt; 0.15)"
-    }
-  ],
-  "generated_at": "2026-05-24T18:42:11.503Z"
-}
-</code></pre>
+<pre>CODE6</pre>
 
 <h2 id="categorize">How captures get bucketed</h2>
 <p>Categorisation is a pure heuristic over fields already on the capture record &mdash; no LLM calls, no on-the-fly classifier. The rules below are checked in order; first match wins. Determinism is the load-bearing property: the same capture set always produces the same buckets, regardless of when the diagnostic ran.</p>
@@ -195,10 +130,10 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   </tbody>
 </table>
 
-<h2 id="ci">Wilson 95% CI &mdash; and the honest null floor</h2>
-<p>When a category has <code>n &gt;= 30</code> rows we report a Wilson 95% confidence interval on the per-bucket mean. The Wilson interval is the right answer for proportions on small samples because it does not blow up at the endpoints &mdash; an unweighted bucket of 47 rows with a mean of 0.62 honestly maps to <code>[0.51, 0.72]</code>, not <code>[0.62, 0.62]</code>.</p>
+<h2 id="ci">Wilson 95% CI &mdash; and the plain null floor</h2>
+<p>When a category has <code>n &gt;= 30</code> rows we report a Wilson 95% confidence interval on the per-bucket mean. The Wilson interval is the right answer for proportions on small samples because it does not blow up at the endpoints &mdash; an unweighted bucket of 47 rows with a mean of 0.62 frankly maps to <code>[0.51, 0.72]</code>, not <code>[0.62, 0.62]</code>.</p>
 
-<p>When <code>n &lt; 30</code> we return <code>k_score_ci_lo: null</code> and <code>k_score_ci_hi: null</code>. We do not substitute a Bayesian prior, we do not fall back to the pooled estimate, we do not interpolate. The bucket is honestly under-sampled and the dashboard says so. This is the same honesty contract that drives W810 calibration's <code>insufficient_data</code> status and W258-ML-1's <code>MIN_HONEST_A_FOR_RATIO</code> floor &mdash; if the measurement is shaky, the envelope says shaky, not "0.6204 &plusmn; 0.0000."</p>
+<p>When <code>n &lt; 30</code> we return <code>k_score_ci_lo: null</code> and <code>k_score_ci_hi: null</code>. We do not substitute a Bayesian prior, we do not fall back to the pooled estimate, we do not interpolate. The bucket is frankly under-sampled and the dashboard says so. This is the same no-silent-pass contract that drives W810 calibration's <code>insufficient_data</code> status and W258-ML-1's <code>MIN_HONEST_A_FOR_RATIO</code> floor &mdash; if the measurement is shaky, the envelope says shaky, not "0.6204 &plusmn; 0.0000."</p>
 
 <h2 id="recommendations">Recommendation rules</h2>
 <p>Recommendations are deterministic and lock-in tested. The four rules below are the entire surface &mdash; no LLM picks them, no human curates them. A capture set that hits the same rule on a re-run produces the same recommendation list, in the same priority order.</p>
@@ -245,8 +180,8 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   </tbody>
 </table>
 
-<h3 id="no-bakeoff">Honest absence: no_bakeoff_results_yet</h3>
-<p>The diagnostic depends on per-row bakeoff results. When no bakeoff has been run for the requested artifact, the route returns HTTP 200 with an honest <code>{ ok: false, error: "no_bakeoff_results_yet" }</code> envelope &mdash; not a 404. The HTTP call itself succeeded; the actionable hint tells the caller what to do next: <code>run `kolm bakeoff first` against this artifact_cid, then retry</code>.</p>
+<h3 id="no-bakeoff">Plain absence: no_bakeoff_results_yet</h3>
+<p>The diagnostic depends on per-row bakeoff results. When no bakeoff has been run for the requested artifact, the route returns HTTP 200 with an plain <code>{ ok: false, error: "no_bakeoff_results_yet" }</code> envelope &mdash; not a 404. The HTTP call itself succeeded; the actionable hint tells the caller what to do next: <code>run `kolm bakeoff first` against this artifact_cid, then retry</code>.</p>
 
 <h2 id="next">Next steps</h2>
 <p>Run <code>kolm bakeoff</code> first to produce per-row K-Score rows, then <code>kolm diagnose &lt;cid&gt;</code> to bucket them. Read <a href="/docs/k-score-methodology">K-Score methodology</a> for the underlying composite and <a href="/docs/pipelines">pipelines</a> for how to compose specialists once you have shipped each per-category artifact.</p>

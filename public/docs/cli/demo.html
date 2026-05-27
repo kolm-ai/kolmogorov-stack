@@ -141,13 +141,7 @@
 <h1>kolm demo</h1>
 <p>The canonical close-the-loop demo. Seeds the local event lake with ~150 synthetic log-triage events so <code>optimize</code>, <code>dataset</code>, <code>bakeoff</code>, <code>build</code>, <code>run</code>, and <code>what</code> all have real data to chew on without you having to wire a proxy first. Every event is tagged <code>source_type=simulated</code>, so the receipt chain never claims this corpus came from production.</p>
 <h2>Usage</h2>
-<pre><code>
-kolm demo list available demo flows
-kolm demo list same as the no-arg form
-kolm demo seed-log-triage [--count N] seed N events (default 150)
-kolm demo seed-log-triage --namespace foo override default namespace
-kolm demo reset --confirm purge the demo-log-triage namespace
-</code></pre>
+<pre>CODE7</pre>
 <h2>Flags</h2>
 <ul>
 <li><code>--count N</code> events to append (clamped to 20..5000, default 150). 100+</li>
@@ -158,16 +152,7 @@ kolm demo reset --confirm purge the demo-log-triage namespace
 <li><code>--confirm</code> required by <code>kolm demo reset</code> (the only destructive subverb).</li>
 </ul>
 <h2>Examples</h2>
-<pre><code>
-kolm demo seed-log-triage
-kolm lake stats
-kolm optimize
-kolm dataset create demo-log-triage
-kolm bakeoff demo-log-triage
-kolm build demo-log-triage
-kolm run demo-log-triage.kolm &quot;ERROR db timeout on checkout&quot;
-kolm what
-</code></pre>
+<pre>CODE18</pre>
 <h2>What it seeds</h2>
 <ul>
 <li>21 log archetypes spanning 6 categories: <code>db</code>, <code>network</code>, <code>auth</code>,</li>
@@ -179,7 +164,7 @@ kolm what
 <li>Every prompt uses the same shape (<code>Triage this log line. Reply ... Log: &quot;&lt;body&gt;&quot;</code>)</li>
 <p>so <code>templateSignature()</code> collapses the corpus to one cluster.</p>
 </ul>
-<h2>Honest scope</h2>
+<h2>Plain scope</h2>
 <p>This is synthetic data for demo purposes. The events carry <code>source_type=simulated</code> end-to-end; <code>kolm lake inspect &lt;id&gt;</code> and the receipt chain reflect that. Reset before any real capture run if you plan to ship an artifact from production traffic.</p>
 <h2>See also</h2>
 <ul>

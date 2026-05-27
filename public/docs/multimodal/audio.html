@@ -67,7 +67,7 @@ td code{font-size:12px}
 .intent-card{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev)}
 .intent-card .intent-tag{font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
 .intent-card p{font-size:12.5px;margin:0;line-height:1.5}
-.honesty{border:1px solid var(--accent);border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
+.truthfulness{border:1px solid var(--accent);border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
 .warn{border:1px solid var(--warn);border-left:4px solid var(--warn);background:rgba(82, 90, 100,0.07);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
 .related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
 @media(max-width:820px){.related{grid-template-columns:1fr}}
@@ -160,46 +160,20 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
     <p class="vendor-tag">openai</p>
     <h3>input_audio</h3>
     <p>Chat Completions audio input. The <code>format</code> field maps directly into the supported MIME table.</p>
-<pre><code>{
-  "role": "user",
-  "content": [
-    {"type": "text", "text": "What did the caller say?"},
-    {"type": "input_audio",
-     "input_audio": {
-        "data": "UklGRhYAAABXQVZF...",
-        "format": "wav"}}
-  ]
-}</code></pre>
+<pre>CODE14</pre>
   </div>
   <div class="capture-card">
     <p class="vendor-tag">pre-transcribed</p>
     <h3>whisper_transcript</h3>
     <p>When the caller has already run openai-whisper upstream (browser, mobile, on-prem), the message may carry the transcript directly. The detector picks it up and the trainer skips re-transcription.</p>
-<pre><code>{
-  "role": "user",
-  "whisper_transcript": "Schedule a follow-up
-   with the patient in two weeks.",
-  "content": []
-}</code></pre>
+<pre>CODE15</pre>
   </div>
 </div>
 
 <h2 id="trainer">Trainer pipeline</h2>
-<p>The distill entry point is <code>apps/trainer/audio_distill.py</code> &mdash; a stdlib-only Python wrapper that consumes a JSONL of captured audio turns. The <code>--dry-run</code> path never imports torch or openai-whisper; it parses the captures file, counts audio rows by source (transcript / url / base64), and emits a <code>run-meta.json</code> envelope tagged <code>trainer_not_invoked:true</code>. Live mode imports whisper + transformers lazily; missing deps exit 3 / 5 / 6 with an honest envelope rather than silently degrading.</p>
+<p>The distill entry point is <code>apps/trainer/audio_distill.py</code> &mdash; a stdlib-only Python wrapper that consumes a JSONL of captured audio turns. The <code>--dry-run</code> path never imports torch or openai-whisper; it parses the captures file, counts audio rows by source (transcript / url / base64), and emits a <code>run-meta.json</code> envelope tagged <code>trainer_not_invoked:true</code>. Live mode imports whisper + transformers lazily; missing deps exit 3 / 5 / 6 with an loud-fail envelope rather than silently degrading.</p>
 
-<pre><code># dry-run (stdlib-only; never imports torch / whisper)
-python apps/trainer/audio_distill.py \
-  --captures audio_captures.jsonl \
-  --out run-meta.json \
-  --dry-run
-
-# live mode (requires openai-whisper + torch + transformers)
-python apps/trainer/audio_distill.py \
-  --captures audio_captures.jsonl \
-  --out run-meta.json \
-  --whisper-model base \
-  --teacher-model anthropic/claude-opus-4-7 \
-  --max-samples 5000</code></pre>
+<pre>CODE20</pre>
 
 <div class="honesty">
   <p>The trainer NEVER fabricates results. Dry-run emits a scaffold tagged <code>trainer_not_invoked:true</code>. Live mode either runs a real transcribe-plus-distill loop or exits with <code>error:'torch_not_available'</code> (exit 3), <code>error:'whisper_load_failed'</code> (exit 5), or <code>error:'teacher_load_failed'</code> (exit 6) &mdash; we will not silently no-op.</p>
@@ -246,11 +220,7 @@ python apps/trainer/audio_distill.py \
 <h2 id="cli">CLI usage</h2>
 <p>The <code>kolm audio</code> verb wraps the three auth-gated routes. Bake-off requires <code>--confirm</code> &mdash; matches the W411 spend-protection pattern so a misclick or stray curl cannot fire the replay against every captured audio row.</p>
 
-<pre><code>kolm audio captures --namespace prod                    # list audio rows
-echo '{"role":"user","content":[...]}' | kolm audio detect
-
-kolm audio bakeoff ./my.kolm --namespace prod --confirm
-kolm audio bakeoff ./my.kolm --namespace prod --max 50 --confirm</code></pre>
+<pre>CODE39</pre>
 
 <h2 id="api">API</h2>
 <table data-w772="api">
@@ -267,7 +237,7 @@ kolm audio bakeoff ./my.kolm --namespace prod --max 50 --confirm</code></pre>
   <p>Every audio read does a per-row <code>tenant_id</code> filter even after the canonical event-store has already filtered. The defense-in-depth filter runs after the <code>listEvents</code> read so a future store schema change cannot silently flip "no leak" to "all leak". The <code>captureAudioMessage</code> chokepoint stamps the canonical event with <code>media_kind:'audio'</code> + the tenant fence column so reads land deterministically.</p>
 </div>
 
-<h2 id="privacy">Privacy honesty</h2>
+<h2 id="privacy">Privacy truthfulness</h2>
 <div class="warn">
   <p>Raw audio bytes <strong>never</strong> enter the capture store. URL-source blocks land as a sha256 digest of the URL only. Base64-source blocks land as a sha256 digest of the first 256 characters of the base64 payload &mdash; dedup still works without storing the audio. The transcript text is capped at 128 KiB; longer transcripts surface a <code>transcript_truncated:true</code> flag so the operator sees the harness clipped instead of silently passing the full blob through.</p>
 </div>

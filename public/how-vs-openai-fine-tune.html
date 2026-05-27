@@ -64,7 +64,7 @@
  "@context": "https://schema.org",
  "@type": "Article",
  "headline": "kolm vs OpenAI fine-tune",
- "description": "Honest comparison of OpenAI fine-tuning (managed, hosted, vendor-bound) against kolm (file you own, ships to your hardware). Cost, latency, privacy, ownership, lock-in, residency.",
+ "description": "Plain comparison of OpenAI fine-tuning (managed, hosted, vendor-bound) against kolm (file you own, ships to your hardware). Cost, latency, privacy, ownership, lock-in, residency.",
  "url": "https://kolm.ai/how-vs-openai-fine-tune",
  "author": {"@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org"},
  "publisher": {"@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org"},
@@ -130,7 +130,7 @@
 <section class="section">
  <div class="wrap">
  <h2>At a glance.</h2>
- <p>The same six dimensions the pricing matrix on <a href="/pricing" style="color:var(--accent)">/pricing</a> uses, expanded to honest sub-lines per cell. OpenAI's row is rated against published 2026 pricing for fine-tuned GPT-4.1 mini and the o4-mini-tune SKU; kolm's row assumes a Qwen 3.6 or Llama 3.3 student on a single 3090 or H100.</p>
+ <p>The same six dimensions the pricing matrix on <a href="/pricing" style="color:var(--accent)">/pricing</a> uses, expanded to plain sub-lines per cell. OpenAI's row is rated against published 2026 pricing for fine-tuned GPT-4.1 mini and the o4-mini-tune SKU; kolm's row assumes a Qwen 3.6 or Llama 3.3 student on a single 3090 or H100.</p>
  <table class="matrix">
  <thead><tr><th>Dimension</th><th>OpenAI fine-tune</th><th>kolm</th></tr></thead>
  <tbody>
@@ -219,7 +219,7 @@
 <section class="section">
  <div class="wrap">
  <h2>The layered pattern (when you use both).</h2>
- <p>The honest middle of the market is teams that use OpenAI as the teacher inside a kolm compile. You keep the frontier-grade capability where it earns its cost (the few percent of requests that genuinely need it) and you ship a kolm artifact for the 90%+ of traffic that is repetitive. OpenAI's API becomes the teacher SKU on the build side; kolm's signed file becomes the runtime artifact on the serve side. The bill drops by an order of magnitude and the auditor reads a receipt chain instead of a console.</p>
+ <p>The plain middle of the market is teams that use OpenAI as the teacher inside a kolm compile. You keep the frontier-grade capability where it earns its cost (the few percent of requests that genuinely need it) and you ship a kolm artifact for the 90%+ of traffic that is repetitive. OpenAI's API becomes the teacher SKU on the build side; kolm's signed file becomes the runtime artifact on the serve side. The bill drops by an order of magnitude and the auditor reads a receipt chain instead of a console.</p>
  <div class="callout">
  <b>Licensing note.</b> OpenAI's API terms restrict using outputs to develop "competing" general-purpose models. A narrow-task kolm artifact (form normalizer, denial-code classifier, single-vertical extractor) is not a competing general model; the legal status of the narrow-task carve-out is unsettled. The always-safe option is <code>--teacher=local:&lt;open-weight-model&gt;</code> on your own GPU. See <a href="/spec/rs-1#section-7-7" style="color:var(--accent)">RS-1 &sect;7.7</a> for the posture.
  </div>

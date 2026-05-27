@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Auto pilot &middot; Open-source AI workbench &middot; kolm.ai">
-<meta property="og:description" content="Continuous background distill. Opt in once; the autopilot does the rest. Honest envelopes, drift-gated, never silent.">
+<meta property="og:description" content="Continuous background distill. Opt in once; the autopilot does the rest. Loud-fail envelopes, drift-gated, never silent.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/kolm-auto-pilot">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -58,7 +58,7 @@ td code{font-size:12px}
 .metric-card .label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin-bottom:6px}
 .metric-card .value{font-size:22px;font-weight:600;font-family:var(--mono);color:var(--ink)}
 .metric-card .delta{font-size:11.5px;color:var(--ink-mute);margin-top:4px}
-.honest-note{font-size:12.5px;color:var(--ink-faint);font-style:italic;border-left:2px solid var(--accent);padding:4px 10px;margin:14px 0;max-width:780px}
+.plain-note{font-size:12.5px;color:var(--ink-faint);font-style:italic;border-left:2px solid var(--accent);padding:4px 10px;margin:14px 0;max-width:780px}
 .cta-row{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}
 .btn{display:inline-block;padding:9px 18px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--ink);font-family:var(--mono);font-size:13px;cursor:pointer;text-decoration:none;line-height:1}
 .btn:hover{border-color:var(--accent);color:var(--accent)}
@@ -80,7 +80,6 @@ td code{font-size:12px}
 </style>
 </head>
 <body>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="skip-link">Skip to content</a>
 <header class="site">
@@ -106,7 +105,7 @@ td code{font-size:12px}
 <p class="lede" data-w775="lede">Auto pilot is the continuous-background-distill daemon. Opt in once; it polls W815 coverage gaps, gates on W813 drift, and silently re-distills when local quality can replace teacher calls. Every decision lands as a durable ledger row &mdash; the daemon never silently retrains on bad data.</p>
 
 <div class="honest-note" data-w775="honest-note">
-W775 honesty contract: <code>action:'redistilled'</code> is never emitted unless W815 returns ok AND the W813 drift gate is green AND the top gap_score crosses the <code>REDISTILL_THRESHOLD</code> (0.25). When any gate trips, the daemon writes a <code>holding_pattern</code> row with the reason so the operator can see WHY the autopilot held. Stamped <code>w775-v1</code>.
+W775 no-silent-pass contract: <code>action:'redistilled'</code> is never emitted unless W815 returns ok AND the W813 drift gate is green AND the top gap_score crosses the <code>REDISTILL_THRESHOLD</code> (0.25). When any gate trips, the daemon writes a <code>holding_pattern</code> row with the reason so the operator can see WHY the autopilot held. Stamped <code>w775-v1</code>.
 </div>
 
 <section data-w775="opt-in">
@@ -191,7 +190,7 @@ kolm autopilot status --namespace default --json | jq '.holding_pattern_reason'<
 <tr><td><code>kolm autopilot disable</code></td><td>alias for <code>stop</code></td><td>full kill switch</td></tr>
 </tbody>
 </table>
-<p style="color:var(--ink-faint);font-size:13px;margin-top:14px"><b>Honest disclosure:</b> system-tray integration (taskbar widget, OS-level start-on-boot) is on the roadmap but not yet shipped. The current daemon is cron-driven via <code>/v1/autopilot/tick</code>; the CLI <code>tick</code> verb is the manual-trigger equivalent.</p>
+<p style="color:var(--ink-faint);font-size:13px;margin-top:14px"><b>Plain disclosure:</b> system-tray integration (taskbar widget, OS-level start-on-boot) is on the roadmap but not yet shipped. The current daemon is cron-driven via <code>/v1/autopilot/tick</code>; the CLI <code>tick</code> verb is the manual-trigger equivalent.</p>
 </section>
 
 <script>

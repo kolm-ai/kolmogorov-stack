@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="A/B testing &middot; kolm.ai">
-<meta property="og:description" content="Two variants, one namespace, honest statistics. Auto-promote when bootstrap p &lt; 0.05 and K-Score lifts &gt;= 0.02. Auto-rollback on fallback or latency regression.">
+<meta property="og:description" content="Two variants, one namespace, plain statistics. Auto-promote when bootstrap p &lt; 0.05 and K-Score lifts &gt;= 0.02. Auto-rollback on fallback or latency regression.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/docs/ab-testing">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -114,7 +114,7 @@
     <h2>Holdout split and assignment</h2>
     <p class="sub">Traffic is split deterministically. Two requests with the same <code>request_hash</code> always land on the same variant - that is the contract that lets you A/B at the user or session granularity without a sticky cookie store.</p>
     <p>The split function is a uniform hash on the <code>request_hash</code> field; the variant boundary is <code>split * 2^32</code>. A request hash of <code>user_42</code> with split=0.5 lands deterministically on A or B and stays there across reconfigurations as long as the split fraction does not move. When you re-issue <code>POST /v1/ab/configure</code> with a new split, the assignment boundary moves and a fraction of previously-A users move to B (and vice versa); that is the cost of changing the split mid-flight.</p>
-    <p>The rollback path uses split=1.0 (all traffic on A). The promote path uses split=0.0 (all traffic on B). Both are honest config moves, not separate "rollback config" rows - the same /v1/ab/configure surface drives all three decisions.</p>
+    <p>The rollback path uses split=1.0 (all traffic on A). The promote path uses split=0.0 (all traffic on B). Both are plain config moves, not separate "rollback config" rows - the same /v1/ab/configure surface drives all three decisions.</p>
   </div>
 </section>
 

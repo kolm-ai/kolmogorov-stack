@@ -164,7 +164,7 @@
  </div>
  </div>
  <div class="tpl-note">
- <b>Honest criteria reporting.</b> If the member's record does not support a criterion (e.g. no documented prior failed therapy), the model is trained to set the corresponding <code>criteria_satisfied[*]</code> to <code>false</code> rather than draft a paragraph that asserts it. Downstream automation can branch on the boolean: a letter with <code>criteria_satisfied.prior_therapy === false</code> is routed to the clinical reviewer before submission.
+ <b>Plain criteria reporting.</b> If the member's record does not support a criterion (e.g. no documented prior failed therapy), the model is trained to set the corresponding <code>criteria_satisfied[*]</code> to <code>false</code> rather than draft a paragraph that asserts it. Downstream automation can branch on the boolean: a letter with <code>criteria_satisfied.prior_therapy === false</code> is routed to the clinical reviewer before submission.
  </div>
  </section>
 
@@ -196,7 +196,7 @@
 
  <section class="tpl-section">
  <h2>4-ring receipt schema</h2>
- <p class="lede">Every generated letter ships a receipt your auditor can re-verify offline. The execution ring carries the criteria-satisfied vector so the auditor can confirm post-hoc that the recipe was honest about which criteria the input actually supported.</p>
+ <p class="lede">Every generated letter ships a receipt your auditor can re-verify offline. The execution ring carries the criteria-satisfied vector so the auditor can confirm post-hoc that the recipe was plain about which criteria the input actually supported.</p>
  <div class="tpl-receipt-grid">
  <div><div class="ring">ring 01 &middot; pre-image</div><div class="name">planned_cpt + member_hash + dx_hash</div><div class="b">tenant-rotated Ed25519</div></div>
  <div><div class="ring">ring 02 &middot; derived</div><div class="name">policy_index_hash + plan_doc_ref</div><div class="b">bound to recipe_version</div></div>

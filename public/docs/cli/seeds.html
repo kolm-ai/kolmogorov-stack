@@ -112,12 +112,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p class="lede">Scaffold and manage <code>seeds.jsonl</code> training corpora. Templates ship for common recipe classes; free-text briefs generate per-class candidate libraries (synthesized rows, tagged so the verifier knows they are placeholders).</p>
 
 <h2 id="usage">Usage</h2>
-<pre><code>kolm seeds new &lt;template&gt; scaffold from a known template
-kolm seeds new "&lt;free text brief&gt;" [flags] candidate seeds from a brief
-kolm seeds generate --from &lt;file&gt; --count &lt;N&gt; deterministic mutation expansion
-kolm seeds list list known templates
-kolm seeds bootstrap generate a starter project
-kolm seeds validate &lt;file&gt; schema-check a seeds.jsonl</code></pre>
+<pre>CODE1</pre>
 
 <h2 id="flags">Flags (brief route)</h2>
 <table>
@@ -133,17 +128,12 @@ kolm seeds validate &lt;file&gt; schema-check a seeds.jsonl</code></pre>
 </table>
 
 <h2 id="examples">Examples</h2>
-<pre><code>kolm seeds new phi-redactor
-kolm seeds new "teach me about denial codes 50 ways" --count 12
-kolm seeds new "draft a denial appeal letter" --class distilled_model --out seeds.jsonl
-kolm seeds new "compute HEDIS CBP measure" --json
-kolm seeds generate --from seeds.jsonl --count 200
-kolm seeds validate seeds.jsonl</code></pre>
+<pre>CODE15</pre>
 
 <h2 id="bootstrap">Bootstrap</h2>
 <p><code>kolm seeds bootstrap</code> creates a starter project layout in the current directory: a <code>spec.json</code>, a 10-row <code>seeds.jsonl</code> with the right schema, and a <code>kolm.yaml</code> that references both. Run it in a fresh folder when you want to see the moving parts before writing your own.</p>
 
-<h2 id="honest">Honest scope</h2>
+<h2 id="honest">Plain scope</h2>
 <p>Brief-mode rows are candidates, not labels. Each row carries <code>synthesized:true</code>. The intended flow is scaffold, then <code>kolm seeds split</code>, then <code>kolm eval</code>, then <code>kolm verify</code>. K-score against scaffolded candidates is not ground truth. Verify before ship: replace candidate rows with examples you actually want the model to learn from, then re-compile and re-verify the receipt chain.</p>
 
 <h2 id="see">Related</h2>

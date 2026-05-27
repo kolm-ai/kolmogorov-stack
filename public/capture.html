@@ -195,7 +195,7 @@ ts                    method  model            ns       latency  tokens
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head">
           <h3 class="fr-spec-list__h">Real prompts beat synthetic prompts</h3>
-          <span class="fr-spec-list__delta">HONEST EVIDENCE &middot; from your traffic</span>
+          <span class="fr-spec-list__delta">REAL EVIDENCE &middot; from your traffic</span>
         </div>
         <p class="fr-spec-list__p">Synthetic data covers what an engineer imagined; capture covers what a user actually typed. The distill step picks the rows that matter; capture is what makes those rows exist in the first place.</p>
       </li>
@@ -297,7 +297,7 @@ ts                    method  model            ns       latency  tokens
       <li>
         <div class="fr-spec-list__head">
           <h3 class="fr-spec-list__name">No silent passthrough</h3>
-          <span class="fr-spec-list__delta">honest fail &middot; live</span>
+          <span class="fr-spec-list__delta">loud fail &middot; live</span>
         </div>
         <p class="fr-spec-list__p">If the redactor is configured but the optional dep is missing, the capture fails with <code>error:no_detector_installed</code> and an install hint. The proxy never silently lets unredacted media through.</p>
       </li>
@@ -360,7 +360,7 @@ ts                    method  model            ns       latency  tokens
       </li>
       <li>
         <div class="fr-spec-list__head">
-          <h3 class="fr-spec-list__name">Disk backpressure is honest</h3>
+          <h3 class="fr-spec-list__name">Disk backpressure is plain</h3>
           <span class="fr-spec-list__delta">backpressure &middot; live</span>
         </div>
         <p class="fr-spec-list__p">If the local disk fills, the proxy refuses new captures with HTTP 507 and the row hash in the response body. A regulated team can wire that to an alert and rotate retention manually before the upstream call completes; a developer can read the error and free space without a silent data loss path.</p>
@@ -455,7 +455,7 @@ kolm.cost_micro_usd       <span class="n">5340</span></pre>
         <tr><td>kolm capture stats</td><td>Per-namespace counts, cost, latency p50/p95/p99, top models.</td></tr>
         <tr><td>kolm capture export</td><td>Stream captures to a file. JSONL, CSV, or Parquet via the optional <code>workers/parquet-export</code>.</td></tr>
         <tr><td>kolm capture delete</td><td>Subject deletion. Removes raw rows and writes a tombstone receipt so an auditor can prove the deletion happened.</td></tr>
-        <tr><td>kolm capture redact-doctor</td><td>Check the optional redaction worker is installed and able to scrub. Honest fail with an install hint if not.</td></tr>
+        <tr><td>kolm capture redact-doctor</td><td>Check the optional redaction worker is installed and able to scrub. Loud fail with an install hint if not.</td></tr>
         <tr><td>kolm namespace set-retention</td><td>Set per-namespace retention in days. The local rotator deletes older rows; receipts that reference them stay verifiable.</td></tr>
       </tbody>
     </table>

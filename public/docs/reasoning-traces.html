@@ -144,7 +144,7 @@ kolm trace verify cap_8a3f0c1d2e
 <section class="doc-section" id="distill-collection">
   <div class="ks-wrap">
     <h2>Distill jobs collection</h2>
-    <p class="sub">The bare collection endpoint <code>GET /v1/trace/distill</code> returns an honest pending envelope until the distill queue is mounted. The per-trace endpoints <code>POST /v1/trace/compile</code> and <code>POST /v1/trace/verify</code> are live today.</p>
+    <p class="sub">The bare collection endpoint <code>GET /v1/trace/distill</code> returns an plain pending envelope until the distill queue is mounted. The per-trace endpoints <code>POST /v1/trace/compile</code> and <code>POST /v1/trace/verify</code> are live today.</p>
     <p>The pending envelope is intentional: tenants can poll the collection endpoint to know whether the queue has been wired without parsing source. Once mounted, the envelope will list completed and in-flight distill jobs keyed by namespace.</p>
     <div class="code-card"><pre>curl -H "Authorization: Bearer $KOLM_API_KEY" \
   https://kolm.ai/v1/trace/distill

@@ -106,63 +106,35 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <div class="step">
  <span class="num">Step 1</span>
  <h3>Export the artifact in Vertex AI shape</h3>
-<pre><code>kolm export --artifact art_8f3a... --format vertexai --out ./kolm-vertex/</code></pre>
+<pre>CODE11</pre>
  <p>The exporter writes a Vertex AI predictor folder: <code>model/</code> (the student weights), <code>predictor/predictor.py</code> (a class that implements <code>predict()</code>, the contract Vertex AI's custom-prediction-routine expects), <code>requirements.txt</code> (the runtime deps), and <code>manifest.json</code> (kolm's compile receipt).</p>
 </div>
 
 <div class="step">
  <span class="num">Step 2</span>
  <h3>Upload to a GCS bucket</h3>
-<pre><code>gsutil cp -r ./kolm-vertex/ gs://my-kolm-bucket/artifacts/art_8f3a/</code></pre>
+<pre>CODE17</pre>
  <p>The bucket must be in the same region as the planned Vertex AI Endpoint (for example, <code>us-central1</code>) or you pay cross-region transfer at request time.</p>
 </div>
 
 <div class="step">
  <span class="num">Step 3</span>
  <h3>Create the Vertex AI Model resource with a custom container</h3>
-<pre><code>gcloud ai models upload \
-  --region us-central1 \
-  --display-name kolm-art-8f3a \
-  --container-image-uri us-docker.pkg.dev/vertex-ai/prediction/pytorch-gpu.2-1:latest \
-  --artifact-uri gs://my-kolm-bucket/artifacts/art_8f3a/ \
-  --container-predict-route /predict \
-  --container-health-route /health \
-  --container-ports 8080</code></pre>
+<pre>CODE19</pre>
  <p>The image is the Vertex AI-managed PyTorch GPU prediction container; it includes transformers and accelerate, which covers the kolm INT4 path. Swap to a custom image in your Artifact Registry if your artifact needs vLLM or TGI.</p>
 </div>
 
 <div class="step">
  <span class="num">Step 4</span>
  <h3>Deploy to a Vertex AI Endpoint</h3>
-<pre><code>gcloud ai endpoints create --region us-central1 --display-name kolm-art-8f3a
-
-ENDPOINT_ID=$(gcloud ai endpoints list --region us-central1 \
-  --filter='display_name=kolm-art-8f3a' --format='value(name)' | awk -F/ '{print $NF}')
-
-MODEL_ID=$(gcloud ai models list --region us-central1 \
-  --filter='display_name=kolm-art-8f3a' --format='value(name)' | awk -F/ '{print $NF}')
-
-gcloud ai endpoints deploy-model $ENDPOINT_ID \
-  --region us-central1 \
-  --model $MODEL_ID \
-  --display-name v1 \
-  --machine-type n1-standard-4 \
-  --accelerator type=nvidia-tesla-t4,count=1 \
-  --min-replica-count 1 \
-  --max-replica-count 3</code></pre>
+<pre>CODE20</pre>
  <p>Provisioning takes 8-15 minutes. Track with <code>gcloud ai endpoints describe $ENDPOINT_ID --region us-central1</code>. The endpoint becomes invokable once the deployment row reaches <code>READY</code>.</p>
 </div>
 
 <div class="step">
  <span class="num">Step 5</span>
  <h3>Test inference</h3>
-<pre><code>from kolm import Client
-import google.auth, google.auth.transport.requests
-creds, _ = google.auth.default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
-creds.refresh(google.auth.transport.requests.Request())
-c = Client(base_url=f"https://us-central1-aiplatform.googleapis.com/v1/projects/my-project/locations/us-central1/endpoints/{ENDPOINT_ID}:predict", bearer=creds.token)
-r = c.invoke({"instances": [{"input": "Summarize this PR description: ..."}]})
-print(r["predictions"][0]["output"], r["predictions"][0]["k_score"])</code></pre>
+<pre>CODE23</pre>
  <p>Vertex AI wraps responses in a <code>predictions</code> array; the inner object preserves the kolm envelope shape (<code>output</code>, <code>k_score</code>, <code>artifact_hash</code>, <code>latency_ms</code>).</p>
 </div>
 
@@ -173,7 +145,7 @@ print(r["predictions"][0]["output"], r["predictions"][0]["k_score"])</code></pre
 <p>Hosting and operations: the prediction container, autoscaling node pool, IAM-gated invocation, VPC Service Controls, Cloud Logging and Cloud Monitoring metrics, model versioning, traffic splitting between deployed model revisions, and optional Model Monitoring for drift. You do not run a serving stack yourself.</p>
 
 <h2 id="cost">Cost model</h2>
-<p>Honest example for a 7B INT4 student serving ~100 requests per minute in <code>us-central1</code>:</p>
+<p>Plain example for a 7B INT4 student serving ~100 requests per minute in <code>us-central1</code>:</p>
 <ul>
  <li><b>Distillation</b> (one-time): runs on your local RTX 5090 in roughly 30 minutes, or on a Vertex AI custom-job <code>n1-standard-4 + T4</code> for about $0.95/hr until done.</li>
  <li><b>Hosting</b> (continuous): one <code>n1-standard-4</code> + <code>NVIDIA_TESLA_T4</code> is roughly $0.55/hr = ~$400/month. A <code>g2-standard-4</code> with <code>NVIDIA_L4</code> is roughly $0.70/hr = ~$504/month and noticeably faster for INT4.</li>

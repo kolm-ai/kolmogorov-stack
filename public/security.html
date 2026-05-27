@@ -237,7 +237,7 @@
       </li>
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>kolm verify works air-gapped</h3><span class="fr-spec-list__delta">OFFLINE &middot; live</span></div>
-        <p class="fr-spec-list__p">The verifier is a static binary. No network, no registry lookup, no honesty service in the middle. Hand a .kolm file to an auditor on a USB stick and they can verify the chain on a laptop.</p>
+        <p class="fr-spec-list__p">The verifier is a static binary. No network, no registry lookup, no truthfulness service in the middle. Hand a .kolm file to an auditor on a USB stick and they can verify the chain on a laptop.</p>
       </li>
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>Per-tenant signing keys</h3><span class="fr-spec-list__delta">KEY-ROTATION &middot; live</span></div>
@@ -307,7 +307,7 @@
 <section class="sec-section" id="compliance">
   <div class="ks-wrap">
     <h2>Regulatory posture</h2>
-    <p class="sub">Honest scope: what is live, what is in progress, what is not on the roadmap. We do not claim certifications we do not hold.</p>
+    <p class="sub">Plain scope: what is live, what is in progress, what is not on the roadmap. We do not claim certifications we do not hold.</p>
     <table class="reg-tbl">
       <thead>
         <tr><th>Standard</th><th>Status</th><th>Notes</th></tr>
@@ -346,7 +346,7 @@
         <p class="fr-spec-list__p">Hosted control plane (kolm.ai), hosted registry (verifies CIDs and serves the public index), compiler-as-a-service workers (the path that runs distill on Kolm-managed GPUs when a customer opts in). Excludes: customer-resident compiler workers, customer-managed signing keys, captures that never leave the customer VPC.</p>
       </li>
       <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Out of scope (and why that's the right scope)</h3><span class="fr-spec-list__delta">SCOPE &middot; honest</span></div>
+        <div class="fr-spec-list__head"><h3>Out of scope (and why that's the right scope)</h3><span class="fr-spec-list__delta">SCOPE &middot; plain</span></div>
         <p class="fr-spec-list__p">Customer VPC deployments are not in the SOC 2 scope because Kolm has no operational access to them &mdash; the right control framework there is the customer&rsquo;s own (often their own SOC 2 or ISO 27001). The same logic applies to on-prem and air-gapped: zero Kolm-side operational footprint means zero Kolm-side audit footprint. Our job is to give your auditor a verifiable artifact chain; their job is to certify your environment.</p>
       </li>
       <li class="fr-spec-list__row">
@@ -687,8 +687,8 @@ $ <span class="s"># kolm publish &lt;cid&gt;                  # publishes hash t
 <a href="/spec/rs-1#section-7-10">RS-1 7.10</a>
 <p>CLI verbs: kolm keys list, kolm keys rotate, kolm keys export.</p>
 <p>Manifest field: signature.key_id (implemented as key_fingerprint).</p>
-<p>Honest scope: kolm ships the rotation receipt format; the customer owns the KMS hook.</p>
-<p>KMS api_status sentinel: <code>awaiting_operator_hook</code> (W365 honest-state token returned by /v1/keys/rotate when the operator KMS hook is not yet registered).</p>
+<p>Plain scope: kolm ships the rotation receipt format; the customer owns the KMS hook.</p>
+<p>KMS api_status sentinel: <code>awaiting_operator_hook</code> (W365 plain-state token returned by /v1/keys/rotate when the operator KMS hook is not yet registered).</p>
 <a href="/threat-model">Threat model</a>
 <a href="/drift">Drift surface</a>
 <p>wave 193 shipped: kolm keys rotate is wired in the CLI.</p>
@@ -713,7 +713,7 @@ $ <span class="s"># kolm publish &lt;cid&gt;                  # publishes hash t
       <li>HIPAA Security Rule mapping documented end-to-end; BAA available under standard MSA for Enterprise customers and on request for Team customers; live today.</li>
       <li>GDPR Article 28 Data Processing Addendum (DPA) shipped; Standard Contractual Clauses (SCCs) baked into the DPA for EU data transfers; live today.</li>
       <li>Halborn penetration test completed April 2026; full summary letter available under MNDA via security@kolm.ai.</li>
-      <li>SOC 2 Type I attestation is available under MNDA alongside the Halborn pentest, Vanta posture monitoring, and CAIQ-Lite for fast vendor assessments. The W476 closure retired the honest-amber "Q3 2026 target" language when the letter shipped.</li>
+      <li>SOC 2 Type I attestation is available under MNDA alongside the Halborn pentest, Vanta posture monitoring, and CAIQ-Lite for fast vendor assessments. The W476 closure retired the plain-amber "Q3 2026 target" language when the letter shipped.</li>
       <li>Bug bounty program runs through HackerOne; payouts from $500 floor for low-severity findings to $10,000 ceiling for critical findings. Report responsibly at security@kolm.ai or via the HackerOne private program (invite on request).</li>
       <li>Encryption at rest: AES-256 via AWS KMS with per-tenant data keys. Encryption in transit: TLS 1.3 with HSTS + certificate pinning on the kolm.ai gateway.</li>
       <li>Per-tenant data isolation enforced at the event-store layer; per-namespace partitioning within each tenant; defense-in-depth via per-row tenant fences inside every query handler.</li>

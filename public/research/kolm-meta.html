@@ -46,8 +46,8 @@
   }
   .km-code b { color: var(--fr-mint); font-weight: 580; }
 
-  .km-honesty { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-top: 20px; }
-  .km-honesty b { color: var(--ink-1); font-weight: 580; }
+  .km-truthfulness { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-top: 20px; }
+  .km-truthfulness b { color: var(--ink-1); font-weight: 580; }
 
   .km-crosslink { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
 </style>
@@ -59,7 +59,6 @@
 </head>
 <body class="ks">
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
@@ -88,7 +87,7 @@
   <div class="fr-container">
     <p class="brand-eyebrow" data-w775="brand-eyebrow">Open-source AI workbench</p>
     <h1>kolm-meta -- the meta-distillation model.</h1>
-    <p class="fr-lede">Given your capture statistics and a chosen student architecture, kolm-meta predicts the K-Score you should expect, the compile time, and the failure modes most likely to bite you. XGBoost-style gradient boosting trained on aggregated run telemetry. Below 1000 training rows we fall back to the TAAS rule ladder with an honest envelope.</p>
+    <p class="fr-lede">Given your capture statistics and a chosen student architecture, kolm-meta predicts the K-Score you should expect, the compile time, and the failure modes most likely to bite you. XGBoost-style gradient boosting trained on aggregated run telemetry. Below 1000 training rows we fall back to the TAAS rule ladder with an loud-fail envelope.</p>
     <div class="meta-row">
       <span class="fr-status"><span class="fr-status__dot"></span>Predicts K-Score + compile time + failure modes</span>
       <span class="fr-status fr-status--info"><span class="fr-status__dot"></span>Tenant-scoped aggregates only, never raw text</span>
@@ -111,7 +110,7 @@
           <h3>Predicted K-Score</h3>
           <span class="fr-spec-list__delta">scalar in 0..1 + 80% CI</span>
         </div>
-        <p class="fr-spec-list__p">A scalar prediction with an 80 percent confidence interval. Tight CIs indicate kolm-meta has seen runs like yours before; wide CIs are the honest "we do not know" signal.</p>
+        <p class="fr-spec-list__p">A scalar prediction with an 80 percent confidence interval. Tight CIs indicate kolm-meta has seen runs like yours before; wide CIs are the plain "we do not know" signal.</p>
       </li>
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head">
@@ -235,7 +234,7 @@
       </li>
     </ul>
     <div class="km-honesty">
-      <b>Honest envelope.</b> When kolm-meta cannot predict, the response is <code>meta_insufficient_data</code> with a clear count of training rows seen so far. We do not silently emit a heuristic prediction styled as a learned one. Every kolm-meta prediction ships with its SHAP attributions, the per-target confidence interval, and a pointer to the training-row cohort it generalized from.
+      <b>Loud-fail envelope.</b> When kolm-meta cannot predict, the response is <code>meta_insufficient_data</code> with a clear count of training rows seen so far. We do not silently emit a heuristic prediction styled as a learned one. Every kolm-meta prediction ships with its SHAP attributions, the per-target confidence interval, and a pointer to the training-row cohort it generalized from.
     </div>
     <div class="km-crosslink">
       <a href="/k-score" class="fr-btn fr-btn--mint">What is a K-Score</a>

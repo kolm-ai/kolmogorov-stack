@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Manifesto: why an open-source AI compiler is the only honest path · kolm.ai</title>
+<title>Manifesto: why an open-source AI compiler is the only plain path · kolm.ai</title>
 <meta name="description" content="The model that decides should be the model that gets audited. The artifact that runs in your VPC should be the artifact your compliance team signed. Principles, written down so we can be held to them.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
@@ -153,7 +153,7 @@ $ kolm verify artifact.kolm  <span style="color:var(--ks-ink-3)"># receipt: ok, 
       <div class="mf-principle">
         <div class="n">02</div>
         <div>
-          <h3>The gate is honest.</h3>
+          <h3>The gate is plain.</h3>
           <p>One number per artifact, computed against held-out evals the artifact never saw, normalized against the teacher, composed across five axes with a weight vector that is part of the receipt. K-score is the same number on your laptop, in your CI, and in your auditor's sandbox. No leaderboard hacking; the eval pack is content-addressed too.</p>
           <div class="cite"><b>Shipped:</b> K-score composite + per-axis receipts + eval-pack hash &middot; <a class="ks-accent" href="/k-score">read the gate spec</a></div>
         </div>
@@ -180,9 +180,9 @@ $ kolm verify artifact.kolm  <span style="color:var(--ks-ink-3)"># receipt: ok, 
       <div class="mf-principle">
         <div class="n">05</div>
         <div>
-          <h3>Honest about what we do not measure.</h3>
+          <h3>Plain about what we do not measure.</h3>
           <p>K-score does not measure jailbreak robustness, multi-turn coherence past your eval shape, or alignment to values not in your eval pack. The receipt lists every axis in scope; everything else is out. We will tell you in writing what kolm is the wrong tool for. The matrix on the <a class="ks-accent" href="/compare">compare</a> page is the public version of that conversation.</p>
-          <div class="cite"><b>Shipped:</b> honest-scope tokens across the surface + an explicit "skip kolm if" section on every product page</div>
+          <div class="cite"><b>Shipped:</b> plain-scope tokens across the surface + an explicit "skip kolm if" section on every product page</div>
         </div>
       </div>
 

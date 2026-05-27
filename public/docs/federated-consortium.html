@@ -183,12 +183,12 @@
   -d '{ "artifact_id":"art_...", "test_inputs":[...], "shadow_models":[],
         "p_threshold": 0.55 }'
 
-# When shadow_models is empty (the honest HTTP case):
+# When shadow_models is empty (the plain HTTP case):
 # -&gt; { "ok":false, "error":"mia_requires_shadow_models",
 #      "install_hint":"Provide &gt;=3 shadow models trained on disjoint shards" }
 </pre></div>
-    <p>Honest scope: this module is the protocol contract. The actual shadow-model attack runs on the operator side because callable models cannot cross the JSON wire. When the route returns the missing-shadow-models envelope, the SDK runs the attack locally and re-posts the AUC for verdict scoring.</p>
-    <p>The verdict envelope tags the audit method: a 'passing' verdict bounds the attacker AUC observed in YOUR test setup; it does not bound a more sophisticated adversary. The verdict is honest within its scope and the scope is stamped.</p>
+    <p>Plain scope: this module is the protocol contract. The actual shadow-model attack runs on the operator side because callable models cannot cross the JSON wire. When the route returns the missing-shadow-models envelope, the SDK runs the attack locally and re-posts the AUC for verdict scoring.</p>
+    <p>The verdict envelope tags the audit method: a 'passing' verdict bounds the attacker AUC observed in YOUR test setup; it does not bound a more sophisticated adversary. The verdict is plain within its scope and the scope is stamped.</p>
   </div>
 </section>
 

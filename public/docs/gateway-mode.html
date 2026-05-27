@@ -150,52 +150,16 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="snippets">Code snippets</h2>
 
 <h3>Cloud (default)</h3>
-<pre><code># Nothing to set  -  KOLM_GATEWAY_MODE defaults to 'cloud'.
-export OPENAI_API_KEY=sk-...
-export KOLM_API_KEY=ks_...
-
-curl https://kolm.ai/v1/chat/completions \
-  -H "authorization: Bearer $KOLM_API_KEY" \
-  -H "content-type: application/json" \
-  -d '{"model":"gpt-4o","messages":[{"role":"user","content":"hello"}]}'
-</code></pre>
+<pre>CODE39</pre>
 
 <h3>local-ollama</h3>
-<pre><code>ollama serve &amp;
-ollama pull qwen2.5:7b
-
-export KOLM_GATEWAY_MODE=local-ollama
-export KOLM_OLLAMA_URL=http://localhost:11434       # optional; default
-export KOLM_GATEWAY_LOCAL_MODEL=qwen2.5:7b          # optional; per-request model wins
-
-curl http://localhost:3000/v1/chat/completions \
-  -H "authorization: Bearer $KOLM_API_KEY" \
-  -H "content-type: application/json" \
-  -d '{"model":"qwen2.5:7b","messages":[{"role":"user","content":"hello"}]}'
-</code></pre>
+<pre>CODE40</pre>
 
 <h3>local-vllm</h3>
-<pre><code>python -m vllm.entrypoints.openai.api_server --model Qwen/Qwen2.5-7B-Instruct &amp;
-
-export KOLM_GATEWAY_MODE=local-vllm
-export KOLM_VLLM_URL=http://localhost:8000          # optional; default
-export KOLM_GATEWAY_LOCAL_MODEL=Qwen/Qwen2.5-7B-Instruct
-
-curl http://localhost:3000/v1/chat/completions \
-  -H "authorization: Bearer $KOLM_API_KEY" \
-  -H "content-type: application/json" \
-  -d '{"model":"Qwen/Qwen2.5-7B-Instruct","messages":[{"role":"user","content":"hello"}]}'
-</code></pre>
+<pre>CODE41</pre>
 
 <h3>mock</h3>
-<pre><code>export KOLM_GATEWAY_MODE=mock
-export KOLM_MOCK_KIND=echo                          # echo | reverse | fixed
-# (only for 'fixed') export KOLM_MOCK_RESPONSE='predictable test output'
-
-# Same call as above  -  but every response is deterministic and free.
-# The response carries kolm_w742.billed:false so a downstream meter
-# can assert that no hosted_inference token was charged.
-</code></pre>
+<pre>CODE42</pre>
 
 <h2 id="api">CLI + API surface</h2>
 <p>Every surface is auth-gated except the public <code>/health</code>. The CLI mirrors the API exactly so a deployment audit lands in one envelope.</p>
@@ -211,7 +175,7 @@ export KOLM_MOCK_KIND=echo                          # echo | reverse | fixed
   </tbody>
 </table>
 
-<h2 id="honest">Honest limits</h2>
+<h2 id="honest">Plain limits</h2>
 <ul>
   <li><strong>Mock is deterministic on purpose.</strong> The token counts are <code>Math.floor(chars/4)</code> so the same input always produces the same usage. Do not use mock for any code path that needs a real model &mdash; it returns the echoed / reversed / fixed string only.</li>
   <li><strong>Local backends are unauthenticated.</strong> The dispatcher assumes <code>localhost</code> (or your private network). If you expose Ollama / vLLM on a public address, that's on you &mdash; the kolm cloud will not act as a reverse proxy or auth gate for them.</li>

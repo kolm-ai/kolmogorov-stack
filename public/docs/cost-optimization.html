@@ -154,7 +154,7 @@
 # -&gt; { "ok":true, "recorded": { "event_id":"...", "cost_micro_usd":15000,
 #      "cost_usd":0.015, "input_tokens":2300, "output_tokens":540 } }
 </pre></div>
-    <p>The cost is computed against the frozen rate-card. Unknown provider returns a 400 with <code>error:'unknown_provider'</code>; unknown model returns <code>error:'unknown_model'</code>. The 400 is honest, the operator can either add the provider/model to the rate-card OR record the cost manually upstream.</p>
+    <p>The cost is computed against the frozen rate-card. Unknown provider returns a 400 with <code>error:'unknown_provider'</code>; unknown model returns <code>error:'unknown_model'</code>. The 400 is plain, the operator can either add the provider/model to the rate-card OR record the cost manually upstream.</p>
   </div>
 </section>
 
@@ -185,7 +185,7 @@
 #   }
 # }
 </pre></div>
-    <h3>Honest sub-states</h3>
+    <h3>Plain sub-states</h3>
     <ul>
       <li><code>status:"no_baseline_started"</code> - call <code>POST /v1/savings/baseline</code> first.</li>
       <li><code>status:"insufficient_baseline"</code> - fewer than 7 days of baseline observed; the saved_usd is null, never fabricated from thin data.</li>

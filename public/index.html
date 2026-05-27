@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>kolm.ai · Compile your AI workload into a model you own</title>
+<title>Compile your AI workload into a model you own · kolm.ai</title>
 <meta name="description" content="Kolm is the evidence-to-artifact compiler. Capture your traffic, distill it into a private .kolm artifact, deploy to your hardware. Apache-2.0, signed, no per-token bill.">
 <meta name="keywords" content="AI compiler, evidence to artifact, model distillation, INT4 quantization, on-device LLM, OpenRouter alternative, model gateway, edge inference, private AI, regulated AI">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
@@ -631,15 +631,7 @@
       </ul>
       <details class="ks-cli-chat__verify">
         <summary>verify it yourself &middot; two curls</summary>
-<pre class="ks-cli-chat__verify-pre"><code># 1. run a real read-only verb (server spawns cli/kolm.js)
-$ curl -s https://kolm.ai/v1/free/cli \
-    -H 'content-type: application/json' \
-    -d '{"command":"kolm whoami"}' | jq '.exit_code, .duration_ms, .stdout'
-
-# 2. ask in plain English (classifier returns a recipe)
-$ curl -s https://kolm.ai/v1/free/chat \
-    -H 'content-type: application/json' \
-    -d '{"question":"distill from claude, gpt and gemini"}' | jq '.command, .workflow.steps[].cmd'</code></pre>
+<pre class="ks-cli-chat__verify-pre">CODE18</pre>
         <p class="ks-cli-chat__verify-why">The CLI route enforces a verb allowlist (<code>whoami</code>, <code>doctor</code>, <code>changelog</code>, <code>route</code>, <code>federated</code>, &hellip;) and a strict arg-token regex - shell metachars are rejected before <code>spawn</code>. 5s timeout, 8KB output cap, 20 calls/IP/day. <code>GET /v1/free/cli/allowlist</code> returns the exact set the server accepts.</p>
       </details>
       <div class="ctas">
@@ -669,17 +661,7 @@ $ curl -s https://kolm.ai/v1/free/chat \
     <!-- W846: real receipt JSON inline - devs want to SEE what "signed
          artifact" actually means, not just read a card. -->
     <div class="kolm-receipt-strip" aria-label="Real receipt example">
-      <pre><code><span class="receipt-line-comment">// $ kolm verify support.kolm --json</span>
-{
-  <span class="receipt-line-key">"artifact"</span>: <span class="receipt-line-str">"support-qwen-7b-int4.kolm"</span>,
-  <span class="receipt-line-key">"hash"</span>:     <span class="receipt-line-str">"sha256:3f2c1a...8de4"</span>,
-  <span class="receipt-line-key">"k_score"</span>:  <span class="receipt-line-str">0.913</span>,    <span class="receipt-line-ok">// passes 0.85 floor</span>
-  <span class="receipt-line-key">"signed_by"</span>: <span class="receipt-line-str">"ed25519:9e7b...c41a"</span>,
-  <span class="receipt-line-key">"teacher"</span>:  <span class="receipt-line-str">"claude-sonnet-4-6"</span>,
-  <span class="receipt-line-key">"eval"</span>:     <span class="receipt-line-str">"support-v3.eval (frozen)"</span>,
-  <span class="receipt-line-key">"verifier"</span>: <span class="receipt-line-str">"offline / no network call"</span>,
-  <span class="receipt-line-key">"ok"</span>: <span class="receipt-line-ok">true</span>
-}</code></pre>
+      <pre>CODE28</pre>
       <div class="kolm-receipt-strip__copy">
         <h4>This is the audit trail.</h4>
         <p>Every <code>.kolm</code> artifact carries its own offline verifier and a receipt your auditor can replay. Same JSON on your laptop, in CI, and at the regulator's desk. No phone-home, no trust in our service required.</p>
@@ -1117,7 +1099,7 @@ $ curl -s https://kolm.ai/v1/free/chat \
   <div class="fr-container fr-container--tight">
     <div class="fr-section__head">
       <span class="fr-eyebrow">FAQ</span>
-      <h2 class="fr-h2" id="faq-h">Honest questions, no marketing.</h2>
+      <h2 class="fr-h2" id="faq-h">Real questions, no marketing.</h2>
       <p class="fr-lede">The longer set (drift, fine-tune vs distill, verify-only, export, cancel) is at <a href="/faq">/faq</a>.</p>
     </div>
     <div class="fr-faq" style="margin-top:32px;">

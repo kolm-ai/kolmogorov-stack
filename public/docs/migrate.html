@@ -5,21 +5,21 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <title>Migrate &middot; from Ollama / LM Studio &middot; kolm.ai</title>
-<meta name="description" content="Bring your existing Ollama and LM Studio model libraries into kolm. Discovery is local-only; each model is wrapped through the W740 import path so the not_kolm_compiled honesty lock flows transitively.">
+<meta name="description" content="Bring your existing Ollama and LM Studio model libraries into kolm. Discovery is local-only; each model is wrapped through the W740 import path so the not_kolm_compiled truthfulness lock flows transitively.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Migrate &middot; from Ollama / LM Studio &middot; kolm.ai">
-<meta property="og:description" content="Bring your Ollama / LM Studio model libraries into kolm. Local-only discovery, honest not_kolm_compiled manifests.">
+<meta property="og:description" content="Bring your Ollama / LM Studio model libraries into kolm. Local-only discovery, plain not_kolm_compiled manifests.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/migrate">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Migrate &middot; from Ollama / LM Studio &middot; kolm.ai">
-<meta name="twitter:description" content="Bring your Ollama / LM Studio model libraries into kolm. Local-only discovery, honest not_kolm_compiled manifests.">
+<meta name="twitter:description" content="Bring your Ollama / LM Studio model libraries into kolm. Local-only discovery, plain not_kolm_compiled manifests.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs/migrate">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Migrate from Ollama and LM Studio into kolm","description":"Bring your Ollama and LM Studio model libraries into kolm. Local-only discovery; each model is wrapped through the W740 import path so the not_kolm_compiled honesty lock flows transitively.","url":"https://kolm.ai/docs/migrate","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Migrate from Ollama and LM Studio into kolm","description":"Bring your Ollama and LM Studio model libraries into kolm. Local-only discovery; each model is wrapped through the W740 import path so the not_kolm_compiled truthfulness lock flows transitively.","url":"https://kolm.ai/docs/migrate","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <link rel="stylesheet" href="/design-tokens.css">
 <style>
 :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:rgba(17, 17, 17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
@@ -102,7 +102,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / migrate</div>
 <p class="eyebrow">Open-source AI workbench</p>
 <h1>Frontier AI on your own infrastructure.</h1>
-<p class="lede">W743 brings the model libraries you already manage in <strong>Ollama</strong> and <strong>LM Studio</strong> into kolm without copying a single GGUF. Discovery walks the on-disk catalogs those tools maintain, then wraps each model through the W740 <code>kolm import</code> path so the <code>not_kolm_compiled:true</code> honesty lock flows transitively. Nothing leaves the box.</p>
+<p class="lede">W743 brings the model libraries you already manage in <strong>Ollama</strong> and <strong>LM Studio</strong> into kolm without copying a single GGUF. Discovery walks the on-disk catalogs those tools maintain, then wraps each model through the W740 <code>kolm import</code> path so the <code>not_kolm_compiled:true</code> truthfulness lock flows transitively. Nothing leaves the box.</p>
 
 <h2 id="ollama">From Ollama</h2>
 <p>Ollama writes its models in a content-addressed layout: a JSON manifest under <code>&lt;root&gt;/manifests/registry.ollama.ai/library/&lt;name&gt;/&lt;tag&gt;</code> points at GGUF blobs in <code>&lt;root&gt;/blobs/sha256-&lt;hex&gt;</code>. We read the manifest, pick the layer whose <code>mediaType</code> is <code>application/vnd.ollama.image.model</code> (or fall back to the largest layer on older builds), and resolve the blob path. The blob is the same GGUF that <code>ollama run</code> uses; we never modify it.</p>
@@ -116,15 +116,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   </tbody>
 </table>
 
-<pre><code># Discover everything Ollama has on disk (no parse, no wrap).
-kolm migrate from-ollama --dry-run
-
-# Override the root if Ollama is somewhere non-default.
-kolm migrate from-ollama --path /mnt/models/.ollama/models --dry-run
-
-# Wrap a specific model by &lt;name:tag&gt;. Emits the not_kolm_compiled manifest.
-kolm migrate from-ollama --name llama3.2:3b
-</code></pre>
+<pre>CODE10</pre>
 
 <h2 id="lmstudio">From LM Studio</h2>
 <p>LM Studio writes models in a <code>&lt;publisher&gt;/&lt;repo&gt;/&lt;file&gt;.gguf</code> tree (sometimes with a per-variant subdirectory). We walk the configured root and pick up every <code>*.gguf</code> we find; the parent directory chain becomes the <code>publisher</code> + <code>repo</code> context on the wrapped manifest. The default-path candidate list covers the layouts LM Studio has shipped on each platform; <code>--path</code> overrides the entire list.</p>
@@ -139,53 +131,21 @@ kolm migrate from-ollama --name llama3.2:3b
   </tbody>
 </table>
 
-<pre><code># Discover everything LM Studio has on disk.
-kolm migrate from-lmstudio --dry-run
-
-# Override the root.
-kolm migrate from-lmstudio --path "/Volumes/Models/lm-studio/models" --dry-run
-
-# Wrap a specific file (matched by basename or full path).
-kolm migrate from-lmstudio --name llama-3.2-3b-instruct-q4_k_m
-</code></pre>
+<pre>CODE23</pre>
 
 <h2 id="doctor">Health check</h2>
 <p><code>kolm migrate doctor</code> reports which default roots exist on this host and how many models we found in each  -  useful for confirming the right Ollama / LM Studio install is being picked up before you start wrapping things.</p>
 
-<pre><code>kolm migrate doctor
-</code></pre>
+<pre>CODE25</pre>
 
-<h2 id="honesty">Honest manifests, every time</h2>
-<p>A migrated model inherits the W740-2 honesty lock:</p>
+<h2 id="honesty">Plain manifests, every time</h2>
+<p>A migrated model inherits the W740-2 truthfulness lock:</p>
 
-<pre><code>{
-  "ok": true,
-  "manifest_version": "w740-v1",
-  "not_kolm_compiled": true,
-  "k_score": null,
-  "holdout": null,
-  "source_tool": "ollama",
-  "source_name": "llama3.2:3b",
-  "source_format": "gguf",
-  "source_sha256": "&lt;64-hex&gt;",
-  "source_path": "/abs/path/blobs/sha256-...",
-  "imported_at": "2026-05-24T12:34:56.789Z",
-  "migrate_version": "w743-v1",
-  "version": "w740-v1"
-}
-</code></pre>
+<pre>CODE26</pre>
 
 <p><strong>Migration alone never earns a K-Score.</strong> The wrap exists so the migrated model can ride through catalog / inspect / signature flows immediately  -  but to claim it is kolm-compiled, you have to run <code>kolm distill</code> on real seeds and let the artifact earn a K-Score on a holdout, exactly like a fresh distill would.</p>
 
-<pre><code># 1. Migrate the existing Ollama model  -  wrapped not_kolm_compiled manifest.
-kolm migrate from-ollama --name llama3.2:3b
-
-# 2. Re-distill against your captured traffic (this is where the K-Score is earned).
-kolm distill --base ~/.ollama/models/blobs/sha256-&lt;hex&gt; --seeds ./seeds.jsonl --out llama-distilled.kolm
-
-# 3. Optional: export back to GGUF for Ollama / LM Studio / llama.cpp.
-kolm export llama-distilled.kolm --backend gguf --quant q4_k_m --out ./exports
-</code></pre>
+<pre>CODE28</pre>
 
 <h2 id="privacy">Privacy: migration is local</h2>
 <p>Discovery walks the filesystem only. Manifests, blob digests, and the path of every GGUF stay on the box; no model name, no SHA, and no file content is sent anywhere. The <code>/v1/migrate/{discover,wrap}</code> routes accept paths from the caller and run the same code; they exist so a self-hosted dashboard or CI runner can drive the migration without shelling out, but they still touch only the local filesystem.</p>
@@ -205,7 +165,7 @@ kolm export llama-distilled.kolm --backend gguf --quant q4_k_m --out ./exports
   </tbody>
 </table>
 
-<h3 id="errors">Honest error envelopes</h3>
+<h3 id="errors">Plain error envelopes</h3>
 <p>Every failure mode is a named error code with a one-line hint. No silent passthrough, no fake parses, no zero-byte manifests.</p>
 
 <table>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Company values &middot; brand &middot; kolm.ai</title>
-<meta name="description" content="Three values we hold ourselves to: transparency, reproducibility, and user ownership. Public source code, public bench, public K-score formula, honest envelopes by default, content-addressed artifacts, no IP claim on">
+<meta name="description" content="Three values we hold ourselves to: transparency, reproducibility, and user ownership. Public source code, public bench, public K-score formula, loud-fail envelopes by default, content-addressed artifacts, no IP claim on">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 
@@ -71,7 +71,6 @@
 </head>
 <body>
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">Frontier AI on your own infrastructure.</span>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <script src="/nav.js" defer></script>
@@ -98,7 +97,7 @@
     <li><b>Public source code.</b> Apache-2.0 across the entire stack - CLI, gateway, distill pipeline, compile path, K-score formula, the frontend you are reading this on. No private fork ships better behavior than the public one.</li>
     <li><b>Public bench.</b> The benchmark methodology, the prompt set, the grader, and the raw scores are in the repo. Re-running them on your own hardware is a documented quickstart, not a sales-engineering favor.</li>
     <li><b>Public K-score formula.</b> The composite quality gate that decides whether a compiled artifact ships is a deterministic function of inputs you can inspect. Same inputs in, same score out, every time.</li>
-    <li><b>Honest envelopes by default.</b> Endpoints return <code>{ok:false, error, install_hint}</code> when a feature is not installed or not configured, never silent passthrough. A redactor that is missing fails loud with <code>no_detector_installed</code> rather than returning the original media as if it had been redacted.</li>
+    <li><b>loud-fail envelopes by default.</b> Endpoints return <code>{ok:false, error, install_hint}</code> when a feature is not installed or not configured, never silent passthrough. A redactor that is missing fails loud with <code>no_detector_installed</code> rather than returning the original media as if it had been redacted.</li>
    </ul>
    <div class="pact-list">
     <div class="pact-item"><span class="k">Concrete property</span><span class="v">The K-score formula is in <code>src/k-score.js</code>. The bench harness is in <code>scripts/bench.cjs</code>. Both are reachable from a fresh <code>git clone</code> in under sixty seconds.</span></div>
@@ -120,7 +119,7 @@
    </ul>
    <div class="pact-list">
     <div class="pact-item"><span class="k">Concrete property</span><span class="v">Run <code>kolm verify &lt;cid&gt;</code> against any public artifact. Network off. Receipt either validates or it doesn't - no third state.</span></div>
-    <div class="pact-item"><span class="k">How you call drift</span><span class="v">If a marketing claim cannot be tied back to an artifact_hash or a public bench row, that is the drift. The honesty contract on every endpoint is "show the receipt or say it is not yet shipped."</span></div>
+    <div class="pact-item"><span class="k">How you call drift</span><span class="v">If a marketing claim cannot be tied back to an artifact_hash or a public bench row, that is the drift. The no-silent-pass contract on every endpoint is "show the receipt or say it is not yet shipped."</span></div>
    </div>
   </div>
  </div>
@@ -146,7 +145,7 @@
  <div class="closing">
   <h3>Why publish values at all</h3>
   <p>Values pages are usually decoration. We publish ours because each one of the three maps to a concrete, auditable property of the codebase - and if we ever drift, the public source code is the receipt. <b>Transparency</b> means the formula is in the repo. <b>Reproducibility</b> means the artifact has a hash. <b>User ownership</b> means your data sits on your disk.</p>
-  <p>Adjacent reading: <a href="/brand/github-org-decision">the GitHub org rename decision</a> and <a href="/brand/company-entity">the company entity status</a> - both published in the same honest-record spirit.</p>
+  <p>Adjacent reading: <a href="/brand/github-org-decision">the GitHub org rename decision</a> and <a href="/brand/company-entity">the company entity status</a> - both published in the same public-record spirit.</p>
  </div>
 
  </div>

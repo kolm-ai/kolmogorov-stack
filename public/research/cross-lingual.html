@@ -65,7 +65,7 @@
   }
   .cl-lang-grid span.first-class { color: var(--fr-mint); border-color: rgba(46,191,145,0.30); }
 
-  .cl-honesty-pill {
+  .cl-truthfulness-pill {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -80,8 +80,8 @@
     margin: 10px 0;
   }
 
-  .cl-honesty { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-top: 20px; }
-  .cl-honesty b { color: var(--ink-1); font-weight: 580; }
+  .cl-truthfulness { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-top: 20px; }
+  .cl-truthfulness b { color: var(--ink-1); font-weight: 580; }
 
   .cl-crosslink { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
 </style>
@@ -93,7 +93,6 @@
 </head>
 <body class="ks">
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
@@ -126,7 +125,7 @@
     <div class="meta-row">
       <span class="fr-status"><span class="fr-status__dot"></span>32 languages first-class</span>
       <span class="fr-status fr-status--info"><span class="fr-status__dot"></span>Synthetic translation always stamped</span>
-      <span class="fr-status fr-status--warn"><span class="fr-status__dot"></span>Non-listed languages fall back to English + honesty pill</span>
+      <span class="fr-status fr-status--warn"><span class="fr-status__dot"></span>Non-listed languages fall back to English + truthfulness pill</span>
     </div>
   </div>
 </section>
@@ -262,7 +261,7 @@
     <div class="fr-section__head">
       <span class="fr-eyebrow">Languages currently covered</span>
       <h2 class="fr-h2">32 first-class. The rest fall back to English with a clear pill.</h2>
-      <p class="fr-lede">First-class languages have validated detection, supported synthetic-translation pipelines, and per-language eval splits. Languages outside this list fall back to English-only and the manifest carries an honesty pill so the operator never deploys blind.</p>
+      <p class="fr-lede">First-class languages have validated detection, supported synthetic-translation pipelines, and per-language eval splits. Languages outside this list fall back to English-only and the manifest carries an truthfulness pill so the operator never deploys blind.</p>
     </div>
     <div class="cl-lang-grid" aria-label="Languages currently first-class for cross-lingual distillation">
       <span class="first-class">en</span><span class="first-class">es</span><span class="first-class">fr</span><span class="first-class">de</span>
@@ -276,7 +275,7 @@
     </div>
     <span class="cl-honesty-pill">Outside this list: English-only fallback with manifest.cross_lingual.coverage = "english_only_fallback"</span>
     <div class="cl-honesty">
-      <b>Honest contract.</b> Synthetic translation rows are always stamped <code>synthetic_translation:true</code>. Per-language K-Score is computed from per-language held-out eval splits, never from a global average. Languages outside the listed 32 fall back to English-only with a manifest honesty flag and a user-visible pill -- the operator never deploys blind to a language we do not yet cover well.
+      <b>Plain contract.</b> Synthetic translation rows are always stamped <code>synthetic_translation:true</code>. Per-language K-Score is computed from per-language held-out eval splits, never from a global average. Languages outside the listed 32 fall back to English-only with a manifest truthfulness flag and a user-visible pill -- the operator never deploys blind to a language we do not yet cover well.
     </div>
     <div class="cl-crosslink">
       <a href="/k-score" class="fr-btn fr-btn--mint">What is a K-Score</a>

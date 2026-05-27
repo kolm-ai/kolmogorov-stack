@@ -176,7 +176,7 @@ python bench_contrastive_token.py --batch 8 --seq 64 --marked-position 47
   <div class="ks-wrap">
     <h2>HTTP and TUI surface</h2>
     <p class="sub">Token-DPO runs surface in two places: the bare HTTP collection at <code>GET /v1/training/token-dpo</code> and the TUI view bound to hotkey <code>T</code> (or commands <code>:dpo</code> / <code>:token-dpo</code>).</p>
-    <p>The HTTP endpoint returns an honest envelope today: until the trainer queue is mounted through the daemon, the response is <code>{ok:true, view:'token-dpo', status:'pending', items:[]}</code> with a note pointing at the trainer module. The endpoint is still useful as a probe in dashboards (so a tenant can poll for "is the W827 trainer wired yet?" without parsing source).</p>
+    <p>The HTTP endpoint returns an loud-fail envelope today: until the trainer queue is mounted through the daemon, the response is <code>{ok:true, view:'token-dpo', status:'pending', items:[]}</code> with a note pointing at the trainer module. The endpoint is still useful as a probe in dashboards (so a tenant can poll for "is the W827 trainer wired yet?" without parsing source).</p>
     <p>The TUI view (hotkey <code>T</code>) is the operator surface. It will list completed runs once the queue is wired; today it shares the same pending envelope so the view always renders.</p>
   </div>
 </section>

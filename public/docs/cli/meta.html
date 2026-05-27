@@ -168,11 +168,11 @@
 <h1>kolm meta</h1>
 <blockquote><p>Meta-distillation model that learns which architecture a task profile should compile to. Built on top of TAAS (W716) as an upgrade path from the rule ladder.</p></blockquote>
 
-<h2>Honest scope</h2>
-<p>The <code>kolm-meta</code> trainer is a <strong>toy gradient-boosting regressor</strong> &mdash; depth-1 stumps, 50 trees, learning_rate 0.1, no column subsampling, no regularization. It is NOT XGBoost. Production-scale meta-distillation should move to <code>apps/trainer/meta_xgb.py</code> via a worker shell (same pattern as <code>workers/multimodal-redact-audio/</code>). The trainer is intentionally honest about its scope &mdash; the on-disk model file embeds a <code>honesty</code> block calling out the toy implementation.</p>
+<h2>Plain scope</h2>
+<p>The <code>kolm-meta</code> trainer is a <strong>toy gradient-boosting regressor</strong> &mdash; depth-1 stumps, 50 trees, learning_rate 0.1, no column subsampling, no regularization. It is NOT XGBoost. Production-scale meta-distillation should move to <code>apps/trainer/meta_xgb.py</code> via a worker shell (same pattern as <code>workers/multimodal-redact-audio/</code>). The trainer is intentionally plain about its scope &mdash; the on-disk model file embeds a <code>honesty</code> block calling out the toy implementation.</p>
 
 <h2>Usage</h2>
-<pre><code>kolm meta &lt;status|rows|retrain|predict&gt; [--json]</code></pre>
+<pre>CODE4</pre>
 
 <h2>Sub-verbs</h2>
 <table>
@@ -180,8 +180,8 @@
 <tbody>
 <tr><td><code>status</code></td><td>Print <code>rows_total</code>, <code>min_rows_for_meta</code>, <code>meta_insufficient_data</code>, <code>model_present</code>.</td></tr>
 <tr><td><code>rows</code></td><td>List the last 100 training rows on disk (<code>~/.kolm/meta-training/rows.jsonl</code>).</td></tr>
-<tr><td><code>retrain</code></td><td>Rebuild <code>~/.kolm/meta-model.json</code> from all rows. Honest <code>insufficient_rows</code> envelope when &lt;2 rows on disk.</td></tr>
-<tr><td><code>predict</code></td><td>Run inference. Honest <code>no_model</code> status when no retrain has run.</td></tr>
+<tr><td><code>retrain</code></td><td>Rebuild <code>~/.kolm/meta-model.json</code> from all rows. Plain <code>insufficient_rows</code> envelope when &lt;2 rows on disk.</td></tr>
+<tr><td><code>predict</code></td><td>Run inference. Plain <code>no_model</code> status when no retrain has run.</td></tr>
 </tbody>
 </table>
 
@@ -190,16 +190,7 @@
 
 <h2>Scheduling</h2>
 <p>We do not schedule cron from Node. Instead, point a systemd timer (or cron) at <code>kolm meta retrain --json</code> once a week:</p>
-<pre><code># /etc/systemd/system/kolm-meta-retrain.timer
-[Unit]
-Description=Weekly kolm-meta retrain
-
-[Timer]
-OnCalendar=weekly
-Persistent=true
-
-[Install]
-WantedBy=timers.target</code></pre>
+<pre>CODE24</pre>
 
 <h2>HTTP routes</h2>
 <table>

@@ -5,21 +5,21 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <title>Security posture &middot; Open-source AI workbench &middot; kolm.ai</title>
-<meta name="description" content="Honest security posture for the kolm.ai Open-source AI workbench. What we do, what we don't yet do, what we promise. Architecture diagram, auth, tenant fence, encryption, audit log, SBOM, supply-chain pinning, and">
+<meta name="description" content="Plain security posture for the kolm.ai Open-source AI workbench. What we do, what we don't yet do, what we promise. Architecture diagram, auth, tenant fence, encryption, audit log, SBOM, supply-chain pinning, and">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Security posture &middot; Open-source AI workbench &middot; kolm.ai">
-<meta property="og:description" content="Honest security posture for kolm.ai. What we do, what we don't yet do, what we promise. Architecture diagram, tenant fence, audit log, SBOM, and compliance status.">
+<meta property="og:description" content="Plain security posture for kolm.ai. What we do, what we don't yet do, what we promise. Architecture diagram, tenant fence, audit log, SBOM, and compliance status.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/security/posture">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Security posture &middot; Open-source AI workbench &middot; kolm.ai">
-<meta name="twitter:description" content="Honest security posture. What we do, what we don't yet do, what we promise.">
+<meta name="twitter:description" content="Plain security posture. What we do, what we don't yet do, what we promise.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/security/posture">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Security posture","description":"Honest security posture for the kolm.ai Open-source AI workbench. What we do, what we don't yet do, what we promise.","url":"https://kolm.ai/security/posture","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Security posture","description":"Plain security posture for the kolm.ai Open-source AI workbench. What we do, what we don't yet do, what we promise.","url":"https://kolm.ai/security/posture","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <link rel="stylesheet" href="/design-tokens.css">
 <style>
 :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:rgba(17, 17, 17,0.10);--warn:#a8b3c2;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
@@ -50,7 +50,7 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);verti
 th{color:var(--ink);font-weight:500}
 td code{font-size:12px}
 .warn{border:1px solid var(--warn);border-left:4px solid var(--warn);background:rgba(82, 90, 100,0.07);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
-.honesty{border:1px solid var(--accent);border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
+.truthfulness{border:1px solid var(--accent);border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
 .do-list,.dont-list{list-style:none;padding:0;margin:14px 0 18px;max-width:920px}
 .do-list li,.dont-list li{padding:14px 18px;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;background:var(--bg-elev);margin:8px 0;color:var(--ink-mute);font-size:14.5px;line-height:1.6}
 .dont-list li{border-left-color:var(--warn)}
@@ -111,7 +111,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/security">security</a> / posture</div>
 <p class="brand-eyebrow">Open-source AI workbench</p>
 <h1>Security posture.</h1>
-<p class="lede">Honest security posture. What we do today, what we have committed to, and the public disclosures that bind us to those commitments. This page is a deeper dive than <a href="/security">the security overview</a> &mdash; it names the controls in production and the controls still on the roadmap with target dates. If a row is missing here it is because the control is still on the roadmap; we do not list aspirational controls.</p>
+<p class="lede">Plain security posture. What we do today, what we have committed to, and the public disclosures that bind us to those commitments. This page is a deeper dive than <a href="/security">the security overview</a> &mdash; it names the controls in production and the controls still on the roadmap with target dates. If a row is missing here it is because the control is still on the roadmap; we do not list aspirational controls.</p>
 
 <h2 id="architecture">Architecture</h2>
 <p>Kolm separates three planes so an attacker who breaches one does not automatically compromise the others. The gateway holds auth and rate limits. The control plane holds tenant metadata, namespaces, and API keys. The data plane holds the captures, the distilled artifacts, the event-store rows, and the worker pools (distill, eval, redact). The diagram below shows the default hosted shape; the same shape ships on-premise with the gateway and control plane co-located.</p>
@@ -220,7 +220,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
     The hosted gateway terminates TLS 1.3 only. HTTP/1.1 plaintext is refused. HSTS with <code>max-age=63072000; includeSubDomains; preload</code>. On-premise deployments inherit the operator's TLS config; the recommended baseline is the same.</li>
 
   <li><b>Encryption at rest &middot; storage-layer provided</b>
-    The event store, artifact registry, and capture lake live on managed storage volumes whose at-rest encryption is provided by the underlying storage layer (AES-256-GCM on the hosted side; whatever the operator configures on-premise). We do not layer a separate at-rest cipher on top &mdash; see <a href="#what-we-dont">What we don't yet do</a> for that honesty.</li>
+    The event store, artifact registry, and capture lake live on managed storage volumes whose at-rest encryption is provided by the underlying storage layer (AES-256-GCM on the hosted side; whatever the operator configures on-premise). We do not layer a separate at-rest cipher on top &mdash; see <a href="#what-we-dont">What we don't yet do</a> for that truthfulness.</li>
 
   <li><b>Audit log &middot; W770 append-only event sink</b>
     Auth events, key issuance, key rotation, namespace mutation, plan change, artifact publish, takedown, and admin action all land in an append-only audit log. Tenant operators can pull their own log via <code>kolm audit</code>; SOC-2-bound enterprise customers can stream it to their SIEM. See <a href="/security/sbom">/security/sbom</a> for the supply-chain side and <code>src/audit.js</code> for the schema.</li>
@@ -236,7 +236,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </ul>
 
 <h2 id="what-we-dont">What we don't yet do</h2>
-<p>Honest list of controls we have not yet shipped. Each item has a roadmap reference or a stated reason.</p>
+<p>Plain list of controls we have not yet shipped. Each item has a roadmap reference or a stated reason.</p>
 
 <ul class="dont-list">
   <li><b>End-to-end encryption of capture payload at rest</b>
@@ -250,7 +250,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </ul>
 
 <h2 id="compliance">Compliance status</h2>
-<p>Honest scope: what is signed, what is in observation, what is mapped, what we do not yet hold. We do not claim certifications we do not hold.</p>
+<p>Plain scope: what is signed, what is in observation, what is mapped, what we do not yet hold. We do not claim certifications we do not hold.</p>
 
 <table class="compliance-tbl">
   <thead><tr><th>Standard</th><th>Status</th><th>Notes</th></tr></thead>

@@ -112,10 +112,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p class="lede">Signing-key rotation lifecycle. Generates Ed25519 keypairs, records rotation receipts, and emits KMS wrap intents. The receipt-chain verifier (<code>kolm verify</code>) re-checks the active fingerprint against the manifest's signing block.</p>
 
 <h2 id="usage">Usage</h2>
-<pre><code>kolm keys list list keys + status + KMS target
-kolm keys rotate [--kms &lt;target&gt;] [--overlap-days &lt;N&gt;]
-kolm keys fingerprint print active key short fingerprint
-kolm keys export emit the rotation manifest as JSON</code></pre>
+<pre>CODE1</pre>
 
 <h2 id="flags">Flags</h2>
 <table>
@@ -128,12 +125,9 @@ kolm keys export emit the rotation manifest as JSON</code></pre>
 </table>
 
 <h2 id="examples">Examples</h2>
-<pre><code>kolm keys list
-kolm keys rotate
-kolm keys rotate --kms aws-kms --overlap-days 60
-kolm keys fingerprint</code></pre>
+<pre>CODE12</pre>
 
-<h2 id="honest">Honest scope</h2>
+<h2 id="honest">Plain scope</h2>
 <p>kolm emits the rotation receipt and writes the new key into <code>KOLM_HOME</code> for the local target. For hosted KMS targets the customer's KMS hook applies the wrapping; kolm does not call AWS, GCP, or Azure APIs from the CLI. Verify the wrap landed in your KMS before rotating production traffic.</p>
 <p>The overlap window matters. During those days both keys verify, so a manifest signed by the old key still passes <code>kolm verify</code> while you re-sign in-flight artifacts. Set <code>--overlap-days</code> shorter than your shortest receipt-validity window and you can lock yourself out of past artifacts. Set it longer than your rotation cadence and you defeat the point.</p>
 

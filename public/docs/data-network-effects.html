@@ -105,21 +105,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p>What does <em>not</em> enter the lake: prompt text, completion text, tool calls, user identity, request hash, or any payload that could be used to re-identify the original capture. The contribution row in the event-store is a tight envelope; <code>tests/wave757-pattern-lake.test.js</code> pins that no raw substring survives the tokenizer.</p>
 
 <h2 id="optin">3. Opt-in flow</h2>
-<pre><code># 1. Flip the install-level hatch (operator action; defaults to OFF).
-export KOLM_W757_LAKE_ENABLED=1
-
-# 2. Opt a namespace in (per-namespace, per-tenant; requires --confirm).
-kolm lake opt-in --namespace support-team-a --confirm
-
-# 3. Contribute a capture (explicit consent flag on top of the opt-in).
-kolm lake contribute --namespace support-team-a --capture-id abc123 --consent
-
-# 4. Pull the cross-tenant trend rollup any time.
-kolm lake trends
-
-# 5. Opt back out durably (append-only registry; future reads observe latest-wins).
-kolm lake opt-out --namespace support-team-a
-</code></pre>
+<pre>CODE10</pre>
 
 <h2 id="dp">4. Differential privacy guarantee</h2>
 <p>Cross-tenant aggregates pass through a Laplace mechanism before they leave the aggregation surface. The default epsilon is <code>1.0</code>; the floor is <code>0.1</code>. An aggregate query with <code>epsilon &lt; 0.1</code> throws <code>epsilon_below_floor</code> &mdash; we never publish a weaker noise level than the floor.</p>
@@ -129,20 +115,11 @@ kolm lake opt-out --namespace support-team-a
 <p>A separate, stronger privacy claim &mdash; the hash-only contribution surface above &mdash; means the DP layer is the belt over the suspenders. The lake's primary guarantee is that raw text never crosses the tenant boundary; DP is the second-order protection against count-based reconstruction attacks.</p>
 
 <h2 id="verticals">5. How vertical fingerprints unlock W751-W755</h2>
-<p>The five vertical foundation students each need a fingerprint of how their industry actually uses AI &mdash; what bigrams dominate in legal prompts versus medical prompts versus support prompts. With the lake disabled, the fingerprint surface returns an honest <code>insufficient_lake_data</code> envelope. With the lake enabled and at least 5 opted-in contributors per vertical, the fingerprint surface returns the top-K bigram hashes the vertical's student should learn to predict.</p>
-<pre><code>GET /v1/verticals/legal/fingerprint
-&rarr; {
-  "ok": true,
-  "vertical_id": "legal",
-  "version": "w757-v1",
-  "n_contributing_namespaces": 12,
-  "top_bigram_hashes": [{"hash":"...", "count": 47}, ...],
-  "generated_at": "..."
-}
-</code></pre>
+<p>The five vertical foundation students each need a fingerprint of how their industry actually uses AI &mdash; what bigrams dominate in legal prompts versus medical prompts versus support prompts. With the lake disabled, the fingerprint surface returns an plain <code>insufficient_lake_data</code> envelope. With the lake enabled and at least 5 opted-in contributors per vertical, the fingerprint surface returns the top-K bigram hashes the vertical's student should learn to predict.</p>
+<pre>CODE17</pre>
 <p>See <a href="/docs/verticals">/docs/verticals</a> for the five vertical foundation students, their target K-Scores, and the marketplace stubs that flip from <code>pending_distill:true</code> once the fingerprint pipeline produces real compiles.</p>
 
-<h2 id="honesty">6. Honesty note</h2>
+<h2 id="honesty">6. Caveats note</h2>
 <div class="callout">
   <b>Lake disabled by default.</b> Set <code>KOLM_W757_LAKE_ENABLED=1</code> to opt your installation in. No data crosses tenant boundaries without consent. The opt-in registry is append-only and per-namespace; opting a namespace in does NOT implicitly opt other namespaces in. Opt-out is durable and observed by all future reads.
 </div>

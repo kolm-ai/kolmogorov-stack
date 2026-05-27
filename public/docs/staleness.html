@@ -113,16 +113,11 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="recency">Recency weighting  -  exponential decay</h2>
 <p>The recency weight is a pure exponential decay in age (days), parameterised by a half-life. Same-day captures get weight <code>1.0</code>. After one half-life of age, weight is <code>0.5</code>. After two half-lives, <code>0.25</code>. Etc. Future-dated captures (clock skew, replay-from-archive) are clamped to <code>1.0</code> so a skewed client never inflates a row above present-day mass.</p>
 
-<pre><code>weight = 0.5 ** (age_days / half_life_days)
-
-# Defaults
-half_life_days = 30  # tune via `kolm staleness sampler-weights --half-life N`
-</code></pre>
+<pre>CODE6</pre>
 
 <p>The 30-day default is a starting point, not a religious commitment. Domains with rapid drift (news, code, market data) want a shorter half-life (7 or 14 days). Domains with slow drift (legal templates, medical coding) want longer (60 or 90). The CLI lets you see the resulting distribution before you hard-code a choice:</p>
 
-<pre><code>kolm staleness sampler-weights production --half-life 14
-</code></pre>
+<pre>CODE7</pre>
 
 <h2 id="ttl">TTL policy &mdash; configurable per-namespace</h2>
 <p>The TTL knob is separate from the weight knob. Weights down-weight a row; TTL <strong>deletes</strong> it. A 90-day TTL on a namespace evicts every row older than 90 days, permanently. The two together let you say "weight aggressively toward recency in the sampler AND drop rows past a known cliff."</p>
@@ -143,7 +138,7 @@ half_life_days = 30  # tune via `kolm staleness sampler-weights --half-life N`
   <li>Provider-specific env: <code>KOLM_TEACHER_VERSION_&lt;UPPER(provider)&gt;</code></li>
   <li>Generic env: <code>KOLM_DISTILL_TEACHER</code> (the existing repo env)</li>
   <li>Documented per-provider default (<code>anthropic</code> &rarr; <code>claude-opus-4-7</code>; <code>openai</code> &rarr; <code>gpt-4o</code>)</li>
-  <li>Honest fallback: <code>unknown_teacher_v0</code> &mdash; queryable string, never <code>null</code></li>
+  <li>Plain fallback: <code>unknown_teacher_v0</code> &mdash; queryable string, never <code>null</code></li>
 </ol>
 
 <p>Tagging is <strong>idempotent</strong>. A row that already carries a non-empty <code>teacher_version</code> (e.g. a passthrough capture that already knew the exact upstream model id) is left alone. This means a capture stamped at proxy time with <code>claude-opus-4-7-20251007</code> survives intact even if the env default later changes &mdash; the closer-to-source value always wins.</p>
@@ -185,40 +180,9 @@ half_life_days = 30  # tune via `kolm staleness sampler-weights --half-life N`
 <h2 id="envelope">Envelope shapes</h2>
 <p>Both read routes return stable shapes. The dashboard + the CLI both consume them; downstream CI gates can rely on the field names.</p>
 
-<pre><code>GET /v1/staleness/production
-{
-  "ok": true,
-  "namespace": "production",
-  "total_captures": 4218,
-  "freshness": [
-    {"bucket_label": "<=1d",  "bucket_max_days": 1,   "count": 412,  "pct": 9.8},
-    {"bucket_label": "<=7d",  "bucket_max_days": 7,   "count": 988,  "pct": 23.4},
-    {"bucket_label": "<=30d", "bucket_max_days": 30,  "count": 1502, "pct": 35.6},
-    {"bucket_label": "<=90d", "bucket_max_days": 90,  "count": 822,  "pct": 19.5},
-    {"bucket_label": "<=365d","bucket_max_days": 365, "count": 408,  "pct": 9.7},
-    {"bucket_label": ">365d", "bucket_max_days": null,"count": 86,   "pct": 2.0}
-  ],
-  "evicted_if_ttl_30d": 1316,
-  "evicted_if_ttl_90d": 494,
-  "version": "w746-v1",
-  "generated_at": "2026-05-24T18:42:11.503Z"
-}
-</code></pre>
+<pre>CODE50</pre>
 
-<pre><code>GET /v1/teacher-versions/production
-{
-  "ok": true,
-  "namespace": "production",
-  "total_captures": 4218,
-  "versions": [
-    {"teacher_version": "claude-opus-4-7",  "count": 3104},
-    {"teacher_version": "claude-opus-4-6",  "count": 982},
-    {"teacher_version": "unknown_teacher_v0","count": 132}
-  ],
-  "version": "w746-v1",
-  "generated_at": "2026-05-24T18:42:11.503Z"
-}
-</code></pre>
+<pre>CODE51</pre>
 
 <h2 id="next">Next steps</h2>
 <p>Use <code>kolm staleness show</code> first to see the freshness distribution and per-teacher split. Look at the projected eviction counts at 30d / 90d before deciding on a TTL. When you do apply a TTL, type the namespace at the prompt &mdash; or pass <code>--yes</code> if you trust your script.</p>

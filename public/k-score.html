@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="K-score &middot; kolm.ai">
-<meta property="og:description" content="The per-artifact gate that decides if a .kolm ships. Composed from five axes. Calibrated against the teacher. Honest by construction.">
+<meta property="og:description" content="The per-artifact gate that decides if a .kolm ships. Composed from five axes. Calibrated against the teacher. Plain by construction.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/k-score">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -21,7 +21,7 @@
 <style>
   .ks-hero-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
   @media (max-width: 920px) { .ks-hero-grid { grid-template-columns: 1fr; } }
-  /* W681: sculptural single-number treatment. Killed the stacked Faith/Cover/Calib/Honest/Cost
+  /* W681: sculptural single-number treatment. Killed the stacked Faith/Cover/Calib/Plain/Cost
      bars (audit flagged: "reads like a fitness app dashboard, not premium B2B"). The number
      IS the hero; the breakdown moved to its own #axes section below where it can breathe. */
   .ks-bigscore { padding: clamp(28px, 4vw, 48px); background: linear-gradient(180deg, rgba(230, 233, 238, 0.022), transparent 60%), var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); position: relative; overflow: hidden; }
@@ -203,7 +203,7 @@
         </div>
       </div>
       <!-- W681: sculptural single-number hero card. Replaced the 5-row stacked horizontal
-           bars (Faith/Cover/Calib/Honest/Cost) the user explicitly called out as amateur
+           bars (Faith/Cover/Calib/Plain/Cost) the user explicitly called out as amateur
            ("the copy does no justice"). The number IS the lede; per-axis breakdown lives
            below at #axes where it has room to be its own story. -->
       <div class="ks-bigscore">
@@ -248,11 +248,11 @@
       <div class="ks-axis">
         <div class="tag">Calibrated</div>
         <h3>Calibrated against the teacher</h3>
-        <p>Components are normalized to the teacher's score on the same eval pack. A K-score of 85 means the artifact recovers 85% of teacher quality on this task, with the cost and coverage you specified. Honest math.</p>
+        <p>Components are normalized to the teacher's score on the same eval pack. A K-score of 85 means the artifact recovers 85% of teacher quality on this task, with the cost and coverage you specified. Plain math.</p>
       </div>
       <div class="ks-axis">
-        <div class="tag">Honest</div>
-        <h3>Honest about what it does not measure</h3>
+        <div class="tag">Plain</div>
+        <h3>Plain about what it does not measure</h3>
         <p>K-score does not measure novel-task transfer, jailbreak robustness, multi-turn coherence past your eval shape, or alignment to values not in your evals. The .kolm receipt lists every axis in scope; everything else is out.</p>
       </div>
     </div>
@@ -286,10 +286,10 @@
         <div class="formula">calib = 100 - <b>ECE</b> * 200 &middot; clamped to [0, 100]</div>
       </div>
       <div class="ks-axis">
-        <div class="tag">04 &middot; Honest</div>
-        <h3>Honesty under disagreement</h3>
-        <p>Does the artifact refuse out-of-distribution prompts? Does it call out missing fields, ambiguous inputs, and adversarial framing? Scored against a curated honesty probe that ships with each eval pack.</p>
-        <div class="formula">honest = <b>refusal_correctness</b> on the adversarial slice</div>
+        <div class="tag">04 &middot; Plain</div>
+        <h3>Caveats under disagreement</h3>
+        <p>Does the artifact refuse out-of-distribution prompts? Does it call out missing fields, ambiguous inputs, and adversarial framing? Scored against a curated truthfulness probe that ships with each eval pack.</p>
+        <div class="formula">plain = <b>refusal_correctness</b> on the adversarial slice</div>
       </div>
       <div class="ks-axis">
         <div class="tag">05 &middot; Cost</div>
@@ -562,7 +562,7 @@ kolm receipt cm-claims-v4.kolm --json | jq <span class="s">'.k_score, .axes, .ve
       </details>
       <details>
         <summary>Does K-score work for multi-modal artifacts?</summary>
-        <p>Yes, with caveats. Faith and Calibration generalize cleanly (image-classification F1, audio-transcript WER). Coverage adapts to per-modality slice priors. Honesty needs a per-modality probe pack, and we ship reference probes for image and audio; for novel modalities you author the probe yourself, signed by your team.</p>
+        <p>Yes, with caveats. Faith and Calibration generalize cleanly (image-classification F1, audio-transcript WER). Coverage adapts to per-modality slice priors. Caveats needs a per-modality probe pack, and we ship reference probes for image and audio; for novel modalities you author the probe yourself, signed by your team.</p>
       </details>
       <details>
         <summary>How do you prevent score inflation across compiler versions?</summary>
@@ -622,19 +622,19 @@ kolm receipt cm-claims-v4.kolm --json | jq <span class="s">'.k_score, .axes, .ve
       <div class="ks-axis">
         <div class="tag">Ship &middot; 87.2</div>
         <h3>cm-soap-notes-v2.kolm</h3>
-        <p>Clinical SOAP note assembler distilled from 18,400 captured physician approvals. Faith 92, Cover 89, Calib 84, Honest 86, Cost 85. The Calibration axis sits a little low because the artifact is slightly under-confident on the "social history" section; that is documented in the receipt and the runtime widens the fallback band for that section.</p>
+        <p>Clinical SOAP note assembler distilled from 18,400 captured physician approvals. Faith 92, Cover 89, Calib 84, Plain 86, Cost 85. The Calibration axis sits a little low because the artifact is slightly under-confident on the "social history" section; that is documented in the receipt and the runtime widens the fallback band for that section.</p>
         <div class="formula"><b>Verdict:</b> production-ready, no caveats, deploy at full traffic.</div>
       </div>
       <div class="ks-axis">
         <div class="tag">Caveats &middot; 73.4</div>
         <h3>fwa-triage-v9.kolm</h3>
-        <p>Fraud triage classifier distilled from 8,200 SIU-confirmed cases. Faith 81, Cover 74, Calib 68, Honest 79, Cost 71. The Calibration crater is real: the artifact is over-confident on the "professional courtesy waiver" slice. The runtime config routes any decision with that flag to the human queue, regardless of model confidence, until the next re-distill.</p>
+        <p>Fraud triage classifier distilled from 8,200 SIU-confirmed cases. Faith 81, Cover 74, Calib 68, Plain 79, Cost 71. The Calibration crater is real: the artifact is over-confident on the "professional courtesy waiver" slice. The runtime config routes any decision with that flag to the human queue, regardless of model confidence, until the next re-distill.</p>
         <div class="formula"><b>Verdict:</b> shippable with a runtime guard on one slice; the receipt names the guard.</div>
       </div>
       <div class="ks-axis">
         <div class="tag">Blocked &middot; 54.1</div>
         <h3>pa-cardio-v1.kolm</h3>
-        <p>Prior-auth assistant for cardiology, first distill attempt. Faith 71, Cover 38, Calib 64, Honest 70, Cost 45. The Coverage axis is the killer: the artifact silently returned low_confidence on 41% of inputs because the captures were skewed to electrophysiology and the eval pack covered the full cardiology line. The fix is more captures across the under-covered slices, then re-distill.</p>
+        <p>Prior-auth assistant for cardiology, first distill attempt. Faith 71, Cover 38, Calib 64, Plain 70, Cost 45. The Coverage axis is the killer: the artifact silently returned low_confidence on 41% of inputs because the captures were skewed to electrophysiology and the eval pack covered the full cardiology line. The fix is more captures across the under-covered slices, then re-distill.</p>
         <div class="formula"><b>Verdict:</b> do not ship; the per-axis breakdown tells you exactly what to capture more of.</div>
       </div>
     </div>
@@ -655,8 +655,8 @@ kolm receipt cm-claims-v4.kolm --json | jq <span class="s">'.k_score, .axes, .ve
       <dd>Distribution skew. The captures over-represent the easy slice. Pull the per-slice Cover breakdown, identify the slices below 0.8, capture more of them, and re-distill. Cover is the axis where re-distillation pays off the most predictably.</dd>
       <dt>Low Calibration</dt>
       <dd>Temperature too high at distill time, or the captured set lacks confidence-supervision. Drop the distill temperature, run a post-hoc temperature scaling on the calibration head, and re-score. ECE typically drops by 30-50% from a single round of post-hoc calibration.</dd>
-      <dt>Low Honest</dt>
-      <dd>The honesty probe pack is hitting a refusal hole. Read the failed-probe transcripts; usually the artifact answers a prompt it should have refused, in a category not represented in your captures. Either capture refusal examples in that category, or annotate the runtime to gate that category at the prompt layer.</dd>
+      <dt>Low Plain</dt>
+      <dd>The truthfulness probe pack is hitting a refusal hole. Read the failed-probe transcripts; usually the artifact answers a prompt it should have refused, in a category not represented in your captures. Either capture refusal examples in that category, or annotate the runtime to gate that category at the prompt layer.</dd>
       <dt>Low Cost</dt>
       <dd>The artifact is too close to the teacher. This is sometimes correct (regulated workloads where you want teacher quality at any price); sometimes a sign you should pick a smaller base model and re-distill. The Cost axis is the only one where a low score can be a deliberate choice rather than a defect.</dd>
     </dl>

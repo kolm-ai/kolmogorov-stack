@@ -173,7 +173,7 @@
         <dt>base_model</dt><dd>The open-weight base the student distilled from, plus its SHA-256 (for example <code>Qwen/Qwen2.5-7B-Instruct</code>).</dd>
         <dt>teacher</dt><dd>The teacher endpoint that produced training data: a frontier model id, a self-hosted vLLM URL, or <code>self-distill</code> for trace-based distillation.</dd>
         <dt>eval_pack</dt><dd>The CID of the eval pack the K-score was computed against. The pack is itself content-addressed and reproducible.</dd>
-        <dt>k_score</dt><dd>Composite numeric (0&ndash;100) plus the five axes (faithfulness, coverage, calibration, honesty, cost).</dd>
+        <dt>k_score</dt><dd>Composite numeric (0&ndash;100) plus the five axes (faithfulness, coverage, calibration, truthfulness, cost).</dd>
         <dt>signed_at</dt><dd>UTC timestamp when the compiler signed the receipt.</dd>
         <dt>public_key</dt><dd>Ed25519 fingerprint of the signing key. Verifiers match this against the artifact's embedded key.</dd>
         <dt>publisher</dt><dd>Tenant id of the team that published; opaque hash unless they opt to publish a display name.</dd>
@@ -351,7 +351,7 @@ $ kolm publish ./artifacts/finance-q2.kolm \
         <p class="fr-spec-list__p">Email <a href="/trust">trust@kolm.ai</a> with the receipt CID and a signature over a takedown nonce we provide. The CID drops from <a href="/registry">/registry</a> search and the <code>/v1/verify/&lt;cid&gt;</code> resolve within 24 hours.</p>
       </li>
       <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>What takedown does not erase</h3><span class="fr-spec-list__delta fr-spec-list__delta--scope">HONEST SCOPE &middot; provenance survives</span></div>
+        <div class="fr-spec-list__head"><h3>What takedown does not erase</h3><span class="fr-spec-list__delta fr-spec-list__delta--scope">PLAIN SCOPE &middot; provenance survives</span></div>
         <p class="fr-spec-list__p">The receipt is signed and content-addressed. A downstream verifier who pulled it before takedown still has a valid receipt body; <code>kolm verify</code> on their copy still passes. Takedown removes discovery, not provenance.</p>
       </li>
       <li class="fr-spec-list__row">
@@ -397,7 +397,7 @@ $ kolm publish ./artifacts/finance-q2.kolm \
 
 <section class="sec-section" id="scope">
   <div class="ks-wrap">
-    <h2>Honest scope</h2>
+    <h2>Plain scope</h2>
     <p class="sub">The registry is a discovery index, not the source of truth. The source of truth is the signed receipt embedded in the artifact zip. We want anyone, including someone who does not trust kolm.ai, to be able to verify the chain.</p>
     <ul class="fr-spec-list rg-list">
       <li class="fr-spec-list__row">
@@ -406,7 +406,7 @@ $ kolm publish ./artifacts/finance-q2.kolm \
       </li>
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>What we do not promise</h3><span class="fr-spec-list__delta fr-spec-list__delta--nonclaim">NON-CLAIM &middot; plumbing not adjudication</span></div>
-        <p class="fr-spec-list__p">The registry does not host model weights. It does not run the eval pack for you (use <code>kolm verify --recompute</code> for that). It does not certify a K-score is honest; only an independent re-run does. It is plumbing, not adjudication.</p>
+        <p class="fr-spec-list__p">The registry does not host model weights. It does not run the eval pack for you (use <code>kolm verify --recompute</code> for that). It does not certify a K-score is plain; only an independent re-run does. It is plumbing, not adjudication.</p>
       </li>
     </ul>
     <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">

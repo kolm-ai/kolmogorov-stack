@@ -65,7 +65,7 @@ td code{font-size:12px}
 .risk-tag.quarantine{color:#7fa1c4}
 .risk-tag.rotate{color:#ef4444}
 .risk-card p{font-size:13.5px;margin:0;line-height:1.55}
-.honesty{border:1px solid var(--accent);border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
+.truthfulness{border:1px solid var(--accent);border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
 .warn{border:1px solid var(--warn);border-left:4px solid var(--warn);background:rgba(82, 90, 100,0.07);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
 .related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
 @media(max-width:820px){.related{grid-template-columns:1fr}}
@@ -154,10 +154,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="hmac-binding">Teacher-response HMAC binding</h2>
 <p data-w761="hmac-binding-doc">The cryptographic binding is the load-bearing signal in the four-layer stack. The hash chain is:</p>
 
-<pre><code>response_hmac = HMAC-SHA256(
-  KOLM_TEACHER_HMAC_KEY,
-  teacher_id || ":" || request_hash || ":" || sha256(response_body) || ":" || timestamp_ms
-)</code></pre>
+<pre>CODE3</pre>
 
 <p>The binding envelope persisted alongside each capture also carries a 16-character key fingerprint &mdash; a SHA-256 hash of the active HMAC key, truncated. The fingerprint lets the verifier detect key rotation explicitly: if the active key's fingerprint differs from the binding's fingerprint, verification surfaces <code>hmac_key_mismatch_post_rotation</code> rather than ambiguously reporting "signature mismatch."</p>
 
@@ -179,22 +176,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <p>Quarantine is idempotent. Re-quarantining the same <code>(capture_id, reason)</code> tuple no-ops &mdash; the orchestrator returns the existing event without writing a duplicate. Release is owner/admin-gated at the route layer; the orchestrator itself only enforces the audit-trail contract.</p>
 
-<pre><code>POST /v1/poisoning/quarantine
-{
-  "capture_id": "ev_8f3a...",
-  "reason": "hmac:invalid_signature",
-  "evidence": ["anomaly:flagged[output_length,vocab_entropy]"],
-  "confirm": true
-}
-&rarr;
-{
-  "ok": true,
-  "capture_id": "ev_8f3a...",
-  "reason": "hmac:invalid_signature",
-  "quarantined_at": "2026-05-24T...",
-  "audit_event_id": "aud_...",
-  "version": "w761-v1"
-}</code></pre>
+<pre>CODE15</pre>
 
 <h2 id="risk-levels">Risk levels and what triggers each</h2>
 <div class="risk-grid">
@@ -220,7 +202,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   </div>
 </div>
 
-<h2 id="honesty">Honesty contract</h2>
+<h2 id="honesty">No-silent-pass contract</h2>
 <div class="honesty">
   <p>HMAC binding requires <code>KOLM_TEACHER_HMAC_KEY</code> set to at least 32 bytes of random data. Without it, every binding call returns <code>{ok:false, error:'hmac_key_not_configured'}</code> &mdash; we do NOT silent-pass with an empty key. Keys shorter than 32 bytes are refused with <code>hmac_key_too_short</code>.</p>
   <p>Generate a key with: <code>openssl rand -hex 32</code></p>
@@ -241,11 +223,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   </tbody>
 </table>
 
-<pre><code>kolm poison bind --teacher anthropic:claude-3-5-sonnet --request-hash &lt;sha&gt; \
-                 --response-body "..." --timestamp-ms 1716557400000 --confirm
-kolm poison verify --binding-file binding.json --response-body "..."
-kolm poison namespace-risk --namespace billing --sample-n 100
-kolm poison quarantine --capture-id ev_8f3a... --reason hmac:invalid_signature --confirm</code></pre>
+<pre>CODE29</pre>
 
 <div class="related">
   <a href="/docs/capture-anomaly"><b>W808 capture anomaly</b><span>Per-tenant 3-sigma detector on four axes of capture telemetry.</span></a>

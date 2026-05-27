@@ -15,7 +15,7 @@
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Distillation 101 &middot; kolm university &middot; kolm.ai">
-<meta name="twitter:description" content="Teacher-student distillation explained. Worked example with honest numbers.">
+<meta name="twitter:description" content="Teacher-student distillation explained. Worked example with plain numbers.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/university/distillation-101">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -139,7 +139,7 @@ td code{font-size:12.5px}
 <p>To make all of this concrete, here is one fully worked example. The task is GitHub-style code review &mdash; an engineer pushes a diff, the model produces a structured review with severity, file, line, and a suggested fix. We will distill Anthropic's Claude 4 down into Qwen 2.5 7B running on a single RTX 5090.</p>
 
 <table>
-  <thead><tr><th>Stage</th><th>Detail</th><th>Honest number</th></tr></thead>
+  <thead><tr><th>Stage</th><th>Detail</th><th>Plain number</th></tr></thead>
   <tbody>
     <tr><td>Captures</td><td>Real review traffic, six weeks</td><td>5,000 prompt-response pairs</td></tr>
     <tr><td>Train / held-out</td><td>Split, with hidden fold</td><td>4,000 train / 750 val / 250 hidden</td></tr>

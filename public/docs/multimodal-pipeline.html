@@ -87,7 +87,7 @@
 ~/.kolm/captures/&lt;namespace&gt;/multi-turn/&lt;conversation_id&gt;.jsonl
 </pre></div>
     <p>The four supported kinds are <code>image</code>, <code>audio</code>, <code>tool_use</code>, and <code>multi_turn</code>. The hash is sha256 over the canonical payload; the same image submitted twice lands in the same JSONL file (one row per submission, dedup is the caller's job). The <code>multi-turn</code> file is keyed by conversation_id so an ongoing thread aggregates into one file.</p>
-    <h3>Honest path safety</h3>
+    <h3>Plain path safety</h3>
     <p>Namespace, kind, and hash are sanitized to closed alphabets before they touch the filesystem. A namespace containing <code>../</code> resolves to a sanitized literal token; the kind must be one of the four supported values or the call returns <code>{ok:false, error:'kind_unsupported'}</code>; the hash must be lowercase hex up to 64 chars. Path traversal is impossible by construction.</p>
   </div>
 </section>
@@ -164,7 +164,7 @@
 #   "run_id": "vlm_a1b2c3d4..."
 # }
 </pre></div>
-    <p>The honest envelope is deliberate: a queued job persists, the operator can set the env var, and the run resumes via the same run_id. The pipeline never claims a finished distillation against a teacher it could not actually reach.</p>
+    <p>The loud-fail envelope is deliberate: a queued job persists, the operator can set the env var, and the run resumes via the same run_id. The pipeline never claims a finished distillation against a teacher it could not actually reach.</p>
     <h3>GET /v1/vlm-distill/runs</h3>
     <div class="code-card"><pre>curl -H "Authorization: Bearer $KOLM_API_KEY" \
   https://kolm.ai/v1/vlm-distill/runs
@@ -183,7 +183,7 @@
       <li><b>workers/multimodal-redact-image</b> (W462) - YOLO face + license-plate detection via onnxruntime-node, sharp blur/mask composite.</li>
       <li><b>workers/multimodal-redact-audio</b> (W464) - voiceprint scrub via pyannote-audio with priority chain over <code>VOICEPRINT_REDACT_CMD</code>, <code>pyannote-audio-redact</code>, <code>~/.kolm/scripts/voiceprint-redact.py</code>.</li>
     </ul>
-    <p>Honesty contract: when a redactor's optional deps are missing, the envelope returns <code>{ok:false, error:'no_detector_installed', redacted_image:null}</code> (or <code>redacted_audio:null</code>) plus an install hint. The pipeline never passes through unredacted media silently when a redactor was requested.</p>
+    <p>No-silent-pass contract: when a redactor's optional deps are missing, the envelope returns <code>{ok:false, error:'no_detector_installed', redacted_image:null}</code> (or <code>redacted_audio:null</code>) plus an install hint. The pipeline never passes through unredacted media silently when a redactor was requested.</p>
   </div>
 </section>
 

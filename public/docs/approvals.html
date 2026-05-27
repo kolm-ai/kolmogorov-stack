@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Distillation approval queue &middot; Open-source AI workbench &middot; kolm.ai</title>
-<meta name="description" content="kolm distillation approval queue: when approvals are required, queue lifecycle, roles and permissions, CLI reference, API routes, and the honest contract that rejection always requires a reason.">
+<meta name="description" content="kolm distillation approval queue: when approvals are required, queue lifecycle, roles and permissions, CLI reference, API routes, and the plain contract that rejection always requires a reason.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://kolm.ai/docs/approvals">
@@ -25,13 +25,12 @@
   table { border-collapse: collapse; max-width: 760px; margin: 14px 0; font-size: 13.5px; }
   th,td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line-1); vertical-align: top; color: var(--ink-2); }
   th { color: var(--ink-1); font-weight: 500; }
-  .ap-honest { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-size: 13.5px; color: var(--ink-2); line-height: 1.55; margin: 20px 0; max-width: 76ch; }
-  .ap-honest b { color: var(--ink-1); font-weight: 580; }
+  .ap-plain { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-size: 13.5px; color: var(--ink-2); line-height: 1.55; margin: 20px 0; max-width: 76ch; }
+  .ap-plain b { color: var(--ink-1); font-weight: 580; }
 </style>
 </head>
 <body class="ks">
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
@@ -108,7 +107,7 @@ kolm approvals reject  &lt;request_id&gt; --reason "wait for HIPAA audit close"<
     </ul>
 
     <div class="ap-honest">
-      <b>Honest contract.</b> Rejection requires a reason string -- the API returns <code>HTTP 400 reason_required</code> if <code>reason</code> is missing or empty. We never silently reject. The reason text is written to the audit log alongside the requester id, the approver id, and the request hash.
+      <b>Plain contract.</b> Rejection requires a reason string -- the API returns <code>HTTP 400 reason_required</code> if <code>reason</code> is missing or empty. We never silently reject. The reason text is written to the audit log alongside the requester id, the approver id, and the request hash.
     </div>
 
     <p class="muted" style="margin-top:48px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:var(--ink-3)">See also: <a href="/account/approvals">approvals dashboard</a> &middot; <a href="/docs/cli">CLI index</a> &middot; <a href="/docs/distill">distill</a> &middot; <a href="/docs/audit">audit</a></p>

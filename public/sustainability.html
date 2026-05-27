@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Sustainability · Open-source AI workbench · kolm.ai</title>
-<meta name="description" content="Sustainability and CO2 footprint for kolm distillations. Estimate model uses GPU TDP, run duration, and regional grid carbon intensity. Honest +/- 30 percent error bars. Never carbon-neutral without offset receipts.">
+<meta name="description" content="Sustainability and CO2 footprint for kolm distillations. Estimate model uses GPU TDP, run duration, and regional grid carbon intensity. Plain +/- 30 percent error bars. Never carbon-neutral without offset receipts.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://kolm.ai/sustainability">
@@ -35,8 +35,8 @@
   .sus-hero .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
   .sus-hero .meta-row { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 28px; }
 
-  .sus-honesty { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-top: 20px; }
-  .sus-honesty b { color: var(--ink-1); font-weight: 580; }
+  .sus-truthfulness { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-top: 20px; }
+  .sus-truthfulness b { color: var(--ink-1); font-weight: 580; }
 
   .sus-formula {
     padding: 18px 20px;
@@ -70,7 +70,7 @@
   .sus-crosslink { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
 </style>
 <meta property="og:title" content="Sustainability &middot; Open-source AI workbench &middot; kolm.ai">
-<meta property="og:description" content="CO2 footprint for kolm distillations. Estimate uses GPU TDP, run duration, regional grid carbon intensity. Honest +/- 30 percent error bars.">
+<meta property="og:description" content="CO2 footprint for kolm distillations. Estimate uses GPU TDP, run duration, regional grid carbon intensity. Plain +/- 30 percent error bars.">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta property="og:url" content="https://kolm.ai/sustainability">
 <meta property="og:type" content="website">
@@ -82,7 +82,7 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/sustainability",
-  "description": "Sustainability and CO2 footprint for kolm distillations. Estimate model uses GPU TDP, run duration, and regional grid carbon intensity. Honest +/- 30 percent error bars. Never carbon-neutral without offset receipts.",
+  "description": "Sustainability and CO2 footprint for kolm distillations. Estimate model uses GPU TDP, run duration, and regional grid carbon intensity. Plain +/- 30 percent error bars. Never carbon-neutral without offset receipts.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -98,7 +98,6 @@
 </head>
 <body class="ks">
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
@@ -127,7 +126,7 @@
   <div class="fr-container">
     <p class="brand-eyebrow" data-w775="brand-eyebrow">Open-source AI workbench</p>
     <h1>Sustainability and CO2 footprint.</h1>
-    <p class="fr-lede">Every distillation has a carbon cost. We measure it, stamp it into the artifact manifest, and let viewers render an honest "Saved X kg CO2 vs cloud inference" pill. No carbon-neutral marketing, no offset hand-waving -- just GPU TDP, run duration, and regional grid intensity with +/- 30 percent error bars.</p>
+    <p class="fr-lede">Every distillation has a carbon cost. We measure it, stamp it into the artifact manifest, and let viewers render an plain "Saved X kg CO2 vs cloud inference" pill. No carbon-neutral marketing, no offset hand-waving -- just GPU TDP, run duration, and regional grid intensity with +/- 30 percent error bars.</p>
     <div class="cta-row">
       <a href="/account/sustainability" class="fr-btn fr-btn--mint">View your CO2 dashboard</a>
       <a href="#estimate-model" class="fr-btn fr-btn--ghost">See the estimate model</a>
@@ -146,7 +145,7 @@
     <div class="fr-section__head">
       <span class="fr-eyebrow">Why we measure</span>
       <h2 class="fr-h2">Every distillation has a carbon cost.</h2>
-      <p class="fr-lede">Training a student model on a teacher's traces uses real electricity. Running a model in the cloud uses more. Running a compiled .kolm on your own GPU avoids the cloud-inference round-trips, which is usually the larger lifetime emission. We want both numbers visible so the comparison is honest.</p>
+      <p class="fr-lede">Training a student model on a teacher's traces uses real electricity. Running a model in the cloud uses more. Running a compiled .kolm on your own GPU avoids the cloud-inference round-trips, which is usually the larger lifetime emission. We want both numbers visible so the comparison is plain.</p>
     </div>
     <ul class="fr-spec-list">
       <li class="fr-spec-list__row">
@@ -245,9 +244,9 @@ co2_kg_estimate = <b>(gpu_tdp_watts</b> * <b>duration_seconds</b> / 3600 / 1000<
 <section class="fr-section" id="honesty">
   <div class="fr-container">
     <div class="fr-section__head">
-      <span class="fr-eyebrow">Honest contract</span>
+      <span class="fr-eyebrow">Plain contract</span>
       <h2 class="fr-h2">+/- 30 percent error bars. No "carbon-neutral" without receipts.</h2>
-      <p class="fr-lede">Energy accounting is hard. The honest move is to publish error bars and refuse to claim offsets we cannot prove. We will not stamp "carbon-neutral" on any artifact unless the tenant has uploaded matching offset receipts that we have hash-bound to the artifact manifest.</p>
+      <p class="fr-lede">Energy accounting is hard. The plain move is to publish error bars and refuse to claim offsets we cannot prove. We will not stamp "carbon-neutral" on any artifact unless the tenant has uploaded matching offset receipts that we have hash-bound to the artifact manifest.</p>
     </div>
     <ul class="fr-spec-list">
       <li class="fr-spec-list__row">
@@ -273,7 +272,7 @@ co2_kg_estimate = <b>(gpu_tdp_watts</b> * <b>duration_seconds</b> / 3600 / 1000<
       </li>
     </ul>
     <div class="sus-honesty">
-      <b>Honest framing.</b> CO2 estimates have a +/- 30 percent error bar by design. They are not a lifecycle assessment. They do not include embodied GPU or datacenter carbon. We will not call a model "carbon-neutral" without uploaded offset receipts that hash-bind to the artifact manifest.
+      <b>Plain framing.</b> CO2 estimates have a +/- 30 percent error bar by design. They are not a lifecycle assessment. They do not include embodied GPU or datacenter carbon. We will not call a model "carbon-neutral" without uploaded offset receipts that hash-bind to the artifact manifest.
     </div>
     <div class="sus-crosslink">
       <a href="/account/sustainability" class="fr-btn fr-btn--mint">View your CO2 dashboard</a>

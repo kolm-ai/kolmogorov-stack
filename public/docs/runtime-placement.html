@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Memory-aware runtime placement &middot; Open-source AI workbench &middot;</title>
-<meta name="description" content="Memory-aware runtime placement in kolm: probes GPU VRAM, system RAM, and NVMe bandwidth, then chooses full-GPU, hybrid auto-split, or NVMe-mmap placement. Pre-load heuristics predict the next artifact. Honest envelope">
+<meta name="description" content="Memory-aware runtime placement in kolm: probes GPU VRAM, system RAM, and NVMe bandwidth, then chooses full-GPU, hybrid auto-split, or NVMe-mmap placement. Pre-load heuristics predict the next artifact. Loud-fail envelope">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://kolm.ai/docs/runtime-placement">
@@ -76,8 +76,8 @@
     margin-top: 10px;
   }
 
-  .rt-honesty { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-top: 20px; }
-  .rt-honesty b { color: var(--ink-1); font-weight: 580; }
+  .rt-truthfulness { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-top: 20px; }
+  .rt-truthfulness b { color: var(--ink-1); font-weight: 580; }
 
   .rt-crosslink { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
 </style>
@@ -89,7 +89,6 @@
 </head>
 <body class="ks">
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
@@ -241,7 +240,7 @@
 <section class="fr-section" id="envelope">
   <div class="fr-container">
     <div class="fr-section__head">
-      <span class="fr-eyebrow">Honest envelope</span>
+      <span class="fr-eyebrow">Loud-fail envelope</span>
       <h2 class="fr-h2">Probe failures fall back conservatively.</h2>
       <p class="fr-lede">If any probe fails -- driver returns nothing, /proc/meminfo is missing, NVMe benchmark times out -- we do not guess. The runtime falls back to a conservative placement (hybrid_auto_split when partial info is available, otherwise refuse-with-envelope) and logs a structured probe-failure record.</p>
     </div>
@@ -257,7 +256,7 @@
 }
     </div>
     <div class="rt-honesty">
-      <b>Honest contract.</b> The runtime never silently picks a placement when probes fail. Every fallback is logged with the failing probe and the reason. Operators can grep the log to see whether a slow load was a placement bug or a genuine hardware limit. If the host falls below documented minimums, the runtime refuses to load with an envelope rather than thrashing the swap file.
+      <b>Plain contract.</b> The runtime never silently picks a placement when probes fail. Every fallback is logged with the failing probe and the reason. Operators can grep the log to see whether a slow load was a placement bug or a genuine hardware limit. If the host falls below documented minimums, the runtime refuses to load with an envelope rather than thrashing the swap file.
     </div>
     <div class="rt-crosslink">
       <a href="/runtimes" class="fr-btn fr-btn--mint">Runtime overview</a>

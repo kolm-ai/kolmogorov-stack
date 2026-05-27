@@ -147,17 +147,12 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h3>Code copyright headers (CODE_COPYRIGHT_REGEX)</h3>
 <p>Matches <code>Copyright (c) 2023 Acme</code>, <code>Copyright (C) 2023-2025 Foo</code>, <code>copyright © 2024 Bar</code>, <code>Copyright &amp;copy; 2025 Baz</code>. Requires a 4-digit year followed by at least one letter so we don't flag bare <em>"copyright 2024"</em> boilerplate that appears in a sentence about a model's training cutoff.</p>
 
-<pre><code>// Matches: "Copyright (c) 2023 Acme Corp"
-//          "Copyright (C) 2023-2025 Foo"
-//          "copyright © 2024 Bar"
-//          "Copyright &amp;copy; 2025 Baz"
-const CODE_COPYRIGHT_REGEX = /\bcopyright\s*(?:\([cC]\)|©|&amp;copy;)?\s*\d{4}(?:-\d{4})?\s*[a-zA-Z]/;
-</code></pre>
+<pre>CODE45</pre>
 
 <h3>SPDX license identifier (SPDX_REGEX)</h3>
 <p>Matches the canonical <code>SPDX-License-Identifier: &lt;name&gt;</code> comment line. Code that carries an SPDX identifier almost always has a real license attached that the model may not be allowed to reproduce verbatim:</p>
 
-<pre><code>const SPDX_REGEX = /SPDX-License-Identifier:\s*[A-Za-z0-9.+-]+/;</code></pre>
+<pre>CODE47</pre>
 
 <h2 id="scoring">Risk score</h2>
 <p>Each hit contributes <code>0.25</code> to the risk score, capped at <code>1.0</code>. Four hits saturate the score; one hit gives <code>0.25</code>, two give <code>0.5</code>, three give <code>0.75</code>. The default quarantine threshold is <code>0.5</code> &mdash; <strong>two hits</strong> are required before the staged row gets a <code>copyright_heuristic:</code> reason. Tune via <code>opts.threshold</code> in code or via the <code>POST</code> body in the API.</p>
@@ -190,42 +185,11 @@ const CODE_COPYRIGHT_REGEX = /\bcopyright\s*(?:\([cC]\)|©|&amp;copy;)?\s*\d{4}(
 <h2 id="envelope">Envelope shape</h2>
 <p>Same envelope is returned by <code>POST /v1/copyright/scan</code> and the <code>kolm copyright-scan text</code> CLI path. Field stability is part of the contract.</p>
 
-<pre><code>{
-  "ok": true,
-  "hits": [
-    { "kind": "disney_character", "matched": "mickey mouse", "index": 12, "side": "input" },
-    { "kind": "spdx",             "matched": "SPDX-License-Identifier: MIT", "index": 0, "side": "output" }
-  ],
-  "risk_score": 0.5,
-  "scanned_chars": 1024,
-  "version": "w750-followup-v1"
-}
-</code></pre>
+<pre>CODE79</pre>
 
 <p>The <code>GET /v1/copyright/queue/:namespace</code> envelope returns the captures that carry a <code>copyright_heuristic:</code> tag in their <code>staged_captures.flag_reason</code>, newest first:</p>
 
-<pre><code>{
-  "ok": true,
-  "namespace": "support",
-  "total": 3,
-  "captures": [
-    {
-      "staged_capture_id": "stg_abc123",
-      "capture_id": "obs_xyz789",
-      "namespace": "support",
-      "staged_at": "2026-05-24T18:42:11.503Z",
-      "quarantine_state": "pending",
-      "flag_reason": "copyright_heuristic:disney_character,spdx",
-      "copyright_heuristic_risk": 0.5,
-      "copyright_heuristic_hits": [
-        { "kind": "disney_character", "matched": "mickey mouse", "side": "input" },
-        { "kind": "spdx",             "matched": "SPDX-License-Identifier: MIT", "side": "output" }
-      ]
-    }
-  ],
-  "version": "w750-followup-v1"
-}
-</code></pre>
+<pre>CODE83</pre>
 
 <h2 id="api">API + CLI surface</h2>
 
@@ -241,22 +205,11 @@ const CODE_COPYRIGHT_REGEX = /\bcopyright\s*(?:\([cC]\)|©|&amp;copy;)?\s*\d{4}(
   </tbody>
 </table>
 
-<p>CLI exit codes are honest: <code>0</code> when the scan finds no hits, <code>3</code> when hits are found (informational &mdash; the operator should review), <code>2</code> on real errors (auth missing, bad arguments, network failure). The hits-found path is intentionally <strong>not</strong> exit-1 so CI can keep "review needed" separate from "build failed".</p>
+<p>CLI exit codes are plain: <code>0</code> when the scan finds no hits, <code>3</code> when hits are found (informational &mdash; the operator should review), <code>2</code> on real errors (auth missing, bad arguments, network failure). The hits-found path is intentionally <strong>not</strong> exit-1 so CI can keep "review needed" separate from "build failed".</p>
 
 <h2 id="quickstart">Quickstart</h2>
 
-<pre><code># Local scan with no auth (text is never sent off your machine)
-kolm copyright-scan text "Copyright (c) 2024 Acme. SPDX-License-Identifier: MIT"
-# → {"ok":true,"hits":[{"kind":"code_copyright",...},{"kind":"spdx",...}],
-#    "risk_score":0.5, ...}
-# exits 3 (hits found, informational)
-
-# Look up the verdict for a staged capture
-kolm copyright-scan capture stg_abc123
-
-# List the copyright-flagged staged captures for a namespace
-kolm copyright-scan queue support
-</code></pre>
+<pre>CODE94</pre>
 
 <p>Pair this with <a href="/docs/drift-alert">drift-alert</a> for production-vs-training distribution drift, and with the W708-4 paywall-shape detector that runs in the same insert path. See <a href="/docs/quickstart">quickstart</a> for the broader capture pipeline.</p>
 

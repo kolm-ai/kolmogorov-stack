@@ -119,49 +119,23 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <h2 id="artifact">The .kolm artifact format</h2>
 <p>A <code>.kolm</code> is a deterministic zip. Open one with any zip tool. The layout is fixed.</p>
-<pre><code>artifact.kolm/
- manifest.json # name, version, kind, sha256s, runtimes, modalities
- seeds.jsonl # the N representative examples
- recipe.bundle.mjs # the executable. ES module, no deps.
- schema.json # input + output schemas, JSON Schema 2020-12
- weights/ # specialists only
- weights.gguf
- weights.gguf.sig
- receipts/
- spec.json # the source spec
- seeds.json # the seed selection trace
- split.json # train/val/holdout assignments
- train.json # training metrics if any
- recipes.json # recipe compile log
- evals.json # bakeoff results
- export.json # how the bundle was assembled
- signatures.json # ed25519 over every other receipt
- rekor.json # sigstore transparency log entry</code></pre>
+<pre>CODE5</pre>
 
 <h2 id="distill">Distill from captures</h2>
-<pre><code>kolm distill --from-captures summarizer --kind recipe
-# selecting seeds ... 240 of 4204 rows
-# compiling recipe ... ./out/summarizer.kolm (38 KB, 9 receipts signed)</code></pre>
+<pre>CODE6</pre>
 
 <h2 id="compile">Compile from spec</h2>
-<pre><code>kolm compile ./summarizer.spec.json --kind specialist --tier 3090
-# parsing spec ... 1 input schema, 1 output schema, 3 rules
-# distilling ... 22 GPU-min on 3090
-# quantizing ... int4 weights, 412 MB
-# signing ... 9/9 receipts
-# ./out/summarizer.kolm</code></pre>
+<pre>CODE7</pre>
 
 <h2 id="verify">Verify</h2>
 <p>Verify replays the receipt chain offline. Never trust an artifact you cannot verify. <code>kolm verify</code> exits non-zero if any signature is invalid, any sha256 is wrong, or any receipt is missing.</p>
-<pre><code>kolm verify ./summarizer.kolm
-# verify OK. 9/9 receipts signed, sha matches, recipe ESM parses clean.</code></pre>
+<pre>CODE9</pre>
 
 <h2 id="run">Run</h2>
-<pre><code>kolm run ./summarizer.kolm --prompt "Summarize this PR diff."
-# This PR refactors the auth middleware to fail-closed on token expiry...</code></pre>
+<pre>CODE10</pre>
 
 <h2 id="modes">Modes deep dive</h2>
-<p>Seven distill modes are first-class in the compiler. Each one is honest about its research lineage; every receipt records the mode in <code>spec.json</code> so an auditor can replay the exact pipeline. The seven map one-to-one with the cards on <a href="/distill#modes">/distill</a>.</p>
+<p>Seven distill modes are first-class in the compiler. Each one is plain about its research lineage; every receipt records the mode in <code>spec.json</code> so an auditor can replay the exact pipeline. The seven map one-to-one with the cards on <a href="/distill#modes">/distill</a>.</p>
 
 <section class="fr-section" style="padding:8px 0 24px;margin:0">
   <div class="fr-grid-2">

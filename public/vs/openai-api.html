@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>kolm vs OpenAI API &middot; Open-source AI workbench &middot; kolm.ai</title>
-<meta name="description" content="kolm vs OpenAI API. Same final-task quality after distillation. Zero marginal teacher cost after compile. Honest side by side - when each one wins.">
+<meta name="description" content="kolm vs OpenAI API. Same final-task quality after distillation. Zero marginal teacher cost after compile. Plain side by side - when each one wins.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 
 <meta property="og:title" content="kolm vs OpenAI API &middot; Open-source AI workbench &middot; kolm.ai">
-<meta property="og:description" content="Same final-task quality after distillation. Zero marginal teacher cost after compile. Honest side by side.">
+<meta property="og:description" content="Same final-task quality after distillation. Zero marginal teacher cost after compile. Plain side by side.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/vs/openai-api">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -85,7 +85,6 @@
 </head>
 <body>
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">Frontier AI on your own infrastructure.</span>
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <script src="/nav.js" defer></script>
@@ -117,7 +116,7 @@
 
  <div class="group">
  <h2>Two different bills, same final-task quality</h2>
- <p>The honest framing: OpenAI's frontier model is the teacher in a kolm pipeline. Your captured request/response pairs become the training set; a smaller open-weight base learns the task; the compiled artifact replaces OpenAI calls on the compiled tasks only. Final-task quality is bounded by what the teacher produced - your captures determine it.</p>
+ <p>The plain framing: OpenAI's frontier model is the teacher in a kolm pipeline. Your captured request/response pairs become the training set; a smaller open-weight base learns the task; the compiled artifact replaces OpenAI calls on the compiled tasks only. Final-task quality is bounded by what the teacher produced - your captures determine it.</p>
  <p>What changes is the bill curve. OpenAI bills per token, forever, at a rate that scales linearly with traffic. kolm bills a flat compile cost plus your own hardware cost. For high-volume narrow tasks the curves cross fast. For one-shot general queries OpenAI stays cheaper.</p>
  </div>
 

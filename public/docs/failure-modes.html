@@ -98,12 +98,12 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="why">Why "K-Score 0.74" needs a slice view</h2>
 <p>A composite K-Score is the right way to rank two artifacts on the same dataset. It is the wrong tool for figuring out where the regression sits. A bot that ships 0.97 on the refund flow and 0.62 on the billing-disputes flow has a headline of around 0.80 &mdash; the average doesn't tell anyone what to fix, and the headline number alone won't even prompt the right question.</p>
 
-<p>The artifact-keyed failure-modes envelope un-collapses the headline by partitioning captures into topical clusters. Each cluster gets its own K-Score (Wilson 95% CI when <code>n &gt;= 30</code>; honest null below), and the report sorts them by <code>delta_vs_overall</code> so the panel literally reads "refunds 0.97 vs billing-disputes 0.62, the student diverges most on billing." Each row links directly to the W741 diagnostic envelope for the next step.</p>
+<p>The artifact-keyed failure-modes envelope un-collapses the headline by partitioning captures into topical clusters. Each cluster gets its own K-Score (Wilson 95% CI when <code>n &gt;= 30</code>; plain null below), and the report sorts them by <code>delta_vs_overall</code> so the panel literally reads "refunds 0.97 vs billing-disputes 0.62, the student diverges most on billing." Each row links directly to the W741 diagnostic envelope for the next step.</p>
 
 <div class="notice"><strong>W812 vs W745.</strong> Both modules live in the same product. W812 (<code>kolm failure-modes</code> with no positional arg) reads the tenant-wide event stream and clusters by topic + length + vendor class &mdash; useful for the routing-and-self-improvement loop. W745 (<code>kolm failure-modes &lt;artifact_cid&gt;</code>) is CID-keyed and reads the bakeoff rows + captures attached to one artifact. Same verb, different question shape.</div>
 
-<h2 id="clustering">The clustering heuristic (and why it's honest about being a placeholder)</h2>
-<p>Today the clustering is pure-heuristic <code>heuristic_keyword_v1</code> &mdash; tokenize the capture input, drop a small built-in stopword list, build top-3 1- and 2-grams, and cluster captures that share at least two n-grams. The envelope ships a <code>clustering</code> field that names the algorithm so downstream dashboards can branch on it. The W745 envelope deliberately reports <code>"heuristic_keyword_v1"</code>, NOT <code>"w757_fingerprint"</code>, because the fingerprinting model from W757 isn't shipped yet. When W757 lands, this field flips and the cluster ids change shape; today it is honestly the placeholder.</p>
+<h2 id="clustering">The clustering heuristic (and why it's plain about being a placeholder)</h2>
+<p>Today the clustering is pure-heuristic <code>heuristic_keyword_v1</code> &mdash; tokenize the capture input, drop a small built-in stopword list, build top-3 1- and 2-grams, and cluster captures that share at least two n-grams. The envelope ships a <code>clustering</code> field that names the algorithm so downstream dashboards can branch on it. The W745 envelope deliberately reports <code>"heuristic_keyword_v1"</code>, NOT <code>"w757_fingerprint"</code>, because the fingerprinting model from W757 isn't shipped yet. When W757 lands, this field flips and the cluster ids change shape; today it is frankly the placeholder.</p>
 
 <ul>
   <li><strong>Stopwords</strong>: a small built-in list of around 80 English function words. Larger lists drift into linguistic territory that ought to be a real embedding model.</li>
@@ -114,87 +114,13 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <p>The same capture set always produces the same cluster ids. Adding one capture might merge two clusters or split one; the envelope's <code>clustering</code> field warns downstream tooling that this version of the heuristic is what was used.</p>
 
-<h2 id="ci">Wilson 95% CI &mdash; and the honest null floor</h2>
-<p>Per-cluster CI is identical to the W741 diagnostic floor: when a cluster has <code>n &gt;= 30</code> bakeoff rows we report a Wilson 95% interval on the per-cluster mean. Below 30, the CI is <code>null</code> for both endpoints &mdash; the bucket is honestly under-sampled and the dashboard says so. This is the same honesty contract that drives W741's recommendations and W810 calibration's <code>insufficient_data</code> status &mdash; if the measurement is shaky, the envelope says shaky, not "0.6204 &plusmn; 0.0000."</p>
+<h2 id="ci">Wilson 95% CI &mdash; and the plain null floor</h2>
+<p>Per-cluster CI is identical to the W741 diagnostic floor: when a cluster has <code>n &gt;= 30</code> bakeoff rows we report a Wilson 95% interval on the per-cluster mean. Below 30, the CI is <code>null</code> for both endpoints &mdash; the bucket is frankly under-sampled and the dashboard says so. This is the same no-silent-pass contract that drives W741's recommendations and W810 calibration's <code>insufficient_data</code> status &mdash; if the measurement is shaky, the envelope says shaky, not "0.6204 &plusmn; 0.0000."</p>
 
 <h2 id="envelope">Envelope shape</h2>
 <p>Same envelope is returned by <code>POST /v1/failure-modes</code>, <code>GET /v1/failure-modes/:cid</code>, and the <code>kolm failure-modes &lt;cid&gt; --json</code> CLI path. Field stability is part of the contract. The canonical example below is the spec-prescribed support-bot story: 0.97 on refunds vs 0.62 on billing disputes.</p>
 
-<pre><code>{
-  "ok": true,
-  "failure_modes_version": "w745-v1",
-  "artifact_cid": "bafkreigh2akiscaildc3xy7p4nntwvjp7m5kw5kbsmm5kkkkkkkkkkkkkk",
-  "overall_k_score": 0.8047,
-  "clustering": "heuristic_keyword_v1",
-  "cluster_count": 4,
-  "clusters": [
-    {
-      "cluster_id": "cluster_a1b2c3d4",
-      "top_keywords": ["refund", "refund return", "return"],
-      "count": 312,
-      "sample_cids": ["cap_001", "cap_002", "cap_003"],
-      "n": 312,
-      "k_score": 0.9712,
-      "k_score_ci_lo": 0.9498,
-      "k_score_ci_hi": 0.9851,
-      "delta_vs_overall": -0.1665
-    },
-    {
-      "cluster_id": "cluster_b2c3d4e5",
-      "top_keywords": ["billing", "billing dispute", "dispute"],
-      "count": 84,
-      "sample_cids": ["cap_017", "cap_021", "cap_044"],
-      "n": 84,
-      "k_score": 0.6204,
-      "k_score_ci_lo": 0.5117,
-      "k_score_ci_hi": 0.7204,
-      "delta_vs_overall": 0.1843
-    },
-    {
-      "cluster_id": "cluster_c3d4e5f6",
-      "top_keywords": ["shipping", "shipping address", "address"],
-      "count": 47,
-      "sample_cids": ["cap_088", "cap_091", "cap_104"],
-      "n": 47,
-      "k_score": 0.8412,
-      "k_score_ci_lo": 0.7361,
-      "k_score_ci_hi": 0.9118,
-      "delta_vs_overall": -0.0365
-    },
-    {
-      "cluster_id": "cluster_d4e5f6a7",
-      "top_keywords": ["pricing", "pricing question", "question"],
-      "count": 12,
-      "sample_cids": ["cap_201", "cap_204", "cap_209"],
-      "n": 12,
-      "k_score": 0.7833,
-      "k_score_ci_lo": null,
-      "k_score_ci_hi": null,
-      "delta_vs_overall": 0.0214
-    }
-  ],
-  "top_regressions": [
-    {
-      "cluster_id": "cluster_b2c3d4e5",
-      "top_keywords": ["billing", "billing dispute", "dispute"],
-      "n": 84,
-      "k_score": 0.6204,
-      "delta_vs_overall": 0.1843,
-      "sample_cids": ["cap_017", "cap_021", "cap_044"]
-    },
-    {
-      "cluster_id": "cluster_d4e5f6a7",
-      "top_keywords": ["pricing", "pricing question", "question"],
-      "n": 12,
-      "k_score": 0.7833,
-      "delta_vs_overall": 0.0214,
-      "sample_cids": ["cap_201", "cap_204", "cap_209"]
-    }
-  ],
-  "diagnostic_link": "/account/diagnose?cid=bafkreigh2akiscaildc3xy7p4nntwvjp7m5kw5kbsmm5kkkkkkkkkkkkkk",
-  "generated_at": "2026-05-24T18:42:11.503Z"
-}
-</code></pre>
+<pre>CODE19</pre>
 
 <p>The headline number here is 0.80, but the report's first row reads "billing dispute 0.62, delta +0.18 vs overall." That is the actionable slice. The refund cluster has 312 rows and ships at 0.97 &mdash; promote-eligible. The billing cluster needs targeted captures + maybe a re-distill.</p>
 
@@ -216,11 +142,11 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   </tbody>
 </table>
 
-<h3 id="no-bakeoff">Honest absence: no_bakeoff_results_yet</h3>
-<p>The report depends on per-row bakeoff results for the requested artifact. When no bakeoff has been run yet, the route returns HTTP 200 with an honest <code>{ ok: false, error: "no_bakeoff_results_yet" }</code> envelope &mdash; not a 404. The HTTP call succeeded; the actionable hint tells the caller what to do next: <code>run `kolm bakeoff first` against this artifact_cid, then retry</code>. The envelope still ships <code>diagnostic_link</code> so the dashboard can offer the W741 pivot even when the bakeoff is missing.</p>
+<h3 id="no-bakeoff">Plain absence: no_bakeoff_results_yet</h3>
+<p>The report depends on per-row bakeoff results for the requested artifact. When no bakeoff has been run yet, the route returns HTTP 200 with an plain <code>{ ok: false, error: "no_bakeoff_results_yet" }</code> envelope &mdash; not a 404. The HTTP call succeeded; the actionable hint tells the caller what to do next: <code>run `kolm bakeoff first` against this artifact_cid, then retry</code>. The envelope still ships <code>diagnostic_link</code> so the dashboard can offer the W741 pivot even when the bakeoff is missing.</p>
 
 <h2 id="next">Next steps</h2>
-<p>Run <code>kolm bakeoff</code> first to produce per-row K-Score rows, then <code>kolm failure-modes &lt;cid&gt;</code> to bucket them. Click any cluster's diagnostic link to land in <a href="/docs/diagnose">/docs/diagnose</a> for the deterministic next-step recommendation. When W757 fingerprinting ships, the <code>clustering</code> field in this envelope will flip from <code>heuristic_keyword_v1</code> to <code>w757_fingerprint</code> and the cluster ids will change &mdash; downstream dashboards should branch on the <code>clustering</code> field to handle the migration honestly.</p>
+<p>Run <code>kolm bakeoff</code> first to produce per-row K-Score rows, then <code>kolm failure-modes &lt;cid&gt;</code> to bucket them. Click any cluster's diagnostic link to land in <a href="/docs/diagnose">/docs/diagnose</a> for the deterministic next-step recommendation. When W757 fingerprinting ships, the <code>clustering</code> field in this envelope will flip from <code>heuristic_keyword_v1</code> to <code>w757_fingerprint</code> and the cluster ids will change &mdash; downstream dashboards should branch on the <code>clustering</code> field to handle the migration frankly.</p>
 
 <div class="related">
   <a href="/docs/diagnose"><b>Diagnose &rarr;</b><span>Per-category K-Score + recommendations for the next CLI step.</span></a>

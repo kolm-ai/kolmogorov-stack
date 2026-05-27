@@ -31,7 +31,7 @@
   .rt-list .fr-spec-list__delta--ondev   { color: #c39bf8; border-color: rgba(195,155,248,0.45); }
   .rt-list .fr-spec-list__delta--noeg    { color: #e8a86a; border-color: rgba(232,168,106,0.45); }
   .rt-list .fr-spec-list__delta--tee     { color: #c39bf8; border-color: rgba(195,155,248,0.45); }
-  .rt-list .fr-spec-list__delta--honest  { color: var(--fr-mint, #6cbf8d); }
+  .rt-list .fr-spec-list__delta--plain  { color: var(--fr-mint, #6cbf8d); }
   .rt-list code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); padding: 1px 6px; border: 1px solid var(--ks-line-1); border-radius: 4px; background: rgba(255,255,255,0.02); }
   .rt-list a { color: var(--ks-accent); }
 </style>
@@ -228,7 +228,7 @@ ok: true &middot; artifact_cid bafkreieq&hellip;4f7c
 <section class="sec-section" id="placement">
   <div class="ks-wrap">
     <h2>How to pick a runtime</h2>
-    <p class="sub">The default is llama.cpp because it runs anywhere. The other five are for cases where you actually need the extra capability. Honest scope: this is a heuristic, not a benchmark; run your own K-score on the candidate runtime before committing to it.</p>
+    <p class="sub">The default is llama.cpp because it runs anywhere. The other five are for cases where you actually need the extra capability. Plain scope: this is a heuristic, not a benchmark; run your own K-score on the candidate runtime before committing to it.</p>
     <ul class="fr-spec-list rt-list rt-place-list">
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>High-throughput chat &amp; tool use</h3><span class="fr-spec-list__delta fr-spec-list__delta--throughput">PICK &middot; vLLM</span></div>
@@ -298,14 +298,14 @@ ok: true &middot; artifact_cid bafkreieq&hellip;4f7c
       </li>
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>Offline verifier</h3><span class="fr-spec-list__delta fr-spec-list__delta--noeg">NO EGRESS &middot; live</span></div>
-        <p class="fr-spec-list__p">The verifier is a single binary. No network, no honesty service, no registry lookup. An auditor on a clean laptop validates the chain end-to-end and sees the same <code>ok:true</code> a production node sees.</p>
+        <p class="fr-spec-list__p">The verifier is a single binary. No network, no truthfulness service, no registry lookup. An auditor on a clean laptop validates the chain end-to-end and sees the same <code>ok:true</code> a production node sees.</p>
       </li>
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>TEE attestation pinning</h3><span class="fr-spec-list__delta fr-spec-list__delta--tee">ATTESTATION &middot; live</span></div>
         <p class="fr-spec-list__p">If the compile step embedded a TEE attestation report, the adapter checks the runtime hardware matches the attested platform before serving. Mismatch refuses to start. See the <a href="/compile#attest">compile attestation section</a>.</p>
       </li>
       <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Real failure modes</h3><span class="fr-spec-list__delta fr-spec-list__delta--honest">HONEST SCOPE &middot; live</span></div>
+        <div class="fr-spec-list__head"><h3>Real failure modes</h3><span class="fr-spec-list__delta fr-spec-list__delta--honest">PLAIN SCOPE &middot; live</span></div>
         <p class="fr-spec-list__p">If the upstream binary segfaults, the adapter forwards the exit code and the last 64 KB of stderr to the operator. We do not swallow runtime crashes; the failure is yours to read and act on.</p>
       </li>
     </ul>
@@ -323,7 +323,7 @@ ok: true &middot; artifact_cid bafkreieq&hellip;4f7c
       <tbody>
         <tr><td>kolm runtime targets</td><td>List every build target the worker knows about. JSON with <code>--json</code>.</td></tr>
         <tr><td>kolm runtime info &lt;slug&gt;</td><td>Show the CMake flags and SDK requirement for one target.</td></tr>
-        <tr><td>kolm runtime doctor --target &lt;slug&gt;</td><td>Check the toolchain on this box can build the target. Honest fail with install hints.</td></tr>
+        <tr><td>kolm runtime doctor --target &lt;slug&gt;</td><td>Check the toolchain on this box can build the target. Loud fail with install hints.</td></tr>
         <tr><td>kolm runtime build-from-source --target &lt;slug&gt;</td><td>Clone the upstream runtime, check out the pinned commit, run CMake, install the binary.</td></tr>
         <tr><td>kolm runtime up --target &lt;adapter&gt; &lt;.kolm&gt;</td><td>Verify the artifact and spawn the upstream serving binary.</td></tr>
         <tr><td>kolm runtime down</td><td>Stop the spawned runtime cleanly. Reports exit code.</td></tr>

@@ -334,26 +334,7 @@ train = seeds \\ holdout</pre>
 <h3>7.5.2 WASM target (wave 155, P+3)</h3>
 <p>The third compile backend is <code>wasm32-wasi</code>, emitted via <code>rustc --target=wasm32-wasi</code> when the rustc target is installed (<code>rustup target add wasm32-wasi</code>), with a fallback to <code>clang --target=wasm32-wasi</code> when a wasi-sysroot is present. Rust is preferred when both are usable because the deterministic flag set is more comprehensive. <b>WASM reuses an existing source kind</b>: the spec already emits a <code>.c</code> and a <code>.rs</code> per recipe, and the WASM compile picks whichever matches the detected toolchain's <code>source_kind</code>. No new source generation step.</p>
 <p>The flag posture mirrors §7.5.1 for the chosen source kind plus <code>--target=wasm32-wasi</code>. For rustc: <code>--edition 2021 --crate-type bin --target=wasm32-wasi -C opt-level=3 -C codegen-units=1 -C lto=fat -C strip=symbols -C panic=abort -C debuginfo=0 --remap-path-prefix=BUILD=/build</code> plus <code>SOURCE_DATE_EPOCH=0</code> in env. For clang: <code>--target=wasm32-wasi -std=c99 -O2 -fno-stack-protector -fno-asynchronous-unwind-tables -fno-ident -ffile-prefix-map=BUILD=/build -Wl,--strip-all</code>.</p>
-<pre><code>compiled_targets.recipes.&lt;rid&gt;.wasm.bin = {
- source_kind: "rust" | "c", // which source the wasm compile fed on
- compiler: "rustc" | "clang",
- compiler_version: "rustc 1.78.0 (9b00956e5 2024-04-29)",
- target_triple: "wasm32-wasi",
- flags: "--edition 2021 --crate-type bin --target=wasm32-wasi -C opt-level=3 ...",
- shim_source_hash: "&lt;sha256 of the same shim used by the native path&gt;",
- source_date_epoch: 0,
- toolchain_version_hash: "&lt;sha256 of compiler+version+flags+shim_hash&gt;",
- bin_filename: "native.wasm", // or "native.&lt;rid&gt;.wasm" in multi-recipe artifacts
- bin_hash: "&lt;sha256 of the .wasm bytes&gt;",
- bytes: 12450,
-}
-
-compiled_targets.target_toolchain_pin.wasm = {
- source_kind: "rust" | "c",
- compiler, compiler_version, shim_source_hash,
- source_date_epoch: 0,
- target_triple: "wasm32-wasi",
-}</code></pre>
+<pre>CODE133</pre>
 <p>WASM is its own opt-in target  - it has separate toggles from native (a builder may want WASM without native, or native without WASM): <code>KOLM_COMPILE_WASM=1</code> enables WASM alongside native; <code>KOLM_COMPILE_WASM_ONLY=1</code> additionally nulls both C and Rust native paths so only the <code>.wasm</code> binary ships. The <code>compileWasm: true</code> / <code>wasmOnly: true</code> opts are the programmatic equivalents. Verifier check #12 (Wave 144) re-hashes the bundled <code>.wasm</code> bytes against <code>bin_hash</code> just like the native binaries  - wasm tamper detection is part of the same chain.</p>
 
 <h3>7.5.3 Deterministic build verification (wave 156, P+4)</h3>
@@ -361,17 +342,7 @@ compiled_targets.target_toolchain_pin.wasm = {
 <p><b>Check #13 ("Build reproducibility")</b> closes the loop. When the verifier owns a local toolchain matching the bundle's <code>target_toolchain_pin</code> (same <code>compiler</code>, same <code>compiler_version</code>), it re-invokes the same compile path the original builder used  - same source bytes from the zip, same flags from the manifest claim, same shim, same <code>SOURCE_DATE_EPOCH=0</code> environment  - and compares the resulting <code>sha256</code> against the manifest <code>bin_hash</code>. A match is the strongest reproducibility evidence the receipt chain can produce: it proves the bundled binary is exactly what the pinned toolchain produces from the bundled source. A mismatch is a hard fail.</p>
 <p>The check is <b>opt-in</b> because rebuild is expensive (seconds per recipe). Default behaviour: report <code>warn  - skipped (set KOLM_VERIFY_REBUILD=1 to enable)</code> so the verifier stays fast and the cheap hash recomputation in check #12 still runs every time. Setting <code>KOLM_VERIFY_REBUILD=1</code> enables the rebuild for binders who want the strongest check available offline.</p>
 <p>Skip-graceful by design: a verifier without a matching local toolchain reports <code>warn</code> with a per-claim reason (no toolchain on host / compiler drift / version drift / source missing / compile threw). The check fires <code>fail</code> only when a rebuild actually completed and the resulting hash differed - the genuine reproducibility break the check is meant to catch. Version drift is exact-string match against the pin's <code>compiler_version</code> field; this is intentionally strict, because reproducibility across versions is not guaranteed and a permissive match would weaken the claim.</p>
-<pre><code># Default  - check #13 reports warn-skipped, check #12 still re-hashes
-$ kolm verify artifact.kolm
- Build reproducibility warn 1 native binary claim(s) eligible for
- deterministic rebuild; skipped
- (set KOLM_VERIFY_REBUILD=1 to enable)
-
-# Opt-in  - check #13 rebuilds and matches
-$ KOLM_VERIFY_REBUILD=1 kolm verify artifact.kolm
- Build reproducibility pass 1 of 1 binary(ies) rebuilt
- deterministically and matched
- manifest claim: rcp_echo/c=gcc@12480B</code></pre>
+<pre>CODE155</pre>
 <p>The receipt-chain implication: <code>toolchain_version_hash</code> (Wave 153) is no longer a passive claim. A buyer with the same toolchain can convert "this binary was built with rustc 1.78.0 + these flags" from a recorded provenance string into an automated re-derivation check. The pin moves from <i>documentation</i> to <i>contract</i>.</p>
 
 <h3>7.6 PHI redactor receipt integrity (wave 157, Q+3a)</h3>
@@ -384,25 +355,7 @@ $ KOLM_VERIFY_REBUILD=1 kolm verify artifact.kolm
 <li><code>reinjection_log_hash</code>, sha256 of <code>reinjection-log.jsonl</code>: one line per call with per-row token counts and a <code>preservation_ok</code> flag (true when every token in the redacted input appeared verbatim in the teacher response, false when the teacher dropped or invented a replacement token).</li>
 </ul>
 <p><b>Check #14 ("PHI redactor receipt integrity")</b> is the verifier-side gate. When <code>manifest.training.redact_class</code> is anything other than <code>none</code>, all three log hashes are <i>required</i>. Missing any of them is an immediate <code>fail</code> - the recorded claim "we redacted" cannot stand without the offline-replay surface that lets a third party verify it. When the artifact additionally bundles the <code>teacher-call-log.jsonl</code> file (kolm artifacts may carry it; the manifest hash claims are sufficient on their own), check #14 also (a) re-hashes the bundled log against <code>training.teacher_call_log_hash</code> and fails on any mismatch; (b) re-runs the redactor over every <code>redacted_input</code> / <code>redacted_system</code> / <code>redacted_response</code> line in the log and fails on any new token detected - the redactor finding new identifiers in fields it had already masked means raw PHI was carried into the log, breaking the tenant-boundary guarantee.</p>
-<pre><code># Default  - verify a redactor-equipped artifact
-$ kolm verify health-insurance-prior-auth.kolm
- PHI redactor receipt integrity pass redact_class=phi;
- redaction_map_hash +
- teacher_call_log_hash +
- reinjection_log_hash all present in
- receipt chain; bundled teacher-call-
- log.jsonl re-hashed and scanned (0
- raw identifiers detected)
-
-# Tampered log  - check #14 detects raw email in a redacted_input field
-$ kolm verify forged.kolm
- PHI redactor receipt integrity fail bundled teacher-call-log.jsonl
- contains 1 raw identifier(s) the
- redactor failed to mask before the
- teacher call. raw PHI is in the log;
- the redactor's tenant-boundary
- guarantee is broken for this
- artifact.</code></pre>
+<pre>CODE179</pre>
 <p>The canary-token-preservation check is recorded but is not a verifier gate: the worker's reinjection-log carries the <code>preservation_ok</code> flag per row, and a recipe-level <code>teacher_compliance_test</code> can refuse to ship if the teacher consistently fails to echo placeholders unchanged. Some teachers normalize or paraphrase tokens; the worker falls back to a per-field call pattern (one teacher call per redacted field) when the canary fails so the teacher never sees an aggregate. Either way the receipt chain captures what was sent and what came back.</p>
 <p><b>The Safe Harbor 18 + kolm extensions.</b> The redactor's class set covers all 18 categories enumerated at 45 CFR 164.514(b)(2): names, geographic subdivisions, dates other than year, telephone, fax, email, SSN, MRN, health-plan beneficiary, account, certificate/license, vehicle, device, URL, IP, biometric, full-face photographs (flagged for vision recipes), and any other unique code. kolm adds three healthcare-provider identifiers regulators care about even though Safe Harbor does not: NPI, DEA, and state Medicaid provider IDs. These exist because real prior-auth and claims-adjudication workflows route on provider identity, and a redactor that masks the patient but leaves the prescriber unmasked still leaks identifying information.</p>
 <p><b>Safe Harbor is necessary but not sufficient.</b> HIPAA §164.514(b)(1) Expert Determination is the deeper de-identification control: it requires a qualified statistician to certify that the risk of re-identification by an "anticipated recipient" is "very small." The redactor handles the 18+3 identifier classes; it does not handle semantic re-identification ("the diabetic woman seen in room 4B on Tuesday") or quasi-identifier combinations (race + ZIP3 + diagnosis date) that uniquely identify a small population. Limited Data Sets per §164.514(e) have a separate carve-out for dates and geography; the redactor supports this via <code>--redact=phi-lds</code>. The spec section on T4 ("misdeclared artifact class") in the threat model below makes the same point in shorter form: the verifier cannot certify HIPAA compliance, only the integrity of the receipt chain that demonstrates the redactor was applied. Compliance review remains required for high-risk workloads.</p>
@@ -424,27 +377,12 @@ $ kolm verify forged.kolm
 <li><code>distillation_method</code>, one of <code>lora</code>, <code>qlora</code>, <code>full-ft</code>, <code>prompt-distill</code>. Required.</li>
 </ul>
 <p><b>Check #15 ("Cross-vendor distillation provenance")</b> is the verifier-side gate. It fires when <code>manifest.lineage.source === 'distillation'</code> and demands all four required fields above (<code>teacher_vendor</code>, <code>teacher_model</code>, <code>student_base</code>, <code>distillation_method</code>). Missing any of them is an immediate <code>fail</code> - the lineage block's "we distilled from X teacher" claim cannot stand without the manifest fields that name X. When all four are present, the check passes with a self-describing detail line that surfaces the full provenance so a reader can identify the teacher/student combination, the optional version pins, the license tag, and the training corpus hash without opening the lineage block:</p>
-<pre><code># Pass  - every required field present, license self-described
-$ kolm verify health-insurance-prior-auth.kolm
- Cross-vendor distillation provenance pass
- teacher=anthropic:claude-opus-4-7@2026-05-17 ·
- student=qwen2.5-0.5b@abc1234 ·
- method=lora ·
- student_base_license=Apache-2.0 ·
- training_corpus_hash=&lt;sha256&gt;
-
-# Fail  - lineage claims distillation, manifest does not name the teacher
-$ kolm verify suspect.kolm
- Cross-vendor distillation provenance fail
- manifest.lineage.source='distillation' but manifest.training is missing
- required field(s): teacher_vendor, teacher_model. Distillation lineage
- requires the full cross-vendor provenance set so a verifier can identify
- the teacher/student combination.</code></pre>
+<pre>CODE233</pre>
 <p><b>Licensing posture.</b> The OpenAI and Anthropic terms each restrict using model outputs to develop competing general-purpose models. The narrow-task carve-out  - distilling a phone-number normalizer or denial-code classifier  - is industry practice but legally unsettled; each tenant must do their own legal review. For tenants who don't want to bet on the carve-out, the always-safe path is <code>--teacher=local:&lt;model&gt;</code> against an open-weight teacher hosted on the tenant's own infrastructure (vLLM, TGI, llama.cpp server, ollama). The receipt chain records the choice either way; the license catalog flags the upstream terms so a compliance officer can see the posture at verify time without consulting an external matrix.</p>
 <p><b>K-score implication (shipped in wave 160, Q+3c  - see &sect;7.8).</b> When a cross-vendor distillation also runs <code>--teacher-holdout</code>, the receipt chain carries <code>teacher_holdout_accuracy</code> + <code>teacher_holdout_count</code> + <code>teacher_holdout_log_hash</code>. The K-score v2 envelope's T axis derives from these (T = student_holdout_accuracy / teacher_holdout_accuracy) and reports an A/T fidelity ratio. A/T = 1.0 means the student matched the teacher on the same holdout; A/T = 0.9 means the student delivered 90% of teacher accuracy at typically &lt;5% of cost. The fidelity ratio makes the cost/quality tradeoff legible in a single number  - and it depends on check #15 having confirmed the teacher identity, since "fidelity to teacher" is undefined without a named teacher.</p>
 
 <h3>7.8 K-score teacher-delta axis T and A/T reporting (wave 160, Q+3c)</h3>
-<p>The K-score v2 envelope ships the T axis as the distillation-honesty signal. Cost and offline execution are not enough by themselves; a buyer needs to know whether the local artifact is close to the teacher on the same holdout. The verifier records teacher identity, student holdout accuracy, teacher holdout accuracy, and the A/T ratio so the tradeoff is visible without reading the manifest by hand.</p>
+<p>The K-score v2 envelope ships the T axis as the distillation-truthfulness signal. Cost and offline execution are not enough by themselves; a buyer needs to know whether the local artifact is close to the teacher on the same holdout. The verifier records teacher identity, student holdout accuracy, teacher holdout accuracy, and the A/T ratio so the tradeoff is visible without reading the manifest by hand.</p>
 <p><b>The two inputs.</b> The T axis is degenerate without both halves. The <code>kolm-distill-worker</code> writes both fields into <code>manifest.training</code> when invoked with <code>--teacher-holdout=&lt;path&gt;.jsonl</code>:</p>
 <ul>
 <li><code>holdout_accuracy</code>, the student model's accuracy on the holdout rows the recipe never saw at training time. Required for the R axis as well. Computed by running the compiled artifact over the holdout inputs and exact-matching against holdout outputs (or the recipe-declared comparator).</li>
@@ -453,33 +391,12 @@ $ kolm verify suspect.kolm
 </ul>
 <p><b>Check #16 ("K-score teacher-delta (A/T)")</b> is the verifier-side gate. It fires when <code>manifest.lineage.source === 'distillation'</code> and branches on the distillation method:</p>
 <ul>
-<li><b>lora, qlora, full-ft</b>, methods that produce real student weights are <i>required</i> to carry both holdout accuracies. Missing either is an immediate <code>fail</code>: an artifact that claims to ship distilled weights at 5x cost reduction but does not record what the teacher would have scored on the same holdout cannot honestly report fidelity. The fail detail names the missing field and points at the <code>--teacher-holdout</code> flag so the operator knows the exact remediation.</li>
+<li><b>lora, qlora, full-ft</b>, methods that produce real student weights are <i>required</i> to carry both holdout accuracies. Missing either is an immediate <code>fail</code>: an artifact that claims to ship distilled weights at 5x cost reduction but does not record what the teacher would have scored on the same holdout cannot frankly report fidelity. The fail detail names the missing field and points at the <code>--teacher-holdout</code> flag so the operator knows the exact remediation.</li>
 <li><b>prompt-distill</b>, teacher-as-judge codegen (no fine-tune; the recipe is a templated function selected for matching teacher outputs). The T axis is informational only here because there is no student model, only a function whose performance is the K-score's A axis. Missing fidelity inputs are a <code>warn</code>, not a fail; present inputs still render the A/T ratio for legibility.</li>
 </ul>
-<pre><code># Pass  - both holdout accuracies present, A/T reported
-$ kolm verify health-insurance-prior-auth.kolm
- K-score teacher-delta (A/T) pass
- student_holdout=0.9420 · teacher_holdout=0.9750 · A/T=0.9662
- (student at 96.6% of teacher accuracy on the same holdout) ·
- T axis = 0.9662
-
-# Fail  - lora artifact, but holdout numbers missing
-$ kolm verify suspect.kolm
- K-score teacher-delta (A/T) fail
- distillation_method=lora requires teacher_holdout_accuracy +
- holdout_accuracy in k_score for the T axis. Re-run the distill
- worker with --teacher-holdout=path/to/teacher-holdout.jsonl so
- the receipt records the teacher's accuracy on the same holdout
- the student was scored against.
-
-# Warn  - prompt-distill artifact, no student model, fidelity inputs absent
-$ kolm verify summarizer.kolm
- K-score teacher-delta (A/T) warn
- distillation_method=prompt-distill (teacher-as-judge, no fine-tune);
- T axis informational only. Supply --teacher-holdout to record A/T
- for cost/quality legibility.</code></pre>
+<pre>CODE252</pre>
 <p><b>Rendering in the compliance binder.</b> The compliance binder's K-score section (<code>renderKScore</code> in <code>src/binder.js</code>) now switches on <code>k_score.spec</code>. V1 artifacts continue to render as five axes (A, S, L, C, V at weight 0.40/0.15/0.15/0.15/0.15). V2 artifacts render the five base axes plus whichever V2 axes the producer captured: R (robustness), T (teacher-fidelity), F (fairness), E (energy), Z (drift). Each axis row shows the supplied weight (after redistribution over present axes), the normalized score, a horizontal bar, and the raw evidence string  - for T, the bar shows the A/T ratio directly and the evidence line reads <code>student 0.9420 / teacher 0.9750 = 0.9662</code>. The formula line above the axes switches to the V2 expression with a note that missing axes redistribute weight, so a reader can reproduce the composite by hand from the rendered numbers.</p>
-<p><b>What this closes from the original critique.</b> Pablo's Round 5 framing  - "<i>K = 0.917 decodes roughly to: on traffic like its training set, it echoes the big model fairly closely, and it's fast and deterministic  - not 91.7% correct</i>"  - is now a property of the artifact instead of a disclaimer in marketing copy. A reader of the binder sees the A axis (raw accuracy on declared positives) <i>next to</i> the R axis (raw accuracy on unseen holdout) <i>next to</i> the T axis (student accuracy as a fraction of teacher accuracy on that holdout). The cost/quality tradeoff that the receipt chain is supposed to certify is the literal first thing on the page. The honest decode is the receipt, not a disclaimer.</p>
+<p><b>What this closes from the original critique.</b> Pablo's Round 5 framing  - "<i>K = 0.917 decodes roughly to: on traffic like its training set, it echoes the big model fairly closely, and it's fast and deterministic  - not 91.7% correct</i>"  - is now a property of the artifact instead of a disclaimer in marketing copy. A reader of the binder sees the A axis (raw accuracy on declared positives) <i>next to</i> the R axis (raw accuracy on unseen holdout) <i>next to</i> the T axis (student accuracy as a fraction of teacher accuracy on that holdout). The cost/quality tradeoff that the receipt chain is supposed to certify is the literal first thing on the page. The plain decode is the receipt, not a disclaimer.</p>
 
 <h3>7.9 Ed25519 as authoritative signer; HMAC as legacy integrity check (release 161, Q+8)</h3>
 <p>Wave 144 §Q+8 named the existential problem in one line: HMAC-SHA256 is a symmetric MAC; anyone who can verify it can also forge it. A "signature" that requires the verifier to hold the same secret as the signer cannot prove provenance to a third party  - it can only prove that two parties share a secret. For an artifact whose entire commercial value rests on a verifier-side compliance officer being able to certify provenance without trusting kolm, the HMAC must be relabeled and a public-key signature must become the contract.</p>
@@ -489,37 +406,7 @@ $ kolm verify summarizer.kolm
 <li><b>verifier check #17 "Signature policy (Ed25519)"</b>  - fires on every <code>kolm verify</code>. When <code>manifest.policy.require_ed25519 === true</code> OR the verifier sets <code>KOLM_REQUIRE_ED25519=1</code>, an HMAC-only receipt is a hard <code>fail</code>. The fail detail names the deciding side (artifact-side policy field vs. verifier-side env var), the current <code>signature_alg</code>, and the exact remediation flag. When the artifact carries Ed25519 and the prior check #5 verified the signature against the embedded public key, check #17 passes with the explicit framing that HMAC has been retained as a legacy integrity check, not as the primary signature.</li>
 <li><b>HMAC relabeled in language, retained in bytes.</b> The receipt body still carries the <code>signature</code> hex (HMAC-SHA256) AND the <code>signature_ed25519</code> block; the binder check #6 ("Audit chain (HMAC receipt)") still verifies the chain step-by-step under the receipt secret. The relabeling is in the framing: pre-Wave-149 artifacts described HMAC as the third-party-verifiable signature. Post-Wave-161 the contract is that HMAC is an <i>integrity check</i>, a defense against in-flight tampering by a party who does not hold the shared secret, and the third-party-verifiable signature is Ed25519 (Wave 161, this section) or Sigstore (Wave 162, &sect;7.10). Both layers remain because dropping HMAC would invalidate every pre-Wave-149 receipt; layering Ed25519 on top added the public-cryptography property without breaking historical bytes.</li>
 </ul>
-<pre><code># Pass  - artifact carries Ed25519 + policy.require_ed25519=true (default)
-$ kolm verify health-insurance-prior-auth.kolm
- Receipt signature (Ed25519, public-key) pass
- Ed25519 signature verified against embedded public key
- (fingerprint a3f7e2c1b908...; no shared secret needed)
- Signature policy (Ed25519) pass
- policy requires Ed25519 and the signature_ed25519 block verified
- against its embedded public key (HMAC retained as a legacy
- integrity check, not as the primary signature)
-
-# Fail  - HMAC-only artifact under a verifier that demands Ed25519
-$ KOLM_REQUIRE_ED25519=1 kolm verify legacy.kolm
- Receipt signature (Ed25519, public-key) warn
- no signature_ed25519 block  - artifact built before Wave 149 or
- with KOLM_ED25519_DISABLE=1; HMAC integrity check below stands
- in until re-signed
- Signature policy (Ed25519) fail
- env KOLM_REQUIRE_ED25519=1 but receipt carries only HMAC
- integrity (signature_alg=hmac-sha256). HMAC is a symmetric MAC
- and cannot prove provenance to a third party  - re-sign with
- Ed25519 (unset KOLM_ED25519_DISABLE, or set
- KOLM_ED25519_PRIVATE_KEY_PATH=/path/to/key.pem) or relax the
- policy.
-
-# Pass  - same legacy artifact under a permissive verifier (no env opt-in)
-$ kolm verify legacy.kolm
- Signature policy (Ed25519) pass
- policy does not require Ed25519; receipt carries HMAC integrity
- check only. Set manifest.policy.require_ed25519=true at build
- time or env KOLM_REQUIRE_ED25519=1 at verify time to upgrade
- the gate.</code></pre>
+<pre>CODE269</pre>
 <p><b>Why an explicit policy field beats an implicit "Ed25519 if present" gate.</b> Pre-Wave-161, the binder pushed a <code>warn</code> on artifacts missing the Ed25519 block, and the verdict still came back <code>pass</code>. A regulated tenant procuring a kolm artifact could not write "the artifact verifies under our compliance policy" without separately auditing whether the warn fired. With check #17 the artifact <i>declares</i> its policy stance and the verifier <i>enforces</i> it; the procurement contract becomes "kolm verify exits 0 against our standard environment." The escape hatch (<code>KOLM_ED25519_DISABLE=1</code> at build time, <code>KOLM_POLICY_OPT_OUT=1</code> for legacy issuance, no env at verify time for permissive verifiers) is preserved so historical artifacts continue to verify and so air-gapped tenants who can't manage keys aren't locked out  - but the default for any new artifact is Ed25519-as-contract.</p>
 <p><b>Receipt chain implication.</b> The Wave 149 receipt chain order was: receipt body  - HMAC over canonical(body)  - body.signature; then Ed25519 over canonical(body INCLUDING HMAC)  - body.signature_ed25519. Wave 161 does not change this ordering; it only adds <code>manifest.policy.require_ed25519</code> to the manifest, which sits one level up in the artifact (the receipt's <code>manifest_hash</code> covers it). A downstream verifier that detects an HMAC-only receipt cannot silently substitute Ed25519, because doing so would require re-issuing the receipt under a different key - the policy field forces the substitution to be visible in the receipt body the next signer attests to.</p>
 
@@ -531,34 +418,7 @@ $ kolm verify legacy.kolm
 <li><b>attestArtifactWithRekor(path)</b>  - a new helper in <code>src/sigstore.js</code> that reads a built <code>.kolm</code>, extracts <code>receipt.json</code>, verifies the existing dry-run sigstore bundle against the canonical receipt body (proof that the embedded signature is real, not a stub), submits the embedded public key + signature + digest to Rekor, and rewrites <code>receipt.signature_sigstore.rekor_log_entry</code> with the returned <code>{ uuid, logIndex, integratedTime, logID }</code>. The artifact is re-emitted via <code>archiver</code> (NOT <code>AdmZip.writeZip</code>, which strips the CRC data descriptors that <code>artifact-runner.js</code> requires  - see Wave 161 lesson). <code>buildAndZip</code> calls it automatically when <code>policy.require_rekor=true</code> or <code>KOLM_SIGSTORE_REKOR_URL</code> is set; standalone <code>kolm sigstore-attest &lt;artifact&gt;</code> is preserved for after-the-fact pinning of legacy artifacts.</li>
 <li><b>verifier check #18 "Transparency policy (Rekor)"</b>  - reads two signals identically to check #17: artifact-side <code>manifest.policy.require_rekor === true</code>, verifier-side <code>KOLM_REQUIRE_REKOR=1</code>. Either being true makes Rekor mandatory. Then branches on whether the receipt carries a sigstore block, whether the bundle is dry-run, and whether the prior check #16 ("Receipt signature (Sigstore bundle)") passed. Pass/warn/fail with no skip (Wave 153 convention)  - every artifact gets a row.</li>
 </ul>
-<pre><code># Pass  - artifact carries pinned Rekor entry + policy.require_rekor=true
-$ kolm verify health-insurance-prior-auth.kolm
- Receipt signature (Sigstore bundle) pass
- sigstore bundle verified against embedded public key
- (rekor logIndex=14829003, integratedTime=2026-05-17T14:32:08Z)
- Transparency policy (Rekor) pass
- policy requires Rekor pinning and the sigstore bundle is
- anchored to a transparency log (logIndex=14829003,
- integratedTime=2026-05-17T14:32:08Z, logID=c0d8 - a2f)
-
-# Fail  - dry-run-only artifact under a verifier that demands Rekor
-$ KOLM_REQUIRE_REKOR=1 kolm verify dryrun.kolm
- Receipt signature (Sigstore bundle) pass
- sigstore bundle verified offline against embedded public key
- (dry-run; not anchored to a public transparency log)
- Transparency policy (Rekor) fail
- env KOLM_REQUIRE_REKOR=1 but receipt carries a dry-run
- sigstore bundle (no rekor_log_entry). Re-attest with
- `kolm sigstore-attest &lt;artifact&gt;` against a reachable Rekor
- instance, or relax the policy.
-
-# Pass  - same dry-run artifact under a permissive verifier (no env opt-in)
-$ kolm verify dryrun.kolm
- Transparency policy (Rekor) pass
- policy does not require Rekor; sigstore bundle is dry-run only.
- Set manifest.policy.require_rekor=true at build time (with
- KOLM_REKOR_REQUIRE=1) or env KOLM_REQUIRE_REKOR=1 at verify
- time to upgrade the gate.</code></pre>
+<pre>CODE304</pre>
 <p><b>Strip-order safety.</b> Pinning to Rekor mutates <code>receipt.signature_sigstore.rekor_log_entry</code> and <code>receipt.signature_sigstore.dry_run</code> after the HMAC and Ed25519 signatures are already affixed. This is safe because both signature verifiers strip the entire <code>signature_sigstore</code> block from the canonical payload before re-canonicalizing: <code>buildBinder</code>'s Ed25519 check destructures <code>{ signature_ed25519, signature_sigstore, ...ed25519Payload }</code>, and the HMAC check destructures <code>{ signature, signature_ed25519, signature_sigstore, ...rest }</code>. Mutating <code>signature_sigstore</code> post-build invalidates neither signature. The sigstore bundle's own <code>messageSignature</code> stays bit-identical (only <code>rekor_log_entry</code> and <code>dry_run</code> are touched, never <code>messageDigest</code> or <code>signature</code>), so <code>verifySigstoreBundle</code> still passes against the same canonical payload it signed.</p>
 <p><b>Why an explicit policy field beats an implicit "pin if reachable" gate.</b> A regulated tenant whose compliance officer needs to assert "this artifact is pinned to a public transparency log" needs the assertion to be a property of the artifact, not of the build environment that produced it. Without <code>require_rekor</code>, a build could quietly fall back to dry-run mode when the Rekor instance was unreachable, and the downstream artifact would look indistinguishable from one pinned to a real log. With <code>require_rekor=true</code>, the build hard-fails when Rekor is unreachable, and the resulting artifact (if it exists) carries the policy stance the verifier enforces. The escape hatches (<code>KOLM_REKOR_REQUIRE</code> unset at build time, <code>KOLM_POLICY_OPT_OUT=1</code>, or <code>KOLM_SIGSTORE_DISABLE=1</code> for sigstore-free artifacts) are preserved so air-gapped tenants and legacy artifacts continue to work  - but the default for a tenant who has explicitly opted in is hard-fail on missing pin.</p>
 <p><b>Receipt chain implication.</b> The three-layer cascade is now complete. <code>signature_alg</code> on the receipt now ranges over <code>hmac-sha256</code> (legacy), <code>ed25519+hmac-sha256</code> (Wave 149+), and <code>sigstore+ed25519+hmac-sha256</code> (Wave 162). The transparency-log layer answers a question the prior two layers could not: <i>when was this artifact signed?</i> Rekor's <code>integratedTime</code> is monotonic and append-only; an attacker who has stolen the Ed25519 private key cannot back-date a forged artifact to before the key was reported compromised, because the Rekor entry would post-date the revocation notice. The compliance contract becomes "kolm verify exits 0, and the integrated time on the Rekor entry pre-dates any known compromise of the signing key"  - a property a third-party auditor can verify without trusting kolm and without re-running the build.</p>
@@ -567,41 +427,11 @@ $ kolm verify dryrun.kolm
 <p>Wave 144 §P+6 closes the model-class compile path: a <code>distilled_model</code> artifact whose <code>recipes[0].engine</code> is one of the native runtimes (<code>llama.cpp</code>, <code>onnxruntime</code>, <code>coreml</code>, <code>mlx</code>, <code>executorch</code>, <code>tensorrt</code>) needs to bundle the actual model bytes inside the <code>.kolm</code>, hash them, and bind the hash into <code>artifact_hash</code> so a downstream verifier can prove that the artifact running on the device is the same artifact whose K-score the build pipeline recorded. The Wave 146 export-provenance bridge (<code>src/export-provenance.js</code>) already supplied the data path; Wave 163 closes the verifier loop, adds a one-command CLI shortcut, and raises every claim in §2 about <code>distilled_model</code> from "weights are addressable" to "weights are addressable AND verifiable AND bound into the artifact identity."</p>
 <p>Three changes ship together:</p>
 <ul>
-<li><b>CLI shortcut <code>--export=&lt;backend&gt; --export-from &lt;path&gt;</code>.</b> <code>kolm compile</code> grows a flag pair that takes an already-produced native artifact (a single <code>.gguf</code> / <code>.onnx</code> / <code>.safetensors</code> / <code>.pte</code> file, or a <code>.mlpackage</code> / <code>mlx_model/</code> / <code>engine/</code> directory) and bundles it with full provenance into the <code>.kolm</code>. The shortcut synthesizes a temp dir mirroring the <code>apps/export/run.py</code> output shape (a <code>manifest.json</code> with <code>kolm_export: true</code> plus the target file or directory copied in), then routes through the same <code>--export-provenance</code> plumbing introduced in Wave 146. Mutually exclusive with <code>--export-provenance</code>: pick one. <b>Honest scope:</b> the shortcut does <i>not</i> run the Python exporter (no GGUF quantization, no ONNX conversion, no CoreML compilation). That work lives in <code>apps/export/run.py</code> precisely because each backend pulls a heavy ML toolchain (<code>llama.cpp</code>, <code>onnxruntime</code>, <code>coremltools</code>) that the JS CLI must not require to keep the rule-class path working. Run the Python exporter first; then use the shortcut to bind the result.</li>
+<li><b>CLI shortcut <code>--export=&lt;backend&gt; --export-from &lt;path&gt;</code>.</b> <code>kolm compile</code> grows a flag pair that takes an already-produced native artifact (a single <code>.gguf</code> / <code>.onnx</code> / <code>.safetensors</code> / <code>.pte</code> file, or a <code>.mlpackage</code> / <code>mlx_model/</code> / <code>engine/</code> directory) and bundles it with full provenance into the <code>.kolm</code>. The shortcut synthesizes a temp dir mirroring the <code>apps/export/run.py</code> output shape (a <code>manifest.json</code> with <code>kolm_export: true</code> plus the target file or directory copied in), then routes through the same <code>--export-provenance</code> plumbing introduced in Wave 146. Mutually exclusive with <code>--export-provenance</code>: pick one. <b>Plain scope:</b> the shortcut does <i>not</i> run the Python exporter (no GGUF quantization, no ONNX conversion, no CoreML compilation). That work lives in <code>apps/export/run.py</code> precisely because each backend pulls a heavy ML toolchain (<code>llama.cpp</code>, <code>onnxruntime</code>, <code>coremltools</code>) that the JS CLI must not require to keep the rule-class path working. Run the Python exporter first; then use the shortcut to bind the result.</li>
 <li><b>Verifier check #19 "Export targets (model files)".</b> <code>buildBinder</code> grows a check that runs after the signature cascade. Three branches with pass/fail/pass-skip semantics, no opaque skip (Wave 153 convention): (a) <code>manifest.export</code> absent  - pass with "no model files bundled (rule-class artifact)"; (b) <code>manifest.export</code> present and every declared target's bytes re-hash to the manifest's <code>targets[].sha256</code> (file targets) or to the bridge's canonical directory hash (dir targets, computed as sha256 over sorted <code>${rel}\0${sha}\0${size}</code> lines joined by newlines, matching <code>export-provenance.js#hashDir</code>)  - pass with target count and total bytes; (c) any declared target is missing from the zip or its bytes drift from the manifest's sha256  - fail with a per-target diff. The check binds tightly to <code>manifest.export.hash</code> via <code>validateExportBlock</code> first, so a tampered manifest fails before any disk read.</li>
 <li><b>Receipt chain implication.</b> <code>artifact_hash_input</code> already carries <code>export_hash</code> (the <code>export_block.hash</code> from Wave 146), so any drift in the bundled bytes propagates into <code>artifact_hash</code> and through the three-layer signature cascade. Check #19 is the explicit verifier surface that makes the binding visible: a regulated tenant whose compliance review asks "prove the <code>model.q4_k_m.gguf</code> on this device is byte-identical to the one whose K-score we recorded at build time" can point at the check #19 row in the binder output, which states the recomputed sha256 next to the declared sha256.</li>
 </ul>
-<pre><code># Pass  - distilled_model artifact with a bundled gguf, hashes match
-$ kolm verify health-insurance-claims-classifier.kolm
- Receipt signature (HMAC) pass
- Receipt signature (Ed25519) pass
- Receipt signature (Sigstore bundle) pass
- Transparency policy (Rekor) pass
- Export targets (model files) pass
- 1 target hashed, 412.3 MB total
- model.q4_k_m.gguf (gguf, 432123456 bytes)
- sha256=a1b2c3d4e5f60718293a4b5c6d7e8f9012345678901234567890abcdef012345
-
-# Pass  - rule-class artifact (no model bundled)
-$ kolm verify phi-redactor.kolm
- Export targets (model files) pass
- no manifest.export block present (no native model files bundled).
- rule-class or synthesized_rule artifacts do not require this check.
-
-# Fail  - manifest claims a .gguf that isn't in the zip
-$ kolm verify tampered.kolm
- Export targets (model files) fail
- 1 declared target missing from zip:
- model.q4_k_m.gguf (file: not in zip)
-
-# Fail  - bytes drift from declared sha256 (someone re-quantized the gguf
-# after the artifact was signed, without re-running kolm compile)
-$ kolm verify drifted.kolm
- Export targets (model files) fail
- 1 target hash drift:
- model.q4_k_m.gguf
- declared sha256: a1b2c3d4e5f60718293a4b5c6d7e8f9012345678901234567890abcdef012345
- recomputed: ffffffffeeeeeeeeddddddddccccccccbbbbbbbbaaaaaaaa9999999988887777</code></pre>
+<pre>CODE372</pre>
 <p><b>Strip-order safety relative to the signature cascade.</b> The export block is part of the receipt body's <code>manifest_hash</code> and (transitively) of <code>artifact_hash_input.export_hash</code>. Check #19 runs after all three signature checks (HMAC #6, Ed25519 #5/#7, Sigstore #16/#18) because if any of those fail, the export-target check is meaningless - the manifest itself isn't trusted. The check therefore ordering is: trust the manifest first (signatures), then trust the manifest's claims about disk bytes (this check). The check does <i>not</i> mutate the receipt or the artifact; it reads-only and writes a binder row.</p>
 <p><b>Backward compatibility.</b> Every pre-Wave-163 artifact lacks <code>manifest.export</code> (the field was introduced in Wave 146 but only set when the user passed <code>--export-provenance</code> or the new <code>--export</code> shortcut). Check #19's branch (a) handles this case by emitting pass with the "no model files bundled" reason. No legacy <code>.kolm</code> regresses; the check only activates when the artifact opts in by carrying an export block.</p>
 <p><b>What this does not solve.</b> The check confirms that the bundled bytes are byte-identical to the manifest's declared sha256. It does <i>not</i> verify the bundled <code>.gguf</code> is a valid llama.cpp file (a corrupted-but-byte-identical file would still pass), and it does <i>not</i> verify the runtime on the device can actually load the file (that's <code>src/device-capabilities.js</code> and the runtime's own validation). The verifier check is "this is the file that was bundled," not "this file is valid for the format." Runtime validity is the inference engine's responsibility, exactly as a <code>cosign verify</code> pass on a container image does not assert the image's code is bug-free ; only that the bytes are the bytes the signer signed.</p>
@@ -615,47 +445,8 @@ $ kolm verify drifted.kolm
 <li><b>Manifest block <code>external_holdout_provenance</code>.</b> Shape: <code>{ spec: "external-holdout-v1", comparator, holdouts: [{ name, kind, license, source_url, accessed_at, file_basename, file_sha256, normalized_hash, row_count, accuracy, passed_count, evaluated_count, suitable_for, adversarial_generator_pair }], hash }</code>. The block-level <code>hash</code> is a canonical-JSON sha256 over the holdouts array plus the comparator, and is bound into <code>artifact_hash_input.external_holdout_hash</code> so any drift in the score, the file bytes, or the catalog metadata propagates through <code>artifact_hash</code> and the three-layer signature cascade (HMAC, Ed25519, sigstore).</li>
 <li><b>Verifier check #20 "External / adversarial holdouts".</b> Three branches, pass/warn/fail no opaque skip (Wave 153 convention): (a) <code>manifest.external_holdout_provenance</code> absent  - pass with "no external or adversarial holdouts declared (seeds.jsonl gate is the floor)" plus an upgrade hint; (b) block present  - <code>validateExternalHoldoutBlock</code> first (schema + hash round-trip), then for each holdout resolve the on-disk JSONL via the catalog, re-hash its bytes, and cross-check <code>license</code> and <code>source_url</code> against the live catalog entry (catches a tenant editing the catalog post-build to claim different provenance); (c) any schema drift, hash drift, file-missing, or catalog-vs-manifest mismatch  - fail with a per-holdout reason string naming the exact field that drifted.</li>
 </ul>
-<pre><code># Pass  - recipe scored against presidio-synthetic-v1 + cross-family-pair-v1
-$ kolm verify health-insurance-claims-classifier.kolm
- Receipt signature (HMAC) pass
- Receipt signature (Ed25519) pass
- Receipt signature (Sigstore bundle) pass
- Transparency policy (Rekor) pass
- Export targets (model files) pass
- External / adversarial holdouts pass
- 2 holdouts evaluated, comparator=exact
- presidio-synthetic-v1 (external, CC0-1.0)
- accuracy=0.857 passed=24/28
- cross-family-pair-v1 (adversarial, CC0-1.0)
- accuracy=0.731 passed=19/26
- anthropic.claude -> openai.gpt
-
-# Pass  - rule-class artifact with no external holdouts declared
-$ kolm verify phi-redactor.kolm
- External / adversarial holdouts pass
- no manifest.external_holdout_provenance block present.
- seeds.jsonl train/holdout (N+1.5/Q+2) remains the floor;
- add --external-holdout / --adversarial-holdout on the next compile
- to score against an out-of-distribution corpus.
-
-# Fail  - catalog edited post-build to claim a different license
-$ kolm verify license-drift.kolm
- External / adversarial holdouts fail
- 1 holdout failed cross-check:
- presidio-synthetic-v1
- catalog license: MIT
- manifest license: CC0-1.0
- (catalog was edited after the artifact was signed)
-
-# Fail  - holdout JSONL re-hashed differently than at build time
-$ kolm verify bytes-drift.kolm
- External / adversarial holdouts fail
- 1 holdout failed hash re-anchor:
- cms-claims-public-v1
- declared sha256: 8a9b0c1d2e3f...
- recomputed: ffeeddccbbaa...
- (file bytes drifted after compile)</code></pre>
-<p><b>Honest scope.</b> The three v1.0 holdouts are <i>synthetic, patterned after</i> the named public sources. <code>presidio-synthetic-v1</code> uses the same 18-Safe-Harbor-identifier shape as Microsoft Presidio Research's synthetic-PHI generator but is generated locally; <code>cms-claims-public-v1</code> uses the CMS Medicare DE-SynPUF inpatient/outpatient/prescription/dme/other taxonomy but the row contents are synthetic; <code>cross-family-pair-v1</code> is a hand-curated set of 26 (claude-input, gpt-paraphrase) pairs. These are eval primitives, not benchmark corpora. A regulated tenant whose compliance review demands real-world distributions (HIPAA limited-data-set claims, signed-DUA Presidio access, MIMIC-III-style PHI) replaces the catalog entry's <code>file</code> with their own DUA-gated JSONL, updates <code>file_sha256</code>, and the verifier check anchors to <i>their</i> corpus. The catalog is the integration surface; the holdouts shipped in the repo are reference implementations a third party can read, audit, and replace.</p>
+<pre>CODE409</pre>
+<p><b>Plain scope.</b> The three v1.0 holdouts are <i>synthetic, patterned after</i> the named public sources. <code>presidio-synthetic-v1</code> uses the same 18-Safe-Harbor-identifier shape as Microsoft Presidio Research's synthetic-PHI generator but is generated locally; <code>cms-claims-public-v1</code> uses the CMS Medicare DE-SynPUF inpatient/outpatient/prescription/dme/other taxonomy but the row contents are synthetic; <code>cross-family-pair-v1</code> is a hand-curated set of 26 (claude-input, gpt-paraphrase) pairs. These are eval primitives, not benchmark corpora. A regulated tenant whose compliance review demands real-world distributions (HIPAA limited-data-set claims, signed-DUA Presidio access, MIMIC-III-style PHI) replaces the catalog entry's <code>file</code> with their own DUA-gated JSONL, updates <code>file_sha256</code>, and the verifier check anchors to <i>their</i> corpus. The catalog is the integration surface; the holdouts shipped in the repo are reference implementations a third party can read, audit, and replace.</p>
 <p><b>K-score R axis implication.</b> The seeds.jsonl holdout (Wave 145) populates the recipe-local R axis: how well the synthesized recipe generalizes from its training pairs to held-out pairs <i>drawn from the same captured corpus</i>. The external holdout populates the <i>external</i> R axis: how well the recipe generalizes to inputs drawn from a different distribution entirely. The adversarial holdout populates the <i>adversarial</i> R axis: how well the recipe survives cross-family paraphrase. The K-score formula <code>K = 0.40*A + 0.15*S + 0.15*L + 0.15*C + 0.15*V</code> has not changed; what Wave 164 changes is the <i>source</i> of the A signal. A composite of <code>recipe_local_A * external_A * adversarial_A</code> is the right thing to surface in v2.x's K-score "axis breakdown," and the manifest now carries the data to compute it. Surfacing in the homepage and <code>/r/&lt;hash&gt;</code> receipt pages is a follow-up wave (O+ track); the data is in the manifest as of Wave 164.</p>
 <p><b>Receipt chain implication.</b> The receipt chain now reads <code>spec  - seeds  - split  - train  - recipes  - evals  - external_holdout  - export  - signatures  - rekor</code>. Each link is hash-bound to the next; a tenant or auditor with the <code>.kolm</code>, the <code>holdouts/catalog.json</code>, and the on-disk holdout JSONL can replay the entire chain offline. The external-holdout layer specifically answers the question "did the recipe generalize beyond its own captured IO?", which the seeds.jsonl gate alone cannot answer because seeds.jsonl is by construction one tenant's data. Wave 164 makes "yes, on these CC0-licensed external corpora, with this accuracy, recomputable from these file bytes" a verifiable artifact property.</p>
 <p><b>Backward compatibility.</b> Every pre-Wave-164 artifact lacks <code>manifest.external_holdout_provenance</code>. Check #20's branch (a) handles this case by emitting pass with the "no external or adversarial holdouts declared" reason and an upgrade hint. No legacy <code>.kolm</code> regresses; the check only activates when the artifact opts in by declaring at least one holdout at compile time.</p>
@@ -668,44 +459,11 @@ $ kolm verify bytes-drift.kolm
 <li><b>HTTP endpoints.</b> <code>POST /v1/eval/tenant_holdout</code> accepts <code>{corpus_id, rows: Array&lt;{input,output} | {prompt,completion}&gt;, replace?}</code>; returns <code>{tenant_id, corpus_id, corpus_sha256, normalized_hash, row_count, stored_at, bytes, residency_note}</code>. <code>GET /v1/eval/tenant_holdout</code> lists all corpora for the authenticated tenant. <code>GET /v1/eval/tenant_holdout/:corpus_id</code> returns metadata for one corpus (never the rows). <code>DELETE /v1/eval/tenant_holdout/:corpus_id</code> removes it. All four are per-tenant scoped - the tenant_id is derived from <code>req.tenant_record.id</code>, never accepted as a body field, so cross-tenant access is impossible.</li>
 <li><b>CLI flag <code>--tenant-shadow-corpus &lt;tenant_id&gt;:&lt;corpus_id&gt;</code>.</b> Repeatable. <code>kolm compile</code> loads each named corpus from per-tenant disk via <code>loadCorpus</code>, normalizes its rows, executes the recipe against the corpus inputs, scores with the recipe's declared comparator, builds a per-corpus block via <code>buildTenantShadowBlock</code>, validates the block, and writes the array into <code>manifest.tenant_shadow_corpus_provenance</code>. The corpus bytes themselves are NEVER added to the .kolm zip.</li>
 <li><b>Manifest block <code>tenant_shadow_corpus_provenance</code> (array).</b> One block per shadow corpus. Shape: <code>{ spec: "tenant-shadow-corpus-v1", tenant_id, corpus_id, corpus_sha256, normalized_hash, row_count, accuracy, passed_count, evaluated_count, comparator, evaluated_at, residency_note, hash }</code>. The per-block <code>hash</code> is a canonical-JSON sha256 over the other fields; the array-level binding into <code>artifact_hash_input.tenant_shadow_corpus_hash</code> is the canonical-JSON sha256 over the ordered <code>[{tenant_id, corpus_id, hash}, ...]</code> shape, so adding, dropping, swapping, or editing any corpus drifts <code>artifact_hash</code> and breaks every signature.</li>
-<li><b>Verifier check #21 "Tenant shadow corpus".</b> Three-way dual-mode pass plus two fail paths: (a) <code>manifest.tenant_shadow_corpus_provenance</code> absent  - pass with "no shadow corpus declared" plus an upgrade hint; (b) block present + <code>reAnchorTenantShadowBlock</code> reports <code>mode='reanchored'</code> + corpus bytes match  - pass with "re-anchored from tenant storage"; (c) block present + <code>mode='unavailable'</code> (verifier is external to tenant infrastructure) + schema/block-hash round-trip clean  - pass with "external verifier; HIPAA data-never-leaves-tenant residency upheld; schema + block hash validated"; (d) block present + <code>mode='reanchored'</code> + bytes drift  - FAIL (corpus edited post-build OR manifest tampered); (e) schema/hash drift  - FAIL. The dual-mode behavior is what makes the check honest: an auditor with the <code>.kolm</code> but no tenant access can still verify the schema and the block hash, while a tenant-internal verifier can additionally re-anchor against the on-disk corpus.</li>
+<li><b>Verifier check #21 "Tenant shadow corpus".</b> Three-way dual-mode pass plus two fail paths: (a) <code>manifest.tenant_shadow_corpus_provenance</code> absent  - pass with "no shadow corpus declared" plus an upgrade hint; (b) block present + <code>reAnchorTenantShadowBlock</code> reports <code>mode='reanchored'</code> + corpus bytes match  - pass with "re-anchored from tenant storage"; (c) block present + <code>mode='unavailable'</code> (verifier is external to tenant infrastructure) + schema/block-hash round-trip clean  - pass with "external verifier; HIPAA data-never-leaves-tenant residency upheld; schema + block hash validated"; (d) block present + <code>mode='reanchored'</code> + bytes drift  - FAIL (corpus edited post-build OR manifest tampered); (e) schema/hash drift  - FAIL. The dual-mode behavior is what makes the check plain: an auditor with the <code>.kolm</code> but no tenant access can still verify the schema and the block hash, while a tenant-internal verifier can additionally re-anchor against the on-disk corpus.</li>
 </ul>
-<pre><code># Pass  - tenant-internal verifier with access to ${KOLM_DATA_DIR}
-$ kolm verify acme-claims-classifier.kolm
- External / adversarial holdouts pass
- Tenant shadow corpus pass
- 1 tenant shadow corpus block(s) re-anchored from tenant storage;
- every declared corpus_sha256 matches on-disk bytes.
- acme:claims-q2-2026: accuracy=88.3% on 53/60
- (re-anchored from /var/lib/kolm/tenant_holdouts/acme/claims-q2-2026.jsonl; bytes match)
-
-# Pass  - external auditor with .kolm but no tenant storage access
-$ kolm verify acme-claims-classifier.kolm
- Tenant shadow corpus pass
- 1 tenant shadow corpus block(s) validated by schema + block hash
- (verifier is external to tenant infrastructure; HIPAA
- data-never-leaves-tenant residency upheld).
- acme:claims-q2-2026: accuracy=88.3% on 53/60
- (corpus stays on tenant infrastructure; schema + block hash round-trip ok)
-
-# Pass  - rule-class artifact with no shadow corpus declared
-$ kolm verify phi-redactor.kolm
- Tenant shadow corpus pass
- no manifest.tenant_shadow_corpus_provenance block.
- seeds.jsonl gate is the floor; upload a corpus via
- POST /v1/eval/tenant_holdout and pass --tenant-shadow-corpus
- &lt;tenant_id&gt;:&lt;corpus_id&gt; to add an N+5 layer.
-
-# Fail  - corpus bytes drifted after compile
-$ kolm verify drift.kolm
- Tenant shadow corpus fail
- 1 corpus-byte drift(s):
- acme:claims-q2-2026: manifest declared corpus_sha256=ab12cd34ef56...,
- on-disk corpus hashes to ff00ee11dd22...
- this means either the corpus was edited after the build
- or the manifest was tampered with to claim a different corpus.</code></pre>
+<pre>CODE454</pre>
 <p><b>HIPAA data-never-leaves-tenant by construction.</b> The whole point of N+5 vs N+3/N+4 is that the corpus stays on the tenant's server. The .kolm artifact ships everywhere  - pinned to a registry, mailed to a counterparty, shared with an external auditor  - and at no point does it carry the corpus rows. An auditor receives the .kolm, validates the schema and the block hash, and sees "this artifact was evaluated against tenant <code>acme</code>'s corpus <code>claims-q2-2026</code> with accuracy 88.3%." They cannot read the corpus. They cannot reconstruct the corpus. They can only confirm that the manifest's fingerprint matches a corpus the manifest claims exists. To <i>re-anchor</i> the fingerprint against the actual bytes, they need access to the tenant's <code>${KOLM_DATA_DIR}/tenant_holdouts/&lt;tenant_id&gt;/</code> directory  - which means either (a) they are the tenant, (b) they have a contractual right to the corpus and an inspection visit on tenant premises, or (c) the tenant cooperatively re-runs <code>kolm verify</code> on tenant infrastructure and shows the auditor the output.</p>
-<p><b>Trust model honesty.</b> An external verifier who cannot re-anchor the corpus bytes is trusting the tenant's build pipeline did honest work on a corpus matching the declared hash. This is a real trust assumption, and the spec is explicit about it. Mitigations: (1) the tenant can grant inspection access on demand; (2) Wave 166's N+7 third-party auditor attestation layer adds a co-signer who attests to having seen the corpus and the score on inspection day; (3) the Ed25519 + Rekor signature cascade still proves the manifest hasn't been retroactively tampered with - the only thing the corpus-side trust assumption gives the tenant is the ability to fudge the bytes <i>at build time</i>, and N+7 closes that.</p>
+<p><b>Trust model truthfulness.</b> An external verifier who cannot re-anchor the corpus bytes is trusting the tenant's build pipeline did plain work on a corpus matching the declared hash. This is a real trust assumption, and the spec is explicit about it. Mitigations: (1) the tenant can grant inspection access on demand; (2) Wave 166's N+7 third-party auditor attestation layer adds a co-signer who attests to having seen the corpus and the score on inspection day; (3) the Ed25519 + Rekor signature cascade still proves the manifest hasn't been retroactively tampered with - the only thing the corpus-side trust assumption gives the tenant is the ability to fudge the bytes <i>at build time</i>, and N+7 closes that.</p>
 <p><b>K-score implication.</b> Tenant shadow corpus accuracy populates the <i>tenant-internal</i> R axis: how well the recipe generalizes on the tenant's actual production-shaped data (which is what the tenant cares about for procurement) without exposing that data to the wider receipt-verification audience (which is what HIPAA/contracts demand). A composite of <code>recipe_local_A ? external_A ? adversarial_A ? tenant_shadow_A</code> is the right thing to surface in the v2.x axis breakdown for tenants who upload shadow corpora. The data is in the manifest as of Wave 165; surfacing in homepage and <code>/r/&lt;hash&gt;</code> receipt pages is a follow-up O+ track wave.</p>
 <p><b>Receipt chain implication.</b> The receipt chain now reads <code>spec  - seeds  - split  - train  - recipes  - evals  - external_holdout  - tenant_shadow  - export  - signatures  - rekor</code>. Tenant shadow appends after external_holdout because tenant shadow accuracy is conditional on the same compiled recipe that external holdouts scored  - it is one more eval signal layered on top, not a replacement.</p>
 <p><b>Backward compatibility.</b> Every pre-Wave-165 artifact lacks <code>manifest.tenant_shadow_corpus_provenance</code>. Check #21's branch (a) handles this case by emitting pass with the "no shadow corpus declared" reason and an upgrade hint. No legacy <code>.kolm</code> regresses; the check only activates when the artifact opts in by declaring at least one shadow corpus at compile time.</p>
@@ -720,49 +478,7 @@ $ kolm verify drift.kolm
 <li><b>Manifest block <code>auditor_attestation_provenance</code> (array).</b> One block per attesting party. Shape: <code>{ spec: "kolm-auditor-attestation-v1", alg: "ed25519", auditor_id, accreditation, scope, notes, artifact_hash, cid, eval_set_hash, eval_score, artifact_class, k_score, external_holdout_hash, tenant_shadow_corpus_hash, checks_passed, public_key, key_fingerprint, signed_at, signature, hash }</code>. The Ed25519 signature covers <code>canonicalJson(block - signature - hash)</code>; the post-signature <code>hash</code> field is <code>sha256(canonicalJson(block including signature))</code> for the artifact_hash binding. The array-level binding into <code>artifact_hash_input.auditor_attestation_hash</code> is the canonical-JSON sha256 over the ordered <code>[{auditor_id, key_fingerprint, hash}, ...]</code> shape  - so adding, dropping, swapping, or quietly editing any attestation drifts <code>artifact_hash</code> and breaks every downstream signature including Rekor.</li>
 <li><b>Verifier check #22 "Third-party auditor attestation".</b> Five branches: (a) <code>manifest.auditor_attestation_provenance</code> absent  - pass with the upgrade hint naming the full <code>kolm auditor keygen / sign / --auditor-attestation</code> workflow; (b) present + every block's signature verifies + every signed claim matches the current manifest + every auditor key fingerprint differs from the builder's  - pass with auditor identities, fingerprints, scopes, and re-ran check counts surfaced; (c) present + any block's Ed25519 signature fails verification (tampered signature, mutated payload, swapped public key)  - FAIL; (d) present + signatures verify but a signed claim (<code>artifact_hash</code>, <code>eval_score</code>, <code>k_score.composite</code>, <code>external_holdout_hash</code>, <code>tenant_shadow_corpus_hash</code>) drifts from the current manifest  - FAIL with the specific drift reason; (e) present + signatures verify but an auditor's key fingerprint matches the builder's  - FAIL with "third-party attestation requires a distinct party." Tolerances: <code>eval_score</code> drift > 1e-6 fails; <code>k_score.composite</code> drift > 1e-4 fails; every hash is exact-match.</li>
 </ul>
-<pre><code># Pass  - third-party attestation valid, claims match, auditor != builder
-$ kolm verify acme-claims-classifier.kolm
- Tenant shadow corpus pass
- Third-party auditor attestation pass
- 2 third-party auditor attestation block(s) verified  - each signature valid
- against its embedded Ed25519 public key, every signed claim
- (artifact_hash + eval_score + k_score + external/tenant-shadow hashes
- when present) matches the current manifest, and every auditor key
- fingerprint differs from the builder's.
- auditor_id='deloitte-us-2026-q2' (key 7c4f2a9b3e8d...)
- scope='SOC 2 Type II AI controls' accreditation='AICPA member 12345'
- attests artifact_hash=ab12cd34ef56, eval_score=0.9530
- (re-ran 6 named binder checks);
- auditor_id='aicpa-trustlab-2026' (key f1e8c3a09b7d...)
- scope='HIPAA eval evidence' attests artifact_hash=ab12cd34ef56, eval_score=0.9530 (re-ran 4 named binder checks)
-
-# Pass  - no attestation declared (upgrade hint)
-$ kolm verify rule-only-artifact.kolm
- Third-party auditor attestation pass
- no manifest.auditor_attestation_provenance block ; only the builder's
- own Ed25519 signature attests to this artifact's verification outputs.
- To add an independent layer: (1) auditor runs `kolm auditor keygen
- --out auditor.key`, (2) auditor runs `kolm auditor sign
- &lt;artifact.kolm&gt; --key auditor.key --auditor-id &lt;slug&gt; --out
- attestation.json`, (3) tenant re-builds with `--auditor-attestation
- attestation.json`. The attestation's signed claims bind cryptographically
- to artifact_hash + eval_score + k_score, so any post-attestation tamper
- breaks the signature.
-
-# Fail : stale attestation: signed claim does not match current manifest
-$ kolm verify rebuild.kolm
- Third-party auditor attestation fail
- manifest.auditor_attestation_provenance has 1 attestation failure(s):
- auditor_id='deloitte-us-2026-q2' (fingerprint 7c4f2a9b3e8d...) signed
- claims do not match current manifest: signed artifact_hash=ab12cd34ef56 does not match current artifact_hash=de78f0a1b234
-# Fail  - auditor key fingerprint matches builder key fingerprint
-$ kolm verify self-signed.kolm
- Third-party auditor attestation fail
- manifest.auditor_attestation_provenance has 1 attestation failure(s):
- auditor_id='vendor-self-attest' uses the SAME Ed25519 key
- (5a3b7c9e1f04 -  as the artifact's builder; third-party attestation
- requires a distinct party. Re-sign with an Ed25519 key not held by
- the build pipeline.</code></pre>
+<pre>CODE515</pre>
 <p><b>Independence guarantee, mechanically.</b> The verifier reads the builder's fingerprint from <code>receipt.signed_by</code> (format <code>ed25519:&lt;hex32&gt;</code>) or <code>receipt.signature_ed25519.key_fingerprint</code>, and reads each auditor's fingerprint from the embedded attestation block. The two MUST differ. This is the structural property N+7 sells. An attestation block whose fingerprint equals the builder's adds zero independence  - it is the vendor signing its own homework with a second pen. Check #22 (e) refuses to count such a block as a third-party attestation. The error message names both fingerprints so the operator can audit which key was reused and re-sign with a distinct one.</p>
 <p><b>Multiple co-signers.</b> The block is an array, not a single attestation. A regulated buyer's procurement workflow typically involves more than one independent reviewer (SOC 2 auditor + HIPAA compliance officer + insurance carrier risk assessor). Each runs <code>kolm auditor sign</code> with their own key; the tenant collects all attestations and passes <code>--auditor-attestation</code> multiple times. The manifest carries all of them. The verifier validates each independently and reports a per-auditor pass/fail. Removing any block post-build (e.g., quietly dropping the unfavorable reviewer) drifts <code>artifact_hash_input.auditor_attestation_hash</code> and breaks every downstream signature including Rekor.</p>
 <p><b>Optional fields and partial attestation.</b> Not every auditor verifies every layer. An attestation block whose <code>external_holdout_hash</code> is null asserts the auditor did not look at external holdouts (no claim, no check). An attestation whose <code>k_score</code> is null asserts the auditor did not score the artifact themselves (only confirmed eval metadata round-trip). The cross-check only fires on fields the auditor actually signed: <code>block.field != null AND manifest.field != null AND they differ</code> is the failure trigger; null on either side is a no-op. This lets a lightweight attestation ("we confirmed artifact_hash matches what the vendor showed us") coexist with a heavyweight one ("we re-ran the entire eval and signed off on every axis"). Both are valid; the <code>checks_passed</code> field documents the scope the auditor stands behind.</p>
@@ -783,56 +499,7 @@ $ kolm verify self-signed.kolm
 <li><b>Manifest block <code>drift_report</code>.</b> Shape: <code>{ spec: "drift-report-v1", computed_at, baseline_snapshot, current_snapshot, signals, verdict, breach_count, drift_count, tolerances?, notes?, hash }</code>. Both embedded snapshots are themselves validated <code>drift-snapshot-v1</code> objects with their own hashes, so the manifest carries a self-validating mini-receipt-chain. Verdict rollup: any <code>breach</code> signal  - <code>breach</code>; any <code>drift</code> with no breach  - <code>drift</code>; else <code>within</code>. Binds into <code>artifact_hash_input.drift_report_hash</code>.</li>
 <li><b>Verifier checks #23 (Supersession chain) + #24 (Drift report).</b> Check #23 has three branches: (a) <code>manifest.supersession_provenance</code> absent  - pass + informational ("this artifact has no recorded predecessor") + upgrade hint quoting the full flag set; (b) present + validates  - pass with predecessor hash prefix, reason, supersession date, optional cid + <code>authorized_by</code>, and an evidence summary (drift-signal breach/drift counts and/or <code>drift_report_hash</code> prefix); (c) present + schema/hash drift  - fail with validator's message. Check #24 has four branches: (a) absent  - pass + informational with <code>kolm drift detect</code> and <code>kolm drift cron</code> usage hints; (b) present + verdict <code>within</code>  - pass with verdict detail; (c) present + verdict <code>drift</code>  - pass with <code>WARN </code> prefix and a "schedule re-distillation before next cadence" hint; (d) present + verdict <code>breach</code>  - fail with the breached axes list and the remediation hint to ship a corrected successor via <code>--supersession-of</code> with <code>--supersession-reason=drift_detected</code>. Both checks emit on every artifact so the binder always shows whether they are activated, not silently absent.</li>
 </ul>
-<pre><code># Pass  - no supersession declared (legacy artifact or first-in-chain)
-$ kolm verify acme-claims-genesis.kolm
- Supersession chain pass
- no manifest.supersession_provenance block  - this artifact has no recorded
- predecessor. To declare this artifact supersedes a prior one, rebuild
- with `kolm compile &lt;spec&gt; --supersession-of &lt;predecessor.kolm&gt;
- --supersession-reason &lt;reason&gt;` (valid reasons: drift_detected,
- scheduled_rebuild, security_patch, recipe_revision, policy_change,
- tenant_request). When reason='drift_detected', also pass
- --supersession-drift-report &lt;report.json&gt; so the evidence for
- retirement is bound into the manifest.
-
-# Pass  - drift_detected supersession with drift evidence embedded
-$ kolm verify acme-claims-q2-2026.kolm
- Supersession chain pass
- predecessor_artifact_hash=ab12cd34ef56 cid=bafyabcdef12 reason='drift_detected' supersession_date='2026-05-17T14:30:00Z'
- authorized_by='compliance-ops-2026' (evidence: 3 drift signal(s):
- 2 breach, 1 drift; drift_report_hash=cd34ef56ab78.
- Block hash bound into artifact_hash_input.supersession_hash so any
- tamper breaks all downstream signatures.
-
-# Fail  - supersession claims drift_detected but no evidence attached
-$ kolm verify bad-supersession.kolm
- Supersession chain fail
- manifest.supersession_provenance failed schema/hash validation:
- supersession.reason='drift_detected' missing evidence
-
-# Pass  - drift report within tolerance
-$ kolm verify acme-claims-fresh.kolm
- Drift report pass
- verdict='within' (0 breach, 0 drift across 5 signal(s))
- baseline=ab12cd34ef56 current=de78f0a1b234 computed_at='2026-05-17T08:00:00Z'
-
-# Pass with WARN  - drift report shows warn-band movement
-$ kolm verify acme-claims-trending.kolm
- Drift report pass
- WARN  - verdict='drift' (0 breach, 2 drift across 5 signal(s))
- baseline=ab12cd34ef56 current=de78f0a1b234 computed_at='2026-05-17T08:00:00Z'.
- Signals moved past the warn band but stayed inside the fail band.
- Schedule a re-distillation against current production traffic before
- the next cadence interval.
-
-# Fail  - drift report shows breach
-$ kolm verify acme-claims-stale.kolm
- Drift report fail
- manifest.drift_report verdict='breach'  - axes that breached tolerance:
- eval_score, k_score.composite, k_score.A. verdict='breach' (3 breach,
- 0 drift across 5 signal(s)) baseline=ab12cd34ef56 current=de78f0a1b234 computed_at='2026-05-17T08:00:00Z'. Re-distill the recipe (or use
- --supersession-of with --supersession-reason=drift_detected to ship
- a corrected successor).</code></pre>
+<pre>CODE640</pre>
 <p><b>Why two checks, not one.</b> Supersession and drift report are independent receipts. A scheduled rebuild can carry a supersession block (<code>reason='scheduled_rebuild'</code>, no drift evidence required) and no drift report at all. A drift-monitoring pipeline can stamp a drift report onto every cadence rebuild without changing the predecessor. The two-check shape lets a verifier surface each independently, so an auditor reading the binder PDF sees both rows whether the artifact is the first-in-chain (both informational), a routine rebuild with drift monitoring (drift report green, supersession green with <code>scheduled_rebuild</code>), or the drift-triggered successor that retires a breached predecessor (drift report on the predecessor was <code>breach</code>; new artifact carries <code>supersession_provenance.reason='drift_detected'</code> with the breached signals inlined).</p>
 <p><b>Why cron config emission, not a daemon.</b> kolm does not own a long-running scheduler process. Every regulated tenant already has one (cron, systemd timer, k8s CronJob, Airflow, GitHub Actions schedule). <code>kolm drift cron</code> builds a hash-stamped <code>drift-cron-v1</code> config block and emits the crontab line; the tenant drops the line into their scheduler. The wrapped <code>kolm drift detect</code> exits non-zero on breach so cron mail delivery surfaces the alert to the operator without needing a webhook. The webhook + <code>--alert-on</code> filter exist for tenants who prefer push notification but they are layered on top of the same exit-code contract, not replacements for it.</p>
 <p><b>Backward compatibility.</b> Every pre-Wave-167 artifact lacks both <code>manifest.supersession_provenance</code> and <code>manifest.drift_report</code>. Checks #23 (a) and #24 (a) handle this case by emitting pass with the "no block" reason and the upgrade hint. No legacy <code>.kolm</code> regresses; both checks only activate when the artifact opts in at compile time. The lifecycle ladder is opt-in across the board, with each tier (stale  - cadence  - drift  - supersession) adding new manifest blocks rather than mutating existing ones.</p>

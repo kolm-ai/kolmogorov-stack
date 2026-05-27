@@ -75,7 +75,7 @@
   <div class="ks-wrap">
     <p class="ks-eyebrow">Open-source AI workbench</p>
     <h1>Artifact marketplace.</h1>
-    <p class="lede">A storefront for signed .kolm artifacts. Publishers upload with an Ed25519 signature over the manifest; the route layer verifies on every upload. Free listings download to any tenant; paid listings gate on plan or explicit entitlement. Ratings carry an anti-gaming gate to keep the leaderboard honest. Publisher payouts settle at a 70/30 split. Stamped <code>w825-mvp-v1</code>.</p>
+    <p class="lede">A storefront for signed .kolm artifacts. Publishers upload with an Ed25519 signature over the manifest; the route layer verifies on every upload. Free listings download to any tenant; paid listings gate on plan or explicit entitlement. Ratings carry an anti-gaming gate to keep the leaderboard plain. Publisher payouts settle at a 70/30 split. Stamped <code>w825-mvp-v1</code>.</p>
   </div>
 </section>
 
@@ -122,7 +122,7 @@
     <h2>Paid listings, 402, and entitlement</h2>
     <p class="sub">Free listings download to any authenticated tenant. Paid listings (<code>paid: true</code>, <code>price_micro_usd &gt; 0</code>) return HTTP 402 when the requesting tenant lacks entitlement.</p>
     <p>Entitlement is OR-gated across three conditions: the tenant is the publisher (self-download is always allowed), the tenant's plan is anything other than <code>free</code> or <code>anon</code> (paid plans get all paid listings), or the tenant has an explicit entry in <code>tenant.entitlements[listing.id] === true</code>. Any of those three opens the download; otherwise the route returns 402 with the listing's price.</p>
-    <p>The 402 is honest - it carries the price in micro-USD, the listing id, and a hint pointing at <code>/pricing</code>. We never silently pass the bytes through on a paid listing.</p>
+    <p>The 402 is plain - it carries the price in micro-USD, the listing id, and a hint pointing at <code>/pricing</code>. We never silently pass the bytes through on a paid listing.</p>
   </div>
 </section>
 
@@ -149,7 +149,7 @@
     <h2>Fine-tune queue</h2>
     <p class="sub">Any marketplace artifact can be the starting point for a transfer-learning fine-tune. <code>POST /v1/marketplace/finetune</code> queues a distill run against the artifact's bytes using your tenant's capture namespace.</p>
     <p>The endpoint copies the artifact into <code>~/.kolm/artifacts/&lt;artifact_id&gt;.kolm</code> for the distill pipeline to pick up by stable filename, then writes a queued event with <code>provider: 'kolm_marketplace_finetune_queued'</code>. The response carries <code>status: 'queued'</code> (never <code>'running'</code> or <code>'completed'</code> - the real distill runs in a follow-up worker). The W381 distill pipeline scans for these rows and picks them up on its next cycle.</p>
-    <p>Honesty contract: when <code>artifact_uri</code> is missing on disk or is a remote URL we cannot stage locally, the response still carries <code>ok: true</code> + <code>copied_to: null</code> + <code>copy_skipped_reason</code> so the operator can see why the bytes did not stage. The distill row is still queued; the worker can retry the copy when the bytes show up.</p>
+    <p>No-silent-pass contract: when <code>artifact_uri</code> is missing on disk or is a remote URL we cannot stage locally, the response still carries <code>ok: true</code> + <code>copied_to: null</code> + <code>copy_skipped_reason</code> so the operator can see why the bytes did not stage. The distill row is still queued; the worker can retry the copy when the bytes show up.</p>
   </div>
 </section>
 

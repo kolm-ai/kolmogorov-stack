@@ -120,7 +120,7 @@
  <h2>Per-capture tagging</h2>
  <p>Every capture can carry an explicit region tag. The tag lives in the event store under <code>provider=kolm_data_residency</code>, <code>model=capture-tag</code>, so the same lake readers that back <a href="/account/billing">/account/billing</a> and <a href="/account/bakeoff">/account/bakeoff</a> can attribute by region without learning a second storage schema.</p>
  <div class="callout">
-  <p><strong>Honesty floor.</strong> An unknown region returns <code>{ok:false, error:'unknown_region'}</code>. We never silently coerce to GLOBAL &mdash; silent coercion would let a caller think they had tagged EU when in fact the row was never persisted with the claimed region.</p>
+  <p><strong>Caveats floor.</strong> An unknown region returns <code>{ok:false, error:'unknown_region'}</code>. We never silently coerce to GLOBAL &mdash; silent coercion would let a caller think they had tagged EU when in fact the row was never persisted with the claimed region.</p>
   <p><strong>Confirm gate.</strong> <code>tagCapture</code> requires <code>confirm:true</code>. A residency tag is an externally-visible compliance claim and we refuse to write one without an acknowledged side-effect.</p>
  </div>
  <h3>CLI</h3>
@@ -169,7 +169,7 @@ $ kolm compile spec.yaml --out support-eu.kolm --region EU_WEST  # region: EU_WE
   "max_n": 200
 }
 
-# Honest empty-state:
+# Plain empty-state:
 # {
 #   "ok": false,
 #   "error": "no_captures_in_region",

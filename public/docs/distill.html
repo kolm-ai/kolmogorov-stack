@@ -102,14 +102,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p class="lede">Auto-distill a captured namespace into a local student artifact via the kolm trainer bridge. Captures from <code>kolm capture</code> cross a threshold, the trainer runs against a chosen base model, the result ships as a signed <code>.kolm</code> artifact.</p>
 
 <h2 id="usage">Usage</h2>
-<pre><code>kolm distill --namespace &lt;n&gt; [--base-model &lt;name&gt;] [--target &lt;size&gt;]
-
-kolm distill --local-worker --spec &lt;file&gt; --seeds &lt;file&gt; --out &lt;dir&gt;
- [--mode stub|collect|full|doctor]
- [--teacher &lt;vendor:model&gt;]
- [--student-base &lt;name&gt;]
- [--distillation-method lora|qlora|full-ft|prompt-distill]
- [--split-seed N] [--redact phi|pci|multi|none|auto]</code></pre>
+<pre>CODE2</pre>
 
 <h2 id="defaults">Defaults</h2>
 <table>
@@ -128,45 +121,34 @@ kolm distill --local-worker --spec &lt;file&gt; --seeds &lt;file&gt; --out &lt;d
  <span class="num">Step 1</span>
  <h3>Capture pairs against a namespace</h3>
  <p>Point your existing app at the local proxy and let it accumulate (input, output) pairs against a named namespace.</p>
-<pre><code>kolm capture --provider openai --as ticket-classifier --namespace tickets
-# proxy listening on http://127.0.0.1:8787
-# point OPENAI_BASE_URL there in the app</code></pre>
+<pre>CODE14</pre>
 </div>
 
 <div class="step">
  <span class="num">Step 2</span>
  <h3>Wait for the threshold</h3>
  <p>Default distill threshold is 1000 captured pairs per namespace. Track progress.</p>
-<pre><code>kolm capture status --namespace tickets
-# pairs captured: 438 / 1000
-# pairs until distill: 562</code></pre>
+<pre>CODE15</pre>
 </div>
 
 <div class="step">
  <span class="num">Step 3</span>
  <h3>Distill the namespace</h3>
  <p>Once the threshold trips, run the distill. The trainer chooses a recipe (LoRA when full ML stack present, prompt-distill otherwise) and emits a signed artifact.</p>
-<pre><code>kolm distill --namespace tickets
-# base-model: Qwen/Qwen2.5-3B-Instruct
-# target: phi-3-mini
-# method: lora (trainer bridge ok)
-# K-score: 0.91 (pass; gate 0.88)
-# artifact: ~/.kolm/artifacts/tickets-2026-05-18.kolm</code></pre>
+<pre>CODE16</pre>
 </div>
 
 <div class="step">
  <span class="num">Step 4</span>
  <h3>Verify and ship</h3>
  <p>Re-check the receipt chain and inspect the artifact before promoting.</p>
-<pre><code>kolm verify ~/.kolm/artifacts/tickets-2026-05-18.kolm
-kolm inspect ~/.kolm/artifacts/tickets-2026-05-18.kolm
-kolm run ~/.kolm/artifacts/tickets-2026-05-18.kolm 'classify: order delayed'</code></pre>
+<pre>CODE17</pre>
 </div>
 
 <h2 id="redact">Redaction classes</h2>
 <p>The trainer accepts <code>--redact</code> to mask sensitive substrings before any teacher call. Classes: <code>phi</code> (HIPAA Safe Harbor identifiers), <code>pci</code> (card data), <code>multi</code> (both), <code>none</code> (off), and <code>auto</code> (read <code>redact_class</code> from the spec). <code>--no-redact</code> is equivalent to <code>--redact=none</code> and is rejected when <code>--redact=&lt;class&gt;</code> is also passed.</p>
 
-<h2 id="honest">Honest scope</h2>
+<h2 id="honest">Plain scope</h2>
 <p>The distill verb runs against a captured namespace or a local spec plus seeds. The hosted compile path is a separate verb (<code>kolm compile</code>). Local distill needs a working Python ML stack for full LoRA mode; <code>--mode doctor</code> probes the worker and reports what is missing.</p>
 
 <h2 id="see">Related</h2>

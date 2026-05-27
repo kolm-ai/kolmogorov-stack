@@ -440,12 +440,12 @@
  <div class="ships-card shipped">
  <span class="tag">shipped &middot; src/distill-onpolicy.js</span>
  <h4>src/distill-onpolicy.js</h4>
- <p>Thinking Machines on-policy distillation: student samples its own trajectories, teacher returns log-probs, reverse-KL gradient computed locally. The Node orchestration shell ships in W480; the gradient-computing trainer is a tenant-installed plug-in resolved through <code>$KOLM_ONPOLICY_TRAINER</code>, returning an honest <code>no_trainer_installed</code> envelope when absent (no silent passthrough). Sequences with <code>src/tune.js</code> so the trainer can switch between off-policy SFT and on-policy distill.</p>
+ <p>Thinking Machines on-policy distillation: student samples its own trajectories, teacher returns log-probs, reverse-KL gradient computed locally. The Node orchestration shell ships in W480; the gradient-computing trainer is a tenant-installed plug-in resolved through <code>$KOLM_ONPOLICY_TRAINER</code>, returning an plain <code>no_trainer_installed</code> envelope when absent (no silent passthrough). Sequences with <code>src/tune.js</code> so the trainer can switch between off-policy SFT and on-policy distill.</p>
  </div>
  <div class="ships-card shipped">
  <span class="tag">shipped &middot; src/distill-preference.js</span>
  <h4>src/distill-preference.js</h4>
- <p>DPO + SimPO + ORPO + KTO as orchestration on top of the existing tune loop; reuses the K-score gate. KTO as the binary-feedback variant for thumbs-up / thumbs-down captures from <code>~/.kolm/tune/&lt;artifact&gt;/captures.jsonl</code>. The gradient computation runs in an external trainer resolved through <code>$KOLM_PREFERENCE_TRAINER</code>; honest <code>no_trainer_installed</code> envelope when absent.</p>
+ <p>DPO + SimPO + ORPO + KTO as orchestration on top of the existing tune loop; reuses the K-score gate. KTO as the binary-feedback variant for thumbs-up / thumbs-down captures from <code>~/.kolm/tune/&lt;artifact&gt;/captures.jsonl</code>. The gradient computation runs in an external trainer resolved through <code>$KOLM_PREFERENCE_TRAINER</code>; plain <code>no_trainer_installed</code> envelope when absent.</p>
  </div>
  <div class="ships-card shipped">
  <span class="tag">shipped &middot; src/spec-decode.js</span>

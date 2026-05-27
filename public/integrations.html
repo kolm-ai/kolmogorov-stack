@@ -259,7 +259,7 @@
     <p class="sub">Gate the release. <code>kolm score --min</code> exits non-zero when the K-score is below your floor; the build fails. Receipts uploaded as CI artifacts so an auditor can pull them later.</p>
     <div class="cat">
       <div class="cat-head"><span class="tag">ci</span><h3>Build-pipeline gates</h3><span class="count">2 adapters</span></div>
-      <p class="gd">Reusable workflow files. Drop into your existing pipeline. The gate is honest: the build fails when the artifact misses its K-score floor.</p>
+      <p class="gd">Reusable workflow files. Drop into your existing pipeline. The gate is plain: the build fails when the artifact misses its K-score floor.</p>
       <ul class="fr-spec-list int-list">
         <li class="fr-spec-list__row">
           <div class="fr-spec-list__head"><h3>GitHub Actions</h3><span class="fr-spec-list__delta">Live &middot; actions/runner</span></div>
@@ -599,11 +599,11 @@
         <p class="fr-spec-list__p">Every adapter ships a verification step. For IDE plugins it is the status-bar reading the tenant. For CI it is a no-op <code>kolm whoami</code> in the pipeline. For gateway proxies it is a single captured row appearing in the local store. If the verify step does not pass, the install did not work.</p>
       </li>
       <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Honest envelope passes through</h3><span class="fr-spec-list__delta">envelope &middot; stable</span></div>
+        <div class="fr-spec-list__head"><h3>Loud-fail envelope passes through</h3><span class="fr-spec-list__delta">envelope &middot; stable</span></div>
         <p class="fr-spec-list__p">Every adapter preserves the <code>{ok, code, error, data}</code> envelope. No adapter hides a 4xx behind a success message. The OpenAI and Anthropic SDK adapters surface kolm errors next to the upstream provider errors so a developer sees both layers.</p>
       </li>
       <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Honest scope per adapter</h3><span class="fr-spec-list__delta">scope &middot; stable</span></div>
+        <div class="fr-spec-list__head"><h3>Plain scope per adapter</h3><span class="fr-spec-list__delta">scope &middot; stable</span></div>
         <p class="fr-spec-list__p">If an adapter does not yet cover a kolm verb (e.g. the Cloudflare binding is verify-only; it does not compile), the adapter page says so explicitly. No silent gaps; future capability commitments are recorded against a target wave in the <a href="/changelog" style="color:var(--ks-accent)">/changelog</a>.</p>
       </li>
     </ul>
@@ -613,7 +613,7 @@
 <section class="int-section" id="missing">
   <div class="ks-wrap">
     <h2>Missing an adapter? File a request.</h2>
-    <p class="sub">Honest scope: the eighteen integrations above are the ones that ship and that we test on every release. If your stack uses something else, the fastest path is an issue with the use case described.</p>
+    <p class="sub">Plain scope: the eighteen integrations above are the ones that ship and that we test on every release. If your stack uses something else, the fastest path is an issue with the use case described.</p>
     <ul class="fr-spec-list int-list">
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>Open a GitHub issue</h3><span class="fr-spec-list__delta int-list__delta--wip">OPEN &middot; github.com</span></div>
@@ -702,8 +702,8 @@
      llamaindex-py, zapier, make). Adapter snippets use SOURCE installs
      (packages/langchain-kolm etc.) because the registry-published variants
      are not verified yet. Zapier card carries the webhook stat-pill and
-     "no native Kolm app yet" honesty language; Make.com card carries the
-     HTTP module stat-pill and "no native Kolm module yet" honesty language.
+     "no native Kolm app yet" truthfulness language; Make.com card carries the
+     HTTP module stat-pill and "no native Kolm module yet" truthfulness language.
      Visible runtime-setup + integration matrix above; this block is the
      stable test anchor surface. Offscreen + aria-hidden + hidden so
      screen readers skip. -->

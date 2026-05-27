@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>REST API reference · kolm.ai</title>
-<meta name="description" content="The kolm REST surface. 708 operations under /v1/* grouped by auth, capture, distill, compile, score, and verify. Honest envelope, x-kolm-api-key header, OpenAPI download.">
+<meta name="description" content="The kolm REST surface. 708 operations under /v1/* grouped by auth, capture, distill, compile, score, and verify. Loud-fail envelope, x-kolm-api-key header, OpenAPI download.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="REST API reference &middot; kolm.ai">
@@ -100,7 +100,7 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/api",
-  "description": "The kolm REST surface. 708 operations under /v1/* grouped by auth, capture, distill, compile, score, and verify. Honest envelope, x-kolm-api-key header, OpenAPI download.",
+  "description": "The kolm REST surface. 708 operations under /v1/* grouped by auth, capture, distill, compile, score, and verify. Loud-fail envelope, x-kolm-api-key header, OpenAPI download.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -142,7 +142,7 @@
 <section class="api-hero">
   <div class="ks-wrap">
     <div class="eyebrow">REST API reference &middot; for developers, engineers, and security reviewers</div>
-    <h1>The kolm /v1 surface. <b>708 operations, one honest envelope.</b></h1>
+    <h1>The kolm /v1 surface. <b>708 operations, one loud-fail envelope.</b></h1>
     <p class="lede">Every CLI verb, every SDK method, every integration adapter resolves to a route under <code>/v1/*</code>. Auth is a single <code>x-kolm-api-key</code> header. Every response carries the shape <code>{ok, code, error, data}</code>; HTTP status is never lied about. This page is the index. Group cards below link to per-surface deep references and code samples.</p>
     <div class="cta-row">
       <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
@@ -321,7 +321,7 @@ curl https://kolm.ai/v1/whoami \
           <li><span class="m">GET</span><span class="p">/v1/doctor</span></li>
           <li><span class="d">Operational health: GPU, drivers, Python, Node, disk, credentials. Returns actionable hints.</span></li>
           <li><span class="m post">POST</span><span class="p">/v1/multimodal/redact-image</span></li>
-          <li><span class="d">Pixel-space face and license-plate scrub for captured images. Honest <code>no_detector_installed</code> envelope when deps missing.</span></li>
+          <li><span class="d">Pixel-space face and license-plate scrub for captured images. Plain <code>no_detector_installed</code> envelope when deps missing.</span></li>
         </ul>
       </article>
 
@@ -752,7 +752,7 @@ GET /v1/verify/bafy2bzace...e8d0 HTTP/1.1
         <tr><td>422</td><td>validation_failed</td><td>Body or query failed schema validation. <code>data.errors[]</code> names the offending fields.</td></tr>
         <tr><td>429</td><td>rate_limited</td><td>Per-tenant per-route ceiling. Respect <code>x-ratelimit-reset</code>.</td></tr>
         <tr><td>500</td><td>internal</td><td>Server fault. The request id in <code>data.request_id</code> is what to send to support.</td></tr>
-        <tr><td>503</td><td>not_yet_implemented</td><td>Source-indexed route advertised but pending entitlement (e.g. SCIM SP config under SSO). Honest pre-ship signal.</td></tr>
+        <tr><td>503</td><td>not_yet_implemented</td><td>Source-indexed route advertised but pending entitlement (e.g. SCIM SP config under SSO). Plain pre-ship signal.</td></tr>
       </tbody>
     </table>
   </div>

@@ -63,10 +63,10 @@
   .pipe-step h4 { margin: 0 0 var(--ks-1); font-size: 14px; font-weight: 540; color: var(--ks-ink); }
   .pipe-step p { margin: 0; font-size: 13px; color: var(--ks-ink-2); line-height: 1.6; }
 
-  .honesty { background: rgba(168, 179, 194,0.06); border: 1px solid rgba(168, 179, 194,0.35); border-radius: var(--ks-r-md); padding: var(--ks-4); margin-top: var(--ks-4); }
-  .honesty h4 { margin: 0 0 var(--ks-2); font-size: 14px; font-weight: 540; color: #a8b3c2; letter-spacing: 0.02em; }
-  .honesty p { margin: 0; font-size: 13.5px; color: var(--ks-ink-2); line-height: 1.6; }
-  .honesty code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); }
+  .truthfulness { background: rgba(168, 179, 194,0.06); border: 1px solid rgba(168, 179, 194,0.35); border-radius: var(--ks-r-md); padding: var(--ks-4); margin-top: var(--ks-4); }
+  .truthfulness h4 { margin: 0 0 var(--ks-2); font-size: 14px; font-weight: 540; color: #a8b3c2; letter-spacing: 0.02em; }
+  .truthfulness p { margin: 0; font-size: 13.5px; color: var(--ks-ink-2); line-height: 1.6; }
+  .truthfulness code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); }
 </style>
 <meta property="og:title" content="Cloud distill &middot; kolm.ai">
 <meta property="og:description" content="Bring your captures. Get your .kolm artifact. Skip the GPUs.">
@@ -193,8 +193,8 @@ total_cost_usd:      $<span class="s">1.4453</span>
 rows:                3</pre>
     </div>
     <div class="honesty">
-      <h4>Honesty &middot; queued vs running</h4>
-      <p>When no managed pool is provisioned, <code>cloud_backend_status</code> returns <code>no_pool_configured</code> and the job sits in <code>queued</code> until an operator sets <code>KOLM_CLOUD_DISTILL_ENDPOINT</code>. We never simulate a finished run when no backend exists; <code>kolm cloud distill status</code> reports the truth. This is the same honesty contract as <a href="/distill#self-host">self-hosted distill</a> and <a href="/k-score">K-score reporting</a>.</p>
+      <h4>Caveats &middot; queued vs running</h4>
+      <p>When no managed pool is provisioned, <code>cloud_backend_status</code> returns <code>no_pool_configured</code> and the job sits in <code>queued</code> until an operator sets <code>KOLM_CLOUD_DISTILL_ENDPOINT</code>. We never simulate a finished run when no backend exists; <code>kolm cloud distill status</code> reports the truth. This is the same no-silent-pass contract as <a href="/distill#self-host">self-hosted distill</a> and <a href="/k-score">K-score reporting</a>.</p>
     </div>
   </div>
 </section>

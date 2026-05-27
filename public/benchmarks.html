@@ -248,7 +248,7 @@ verified:              <span class="k">true</span></pre>
       <div class="bm-card">
         <span class="lab">Compression ratio</span>
         <span class="big">3.4x</span>
-        <p>R1-32B from 61.0 GB BF16 to 17.9 GB INT4 (NF4 with double-quant). Faithfulness axis 94 against the held-out eval pack; honesty axis 96.</p>
+        <p>R1-32B from 61.0 GB BF16 to 17.9 GB INT4 (NF4 with double-quant). Faithfulness axis 94 against the held-out eval pack; truthfulness axis 96.</p>
       </div>
       <div class="bm-card">
         <span class="lab">Quantize wall-clock</span>
@@ -293,12 +293,12 @@ verified:              <span class="k">true</span></pre>
         <tr><td>faithfulness</td><td>Does the student match the teacher on grounded probes?</td><td class="num">94</td><td class="num">96</td><td class="num">96</td><td class="num">97</td></tr>
         <tr><td>coverage</td><td>Does the student answer on the full distribution, no silent drops?</td><td class="num">91</td><td class="num">94</td><td class="num">95</td><td class="num">96</td></tr>
         <tr><td>calibration</td><td>Are the student's confidence scores well-ordered against truth?</td><td class="num">90</td><td class="num">93</td><td class="num">95</td><td class="num">96</td></tr>
-        <tr><td>honesty</td><td>Does the student refuse what it does not know, no hallucinations?</td><td class="num">96</td><td class="num">95</td><td class="num">96</td><td class="num">98</td></tr>
+        <tr><td>truthfulness</td><td>Does the student refuse what it does not know, no hallucinations?</td><td class="num">96</td><td class="num">95</td><td class="num">96</td><td class="num">98</td></tr>
         <tr><td>cost</td><td>Throughput per dollar against a hosted baseline.</td><td class="num">93</td><td class="num">95</td><td class="num">97</td><td class="num">99</td></tr>
         <tr><td><b>composite K-score</b></td><td>Weighted geometric mean of the five axes.</td><td class="num"><b>93</b></td><td class="num"><b>95</b></td><td class="num"><b>96</b></td><td class="num"><b>97</b></td></tr>
       </tbody>
     </table>
-    <p style="font-size:12.5px; font-family:var(--ks-mono); color:var(--ks-ink-3); margin-top:var(--ks-3)">Default axis weights: faith 0.30, coverage 0.20, calibration 0.20, honesty 0.15, cost 0.15. Per-eval-pack weights override the defaults; the weights are embedded in the receipt so the K-score is reproducible by a third party.</p>
+    <p style="font-size:12.5px; font-family:var(--ks-mono); color:var(--ks-ink-3); margin-top:var(--ks-3)">Default axis weights: faith 0.30, coverage 0.20, calibration 0.20, truthfulness 0.15, cost 0.15. Per-eval-pack weights override the defaults; the weights are embedded in the receipt so the K-score is reproducible by a third party.</p>
   </div>
 </section>
 
@@ -333,7 +333,7 @@ kolm run    ./r1-distill-qwen-32b.int4.kolm \
 
 <section class="bm-section" id="methodology">
   <div class="ks-wrap">
-    <h2>Methodology, honestly</h2>
+    <h2>Methodology, plainly</h2>
     <p class="sub">A benchmark is only useful if it tells you what it measured and what it did not. The notes below are what the numbers above include and exclude.</p>
     <div class="bm-grid">
       <div class="bm-card">
@@ -342,7 +342,7 @@ kolm run    ./r1-distill-qwen-32b.int4.kolm \
         <p>BF16 source from HuggingFace, sha256 verified. NF4 + double-quantization via bitsandbytes 0.49.2. Quantize wall-clock is end to end including CPU-side packing. Load, first-token, and tokens-per-second measured against a real held-out prompt set, not a synthetic warmup.</p>
       </div>
       <div class="bm-card">
-        <div class="row"><span class="tag">excluded</span><span class="st live">Honest</span></div>
+        <div class="row"><span class="tag">excluded</span><span class="st live">Plain</span></div>
         <h3>What every row excludes</h3>
         <p>Network download time for the BF16 base. Cold disk-cache miss on first load (we report warm load). Multi-GPU scaling (every row above is single-GPU on a 5090). Server-side batching gains (single-stream throughput).</p>
       </div>
@@ -382,14 +382,14 @@ kolm run    ./r1-distill-qwen-32b.int4.kolm \
       </div>
     </div>
     <p style="font-size:12.5px; font-family:var(--ks-mono); color:var(--ks-ink-3); margin-top:var(--ks-3)">Drift detection runs as <code>kolm drift snapshot</code> + <code>kolm drift detect</code> in CI. The detector compares the current capture distribution against the artifact's training distribution and emits a verdict. The gate triggers a re-distill alert when the verdict crosses the configured threshold. The default threshold matches the eval-pack reviewer recommendation; per-namespace overrides are honored.</p>
-    <p style="font-size:12.5px; font-family:var(--ks-mono); color:var(--ks-ink-3); margin-top:var(--ks-2)">Honest scope: the three pilots above are deployments where the operators have shared anonymized weekly K-scores with us. Numbers behind any real customer name remain confidential; the patterns are representative.</p>
+    <p style="font-size:12.5px; font-family:var(--ks-mono); color:var(--ks-ink-3); margin-top:var(--ks-2)">Plain scope: the three pilots above are deployments where the operators have shared anonymized weekly K-scores with us. Numbers behind any real customer name remain confidential; the patterns are representative.</p>
   </div>
 </section>
 
 <section class="bm-section" id="vs-frontier">
   <div class="ks-wrap">
     <h2>How the distilled artifacts compare against frontier teachers</h2>
-    <p class="sub">A distilled INT4 specialist will not beat its frontier teacher on the open web. It will frequently match or beat the teacher on a narrow grounded eval pack at a fraction of the cost. The rows below are honest single-task comparisons against the held-out packs.</p>
+    <p class="sub">A distilled INT4 specialist will not beat its frontier teacher on the open web. It will frequently match or beat the teacher on a narrow grounded eval pack at a fraction of the cost. The rows below are plain single-task comparisons against the held-out packs.</p>
     <table class="axis-tbl">
       <thead>
         <tr>
@@ -537,7 +537,7 @@ kolm run    ./r1-distill-qwen-32b.int4.kolm \
         <a href="/leaderboard" class="fr-btn fr-btn--ghost" style="margin-top:var(--ks-3)">View /leaderboard</a>
       </div>
     </div>
-    <p style="font-size:12.5px; font-family:var(--ks-mono); color:var(--ks-ink-3); margin-top:var(--ks-4)">Sample runs above are the in-house rig speaking honestly. The public leaderboard at <a href="/leaderboard" style="color:var(--ks-accent)">/leaderboard</a> opens once third-party submissions clear receipt verification.</p>
+    <p style="font-size:12.5px; font-family:var(--ks-mono); color:var(--ks-ink-3); margin-top:var(--ks-4)">Sample runs above are the in-house rig speaking frankly. The public leaderboard at <a href="/leaderboard" style="color:var(--ks-accent)">/leaderboard</a> opens once third-party submissions clear receipt verification.</p>
   </div>
 </section>
 
@@ -545,7 +545,7 @@ kolm run    ./r1-distill-qwen-32b.int4.kolm \
   <div class="fr-container">
     <div class="fr-eyebrow">Reproducibility &middot; receipts not vibes</div>
     <h2 class="fr-h2">Every score is verifiable offline</h2>
-    <p class="fr-lede">A benchmark number on this page is only as honest as the receipt it points at. Every run on a .kolm artifact bakes the eval pack into the manifest; a third party can replay the score against the same prompts, on different hardware, and compare the resulting receipts byte for byte.</p>
+    <p class="fr-lede">A benchmark number on this page is only as plain as the receipt it points at. Every run on a .kolm artifact bakes the eval pack into the manifest; a third party can replay the score against the same prompts, on different hardware, and compare the resulting receipts byte for byte.</p>
     <div class="fr-grid-3" style="margin-top:var(--ks-6)">
       <div class="fr-card fr-reveal">
         <span class="fr-status"><span class="fr-status__dot"></span>Manifest binding</span>
@@ -608,7 +608,7 @@ kolm run    ./r1-distill-qwen-32b.int4.kolm \
 <section id="w758-external-benchmarks" class="bench-section">
   <p class="eyebrow">External benchmarks (W758)</p>
   <h2>MMLU &middot; HumanEval &middot; MT-Bench</h2>
-  <p class="lede">Industry-standard harnesses, locally runnable, honest-empty until the pack is downloaded.</p>
+  <p class="lede">Industry-standard harnesses, locally runnable, loud-empty until the pack is downloaded.</p>
   <table class="bench-table" data-w758="external-results">
     <thead><tr><th>Benchmark</th><th>Pack source</th><th>Local status</th><th>Latest run</th></tr></thead>
     <tbody>
@@ -617,7 +617,7 @@ kolm run    ./r1-distill-qwen-32b.int4.kolm \
       <tr><td>MT-Bench</td><td>github.com/lm-sys/FastChat</td><td><span class="status-pill">pack_not_local</span></td><td>&mdash;</td></tr>
     </tbody>
   </table>
-  <p class="note">Status reflects whether the benchmark data is present on this server. Run <code>kolm bench &lt;mmlu|humaneval|mtbench&gt; --pack-dir &lt;path&gt;</code> to score locally. The harness ships honest envelopes (<code>bench_pack_not_local</code>, <code>runtime_not_wired</code>, <code>no_code_sandbox_configured</code>, <code>no_judge_model_configured</code>) and never fakes numbers.</p>
+  <p class="note">Status reflects whether the benchmark data is present on this server. Run <code>kolm bench &lt;mmlu|humaneval|mtbench&gt; --pack-dir &lt;path&gt;</code> to score locally. The harness ships loud-fail envelopes (<code>bench_pack_not_local</code>, <code>runtime_not_wired</code>, <code>no_code_sandbox_configured</code>, <code>no_judge_model_configured</code>) and never fakes numbers.</p>
 </section>
 
 </main>

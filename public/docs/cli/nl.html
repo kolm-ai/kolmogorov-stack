@@ -112,7 +112,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p class="lede">Natural-language recipe scaffolder. Describe what you want in plain English, get a deterministic <code>spec.json</code> plus seed stub ready to drop into <code>kolm compile</code>. The default path is air-gapped and keyword-based, so the same brief always produces the same scaffold.</p>
 
 <h2 id="usage">Usage</h2>
-<pre><code>kolm nl "&lt;free text request&gt;" [--class &lt;c&gt;] [--out &lt;path&gt;] [--json] [--network|--no-network]</code></pre>
+<pre>CODE2</pre>
 
 <h2 id="flags">Flags</h2>
 <table>
@@ -127,24 +127,10 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </table>
 
 <h2 id="examples">Examples</h2>
-<pre><code>kolm nl "parse EDI 837 claims and emit JSON rows"
-kolm nl "draft an appeal letter for an 835 denial with code CO-97"
-kolm nl "compute HEDIS HBD measure for a diabetic cohort"
-kolm nl "redact PHI from clinical notes" --class rule --out scaffolds/phi.json</code></pre>
+<pre>CODE15</pre>
 
 <h2 id="schema">Output schema</h2>
-<pre><code>{
- "ok": true,
- "suggested_slug": "&lt;kebab-case slug&gt;",
- "suggested_task_description": "&lt;the request, verbatim&gt;",
- "recipe_class": "rule | synthesized_rule | compiled_rule | distilled_model",
- "suggested_k_score_gate": 0.88,
- "suggested_seed_examples": [{ "prompt": "...", "completion": "..." }, ...],
- "next_steps": [ "kolm compile --spec ...", "kolm verify ..." ],
- "class_inference_basis": "keyword:edi | class_hint | default",
- "network_status": "air_gap | wired",
- "note": "scaffolds are starting points. refine + verify before compile."
-}</code></pre>
+<pre>CODE16</pre>
 
 <h2 id="inference">How class inference works (air-gap path)</h2>
 <p>A keyword match over the request text picks the class in priority order:</p>
@@ -153,10 +139,10 @@ kolm nl "redact PHI from clinical notes" --class rule --out scaffolds/phi.json</
  <li>Native, wasm, C, or Rust mentions map to <code>compiled_rule</code>.</li>
  <li>Known measures with a spec (<code>HEDIS</code>, <code>compute measure</code>, <code>apply spec</code>) map to <code>synthesized_rule</code> (teacher emits rule code, AST-validated).</li>
  <li>Deterministic parsing or redacting or validating (<code>parse</code>, <code>redact</code>, <code>extract</code>, <code>EDI</code>, <code>FHIR</code>, <code>classify</code>) maps to <code>rule</code>.</li>
- <li>No keyword match falls back to <code>rule</code> (honest floor; upgrade with <code>--class</code>).</li>
+ <li>No keyword match falls back to <code>rule</code> (plain floor; upgrade with <code>--class</code>).</li>
 </ol>
 
-<h2 id="honest">Honest scope</h2>
+<h2 id="honest">Plain scope</h2>
 <p>The air-gap path is deterministic and ships today. Same input always produces the same scaffold. The networked drafter is opt-in via <code>--network</code> and enriches seed examples plus task-description refinement with model-generated suggestions, while class inference, slug, and gate stay intact.</p>
 <p>Scaffolds are starting points, not finished recipes. Edit the seeds, refine the task description, then run <code>kolm compile --spec &lt;file&gt;</code> and <code>kolm verify &lt;artifact&gt;.kolm</code> before you ship anything to production.</p>
 

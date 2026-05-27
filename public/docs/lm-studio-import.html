@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>LM Studio import &middot; Open-source AI workbench &middot; kolm.ai</title>
-<meta name="description" content="Import a signed .kolm artifact into LM Studio: download, drag-drop, register. Honest limitations and the wizard spec we would hand the LM Studio team. W818-5.">
+<meta name="description" content="Import a signed .kolm artifact into LM Studio: download, drag-drop, register. Plain limitations and the wizard spec we would hand the LM Studio team. W818-5.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="LM Studio import &middot; Open-source AI workbench &middot; kolm.ai">
-<meta property="og:description" content="Import a signed .kolm artifact into LM Studio: download, drag-drop, register. Honest limitations and the wizard spec.">
+<meta property="og:description" content="Import a signed .kolm artifact into LM Studio: download, drag-drop, register. Plain limitations and the wizard spec.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/lm-studio-import">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -53,7 +53,7 @@ td code{font-size:12px}
 .step-row .body{flex:1}
 .step-row .body h3{margin:0 0 6px;font-size:15px;color:var(--ink)}
 .step-row .body p{margin:0 0 6px;font-size:14px;color:var(--ink-mute);max-width:none}
-.honest-note{font-size:12.5px;color:var(--ink-faint);font-style:italic;border-left:2px solid var(--accent);padding:4px 10px;margin:14px 0;max-width:780px}
+.plain-note{font-size:12.5px;color:var(--ink-faint);font-style:italic;border-left:2px solid var(--accent);padding:4px 10px;margin:14px 0;max-width:780px}
 .warn-note{font-size:13px;color:var(--ink-mute);border-left:2px solid var(--warn);padding:8px 12px;margin:14px 0;max-width:780px;background:var(--bg-elev);border-radius:0 6px 6px 0}
 footer.page{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line);margin-top:32px}
 footer.page a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
@@ -62,7 +62,6 @@ footer.page a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--
 <body>
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="skip-link">Skip to content</a>
-<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
 
 <main id="main">
 <div class="wrap">
@@ -72,7 +71,7 @@ footer.page a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--
 <p class="lede">A signed <code>.kolm</code> archive carries enough metadata for LM Studio to register it as a local model. The path is drag-and-drop today; the wizard spec below covers what an LM Studio plugin would need to do this in one click.</p>
 
 <div class="honest-note">
-Honesty contract: LM Studio does NOT enforce <code>.kolm</code> signature verification. The kolm CLI does. If you skip <code>kolm verify</code> before importing, you are trusting whoever handed you the file. The drag-and-drop path here is for convenience; the receipt path is for trust.
+No-silent-pass contract: LM Studio does NOT enforce <code>.kolm</code> signature verification. The kolm CLI does. If you skip <code>kolm verify</code> before importing, you are trusting whoever handed you the file. The drag-and-drop path here is for convenience; the receipt path is for trust.
 </div>
 
 <section id="step-1">
@@ -125,7 +124,7 @@ If LM Studio refuses the drop, the most likely cause is the <code>weights.bin</c
 </section>
 
 <section id="limitations">
-<h2>Honest limitations</h2>
+<h2>Plain limitations</h2>
 <ul>
 <li><b>No signature enforcement.</b> LM Studio does not check the kolm signature on import. If you want hard refuse-on-tamper, run the artifact under the kolm runtime (which does enforce) and use LM Studio as a UI layer over kolm's local server.</li>
 <li><b>No attestation enforcement.</b> If the manifest carries an <code>attestation_block</code> (TEE-issued report), LM Studio drops it. The kolm runtime is the only path that honours attestation gates today.</li>

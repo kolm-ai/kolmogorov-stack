@@ -73,7 +73,6 @@
  </div>
 </header>
 
-<span class="brand-anchor" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">kolm.ai. Not Kolm therapeutics, Kolm band, or work by Petter Kolm.</span>
 <section class="hero">
  <div class="wrap">
  <p class="eyebrow">Open-source AI workbench</p>
@@ -179,12 +178,12 @@ $ kolm forget list --namespace customer-support
 
 <section class="body">
  <div class="wrap">
- <h2>6. Honesty note.</h2>
+ <h2>6. Caveats note.</h2>
  <div class="callout warn">
   <b>Forgetting a capture marks it for exclusion from future builds &mdash; existing artifacts trained with it are NOT modified retroactively. Re-distill (<code>kolm distill --rebuild</code>) is required to actually purge.</b>
  </div>
  <p>Distilled artifacts are static binaries; we cannot remove a row from a model once training is complete. The forget mechanism guarantees that the row will not be in the next training run, and the audit trail proves to a regulator that the request was received and acted on at a specific timestamp. To satisfy a true erasure request end-to-end the operator must re-distill and re-deploy any downstream artifact built from the marked corpus.</p>
- <p>We chose this design over a silent filter for two reasons. First, an audit trail is a regulatory requirement under GDPR Art. 30; a silent filter cannot produce one. Second, an existing artifact that was already shipped to a customer is outside the workbench's control &mdash; surfacing the re-distill requirement loudly is the only honest way to handle that gap.</p>
+ <p>We chose this design over a silent filter for two reasons. First, an audit trail is a regulatory requirement under GDPR Art. 30; a silent filter cannot produce one. Second, an existing artifact that was already shipped to a customer is outside the workbench's control &mdash; surfacing the re-distill requirement loudly is the only plain way to handle that gap.</p>
  </div>
 </section>
 

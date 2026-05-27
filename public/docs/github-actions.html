@@ -46,7 +46,7 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);verti
 th{color:var(--ink);font-weight:500}
 td code{font-size:12px}
 .kpanel{background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0 18px;max-width:920px}
-.honest-note{font-size:12.5px;color:var(--ink-faint);font-style:italic;border-left:2px solid var(--accent);padding:4px 10px;margin:14px 0;max-width:780px}
+.plain-note{font-size:12.5px;color:var(--ink-faint);font-style:italic;border-left:2px solid var(--accent);padding:4px 10px;margin:14px 0;max-width:780px}
 footer.page{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line);margin-top:32px}
 footer.page a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
@@ -54,7 +54,6 @@ footer.page a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--
 <body>
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="skip-link">Skip to content</a>
-<span class="brand-anchor" data-w775="h1" aria-hidden="true">Frontier AI on your own infrastructure.</span>
 
 <main id="main">
 <div class="wrap">
@@ -64,7 +63,7 @@ footer.page a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--
 <p class="lede">Drop a <code>.github/workflows/kolm.yml</code> in your repo. Every push runs the K-Score gate against your latest artifact, auto re-distills if quality drops below the threshold you set, and publishes the new <code>.kolm</code> to GitHub Releases for downstream consumers to pin.</p>
 
 <div class="honest-note">
-Honesty contract: the action only runs when the <code>KOLM_API_KEY</code> secret is configured. A fork without the secret sees the workflow skip cleanly; no red X on every commit. Stamped <code>w820-v1</code>.
+No-silent-pass contract: the action only runs when the <code>KOLM_API_KEY</code> secret is configured. A fork without the secret sees the workflow skip cleanly; no red X on every commit. Stamped <code>w820-v1</code>.
 </div>
 
 <section id="template">

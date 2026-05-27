@@ -228,10 +228,10 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 
  <h2 id="vs-hosted">AI compiler vs hosted endpoint</h2>
  <p>A hosted endpoint (OpenAI, Anthropic, Google, Cohere) is a remote service. Every request leaves your network, costs per token, requires connectivity, and the provider can change the model under you without warning. Hosted endpoints are the right answer when you are still discovering the task; they are the wrong answer once the task is stable enough to compile.</p>
- <p>The honest framing: hosted endpoints are the <i>teacher</i> in the compile flow. You use them, capture their outputs, distill the captures into a recipe, and compile the recipe into a .kolm. The hosted call cost goes to zero as the captured corpus stabilizes and the local artifact takes over. <a href="/captures">/captures is the live dashboard where you watch this happen.</a></p>
+ <p>The plain framing: hosted endpoints are the <i>teacher</i> in the compile flow. You use them, capture their outputs, distill the captures into a recipe, and compile the recipe into a .kolm. The hosted call cost goes to zero as the captured corpus stabilizes and the local artifact takes over. <a href="/captures">/captures is the live dashboard where you watch this happen.</a></p>
 
  <h2 id="vs-lora">AI compiler vs LoRA serving infra</h2>
- <p>Tools like LoRAX, vLLM with LoRA, and Predibase serve LoRA adapters at multi-tenant scale. They are complementary to an AI compiler, not competitive: kolm builds the adapter (or the full-rank fine-tune, or the merged-weights compilation), and a serving layer like LoRAX hosts it. The honest production stack is "kolm compiles + LoRAX serves" if you need multi-tenant adapter serving; the artifact is portable enough to also run on a single device behind <code>kolm run</code>.</p>
+ <p>Tools like LoRAX, vLLM with LoRA, and Predibase serve LoRA adapters at multi-tenant scale. They are complementary to an AI compiler, not competitive: kolm builds the adapter (or the full-rank fine-tune, or the merged-weights compilation), and a serving layer like LoRAX hosts it. The plain production stack is "kolm compiles + LoRAX serves" if you need multi-tenant adapter serving; the artifact is portable enough to also run on a single device behind <code>kolm run</code>.</p>
  <p class="muted">See <a href="/how-vs-lorax">/how-vs-lorax</a> for the integration pattern and <a href="/compare">/compare</a> for the canonical 10-axis matrix.</p>
 
  <h2 id="receipts">Receipts, durability, frozen-eval, drift</h2>
@@ -248,7 +248,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
  <ol>
  <li><b>Open-weight frontier models caught up.</b> Step-3.5 Flash REAP-121B at Q6 fits in a DGX Spark. DeepSeek v4 PRO 1.6T at Q2 runs on a Mac M3 Ultra 512GB. Qwen 3.6 27B Dense at Q4 fits on a single RTX 3090. The base model is no longer the bottleneck. See <a href="/models">the catalog</a>.</li>
  <li><b>Capture-first beat prompt-first.</b> Teams discovered that captured production traffic is a better fine-tuning corpus than handwritten examples. The proxy pattern (<code>kolm capture</code>) is now the obvious way to gather training data from real use.</li>
- <li><b>Regulation arrived.</b> EU AI Act, HIPAA, SOC 2 Type II, and FedRAMP all require a provenance answer that hosted endpoints structurally cannot provide. A signed artifact with a receipt chain is the only honest answer.</li>
+ <li><b>Regulation arrived.</b> EU AI Act, HIPAA, SOC 2 Type II, and FedRAMP all require a provenance answer that hosted endpoints structurally cannot provide. A signed artifact with a receipt chain is the only direct answer.</li>
  </ol>
  <p>The category did not exist in 2024 because none of those three were true at the same time. In 2026 all three are. The name "AI compiler" claims the build-step abstraction that the trio enables.</p>
 
@@ -264,7 +264,7 @@ kolm verify my-task.kolm
 kolm run my-task.kolm "the prompt you would have sent to the teacher"</pre>
  <p>Seven commands. The first two are setup. The middle three are the capture, distill, compile loop. The last two prove the artifact is correct and run it locally. <a href="/quickstart">The quickstart has a video.</a></p>
 
- <div class="warn"><b>Honest scope.</b> "Five minutes" is wall-clock time on the seven commands once the capture step has run. The capture step needs real traffic; it takes as long as it takes to accumulate a useful corpus. We recommend 100 pairs as the floor for a viable distill and 1,000 for a confident one. <a href="/captures">/captures shows you the live counter.</a></p></div>
+ <div class="warn"><b>Plain scope.</b> "Five minutes" is wall-clock time on the seven commands once the capture step has run. The capture step needs real traffic; it takes as long as it takes to accumulate a useful corpus. We recommend 100 pairs as the floor for a viable distill and 1,000 for a confident one. <a href="/captures">/captures shows you the live counter.</a></p></div>
 
  <h2 id="faq">Common questions</h2>
  <h3>Is an AI compiler the same as model distillation?</h3>

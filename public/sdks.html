@@ -158,7 +158,7 @@
 <section class="fr-section sdk-section" id="overview">
   <div class="fr-container ks-wrap">
     <div class="fr-eyebrow">Coverage matrix</div>
-    <h2 class="fr-h2">Honest scope across every binding</h2>
+    <h2 class="fr-h2">Plain scope across every binding</h2>
     <p class="fr-lede">Coverage is intentionally uneven. Node and Python wrap every /v1/* route. MCP and VS Code wrap the verbs a Claude-resident developer actually uses. C and Rust wrap the verifier path so regulated and embedded deployments can verify a .kolm artifact without a heavy runtime. Swift and Kotlin are on-device loaders, not gateway clients — the row marks what they'll cover when they ship.</p>
     <table class="cov-tbl">
       <thead>
@@ -269,7 +269,7 @@
   <div class="fr-container ks-wrap">
     <div class="fr-eyebrow">In progress &middot; on-device loaders</div>
     <h2 class="fr-h2">Mobile and edge bindings</h2>
-    <p class="fr-lede">A .kolm artifact already runs on a laptop GPU and a server. The next step is loading the same signed bundle on a phone. Swift and Kotlin loaders are on the bench — honest status below; no install line yet.</p>
+    <p class="fr-lede">A .kolm artifact already runs on a laptop GPU and a server. The next step is loading the same signed bundle on a phone. Swift and Kotlin loaders are on the bench — plain status below; no install line yet.</p>
 
     <div class="fr-grid-2" style="margin-top:var(--ks-6)">
 
@@ -380,7 +380,7 @@ printf(<span class="s">"%d %s\n"</span>, r.status, r.body);</pre>
     <p class="fr-lede">Six shipped bindings, one contract. The shape an engineer relies on stays constant.</p>
     <ul class="fr-spec-list sk-list" style="margin-top:var(--ks-6)">
       <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Honest error envelope</h3><span class="fr-spec-list__delta fr-spec-list__delta--envelope">ENVELOPE &middot; raw status + body</span></div>
+        <div class="fr-spec-list__head"><h3>Plain error envelope</h3><span class="fr-spec-list__delta fr-spec-list__delta--envelope">ENVELOPE &middot; raw status + body</span></div>
         <p class="fr-spec-list__p">Every response surfaces raw HTTP status plus the structured body <code>{ok, code, error, data}</code>. No binding hides a 4xx behind a success boolean. The C and Rust bindings expose status and body directly so callers see what the server said.</p>
       </li>
       <li class="fr-spec-list__row">

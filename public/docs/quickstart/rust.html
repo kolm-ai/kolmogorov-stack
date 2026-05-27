@@ -66,72 +66,30 @@ pre{background:#06080a;color:#e9eef3;border:1px solid var(--line,rgba(230, 233, 
 <section data-w789="install">
  <h2>Install</h2>
  <p>Add the crate to your project with cargo.</p>
- <pre><code>cargo add kolm
-cargo add serde_json   # for parsing responses</code></pre>
+ <pre>CODE1</pre>
  <p>Requires Rust 1.75 or newer. The crate is sync; pair with <code>tokio::task::spawn_blocking</code> if you need to call it from an async context.</p>
 </section>
 
 <section data-w789="auth">
  <h2>Authenticate</h2>
  <p>The crate reads <code>KOLM_API_KEY</code> from the environment by default. Get a key from the CLI or from the dashboard.</p>
- <pre><code># option 1: log in with the CLI
-kolm login
-
-# option 2: set the env var directly
-export KOLM_API_KEY=ks_your_key_here
-export KOLM_BASE_URL=https://kolm.ai   # optional, defaults to https://kolm.ai</code></pre>
+ <pre>CODE4</pre>
  <p>Sign up for a free key at <a href="/signup">kolm.ai/signup</a> if you do not have one yet.</p>
 </section>
 
 <section data-w789="first-capture">
  <h2>First capture</h2>
  <p>Create a new binary with <code>cargo new first-capture</code>, replace <code>src/main.rs</code>, and run.</p>
- <pre><code>use kolm::Kolm;
-use serde_json::json;
-
-fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-    let kolm = Kolm::from_env()?;   // reads KOLM_API_KEY + KOLM_BASE_URL
-
-    let whoami = kolm.whoami()?;
-    println!("authed: status={} body={}", whoami.status, whoami.body);
-
-    let body = json!({
-        "namespace": "quickstart",
-        "input":  { "prompt": "What is the capital of France?" },
-        "output": { "reply":  "Paris" },
-        "meta":   { "source": "rust-quickstart" }
-    });
-
-    let captured = kolm.capture_log(&body.to_string())?;
-    println!("captured: status={} body={}", captured.status, captured.body);
-    Ok(())
-}</code></pre>
+ <pre>CODE7</pre>
  <p>Run it:</p>
- <pre><code>cargo run
-# authed: status=200 body={"ok":true,"tenant_id":"tenant_f33c240034c5",...}
-# captured: status=200 body={"ok":true,"id":"cap_a1b2c3d4..."}</code></pre>
- <p>Note the honest envelope: every response returns <code>{ status, body }</code>. A 4xx is not a transport error, it is a response. Parse with serde_json on the caller side.</p>
+ <pre>CODE8</pre>
+ <p>Note the loud-fail envelope: every response returns <code>{ status, body }</code>. A 4xx is not a transport error, it is a response. Parse with serde_json on the caller side.</p>
 </section>
 
 <section data-w789="first-deploy">
  <h2>First deploy (outline)</h2>
  <p>The compile-and-deploy path is HTTP-shaped; the SDK exposes thin wrappers. From a Rust script:</p>
- <pre><code>let job = kolm.compile_create(&json!({
-    "namespace": "quickstart",
-    "target":    "qwen2.5-3b-instruct-int4",
-    "epochs":    3
-}).to_string())?;
-println!("compile job: {}", job.body);
-
-// poll kolm.compile_status(job_id) until done, or call the CLI:
-//   kolm compile wait $JOB_ID
-
-let deploy = kolm.deploy_create(&json!({
-    "artifact_cid": "&lt;cid-from-compile&gt;",
-    "runtime":      "vllm",
-    "endpoint":     "https://gpu.internal:8000"
-}).to_string())?;
-println!("deployed: {}", deploy.body);</code></pre>
+ <pre>CODE10</pre>
  <p>The crate is intentionally thin around the HTTP surface so you can drop down to the raw API when needed.</p>
 </section>
 

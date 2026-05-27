@@ -183,7 +183,7 @@
   <div class="ks-wrap">
     <div class="eyebrow">Compile &middot; step 3 of 4 &middot; spec to signed .kolm</div>
     <h1>Spec in. Signed <b>.kolm artifact out.</b></h1>
-    <p class="lede">A compiler engineer feeds a spec (the base model, the distilled weights, the K-score gate, the eval pack, the teacher trace) into <code>kolm compile</code>. The output is a single .kolm zip with an Ed25519 signature over a JCS-canonical SHA-256 hash of the receipt. The artifact_cid binds the weights, the receipt, and the K-score into one object an auditor can verify offline three years later, on a clean laptop, with no network and no honesty service in the middle.</p>
+    <p class="lede">A compiler engineer feeds a spec (the base model, the distilled weights, the K-score gate, the eval pack, the teacher trace) into <code>kolm compile</code>. The output is a single .kolm zip with an Ed25519 signature over a JCS-canonical SHA-256 hash of the receipt. The artifact_cid binds the weights, the receipt, and the K-score into one object an auditor can verify offline three years later, on a clean laptop, with no network and no truthfulness service in the middle.</p>
     <div class="cta-row">
       <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
       <a href="/runtimes" class="ks-btn ks-btn--ghost">Next: load in a runtime</a>
@@ -281,7 +281,7 @@ artifact    ~/.kolm/artifacts/support-triage.kolm
 size        5.4 GB
 verify      kolm verify support-triage.kolm</pre>
     </div>
-    <p class="sub" style="margin-top:var(--ks-4)">A developer hands the .kolm zip to an auditor. The auditor runs <code>kolm verify support-triage.kolm</code> on an air-gapped laptop. The verifier reads the receipt, recomputes the artifact hash, verifies the Ed25519 signature against the embedded public key fingerprint, and reports <code>ok:true</code>. No network call; no honesty service; no trust in us.</p>
+    <p class="sub" style="margin-top:var(--ks-4)">A developer hands the .kolm zip to an auditor. The auditor runs <code>kolm verify support-triage.kolm</code> on an air-gapped laptop. The verifier reads the receipt, recomputes the artifact hash, verifies the Ed25519 signature against the embedded public key fingerprint, and reports <code>ok:true</code>. No network call; no truthfulness service; no trust in us.</p>
   </div>
 </section>
 
@@ -553,7 +553,7 @@ verify      kolm verify support-triage.kolm</pre>
       </li>
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>AngelSlim</h3><span class="fr-spec-list__delta fr-spec-list__delta--violet">TERNARY &middot; BitNet</span></div>
-        <p class="fr-spec-list__p">BitNet ternary {-1, 0, +1} recipe. Matmul becomes additions; CPU-friendly. Honest scope: under 2-bit avg is research-tier, K-score gated.</p>
+        <p class="fr-spec-list__p">BitNet ternary {-1, 0, +1} recipe. Matmul becomes additions; CPU-friendly. Plain scope: under 2-bit avg is research-tier, K-score gated.</p>
       </li>
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>SmoothQuant</h3><span class="fr-spec-list__delta">INT8 W/A &middot; full-INT</span></div>
@@ -596,7 +596,7 @@ verify      kolm verify support-triage.kolm</pre>
       </li>
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>Rewrite the K-score, lose the signature</h3><span class="fr-spec-list__delta">TAMPER-EVIDENCE &middot; live</span></div>
-        <p class="fr-spec-list__p">The K-score axes and verdict sit inside the receipt JSON. Rewriting them changes the JCS-canonical hash, which breaks the Ed25519 verify; no honesty service is needed in the loop.</p>
+        <p class="fr-spec-list__p">The K-score axes and verdict sit inside the receipt JSON. Rewriting them changes the JCS-canonical hash, which breaks the Ed25519 verify; no truthfulness service is needed in the loop.</p>
       </li>
       <li class="fr-spec-list__row">
         <div class="fr-spec-list__head"><h3>Teacher trace is bound</h3><span class="fr-spec-list__delta">REPLAY-PROTECTION &middot; live</span></div>
@@ -613,7 +613,7 @@ verify      kolm verify support-triage.kolm</pre>
 <section class="sec-section" id="verify">
   <div class="ks-wrap">
     <h2>kolm verify, offline</h2>
-    <p class="sub">The verifier is a static binary. No network, no registry lookup, no honesty service in the middle. Hand a .kolm file to a compliance reviewer on a USB stick and they can validate the chain on a clean laptop.</p>
+    <p class="sub">The verifier is a static binary. No network, no registry lookup, no truthfulness service in the middle. Hand a .kolm file to a compliance reviewer on a USB stick and they can validate the chain on a clean laptop.</p>
     <div class="terminal">
 <pre><span class="c"># Verify a .kolm artifact offline</span>
 <span class="prompt">$</span> <span class="k">kolm verify support-triage.kolm</span>
@@ -655,7 +655,7 @@ public-key: ed25519:2dba&hellip;77c4</pre>
         <p class="fr-spec-list__p"><code>--attestation-kind nitro-attestation</code> for AWS Nitro Enclaves. NSM token verification on the verifier side.</p>
       </li>
     </ul>
-    <p class="sub" style="margin-top:var(--ks-4)">Honest scope: the compiler can bind an attestation report into the receipt, but it does not crypto-verify the report by itself. A tenant registers a real verifier with <code>registerAttestationVerifier()</code>; until then, the receipt records <code>state:shape_ok, verified:false</code>.</p>
+    <p class="sub" style="margin-top:var(--ks-4)">Plain scope: the compiler can bind an attestation report into the receipt, but it does not crypto-verify the report by itself. A tenant registers a real verifier with <code>registerAttestationVerifier()</code>; until then, the receipt records <code>state:shape_ok, verified:false</code>.</p>
   </div>
 </section>
 
@@ -715,7 +715,7 @@ public-key: ed25519:2dba&hellip;77c4</pre>
         <p class="fr-spec-list__p">The spec, the seeds.jsonl, the base-model SHA-256, the quantize scheme, the eval pack snapshot, the K-score threshold. Two runs on the same machine with the same inputs produce the same artifact_cid.</p>
       </li>
       <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Outside the envelope</h3><span class="fr-spec-list__delta">HONEST-SCOPE &middot; recorded</span></div>
+        <div class="fr-spec-list__head"><h3>Outside the envelope</h3><span class="fr-spec-list__delta">PLAIN SCOPE &middot; recorded</span></div>
         <p class="fr-spec-list__p">The exact CUDA driver, the BLAS kernel selection, the OS scheduler. These can shift floating-point rounding in the final per-axis K-score by under a tenth of a point; the verdict stays the same but the bytes hash can differ. The receipt records the toolchain so a third party can match it.</p>
       </li>
     </ul>

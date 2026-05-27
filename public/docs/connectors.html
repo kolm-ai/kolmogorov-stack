@@ -120,21 +120,17 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </div>
 
 <h2 id="start">Start the proxy</h2>
-<pre><code>kolm capture --provider openai --as ticket-classifier --namespace tickets
-# kolm proxy listening on http://127.0.0.1:8787
-# capture config written to ~/.kolm/capture/ticket-classifier.json</code></pre>
+<pre>CODE9</pre>
 <p>The first form picks a namespace and the upstream provider, and writes a small JSON file with the headers your app should send. Pass your real OpenAI, Anthropic, or OpenRouter key in the <code>x-upstream-api-key</code> header on each request; the Kolm API key goes in <code>Authorization: Bearer ks_*</code> or <code>Authorization: Bearer kao_*</code>.</p>
 
 <h2 id="verify">Verify the proxy sees traffic</h2>
-<pre><code>kolm capture status --namespace tickets
-# pairs captured: 38 / 1000
-# pairs until distill: 962</code></pre>
+<pre>CODE13</pre>
 <p>Once you cross the threshold (default 1000 pairs), <code>kolm distill --namespace tickets</code> auto-runs the LoRA trainer against the namespace.</p>
 
 <h2 id="streaming">Streaming and tool use</h2>
 <p>Server-sent events are forwarded byte-for-byte from the upstream provider. Tool use, function calling, and structured outputs pass through with no schema rewrite. The only thing the proxy adds is a captured row in the local lake; payload shape is whatever the upstream emitted.</p>
 
-<h2 id="honest">Honest scope</h2>
+<h2 id="honest">Plain scope</h2>
 <p>The proxy is local. Captured pairs land in <code>~/.kolm/events.sqlite</code> on the machine running the proxy. Nothing is sent to <code>kolm.ai</code> unless you flip on cloud-sync (off by default) or run a hosted compile. The 19-class privacy membrane tags each captured prompt with which classes it touched, and the per-class blocklist on the cloud-sync settings page acts as a kill-switch.</p>
 
 <h2 id="see">Related</h2>

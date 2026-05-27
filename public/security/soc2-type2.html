@@ -15,7 +15,7 @@
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="SOC 2 Type II readiness &middot; kolm.ai">
-<meta name="twitter:description" content="The kolm stack ships every TSC control by default. Honest checklist: items we ship are marked YES; auditor-supplied items are marked NO with a pointer to who provides them.">
+<meta name="twitter:description" content="The kolm stack ships every TSC control by default. Plain checklist: items we ship are marked YES; auditor-supplied items are marked NO with a pointer to who provides them.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/security/soc2-type2">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -60,7 +60,7 @@ td code{font-size:12px}
 .checklist .row .status.ok{color:var(--accent)}
 .checklist .row .status.ext{color:var(--warn)}
 @media(max-width:720px){.checklist .row{grid-template-columns:1fr 1fr;gap:6px}.checklist .row .id{grid-column:1/2}.checklist .row .crit{grid-column:2/3;text-align:right}.checklist .row .item{grid-column:1/-1}.checklist .row .status{grid-column:1/-1;text-align:left}}
-.honesty{border:1px solid var(--accent);border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
+.truthfulness{border:1px solid var(--accent);border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
 .warn{border:1px solid var(--warn);border-left:4px solid var(--warn);background:rgba(82, 90, 100,0.07);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
 .cross-link{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border:1px solid var(--accent);border-radius:10px;background:var(--accent-soft);color:var(--ink);text-decoration:none;font-size:14px;margin:18px 0;max-width:560px}
 .cross-link:hover{filter:brightness(1.05)}
@@ -163,7 +163,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   <div class="row"><div class="id">TSC-A3</div><div class="crit">Availability</div><div class="item">DR/backup retention &ge; 12 months<small>W767-3 audit-retention 365d default</small></div><div class="status ok">YES &middot; kolm</div></div>
   <div class="row"><div class="id">TSC-PI1</div><div class="crit">Processing Integrity</div><div class="item">Artifact receipt verification<small>src/binder.js HMAC chain + cid lock</small></div><div class="status ok">YES &middot; kolm</div></div>
   <div class="row"><div class="id">TSC-PI2</div><div class="crit">Processing Integrity</div><div class="item">Capture-anomaly quarantine before prod ingest<small>W808 staged-captures + W761 poisoning orchestrator</small></div><div class="status ok">YES &middot; kolm</div></div>
-  <div class="row"><div class="id">TSC-PI3</div><div class="crit">Processing Integrity</div><div class="item">Numeric/eval honesty (kolmbench + numeric-accuracy)<small>W756 kolmbench + W759 numeric-accuracy</small></div><div class="status ok">YES &middot; kolm</div></div>
+  <div class="row"><div class="id">TSC-PI3</div><div class="crit">Processing Integrity</div><div class="item">Numeric/eval truthfulness (kolmbench + numeric-accuracy)<small>W756 kolmbench + W759 numeric-accuracy</small></div><div class="status ok">YES &middot; kolm</div></div>
   <div class="row"><div class="id">TSC-C1</div><div class="crit">Confidentiality</div><div class="item">PII scan + redaction prior to distillation<small>W764 mit/scan-pii + W454 transcript-redact</small></div><div class="status ok">YES &middot; kolm</div></div>
   <div class="row"><div class="id">TSC-C2</div><div class="crit">Confidentiality</div><div class="item">Tenant-fenced reads (W411 defense in depth)<small>tenant_id filter on every listEvents + re-filter inside helpers</small></div><div class="status ok">YES &middot; kolm</div></div>
   <div class="row"><div class="id">TSC-C3</div><div class="crit">Confidentiality</div><div class="item">Confidential-compute attestation embed<small>W460 attestation_kind manifest binding</small></div><div class="status ok">YES &middot; kolm</div></div>
@@ -174,12 +174,12 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </div>
 
 <h2 id="retention" data-w767="retention-statement">12-month audit retention statement</h2>
-<p>The kolm audit chain defaults to <strong>365-day retention</strong> per <code>DEFAULT_RETENTION_DAYS</code> in <code>src/audit-retention.js</code>. The minimum permitted floor is 90 days (SOC 2 Type I), and the maximum is 2555 days (~7 years &mdash; HIPAA / GDPR right-to-erasure exception ceiling). Operators can set a per-tenant override via <code>kolm cert audit-retention-set &lt;days&gt; --confirm</code>; values outside the [MIN, MAX] window are rejected with an honest envelope rather than silently clamped.</p>
+<p>The kolm audit chain defaults to <strong>365-day retention</strong> per <code>DEFAULT_RETENTION_DAYS</code> in <code>src/audit-retention.js</code>. The minimum permitted floor is 90 days (SOC 2 Type I), and the maximum is 2555 days (~7 years &mdash; HIPAA / GDPR right-to-erasure exception ceiling). Operators can set a per-tenant override via <code>kolm cert audit-retention-set &lt;days&gt; --confirm</code>; values outside the [MIN, MAX] window are rejected with an loud-fail envelope rather than silently clamped.</p>
 
 <p>Retention enforcement is dry-run by default. The <code>enforceRetentionPolicy</code> entry point ALWAYS counts what would be evicted; live eviction requires BOTH <code>confirm:true</code> AND <code>dry_run:false</code>. A bare <code>confirm:true</code> without explicit <code>dry_run:false</code> remains a dry run &mdash; two-key destruction so an accidental flag cannot trigger eviction.</p>
 
 <div class="honesty">
-  <p><strong>Honesty floor.</strong> A retention policy that silently truncates audit data below the configured floor is worse than no policy &mdash; it produces a false-clean report. We log every retention-policy change through the same audit chain, so an auditor can reconstruct the operator's intent across the sample period.</p>
+  <p><strong>Caveats floor.</strong> A retention policy that silently truncates audit data below the configured floor is worse than no policy &mdash; it produces a false-clean report. We log every retention-policy change through the same audit chain, so an auditor can reconstruct the operator's intent across the sample period.</p>
 </div>
 
 <h2 id="monitoring" data-w767="monitoring-link">Continuous monitoring dashboard</h2>

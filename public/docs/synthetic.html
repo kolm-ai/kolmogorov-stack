@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <title>Synthetic augmentation &middot; gap-fill, coverage, rare-case upweight</title>
-<meta name="description" content="Detect coverage gaps in your captures, use the teacher to generate synthetic variations for under-served categories, and up-weight rare captures in the sampler. Honest contract: every synthetic row tagged">
+<meta name="description" content="Detect coverage gaps in your captures, use the teacher to generate synthetic variations for under-served categories, and up-weight rare captures in the sampler. Plain contract: every synthetic row tagged">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Synthetic augmentation &middot; gap-fill, coverage, rare-case upweight &middot; kolm.ai">
-<meta property="og:description" content="Coverage report + Gini + rare-bucket up-weighting + teacher-driven gap fill. Honest synthetic tagging. Open-source AI workbench.">
+<meta property="og:description" content="Coverage report + Gini + rare-bucket up-weighting + teacher-driven gap fill. Plain synthetic tagging. Open-source AI workbench.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs/synthetic">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -19,7 +19,7 @@
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs/synthetic">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Synthetic capture augmentation","description":"Detect coverage gaps, generate synthetic variations via teacher, up-weight rare captures. Honest contract: every synthetic row tagged kolm_synthetic:true.","url":"https://kolm.ai/docs/synthetic","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Synthetic capture augmentation","description":"Detect coverage gaps, generate synthetic variations via teacher, up-weight rare captures. Plain contract: every synthetic row tagged kolm_synthetic:true.","url":"https://kolm.ai/docs/synthetic","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <link rel="stylesheet" href="/design-tokens.css">
 <style>
 :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:rgba(17, 17, 17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
@@ -56,7 +56,7 @@ td code{font-size:12px}
 .related b{font-size:14px;color:var(--ink);font-weight:500}
 .related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
 .warn{border:1px solid #6b6b66;border-left:4px solid #6b6b66;background:rgba(82, 90, 100,0.07);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
-.honesty{border:1px solid var(--accent);border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
+.truthfulness{border:1px solid var(--accent);border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
@@ -97,12 +97,12 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / synthetic</div>
 <p class="brand-eyebrow">Open-source AI workbench</p>
 <h1>Frontier AI on your own infrastructure.</h1>
-<p class="lede">Synthetic augmentation closes the loop between coverage analysis and training-set hygiene. Look at the distribution of your captures, find the under-served buckets ("200 refund queries but zero escalation"), and ask the teacher to generate the gap-filler &mdash; with every synthetic row honestly tagged <code>kolm_synthetic:true</code> and tied back to its parent seed CIDs. Stamped <code>w749-v1</code>. Built by <code>src/synthetic-augment.js</code>.</p>
+<p class="lede">Synthetic augmentation closes the loop between coverage analysis and training-set hygiene. Look at the distribution of your captures, find the under-served buckets ("200 refund queries but zero escalation"), and ask the teacher to generate the gap-filler &mdash; with every synthetic row frankly tagged <code>kolm_synthetic:true</code> and tied back to its parent seed CIDs. Stamped <code>w749-v1</code>. Built by <code>src/synthetic-augment.js</code>.</p>
 
-<h2 id="honesty">Honesty contract</h2>
+<h2 id="honesty">No-silent-pass contract</h2>
 <div class="honesty"><strong>Synthetic captures are always tagged <code>kolm_synthetic:true</code>.</strong> The flag is written at the event-store boundary by <code>POST /v1/synthetic/commit</code> and survives every downstream consumer (datasets, bakeoffs, sampler weights). Every row also carries <code>parent_seed_cids</code> &mdash; the capture CIDs the teacher saw as in-context examples &mdash; so downstream audits can answer "which real captures did this synthetic row descend from?" without guessing. We never silently mix synthetic with real.</div>
 
-<p>Why this matters: a distilled student that scored 0.94 K-Score on a mix that was 30% synthetic and 70% real may be over-fitting the teacher's style on the synthetic rows. The honest tag lets the bakeoff stratify by <code>kolm_synthetic</code> and report two K-Scores &mdash; one on real-only, one on synthetic-only &mdash; so you can spot that gap before promotion.</p>
+<p>Why this matters: a distilled student that scored 0.94 K-Score on a mix that was 30% synthetic and 70% real may be over-fitting the teacher's style on the synthetic rows. The plain tag lets the bakeoff stratify by <code>kolm_synthetic</code> and report two K-Scores &mdash; one on real-only, one on synthetic-only &mdash; so you can spot that gap before promotion.</p>
 
 <h2 id="coverage">Coverage report + Gini coefficient</h2>
 <p>Coverage analysis buckets your captures and reports a count + percentage per bucket. The default bucket strategy is <strong>category</strong>, using the same inferred categorizer as <a href="/docs/diagnose">W741 diagnose</a> (multi-turn, media kind, tool-use, namespace, or general). The keyword strategy uses <a href="/docs/failure-modes">W745 keyword clustering</a> for finer-grained topical buckets.</p>
@@ -119,131 +119,37 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   </tbody>
 </table>
 
-<pre><code>GET /v1/synthetic/coverage/billing?bucket_strategy=category
-{
-  "ok": true,
-  "namespace": "billing",
-  "total": 247,
-  "buckets": [
-    {"name": "refund", "count": 200, "pct": 0.81, "rarity_score": 0.04},
-    {"name": "general", "count": 45, "pct": 0.18, "rarity_score": 0.32},
-    {"name": "escalation", "count": 2, "pct": 0.008, "rarity_score": 0.87}
-  ],
-  "rare_buckets": [
-    {"name": "escalation", "count": 2, "rarity_score": 0.87},
-    ...
-  ],
-  "gini_coefficient": 0.661,
-  "bucket_strategy": "category",
-  "version": "w749-v1"
-}
-</code></pre>
+<pre>CODE13</pre>
 
 <h2 id="rarity">Rarity score + up-weighting math</h2>
 <p>Each bucket carries a <code>rarity_score</code> in roughly <code>[0, 1]</code>:</p>
 
-<pre><code>rarity_score(bucket) = -log(pct + 1e-6) / log(total)
-
-# pct ∈ [0, 1]    -  fraction of captures in this bucket
-# total           -  total capture count
-# epsilon (1e-6)  -  guards log(0) for zero-count buckets when target_categories is used
-</code></pre>
+<pre>CODE16</pre>
 
 <p>The training sampler can then up-weight rare buckets so the model sees them proportionally more often than their raw frequency would dictate:</p>
 
-<pre><code>importance_weight(capture) = 1.0 + rarity_score(capture.bucket) * 2
-
-# Common bucket  (rarity ~= 0): weight ~= 1.0  (no boost)
-# Rare bucket    (rarity ~= 1): weight ~= 3.0  (3x boost)
-# Capped at 5.0  to prevent gradient explosion on degenerate corpora.
-</code></pre>
+<pre>CODE17</pre>
 
 <p>This is a sampler weight, not a loss weight &mdash; rare captures appear in the training batches more often, but each example contributes the same gradient. (Loss-weighting can be added by multiplying the gradient by the same factor; we keep the two knobs separate so practitioners can tune them independently.)</p>
 
 <h2 id="gaps">Gap detection + the "Generate 50?" UI</h2>
 <p>Gap detection answers a focused question: "which categories have fewer than N captures?" The default N is <strong>50</strong> &mdash; below this threshold a category is considered under-served and surfaced for synthetic top-up. You can pass either a list of <code>target_categories</code> (forces missing categories to appear with count=0) or omit it (only shows categories the corpus already has, under-served).</p>
 
-<pre><code>GET /v1/synthetic/gaps/billing?target_categories=refund,escalation,billing,general
-{
-  "ok": true,
-  "namespace": "billing",
-  "total_captures": 247,
-  "gaps": [
-    {"category": "escalation", "current_count": 2,   "suggested_count": 50, "gap": 48, "present": true},
-    {"category": "billing",    "current_count": 0,   "suggested_count": 50, "gap": 50, "present": false},
-    {"category": "general",    "current_count": 45,  "suggested_count": 50, "gap": 5,  "present": true}
-  ],
-  "version": "w749-v1"
-}
-</code></pre>
+<pre>CODE19</pre>
 
 <p>The dashboard at <a href="/account/synthetic">/account/synthetic</a> renders one card per gap with a "Generate 50?" button that opens the confirm modal &mdash; matching the spec verbatim ("I see you have 200 refund queries but zero escalation &mdash; generate 50 escalation examples from teacher?").</p>
 
 <h2 id="spend">Spend warning &mdash; the confirm gate</h2>
 <div class="warn"><strong>Synthetic generation costs money.</strong> Each row calls the teacher (currently Anthropic Claude when wired) and bills against your hosted-inference budget. <code>POST /v1/synthetic/generate</code> deliberately refuses to incur charges without <code>confirm:true</code> in the body. Without confirm, the route returns <code>200 OK</code> with <code>{ ok: false, error: "synthetic_costs_money", estimated_cost_usd }</code> &mdash; a preview, not a charge. Re-submit with <code>confirm: true</code> to actually run the batch.</div>
 
-<pre><code># Preview (no charge):
-POST /v1/synthetic/generate
-{
-  "namespace": "billing",
-  "category": "escalation",
-  "target_count": 50
-}
-→ 200 OK
-{
-  "ok": false,
-  "error": "synthetic_costs_money",
-  "hint": "synthetic generation calls the teacher and incurs cost; re-send with {confirm:true} to proceed",
-  "namespace": "billing",
-  "category": "escalation",
-  "target_count": 50,
-  "estimated_cost_usd": 0.10,
-  "cost_per_row_usd": 0.002,
-  "version": "w749-v1"
-}
-
-# Actually run (charged):
-POST /v1/synthetic/generate
-{
-  "namespace": "billing",
-  "category": "escalation",
-  "target_count": 50,
-  "confirm": true
-}
-→ 200 OK
-{
-  "ok": true,
-  "namespace": "billing",
-  "category": "escalation",
-  "generation_id": "a3b9f7c1e2d4a8e0",
-  "generated": [ /* 50 rows, each kolm_synthetic:true */ ],
-  "actual_count": 50,
-  "cost_usd_est": 0.10,
-  "version": "w749-v1"
-}
-</code></pre>
+<pre>CODE25</pre>
 
 <p>The CLI mirrors this protocol verbatim. Without <code>--confirm</code>, the dispatcher prints a yellow <strong>&#9888;</strong> warning to stderr AND sends the request without the confirm flag, so the user sees the cost estimate in the envelope before they commit. With <code>--confirm</code>, the request fires for real.</p>
 
 <h2 id="commit">Commit &mdash; staging to event-store</h2>
 <p>Generation does NOT immediately write to the event-store. A successful generate returns a <code>generation_id</code> and stages the batch in-process. The caller must explicitly <code>POST /v1/synthetic/commit</code> with the same id to persist:</p>
 
-<pre><code>POST /v1/synthetic/commit
-{
-  "namespace": "billing",
-  "generation_id": "a3b9f7c1e2d4a8e0"
-}
-→ 200 OK
-{
-  "ok": true,
-  "namespace": "billing",
-  "generation_id": "a3b9f7c1e2d4a8e0",
-  "persisted_count": 50,
-  "persisted_event_ids": [ "ev_...", ... ],
-  "errors": [],
-  "version": "w749-v1"
-}
-</code></pre>
+<pre>CODE30</pre>
 
 <p>The staging Map is in-process only by design. If the server restarts before commit, the generated rows are dropped &mdash; no orphaned synthetic data lands silently in your corpus. Generate + commit are expected to happen in the same session.</p>
 
