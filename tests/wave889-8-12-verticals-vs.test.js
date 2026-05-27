@@ -166,12 +166,18 @@ test('W889-8.x #10 — vercel.json carries rewrites for new pages + /account/sig
   }
 });
 
-test('W889-8.x #11 — sw.js carries wave889-verticals-vs slug + CACHE_VERSION > 113', () => {
+test('W889-8.x #11 — sw.js CACHE slug carries wave token >= 889 + CACHE_VERSION > 113', () => {
   const sw = readFile('public/sw.js');
-  assert.ok(
-    sw.includes('wave889-verticals-vs'),
-    'sw.js missing wave889-verticals-vs cache slug'
-  );
+  // Regex+threshold (per W886 #9 family-lock pattern + W446 #5 note): the slug
+  // moves forward each wave, so don't pin literal 'wave889-verticals-vs'.
+  // Extract the wave token from the ACTIVE CACHE = '...' declaration (not
+  // from history comments which may reference older waves).
+  const cacheDecl = sw.match(/const\s+CACHE\s*=\s*['"]([^'"]+)['"]/);
+  assert.ok(cacheDecl, 'sw.js must declare const CACHE = "..."');
+  const waveMatch = cacheDecl[1].match(/wave(\d{3,4})/);
+  assert.ok(waveMatch, `CACHE slug "${cacheDecl[1]}" must include a wave token like "waveNNN"`);
+  const w = parseInt(waveMatch[1], 10);
+  assert.ok(w >= 889, `CACHE slug wave token must be >= 889 (post-W889-8.x floor); got wave${w} in "${cacheDecl[1]}"`);
   const m = sw.match(/const\s+CACHE_VERSION\s*=\s*(\d+)/);
   assert.ok(m, 'sw.js missing CACHE_VERSION constant');
   assert.ok(

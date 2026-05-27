@@ -591,12 +591,33 @@ if (process.argv[1] && process.argv[1].endsWith('server.js')) {
   process.on('SIGTERM', onSig('SIGTERM'));
   process.on('SIGINT', onSig('SIGINT'));
 
-  // Auto-provision the demo tenant.
-  const demo = provisionTenant(process.env.DEFAULT_TENANT || 'demo');
+  // Auto-provision the demo tenant. Wrapped: if the durable store is
+  // unrecoverable (corrupt JSON + EACCES on backup + EACCES on writes), we
+  // STILL want the HTTP server to start so /health responds and operators
+  // can introspect — auth-bearing routes degrade to 503 downstream rather
+  // than crash-looping the whole container.
+  const demoName = process.env.DEFAULT_TENANT || 'demo';
+  let demo;
+  try {
+    demo = provisionTenant(demoName);
+  } catch (err) {
+    console.error('[boot] provisionTenant failed; continuing in degraded mode:', err && err.message);
+    demo = { name: demoName, api_key: null, plan: 'free', degraded: true };
+  }
 
   // Idempotent seed: synthesizes any missing example/*.json concepts.
-  const { added, skipped } = await bootSeedDemoConcepts(demo.name);
-  if (added > 0 || skipped > 0) console.log(`  seed: +${added} added, ${skipped} skipped`);
+  // Skip if we couldn't provision the tenant — seeding without a real
+  // tenant row would write orphan concepts.
+  if (!demo.degraded) {
+    try {
+      const { added, skipped } = await bootSeedDemoConcepts(demo.name);
+      if (added > 0 || skipped > 0) console.log(`  seed: +${added} added, ${skipped} skipped`);
+    } catch (err) {
+      console.error('[boot] bootSeedDemoConcepts failed; continuing:', err && err.message);
+    }
+  } else {
+    console.log('  seed: skipped (tenant provision degraded)');
+  }
 
   // Stripe configuration sanity check. Counts how many of the 5 payment links
   // are wired so a misconfigured deploy logs a single line at boot rather than

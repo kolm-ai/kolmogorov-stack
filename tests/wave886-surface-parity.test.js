@@ -85,12 +85,20 @@ test('W886 #7 - sw.js CACHE_VERSION is a number and >= 95', () => {
 });
 
 // ----------------------------------------------------------------------------
-// 8) sw.js CACHE slug carries wave867/868/869 token
+// 8) sw.js ACTIVE CACHE slug carries a wave token >= 867 (regex+threshold;
+//    see W446 #5 note — explicit-array assertions break when the slug moves
+//    forward. Extract from `const CACHE = "..."` declaration, NOT the file
+//    body — history comments reference older waves and would let stale slugs
+//    pass.)
 // ----------------------------------------------------------------------------
-test('W886 #8 - sw.js CACHE slug carries wave867 OR wave868 OR wave869 token', () => {
+test('W886 #8 - sw.js ACTIVE CACHE slug carries a wave token >= 867', () => {
   const sw = fs.readFileSync(SW_JS, 'utf8');
-  assert.ok(/wave86[789]\b/.test(sw),
-    `sw.js CACHE slug must include at least one of wave867/wave868/wave869`);
+  const cacheDecl = sw.match(/const\s+CACHE\s*=\s*['"]([^'"]+)['"]/);
+  assert.ok(cacheDecl, 'sw.js must declare const CACHE = "..."');
+  const m = cacheDecl[1].match(/wave(\d{3,4})/);
+  assert.ok(m, `CACHE slug "${cacheDecl[1]}" must include a wave token like "waveNNN"`);
+  const n = parseInt(m[1], 10);
+  assert.ok(n >= 867, `CACHE slug wave token must be >= 867 (post-W886 floor); got wave${n} in "${cacheDecl[1]}"`);
 });
 
 // ----------------------------------------------------------------------------

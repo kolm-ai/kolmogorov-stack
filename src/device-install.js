@@ -30,10 +30,26 @@ function _kolmDir() {
   const base = process.env.KOLM_DATA_DIR ? path.resolve(process.env.KOLM_DATA_DIR) : path.join(_home(), '.kolm');
   return base;
 }
+let _installedRootCache = null;
+let _installedRootCacheKey = null;
 function _installedRoot() {
   const p = path.join(_kolmDir(), 'installed');
-  fs.mkdirSync(p, { recursive: true });
-  return p;
+  if (_installedRootCache && _installedRootCacheKey === p) return _installedRootCache;
+  try {
+    fs.mkdirSync(p, { recursive: true });
+    _installedRootCacheKey = p;
+    _installedRootCache = p;
+    return p;
+  } catch (err) {
+    if (err && (err.code === 'EACCES' || err.code === 'EPERM' || err.code === 'EROFS')) {
+      const fb = path.join(os.tmpdir(), 'kolm-installed');
+      fs.mkdirSync(fb, { recursive: true });
+      _installedRootCacheKey = p;
+      _installedRootCache = fb;
+      return fb;
+    }
+    throw err;
+  }
 }
 function _deviceRoot(deviceId) {
   const p = path.join(_installedRoot(), deviceId);

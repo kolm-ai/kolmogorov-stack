@@ -8235,45 +8235,85 @@ export function buildRouter() {
   // a set of capture ids, export streams JSONL/CSV. Empty-tenant safe.
   r.get('/v1/capture/browse', (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
-    const tenantId = req.tenant_record.id;
     const limit = Math.max(1, Math.min(500, parseInt(req.query.limit, 10) || 50));
     const offset = Math.max(0, parseInt(req.query.offset, 10) || 0);
     const namespace = req.query.namespace ? String(req.query.namespace) : null;
-    let rows = [];
-    try {
-      if (typeof listCapturesForTenant === 'function') {
-        rows = listCapturesForTenant(tenantId, { namespace, limit, offset }) || [];
-      }
-    } catch {} // deliberate: cleanup
-    res.json({ ok: true, count: rows.length, limit, offset, namespace, items: rows });
+    const _tName = req.tenant;
+    const _tId = req.tenant_record && req.tenant_record.id;
+    const obs = [
+      ...(findByTenant('observations', _tName) || []),
+      ...((_tId && _tId !== _tName) ? (findByTenant('observations', _tId) || []) : []),
+    ].filter((o, i, arr) => arr.findIndex((x) => x.id === o.id) === i);
+    const obsNs = (o) => o.corpus_namespace || o.namespace || 'default';
+    let rows = obs.slice();
+    if (namespace) rows = rows.filter((o) => obsNs(o) === namespace);
+    rows.sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
+    const total = rows.length;
+    const page = rows.slice(offset, offset + limit).map((o) => ({
+      id: o.id,
+      capture_id: o.id,
+      timestamp: o.created_at,
+      namespace: obsNs(o),
+      provider: o.provider || o.upstream || 'unknown',
+      model: o.model,
+      status: o.review_status || (o.discarded ? 'rejected' : 'pending'),
+      risk_score: Number.isFinite(o.risk_score) ? Number(o.risk_score) : 0,
+      redaction_applied: Array.isArray(o.redaction_applied) ? o.redaction_applied : [],
+      confidence: Number.isFinite(o.confidence) ? Number(o.confidence) : null,
+      latency_ms: o.latency_ms || null,
+      cost_usd: o.cost_usd || 0,
+      prompt_preview: String(o.variable_input || o.prompt || '').slice(0, 200),
+      response_preview: String(o.response || '').slice(0, 200),
+      receipt_id: o.receipt_id || null,
+    }));
+    res.json({ ok: true, count: page.length, total, limit, offset, namespace, captures: page, items: page });
   });
-  r.post('/v1/capture/bulk', (req, res) => {
+  r.post('/v1/capture/bulk', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     const body = req.body || {};
-    const action = String(body.action || '');
-    const ids = Array.isArray(body.capture_ids) ? body.capture_ids : [];
+    const action = String(body.action || '').toLowerCase();
+    const ids = Array.isArray(body.capture_ids) ? body.capture_ids.filter((x) => typeof x === 'string') : [];
     if (!action) return res.status(400).json({ ok: false, error: 'missing_action', detail: 'pass action: approve|reject|redact|delete' });
     if (!ids.length) return res.status(400).json({ ok: false, error: 'missing_capture_ids' });
     const ALLOWED = new Set(['approve', 'reject', 'redact', 'delete']);
     if (!ALLOWED.has(action)) return res.status(400).json({ ok: false, error: 'invalid_action', allowed: [...ALLOWED] });
-    res.json({ ok: true, action, tenant_id: req.tenant_record.id, requested: ids.length, processed: ids.length, applied_at: new Date().toISOString() });
+    try {
+      const status = action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : action === 'delete' ? 'quarantined' : 'redacted';
+      const store = await import('./store.js');
+      const obs = [
+        ...(store.findByTenant('observations', req.tenant) || []),
+        ...((req.tenant_record.id && req.tenant_record.id !== req.tenant) ? (store.findByTenant('observations', req.tenant_record.id) || []) : []),
+      ].filter((o, i, arr) => arr.findIndex((x) => x.id === o.id) === i);
+      let processed = 0;
+      const notFound = [];
+      for (const id of ids) {
+        const row = obs.find((o) => o.id === id);
+        if (!row) { notFound.push(id); continue; }
+        const upd = { ...row, review_status: status, review_at: new Date().toISOString(), discarded: status === 'rejected' || status === 'quarantined' };
+        store.update('observations', { id }, upd);
+        processed++;
+      }
+      res.json({ ok: true, action, tenant_id: req.tenant_record.id, requested: ids.length, processed, not_found: notFound, applied_at: new Date().toISOString() });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'capture_bulk_error', detail: String(e && e.message || e) });
+    }
   });
   r.get('/v1/capture/export', (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     const tenantId = req.tenant_record.id;
     const format = String(req.query.format || 'jsonl').toLowerCase();
     const namespace = req.query.namespace ? String(req.query.namespace) : null;
-    let rows = [];
-    try {
-      if (typeof listCapturesForTenant === 'function') {
-        rows = listCapturesForTenant(tenantId, { namespace, limit: 10000, offset: 0 }) || [];
-      }
-    } catch {} // deliberate: cleanup
+    const _tName = req.tenant;
+    const obs = [
+      ...(findByTenant('observations', _tName) || []),
+      ...((tenantId && tenantId !== _tName) ? (findByTenant('observations', tenantId) || []) : []),
+    ].filter((o, i, arr) => arr.findIndex((x) => x.id === o.id) === i);
+    const rows = (namespace ? obs.filter((o) => (o.corpus_namespace || o.namespace || 'default') === namespace) : obs).slice(0, 10000);
     if (format === 'csv') {
       res.set('Content-Type', 'text/csv');
       res.set('Content-Disposition', `attachment; filename="captures-${tenantId}.csv"`);
       const lines = ['id,namespace,created_at'];
-      for (const r0 of rows) lines.push([r0.id || '', r0.namespace || '', r0.created_at || ''].join(','));
+      for (const r0 of rows) lines.push([r0.id || '', (r0.corpus_namespace || r0.namespace || ''), r0.created_at || ''].join(','));
       return res.send(lines.join('\n'));
     }
     res.set('Content-Type', 'application/x-ndjson');
@@ -18791,6 +18831,155 @@ res.json({
       if (!device || device.removed_at) return res.status(404).json({ ok: false, error: 'unknown_device', id: req.params.id });
       res.json({ ok: true, device });
     } catch (e) { res.status(500).json(_w384Err(e, 'device_get_error')); }
+  });
+
+  // W896 — browser-form translator for /account/fleet "Add device" modal.
+  // The form posts {name, type, tags, connection:{host,user,key_path|base_url|kubeconfig,namespace}}
+  // which we flatten to DeviceRegistry.register() args.
+  r.post('/v1/devices/add', async (req, res) => {
+    try {
+      const body = req.body || {};
+      const conn = body.connection || {};
+      const idSlug = String(body.id || body.name || '').toLowerCase().replace(/[^a-z0-9._-]/g, '-').replace(/^-+|-+$/g, '');
+      const payload = {
+        id: idSlug,
+        name: body.name || idSlug,
+        type: body.type || 'ssh',
+        tags: Array.isArray(body.tags) ? body.tags : [],
+        host: conn.host || (conn.base_url ? new URL(conn.base_url).hostname : null),
+        port: conn.port || (conn.base_url ? Number(new URL(conn.base_url).port) || null : null),
+        user: conn.user || null,
+        keyPath: conn.key_path || conn.keyPath || null,
+        hardware_hint: body.hardware_hint || null,
+      };
+      const { DeviceRegistry } = await import('./device-registry.js');
+      const registry = new DeviceRegistry({});
+      const device = await registry.register(payload);
+      res.json({ ok: true, device });
+    } catch (e) {
+      const code = e && e.code ? String(e.code).toLowerCase().replace(/^kolm_e_/, '') : 'device_add_error';
+      res.status(400).json({ ok: false, error: code, detail: e && e.message ? e.message : String(e) });
+    }
+  });
+
+  // W896 — POST shim for /v1/devices/remove (fleet.html "Remove" button uses POST not DELETE).
+  // Accepts {name|id, hard?}. Soft delete by default.
+  r.post('/v1/devices/remove', async (req, res) => {
+    try {
+      const body = req.body || {};
+      const id = String(body.id || body.name || '').trim();
+      if (!id) return res.status(400).json({ ok: false, error: 'id_or_name_required' });
+      const { DeviceRegistry } = await import('./device-registry.js');
+      const registry = new DeviceRegistry({});
+      const hard = body.hard === true || body.hard === '1' || body.hard === 'true';
+      const r2 = await registry.remove(id, { hard });
+      if (!r2.ok) return res.status(404).json({ ok: false, error: r2.error || 'remove_failed', id });
+      res.json(r2);
+    } catch (e) { res.status(500).json(_w384Err(e, 'device_remove_error')); }
+  });
+
+  // W896 — W888-E fleet HTTP control plane. Wraps src/fleet.js Fleet class.
+  // All routes accept {tag, namespace} for fleet-wide ops, OR {device} to
+  // narrow to a single device by id/name.
+  async function _w896BuildFleet(deviceFilter) {
+    const deviceCapsMod = await import('./device-capabilities.js');
+    const { Fleet } = await import('./fleet.js');
+    if (!deviceFilter) return new Fleet();
+    const caps = {
+      ...deviceCapsMod,
+      listDevices: async () => {
+        const all = await deviceCapsMod.listDevices();
+        return all.filter(d => d.device_id === deviceFilter || d.name === deviceFilter);
+      },
+    };
+    return new Fleet({ deviceCaps: caps });
+  }
+
+  // GET /v1/fleet/status?tag=&namespace=&device=
+  r.get('/v1/fleet/status', async (req, res) => {
+    try {
+      const tag = req.query.tag ? String(req.query.tag) : null;
+      const namespace = req.query.namespace ? String(req.query.namespace) : null;
+      const device = req.query.device ? String(req.query.device) : null;
+      const fleet = await _w896BuildFleet(device);
+      const status = await fleet.status({ tag, namespace });
+      res.json({ ok: true, devices: status, count: status.length });
+    } catch (e) { res.status(500).json(_w384Err(e, 'fleet_status_error')); }
+  });
+
+  // POST /v1/fleet/deploy — body {artifact_path|artifactPath, tag?, namespace?, device?, mode?, canary_observe_ms?}
+  r.post('/v1/fleet/deploy', async (req, res) => {
+    try {
+      const body = req.body || {};
+      const artifactPath = body.artifact_path || body.artifactPath;
+      if (!artifactPath) return res.status(400).json({ ok: false, error: 'artifact_path_required' });
+      const mode = body.mode || 'rolling';
+      const fleet = await _w896BuildFleet(body.device || null);
+      const result = await fleet.deploy({
+        artifactPath,
+        tag: body.tag || null,
+        namespace: body.namespace || null,
+        mode,
+        canaryObserveMs: body.canary_observe_ms || body.canaryObserveMs || 60_000,
+        pipelineConfig: body.config || {},
+      });
+      res.json(result);
+    } catch (e) { res.status(500).json(_w384Err(e, 'fleet_deploy_error')); }
+  });
+
+  // POST /v1/fleet/rollback — body {tag?, namespace?, device?, confirm?}
+  // Browser button passes {device}; CLI passes {tag|namespace, confirm:true}.
+  r.post('/v1/fleet/rollback', async (req, res) => {
+    try {
+      const body = req.body || {};
+      const fleet = await _w896BuildFleet(body.device || null);
+      // Single-device rollback from browser button is implicitly confirmed
+      // (the browser confirm() dialog has already gated it).
+      const confirm = body.confirm === true || body.confirm === 'true' || !!body.device;
+      const result = await fleet.rollback({
+        tag: body.tag || null,
+        namespace: body.namespace || null,
+        confirm,
+        pipelineConfig: body.config || {},
+      });
+      res.json(result);
+    } catch (e) { res.status(500).json(_w384Err(e, 'fleet_rollback_error')); }
+  });
+
+  // POST /v1/fleet/stop — body {tag?, namespace?, device?, all?, confirm?}
+  r.post('/v1/fleet/stop', async (req, res) => {
+    try {
+      const body = req.body || {};
+      const fleet = await _w896BuildFleet(body.device || null);
+      const all = body.all === true || body.all === 'true';
+      const confirm = body.confirm === true || body.confirm === 'true' || !!body.device;
+      const result = await fleet.stop({
+        tag: body.tag || null,
+        namespace: body.namespace || null,
+        all,
+        confirm,
+      });
+      res.json(result);
+    } catch (e) { res.status(500).json(_w384Err(e, 'fleet_stop_error')); }
+  });
+
+  // GET /v1/fleet/monitor — one monitor tick (synchronous, no streaming).
+  // For long-running monitoring use the CLI `kolm fleet monitor` instead.
+  r.get('/v1/fleet/monitor', async (req, res) => {
+    try {
+      const tag = req.query.tag ? String(req.query.tag) : null;
+      const namespace = req.query.namespace ? String(req.query.namespace) : null;
+      const device = req.query.device ? String(req.query.device) : null;
+      const deviceCapsMod = await import('./device-capabilities.js');
+      const { FleetMonitor } = await import('./fleet-monitor.js');
+      const caps = device ? {
+        ...deviceCapsMod,
+        listDevices: async () => (await deviceCapsMod.listDevices()).filter(d => d.device_id === device || d.name === device),
+      } : deviceCapsMod;
+      const monitor = new FleetMonitor({ deviceCaps: caps });
+      const tick = await monitor.tick({ tag, namespace, alertSinks: [{ name: 'noop', async send() { return { ok: true }; } }] });
+      res.json({ ok: true, ...tick });
+    } catch (e) { res.status(500).json(_w384Err(e, 'fleet_monitor_error')); }
   });
 
   // W888-D HTTP control plane: POST /v1/deploy + /v1/deploy/canary +

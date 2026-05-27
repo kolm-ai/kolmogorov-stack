@@ -39,16 +39,41 @@ test('json store writes backups and recovers a corrupt primary table', async (t)
   assert.equal(corruptFiles(dir, 'concepts.json').length, 1);
 });
 
-test('json store fails closed when primary and backup are both invalid', async (t) => {
+test('json store fails closed when both invalid AND KOLM_STORE_STRICT=1', async (t) => {
   const dir = createDataDir(t);
   fs.writeFileSync(path.join(dir, 'tenants.json'), '{"broken"', 'utf8');
   fs.writeFileSync(path.join(dir, 'tenants.json.bak'), '{"also-broken"', 'utf8');
 
-  const store = await import(`../src/store.js?store-corrupt=${Date.now()}`);
+  const savedStrict = process.env.KOLM_STORE_STRICT;
+  process.env.KOLM_STORE_STRICT = '1';
+  t.after(() => {
+    if (savedStrict === undefined) delete process.env.KOLM_STORE_STRICT;
+    else process.env.KOLM_STORE_STRICT = savedStrict;
+  });
+
+  const store = await import(`../src/store.js?store-corrupt-strict=${Date.now()}`);
   assert.throws(
     () => store.all('tenants'),
     /Cannot load store table "tenants": primary JSON is invalid/,
   );
+  assert.equal(corruptFiles(dir, 'tenants.json').length, 2);
+});
+
+test('json store recovers to empty array (default) when primary and backup both invalid', async (t) => {
+  // W896-RECOVERY — boot resilience: corrupt store should not crash the
+  // process. Operators can opt into strict fail-closed behavior via
+  // KOLM_STORE_STRICT=1 (covered by the previous test). Default is loud-log
+  // + start with empty in-memory table so /health responds and the surface
+  // doesn't crash-loop. The corrupt files are quarantined for forensic
+  // recovery.
+  const dir = createDataDir(t);
+  fs.writeFileSync(path.join(dir, 'tenants.json'), '{"broken"', 'utf8');
+  fs.writeFileSync(path.join(dir, 'tenants.json.bak'), '{"also-broken"', 'utf8');
+
+  const store = await import(`../src/store.js?store-corrupt-tolerant=${Date.now()}`);
+  const rows = store.all('tenants');
+  assert.deepEqual(rows, []);
+  // Both primary and backup are quarantined .corrupt-* siblings.
   assert.equal(corruptFiles(dir, 'tenants.json').length, 2);
 });
 

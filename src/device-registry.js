@@ -36,6 +36,7 @@
 //     the device-capabilities snapshot store + fleet-monitor tick journal.
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
@@ -48,16 +49,42 @@ function _defaultDataDir() {
   return path.resolve('data');
 }
 
+const _fallbackPathMap = new Map();
+function _fallbackFor(filePath) {
+  if (_fallbackPathMap.has(filePath)) return _fallbackPathMap.get(filePath);
+  const tag = crypto.createHash('sha256').update(filePath).digest('hex').slice(0, 12);
+  const fb = path.join(os.tmpdir(), 'kolm-device-registry-' + tag, path.basename(filePath));
+  _fallbackPathMap.set(filePath, fb);
+  return fb;
+}
+
 function _atomicWriteJson(filePath, value) {
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  try {
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  } catch (err) {
+    if (err && (err.code === 'EACCES' || err.code === 'EPERM' || err.code === 'EROFS')) {
+      const fb = _fallbackFor(filePath);
+      fs.mkdirSync(path.dirname(fb), { recursive: true });
+      const tmpFb = fb + '.tmp.' + crypto.randomBytes(6).toString('hex');
+      fs.writeFileSync(tmpFb, JSON.stringify(value, null, 2));
+      fs.renameSync(tmpFb, fb);
+      return;
+    }
+    throw err;
+  }
   const tmp = filePath + '.tmp.' + crypto.randomBytes(6).toString('hex');
   fs.writeFileSync(tmp, JSON.stringify(value, null, 2));
   fs.renameSync(tmp, filePath);
 }
 
 function _readJsonOr(filePath, fallback) {
-  if (!fs.existsSync(filePath)) return fallback;
-  try { return JSON.parse(fs.readFileSync(filePath, 'utf8')); }
+  let target = filePath;
+  if (!fs.existsSync(target)) {
+    const fb = _fallbackPathMap.get(filePath) || _fallbackFor(filePath);
+    if (!fs.existsSync(fb)) return fallback;
+    target = fb;
+  }
+  try { return JSON.parse(fs.readFileSync(target, 'utf8')); }
   catch { return fallback; }
 }
 

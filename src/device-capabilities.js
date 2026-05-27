@@ -257,11 +257,27 @@ export const RUNTIMES = Object.freeze([
 export const MODALITIES = Object.freeze(['text', 'vision', 'audio', 'video']);
 
 function _home() { return process.env.HOME || process.env.USERPROFILE || os.homedir(); }
+let _devicesDirCache = null;
+let _devicesDirCacheKey = null;
 function _devicesDir() {
   const base = process.env.KOLM_DATA_DIR ? path.resolve(process.env.KOLM_DATA_DIR) : path.join(_home(), '.kolm');
   const p = path.join(base, 'devices');
-  fs.mkdirSync(p, { recursive: true });
-  return p;
+  if (_devicesDirCache && _devicesDirCacheKey === p) return _devicesDirCache;
+  try {
+    fs.mkdirSync(p, { recursive: true });
+    _devicesDirCacheKey = p;
+    _devicesDirCache = p;
+    return p;
+  } catch (err) {
+    if (err && (err.code === 'EACCES' || err.code === 'EPERM' || err.code === 'EROFS')) {
+      const fb = path.join(os.tmpdir(), 'kolm-devices');
+      fs.mkdirSync(fb, { recursive: true });
+      _devicesDirCacheKey = p;
+      _devicesDirCache = fb;
+      return fb;
+    }
+    throw err;
+  }
 }
 
 export function deviceProfileSchema() {

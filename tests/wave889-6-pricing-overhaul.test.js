@@ -128,8 +128,17 @@ test('#9 no public/*.html page advertises the old $1,499 Enterprise SKU', () => 
   assert.deepEqual(offenders, [], 'these pages still advertise $1,499:\n  ' + offenders.join('\n  '));
 });
 
-test('#10 sw.js carries W889 cache slug and CACHE_VERSION advanced past 111', () => {
-  assert.match(SW_JS, /wave889|pricing-overhaul/i, 'sw.js CACHE slug must mention wave889 or pricing-overhaul');
+test('#10 sw.js CACHE slug carries W889+ wave token and CACHE_VERSION advanced past 111', () => {
+  // Regex+threshold (per W886 #9 family-lock pattern + W446 #5 note): the slug
+  // moves forward each wave, so don't pin literal 'wave889' or 'pricing-overhaul'.
+  // Extract the wave token from the ACTIVE CACHE = '...' declaration (not
+  // from history comments which may reference older waves).
+  const cacheDecl = SW_JS.match(/const\s+CACHE\s*=\s*['"]([^'"]+)['"]/);
+  assert.ok(cacheDecl, 'sw.js must declare const CACHE = "..."');
+  const waveMatch = cacheDecl[1].match(/wave(\d{3,4})/);
+  assert.ok(waveMatch, `CACHE slug "${cacheDecl[1]}" must include a wave token like "waveNNN"`);
+  const w = parseInt(waveMatch[1], 10);
+  assert.ok(w >= 889, `CACHE slug wave token must be >= 889 (post-W889-6.1 floor); got wave${w} in "${cacheDecl[1]}"`);
   const m = SW_JS.match(/const\s+CACHE_VERSION\s*=\s*(\d+)/);
   assert.ok(m, 'CACHE_VERSION constant must exist');
   const v = Number(m[1]);

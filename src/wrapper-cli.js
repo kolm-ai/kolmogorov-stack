@@ -55,7 +55,17 @@ function _envBase() {
 }
 
 function _apiKey() {
-  return process.env.KOLM_API_KEY || process.env.KOLM_KEY || '';
+  const envKey = process.env.KOLM_API_KEY || process.env.KOLM_KEY;
+  if (envKey) return envKey;
+  try {
+    const home = process.env.KOLM_DIR || path.join(os.homedir(), '.kolm');
+    const cfgPath = path.join(home, 'config.json');
+    if (fs.existsSync(cfgPath)) {
+      const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf-8'));
+      if (cfg && cfg.api_key) return cfg.api_key;
+    }
+  } catch (_) { /* malformed config is non-fatal */ }
+  return '';
 }
 
 function _requireKey(emit) {
@@ -1076,7 +1086,8 @@ export async function capturesList(args) {
     });
     return;
   }
-  _emit({ ok: true, source: 'server', key_present: true, local_n: orderedLocal.length, rows: pagedLocal, ...r.json, version: WRAPPER_CLI_VERSION });
+  const serverRows = Array.isArray(r.json && r.json.captures) ? r.json.captures : [];
+  _emit({ ok: true, source: 'server', key_present: true, local_n: orderedLocal.length, rows: serverRows, ...r.json, version: WRAPPER_CLI_VERSION });
 }
 
 /**

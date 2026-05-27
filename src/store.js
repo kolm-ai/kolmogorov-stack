@@ -6,6 +6,7 @@
 // runtime package dependency on modern Node builds.
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
@@ -14,9 +15,37 @@ const require = createRequire(import.meta.url);
 
 const ON_VERCEL = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
 const BUNDLED_DATA_DIR = path.resolve('data');
-const DATA_DIR = process.env.KOLM_DATA_DIR
+const PREFERRED_DATA_DIR = process.env.KOLM_DATA_DIR
   ? path.resolve(process.env.KOLM_DATA_DIR)
   : (ON_VERCEL ? '/tmp/data' : BUNDLED_DATA_DIR);
+
+function probeWritable(dir) {
+  // Verify we can actually create/write files in this directory. On Railway
+  // persistent volumes the directory can exist but be owned by a previous
+  // container's user → EACCES on every write. When that happens we must
+  // degrade to a writable fallback OR the boot path can succeed but every
+  // write-bound HTTP route (signup, capture, deploy) will 500 forever.
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+    const marker = path.join(dir, '.kolm-write-probe');
+    fs.writeFileSync(marker, String(Date.now()));
+    fs.unlinkSync(marker);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+let DATA_DIR = PREFERRED_DATA_DIR;
+if (!probeWritable(DATA_DIR)) {
+  const fallback = path.join(os.tmpdir(), 'kolm-data');
+  if (probeWritable(fallback)) {
+    console.error(`[store] WARNING: KOLM_DATA_DIR ${DATA_DIR} is not writable (EACCES or similar). Falling back to ${fallback}. State written here will NOT survive container restarts — fix volume permissions to recover persistence.`);
+    DATA_DIR = fallback;
+  } else {
+    console.error(`[store] FATAL: neither ${DATA_DIR} nor ${fallback} is writable. Persistent state operations will throw at write time.`);
+  }
+}
 
 function detectDefaultDriver() {
   // Production-like environments default to SQLite when the runtime supports
@@ -179,21 +208,42 @@ function loadJsonTable(name) {
       if (fs.existsSync(bak)) {
         try {
           rows = readRowsFile(name, bak);
-          writeFileDurably(p, JSON.stringify(rows, null, 2));
-          console.error(`[store] recovered ${name}.json from backup after read failure`);
+          try {
+            writeFileDurably(p, JSON.stringify(rows, null, 2));
+            console.error(`[store] recovered ${name}.json from backup after read failure`);
+          } catch (writeErr) {
+            console.error(`[store] recovered ${name}.json from backup but flush to primary failed: ${writeErr.message}`);
+          }
         } catch (backupErr) {
           const corruptBackup = quarantineCorruptFile(bak);
-          throw new Error(
-            `Cannot load store table "${name}": primary JSON is invalid` +
-            `${corruptPrimary ? `; quarantined at ${corruptPrimary}` : ''}; ` +
-            `backup is invalid${corruptBackup ? `; quarantined at ${corruptBackup}` : ''}: ${backupErr.message}`,
+          if (process.env.KOLM_STORE_STRICT === '1') {
+            throw new Error(
+              `Cannot load store table "${name}": primary JSON is invalid` +
+              `${corruptPrimary ? `; quarantined at ${corruptPrimary}` : ''}; ` +
+              `backup is invalid${corruptBackup ? `; quarantined at ${corruptBackup}` : ''}: ${backupErr.message}`,
+            );
+          }
+          console.error(
+            `[store] FATAL recoverable: ${name}.json + ${name}.json.bak both unreadable` +
+            `${corruptPrimary ? ` (primary quarantined at ${corruptPrimary})` : ''}` +
+            `${corruptBackup ? ` (backup quarantined at ${corruptBackup})` : ''}` +
+            `; starting with empty table. primary: ${primaryErr.message}; backup: ${backupErr.message}`,
           );
+          rows = [];
         }
       } else {
-        throw new Error(
-          `Cannot load store table "${name}": primary JSON is invalid` +
-          `${corruptPrimary ? `; quarantined at ${corruptPrimary}` : ''}: ${primaryErr.message}`,
+        if (process.env.KOLM_STORE_STRICT === '1') {
+          throw new Error(
+            `Cannot load store table "${name}": primary JSON is invalid` +
+            `${corruptPrimary ? `; quarantined at ${corruptPrimary}` : ''}: ${primaryErr.message}`,
+          );
+        }
+        console.error(
+          `[store] FATAL recoverable: ${name}.json unreadable and no backup present` +
+          `${corruptPrimary ? ` (primary quarantined at ${corruptPrimary})` : ''}` +
+          `; starting with empty table. primary: ${primaryErr.message}`,
         );
+        rows = [];
       }
     }
   }

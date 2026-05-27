@@ -73,13 +73,29 @@ function _home() {
   return process.env.HOME || process.env.USERPROFILE || os.homedir();
 }
 
+let _teamDirCache = null;
+let _teamDirCacheKey = null;
 function teamDir() {
   const base = process.env.KOLM_DATA_DIR
     ? path.resolve(process.env.KOLM_DATA_DIR)
     : path.join(_home(), '.kolm');
   const p = path.join(base, 'team');
-  fs.mkdirSync(p, { recursive: true });
-  return p;
+  if (_teamDirCache && _teamDirCacheKey === p) return _teamDirCache;
+  try {
+    fs.mkdirSync(p, { recursive: true });
+    _teamDirCacheKey = p;
+    _teamDirCache = p;
+    return p;
+  } catch (err) {
+    if (err && (err.code === 'EACCES' || err.code === 'EPERM' || err.code === 'EROFS')) {
+      const fb = path.join(os.tmpdir(), 'kolm-team');
+      fs.mkdirSync(fb, { recursive: true });
+      _teamDirCacheKey = p;
+      _teamDirCache = fb;
+      return fb;
+    }
+    throw err;
+  }
 }
 
 function workspacePath() { return path.join(teamDir(), 'workspace.json'); }

@@ -44320,7 +44320,15 @@ async function main() {
       // W739 — `kolm lineage <cid>` walks the parent_cid chain anchored at
       // <cid> against local artifacts (~/.kolm/artifacts/*.kolm).
       case 'lineage':  await withErrorContext('lineage',  () => cmdW739Lineage(rest)); break;
-      case 'verify':   await withErrorContext('verify',   () => cmdVerify(rest)); break;
+      case 'verify': {
+        if (rest && rest[0] && /^rcpt_/i.test(rest[0])) {
+          const mod = await import('../src/wrapper-cli.js');
+          await withErrorContext('receipts verify', () => mod.RECEIPTS_VERBS.verify.fn(rest));
+        } else {
+          await withErrorContext('verify', () => cmdVerify(rest));
+        }
+        break;
+      }
       // W869 Persona D — `kolm passport <artifact.kolm> [--format compliance|json|markdown]`
       // bundles model card + AI Act Annex IV + SBOM + carbon estimate + signed
       // receipt summary into a single envelope a model-risk-management team can

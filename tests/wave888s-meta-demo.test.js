@@ -88,13 +88,22 @@ test('W888-S #8: vercel.json includes rewrite for /about-the-assistant', () => {
   assert.ok(found, 'vercel.json must rewrite /about-the-assistant -> /about-the-assistant.html');
 });
 
-test('W888-S #9: sw.js cache version bumped (>=111) and wave888s slug present', () => {
+test('W888-S #9: sw.js cache version bumped (>=111) and ACTIVE CACHE slug carries wave token >=888', () => {
   const sw = readFile(SW);
   const versionMatch = sw.match(/CACHE_VERSION\s*=\s*(\d+)/);
   assert.ok(versionMatch, 'sw.js must declare CACHE_VERSION');
   const v = parseInt(versionMatch[1], 10);
   assert.ok(v >= 111, 'CACHE_VERSION must be >= 111 (was 110 before W888-S); got ' + v);
-  assert.ok(/wave888s/i.test(sw), 'sw.js CACHE slug must include wave888s token');
+  // Regex+threshold (per W886 #9 family-lock pattern + W446 #5 note): the slug
+  // moves forward each wave. Extract the wave token from the ACTIVE
+  // `const CACHE = "..."` declaration, NOT the file body — history comments
+  // reference older waves and would let stale slugs pass.
+  const cacheDecl = sw.match(/const\s+CACHE\s*=\s*['"]([^'"]+)['"]/);
+  assert.ok(cacheDecl, 'sw.js must declare const CACHE = "..."');
+  const waveMatch = cacheDecl[1].match(/wave(\d{3,4})/);
+  assert.ok(waveMatch, `CACHE slug "${cacheDecl[1]}" must include a wave token like "waveNNN"`);
+  const w = parseInt(waveMatch[1], 10);
+  assert.ok(w >= 888, `CACHE slug wave token must be >= 888 (post-W888-S floor); got wave${w} in "${cacheDecl[1]}"`);
 });
 
 test('W888-S #10: assistant-widget.js exists and renders passport hash', () => {
