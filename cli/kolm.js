@@ -38186,7 +38186,7 @@ async function cmdTui(args) {
     { id: 'k8s-readiness',      key: 'Q', endpoint: '/v1/ready/deep',            kind: 'get',   label: 'k8s readiness (artifact-aware)' },
     // W825 — Marketplace view. Closes the listings triangle: public
     // marketplace page, CLI (`kolm marketplace list`), TUI.
-    { id: 'marketplace',        key: 'R', endpoint: '/v1/marketplace/listings',  kind: 'get',   label: 'marketplace (listings)' },
+    { id: 'marketplace',        key: 'R', endpoint: '/v1/marketplace/list',      kind: 'get',   label: 'marketplace (listings)' },
     // W826 — Runtime placement view. VRAM -> RAM -> NVMe -> network tier
     // decision tree visible from the TUI so the operator can audit which
     // tier an artifact will land on before it runs.

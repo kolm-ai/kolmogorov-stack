@@ -2932,9 +2932,31 @@ export function buildRouter() {
   // by deleting their published key.
 
   // Public keys list - returns registered Ed25519 verification keys and directory stats.
-  r.get('/v1/keys/public', (_req, res) => {
+  // W899 — additionally surface the default receipt signing pubkey under
+  // source:'system' so /v1/verify callers can discover it without going
+  // through the challenge→sign→register flow first.
+  r.get('/v1/keys/public', async (_req, res) => {
     try {
-      return res.json({ keys: pubkeyDir.listKeys(), stats: pubkeyDir.stats() });
+      const keys = Array.from(pubkeyDir.listKeys() || []);
+      try {
+        const ed = await import('./ed25519.js');
+        const signer = ed.loadOrCreateDefaultSigner();
+        if (signer && signer.key_fingerprint) {
+          const fp = signer.key_fingerprint;
+          const dup = keys.some(k => k.key_fingerprint === fp || k.fingerprint === fp);
+          if (!dup) {
+            keys.push({
+              key_fingerprint: fp,
+              public_key: signer.publicKey,
+              tenant_id: null,
+              label: 'kolm-receipt-signing-default',
+              source: 'system',
+              registered_at: null,
+            });
+          }
+        }
+      } catch (_) {} // signer load failures are non-fatal
+      return res.json({ keys, stats: pubkeyDir.stats() });
     } catch (e) {
       return res.status(500).json({ error: 'pubkey directory unavailable', detail: e.message });
     }
@@ -7579,7 +7601,8 @@ export function buildRouter() {
   // Validates task/model/output options, bills usage, and writes the compile audit record.
   r.post('/v1/compile', async (req, res) => {
     const { task, examples = [], corpus_namespace, base_model, deploy_hook, preset, lora_rank, k_threshold,
-            chat_template, thinking_mode, recipe_class, hw_tier, output_target, multi_device } = req.body || {};
+            chat_template, thinking_mode, recipe_class, hw_tier, output_target, multi_device,
+            allow_below_gate } = req.body || {};
     if (!task || typeof task !== 'string') return res.status(400).json({ error: 'task (string) required' });
     if (task.length > 4000) return res.status(400).json({ error: 'task description too long (>4000 chars)' });
     if (examples && (!Array.isArray(examples) || examples.length > 200)) {
@@ -7637,6 +7660,7 @@ export function buildRouter() {
       tenant: req.tenant, tenant_id: req.tenant_record?.id || null,
       deploy_hook, preset, lora_rank, k_threshold,
       chat_template, thinking_mode,
+      allow_below_gate: allow_below_gate === true || allow_below_gate === 'true' || allow_below_gate === 1,
     });
     const ctx = {
       synthesize,
@@ -8319,6 +8343,28 @@ export function buildRouter() {
     res.set('Content-Type', 'application/x-ndjson');
     res.set('Content-Disposition', `attachment; filename="captures-${tenantId}.jsonl"`);
     res.send(rows.map((r0) => JSON.stringify(r0)).join('\n'));
+  });
+  // W899 — POST shim so account/captures.html bulk-export button (sends
+  // {capture_ids:[...]} in body) doesn't 404. Filters to the listed ids and
+  // returns the rows inline as JSON so the page can blob-download client-side.
+  r.post('/v1/capture/export', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const tenantId = req.tenant_record.id;
+    const body = req.body || {};
+    const ids = Array.isArray(body.capture_ids) ? body.capture_ids.map(String) : [];
+    const format = String(body.format || 'jsonl').toLowerCase();
+    const namespace = typeof body.namespace === 'string' ? body.namespace : null;
+    const _tName = req.tenant;
+    const obs = [
+      ...(findByTenant('observations', _tName) || []),
+      ...((tenantId && tenantId !== _tName) ? (findByTenant('observations', tenantId) || []) : []),
+    ].filter((o, i, arr) => arr.findIndex((x) => x.id === o.id) === i);
+    const idSet = ids.length ? new Set(ids) : null;
+    let rows = obs;
+    if (idSet) rows = rows.filter(r0 => idSet.has(String(r0.id)));
+    if (namespace) rows = rows.filter(r0 => (r0.corpus_namespace || r0.namespace || 'default') === namespace);
+    rows = rows.slice(0, 10000);
+    return res.json({ ok: true, format, count: rows.length, captures: rows });
   });
 
   // W409f — /v1/team/invites — team.html invite list / create endpoint.
@@ -18884,12 +18930,57 @@ res.json({
   async function _w896BuildFleet(deviceFilter) {
     const deviceCapsMod = await import('./device-capabilities.js');
     const { Fleet } = await import('./fleet.js');
-    if (!deviceFilter) return new Fleet();
+    // W899 — DeviceRegistry rows added via POST /v1/devices/add live in a
+    // separate store from device-capabilities profiles. Without this union,
+    // newly-registered devices never appear in /v1/fleet/status, fleet/deploy
+    // never reaches them, and the fleet.html "Remove" button refers to a
+    // device the fleet doesn't know about. Reconcile both stores here.
+    const { DeviceRegistry } = await import('./device-registry.js');
+    const registry = new DeviceRegistry({});
+    const _registryProfiles = async () => {
+      try {
+        const rows = await registry.list({});
+        return (rows || []).map(d => ({
+          device_id: d.id,
+          name: d.name || d.id,
+          type: d.type || 'ssh',
+          status: d.status || 'unknown',
+          host: d.host || null,
+          port: d.port || null,
+          user: d.user || null,
+          runtimes: d.observed_hardware?.runtimes || [],
+          supports: { text: true, vision: false, audio: false, video: false },
+          registered_at: d.created_at || null,
+          source: 'registry',
+        }));
+      } catch (_) { return []; }
+    };
+    const _dedupe = (list) => {
+      const seen = new Set();
+      const out = [];
+      for (const d of list) {
+        const k = d.device_id || d.name;
+        if (!k || seen.has(k)) continue;
+        seen.add(k);
+        out.push(d);
+      }
+      return out;
+    };
+    const _unionListDevices = async () => {
+      const [caps, reg] = await Promise.all([
+        Promise.resolve(deviceCapsMod.listDevices()).catch(() => []),
+        _registryProfiles(),
+      ]);
+      return _dedupe([...(caps || []), ...(reg || [])]);
+    };
+    if (!deviceFilter) {
+      return new Fleet({ deviceCaps: { ...deviceCapsMod, listDevices: _unionListDevices } });
+    }
     const caps = {
       ...deviceCapsMod,
       listDevices: async () => {
-        const all = await deviceCapsMod.listDevices();
-        return all.filter(d => d.device_id === deviceFilter || d.name === deviceFilter);
+        const union = await _unionListDevices();
+        return union.filter(d => d.device_id === deviceFilter || d.name === deviceFilter);
       },
     };
     return new Fleet({ deviceCaps: caps });
@@ -20966,7 +21057,13 @@ res.json({
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {
       const id = String(req.params.id || '');
-      const obs = findByTenant('observations', req.tenant) || [];
+      // W899 — observations may key on tenant name OR tenant_id (mirror list-handler union).
+      const _tName = req.tenant;
+      const _tId = req.tenant_record && req.tenant_record.id;
+      const obs = [
+        ...(findByTenant('observations', _tName) || []),
+        ...((_tId && _tId !== _tName) ? (findByTenant('observations', _tId) || []) : []),
+      ].filter((o, i, arr) => arr.findIndex((x) => x.id === o.id) === i);
       const row = obs.find(o => o.id === id);
       if (!row) return res.status(404).json({ ok: false, error: 'capture_not_found', capture_id: id });
       res.json({
@@ -21011,7 +21108,13 @@ res.json({
     try {
       const id = String(req.params.id || '');
       const store = await import('./store.js');
-      const obs = store.findByTenant('observations', req.tenant) || [];
+      // W899 — tenant-union lookup (mirror list-handler).
+      const _tName = req.tenant;
+      const _tId = req.tenant_record && req.tenant_record.id;
+      const obs = [
+        ...(store.findByTenant('observations', _tName) || []),
+        ...((_tId && _tId !== _tName) ? (store.findByTenant('observations', _tId) || []) : []),
+      ].filter((o, i, arr) => arr.findIndex((x) => x.id === o.id) === i);
       const row = obs.find(o => o.id === id);
       if (!row) return res.status(404).json({ ok: false, error: 'capture_not_found', capture_id: id });
       const status = action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'quarantined';
@@ -21035,7 +21138,13 @@ res.json({
     try {
       const status = action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'quarantined';
       const store = await import('./store.js');
-      const obs = store.findByTenant('observations', req.tenant) || [];
+      // W899 — tenant-union lookup (mirror list-handler).
+      const _tName = req.tenant;
+      const _tId = req.tenant_record && req.tenant_record.id;
+      const obs = [
+        ...(store.findByTenant('observations', _tName) || []),
+        ...((_tId && _tId !== _tName) ? (store.findByTenant('observations', _tId) || []) : []),
+      ].filter((o, i, arr) => arr.findIndex((x) => x.id === o.id) === i);
       const idSet = new Set(ids);
       let updated_count = 0;
       const notFound = [];
@@ -21085,6 +21194,9 @@ res.json({
         output_tokens: o.output_tokens || 0,
         cost_usd: o.cost_usd || 0,
         capture_id: o.id,
+        // W899 — expose chain fields so receipts can be chain-walked from the public surface.
+        chain_prev_hash: o.chain_prev_hash || null,
+        chain_hash: o.chain_hash || null,
       }));
       res.json({ ok: true, total, limit, offset, receipts: page });
     } catch (e) {
@@ -21212,6 +21324,10 @@ res.json({
         ok: true,
         receipt_id: id,
         receipt: row.receipt,
+        // W899 — expose chain fields so receipts can be chain-walked from the
+        // public /v1/verify surface without a separate /v1/receipts/list call.
+        chain_prev_hash: row.chain_prev_hash || null,
+        chain_hash: row.chain_hash || null,
         verify: verifyResult,
       });
     } catch (e) {
@@ -21467,6 +21583,37 @@ res.json({
       res.json({ ok: true, count: rows.length, namespaces: rows });
     } catch (e) {
       res.status(500).json({ ok: false, error: 'namespace_list_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // W899 — GET /v1/namespaces/:slug/stats — counts of pending/approved/
+  // rejected/quarantined captures in a namespace. Powers the "ready to
+  // compile?" readiness signal on /account/overview and the namespace badge
+  // on /account/namespaces. Tenant-union pattern to handle name-vs-id keys.
+  r.get('/v1/namespaces/:slug/stats', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    const slug = String(req.params.slug || '').toLowerCase();
+    if (!NS_SLUG.test(slug)) return res.status(400).json({ ok: false, error: 'invalid_slug' });
+    try {
+      const store = await import('./store.js');
+      const tName = req.tenant;
+      const tId = req.tenant_record && req.tenant_record.id;
+      const obs = [
+        ...(store.findByTenant('observations', tName) || []),
+        ...((tId && tId !== tName) ? (store.findByTenant('observations', tId) || []) : []),
+      ].filter((o, i, arr) => arr.findIndex((x) => x.id === o.id) === i)
+       .filter((o) => (o.corpus_namespace || o.namespace || (o.receipt && o.receipt.namespace_id)) === slug);
+      const counts = { pending: 0, approved: 0, rejected: 0, quarantined: 0 };
+      for (const o of obs) {
+        const st = String(o.review_status || o.status || 'pending').toLowerCase();
+        if (st === 'approved') counts.approved++;
+        else if (st === 'rejected') counts.rejected++;
+        else if (st === 'quarantined') counts.quarantined++;
+        else counts.pending++;
+      }
+      res.json({ ok: true, namespace: slug, total: obs.length, ...counts });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: 'namespace_stats_error', detail: String(e && e.message || e) });
     }
   });
 

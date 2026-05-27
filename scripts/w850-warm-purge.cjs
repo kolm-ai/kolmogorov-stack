@@ -73,6 +73,21 @@ const SWAPS = [
   [/#c0bcb3/gi, '#b8b094'],
   [/#c97070/gi, '#b86a72'],
 
+  // ───────── HEX (warm amber / gold "warn" — W899 anti-warn-amber) ─────────
+  [/#f0b86b/gi, '#a8b3c2'],   // warm gold warn → cool steel
+  [/#d6a65a/gi, '#a8b3c2'],   // warm gold variant → cool steel
+  [/#d6cfb8/gi, '#d5d9e0'],   // warm beige border → cool slate
+  [/#f0ecdd/gi, '#eef0f3'],   // warm cream card → cool slate
+  [/#c9c2b2/gi, '#b8c0ca'],   // warm beige accent-strong → cool steel
+  [/#b8b099/gi, '#a8b3c2'],   // warm tan ink-mute → cool steel
+  [/#6a6354/gi, '#6b7585'],   // warm brown faint → cool slate faint
+  [/#5eead4/gi, '#7fa1c4'],   // mint accent → cool blue (W898 left a few)
+
+  // ───────── RGBA — warm amber/gold (W899) ─────────
+  [/rgba\(\s*214\s*,\s*166\s*,\s*90/g, 'rgba(168, 179, 194'],
+  [/rgba\(\s*240\s*,\s*184\s*,\s*107/g, 'rgba(168, 179, 194'],
+  [/rgba\(\s*214\s*,\s*207\s*,\s*184/g, 'rgba(213, 217, 224'],
+
   // ───────── HEX (second-tier off-whites and warm cards) ─────────
   [/#fbf8f0/gi, '#eef1f5'],   // warm off-white card
   [/#fdfcf8/gi, '#f3f5f7'],   // warm off-white bg
