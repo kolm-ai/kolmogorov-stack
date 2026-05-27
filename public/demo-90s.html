@@ -3,172 +3,529 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1920,initial-scale=1">
-<title>kolm &mdash; 90-second product demo</title>
+<title>kolm &mdash; 90-second product walkthrough</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --bg:       #0d1117;
+    --bg-2:     #0b0e13;
+    --card:     #161b22;
+    --chrome:   #1c2128;
+    --rule:     #21262d;
+    --rule-2:   #30363d;
+    --text:     #e6edf3;
+    --muted:    #8b949e;
+    --dim:      #6e7681;
+    --prompt:   #b8bcc4;
+    --success:  #3fb950;
+    --accent:   #79c0ff;
+    --accent-2: #a5d6ff;
+    --warn:     #d29922;
+    --red:      #ff7b72;
+    --halo:     rgba(121, 192, 255, 0.18);
+  }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
     width: 1920px; height: 1080px;
-    background: #0e1116; color: #e6edf3;
-    font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+    background: var(--bg); color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     overflow: hidden;
+    font-feature-settings: 'ss01', 'cv11', 'kern';
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
   }
   body { position: relative; }
+  .mono { font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
 
-  /* ====== STAGES (full-screen overlays that cross-fade) ====== */
+  /* ====== AMBIENT BACKDROP ====== */
+  .ambient {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(1100px 800px at 18% 12%, rgba(121, 192, 255, 0.07), transparent 70%),
+      radial-gradient(900px 700px at 84% 88%, rgba(184, 188, 196, 0.05), transparent 70%),
+      linear-gradient(180deg, #0b0e13 0%, #0d1117 50%, #0b0e13 100%);
+    animation: ambientDrift 28s ease-in-out infinite alternate;
+  }
+  .grid-overlay {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    opacity: 0.35;
+    background-image:
+      linear-gradient(rgba(184, 188, 196, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(184, 188, 196, 0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 50%, transparent 100%);
+  }
+  @keyframes ambientDrift {
+    0%   { background-position: 0 0, 0 0, 0 0; }
+    100% { background-position: 30px 20px, -30px -20px, 0 0; }
+  }
+
+  /* ====== CHAPTER PROGRESS BAR ====== */
+  .chapters {
+    position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 10;
+    display: flex; gap: 4px; padding: 12px 80px 0;
+    pointer-events: none;
+  }
+  .chapter-seg {
+    flex: 1; height: 3px; background: rgba(184, 188, 196, 0.08);
+    border-radius: 999px; overflow: hidden;
+    position: relative;
+  }
+  .chapter-seg::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transform-origin: left; transform: scaleX(0);
+    transition: transform 600ms cubic-bezier(0.4, 0.0, 0.2, 1);
+    box-shadow: 0 0 12px var(--halo);
+  }
+  .chapter-seg.fill::after  { transform: scaleX(1); }
+  .chapter-seg.active::after { transition-duration: var(--chapter-duration, 22000ms); transition-timing-function: linear; transform: scaleX(1); }
+
+  .chapter-labels {
+    position: fixed; top: 32px; left: 0; right: 0; z-index: 10;
+    display: flex; gap: 4px; padding: 0 80px;
+    pointer-events: none;
+  }
+  .chapter-label {
+    flex: 1; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--dim); opacity: 0.5; transition: opacity 300ms ease, color 300ms ease;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .chapter-label.active { opacity: 1; color: var(--accent); }
+  .chapter-label.done   { opacity: 0.7; color: var(--prompt); }
+
+  /* ====== STAGES (cross-fade) ====== */
   .stage {
-    position: absolute; inset: 0;
-    opacity: 0; transition: opacity 600ms ease;
+    position: absolute; inset: 0; z-index: 2;
+    opacity: 0; transition: opacity 700ms cubic-bezier(0.4, 0.0, 0.2, 1);
     display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
   }
-  .stage.on { opacity: 1; }
+  .stage.on { opacity: 1; pointer-events: auto; }
 
-  /* ====== TITLE / CLOSING CARDS ====== */
-  .card {
-    text-align: center;
+  /* ====== TITLE CARD ====== */
+  .title-card .card { text-align: center; position: relative; }
+  .title-card .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px; letter-spacing: 0.32em; text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 36px; opacity: 0;
+    animation: fadeUp 800ms cubic-bezier(0.2, 0.8, 0.2, 1) 200ms forwards;
   }
-  .card .logo {
-    font-size: 192px; font-weight: 600; letter-spacing: -0.04em;
-    color: #e6edf3;
-    text-shadow: 0 0 80px rgba(184, 188, 196, 0.35);
-    line-height: 1;
+  .title-card .logo {
+    font-size: 184px; font-weight: 600; letter-spacing: -0.05em;
+    color: var(--text); line-height: 1;
+    background: linear-gradient(180deg, #ffffff 0%, #b8bcc4 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 120px rgba(121, 192, 255, 0.25);
+    opacity: 0;
+    animation: fadeUp 900ms cubic-bezier(0.2, 0.8, 0.2, 1) 500ms forwards;
   }
-  .card .tagline {
-    font-size: 28px; color: #8b949e; margin-top: 28px;
-    letter-spacing: 0.02em;
+  .title-card .tagline {
+    font-size: 32px; color: var(--muted); margin-top: 40px;
+    letter-spacing: -0.005em; font-weight: 300;
+    opacity: 0;
+    animation: fadeUp 900ms cubic-bezier(0.2, 0.8, 0.2, 1) 900ms forwards;
   }
-  .card .accent-line {
-    width: 120px; height: 2px; background: #b8bcc4;
-    margin: 40px auto 0; opacity: 0.5;
+  .title-card .accent-line {
+    width: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    margin: 56px auto 0; opacity: 0;
+    animation: expandLine 1000ms cubic-bezier(0.2, 0.8, 0.2, 1) 1300ms forwards;
   }
-  .card .cta {
-    font-size: 36px; color: #b8bcc4; margin-top: 40px;
-    font-weight: 500;
+  .title-card .meta-row {
+    margin-top: 56px; display: flex; gap: 48px; justify-content: center;
+    opacity: 0;
+    animation: fadeUp 800ms cubic-bezier(0.2, 0.8, 0.2, 1) 1600ms forwards;
   }
-  .card .meta {
-    font-size: 18px; color: #6e7681; margin-top: 16px;
-    letter-spacing: 0.04em;
+  .title-card .meta-row span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px; color: var(--dim); letter-spacing: 0.14em; text-transform: uppercase;
+  }
+  .title-card .meta-row span::before {
+    content: '\2022'; margin-right: 12px; color: var(--accent); opacity: 0.6;
   }
 
-  /* ====== TERMINAL ====== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes expandLine {
+    from { width: 0; opacity: 0; }
+    to   { width: 200px; opacity: 1; }
+  }
+
+  /* ====== TERMINAL STAGE (split layout) ====== */
+  #stage-terminal { padding: 100px 80px 60px; }
+  .split {
+    width: 100%; height: 100%; display: grid;
+    grid-template-columns: 1180px 1fr;
+    gap: 48px; align-items: stretch;
+  }
+
+  .terminal-col { display: flex; flex-direction: column; min-width: 0; }
   .terminal-wrap {
-    width: 1400px;
-    background: #161b22;
-    border-radius: 16px;
-    border: 1px solid #30363d;
-    box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+    background: var(--card);
+    border-radius: 14px;
+    border: 1px solid var(--rule-2);
+    box-shadow:
+      0 28px 80px -16px rgba(0, 0, 0, 0.6),
+      0 8px 24px -8px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03);
     overflow: hidden;
+    flex: 1; display: flex; flex-direction: column;
   }
   .terminal-chrome {
     display: flex; align-items: center; gap: 8px;
-    padding: 18px 24px;
-    background: #1c2128;
-    border-bottom: 1px solid #30363d;
+    padding: 14px 20px;
+    background: var(--chrome);
+    border-bottom: 1px solid var(--rule);
+    flex-shrink: 0;
   }
-  .dot { width: 14px; height: 14px; border-radius: 50%; }
-  .dot.red { background: #ff5f57; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.red    { background: #ff5f57; }
   .dot.yellow { background: #febc2e; }
-  .dot.green { background: #28c840; }
+  .dot.green  { background: #28c840; }
   .terminal-title {
-    margin-left: 24px; color: #6e7681; font-size: 16px;
+    margin-left: 20px; color: var(--dim); font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .terminal-status {
+    margin-left: auto; display: flex; gap: 16px; align-items: center;
+    color: var(--dim); font-size: 12px; font-family: 'JetBrains Mono', monospace;
+  }
+  .live-dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--success); box-shadow: 0 0 8px var(--success);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.6; transform: scale(0.9); }
   }
   .terminal-body {
-    padding: 36px 40px;
-    font-size: 22px; line-height: 1.7;
-    min-height: 700px; max-height: 850px;
-    overflow: hidden;
+    padding: 28px 36px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px; line-height: 1.6;
+    flex: 1; overflow: hidden;
   }
-  .prompt { color: #b8bcc4; }
-  .command { color: #e6edf3; }
-  .comment { color: #6e7681; font-style: italic; }
-  .success { color: #3fb950; }
-  .accent { color: #79c0ff; }
-  .output { color: #8b949e; }
-  .warn { color: #d29922; }
+  .prompt  { color: var(--prompt); }
+  .command { color: var(--text); }
+  .comment { color: var(--dim); font-style: italic; }
+  .success { color: var(--success); }
+  .accent  { color: var(--accent); }
+  .output  { color: var(--muted); }
+  .warn    { color: var(--warn); }
+  .pill {
+    display: inline-block; padding: 2px 10px; border-radius: 999px;
+    font-size: 14px; font-family: 'Inter', sans-serif; font-weight: 500;
+    border: 1px solid currentColor; margin-right: 6px;
+  }
+  .pill.ok    { color: var(--success); background: rgba(63, 185, 80, 0.08); }
+  .pill.info  { color: var(--accent);  background: rgba(121, 192, 255, 0.08); }
+  .pill.muted { color: var(--muted);   background: rgba(139, 148, 158, 0.08); border-color: var(--rule-2); }
   .cursor {
-    display: inline-block; width: 12px; height: 24px;
-    background: #b8bcc4; margin-left: 2px;
-    vertical-align: text-bottom;
+    display: inline-block; width: 10px; height: 22px;
+    background: var(--accent); margin-left: 2px;
+    vertical-align: text-bottom; box-shadow: 0 0 10px var(--halo);
     animation: blink 1s steps(2, end) infinite;
   }
   @keyframes blink { 50% { opacity: 0; } }
 
-  /* ====== SECTION BADGE ====== */
-  .section-badge {
-    position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
-    padding: 12px 28px;
-    background: rgba(184, 188, 196, 0.08);
-    border: 1px solid rgba(184, 188, 196, 0.3);
-    border-radius: 999px;
-    font-size: 18px; color: #b8bcc4;
-    letter-spacing: 0.12em; text-transform: uppercase;
-    opacity: 0; transition: opacity 400ms ease;
+  /* ====== VISUAL PANE ====== */
+  .visual-col {
+    display: flex; flex-direction: column; gap: 16px; min-width: 0;
   }
-  .section-badge.on { opacity: 1; }
+  .visual-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--accent); opacity: 0;
+    transition: opacity 400ms ease;
+  }
+  .visual-eyebrow.on { opacity: 1; }
+  .visual-heading {
+    font-size: 32px; font-weight: 500; color: var(--text); line-height: 1.15;
+    letter-spacing: -0.015em; max-width: 540px;
+    opacity: 0; transform: translateY(8px);
+    transition: opacity 600ms ease, transform 600ms ease;
+  }
+  .visual-heading.on { opacity: 1; transform: translateY(0); }
 
-  /* ====== CAPTION ====== */
+  .visual-stage {
+    flex: 1; display: flex; flex-direction: column;
+    gap: 16px; min-height: 0; padding-top: 8px;
+  }
+
+  /* visual cards (slide in from right) */
+  .v-card {
+    background: linear-gradient(180deg, var(--card), #12161e);
+    border: 1px solid var(--rule-2);
+    border-radius: 12px;
+    padding: 22px 26px;
+    opacity: 0; transform: translateX(40px);
+    transition: opacity 600ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                transform 600ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.4);
+  }
+  .v-card.on { opacity: 1; transform: translateX(0); }
+
+  .v-card__head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .v-card__title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--dim);
+  }
+  .v-card__badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--success); font-weight: 500;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .v-card__badge::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--success); box-shadow: 0 0 8px var(--success);
+  }
+
+  .v-row {
+    display: flex; justify-content: space-between; padding: 8px 0;
+    border-bottom: 1px solid var(--rule);
+    font-family: 'JetBrains Mono', monospace; font-size: 14px;
+  }
+  .v-row:last-child { border-bottom: none; }
+  .v-row__k { color: var(--dim); }
+  .v-row__v { color: var(--text); font-weight: 500; }
+  .v-row__v.muted { color: var(--muted); font-weight: 400; }
+
+  /* K-Score gauge */
+  .gauge {
+    display: flex; align-items: center; gap: 24px;
+    padding: 4px 0;
+  }
+  .gauge svg { flex-shrink: 0; }
+  .gauge circle.bg    { fill: none; stroke: var(--rule-2); stroke-width: 8; }
+  .gauge circle.fg    {
+    fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round;
+    transform-origin: center; transform: rotate(-90deg);
+    transition: stroke-dashoffset 1200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+    filter: drop-shadow(0 0 8px var(--halo));
+  }
+  .gauge__num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 36px; font-weight: 600; color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .gauge__lbl {
+    font-size: 12px; color: var(--dim); font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase; letter-spacing: 0.14em; margin-top: 4px;
+  }
+  .gauge__lbl span { color: var(--success); }
+
+  .gauge__pass {
+    display: grid; gap: 6px; flex: 1;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  }
+  .gauge__pass-row {
+    display: flex; justify-content: space-between; opacity: 0.3;
+    transition: opacity 400ms ease, color 400ms ease;
+  }
+  .gauge__pass-row.on { opacity: 1; color: var(--text); }
+  .gauge__pass-row .v { color: var(--success); }
+
+  /* Cost ticker */
+  .ticker {
+    padding: 14px 0; display: flex; flex-direction: column; gap: 10px;
+  }
+  .ticker__row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace; font-size: 16px;
+  }
+  .ticker__label { color: var(--dim); font-size: 13px; letter-spacing: 0.04em; }
+  .ticker__val   { font-weight: 600; font-size: 22px; color: var(--text); }
+  .ticker__val.strike { text-decoration: line-through; color: var(--muted); font-weight: 400; }
+  .ticker__val.zero   { color: var(--success); text-shadow: 0 0 12px rgba(63, 185, 80, 0.4); }
+  .ticker__big {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 56px; font-weight: 600; color: var(--success);
+    text-align: center; padding: 16px 0 4px;
+    letter-spacing: -0.02em;
+    text-shadow: 0 0 24px rgba(63, 185, 80, 0.3);
+  }
+  .ticker__big-lbl {
+    text-align: center; font-size: 12px; color: var(--dim);
+    text-transform: uppercase; letter-spacing: 0.18em;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ====== CAPTION (bottom bar) ====== */
   .caption {
-    position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
-    font-size: 24px; color: rgba(232, 237, 243, 0.7);
-    text-align: center; letter-spacing: 0.02em;
-    opacity: 0; transition: opacity 400ms ease;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-weight: 300;
+    position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+    font-size: 18px; color: rgba(232, 237, 243, 0.75);
+    text-align: center; letter-spacing: -0.005em;
+    opacity: 0; transition: opacity 500ms ease;
+    font-weight: 300; max-width: 900px;
   }
   .caption.on { opacity: 1; }
 
-  /* ====== TITLE CARD ANIMATIONS ====== */
-  .title-card .logo {
-    animation: fadeUp 800ms cubic-bezier(0.2, 0.8, 0.2, 1) 200ms backwards;
+  /* ====== CLOSING ====== */
+  .closing .card {
+    text-align: center; display: flex; flex-direction: column;
+    align-items: center; gap: 32px;
   }
-  .title-card .tagline {
-    animation: fadeUp 800ms cubic-bezier(0.2, 0.8, 0.2, 1) 600ms backwards;
+  .closing .logo {
+    font-size: 152px; font-weight: 600; letter-spacing: -0.05em;
+    background: linear-gradient(180deg, #ffffff 0%, #b8bcc4 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 120px rgba(121, 192, 255, 0.25);
+    line-height: 1;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 800ms ease, transform 800ms ease;
   }
-  .title-card .accent-line {
-    animation: expandLine 600ms cubic-bezier(0.2, 0.8, 0.2, 1) 1000ms backwards;
+  .closing.on .logo { opacity: 1; transform: translateY(0); }
+
+  .closing .metrics {
+    display: flex; gap: 36px; margin-top: 8px;
   }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+  .closing .metric {
+    padding: 24px 32px;
+    background: var(--card);
+    border: 1px solid var(--rule-2);
+    border-radius: 12px; min-width: 220px;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 700ms ease, transform 700ms ease;
   }
-  @keyframes expandLine {
-    from { width: 0; opacity: 0; }
-    to { width: 120px; opacity: 0.5; }
+  .closing.on .metric:nth-child(1) { transition-delay: 300ms; opacity: 1; transform: translateY(0); }
+  .closing.on .metric:nth-child(2) { transition-delay: 450ms; opacity: 1; transform: translateY(0); }
+  .closing.on .metric:nth-child(3) { transition-delay: 600ms; opacity: 1; transform: translateY(0); }
+  .closing .metric__big {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 40px; font-weight: 600; color: var(--text);
+    letter-spacing: -0.02em; line-height: 1;
+  }
+  .closing .metric__big.ok { color: var(--success); }
+  .closing .metric__lbl {
+    font-size: 13px; color: var(--dim); margin-top: 12px;
+    letter-spacing: 0.08em;
+  }
+  .closing .cta-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    margin-top: 24px;
+    opacity: 0; transition: opacity 700ms ease 850ms;
+  }
+  .closing.on .cta-wrap { opacity: 1; }
+  .closing .cta {
+    font-size: 32px; color: var(--text); font-weight: 500;
+    padding: 16px 36px;
+    border: 1px solid var(--rule-2);
+    border-radius: 999px;
+    background: linear-gradient(180deg, var(--card), var(--bg));
+    box-shadow: 0 0 32px rgba(121, 192, 255, 0.15);
+  }
+  .closing .cta .arrow {
+    color: var(--accent); margin-left: 12px;
+    display: inline-block; transition: transform 300ms ease;
+  }
+  .closing .meta {
+    font-size: 14px; color: var(--dim); margin-top: 16px;
+    letter-spacing: 0.06em;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .closing .meta span {
+    color: var(--muted); margin: 0 12px;
   }
 </style>
 </head>
 <body>
 
+<div class="ambient"></div>
+<div class="grid-overlay"></div>
+
+<!-- CHAPTER PROGRESS BAR -->
+<div class="chapters">
+  <div class="chapter-seg" id="seg-0"></div>
+  <div class="chapter-seg" id="seg-1"></div>
+  <div class="chapter-seg" id="seg-2"></div>
+  <div class="chapter-seg" id="seg-3"></div>
+</div>
+<div class="chapter-labels">
+  <div class="chapter-label" id="lbl-0">Intro</div>
+  <div class="chapter-label" id="lbl-1">01 &middot; Route &amp; Capture</div>
+  <div class="chapter-label" id="lbl-2">02 &middot; Distill &amp; Compile</div>
+  <div class="chapter-label" id="lbl-3">03 &middot; Run &amp; Verify</div>
+</div>
+
 <!-- TITLE STAGE -->
 <div class="stage title-card" id="stage-title">
   <div class="card">
+    <div class="eyebrow">A 90-second walkthrough</div>
     <div class="logo">kolm</div>
     <div class="tagline">Compile your AI workload into a model you own.</div>
     <div class="accent-line"></div>
+    <div class="meta-row">
+      <span>Open source</span>
+      <span>Apache-2.0</span>
+      <span>Self-hostable</span>
+    </div>
   </div>
 </div>
 
 <!-- TERMINAL STAGE -->
 <div class="stage" id="stage-terminal">
-  <div class="section-badge" id="badge"></div>
-  <div class="terminal-wrap">
-    <div class="terminal-chrome">
-      <div class="dot red"></div>
-      <div class="dot yellow"></div>
-      <div class="dot green"></div>
-      <div class="terminal-title">~/projects/support &mdash; zsh</div>
+  <div class="split">
+    <!-- LEFT: terminal -->
+    <div class="terminal-col">
+      <div class="terminal-wrap">
+        <div class="terminal-chrome">
+          <div class="dot red"></div>
+          <div class="dot yellow"></div>
+          <div class="dot green"></div>
+          <div class="terminal-title">~/projects/support &mdash; zsh</div>
+          <div class="terminal-status">
+            <span class="live-dot"></span>
+            <span id="status-ctx">main</span>
+          </div>
+        </div>
+        <div class="terminal-body" id="terminal"></div>
+      </div>
     </div>
-    <div class="terminal-body" id="terminal"></div>
+    <!-- RIGHT: visual pane -->
+    <div class="visual-col">
+      <div class="visual-eyebrow" id="visual-eye"></div>
+      <div class="visual-heading" id="visual-head"></div>
+      <div class="visual-stage" id="visual"></div>
+    </div>
   </div>
   <div class="caption" id="caption"></div>
 </div>
 
 <!-- CLOSING STAGE -->
-<div class="stage" id="stage-closing">
+<div class="stage closing" id="stage-closing">
   <div class="card">
-    <div class="logo" style="font-size: 144px;">kolm.ai</div>
-    <div class="accent-line" style="margin-top: 32px;"></div>
-    <div class="cta">Start free &rarr;</div>
-    <div class="meta">Apache-2.0 &middot; Self-hostable &middot; No credit card</div>
+    <div class="logo">kolm.ai</div>
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric__big">1</div>
+        <div class="metric__lbl">CALL ROUTED &middot; SIGNED RECEIPT</div>
+      </div>
+      <div class="metric">
+        <div class="metric__big">1</div>
+        <div class="metric__lbl">MODEL COMPILED &middot; K-SCORE 0.91</div>
+      </div>
+      <div class="metric">
+        <div class="metric__big ok">$0</div>
+        <div class="metric__lbl">PER TOKEN &middot; YOUR HARDWARE</div>
+      </div>
+    </div>
+    <div class="cta-wrap">
+      <div class="cta">Start free<span class="arrow">&rarr;</span></div>
+      <div class="meta">kolm.ai <span>&middot;</span> Apache-2.0 <span>&middot;</span> No credit card</div>
+    </div>
   </div>
 </div>
 
@@ -179,8 +536,11 @@ const stages = {
   closing:  document.getElementById('stage-closing'),
 };
 const terminal = document.getElementById('terminal');
-const badge    = document.getElementById('badge');
 const caption  = document.getElementById('caption');
+const visual   = document.getElementById('visual');
+const visualEye  = document.getElementById('visual-eye');
+const visualHead = document.getElementById('visual-head');
+const statusCtx  = document.getElementById('status-ctx');
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -189,19 +549,47 @@ function showStage(name) {
     el.classList.toggle('on', k === name);
   }
 }
-function setBadge(text) {
-  badge.textContent = text;
-  badge.classList.toggle('on', !!text);
+
+function setChapter(idx, duration) {
+  // mark previous chapters done, current active
+  for (let i = 0; i < 4; i++) {
+    const seg = document.getElementById('seg-' + i);
+    const lbl = document.getElementById('lbl-' + i);
+    seg.classList.remove('active');
+    if (i < idx)      { seg.classList.add('fill'); lbl.classList.add('done');   lbl.classList.remove('active'); }
+    else if (i === idx) { seg.classList.remove('fill'); lbl.classList.add('active'); lbl.classList.remove('done'); }
+    else              { seg.classList.remove('fill'); lbl.classList.remove('active', 'done'); }
+  }
+  const cur = document.getElementById('seg-' + idx);
+  if (duration) {
+    cur.style.setProperty('--chapter-duration', duration + 'ms');
+    requestAnimationFrame(() => cur.classList.add('active'));
+  } else {
+    cur.classList.add('fill');
+  }
 }
+
 function setCaption(text) {
-  caption.textContent = text;
+  caption.textContent = text || '';
   caption.classList.toggle('on', !!text);
 }
+
+function setVisualHead(eye, head) {
+  visualEye.textContent = eye || '';
+  visualHead.textContent = head || '';
+  visualEye.classList.toggle('on', !!eye);
+  visualHead.classList.toggle('on', !!head);
+}
+
+function clearVisual() {
+  visual.innerHTML = '';
+}
+
 function clearTerminal() {
   terminal.innerHTML = '';
 }
 
-async function typeLine(text, cls, charDelay = 22) {
+async function typeLine(text, cls, charDelay = 18) {
   const span = document.createElement('div');
   span.className = cls || '';
   terminal.appendChild(span);
@@ -224,7 +612,8 @@ function addHTML(html) {
   terminal.appendChild(div);
 }
 
-async function prompt(cmd) {
+async function prompt(cmd, ctx) {
+  if (ctx) statusCtx.textContent = ctx;
   const wrap = document.createElement('div');
   const p = document.createElement('span');
   p.className = 'prompt';
@@ -236,146 +625,339 @@ async function prompt(cmd) {
   terminal.appendChild(wrap);
   for (const ch of cmd) {
     c.textContent += ch;
-    await sleep(24);
+    await sleep(20);
   }
 }
 
-async function animateProgress(label, finalScore, durationMs = 1500) {
+async function animateProgress(label, finalScore, durationMs, passIdx) {
   const div = document.createElement('div');
   div.className = 'output';
   terminal.appendChild(div);
-  const steps = 40;
+  const steps = 36;
   const stepMs = durationMs / steps;
   for (let i = 0; i <= steps; i++) {
     const pct = Math.round((i / steps) * 100);
-    const filled = Math.floor((i / steps) * 30);
-    const bar = '█'.repeat(filled) + '░'.repeat(30 - filled);
+    const filled = Math.floor((i / steps) * 24);
+    const bar = '█'.repeat(filled) + '░'.repeat(24 - filled);
     div.textContent = `  ${label}  [${bar}] ${pct}%`;
+    if (passIdx !== undefined) {
+      const passRow = document.getElementById('pass-row-' + passIdx);
+      if (passRow) {
+        passRow.querySelector('.v').textContent = (0.50 + (i / steps) * (finalScore - 0.50)).toFixed(2);
+      }
+    }
     await sleep(stepMs);
   }
-  div.innerHTML = `  <span class="success">${label}  &check; K-Score ${finalScore}</span>`;
+  div.innerHTML = `  <span class="success">${label}  ✓ K-Score ${finalScore.toFixed(2)}</span>`;
+  if (passIdx !== undefined) {
+    const passRow = document.getElementById('pass-row-' + passIdx);
+    if (passRow) { passRow.classList.add('on'); passRow.querySelector('.v').textContent = finalScore.toFixed(2); }
+  }
+}
+
+// ====== VISUAL CARDS ======
+
+function showReceiptCard() {
+  visual.innerHTML = `
+    <div class="v-card" id="vc-receipt">
+      <div class="v-card__head">
+        <div class="v-card__title">Signed receipt</div>
+        <div class="v-card__badge">Ed25519 verified</div>
+      </div>
+      <div class="v-row"><span class="v-row__k">receipt</span><span class="v-row__v">rcpt_01KZBX&hellip;DCW3</span></div>
+      <div class="v-row"><span class="v-row__k">cid</span><span class="v-row__v muted">bafkreih7t4&hellip;m2qa</span></div>
+      <div class="v-row"><span class="v-row__k">signer</span><span class="v-row__v muted">tenant_f33c240034c5</span></div>
+      <div class="v-row"><span class="v-row__k">policy</span><span class="v-row__v"><span class="pill ok">PHI redacted</span><span class="pill info">region-lock us-east</span></span></div>
+      <div class="v-row"><span class="v-row__k">cost</span><span class="v-row__v">$0.0021</span></div>
+      <div class="v-row"><span class="v-row__k">latency</span><span class="v-row__v">1.24 s</span></div>
+    </div>
+    <div class="v-card" id="vc-capture">
+      <div class="v-card__head">
+        <div class="v-card__title">Capture lake</div>
+        <div class="v-card__badge">+1 event</div>
+      </div>
+      <div class="v-row"><span class="v-row__k">namespace</span><span class="v-row__v">support</span></div>
+      <div class="v-row"><span class="v-row__k">events today</span><span class="v-row__v">41,802 <span class="output">(+1)</span></span></div>
+      <div class="v-row"><span class="v-row__k">backend</span><span class="v-row__v muted">jsonl + s3 mirror</span></div>
+    </div>
+  `;
+  setTimeout(() => document.getElementById('vc-receipt').classList.add('on'), 60);
+  setTimeout(() => document.getElementById('vc-capture').classList.add('on'), 320);
+}
+
+function showCompileVisual() {
+  // K-Score gauge + pass tracker, then artifact card swaps in
+  visual.innerHTML = `
+    <div class="v-card" id="vc-gauge">
+      <div class="v-card__head">
+        <div class="v-card__title">K-Score &middot; live</div>
+        <div class="v-card__badge" id="gauge-badge" style="opacity:0">target met</div>
+      </div>
+      <div class="gauge">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle class="bg" cx="60" cy="60" r="52"></circle>
+          <circle class="fg" id="gauge-ring" cx="60" cy="60" r="52"
+                  stroke-dasharray="326.7" stroke-dashoffset="326.7"></circle>
+        </svg>
+        <div>
+          <div class="gauge__num" id="gauge-num">0.00</div>
+          <div class="gauge__lbl">composite over <span>3 passes</span></div>
+        </div>
+      </div>
+      <div class="gauge__pass" style="margin-top:14px">
+        <div class="gauge__pass-row" id="pass-row-0"><span>Pass 1 &middot; format learning</span><span class="v">&mdash;</span></div>
+        <div class="gauge__pass-row" id="pass-row-1"><span>Pass 2 &middot; reasoning chain</span><span class="v">&mdash;</span></div>
+        <div class="gauge__pass-row" id="pass-row-2"><span>Pass 3 &middot; edge cases</span><span class="v">&mdash;</span></div>
+      </div>
+    </div>
+    <div class="v-card" id="vc-artifact" style="display:none">
+      <div class="v-card__head">
+        <div class="v-card__title">support.kolm</div>
+        <div class="v-card__badge">signed &middot; reproducible</div>
+      </div>
+      <div class="v-row"><span class="v-row__k">format</span><span class="v-row__v">gguf-q4km &middot; INT4 NF4</span></div>
+      <div class="v-row"><span class="v-row__k">size</span><span class="v-row__v">5.2 GB</span></div>
+      <div class="v-row"><span class="v-row__k">teachers</span><span class="v-row__v muted">claude-sonnet-4-6, gpt-4o, deepseek-v3</span></div>
+      <div class="v-row"><span class="v-row__k">student</span><span class="v-row__v muted">qwen2.5-7b-instruct</span></div>
+      <div class="v-row"><span class="v-row__k">eval</span><span class="v-row__v">96.5% &middot; n=57</span></div>
+      <div class="v-row"><span class="v-row__k">license</span><span class="v-row__v">Apache-2.0</span></div>
+    </div>
+  `;
+  setTimeout(() => document.getElementById('vc-gauge').classList.add('on'), 60);
+}
+
+function setGaugeScore(score) {
+  const ring = document.getElementById('gauge-ring');
+  const num  = document.getElementById('gauge-num');
+  if (!ring) return;
+  const circ = 2 * Math.PI * 52; // 326.7
+  ring.setAttribute('stroke-dashoffset', (circ * (1 - score)).toFixed(1));
+  num.textContent = score.toFixed(2);
+}
+
+function gaugeTargetMet() {
+  const b = document.getElementById('gauge-badge');
+  if (b) b.style.opacity = '1';
+}
+
+function swapToArtifact() {
+  const g = document.getElementById('vc-gauge');
+  const a = document.getElementById('vc-artifact');
+  if (g && a) {
+    a.style.display = 'block';
+    setTimeout(() => a.classList.add('on'), 60);
+  }
+}
+
+function showCostVisual() {
+  visual.innerHTML = `
+    <div class="v-card" id="vc-perf">
+      <div class="v-card__head">
+        <div class="v-card__title">Local serve &middot; live</div>
+        <div class="v-card__badge">http://localhost:8080</div>
+      </div>
+      <div class="v-row"><span class="v-row__k">runtime</span><span class="v-row__v">llama.cpp + Shard KV cache (10×)</span></div>
+      <div class="v-row"><span class="v-row__k">hardware</span><span class="v-row__v">RTX 5090 &middot; 24 GB VRAM used</span></div>
+      <div class="v-row"><span class="v-row__k">throughput</span><span class="v-row__v"><span id="tok-rate">0.0</span> tok/s</span></div>
+      <div class="v-row"><span class="v-row__k">first byte</span><span class="v-row__v">824 ms</span></div>
+    </div>
+    <div class="v-card" id="vc-cost">
+      <div class="v-card__head">
+        <div class="v-card__title">Cost &middot; monthly</div>
+        <div class="v-card__badge">1.2M tokens</div>
+      </div>
+      <div class="ticker">
+        <div class="ticker__row"><span class="ticker__label">via claude-sonnet-4-6</span><span class="ticker__val strike" id="cost-before">$4,140.00</span></div>
+        <div class="ticker__row"><span class="ticker__label">via kolm local</span><span class="ticker__val zero" id="cost-after">$0.00</span></div>
+        <div class="ticker__row"><span class="ticker__label">+ GPU electricity</span><span class="ticker__val" style="font-size:16px;color:var(--muted)">$14.20</span></div>
+      </div>
+      <div class="ticker__big" id="savings-big">$0.00</div>
+      <div class="ticker__big-lbl">SAVED PER MONTH</div>
+    </div>
+  `;
+  setTimeout(() => document.getElementById('vc-perf').classList.add('on'), 60);
+  setTimeout(() => document.getElementById('vc-cost').classList.add('on'), 360);
+}
+
+function animateTokRate(target) {
+  const el = document.getElementById('tok-rate');
+  if (!el) return;
+  let v = 0; const t0 = performance.now();
+  const tick = () => {
+    const t = Math.min(1, (performance.now() - t0) / 1200);
+    v = target * (1 - Math.pow(1 - t, 3));
+    el.textContent = v.toFixed(1);
+    if (t < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+function animateSavings(target) {
+  const big = document.getElementById('savings-big');
+  if (!big) return;
+  let v = 0; const t0 = performance.now();
+  const tick = () => {
+    const t = Math.min(1, (performance.now() - t0) / 1800);
+    v = target * (1 - Math.pow(1 - t, 3));
+    big.textContent = '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (t < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
 }
 
 // ====== DEMO SEQUENCE ======
-async function runDemo() {
-  // 0:00 - 0:03  TITLE
-  showStage('title');
-  await sleep(3000);
 
-  // 0:03 - 0:25  SECTION 1: ROUTE
+async function runDemo() {
+  // 0:00 - 0:04  TITLE (4s)
+  setChapter(0, 4000);
+  showStage('title');
+  await sleep(4000);
+
+  // 0:04 - 0:28  SECTION 1: ROUTE (24s)
+  setChapter(1, 24000);
   showStage('terminal');
-  setBadge('01 · Route & Capture');
-  setCaption('One URL. Every provider. Signed receipts.');
-  await sleep(400);
+  setVisualHead('Section 01', 'Point any LLM client at kolm. Same response. Signed receipt.');
+  setCaption('One URL. Every provider. Tamper-evident receipts.');
+  await sleep(500);
 
   await typeLine('# Point your existing OpenAI client at kolm. One env var.', 'comment');
-  await sleep(800);
+  await sleep(700);
 
   await prompt('export OPENAI_BASE_URL=https://api.kolm.ai/v1');
-  await sleep(800);
-  await prompt('export KOLM_API_KEY=ks_demo_4b7bc3b...');
-  await sleep(600);
+  await sleep(450);
+  addLine('');
+  await prompt('export KOLM_API_KEY=ks_4b7bc3b…');
+  await sleep(450);
   addLine('');
 
-  await typeLine('# Every call routes through kolm. Same response. Signed receipt per call.', 'comment');
-  await sleep(800);
+  await typeLine('# Every call now routes through kolm. Per-call signed receipt.', 'comment');
+  await sleep(700);
 
   await prompt('kolm call --model claude-sonnet-4-6 \\\n      "What ICD-10 code applies to type 2 diabetes?"');
-  await sleep(900);
+  await sleep(700);
 
-  addLine('  "Type 2 diabetes mellitus maps to ICD-10-CM code E11.9', 'output');
-  addLine('   (without complications) or E11.65 (with hyperglycemia)."', 'output');
+  addLine('  "Type 2 diabetes mellitus maps to ICD-10-CM E11.9 (no', 'output');
+  addLine('   complications) or E11.65 (with hyperglycemia)."', 'output');
   await sleep(500);
-  addHTML('  <span class="success">&check;</span> <span class="output">receipt: rcpt_01KZBX...DCW3 · Ed25519 · verified</span>');
-  addHTML('  <span class="success">&check;</span> <span class="output">captured: cap_7f3a... · PHI redacted · 1.24s · $0.0021</span>');
-  await sleep(2500);
+  addHTML('  <span class="success">✓</span> <span class="output">receipt rcpt_01KZBX…DCW3 · Ed25519 · captured</span>');
+  await sleep(300);
 
-  await prompt('kolm verify rcpt_01KZBX...DCW3 --offline');
+  showReceiptCard();
+  await sleep(2400);
+
+  await prompt('kolm verify rcpt_01KZBX…DCW3 --offline');
   await sleep(600);
-  addHTML('  <span class="accent">cid:</span>      bafkreih... (sha-256)');
-  addHTML('  <span class="accent">signer:</span>   tenant_f33c240034c5');
-  addHTML('  <span class="accent">policy:</span>   redact-phi-v3 · region-lock-us-east');
-  addHTML('  <span class="success">&check; verified — no trust in our service required</span>');
+  addHTML('  <span class="accent">cid</span>     bafkreih7t4&hellip;m2qa (sha-256)');
+  addHTML('  <span class="accent">signer</span>  tenant_f33c240034c5');
+  addHTML('  <span class="accent">policy</span>  redact-phi-v3 · region-lock-us-east');
+  addHTML('  <span class="success">✓ verified offline — no trust in our service required</span>');
   await sleep(3500);
 
-  // 0:25 - 0:55  SECTION 2: COMPILE
-  clearTerminal();
-  setBadge('02 · Distill & Compile');
-  setCaption('Teacher Council blends Claude + GPT-4 + DeepSeek.');
-  await sleep(400);
-
-  await typeLine('# After capturing traffic, compile it into a model you own.', 'comment');
-  await typeLine('# One command. Trinity teacher council. Frozen eval gate.', 'comment');
-  await sleep(800);
-
-  await prompt('kolm compile --namespace support \\\n      --teachers claude,gpt4,deepseek \\\n      --target gguf-q4km');
-  await sleep(800);
-
-  addLine('  Capturing 41,802 events from namespace support ...', 'output');
-  await sleep(700);
-  addHTML('  <span class="success">&check;</span> <span class="output">410 council pairs after dedup + frozen-eval holdout</span>');
+  // 0:28 - 0:60  SECTION 2: COMPILE (32s)
+  clearTerminal(); clearVisual();
+  setChapter(2, 32000);
+  setVisualHead('Section 02', 'Distill captured traffic into a small specialist you own.');
+  setCaption('Teacher Council: Claude + GPT-4o + DeepSeek. Frozen-eval gated.');
+  showCompileVisual();
   await sleep(600);
 
-  await animateProgress('Pass 1 · format learning ', '0.94', 1400);
-  await animateProgress('Pass 2 · reasoning chain ', '0.91', 1500);
-  await animateProgress('Pass 3 · edge cases     ', '0.91', 1300);
+  await typeLine('# After capturing traffic, compile it into a model you own.', 'comment');
+  await typeLine('# One command. Trinity teacher council. Frozen-eval gate.', 'comment');
+  await sleep(700);
+
+  await prompt('kolm compile --namespace support \\\n      --teachers claude,gpt4,deepseek \\\n      --target gguf-q4km', 'compile');
+  await sleep(700);
+
+  addLine('  Capturing 41,802 events from namespace support …', 'output');
+  await sleep(600);
+  addHTML('  <span class="success">✓</span> <span class="output">410 council pairs after dedup + frozen-eval holdout</span>');
+  await sleep(500);
+
+  // Pass 1
+  setGaugeScore(0.50);
+  await animateProgress('Pass 1 · format learning  ', 0.94, 1300, 0);
+  setGaugeScore(0.62);
+  await sleep(200);
+
+  // Pass 2
+  await animateProgress('Pass 2 · reasoning chain  ', 0.91, 1400, 1);
+  setGaugeScore(0.78);
+  await sleep(200);
+
+  // Pass 3
+  await animateProgress('Pass 3 · edge cases       ', 0.91, 1300, 2);
+  setGaugeScore(0.91);
+  gaugeTargetMet();
   await sleep(400);
 
-  addLine('  Quantizing: INT4 NF4 + double-quant ...', 'output');
-  await sleep(900);
-  addHTML('  <span class="success">&check;</span> <span class="output">support.kolm · 5.2 GB · Ed25519-signed · K-Score 0.91</span>');
+  addLine('  Quantizing: INT4 NF4 + double-quant …', 'output');
+  await sleep(700);
+  addHTML('  <span class="success">✓</span> <span class="output">support.kolm · 5.2 GB · Ed25519-signed</span>');
+  swapToArtifact();
   await sleep(1500);
 
   await prompt('kolm inspect support.kolm --passport');
-  await sleep(700);
-  addHTML('  <span class="accent">artifact:</span>  support.kolm · gguf-q4km · 5.2 GB');
-  addHTML('  <span class="accent">teachers:</span>  claude-sonnet-4-6, gpt-4o, deepseek-v3');
-  addHTML('  <span class="accent">student:</span>   qwen2.5-7b-instruct');
-  addHTML('  <span class="accent">eval:</span>      asks-1Q 96.5% · judge-on-policy 100% · n=57');
-  addHTML('  <span class="accent">license:</span>   Apache-2.0 (compatible with all teachers)');
-  addHTML('  <span class="success">&check; portable · reproducible · yours</span>');
-  await sleep(4500);
+  await sleep(600);
+  addHTML('  <span class="accent">artifact</span>  support.kolm · gguf-q4km · 5.2 GB');
+  addHTML('  <span class="accent">teachers</span>  claude-sonnet-4-6, gpt-4o, deepseek-v3');
+  addHTML('  <span class="accent">student</span>   qwen2.5-7b-instruct');
+  addHTML('  <span class="accent">eval</span>      asks-1Q 96.5% · judge-on-policy 100% · n=57');
+  addHTML('  <span class="accent">license</span>   Apache-2.0 (compatible with all teachers)');
+  addHTML('  <span class="success">✓ portable · reproducible · yours</span>');
+  await sleep(3500);
 
-  // 0:55 - 1:20  SECTION 3: RUN
-  clearTerminal();
-  setBadge('03 · Run & Verify');
-  setCaption('Your hardware. $0 per token. Verify offline.');
-  await sleep(400);
+  // 0:60 - 0:82  SECTION 3: RUN (22s)
+  clearTerminal(); clearVisual();
+  setChapter(3, 22000);
+  setVisualHead('Section 03', 'Serve locally on hardware you already own. $0 per token.');
+  setCaption('Same OpenAI API. Verify the chain offline. Sovereign by default.');
+  showCostVisual();
+  await sleep(500);
 
   await typeLine('# Serve it locally. Same OpenAI API. $0 per token.', 'comment');
-  await sleep(800);
+  await sleep(700);
 
-  await prompt('kolm serve support.kolm --port 8080');
-  await sleep(800);
-  addHTML('  <span class="success">&check;</span> <span class="output">loaded · llama.cpp · RTX 5090 · shard 10× KV-cache</span>');
-  addHTML('  <span class="success">&check;</span> <span class="output">serving on http://localhost:8080  (warm-up 1.8s)</span>');
-  await sleep(1800);
+  await prompt('kolm serve support.kolm --port 8080', 'serve');
+  await sleep(700);
+  addHTML('  <span class="success">✓</span> <span class="output">loaded · llama.cpp · RTX 5090 · shard 10× KV-cache</span>');
+  addHTML('  <span class="success">✓</span> <span class="output">serving on http://localhost:8080  (warm-up 1.8s)</span>');
+  await sleep(1500);
 
   await prompt('curl localhost:8080/v1/chat/completions \\\n      -d \'{"messages":[{"role":"user","content":"How do I reset my password?"}]}\'');
-  await sleep(900);
+  await sleep(800);
   addLine('  "To reset your password, go to Settings > Security >', 'output');
   addLine('   Reset Password. You will receive a verification email."', 'output');
-  await sleep(500);
-  addHTML('  <span class="success">&check;</span> <span class="output">45.2 tok/s · 824 ms · <span class="accent">$0.00</span> · your hardware</span>');
-  await sleep(3000);
+  await sleep(400);
+  addHTML('  <span class="success">✓</span> <span class="output">45.2 tok/s · 824 ms · <span class="accent">$0.00</span> · your hardware</span>');
+  animateTokRate(45.2);
+  await sleep(2400);
 
   await prompt('kolm savings --vs claude-sonnet-4-6 --monthly');
-  await sleep(700);
-  addHTML('  <span class="accent">monthly volume:</span>  1.2M tokens');
-  addHTML('  <span class="accent">via claude:</span>      $4,140.00 / mo');
-  addHTML('  <span class="accent">via kolm local:</span>  $0.00 / mo (+ $14.20 GPU hours)');
-  addHTML('  <span class="success">&check; savings: $4,125.80 / mo · 100% sovereignty</span>');
-  await sleep(4500);
+  await sleep(600);
+  addHTML('  <span class="accent">monthly volume</span>  1.2M tokens');
+  addHTML('  <span class="accent">via claude</span>      $4,140.00 / mo');
+  addHTML('  <span class="accent">via kolm local</span>  $0.00 / mo (+ $14.20 GPU electricity)');
+  addHTML('  <span class="success">✓ saved $4,125.80 / mo · 100% sovereignty</span>');
+  animateSavings(4125.80);
+  await sleep(3800);
 
-  // 1:20 - 1:30  CLOSING
+  // 0:82 - 0:90  CLOSING (8s)
+  setCaption('');
   showStage('closing');
-  await sleep(10000);
+  setChapter(3, 0); // freeze chapter bar at end
+  // mark all four chapters done
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('seg-' + i).classList.add('fill');
+    document.getElementById('seg-' + i).classList.remove('active');
+    document.getElementById('lbl-' + i).classList.add('done');
+    document.getElementById('lbl-' + i).classList.remove('active');
+  }
+  await sleep(8000);
 
   // signal "done" to the recorder
   document.body.setAttribute('data-demo-done', '1');
 }
 
-// auto-start
 runDemo();
 </script>
 </body>

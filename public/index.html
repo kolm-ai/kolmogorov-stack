@@ -449,18 +449,35 @@
       into a 7B specialist, quantize it for a 5090, serve OpenAI-compatible
       on <code>localhost:8080</code>. No edits, no cuts.
     </p>
-    <div class="kolm-demo-video__frame">
-      <video
-        class="kolm-demo-video__el"
-        autoplay muted loop playsinline
-        preload="metadata"
-        poster="/demo-90s-poster.jpg"
-        aria-label="90-second cinematic walkthrough of the kolm compiler"
-      >
-        <source src="/demo-90s.mp4" type="video/mp4">
-        <p>Your browser does not support embedded video.
-          <a href="/demo-90s.mp4">Download the MP4</a>.</p>
-      </video>
+    <div class="kolm-demo-video__shell">
+      <div class="kolm-demo-video__frame">
+        <video
+          id="kolm-demo-vid"
+          class="kolm-demo-video__el"
+          autoplay muted loop playsinline
+          preload="metadata"
+          poster="/demo-90s-poster.jpg"
+          aria-label="90-second cinematic walkthrough of the kolm compiler"
+        >
+          <source src="/demo-90s.mp4" type="video/mp4">
+          <p>Your browser does not support embedded video.
+            <a href="/demo-90s.mp4">Download the MP4</a>.</p>
+        </video>
+        <button class="kolm-demo-video__replay" type="button" aria-label="Replay from start"
+                onclick="(function(v){if(!v)return;v.currentTime=0;v.play();}(document.getElementById('kolm-demo-vid')))">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M2.5 8a5.5 5.5 0 1 1 1.61 3.89" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2.5 4.5v3h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Replay</span>
+        </button>
+      </div>
+      <ol class="kolm-demo-video__chapters" aria-label="Chapters">
+        <li><span class="ch-num">00</span><span class="ch-name">Intro</span><span class="ch-t">0:00</span></li>
+        <li><span class="ch-num">01</span><span class="ch-name">Route &amp; Capture</span><span class="ch-t">0:04</span></li>
+        <li><span class="ch-num">02</span><span class="ch-name">Distill &amp; Compile</span><span class="ch-t">0:28</span></li>
+        <li><span class="ch-num">03</span><span class="ch-name">Run &amp; Verify</span><span class="ch-t">1:00</span></li>
+      </ol>
     </div>
     <p class="kolm-demo-video__cta">
       <a class="kolm-demo-video__link" href="/quickstart">Run it yourself &rarr;</a>
@@ -512,23 +529,119 @@
   border-radius: 4px;
   color: var(--ink-1, #0e1116);
 }
-.kolm-demo-video__frame {
+.kolm-demo-video__shell {
   width: 100%;
   max-width: 1080px;
   margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+.kolm-demo-video__shell::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 14px;
+  padding: 1px;
+  background: linear-gradient(135deg,
+    rgba(121, 192, 255, 0.35) 0%,
+    rgba(184, 188, 196, 0.18) 40%,
+    rgba(63, 185, 80, 0.25) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.65;
+}
+.kolm-demo-video__frame {
+  width: 100%;
   border-radius: 12px;
   overflow: hidden;
   background: #0e1116;
   border: 1px solid var(--rule, #e5e1d8);
-  box-shadow: 0 8px 32px -16px rgba(14, 17, 22, 0.18),
-              0 2px 8px -4px rgba(14, 17, 22, 0.08);
+  box-shadow: 0 12px 40px -16px rgba(14, 17, 22, 0.22),
+              0 2px 10px -4px rgba(14, 17, 22, 0.10);
   aspect-ratio: 16 / 9;
+  position: relative;
 }
 .kolm-demo-video__el {
   width: 100%;
   height: 100%;
   display: block;
   object-fit: cover;
+}
+.kolm-demo-video__replay {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(184, 188, 196, 0.28);
+  background: rgba(14, 17, 22, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #e6edf3;
+  font: 500 12px/1 ui-sans-serif, system-ui, -apple-system, sans-serif;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 240ms ease, border-color 240ms ease, background 240ms ease;
+}
+.kolm-demo-video__frame:hover .kolm-demo-video__replay,
+.kolm-demo-video__frame:focus-within .kolm-demo-video__replay {
+  opacity: 1;
+}
+.kolm-demo-video__replay:hover {
+  border-color: rgba(184, 188, 196, 0.55);
+  background: rgba(14, 17, 22, 0.78);
+}
+.kolm-demo-video__chapters {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border-top: 1px solid var(--rule, #e5e1d8);
+  border-radius: 0;
+  background: transparent;
+}
+.kolm-demo-video__chapters li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px 0;
+  border-right: 1px solid var(--rule, #e5e1d8);
+  position: relative;
+}
+.kolm-demo-video__chapters li:last-child { border-right: none; }
+.kolm-demo-video__chapters li::before {
+  content: "";
+  position: absolute;
+  top: -1px; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(121, 192, 255, 0.55), rgba(121, 192, 255, 0));
+  opacity: 0;
+  transition: opacity 240ms ease;
+}
+.kolm-demo-video__chapters li:hover::before { opacity: 1; }
+.ch-num {
+  font: 500 11px/1 ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+  letter-spacing: 0.14em;
+  color: var(--ink-3, #6e7681);
+}
+.ch-name {
+  font: 500 14px/1.3 ui-sans-serif, system-ui, -apple-system, sans-serif;
+  color: var(--ink-1, #0e1116);
+  letter-spacing: -0.005em;
+}
+.ch-t {
+  font: 400 11px/1 ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+  color: var(--ink-3, #6e7681);
+  letter-spacing: 0.04em;
 }
 .kolm-demo-video__cta {
   display: flex;
@@ -550,9 +663,18 @@
   color: var(--ink-3, #6e7681);
   border-bottom-color: var(--rule, #e5e1d8);
 }
+@media (max-width: 760px) {
+  .kolm-demo-video__chapters { grid-template-columns: repeat(2, 1fr); }
+  .kolm-demo-video__chapters li:nth-child(2) { border-right: none; }
+  .kolm-demo-video__chapters li:nth-child(3),
+  .kolm-demo-video__chapters li:nth-child(4) { padding-bottom: 14px; }
+  .kolm-demo-video__chapters li:nth-child(1),
+  .kolm-demo-video__chapters li:nth-child(2) { border-bottom: 1px solid var(--rule, #e5e1d8); }
+}
 @media (max-width: 640px) {
   .kolm-demo-video { padding: 40px 16px; }
   .kolm-demo-video__cta { gap: 16px; flex-direction: column; align-items: center; }
+  .kolm-demo-video__replay { opacity: 1; }
 }
 </style>
 
