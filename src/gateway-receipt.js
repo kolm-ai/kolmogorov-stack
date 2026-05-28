@@ -23,6 +23,7 @@ import crypto from 'node:crypto';
 import {
   RECEIPT_SCHEMA,
   ALL_FIELDS,
+  FALLBACK_REASONS,
   validateReceipt,
   canonicalForSigning,
   emptyReceipt,
@@ -114,7 +115,11 @@ export function buildAndSignReceipt(opts = {}) {
   r.confidence   = (typeof opts.confidence === 'number' && Number.isFinite(opts.confidence))
     ? Math.max(0, Math.min(1, opts.confidence))
     : null;
-  r.fallback_reason = opts.fallback_reason == null ? null : String(opts.fallback_reason).slice(0, 64);
+  // W921 P0: clamp to the schema enum so an unexpected logging value can NEVER
+  // throw in validateReceipt and abort a live gateway call (fail-open). Unknown
+  // reasons collapse to null; the attempted[] array still carries the detail.
+  const _fr = opts.fallback_reason == null ? null : String(opts.fallback_reason).slice(0, 64);
+  r.fallback_reason = FALLBACK_REASONS.includes(_fr) ? _fr : null;
 
   r.input_hash  = opts.input_hash  || hashInput(opts.input_text ?? '');
   r.output_hash = opts.output_hash || hashOutput(opts.output_text ?? '');
