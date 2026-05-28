@@ -31,19 +31,19 @@
  * - 96/56 rhythm, dot-grid backdrop, hairline rules
  */
 .research-page { background: var(--bg, #0a0c10) !important; }
-[data-theme=light] .research-page { background: #f6f3eb !important; }
+[data-theme=light] .research-page { background: #f3f5f7 !important; }
 
 .research-hero {
  padding: 144px 0 88px !important;
- border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+ border-bottom: 1px solid var(--line-1) !important;
  position: relative !important;
  overflow: hidden !important;
 }
-[data-theme=light] .research-hero { border-bottom-color: rgba(0,0,0,0.06) !important; }
+[data-theme=light] .research-hero { border-bottom-color: var(--line-1) !important; }
 .research-hero::before {
  content: "";
  position: absolute; inset: 0;
- background-image: radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px);
+ background-image: radial-gradient(circle, var(--line-1) 1px, transparent 1px);
  background-size: 32px 32px;
  mask-image: radial-gradient(ellipse 900px 600px at 18% 30%, #000 0%, rgba(0,0,0,0.4) 55%, transparent 95%);
  -webkit-mask-image: radial-gradient(ellipse 900px 600px at 18% 30%, #000 0%, rgba(0,0,0,0.4) 55%, transparent 95%);
@@ -51,7 +51,7 @@
  z-index: 0;
 }
 [data-theme=light] .research-hero::before {
- background-image: radial-gradient(circle, rgba(0,0,0,0.055) 1px, transparent 1px);
+ background-image: radial-gradient(circle, var(--line-1) 1px, transparent 1px);
 }
 .research-hero .wrap { position: relative; z-index: 1; }
 .research-hero h1 {
@@ -107,16 +107,16 @@
  border-radius: 8px !important;
  font-weight: 500 !important;
 }
-[data-theme=light] .research-hero .btn.primary { background: #1f2429 !important; color: #f6f3eb !important; }
+[data-theme=light] .research-hero .btn.primary { background: #1f2429 !important; color: #f3f5f7 !important; }
 .research-hero .btn.ghost {
- border: 1px solid rgba(255,255,255,0.18) !important;
+ border: 1px solid var(--line-3) !important;
  color: var(--ink-mute, #aab0b8) !important;
  padding: 13px 24px !important;
  font-size: 14.5px !important;
  border-radius: 8px !important;
 }
 [data-theme=light] .research-hero .btn.ghost {
- border-color: rgba(0,0,0,0.18) !important;
+ border-color: var(--line-3) !important;
  color: #4b5158 !important;
 }
 
@@ -145,20 +145,20 @@
 .research-index .ri-card {
  display: block !important;
  padding: 22px 24px !important;
- background: rgba(255,255,255,0.025) !important;
- border: 1px solid rgba(255,255,255,0.08) !important;
+ background: var(--line-1) !important;
+ border: 1px solid var(--line-2) !important;
  border-radius: 12px !important;
  text-decoration: none !important;
  color: inherit !important;
  transition: border-color 120ms, background 120ms !important;
 }
 .research-index .ri-card:hover {
- border-color: rgba(255,255,255,0.22) !important;
- background: rgba(255,255,255,0.045) !important;
+ border-color: var(--line-3) !important;
+ background: var(--line-1) !important;
 }
 [data-theme=light] .research-index .ri-card {
  background: #ffffff !important;
- border-color: rgba(0,0,0,0.10) !important;
+ border-color: var(--line-2) !important;
 }
 [data-theme=light] .research-index .ri-card:hover {
  border-color: rgba(0,0,0,0.28) !important;
@@ -193,7 +193,7 @@
 }
 .research-index .ri-badge {
  color: var(--ink, #e6e9ee) !important;
- border: 1px solid rgba(255,255,255,0.18) !important;
+ border: 1px solid var(--line-3) !important;
  padding: 2px 8px !important;
  border-radius: 999px !important;
  text-transform: uppercase !important;
@@ -214,12 +214,12 @@
 }
 .research-index .ri-list li {
  padding: 18px 22px !important;
- background: rgba(255,255,255,0.02) !important;
- border-left: 2px solid rgba(255,255,255,0.18) !important;
+ background: var(--line-1) !important;
+ border-left: 2px solid var(--line-3) !important;
  border-radius: 0 8px 8px 0 !important;
 }
 [data-theme=light] .research-index .ri-list li {
- background: rgba(0,0,0,0.02) !important;
+ background: var(--line-1) !important;
  border-left-color: rgba(0,0,0,0.22) !important;
 }
 .research-index .ri-q {
@@ -246,7 +246,7 @@
 .research-index .ri-cite-note a {
  color: var(--accent, #e6e9ee) !important;
  text-decoration: none !important;
- border-bottom: 1px solid rgba(230, 233, 238,0.3) !important;
+ border-bottom: 1px solid var(--line-strong) !important;
 }
 .research-index .ri-cite-note a:hover { border-bottom-color: var(--accent, #e6e9ee) !important; }
 @media (max-width: 720px) {
@@ -257,9 +257,9 @@
 /* Section rhythm: 96/56 */
 .research-page section.section {
  padding: 96px 0 !important;
- border-top: 1px solid rgba(255,255,255,0.05) !important;
+ border-top: 1px solid var(--line-1) !important;
 }
-[data-theme=light] .research-page section.section { border-top-color: rgba(0,0,0,0.06) !important; }
+[data-theme=light] .research-page section.section { border-top-color: var(--line-1) !important; }
 @media (max-width: 720px) {
  .research-page section.section { padding: 56px 0 !important; }
 }
@@ -314,13 +314,13 @@
  gap: 48px !important;
  padding: 40px !important;
  border-radius: 18px !important;
- background: rgba(255,255,255,0.02) !important;
- border: 1px solid rgba(255,255,255,0.08) !important;
+ background: var(--line-1) !important;
+ border: 1px solid var(--line-2) !important;
 }
 [data-theme=light] .featured-paper {
  background: #ffffff !important;
- border-color: rgba(0,0,0,0.08) !important;
- box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+ border-color: var(--line-2) !important;
+ box-shadow: 0 1px 2px var(--line-1) !important;
 }
 @media (max-width: 880px) { .featured-paper { grid-template-columns: 1fr !important; gap: 24px !important; padding: 28px !important; } }
 .featured-paper .meta {
@@ -359,27 +359,27 @@
 }
 .featured-paper .body .links a {
  color: #111111 !important; text-decoration: none !important;
- border-bottom: 1px solid rgba(17, 17, 17,0.3) !important;
+ border-bottom: 1px solid var(--line-strong) !important;
  padding-bottom: 1px !important;
 }
 [data-theme=light] .featured-paper .body .links a { color: #059669 !important; border-bottom-color: rgba(5,150,105,0.3) !important; }
 .featured-paper .body .links a:hover { border-bottom-color: currentColor !important; }
 
 /* Report feed --- /articles-style reverse chrono list */
-.report-feed { margin-top: 32px !important; border-top: 1px solid rgba(255,255,255,0.06) !important; }
-[data-theme=light] .report-feed { border-top-color: rgba(0,0,0,0.06) !important; }
+.report-feed { margin-top: 32px !important; border-top: 1px solid var(--line-1) !important; }
+[data-theme=light] .report-feed { border-top-color: var(--line-1) !important; }
 .report-feed a.report {
  display: grid !important;
  grid-template-columns: 140px 1fr 100px !important;
  gap: 32px !important;
  padding: 28px 0 !important;
- border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+ border-bottom: 1px solid var(--line-1) !important;
  align-items: baseline !important;
  transition: background 200ms;
 }
-[data-theme=light] .report-feed a.report { border-bottom-color: rgba(0,0,0,0.06) !important; }
-.report-feed a.report:hover { background: rgba(255,255,255,0.02) !important; text-decoration: none !important; }
-[data-theme=light] .report-feed a.report:hover { background: rgba(0,0,0,0.015) !important; }
+[data-theme=light] .report-feed a.report { border-bottom-color: var(--line-1) !important; }
+.report-feed a.report:hover { background: var(--line-1) !important; text-decoration: none !important; }
+[data-theme=light] .report-feed a.report:hover { background: var(--line-1) !important; }
 .report-feed a.report .stamp {
  font-family: var(--mono) !important; font-size: 11.5px !important;
  letter-spacing: 0.04em !important; text-transform: uppercase !important;
@@ -426,19 +426,19 @@
  display: flex !important; flex-direction: column !important; gap: 8px !important;
  padding: 24px 24px !important;
  border-radius: 12px !important;
- background: rgba(255,255,255,0.02) !important;
- border: 1px solid rgba(255,255,255,0.08) !important;
+ background: var(--line-1) !important;
+ border: 1px solid var(--line-2) !important;
  transition: border-color 160ms, background 160ms;
  text-decoration: none !important;
 }
 [data-theme=light] .spec-rail a {
  background: #ffffff !important;
- border-color: rgba(0,0,0,0.08) !important;
- box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+ border-color: var(--line-2) !important;
+ box-shadow: 0 1px 2px var(--line-1) !important;
 }
 .spec-rail a:hover {
- border-color: rgba(17, 17, 17,0.4) !important;
- background: rgba(255,255,255,0.04) !important;
+ border-color: var(--line-strong) !important;
+ background: var(--line-1) !important;
 }
 [data-theme=light] .spec-rail a:hover { background: #fbfbf5 !important; border-color: rgba(5,150,105,0.4) !important; }
 .spec-rail a .k {
@@ -469,17 +469,17 @@
  font-weight: 400 !important;
  margin: 56px 0 0 !important;
  padding-top: 24px !important;
- border-top: 1px solid rgba(255,255,255,0.08) !important;
+ border-top: 1px solid var(--line-2) !important;
 }
-[data-theme=light] .frontier-ref .group-head { border-top-color: rgba(0,0,0,0.08) !important; }
+[data-theme=light] .frontier-ref .group-head { border-top-color: var(--line-2) !important; }
 .frontier-ref .group-head:first-child { margin-top: 0 !important; padding-top: 0 !important; border-top: 0 !important; }
 .row24 {
- border-top: 1px solid rgba(255,255,255,0.05) !important;
+ border-top: 1px solid var(--line-1) !important;
  padding-top: 24px !important;
  margin-top: 24px !important;
  scroll-margin-top: 88px !important;
 }
-[data-theme=light] .row24 { border-top-color: rgba(0,0,0,0.06) !important; }
+[data-theme=light] .row24 { border-top-color: var(--line-1) !important; }
 .row24:first-of-type, .frontier-ref .group-head + .row24 { border-top: 0 !important; padding-top: 12px !important; margin-top: 12px !important; }
 .row24 .head { display: flex !important; align-items: baseline !important; gap: 14px !important; flex-wrap: wrap !important; margin-bottom: 8px !important; }
 .row24 .head .num {
@@ -522,15 +522,15 @@
  margin: 0 !important;
 }
 [data-theme=light] .row24 p { color: #4b5158 !important; }
-.row24 p a { color: var(--ink, #e6e9ee) !important; border-bottom: 1px solid rgba(255,255,255,0.18) !important; }
-[data-theme=light] .row24 p a { color: #1f2429 !important; border-bottom-color: rgba(0,0,0,0.2) !important; }
+.row24 p a { color: var(--ink, #e6e9ee) !important; border-bottom: 1px solid var(--line-3) !important; }
+[data-theme=light] .row24 p a { color: #1f2429 !important; border-bottom-color: var(--line-3) !important; }
 .row24 p a:hover { border-bottom-color: rgba(17, 17, 17,0.6) !important; }
-.frontier-ref .closer { margin-top: 56px !important; padding-top: 32px !important; border-top: 1px solid rgba(255,255,255,0.08) !important; }
-[data-theme=light] .frontier-ref .closer { border-top-color: rgba(0,0,0,0.08) !important; }
+.frontier-ref .closer { margin-top: 56px !important; padding-top: 32px !important; border-top: 1px solid var(--line-2) !important; }
+[data-theme=light] .frontier-ref .closer { border-top-color: var(--line-2) !important; }
 .frontier-ref .closer p { font-size: 14.5px !important; line-height: 1.65 !important; color: var(--ink-mute, #aab0b8) !important; max-width: 70ch !important; margin: 0 0 12px !important; }
 [data-theme=light] .frontier-ref .closer p { color: #4b5158 !important; }
-.frontier-ref .closer p a { color: var(--ink, #e6e9ee) !important; border-bottom: 1px solid rgba(255,255,255,0.18) !important; }
-[data-theme=light] .frontier-ref .closer p a { color: #1f2429 !important; border-bottom-color: rgba(0,0,0,0.2) !important; }
+.frontier-ref .closer p a { color: var(--ink, #e6e9ee) !important; border-bottom: 1px solid var(--line-3) !important; }
+[data-theme=light] .frontier-ref .closer p a { color: #1f2429 !important; border-bottom-color: var(--line-3) !important; }
 </style>
 <script type="application/ld+json">
 {
@@ -581,7 +581,7 @@
  <a href="/whitepaper" class="btn primary lg">Read the whitepaper &rarr;</a>
  <a href="/benchmarks" class="btn ghost lg">Benchmark methodology</a><a href="/compare" hidden aria-hidden="true">compare</a>
  </div>
- <div style="margin:20px 0 0;padding:14px 18px;border:1px solid rgba(150, 158, 170,0.32);border-left:3px solid #56606c;border-radius:8px;background:rgba(150, 158, 170,0.06);font-size:14px;line-height:1.55;color:var(--ink-mute);max-width:760px"><b style="color:var(--ink)">v0.2 vs research-tier (wave 144).</b> This is the research register. Every technique below is published with its <i>gating condition</i>, what hardware, what data, what wave it lands in. v0.2 <code>kolm compile</code> ships the recipe-class artifact (deterministic compiled code, Ed25519-signed manifest + receipt, optional <code>kolm-moe-1</code> composition, optional <code>kolm-tokenizer-1</code> byte-level BPE, <code>KOLMIDX</code> lookup, K-score gate). The LoRA variants, multi-LoRA serving, INT4/GGUF/ONNX bundling, federated compile, voice/vision adapters, and reward-modelling work catalogued here are research-tier with explicit gates, not features in the v0.2 zip.</div>
+ <div style="margin:20px 0 0;padding:14px 18px;border:1px solid rgba(150, 158, 170,0.32);border-left:3px solid var(--ink-3,#56606c);border-radius:8px;background:rgba(150, 158, 170,0.06);font-size:14px;line-height:1.55;color:var(--ink-mute);max-width:760px"><b style="color:var(--ink)">v0.2 vs research-tier (wave 144).</b> This is the research register. Every technique below is published with its <i>gating condition</i>, what hardware, what data, what wave it lands in. v0.2 <code>kolm compile</code> ships the recipe-class artifact (deterministic compiled code, Ed25519-signed manifest + receipt, optional <code>kolm-moe-1</code> composition, optional <code>kolm-tokenizer-1</code> byte-level BPE, <code>KOLMIDX</code> lookup, K-score gate). The LoRA variants, multi-LoRA serving, INT4/GGUF/ONNX bundling, federated compile, voice/vision adapters, and reward-modelling work catalogued here are research-tier with explicit gates, not features in the v0.2 zip.</div>
 
  <div class="research-index" aria-label="research index">
 
@@ -1218,7 +1218,7 @@
 
  <div class="closer">
  <p>This is the production-shipping list. The research agenda is on the reports feed below: K-score cross-task calibration, eval-set drift detection, K-sampling at compile time with embedding-cluster diversity, adapter compression, receipt aggregation. The forty-two items above are bench-checked against real captures; the agenda items are open problems we are willing to be wrong about in public.</p>
- <p>If a technique you expect to see is missing, the answer is one of three things: it does not benefit the LoRA-distill loop (most pre-training-only techniques), the implementation is in flight (item on the research agenda), or we have not yet found a buyer whose problem requires it. Open an issue on <a href="https://github.com/kolm-ai/kolm-stack" rel="noopener">GitHub</a> and tell us which.</p>
+ <p>If a technique you expect to see is missing, the answer is one of three things: it does not benefit the LoRA-distill loop (most pre-training-only techniques), the implementation is in flight (item on the research agenda), or we have not yet found a buyer whose problem requires it. Open an issue on <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">GitHub</a> and tell us which.</p>
  </div>
  </div>
  </div>
@@ -1241,7 +1241,7 @@
  <div class="links">
  <a href="/whitepaper">Read &rarr;</a>
  <a href="/spec">RS-1 spec</a>
- <a href="https://github.com/kolm-ai/kolm-stack" rel="noopener">Reference implementation</a>
+ <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">Reference implementation</a>
  </div>
  </div>
  </article>
@@ -1696,7 +1696,7 @@
  <div class="t">Developer reference</div>
  <div class="d">CLI, server, runtime API. Quickstart through to remote-access TEE deployment.</div>
  </a>
- <a href="https://github.com/kolm-ai/kolm-stack" rel="noopener">
+ <a href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">
  <div class="k">code</div>
  <div class="t">GitHub</div>
  <div class="d">Reference implementation. The harness that produces the numbers above is the same code we ship.</div>

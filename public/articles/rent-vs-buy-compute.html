@@ -54,10 +54,10 @@
 </script>
 <style>
  :root {
- --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
- --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --bg: #0e1116; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: var(--line-1); --line-strong: var(--line-2);
  --ink: #e6e9ee; --ink-mute: #aab0b8; --ink-faint: #6a727c;
- --accent: #e6e9ee; --accent-soft: rgba(230, 233, 238, 0.10); --accent-strong: #b8c0ca;
+ --accent: #e6e9ee; --accent-soft: var(--line-2); --accent-strong: #b8c0ca;
  --good: #e6e9ee; --bad: #ff6b91;
  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
@@ -85,7 +85,7 @@
  @media (max-width: 720px) { header.site nav { display: none; } }
 
  section.hero { padding: 80px 0 36px; position: relative; overflow: hidden; }
- section.hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 900px 460px at 22% 12%, rgba(230, 233, 238, 0.10), transparent 60%); }
+ section.hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 900px 460px at 22% 12%, var(--line-2), transparent 60%); }
  section.hero .wrap { position: relative; }
  .pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 12px; background: var(--bg-elev); }
  .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
@@ -121,7 +121,7 @@
  .figure .cap { margin-top: 14px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: uppercase; color: var(--ink-faint); }
  .figure .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
  @media (max-width: 720px) { .figure .grid { grid-template-columns: 1fr; } }
- .figure .row { padding: 10px 14px; border: 1px solid var(--line); border-radius: 6px; background: rgba(0,0,0,0.18); display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12.5px; color: var(--ink-mute); }
+ .figure .row { padding: 10px 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--line-3); display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12.5px; color: var(--ink-mute); }
  .figure .row .v { color: var(--ink); }
  .figure .row .v.acc { color: var(--accent); }
  .figure .row .v.good { color: var(--good); }
@@ -133,7 +133,7 @@
  table.ledger td.v { color: var(--ink); }
  table.ledger td.acc { color: var(--accent); }
  table.ledger td.good { color: var(--good); }
- table.ledger tr:hover td { background: rgba(230, 233, 238, 0.04); }
+ table.ledger tr:hover td { background: var(--line-1); }
 
  .signpost { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 36px 0 0; }
  @media (max-width: 720px) { .signpost { grid-template-columns: 1fr; } }
@@ -326,7 +326,7 @@ kolm inspect ~/.kolm/artifacts/<span class="arg">prod-tickets.kolm</span></pre>
  <h2 id="starthere">Start here.</h2>
  <p><b>Smallest commitment:</b> install the CLI, point one of your existing services at the capture endpoint for a week, run <code>kolm capture status</code> to see what your verified pair count looks like. There is no charge for capture under a hundred thousand pairs per month. <b>Larger commitment:</b> book a thirty-minute design-partner call and we will scope a namespace plan with your team, including the bring-your-own-VPC option if your data residency requires it.</p>
 
- <pre>npm i -g github:kolm-ai/kolm-stack
+ <pre>npm i -g github:kolm-ai/kolmogorov-stack
 kolm config base <span class="arg">https://kolm.ai</span>
 kolm login
 

@@ -55,7 +55,8 @@
 
 <style>
   /* Page-local — only what frontier.css does not already give us. */
-  body { background: #07090c; }
+  body { background: var(--surface-0, #f3f5f7); }
+  [data-theme="dark"] body { background: var(--surface-0, #0e1116); }
 
   /* Hero — page-local, mirrors forge.html rhythm. */
   .lb-hero { padding: clamp(56px, 7vw, 112px) 24px clamp(40px, 5vw, 72px); border-bottom: 1px solid var(--line-1); position: relative; overflow: hidden; }
@@ -244,7 +245,7 @@
   .pub-strip {
     margin-top: 32px;
     padding: 32px;
-    background: linear-gradient(180deg, rgba(230, 233, 238,0.04) 0%, var(--surface-1) 60%);
+    background: linear-gradient(180deg, var(--line-1) 0%, var(--surface-1) 60%);
     border: 1px solid var(--fr-mint-edge);
     border-radius: var(--radius-lg);
     display: grid;

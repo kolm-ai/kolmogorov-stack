@@ -355,7 +355,7 @@ function normalizeLicense(license) {
   };
 }
 
-export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, output_schema, guardrails, parent_cid, region, runtime_passports, evidence_dag }) {
+export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, output_schema, guardrails, parent_cid, region, runtime_passports, evidence_dag, speculative_decoding, prompt_cache, continuous_batching }) {
   const secret = requireSignSecret();
   // W252 — K-score ship gate is load-bearing. If a K-score is supplied AND
   // it says ships=false, the builder must refuse unless the caller explicitly
@@ -1191,6 +1191,36 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       runtime_passports: _runtime_passports_canon,
       runtime_passports_spec_version: RUNTIME_PASSPORT_SCHEMA_VERSION,
     } : {}),
+    // W916-I1 — speculative decoding. Conditional spread per the W460
+    // byte-stability law: when the caller did not pass a speculative_decoding
+    // block the key is OMITTED entirely so pre-W916 artifacts rebuilt without
+    // the field remain byte-identical to their original manifest_hash + cid.
+    // NOT bound into artifact_hash_input below — speculative_decoding is an
+    // OPERATIONAL fingerprint (target/draft pair + measured acceptance_rate),
+    // not a property of the artifact bytes. A verifier on a different host
+    // can legitimately re-probe with the same draft model and surface a
+    // different acceptance_rate without breaking the receipt chain.
+    // Schema lives in src/speculative-decoding.js (speculativePassportEntry).
+    // Read at serve-time by apps/runtime/serve.py:build_engine to choose
+    // draft_model + num_speculative_tokens before falling back to env
+    // (KOLM_SERVE_SPECULATIVE_DRAFT) or auto-pairing.
+    ...(speculative_decoding && typeof speculative_decoding === 'object'
+        && Object.keys(speculative_decoding).length > 0
+      ? { speculative_decoding } : {}),
+    // W916-I3 — prompt cache (vLLM enable_prefix_caching / llama.cpp
+    // --prompt-cache-all). Conditional spread; operational fingerprint
+    // only — not bound into artifact_hash. Read at serve-time by
+    // apps/runtime/serve.py via KOLM_PROMPT_CACHE env override → manifest.
+    ...(prompt_cache && typeof prompt_cache === 'object'
+        && Object.keys(prompt_cache).length > 0
+      ? { prompt_cache } : {}),
+    // W916-I4 — continuous batching (vLLM max_num_seqs / llama.cpp
+    // --parallel N). Conditional spread; operational fingerprint only —
+    // not bound into artifact_hash. Read at serve-time by
+    // apps/runtime/serve.py via KOLM_MAX_NUM_SEQS env override → manifest.
+    ...(continuous_batching && typeof continuous_batching === 'object'
+        && Object.keys(continuous_batching).length > 0
+      ? { continuous_batching } : {}),
     // R-5 — evidence DAG. Conditional spread per the W460 byte-stability
     // law: when the caller did not pass an evidence_dag argument the key
     // is OMITTED from the manifest entirely so pre-R-5 artifacts rebuilt
@@ -1932,7 +1962,7 @@ export function packageArtifact({ job_id, payload, outPath }) {
 // with the size-aware K-score patched into the manifest. The double-zip is
 // cheap (≤10ms for 5KB artifacts) and keeps the K-score honest — the size
 // axis includes the K-score bytes themselves.
-export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, outPath: outPathOverride, judge_id, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails, parent_cid, region, runtime_passports }) {
+export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, outPath: outPathOverride, judge_id, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails, parent_cid, region, runtime_passports, speculative_decoding, prompt_cache, continuous_batching }) {
   requireSignSecret();
   // W457b (build-honors-out) — when an explicit outPath is supplied, write
   // the .kolm directly at the user-requested filename. Otherwise fall back
@@ -1967,7 +1997,7 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
     confidential_compute = await verifyAttestation(kind, attestation_report);
   }
 
-  const sharedBlocks = { capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails, parent_cid, region, runtime_passports };
+  const sharedBlocks = { capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails, parent_cid, region, runtime_passports, speculative_decoding, prompt_cache, continuous_batching };
 
   // W350 — temp-file cleanup registry. The two-pass build writes a probe zip
   // to measure its size before the K-score is embedded; on success the probe

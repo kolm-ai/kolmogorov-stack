@@ -89,9 +89,9 @@
 
   /* Table - same dna as .home-receipts from index.html.
      Columns: name+sub+badges (2.4fr) | k-score (1fr) | size+license (1fr) | kolm pull CLI (1.6fr) */
-  .mk-table { margin-top: 4px; border-top: 1px solid rgba(230, 233, 238,0.10); }
-  .mk-row { display: grid; grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.6fr); column-gap: var(--ks-5); align-items: baseline; padding: 18px 0; border-bottom: 1px solid rgba(230, 233, 238,0.08); }
-  .mk-row--head { padding: 10px 0; border-bottom: 1px solid rgba(230, 233, 238,0.10); }
+  .mk-table { margin-top: 4px; border-top: 1px solid var(--line-2); }
+  .mk-row { display: grid; grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.6fr); column-gap: var(--ks-5); align-items: baseline; padding: 18px 0; border-bottom: 1px solid var(--line-2); }
+  .mk-row--head { padding: 10px 0; border-bottom: 1px solid var(--line-2); }
   .mk-row--head span { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--ks-ink-3); }
   .mk-row[hidden] { display: none; }
   .mk-row__name { font-family: var(--ks-mono); font-size: 13.5px; color: var(--ks-ink); font-weight: 540; }
@@ -100,9 +100,9 @@
   .mk-row__sub { display: block; font-family: var(--ks-sans); font-size: 12.5px; color: var(--ks-ink-3); margin-top: 4px; line-height: 1.5; font-weight: 400; }
   .mk-row__badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
   .mk-row__badge { display: inline-block; font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ks-line-2); color: var(--ks-ink-3); }
-  .mk-row__badge--avail { color: var(--ks-accent); border-color: var(--ks-accent-edge); background: rgba(230, 233, 238, 0.05); }
+  .mk-row__badge--avail { color: var(--ks-accent); border-color: var(--ks-accent-edge); background: var(--line-1); }
   .mk-row__badge--preview { color: var(--ks-ink-3); border-color: var(--ks-line-2); border-style: dashed; }
-  .mk-row__badge--verified { color: var(--ks-accent); border-color: var(--ks-accent); background: rgba(230, 233, 238, 0.10); }
+  .mk-row__badge--verified { color: var(--ks-accent); border-color: var(--ks-accent); background: var(--line-2); }
   .mk-row__k { font-family: var(--ks-mono); font-size: 18px; color: var(--ks-accent); font-weight: 540; font-variant-numeric: tabular-nums; line-height: 1.2; }
   .mk-row__k-sub { display: block; font-family: var(--ks-mono); font-size: 10.5px; color: var(--ks-ink-faint); margin-top: 4px; letter-spacing: 0.04em; }
   .mk-row__size { font-family: var(--ks-mono); font-size: 13px; color: var(--ks-ink-2); font-variant-numeric: tabular-nums; }
@@ -191,7 +191,7 @@
 <main id="main" class="ks-wrap mk-page">
 
   
-  <section class="mk-teaser" aria-labelledby="mk-teaser-h" style="margin:8px 0 var(--ks-8);padding:24px 28px;border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md);background:rgba(255,255,255,0.02)">
+  <section class="mk-teaser" aria-labelledby="mk-teaser-h" style="margin:8px 0 var(--ks-8);padding:24px 28px;border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md);background:var(--surface-2)">
     <header style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px">
       <div>
         <span class="mk-hero__eyebrow" style="display:inline-block;margin-bottom:6px">Premium marketplace</span>
@@ -232,21 +232,21 @@
       <li style="padding:14px 16px;border:1px dashed var(--ks-line-2);border-radius:var(--ks-r-sm);background:var(--ks-bg-1)">
         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px">
           <strong style="font-family:var(--ks-mono);font-size:13.5px;color:var(--ks-ink)">qwen2.5-7b-medical-coding</strong>
-          <span class="mk-row__badge mk-row__badge--preview" style="font-family:var(--ks-mono);font-size:10px;color:#a8b3c2">Preview</span>
+          <span class="mk-row__badge mk-row__badge--preview" style="font-family:var(--ks-mono);font-size:10px;color:var(--ink-4,#a8b3c2)">Preview</span>
         </div>
         <span style="font-family:var(--ks-sans);font-size:12.5px;color:var(--ks-ink-3);line-height:1.55">Healthcare vertical &middot; ICD-10 / CPT code suggestion fine-tune from Qwen2.5-7B. Holdout pinned to deidentified DRG samples.</span>
       </li>
       <li style="padding:14px 16px;border:1px dashed var(--ks-line-2);border-radius:var(--ks-r-sm);background:var(--ks-bg-1)">
         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px">
           <strong style="font-family:var(--ks-mono);font-size:13.5px;color:var(--ks-ink)">claude-distilled-sql-agent</strong>
-          <span class="mk-row__badge mk-row__badge--preview" style="font-family:var(--ks-mono);font-size:10px;color:#a8b3c2">Preview</span>
+          <span class="mk-row__badge mk-row__badge--preview" style="font-family:var(--ks-mono);font-size:10px;color:var(--ink-4,#a8b3c2)">Preview</span>
         </div>
         <span style="font-family:var(--ks-sans);font-size:12.5px;color:var(--ks-ink-3);line-height:1.55">Developer tool &middot; SQL-from-prose agent distilled from Claude. Includes BIRD + Spider holdouts plus a runtime passport pinning latency on a single A100.</span>
       </li>
       <li style="padding:14px 16px;border:1px dashed var(--ks-line-2);border-radius:var(--ks-r-sm);background:var(--ks-bg-1)">
         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px">
           <strong style="font-family:var(--ks-mono);font-size:13.5px;color:var(--ks-ink)">gpt-4o-deep-research-rag</strong>
-          <span class="mk-row__badge mk-row__badge--preview" style="font-family:var(--ks-mono);font-size:10px;color:#a8b3c2">Preview</span>
+          <span class="mk-row__badge mk-row__badge--preview" style="font-family:var(--ks-mono);font-size:10px;color:var(--ink-4,#a8b3c2)">Preview</span>
         </div>
         <span style="font-family:var(--ks-sans);font-size:12.5px;color:var(--ks-ink-3);line-height:1.55">Knowledge worker &middot; Deep-research RAG pack distilled from GPT-4o. Ships a citation-grounded retriever and a 9-step evidence DAG bundled inside the .kolm.</span>
       </li>
@@ -659,16 +659,16 @@ $ curl -s https://kolm.ai/v1/marketplace/catalog.json | jq .signature_algo
 </script>
 
 
-<section id="w737-faceted" aria-labelledby="w737-faceted-title" style="margin:48px auto 0;max-width:1200px;padding:32px 24px 0;border-top:1px solid rgba(255,255,255,0.06)">
+<section id="w737-faceted" aria-labelledby="w737-faceted-title" style="margin:48px auto 0;max-width:1200px;padding:32px 24px 0;border-top:1px solid var(--line-1)">
   <header style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px">
-    <h2 id="w737-faceted-title" style="font-size:22px;font-weight:500;letter-spacing:-0.018em;margin:0;color:#e6e9ee">Browse publisher submissions</h2>
-    <a href="/docs/marketplace/publish" style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;color:#9aa3a8;text-decoration:none;border-bottom:1px dashed rgba(255,255,255,0.12)">Publish your .kolm &rarr;</a>
+    <h2 id="w737-faceted-title" style="font-size:22px;font-weight:500;letter-spacing:-0.018em;margin:0;color:var(--ink-1,#e6e9ee)">Browse publisher submissions</h2>
+    <a href="/docs/marketplace/publish" style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;color:var(--ink-3,#9aa3a8);text-decoration:none;border-bottom:1px dashed var(--line-2)">Publish your .kolm &rarr;</a>
   </header>
-  <p style="color:#9aa3a8;font-size:14px;margin:0 0 18px;max-width:760px">Faceted search by the-1 axes - vertical, task type, K-Score, and hardware target. The 70/30 publisher/platform revenue split is locked in the <a href="/docs/marketplace/publish#revenue-split" style="color:#111111">publisher TOS</a>. Empty results below means no publisher listings have been registered yet - <a href="/docs/marketplace/publish" style="color:#111111">be the first to publish?</a></p>
+  <p style="color:var(--ink-3,#9aa3a8);font-size:14px;margin:0 0 18px;max-width:760px">Faceted search by the-1 axes - vertical, task type, K-Score, and hardware target. The 70/30 publisher/platform revenue split is locked in the <a href="/docs/marketplace/publish#revenue-split" style="color:var(--ink,#111111)">publisher TOS</a>. Empty results below means no publisher listings have been registered yet - <a href="/docs/marketplace/publish" style="color:var(--ink,#111111)">be the first to publish?</a></p>
   <div style="display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:start" id="w737-grid">
     <aside aria-label="facet filters" style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12.5px;color:#cfd6d8">
-      <fieldset style="border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 14px;margin:0 0 14px">
-        <legend style="padding:0 6px;color:#e6e9ee;font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">Vertical</legend>
+      <fieldset style="border:1px solid var(--line-2);border-radius:8px;padding:12px 14px;margin:0 0 14px">
+        <legend style="padding:0 6px;color:var(--ink-1,#e6e9ee);font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">Vertical</legend>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-vertical" value="" checked> any</label>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-vertical" value="medical"> medical</label>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-vertical" value="legal"> legal</label>
@@ -677,30 +677,30 @@ $ curl -s https://kolm.ai/v1/marketplace/catalog.json | jq .signature_algo
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-vertical" value="support"> support</label>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-vertical" value="general"> general</label>
       </fieldset>
-      <fieldset style="border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 14px;margin:0 0 14px">
-        <legend style="padding:0 6px;color:#e6e9ee;font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">Task type</legend>
+      <fieldset style="border:1px solid var(--line-2);border-radius:8px;padding:12px 14px;margin:0 0 14px">
+        <legend style="padding:0 6px;color:var(--ink-1,#e6e9ee);font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">Task type</legend>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-task" value="" checked> any</label>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-task" value="extraction"> extraction</label>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-task" value="generation"> generation</label>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-task" value="reasoning"> reasoning</label>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-task" value="support"> support</label>
       </fieldset>
-      <fieldset style="border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 14px;margin:0 0 14px">
-        <legend style="padding:0 6px;color:#e6e9ee;font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">Hardware target</legend>
+      <fieldset style="border:1px solid var(--line-2);border-radius:8px;padding:12px 14px;margin:0 0 14px">
+        <legend style="padding:0 6px;color:var(--ink-1,#e6e9ee);font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">Hardware target</legend>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-hw" value="" checked> any</label>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-hw" value="m-series"> M-series</label>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-hw" value="rtx"> RTX</label>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-hw" value="h100"> H100</label>
         <label style="display:block;margin:4px 0"><input type="radio" name="w737-hw" value="cpu"> CPU</label>
       </fieldset>
-      <fieldset style="border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 14px;margin:0 0 14px">
-        <legend style="padding:0 6px;color:#e6e9ee;font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">K-Score</legend>
+      <fieldset style="border:1px solid var(--line-2);border-radius:8px;padding:12px 14px;margin:0 0 14px">
+        <legend style="padding:0 6px;color:var(--ink-1,#e6e9ee);font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase">K-Score</legend>
         <label style="display:block;margin:4px 0">min: <input type="range" id="w737-min-kscore" min="0" max="1" step="0.05" value="0" style="width:100%"></label>
-        <output id="w737-min-kscore-out" style="display:block;color:#9aa3a8;font-size:11.5px;margin-top:2px">0.00</output>
+        <output id="w737-min-kscore-out" style="display:block;color:var(--ink-3,#9aa3a8);font-size:11.5px;margin-top:2px">0.00</output>
       </fieldset>
     </aside>
     <div id="w737-results" role="region" aria-live="polite" style="min-height:200px">
-      <p style="color:#9aa3a8;font-size:14px;margin:0">Loading publisher listings&hellip;</p>
+      <p style="color:var(--ink-3,#9aa3a8);font-size:14px;margin:0">Loading publisher listings&hellip;</p>
     </div>
   </div>
 </section>
@@ -731,9 +731,9 @@ $ curl -s https://kolm.ai/v1/marketplace/catalog.json | jq .signature_algo
   function render(envelope){
     if (!envelope || envelope.ok === false || (envelope.results && envelope.results.length === 0)){
       var hint = (envelope && envelope.hint) || 'No artifacts match these filters yet. Be the first to publish?';
-      grid.innerHTML = '<div data-test="w737-empty-state" style="padding:32px 24px;border:1px dashed rgba(255,255,255,0.12);border-radius:10px;color:#9aa3a8;font-size:14px;text-align:center">' +
+      grid.innerHTML = '<div data-test="w737-empty-state" style="padding:32px 24px;border:1px dashed var(--line-2);border-radius:10px;color:var(--ink-3,#9aa3a8);font-size:14px;text-align:center">' +
         escapeHtml(hint) +
-        ' <a href="/docs/marketplace/publish" style="color:#111111;text-decoration:none">/docs/marketplace/publish &rarr;</a></div>';
+        ' <a href="/docs/marketplace/publish" style="color:var(--ink,#111111);text-decoration:none">/docs/marketplace/publish &rarr;</a></div>';
       return;
     }
     var results = envelope.results || [];
@@ -741,12 +741,12 @@ $ curl -s https://kolm.ai/v1/marketplace/catalog.json | jq .signature_algo
     for (var i=0;i<results.length;i++){
       var r = results[i];
       var k = (r.k_score != null) ? Number(r.k_score).toFixed(3) : '—';
-      html += '<article data-test="w737-card" style="border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px 16px;background:#0f1216">' +
+      html += '<article data-test="w737-card" style="border:1px solid var(--line-2);border-radius:10px;padding:14px 16px;background:var(--surface-1)">' +
         '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px">' +
-          '<strong style="font-size:14px;color:#e6e9ee">' + escapeHtml(r.name || r.cid) + '</strong>' +
+          '<strong style="font-size:14px;color:var(--ink-1,#e6e9ee)">' + escapeHtml(r.name || r.cid) + '</strong>' +
           '<span style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:11.5px;color:#111111">' + escapeHtml(k) + '</span>' +
         '</div>' +
-        '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:11.5px;color:#9aa3a8;letter-spacing:0.04em">' +
+        '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:11.5px;color:var(--ink-3,#9aa3a8);letter-spacing:0.04em">' +
           escapeHtml(r.vertical || '—') + ' · ' + escapeHtml(r.task_type || '—') + ' · ' + escapeHtml(r.hardware_target || '—') +
         '</div>' +
         '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:11.5px;color:#cfd6d8;margin-top:8px">' +

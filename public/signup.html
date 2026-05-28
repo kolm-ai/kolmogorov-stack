@@ -38,7 +38,7 @@
  [data-theme="light"] .auth-brand{color:var(--accent,#0a8862)}
  .auth-brand svg{display:block}
  .oauth-row{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
- .oauth-row .oauth-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 16px;font-size:14px;font-weight: 500;background:var(--bg-2,#0e1116) !important;background-image:none !important;color:var(--ink,#e6e9ee) !important;border:1px solid var(--line-2,rgba(230, 233, 238,0.22)) !important;border-radius:10px;cursor:pointer;transition:border-color 140ms,background 140ms,transform 140ms}
+ .oauth-row .oauth-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 16px;font-size:14px;font-weight: 500;background:var(--bg-2,#0e1116) !important;background-image:none !important;color:var(--ink,#e6e9ee) !important;border:1px solid var(--line-2,var(--line-3)) !important;border-radius:10px;cursor:pointer;transition:border-color 140ms,background 140ms,transform 140ms}
  .oauth-row .oauth-btn:hover{border-color:var(--accent,#e6e9ee) !important;transform:translateY(-1px)}
  [data-theme="light"] .oauth-row .oauth-btn{background:#ffffff !important;color:#0c0f14 !important;border-color:rgba(12,14,16,0.18) !important}
  [data-theme="light"] .oauth-row .oauth-btn:hover{border-color:rgba(10,136,98,0.40) !important}
@@ -204,7 +204,7 @@
  <div class="cli-details-body">
  <div id="cli-bridge">
  <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px">Use it from the CLI</div>
- <pre id="cli-snippet" style="margin:0;padding:12px 14px;background:#0b0d10;border:1px solid var(--line);border-radius:8px;color:#e6e9ee;font-family:var(--mono);font-size:13px;overflow-x:auto;white-space:pre;line-height:1.55"><code id="cli-snippet-code">npm i -g github:kolm-ai/kolm-stack
+ <pre id="cli-snippet" style="margin:0;padding:12px 14px;background:var(--surface-input, var(--ks-bg-1));border:1px solid var(--line);border-radius:8px;color:var(--ks-ink, #e6e9ee);font-family:var(--mono);font-size:13px;overflow-x:auto;white-space:pre;line-height:1.55"><code id="cli-snippet-code">npm i -g github:kolm-ai/kolmogorov-stack
 kolm login --key ks_...
 kolm init
 kolm new my-skill --from classifier
@@ -419,7 +419,7 @@ kolm compile --spec my-skill.spec.json</code></pre>
  var snippet = $('cli-snippet-code');
  if (snippet) {
  snippet.textContent =
- 'npm i -g github:kolm-ai/kolm-stack\n' +
+ 'npm i -g github:kolm-ai/kolmogorov-stack\n' +
  'kolm login --key ' + key + '\n' +
  'kolm init\n' +
  'kolm new my-skill --from classifier\n' +

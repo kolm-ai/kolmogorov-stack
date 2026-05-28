@@ -925,6 +925,90 @@ export async function compileSpec(spec, opts = {}) {
     }
   }
 
+  // W916-I1 — speculative decoding block resolution. The CLI's
+  // `kolm compile --with-draft <auto|off|<draft-id>>` plumbs through
+  // process.env.KOLM_COMPILE_SPECULATIVE_DRAFT (+ optional K and MODE).
+  // We resolve the draft choice against the same DRAFT_PAIRINGS registry
+  // that serve.py uses, and when a draft is chosen we attach a
+  // build-time `speculative_decoding` block to the manifest. The block
+  // is OPERATIONAL (not bound into artifact_hash) so a verifier on a
+  // different host can re-probe with a different draft / measured
+  // acceptance_rate without breaking the receipt chain. Pre-W916
+  // artifacts rebuilt without this env set produce byte-identical
+  // bytes (the artifact.js conditional-spread omits the manifest key
+  // entirely when the value is null/undefined).
+  let speculativeDecodingBlock = null;
+  const _specDraftRaw = process.env.KOLM_COMPILE_SPECULATIVE_DRAFT;
+  if (_specDraftRaw !== undefined && _specDraftRaw !== '') {
+    try {
+      const { resolveSpeculative, SPECULATIVE_VERSION, DEFAULT_NUM_SPECULATIVE_TOKENS } = await import('./speculative-decoding.js');
+      const _specK = Number.parseInt(process.env.KOLM_COMPILE_SPECULATIVE_K || '', 10);
+      // Compile-time block targets the FIRST exported runtime that supports
+      // speculative decoding; defaults to 'vllm' when no exports happened
+      // (because vllm is the universal kolm serve target and the manifest
+      // entry remains valid even for a future serve-time override).
+      let _specRuntime = 'vllm';
+      if (exportProvenance && Array.isArray(exportProvenance.targets)) {
+        for (const t of exportProvenance.targets) {
+          if (t && t.format && /transformers|hf|safetensors/i.test(String(t.format))) {
+            _specRuntime = 'transformers'; break;
+          }
+        }
+      }
+      const _resolved = resolveSpeculative({
+        flag: _specDraftRaw,
+        target: spec.base_model || 'unknown',
+        runtime: _specRuntime,
+        numSpeculativeTokens: Number.isFinite(_specK) && _specK > 0 ? _specK : undefined,
+      });
+      if (_resolved.supported && _resolved.draft_model) {
+        speculativeDecodingBlock = {
+          method: 'speculative_decoding',
+          version: SPECULATIVE_VERSION,
+          draft_model: _resolved.draft_model,
+          target_model: spec.base_model || 'unknown',
+          runtime: _specRuntime,
+          num_speculative_tokens: _resolved.num_speculative_tokens || DEFAULT_NUM_SPECULATIVE_TOKENS,
+          mode: _resolved.mode === 'auto' ? 'auto' : 'explicit',
+          // Build-time block does NOT carry acceptance_rate / throughput_speedup
+          // (those require live measurement). serve.py overwrites these via
+          // /info metrics + runtime_passport append, which is the warmed-up
+          // floor a verifier replays at probe time.
+          acceptance_rate: null,
+          throughput_speedup: null,
+          resolved_at: 'compile',
+          reason: _resolved.reason,
+        };
+      }
+    } catch (e) {
+      // Speculative is a speed optimization; failure to resolve must NEVER
+      // break the build. Log and continue without the block.
+      console.error(`[kolm compile] speculative decoding resolution skipped: ${e.message}`);
+    }
+  }
+
+  // W916-I3 — prompt cache compile-time fingerprint. Surfaces the operator's
+  // intent so a verifier can confirm the serve env matches. Read by serve.py
+  // build_engine when KOLM_PROMPT_CACHE env override is absent.
+  let promptCacheBlock = null;
+  const _promptCacheRaw = process.env.KOLM_COMPILE_PROMPT_CACHE;
+  if (_promptCacheRaw !== undefined && _promptCacheRaw !== '') {
+    const _v = String(_promptCacheRaw).trim().toLowerCase();
+    if (_v === 'on' || _v === 'off' || _v === 'auto') {
+      promptCacheBlock = { method: 'prompt_cache', state: _v, resolved_at: 'compile' };
+    }
+  }
+
+  // W916-I4 — continuous batching compile-time fingerprint.
+  let continuousBatchingBlock = null;
+  const _maxBatchRaw = process.env.KOLM_COMPILE_MAX_BATCH;
+  if (_maxBatchRaw !== undefined && _maxBatchRaw !== '') {
+    const _n = Number.parseInt(_maxBatchRaw, 10);
+    if (Number.isFinite(_n) && _n > 0) {
+      continuousBatchingBlock = { method: 'continuous_batching', max_num_seqs: _n, resolved_at: 'compile' };
+    }
+  }
+
   // W457b — when the caller passes opts.outPath, hand it straight to
   // buildAndZip so the .kolm is written at the user's exact filename
   // (no `<job_id>.kolm` intermediate + copy-rename that leaked the
@@ -969,6 +1053,14 @@ export async function compileSpec(spec, opts = {}) {
     // either carries the field (when ExportForge produced targets) or
     // remains byte-identical to pre-R-1 artifacts when no exports happened.
     runtime_passports: runtimePassports,
+    // W916-I1/I3/I4 — inference-speed operational fingerprints. All three
+    // are conditional-spread on the artifact.js side (W460 byte-stability):
+    // null → key OMITTED from manifest entirely; populated → key present.
+    // serve.py reads manifest.speculative_decoding at boot to pick a draft
+    // model when KOLM_SERVE_SPECULATIVE_DRAFT env is not set.
+    speculative_decoding: speculativeDecodingBlock,
+    prompt_cache: promptCacheBlock,
+    continuous_batching: continuousBatchingBlock,
   });
 
   // W350 — once buildAndZip has produced an artifact, any post-build failure

@@ -1,6 +1,6 @@
 // W484 P0-3 — `kolm update` must refuse to run from a repo checkout (without
 // --force). Audit flagged: a dev cloning the repo and running `kolm update`
-// silently triggers `npm i -g github:kolm-ai/kolm-stack`, which
+// silently triggers `npm i -g github:kolm-ai/kolmogorov-stack`, which
 // clobbers their global install with whatever main is at right now. The fix
 // detects the checkout (sibling .git + matching package.json name) and routes
 // the user to `git pull` instead.

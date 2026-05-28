@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#050607;color:#e6e9ee}html{color-scheme:dark}</style>
+<style>html{color-scheme:light dark}html,body{background:#f3f5f7;color:#111}@media (prefers-color-scheme:dark){html,body{background:#0e1116;color:#e6e9ee}}[data-theme="light"] html,[data-theme="light"] body{background:#f3f5f7;color:#111}[data-theme="dark"] html,[data-theme="dark"] body{background:#0e1116;color:#e6e9ee}</style>
 <title>Self-hosted compile server · kolm.ai</title>
 <meta name="description" content="Run the full kolm compile pipeline inside your network, behind your firewall, or fully air-gapped. Same .kolm artifact, same signing chain, byte-identical...">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
@@ -24,8 +24,8 @@
 
 <style>
  :root {
- --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
- --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --bg: #0e1116; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: var(--line-1); --line-strong: var(--line-2);
  --ink: #e6e9ee; --ink-mute: #aab0b8; --ink-faint: #6a727c;
  --accent: #e6e9ee; --accent-strong: #b8c0ca;
  --good: #e6e9ee; --warn: #a8b3c2; --stop: #d77;
@@ -33,7 +33,7 @@
  }
  html[data-theme="light"] {
  --bg: #f3f5f7; --bg-elev: #ffffff; --bg-card: #eef1f5;
- --line: rgba(0,0,0,0.08); --line-strong: rgba(0,0,0,0.14);
+ --line: var(--line-2); --line-strong: var(--line-3);
  --ink: #1c1f1c; --ink-mute: #4a4f47; --ink-faint: #7a807a;
  --accent: #1c1f1c; --accent-strong: #2e3329;
  --good: #1a8568; --warn: #a67200; --stop: #b03434;

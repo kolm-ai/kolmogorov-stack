@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Registry · kolm.ai</title>
 <meta name="description" content="The public .kolm registry. A content-addressed index of signed artifacts; resolve a CID to a receipt body and verify offline. Receipts only, never weights.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
@@ -26,7 +27,7 @@
   .rg-list .fr-spec-list__delta--audit    { color: #c39bf8; border-color: rgba(195,155,248,0.45); }
   .rg-list .fr-spec-list__delta--source   { color: var(--fr-mint, #6cbf8d); }
   .rg-list .fr-spec-list__delta--nonclaim { color: #e8a86a; border-color: rgba(232,168,106,0.45); }
-  .rg-list code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); padding: 1px 6px; border: 1px solid var(--ks-line-1); border-radius: 4px; background: rgba(255,255,255,0.02); }
+  .rg-list code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); padding: 1px 6px; border: 1px solid var(--ks-line-1); border-radius: 4px; background: var(--line-1); }
   .rg-list a { color: var(--ks-accent); }
 </style>
 <style>
@@ -55,14 +56,14 @@
   .sec-card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); }
   .sec-card p + p { margin-top: var(--ks-2); }
   .sec-card a { color: var(--ks-accent); }
-  .sec-card code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--ks-line-1); }
+  .sec-card code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); background: var(--line-1); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--ks-line-1); }
 
   .pact { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-6); }
   .pact h3 { margin: 0 0 var(--ks-3); font-size: 18px; font-weight: 560; color: var(--ks-ink); letter-spacing: -0.005em; }
   .pact dl { margin: 0; display: grid; grid-template-columns: 220px 1fr; gap: var(--ks-3) var(--ks-5); }
   .pact dt { font-family: var(--ks-mono); font-size: 12px; letter-spacing: 0.04em; color: var(--ks-ink-3); text-transform: uppercase; padding-top: 2px; }
   .pact dd { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink); }
-  .pact dd code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--ks-line-1); }
+  .pact dd code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); background: var(--line-1); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--ks-line-1); }
   @media (max-width: 900px) { .pact dl { grid-template-columns: 1fr; gap: var(--ks-1) var(--ks-3); } .pact dt { padding-top: 0; } .pact dd { margin-bottom: var(--ks-3); } }
 
   .reg-tbl { width: 100%; border-collapse: collapse; margin-top: var(--ks-4); font-size: 14px; }
@@ -71,7 +72,7 @@
   .reg-tbl td.cid { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); white-space: nowrap; }
   .reg-tbl td.mono { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink-2); }
   .reg-tbl .k { font-family: var(--ks-mono); font-size: 12px; color: var(--ks-accent); border: 1px solid var(--ks-accent-edge); padding: 2px 8px; border-radius: 999px; }
-  .reg-tbl tr:hover td { background: rgba(255,255,255,0.015); }
+  .reg-tbl tr:hover td { background: var(--line-1); }
 
   .code-block { background: #050607; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); margin-top: var(--ks-4); }
   .code-block pre { margin: 0; font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.6; color: var(--ks-ink); overflow-x: auto; }

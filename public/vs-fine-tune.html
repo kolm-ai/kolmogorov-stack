@@ -23,8 +23,8 @@
 
 <style>
  :root {
- --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
- --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --bg: #0e1116; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: var(--line-1); --line-strong: var(--line-2);
  --ink: #e6e9ee; --ink-mute: #aab0b8; --ink-faint: #6a727c;
  --accent: #e6e9ee; --accent-strong: #b8c0ca; --good: #e6e9ee; --bad: #ff6b91;
  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -92,7 +92,7 @@
  pre.code .ok { color: var(--good); }
  pre.code .k { color: var(--accent-strong); }
 
- .verdict { padding: 28px 32px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, rgba(230, 233, 238, 0.04), rgba(230, 233, 238, 0.01)); margin: 24px 0 0; }
+ .verdict { padding: 28px 32px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, var(--line-1), var(--line-1)); margin: 24px 0 0; }
  .verdict h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; color: var(--ink); }
  .verdict p { margin: 0 0 8px; font-size: 14.5px; color: var(--ink-mute); line-height: 1.6; }
  .verdict p:last-child { margin-bottom: 0; }
@@ -156,7 +156,7 @@
 <article>
  <div class="wrap">
 
- <div style="margin:0 0 24px;padding:14px 18px;border:1px solid rgba(150, 158, 170,0.32);border-left:3px solid #56606c;border-radius:8px;background:rgba(150, 158, 170,0.06);font-size:14px;line-height:1.55"><b>v0.2 provenance (wave 144).</b> Today <code>kolm compile</code> produces a recipe-class artifact (deterministic code + K-score gate + Ed25519-signed manifest + receipt, with optional MoE composition and bundled byte-level BPE tokenizer). The trained-student LoRA-distill path with INT4/GGUF runtime described below ships through the runtime bridge.</div>
+ <div style="margin:0 0 24px;padding:14px 18px;border:1px solid rgba(150, 158, 170,0.32);border-left:3px solid var(--ink-3,#56606c);border-radius:8px;background:rgba(150, 158, 170,0.06);font-size:14px;line-height:1.55"><b>v0.2 provenance (wave 144).</b> Today <code>kolm compile</code> produces a recipe-class artifact (deterministic code + K-score gate + Ed25519-signed manifest + receipt, with optional MoE composition and bundled byte-level BPE tokenizer). The trained-student LoRA-distill path with INT4/GGUF runtime described below ships through the runtime bridge.</div>
 
  <div class="group">
  <h2>What is the same</h2>

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>kolm vs Fireworks, Together, Baseten, DIY, hyperscaler · kolm.ai</title>
 <meta name="description" content="Column-by-column matrix that compares a signed .kolm artifact against current inference clouds and fine-tune SaaS. Capability claims cite vendor docs; pricing cites published rate sheets.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
@@ -32,7 +33,7 @@
   .cmp-matrix td.k b { display: block; color: var(--ks-accent); font-weight: 600; font-family: var(--ks-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
   .cmp-matrix td.pc { color: var(--ks-ink); background: rgba(168, 179, 194, 0.08); border-left: 1px solid var(--ks-line-2); border-right: 1px solid var(--ks-line-2); }
   .cmp-matrix td.pc b { display: block; color: var(--ks-ink-1, #1f2937); font-weight: 600; font-family: var(--ks-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
-  .cmp-matrix tbody tr:hover td { background: rgba(255,255,255,0.015); }
+  .cmp-matrix tbody tr:hover td { background: var(--line-1); }
   .cmp-matrix tbody tr:hover td.k { background: rgba(118, 237, 208, 0.10); }
   .cmp-matrix tbody tr:hover td.pc { background: rgba(168, 179, 194, 0.14); }
   .ico { display: inline-block; width: 14px; height: 14px; vertical-align: middle; margin-right: 4px; }
@@ -131,8 +132,8 @@
       <a href="#matrix" class="ks-btn ks-btn--ghost ks-btn--lg">Open the matrix</a>
       <a href="/enterprise" class="ks-btn ks-btn--ghost ks-btn--lg">Talk to procurement</a>
     </div>
-    <div style="margin-top: var(--ks-5); padding: 14px 16px; background: #050607; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.7; color: var(--ks-ink-2); max-width: 620px;">
-      <span style="color: var(--ks-accent)">$</span> pip install git+https://github.com/kolm-ai/kolm-stack@main#subdirectory=sdk/python<br>
+    <div style="margin-top: var(--ks-5); padding: 14px 16px; background: var(--surface-input, var(--ks-bg-1)); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.7; color: var(--ks-ink-2); max-width: 620px;">
+      <span style="color: var(--ks-accent)">$</span> pip install git+https://github.com/kolm-ai/kolmogorov-stack@main#subdirectory=sdk/python<br>
       <span style="color: var(--ks-accent)">$</span> kolm distill --from captures.jsonl --teacher claude-opus-4-7<br>
       <span style="color: var(--ks-accent)">$</span> kolm compile spec.yaml --target gguf,int4<br>
       <span style="color: var(--ks-ink-3)">// signed .kolm artifact, K-score gate, Ed25519 receipt</span>

@@ -19,7 +19,7 @@ $ErrorActionPreference = 'Stop'
 $KolmVersion     = if ($env:KOLM_VERSION)     { $env:KOLM_VERSION }     else { 'main' }
 $KolmInstallDir  = if ($env:KOLM_INSTALL_DIR) { $env:KOLM_INSTALL_DIR } else { Join-Path $env:USERPROFILE '.kolm\lib\kolm' }
 $KolmBinDir      = if ($env:KOLM_BIN_DIR)     { $env:KOLM_BIN_DIR }     else { Join-Path $env:USERPROFILE '.local\bin' }
-$KolmRepoUrl     = if ($env:KOLM_REPO_URL)    { $env:KOLM_REPO_URL }    else { 'https://github.com/kolm-ai/kolm-stack.git' }
+$KolmRepoUrl     = if ($env:KOLM_REPO_URL)    { $env:KOLM_REPO_URL }    else { 'https://github.com/kolm-ai/kolmogorov-stack.git' }
 $KolmRequireNode = if ($env:KOLM_REQUIRE_NODE_MAJOR) { [int]$env:KOLM_REQUIRE_NODE_MAJOR } else { 20 }
 
 function Write-Log  ([string]$msg) { Write-Host "[kolm-install] $msg" }

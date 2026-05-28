@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Recipes · kolm.ai</title>
 <meta name="description" content="A curated gallery of kolm CLI one-liners. Frontier distillations for the LocalLLaMA crowd; production vertical bots for the compliance crowd. Same compiler, same signed receipts.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
@@ -22,8 +23,8 @@
   .rg-hero__bg {
     position: absolute; inset: 0; pointer-events: none; z-index: 0;
     background:
-      radial-gradient(ellipse 60% 50% at 18% 22%, rgba(230, 233, 238,0.10), transparent 60%),
-      radial-gradient(ellipse 50% 40% at 84% 78%, rgba(230, 233, 238,0.08), transparent 60%);
+      radial-gradient(ellipse 60% 50% at 18% 22%, var(--line-2), transparent 60%),
+      radial-gradient(ellipse 50% 40% at 84% 78%, var(--line-2), transparent 60%);
   }
   .rg-hero__inner { position: relative; z-index: 1; max-width: var(--fr-container); margin: 0 auto; }
   .rg-hero h1 {
@@ -606,7 +607,7 @@
 
     </ul>
 
-    <div class="fr-callout fr-reveal" data-w703="cookbook-bridge" style="margin:32px 0 0;padding:22px 24px;border:1px solid rgba(230, 233, 238,0.32);background:linear-gradient(135deg,rgba(230, 233, 238,0.06),rgba(230, 233, 238,0.01));border-radius:10px">
+    <div class="fr-callout fr-reveal" data-w703="cookbook-bridge" style="margin:32px 0 0;padding:22px 24px;border:1px solid var(--line-strong);background:linear-gradient(135deg,var(--line-1),transparent);border-radius:10px">
       <div style="display:flex;align-items:baseline;justify-content:space-between;gap:18px;flex-wrap:wrap">
         <div style="flex:1;min-width:280px">
           <span class="fr-eyebrow" style="display:block;margin:0 0 6px">Cookbook bridge</span>

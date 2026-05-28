@@ -19,8 +19,8 @@
 <link rel="stylesheet" href="/design-tokens.css">
     <link rel="stylesheet" href="/warm-paper.css">
 <style>
-:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:rgba(17, 17, 17,0.10);--warn:#6b6b66;--bad:#dc2626;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:var(--line-2);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:var(--line-2);--warn:#6b6b66;--bad:#dc2626;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:var(--line-2);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
 .skip-link{position:absolute;left:-9999px;top:0;background:var(--accent);color:#fff;padding:8px 14px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
@@ -48,10 +48,10 @@ td code{font-size:12px}
 .kpanel{background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0 18px;max-width:920px}
 .kpanel h2{margin:0 0 8px;font-size:18px}
 .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-family:var(--mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;border:1px solid var(--line);background:var(--bg)}
-.pill-on{color:var(--accent);border-color:rgba(17, 17, 17,0.4)}
+.pill-on{color:var(--accent);border-color:var(--line-strong)}
 .pill-off{color:var(--ink-faint)}
 .pill-hold{color:#6b6b66;border-color:rgba(82, 90, 100,0.4)}
-.pill-redistilled{color:var(--accent);border-color:rgba(17, 17, 17,0.4)}
+.pill-redistilled{color:var(--accent);border-color:var(--line-strong)}
 .metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0 20px;max-width:920px}
 @media(max-width:820px){.metric-grid{grid-template-columns:1fr 1fr}}
 .metric-card{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:14px}
@@ -104,7 +104,7 @@ td code{font-size:12px}
 <h1 data-w775="h1">Frontier AI on your own infrastructure.</h1>
 <p class="lede" data-w775="lede">Auto pilot is the continuous-background-distill daemon. Opt in once; it polls coverage gaps, gates on drift, and silently re-distills when local quality can replace teacher calls. Every decision lands as a durable ledger row &mdash; the daemon never silently retrains on bad data.</p>
 
-<div class="honest-note" data-w775="honest-note"> no-silent-pass contract: <code>action:'redistilled'</code> is never emitted unless returns ok AND the drift gate is green AND the top gap_score crosses the <code>REDISTILL_THRESHOLD</code> (0.25). When any gate trips, the daemon writes a <code>holding_pattern</code> row with the reason so the operator can see WHY the autopilot held. Stamped <code>w775-v1</code>.
+<div class="caveat-note" data-w775="caveat-note"> no-silent-pass contract: <code>action:'redistilled'</code> is never emitted unless returns ok AND the drift gate is green AND the top gap_score crosses the <code>REDISTILL_THRESHOLD</code> (0.25). When any gate trips, the daemon writes a <code>holding_pattern</code> row with the reason so the operator can see WHY the autopilot held. Stamped <code>w775-v1</code>.
 </div>
 
 <section data-w775="opt-in">

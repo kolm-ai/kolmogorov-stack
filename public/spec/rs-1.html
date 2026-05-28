@@ -10,8 +10,8 @@
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <link rel="canonical" href="https://kolm.ai/spec/rs-1">
 <style>
- :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
- [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669}
+ :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:var(--line-2);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:var(--line-2);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669}
  body{background:var(--bg);color:var(--ink);font:16.5px/1.7 -apple-system,Inter,system-ui,sans-serif;margin:0}
  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
@@ -26,7 +26,7 @@
  .subtitle{font-size:16.5px;color:var(--ink-mute);margin:0 0 14px;font-style:italic;line-height:1.55}
  .authors{font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin:0 0 6px;letter-spacing:0.04em}
  .stamp{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:6px 0 0;letter-spacing:0.04em}
- .abstract{margin:32px 0 0;padding:20px 24px;border-left:2px solid var(--accent);background:rgba(17, 17, 17,0.04);font-size:15.5px;line-height:1.65;color:var(--ink-mute)}
+ .abstract{margin:32px 0 0;padding:20px 24px;border-left:2px solid var(--accent);background:var(--line-1);font-size:15.5px;line-height:1.65;color:var(--ink-mute)}
  .abstract b{color:var(--ink);font-weight:500}
  .provenance{margin:24px 0 0;padding:14px 18px;border:1px dashed rgba(150, 158, 170,0.45);border-radius:6px;background:rgba(150, 158, 170,0.04);font-size:13.5px;color:var(--ink-mute);font-family:var(--mono);line-height:1.6}
  .provenance b{color:#56606c}
@@ -46,7 +46,7 @@
  table.matrix td.yes{color:#111111}
  table.matrix td.no{color:var(--ink-faint)}
  .cites{font-family:var(--mono);font-size:12px;color:var(--ink-mute);line-height:1.6}
- .cites a{color:var(--accent);text-decoration:none;border-bottom:1px dashed rgba(17, 17, 17,0.32)}
+ .cites a{color:var(--accent);text-decoration:none;border-bottom:1px dashed var(--line-strong)}
  .actions{display:flex;gap:12px;margin:36px 0 0;flex-wrap:wrap}
  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--ink);transition:all 160ms}
  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
@@ -97,15 +97,15 @@
 
 <p class="crumbs"><a href="/">kolm.ai</a> &nbsp;/&nbsp; <a href="/spec">spec</a> &nbsp;/&nbsp; RS-1 v2.1</p>
 
-<div class="open-banner" style="margin:0 0 24px;padding:14px 18px;border:1px solid rgba(17, 17, 17,0.32);border-radius:8px;background:rgba(17, 17, 17,0.06);font-size:13.5px;line-height:1.6;color:var(--ink-mute);font-family:var(--mono)">
+<div class="open-banner" style="margin:0 0 24px;padding:14px 18px;border:1px solid var(--line-strong);border-radius:8px;background:var(--line-1);font-size:13.5px;line-height:1.6;color:var(--ink-mute);font-family:var(--mono)">
  <b style="color:var(--accent)">RS-1 is an open standard (Apache-2.0).</b>
  The format spec, the K-score formula, the four-class taxonomy, and the reference verifier are all Apache-2.0 licensed.
- Read the reference verifier on <a href="https://github.com/kolm-ai/kolm-stack" style="color:var(--accent)">GitHub</a>,
+ Read the reference verifier on <a href="https://github.com/kolm-ai/kolmogorov-stack" style="color:var(--accent)">GitHub</a>,
  install the free standalone verifier at <a href="/verify-cli" style="color:var(--accent)">/verify-cli</a>,
  or follow the change log at <a href="/spec/changelog" style="color:var(--accent)">/spec/changelog</a>.
 </div>
 
-<div class="version-callout" style="margin:0 0 18px;padding:10px 16px;border-left:2px solid var(--accent);background:rgba(17, 17, 17,0.04);font-size:13px;line-height:1.55;color:var(--ink-mute);font-family:var(--mono)">
+<div class="version-callout" style="margin:0 0 18px;padding:10px 16px;border-left:2px solid var(--accent);background:var(--line-1);font-size:13px;line-height:1.55;color:var(--ink-mute);font-family:var(--mono)">
  <b style="color:var(--ink)">v2.1 current</b> &nbsp;.&nbsp; see <a href="/spec/changelog" style="color:var(--accent)">/spec/changelog</a> for history (v1.0 frozen 2026-01-15 / v1.1 drift / v2.0 supersession + teacher fidelity / v2.1 k-score-2 axes).
 </div>
 
@@ -530,7 +530,7 @@ train = seeds \\ holdout</pre>
 <h3>10.1 How to participate</h3>
 <p>RS-1 is governed in the open and follows a Linux Foundation style process for proposed changes. Five participation surfaces are available:</p>
 <ul>
-<li><b>RFC process.</b> Any normative change to the spec (new manifest field, new recipe class, new verifier check, new signature layer, new K-score axis weight) goes through a numbered RFC pull request against <code>docs/rfcs/</code> in the <a href="https://github.com/kolm-ai/kolm-stack">kolm-stack</a> repo. RFCs land with a 14-day public comment window. The current RFC template lives at <code>docs/rfcs/0000-template.md</code>.</li>
+<li><b>RFC process.</b> Any normative change to the spec (new manifest field, new recipe class, new verifier check, new signature layer, new K-score axis weight) goes through a numbered RFC pull request against <code>docs/rfcs/</code> in the <a href="https://github.com/kolm-ai/kolmogorov-stack">kolm-stack</a> repo. RFCs land with a 14-day public comment window. The current RFC template lives at <code>docs/rfcs/0000-template.md</code>.</li>
 <li><b>Mailing list.</b> Discussion and announcements are mirrored to <code>rs-1-discuss@kolm.ai</code> (subscribe via <code>hello@kolm.ai</code>). Archives are public-by-default; private threads only for security disclosures under the embargo policy at <a href="/security">/security</a>.</li>
 <li><b>Change log.</b> Every minor or major version bump is recorded at <a href="/spec/changelog">/spec/changelog</a> with a date, summary, and a diff link to the spec PR that landed it. v1.0 (2026-01-15), v1.1 (drift block), v2.0 (supersession + teacher fidelity), v2.1 (k-score-2 axes).</li>
 <li><b>Reference verifier.</b> The free standalone <code>kolm verify</code> CLI lives at <a href="/verify-cli">/verify-cli</a>; it verifies any <code>.kolm</code> artifact against this spec with zero login, zero telemetry, zero third-party runtime. Source is Apache-2.0; binary releases ship signed.</li>

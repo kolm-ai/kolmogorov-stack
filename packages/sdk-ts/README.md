@@ -43,7 +43,7 @@ interface KolmOutput { text: string; cid?: string; credential?: string; latency_
 interface LoadOptions { secret?: string | Buffer; endpoint?: string; apiKey?: string; skipHashCheck?: boolean; }
 ```
 
-The surface mirrors the Python SDK (`packages/sdk-python`). If a method exists there and not here, that is a bug. File it at https://github.com/kolm-ai/kolm-stack/issues.
+The surface mirrors the Python SDK (`packages/sdk-python`). If a method exists there and not here, that is a bug. File it at https://github.com/kolm-ai/kolmogorov-stack/issues.
 
 ## Browser
 

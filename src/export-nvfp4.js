@@ -79,6 +79,56 @@ export function probeNvfp4Toolchain() {
   };
 }
 
+// W916-I2 — Blackwell-native gate. NVFP4 only delivers its 2-3x throughput
+// win on Blackwell (sm_100+). On Hopper/Ada it loads via emulation and is
+// SLOWER than FP8. This probe returns a structured object so callers can
+// surface a banner and let users override with `force: true`. Returning a
+// rich object (not a bool) so /info, previewExport, and runExport can all
+// quote the same diagnostic verbatim.
+export function probeBlackwellNative() {
+  try {
+    // Inline nvidia-smi probe (avoids cross-module ESM/CJS issues and
+    // keeps this fn sync so previewExport stays sync). nvidia-smi exit
+    // status > 0 → no NVIDIA driver / GPU → return non-Blackwell.
+    const r = spawnSync('nvidia-smi',
+      ['--query-gpu=name,compute_cap', '--format=csv,noheader,nounits'],
+      { encoding: 'utf8', timeout: 5_000, windowsHide: true });
+    if (r.status !== 0 || !r.stdout) {
+      return {
+        ok: false,
+        blackwell_native: false,
+        vendor: 'unknown',
+        compute_capability: null,
+        reason: 'NVFP4 requires NVIDIA Blackwell silicon; nvidia-smi not available or no NVIDIA GPU detected.',
+      };
+    }
+    const firstLine = String(r.stdout).split(/\r?\n/).find(s => s.trim()) || '';
+    const parts = firstLine.split(',').map(s => s.trim());
+    const deviceName = parts[0] || null;
+    const cc = parts[1] || '';
+    const major = parseInt(cc.split('.')[0], 10);
+    const isBlackwell = Number.isFinite(major) && major >= 10;
+    return {
+      ok: isBlackwell,
+      blackwell_native: isBlackwell,
+      vendor: 'nvidia',
+      device_name: deviceName,
+      compute_capability: cc || null,
+      reason: isBlackwell
+        ? `Blackwell native (cc ${cc}) — NVFP4 will run at full speed.`
+        : `Detected ${deviceName || 'NVIDIA GPU'} (cc ${cc}). NVFP4 calibration will succeed but inference will emulate FP4 — slower than FP8 on this device.`,
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      blackwell_native: false,
+      vendor: 'unknown',
+      compute_capability: null,
+      reason: `hardware probe failed: ${e.message}`,
+    };
+  }
+}
+
 export function previewExport({ artifact, quant, target_dir }) {
   if (!artifact || typeof artifact !== 'object') {
     throw new Error('previewExport: artifact required');
@@ -106,6 +156,7 @@ export function previewExport({ artifact, quant, target_dir }) {
     py, '-c',
     `"import modelopt.torch.quantization as mtq; from transformers import AutoModelForCausalLM; m=AutoModelForCausalLM.from_pretrained('${artifact.merged_dir || '<hf_dir>'}'); mtq.quantize(m, mtq.${formatStr}_CFG, forward_loop=lambda m: None); m.save_pretrained('${target_dir}')"`,
   ].join(' ');
+  const blackwell = probeBlackwellNative();
   return {
     format: 'nvfp4',
     quant: parsed.mode,
@@ -116,11 +167,12 @@ export function previewExport({ artifact, quant, target_dir }) {
     requires_gpu: true,
     runtime_hint: RUNTIME_HINT,
     command,
+    blackwell_gate: blackwell,
     notes: 'NVFP4 needs Blackwell (sm_100) for full speedup; on Hopper/Ada it loads via emulation and is slower than FP8.',
   };
 }
 
-export async function runExport({ artifact, quant, target_dir }) {
+export async function runExport({ artifact, quant, target_dir, force = false }) {
   if (!artifact || typeof artifact !== 'object') {
     throw new Error('runExport: artifact required');
   }
@@ -132,6 +184,19 @@ export async function runExport({ artifact, quant, target_dir }) {
       ok: false,
       error: `invalid_quant_${quant}`,
       hint: `accepted: ${QUANT_LEVELS.join(', ')}`,
+    };
+  }
+  // W916-I2 — Blackwell gate. Block by default on non-Blackwell silicon
+  // (emulation runs slower than FP8 — no point quantizing). Bypass with
+  // `force: true` for benchmark sweeps that intentionally measure the
+  // emulation path.
+  const blackwell = probeBlackwellNative();
+  if (!blackwell.blackwell_native && !force) {
+    return {
+      ok: false,
+      error: 'not_blackwell_native',
+      blackwell_gate: blackwell,
+      hint: 'NVFP4 export only delivers a speedup on Blackwell silicon (sm_100+). On Hopper/Ada the emulation path is slower than FP8. Use --target fp8 instead, or pass force:true / --force to override.',
     };
   }
   const probe = probeNvfp4Toolchain();
@@ -214,6 +279,8 @@ export async function runExport({ artifact, quant, target_dir }) {
     size_bytes,
     wall_ms,
     runtime_hint: RUNTIME_HINT,
+    blackwell_gate: blackwell,
+    forced: force === true && !blackwell.blackwell_native,
     forge_version: NVFP4_EXPORT_VERSION,
   };
 }

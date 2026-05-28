@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>K-score: the one number that decides if a .kolm ships · kolm.ai</title>
 <meta name="description" content="K-score is a per-artifact gate. Every .kolm file gets one number from its own held-out evals. Five composed axes, calibrated against the teacher. Not a leaderboard for the underlying base model.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
@@ -22,9 +23,9 @@
   .ks-hero-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
   @media (max-width: 920px) { .ks-hero-grid { grid-template-columns: 1fr; } }
   
-  .ks-bigscore { padding: clamp(28px, 4vw, 48px); background: linear-gradient(180deg, rgba(230, 233, 238, 0.022), transparent 60%), var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); position: relative; overflow: hidden; }
+  .ks-bigscore { padding: clamp(28px, 4vw, 48px); background: linear-gradient(180deg, var(--line-1), transparent 60%), var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); position: relative; overflow: hidden; }
   
-  .ks-bigscore::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(230, 233, 238, 0.42), transparent); }
+  .ks-bigscore::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--line-strong), transparent); }
   .ks-bigscore .label { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: var(--ks-5); }
   .ks-bigscore__nrow { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--ks-4); margin-bottom: var(--ks-6); }
   .ks-bigscore .v { font-family: var(--ks-mono); font-size: clamp(88px, 14vw, 156px); color: var(--ks-accent); font-variant-numeric: tabular-nums; line-height: 0.88; letter-spacing: -0.05em; font-weight: 320; }

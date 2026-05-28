@@ -7,7 +7,7 @@ import path from 'node:path';
 
 const ROOT = process.cwd();
 const PUBLIC = path.join(ROOT, 'public');
-const CANONICAL = 'npm i -g github:kolm-ai/kolm-stack';
+const CANONICAL = 'npm i -g github:kolm-ai/kolmogorov-stack';
 
 function read(rel) {
   return fs.readFileSync(path.join(ROOT, rel), 'utf8');
@@ -61,7 +61,7 @@ test('W494 #2 - first-party install docs use the GitHub npm source path', () => 
     'public/quickstart.html',
   ]) {
     const html = read(relPath);
-    assert.ok(html.includes('github:kolm-ai/kolm-stack'), `${relPath} must show source install`);
+    assert.ok(html.includes('github:kolm-ai/kolmogorov-stack'), `${relPath} must show source install`);
   }
 
   for (const relPath of [
@@ -85,11 +85,11 @@ test('W494 #3 - Homebrew, winget, scoop, and Docker are runtime setup, not shipp
 
 test('W494 #4 - marketing copy and CLI help name the canonical source install', () => {
   const why = read('public/why-kolm.html');
-  assert.ok(why.includes('npm install -g github:kolm-ai/kolm-stack'));
+  assert.ok(why.includes('npm install -g github:kolm-ai/kolmogorov-stack'));
   assert.equal(why.includes('Homebrew, winget, apt'), false);
 
   const cli = read('cli/kolm.js');
-  assert.ok(cli.includes('npm i -g github:kolm-ai/kolm-stack'));
+  assert.ok(cli.includes('npm i -g github:kolm-ai/kolmogorov-stack'));
   assert.doesNotMatch(cli, /\bnpm\s+(?:i|install)\s+-g\s+kolm\b/i);
 });
 

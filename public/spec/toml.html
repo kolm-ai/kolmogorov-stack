@@ -33,8 +33,8 @@
 }
 </script>
 <style>
- :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
- [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669}
+ :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:var(--line-2);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:var(--line-2);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669}
  body{background:var(--bg);color:var(--ink);font:16.5px/1.7 -apple-system,Inter,system-ui,sans-serif;margin:0}
  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
@@ -49,7 +49,7 @@
  .subtitle{font-size:16.5px;color:var(--ink-mute);margin:0 0 14px;font-style:italic;line-height:1.55}
  .authors{font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin:0 0 6px;letter-spacing:0.04em}
  .stamp{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:6px 0 0;letter-spacing:0.04em}
- .abstract{margin:32px 0 0;padding:20px 24px;border-left:2px solid var(--accent);background:rgba(17, 17, 17,0.04);font-size:15.5px;line-height:1.65;color:var(--ink-mute)}
+ .abstract{margin:32px 0 0;padding:20px 24px;border-left:2px solid var(--accent);background:var(--line-1);font-size:15.5px;line-height:1.65;color:var(--ink-mute)}
  .abstract b{color:var(--ink);font-weight:500}
  h2{font-size:22px;font-weight:500;letter-spacing:-0.012em;margin:48px 0 12px;color:var(--ink)}
  h3{font-size:17px;font-weight:500;margin:24px 0 8px;color:var(--ink)}
@@ -72,7 +72,7 @@
  .feedback ul{margin:8px 0 0}
  .pill-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 18px}
  .pill-row .p{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-radius:4px;padding:3px 8px;color:var(--ink-mute);letter-spacing:0.02em}
- .pill-row .p.live{color:var(--accent);border-color:rgba(17, 17, 17,0.4)}
+ .pill-row .p.live{color:var(--accent);border-color:var(--line-strong)}
  footer.site{padding:32px 0;border-top:1px solid var(--line);color:var(--ink-faint);font-size:13px;margin-top:64px}
  footer.site .wrap{max-width:1180px}
  footer.site a{color:var(--ink-mute);text-decoration:none}

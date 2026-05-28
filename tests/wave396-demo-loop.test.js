@@ -1,7 +1,7 @@
 // Wave 396 . `kolm demo seed-log-triage` close-the-loop seed corpus.
 //
 // The acceptance test is the 12-command flow:
-//   npm i -g github:kolm-ai/kolm-stack
+//   npm i -g github:kolm-ai/kolmogorov-stack
 //   kolm connect start --detach
 //   kolm connect doctor
 //   kolm privacy test "email a@b.com ssn 123-45-6789"

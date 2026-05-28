@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>kolm-meta &middot; Open-source AI workbench &middot; kolm.ai</title>
 <meta name="description" content="kolm-meta is the meta-distillation model: given capture stats and a chosen architecture, it predicts K-Score, compile time, and likely failure modes. XGBoost-style gradient boosting, falls back to TAAS rule ladder under">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
@@ -36,7 +37,7 @@
     padding: 18px 20px;
     border: 1px solid var(--line-1);
     border-radius: 10px;
-    background: rgba(255,255,255,0.015);
+    background: var(--line-1);
     font-family: var(--fr-font-mono);
     font-size: 13px;
     color: var(--ink-2);
@@ -233,7 +234,7 @@
         <p class="fr-spec-list__p">Because rows are aggregates by design, kolm-meta is compatible with the federated approval-row sharing model: only hashed, noise-protected fingerprints cross the tenant boundary.</p>
       </li>
     </ul>
-    <div class="km-honesty">
+    <div class="km-caveat">
       <b>Loud-fail envelope.</b> When kolm-meta cannot predict, the response is <code>meta_insufficient_data</code> with a clear count of training rows seen so far. We do not silently emit a heuristic prediction styled as a learned one. Every kolm-meta prediction ships with its SHAP attributions, the per-target confidence interval, and a pointer to the training-row cohort it generalized from.
     </div>
     <div class="km-crosslink">

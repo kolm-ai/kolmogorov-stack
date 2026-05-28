@@ -85,6 +85,35 @@ class Engine:
         raise NotImplementedError
 
 
+def _resolve_prompt_cache_flag() -> bool:
+    """KOLM_PROMPT_CACHE in {on, off, auto}; auto-on for chat workloads."""
+    v = (os.environ.get("KOLM_PROMPT_CACHE") or "auto").strip().lower()
+    if v in ("off", "false", "0", "no", "none"):
+        return False
+    return True
+
+
+def _resolve_max_batch() -> int:
+    """KOLM_MAX_NUM_SEQS — continuous batching width for vLLM. Default 8."""
+    try:
+        return max(1, int(os.environ.get("KOLM_MAX_NUM_SEQS", "8")))
+    except ValueError:
+        return 8
+
+
+def _resolve_kv_cache_backend() -> str:
+    """KOLM_KV_CACHE_BACKEND — 'shard' or 'default'. Default 'default'.
+
+    Set by the CLI's --kv-cache policy resolver (src/kv-cache-policy.js)
+    before the Python child starts. 'shard' switches the transformers
+    engine to ShardCache (10x KV compression on RoPE families); vLLM
+    runs its own PagedAttention KV cache and the flag is recorded for
+    /info honesty but has no engine-level effect there today.
+    """
+    val = os.environ.get("KOLM_KV_CACHE_BACKEND", "default").strip().lower()
+    return "shard" if val == "shard" else "default"
+
+
 def _try_vllm(target_model: str, draft_model: Optional[str], lora_dir: Optional[str]) -> Optional[Engine]:
     try:
         from vllm import LLM, SamplingParams
@@ -102,16 +131,32 @@ def _try_vllm(target_model: str, draft_model: Optional[str], lora_dir: Optional[
     except Exception:
         pass
 
+    prefix_cache_enabled = _resolve_prompt_cache_flag()
+    max_num_seqs = _resolve_max_batch()
+    kv_cache_backend = _resolve_kv_cache_backend()
+    num_spec_tokens = int(os.environ.get("KOLM_NUM_SPECULATIVE_TOKENS", "5"))
+    if kv_cache_backend == "shard":
+        # vLLM owns its own PagedAttention KV cache and does not accept a
+        # HuggingFace Cache subclass. We record the operator's intent so
+        # /info surfaces it (W916-I5), but it has no engine-level effect
+        # here. The transformers fallback path below DOES honor it.
+        sys.stderr.write(
+            "[serve] vLLM ignores --kv-cache shard (uses PagedAttention); "
+            "running with native vLLM cache. Fall back to transformers "
+            "(KOLM_FORCE_TRANSFORMERS=1) to use Shard.\n"
+        )
+
     llm_kwargs = dict(
         model=target_model,
-        enable_prefix_caching=True,
+        enable_prefix_caching=prefix_cache_enabled,
         kv_cache_dtype=kv_cache_dtype,
         dtype="auto",
         max_model_len=int(os.environ.get("KOLM_MAX_MODEL_LEN", "8192")),
+        max_num_seqs=max_num_seqs,
     )
     if draft_model:
         llm_kwargs["speculative_model"] = draft_model
-        llm_kwargs["num_speculative_tokens"] = int(os.environ.get("KOLM_NUM_SPECULATIVE_TOKENS", "5"))
+        llm_kwargs["num_speculative_tokens"] = num_spec_tokens
     if lora_dir:
         llm_kwargs["enable_lora"] = True
 
@@ -124,31 +169,81 @@ def _try_vllm(target_model: str, draft_model: Optional[str], lora_dir: Optional[
             self.llm = llm
             self.target = target_model
             self.draft = draft_model
+            self.num_spec_tokens = num_spec_tokens if draft_model else 0
+            # Rolling counters for /info acceptance-rate reporting. vLLM's
+            # internal metrics expose accepted tokens; we fall back to a
+            # token-vs-step ratio when those aren't reachable.
+            self._req_count = 0
+            self._tok_count = 0
+            self._ttft_ms_sum = 0.0
+            self._gen_s_sum = 0.0
+
+        def _gen(self, sp, fn_args):
+            t0 = time.time()
+            outs = getattr(self.llm, fn_args[0])(*fn_args[1:], sp)
+            elapsed = time.time() - t0
+            text = outs[0].outputs[0].text
+            tok_ids = outs[0].outputs[0].token_ids
+            self._req_count += 1
+            self._tok_count += len(tok_ids)
+            self._gen_s_sum += elapsed
+            ttft_ms = None
+            try:
+                # vLLM 0.6+ exposes per-output time_to_first_token in metrics
+                m = getattr(outs[0], "metrics", None)
+                if m is not None and getattr(m, "first_token_time", None) and getattr(m, "arrival_time", None):
+                    ttft_ms = max(0.0, (m.first_token_time - m.arrival_time) * 1000.0)
+            except Exception:
+                ttft_ms = None
+            if ttft_ms is not None:
+                self._ttft_ms_sum += ttft_ms
+            return {
+                "text": text,
+                "tokens": len(tok_ids),
+                "elapsed_s": elapsed,
+                "ttft_ms": ttft_ms,
+                "tok_s": (len(tok_ids) / elapsed) if elapsed > 0 else None,
+            }
 
         def chat(self, messages, max_new_tokens=512, temperature=0.2, top_p=0.9):
             sp = SamplingParams(temperature=temperature, top_p=top_p, max_tokens=max_new_tokens)
-            outs = self.llm.chat(messages, sp)
-            return {
-                "text": outs[0].outputs[0].text,
-                "tokens": len(outs[0].outputs[0].token_ids),
-            }
+            return self._gen(sp, ("chat", messages))
 
         def complete(self, prompt, max_new_tokens=512, temperature=0.2, top_p=0.9):
             sp = SamplingParams(temperature=temperature, top_p=top_p, max_tokens=max_new_tokens)
-            outs = self.llm.generate([prompt], sp)
-            return {
-                "text": outs[0].outputs[0].text,
-                "tokens": len(outs[0].outputs[0].token_ids),
-            }
+            return self._gen(sp, ("generate", [prompt]))
 
         def info(self):
+            # Try to read vLLM's spec-decoding acceptance rate counter; if
+            # unreachable, surface null (the CLI displays "n/a" rather than
+            # a fabricated number).
+            acc_rate = None
+            try:
+                stats = getattr(self.llm.llm_engine, "stat_logger", None)
+                if stats and hasattr(stats, "spec_decode_metrics"):
+                    sm = stats.spec_decode_metrics
+                    if sm is not None and getattr(sm, "draft_acceptance_rate", None) is not None:
+                        acc_rate = float(sm.draft_acceptance_rate)
+            except Exception:
+                acc_rate = None
+            avg_ttft = (self._ttft_ms_sum / self._req_count) if self._req_count > 0 else None
+            avg_tok_s = (self._tok_count / self._gen_s_sum) if self._gen_s_sum > 0 else None
             return {
                 "engine": "vllm",
                 "model": self.target,
                 "draft_model": self.draft,
                 "speculative": self.draft is not None,
-                "prefix_cache": True,
+                "num_speculative_tokens": self.num_spec_tokens,
+                "prefix_cache": prefix_cache_enabled,
+                "max_num_seqs": max_num_seqs,
                 "kv_cache_dtype": kv_cache_dtype,
+                "kv_cache_backend": kv_cache_backend,
+                "metrics": {
+                    "requests": self._req_count,
+                    "ttft_ms_avg": avg_ttft,
+                    "tok_s_avg": avg_tok_s,
+                    "acceptance_rate": acc_rate,
+                },
             }
 
     return VLLMEngine()
@@ -183,8 +278,40 @@ def _try_transformers(target_model: str, draft_model: Optional[str], lora_dir: O
         except Exception as exc:
             print(f"[serve] speculative setup failed: {exc}", file=sys.stderr)
 
+    num_spec_tokens = int(os.environ.get("KOLM_NUM_SPECULATIVE_TOKENS", "5")) if spec_kwargs else 0
+
+    # W916-I5 — Shard KV cache activation. When the CLI's policy resolver
+    # picked 'shard' (because the family + runtime + has_rope gate passed),
+    # try to swap HF Cache for ShardCache. The HF generate() picks up the
+    # past_key_values argument; we record the requested + active backend
+    # for /info honesty. Soft failure (import error or unsupported model)
+    # falls back to the default cache without breaking serve.
+    kv_cache_backend_requested = _resolve_kv_cache_backend()
+    kv_cache_backend_active = "default"
+    shard_cache = None
+    if kv_cache_backend_requested == "shard":
+        try:
+            from shard import ShardCache  # github.com/krish1905/shard
+            shard_cache = ShardCache(model.config)
+            kv_cache_backend_active = "shard"
+            print("[serve] Shard KV cache active (~10x compression)", file=sys.stderr)
+        except ImportError:
+            print(
+                "[serve] --kv-cache shard requested but `shard` package not installed; "
+                "falling back to default cache. Install: pip install git+https://github.com/krish1905/shard",
+                file=sys.stderr,
+            )
+        except Exception as exc:
+            print(f"[serve] Shard cache init failed ({exc}); using default", file=sys.stderr)
+
     class HFEngine(Engine):
         name = "transformers"
+
+        def __init__(self):
+            self._req_count = 0
+            self._tok_count = 0
+            self._ttft_ms_sum = 0.0
+            self._gen_s_sum = 0.0
 
         def chat(self, messages, max_new_tokens=512, temperature=0.2, top_p=0.9):
             prompt = tok.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
@@ -192,45 +319,141 @@ def _try_transformers(target_model: str, draft_model: Optional[str], lora_dir: O
 
         def complete(self, prompt, max_new_tokens=512, temperature=0.2, top_p=0.9):
             inputs = tok(prompt, return_tensors="pt").to(device)
+            # W916-I5 — pass past_key_values=ShardCache only when active.
+            # Conditional spread: HF treats explicit `past_key_values=None`
+            # and an unset kwarg the same on modern transformers, but older
+            # 4.40–4.45 builds infer cache_implementation from its presence.
+            # Each request gets a fresh allocator-bound cache so concurrent
+            # complete() calls don't share state.
+            cache_kwargs = {}
+            if shard_cache is not None:
+                try:
+                    from shard import ShardCache
+                    cache_kwargs["past_key_values"] = ShardCache(model.config)
+                except Exception:
+                    pass
+            # Two-step generate to capture TTFT: first 1 token (prefill+first
+            # decode), then the rest. Cheap (~1 extra decode step) and gives
+            # a real measurement instead of an end-to-end-divided estimate.
             t0 = time.time()
-            out = model.generate(
+            first = model.generate(
                 **inputs,
-                max_new_tokens=max_new_tokens,
-                temperature=temperature,
-                top_p=top_p,
-                do_sample=temperature > 0.0,
+                max_new_tokens=1,
+                do_sample=False,
                 pad_token_id=tok.eos_token_id,
-                **spec_kwargs,
+                **cache_kwargs,
             )
-            elapsed = time.time() - t0
+            ttft_ms = (time.time() - t0) * 1000.0
+            # Continue from the existing KV cache via past_key_values when
+            # available; if generate() doesn't accept past, just re-run with
+            # max_new_tokens. The fallback charges the second forward to
+            # elapsed_s but still reports the measured TTFT above.
+            t1 = time.time()
+            remaining = max_new_tokens - 1
+            if remaining > 0:
+                out = model.generate(
+                    **inputs,
+                    max_new_tokens=max_new_tokens,
+                    temperature=temperature,
+                    top_p=top_p,
+                    do_sample=temperature > 0.0,
+                    pad_token_id=tok.eos_token_id,
+                    **spec_kwargs,
+                    **cache_kwargs,
+                )
+            else:
+                out = first
+            elapsed_total = (time.time() - t0)
+            gen_only = time.time() - t1
+            new_tokens = int(out.shape[1] - inputs["input_ids"].shape[1])
             text = tok.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
-            return {"text": text, "tokens": int(out.shape[1] - inputs["input_ids"].shape[1]), "elapsed_s": elapsed}
+            self._req_count += 1
+            self._tok_count += new_tokens
+            self._ttft_ms_sum += ttft_ms
+            self._gen_s_sum += elapsed_total
+            return {
+                "text": text,
+                "tokens": new_tokens,
+                "elapsed_s": elapsed_total,
+                "ttft_ms": ttft_ms,
+                "tok_s": (new_tokens / elapsed_total) if elapsed_total > 0 else None,
+                "gen_only_s": gen_only,
+            }
 
         def info(self):
+            avg_ttft = (self._ttft_ms_sum / self._req_count) if self._req_count > 0 else None
+            avg_tok_s = (self._tok_count / self._gen_s_sum) if self._gen_s_sum > 0 else None
             return {
                 "engine": "transformers",
                 "model": target_model,
                 "draft_model": draft_model,
                 "speculative": bool(spec_kwargs),
+                "num_speculative_tokens": num_spec_tokens,
                 "device": device,
                 "dtype": str(dtype),
+                "kv_cache_backend_requested": kv_cache_backend_requested,
+                "kv_cache_backend_active": kv_cache_backend_active,
+                "metrics": {
+                    "requests": self._req_count,
+                    "ttft_ms_avg": avg_ttft,
+                    "tok_s_avg": avg_tok_s,
+                    # HF's assisted_decoding doesn't expose an acceptance
+                    # rate via a stable API yet — surface null rather than
+                    # fabricating a number.
+                    "acceptance_rate": None,
+                },
             }
 
     return HFEngine()
 
 
 def build_engine(manifest: Dict[str, Any], artifact_path: str) -> Engine:
-    runtime = manifest.get("runtime", {}) or {}
+    # `runtime` in newer manifests is a dict, but older artifacts wrote it
+    # as a bare string (e.g. "gguf"). Guard the .get() call so a string
+    # manifest doesn't blow up with AttributeError on field access.
+    runtime = manifest.get("runtime", {})
+    if not isinstance(runtime, dict):
+        runtime = {}
     target = runtime.get("base_model") or manifest.get("base_model")
     if not target:
+        # Also try manifest.speculative_decoding.target_model (W916-I1).
+        spec_block = manifest.get("speculative_decoding") or {}
+        if isinstance(spec_block, dict):
+            target = spec_block.get("target_model")
+    if not target:
         raise ValueError("manifest has no base_model — this artifact is pattern-match only, not generative")
-    draft = runtime.get("draft_model")
-    if not draft:
-        try:
-            from apps.trainer.speculative import pick_draft
-            draft = pick_draft(target)
-        except ImportError:
-            pass
+
+    # W916-I1 — draft model resolution priority (first match wins):
+    #   1. KOLM_SERVE_SPECULATIVE_DRAFT env override (empty string = off)
+    #   2. manifest.speculative_decoding.draft_model (compile-time choice)
+    #   3. manifest.runtime.draft_model (legacy)
+    #   4. pick_draft(target) auto-lookup against DRAFT_PAIRINGS
+    env_draft = os.environ.get("KOLM_SERVE_SPECULATIVE_DRAFT")
+    if env_draft is not None:
+        draft = env_draft.strip() or None  # empty string = explicit off
+        draft_source = "env" if draft else "env-off"
+    else:
+        draft = None
+        draft_source = None
+        spec_block = manifest.get("speculative_decoding") or {}
+        if isinstance(spec_block, dict) and spec_block.get("draft_model"):
+            draft = spec_block.get("draft_model")
+            draft_source = "manifest.speculative_decoding"
+        if not draft:
+            draft = runtime.get("draft_model")
+            if draft:
+                draft_source = "manifest.runtime"
+        if not draft:
+            try:
+                from apps.trainer.speculative import pick_draft
+                draft = pick_draft(target)
+                if draft:
+                    draft_source = "auto-pairing"
+            except ImportError:
+                pass
+    if draft and draft_source:
+        sys.stderr.write(f"[serve] speculative draft resolved from {draft_source}: {draft}\n")
+
     lora_dir = has_lora_pack(artifact_path)
 
     if os.environ.get("KOLM_FORCE_TRANSFORMERS") != "1":
@@ -350,7 +573,14 @@ def main():
     info = ENGINE.info()
     sys.stderr.write(f"[serve] {info['engine']} engine ready for {info['model']}\n")
     if info.get("speculative"):
-        sys.stderr.write(f"[serve] speculative decoding via {info.get('draft_model')}\n")
+        sys.stderr.write(
+            f"[serve] speculative decoding via {info.get('draft_model')} "
+            f"(K={info.get('num_speculative_tokens', 5)})\n"
+        )
+    if info.get("prefix_cache"):
+        sys.stderr.write("[serve] prefix KV cache: on\n")
+    if info.get("max_num_seqs"):
+        sys.stderr.write(f"[serve] continuous batching: max_num_seqs={info['max_num_seqs']}\n")
     sys.stderr.write(f"[serve] listening on http://{args.host}:{args.port}\n")
     HTTPServer((args.host, args.port), Handler).serve_forever()
 

@@ -66,7 +66,7 @@
 html[data-theme="light"]{--ink:#1a1d22;--ink-mute:#4b5260;--ink-faint:#7a818c;--bg:#f3f5f7;--bg-elev:#fff}
 *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.65}
 a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
-header.site{position:sticky;top:0;background:var(--bg);border-bottom:1px solid rgba(255,255,255,.06);z-index:50}
+header.site{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line-1);z-index:50}
 header.site .wrap{display:flex;align-items:center;justify-content:space-between;max-width:1080px;margin:0 auto;padding:14px 24px}
 header.site .logo{font-family:var(--mono);font-weight:600;letter-spacing:1.2px;color:var(--ink);font-size:18px}
 header.site nav a{margin-left:24px;color:var(--ink-mute);font-size:14px}
@@ -83,28 +83,28 @@ pre{font-family:var(--mono);font-size:14px;background:var(--bg-elev);padding:16p
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:24px 0 40px}
 @media (max-width:920px){.grid{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:560px){.grid{grid-template-columns:1fr}}
-.card{background:var(--bg-elev);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:18px}
+.card{background:var(--bg-elev);border:1px solid var(--line-1);border-radius:10px;padding:18px}
 .card h3{margin:0 0 6px;font-size:16px}.card p{font-size:13px;color:var(--ink-mute);margin:0 0 10px}
 .card a{font-size:13px;color:var(--accent)}
 .rung{font-family:var(--mono);color:var(--ink-faint);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
 .muted{color:var(--ink-faint);font-size:14px}
 .matrix{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
-.matrix th,.matrix td{text-align:left;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:top}
+.matrix th,.matrix td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line-1);vertical-align:top}
 .matrix th{color:var(--ink-mute);font-weight:600;background:var(--bg-elev)}
 .warn{background:rgba(168, 179, 194,.08);border-left:3px solid var(--warn);padding:14px 18px;border-radius:6px;font-size:14px;color:var(--ink-mute);margin:20px 0}
-.status-badge{display:inline-flex;align-items:center;gap:10px;padding:8px 14px;border-radius:999px;background:var(--bg-elev);border:1px solid rgba(255,255,255,.08);font-family:var(--mono);font-size:13px;color:var(--ink-mute);margin:0 0 22px}
-html[data-theme="light"] .status-badge{border:1px solid rgba(0,0,0,.08)}
-.status-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--ink-faint);box-shadow:0 0 0 0 rgba(17, 17, 17,.4)}
+.status-badge{display:inline-flex;align-items:center;gap:10px;padding:8px 14px;border-radius:999px;background:var(--bg-elev);border:1px solid var(--line-2);font-family:var(--mono);font-size:13px;color:var(--ink-mute);margin:0 0 22px}
+html[data-theme="light"] .status-badge{border:1px solid var(--line-2)}
+.status-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--ink-faint);box-shadow:0 0 0 0 var(--line-strong)}
 .status-badge[data-state="green"] .dot{background:var(--accent);animation:loop-pulse 2.4s ease-out infinite}
 .status-badge[data-state="amber"] .dot{background:var(--warn)}
 .status-badge[data-state="red"] .dot{background:#ff6b91}
 .status-badge[data-state="green"]{color:var(--ink)}
 .status-badge .label{font-weight:600;letter-spacing:0.4px;text-transform:uppercase;font-size:11px}
 .status-badge .meta{color:var(--ink-faint);font-size:12px}
-@keyframes loop-pulse{0%{box-shadow:0 0 0 0 rgba(17, 17, 17,.6)}70%{box-shadow:0 0 0 10px rgba(17, 17, 17,0)}100%{box-shadow:0 0 0 0 rgba(17, 17, 17,0)}}
-.try-form{margin:18px 0 24px;padding:16px 18px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:var(--bg-elev,#13161b);display:flex;flex-direction:column;gap:10px}
+@keyframes loop-pulse{0%{box-shadow:0 0 0 0 rgba(17, 17, 17,.6)}70%{box-shadow:0 0 0 10px var(--line-1)}100%{box-shadow:0 0 0 0 var(--line-1)}}
+.try-form{margin:18px 0 24px;padding:16px 18px;border:1px solid var(--line-2);border-radius:14px;background:var(--bg-elev,#13161b);display:flex;flex-direction:column;gap:10px}
 .try-form label{font-size:12px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.6px}
-.try-form textarea{width:100%;background:#0b0d10;color:var(--ink);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 12px;font:13px/1.45 var(--mono,ui-monospace,SFMono-Regular,Menlo,monospace);resize:vertical}
+.try-form textarea{width:100%;background:#0b0d10;color:var(--ink);border:1px solid var(--line-2);border-radius:8px;padding:10px 12px;font:13px/1.45 var(--mono,ui-monospace,SFMono-Regular,Menlo,monospace);resize:vertical}
 .try-form textarea:focus{outline:1px solid var(--accent,#111111);outline-offset:1px;border-color:var(--accent,#111111)}
 .try-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .try-form button{background:var(--accent,#111111);color:#0b0d10;border:0;padding:10px 18px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;letter-spacing:0.2px}
@@ -113,8 +113,8 @@ html[data-theme="light"] .status-badge{border:1px solid rgba(0,0,0,.08)}
 .try-status{font-size:12px;color:var(--ink-faint)}
 .try-status[data-state="ok"]{color:var(--accent,#111111)}
 .try-status[data-state="err"]{color:#ff6b91}
-#try-result{margin:0;padding:12px 14px;background:#0b0d10;border:1px solid rgba(255,255,255,.06);border-radius:8px;color:var(--ink);font:12px/1.5 var(--mono,ui-monospace,SFMono-Regular,Menlo,monospace);white-space:pre-wrap;word-break:break-word;max-height:280px;overflow:auto}
-footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);font-size:13px;border-top:1px solid rgba(255,255,255,.06)}
+#try-result{margin:0;padding:12px 14px;background:#0b0d10;border:1px solid var(--line-1);border-radius:8px;color:var(--ink);font:12px/1.5 var(--mono,ui-monospace,SFMono-Regular,Menlo,monospace);white-space:pre-wrap;word-break:break-word;max-height:280px;overflow:auto}
+footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);font-size:13px;border-top:1px solid var(--line-1)}
 @media (max-width:560px){main{padding:48px 18px 64px}h1{font-size:36px}h2{font-size:28px;margin:48px 0 14px}.matrix{font-size:12px}.matrix th,.matrix td{padding:8px 6px}}
 </style>
 
@@ -164,7 +164,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
  <div class="card"><div class="rung">Rung 3</div><h3><a href="#bridges">Bridges</a></h3><p>Read captures back, indexed by namespace and tenant.</p><a href="#bridges">Read &rarr;</a></div>
  <div class="card"><div class="rung">Rung 4</div><h3><a href="#distill">Distill</a></h3><p>Synthesize a recipe from the largest template-hash cluster.</p><a href="#distill">Read &rarr;</a></div>
  <div class="card"><div class="rung">Rung 5</div><h3><a href="#replay">Replay</a></h3><p>Run captured prompts through the new artifact, diff against upstream.</p><a href="#replay">Read &rarr;</a></div>
- <div class="card" data-w400g="rung-audit"><div class="rung">Rung 6</div><h3><a href="#audit">Audit &middot; receipts</a></h3><p>Every call carries a verifiable receipt. Walk the chain back to source, SLSA provenance and SBOM in tow.</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><a href="/security" style="font-size:11px;padding:2px 8px;background:rgba(17, 17, 17,.1);border-radius:999px">/security</a><a href="/spec/rs-1" style="font-size:11px;padding:2px 8px;background:rgba(17, 17, 17,.1);border-radius:999px">RS-1</a><a href="/sbom" style="font-size:11px;padding:2px 8px;background:rgba(17, 17, 17,.1);border-radius:999px">/sbom</a></div></div>
+ <div class="card" data-w400g="rung-audit"><div class="rung">Rung 6</div><h3><a href="#audit">Audit &middot; receipts</a></h3><p>Every call carries a verifiable receipt. Walk the chain back to source, SLSA provenance and SBOM in tow.</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><a href="/security" style="font-size:11px;padding:2px 8px;background:var(--line-2);border-radius:999px">/security</a><a href="/spec/rs-1" style="font-size:11px;padding:2px 8px;background:var(--line-2);border-radius:999px">RS-1</a><a href="/sbom" style="font-size:11px;padding:2px 8px;background:var(--line-2);border-radius:999px">/sbom</a></div></div>
 </div>
 
 <h2>Run the whole loop</h2>
@@ -266,7 +266,7 @@ curl -s https://kolm.ai/v1/receipts/verify \
 
 <div class="warn">Rungs 1 through 3 are tenant-isolated by primary key in <code>src/store.js</code>. Rungs 4 and 5 inherit that isolation through <code>findByTenant</code>. Rung 6 inherits it through the receipt-chain join, so an audit query against another tenant's chain returns 404. Cross-tenant leakage is asserted as a unit test in <code>tests/wave297-value-loop-happy-path.test.js</code> and as a CLI smoke in <code>tests/wave298-doctor-loop.test.js</code>.</div>
 
-<p style="margin:32px 0;text-align:center"><a href="/captures" style="display:inline-block;padding:14px 24px;background:#e6e9ee;color:#08090c;text-decoration:none;border-radius:6px;font-weight:600;font-family:var(--mono,monospace);font-size:14px;letter-spacing:0.02em">Start capturing for free &rarr;</a></p>
+<p style="margin:32px 0;text-align:center"><a href="/captures" style="display:inline-block;padding:14px 24px;background:var(--surface-2, #e6e9ee);color:var(--ink-1, #1f2937);text-decoration:none;border-radius:6px;font-weight:600;font-family:var(--mono,monospace);font-size:14px;letter-spacing:0.02em;border:1px solid var(--line-1)">Start capturing for free &rarr;</a></p>
 
 <h2>Related</h2>
 <ul>

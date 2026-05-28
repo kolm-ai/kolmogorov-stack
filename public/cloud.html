@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Cloud distill · kolm.ai</title>
 <meta name="description" content="Bring your captures. Get your .kolm artifact. Skip the GPUs. kolm cloud distill runs the training pass on managed infra, returns a quantized artifact, and meters per GPU-hour (separate from inference $/1k-tokens).">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
@@ -192,7 +193,7 @@ total_gpu_seconds:   <span class="s">2614</span>
 total_cost_usd:      $<span class="s">1.4453</span>
 rows:                3</pre>
     </div>
-    <div class="honesty">
+    <div class="caveat">
       <h4>Caveats &middot; queued vs running</h4>
       <p>When no managed pool is provisioned, <code>cloud_backend_status</code> returns <code>no_pool_configured</code> and the job sits in <code>queued</code> until an operator sets <code>KOLM_CLOUD_DISTILL_ENDPOINT</code>. We never simulate a finished run when no backend exists; <code>kolm cloud distill status</code> reports the truth. This is the same no-silent-pass contract as <a href="/distill#self-host">self-hosted distill</a> and <a href="/k-score">K-score reporting</a>.</p>
     </div>

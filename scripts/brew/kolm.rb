@@ -4,11 +4,11 @@
 class Kolm < Formula
   desc "AI compiler  -  produce signed.kolm artifacts that run anywhere"
   homepage "https://kolm.ai"
-  url "https://github.com/kolm-ai/kolm-stack/archive/refs/tags/v0.1.0.tar.gz"
+  url "https://github.com/kolm-ai/kolmogorov-stack/archive/refs/tags/v0.1.0.tar.gz"
   # SHA256 to be set on first tagged release.
   sha256 "0000000000000000000000000000000000000000000000000000000000000000"
   license "MIT"
-  head "https://github.com/kolm-ai/kolm-stack.git", branch: "main"
+  head "https://github.com/kolm-ai/kolmogorov-stack.git", branch: "main"
 
   depends_on "node@22"
 

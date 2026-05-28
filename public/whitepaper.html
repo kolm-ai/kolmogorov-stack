@@ -23,12 +23,12 @@
 <meta property="twitter:image" content="https://kolm.ai/img/brand-og.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
- :root{--bg:#050607;--bg-elev:#0b0f10;--bg-card:#101514;--line:rgba(255,255,255,0.06);--line-strong:rgba(255,255,255,0.12);--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--accent:#e6e9ee;--accent-soft:rgba(230, 233, 238, 0.10);--good:#e6e9ee;--bad:#ff6b91;--warn:#f6c177;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
+ :root{--bg:#0e1116;--bg-elev:#0b0f10;--bg-card:#101514;--line:var(--line-1);--line-strong:var(--line-2);--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--accent:#e6e9ee;--accent-soft:var(--line-2);--good:#e6e9ee;--bad:#ff6b91;--warn:#f6c177;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;}
  *{box-sizing:border-box}
  html,body{margin:0;padding:0;scroll-behavior:smooth}
  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;font-synthesis:none}
  a{color:inherit;text-decoration:none}
- ::selection{background:rgba(230, 233, 238, 0.30)}
+ ::selection{background:var(--line-strong)}
 
  .wrap{max-width:1180px;margin:0 auto;padding:0 32px}
  @media(max-width:720px){.wrap{padding:0 20px}}
@@ -47,7 +47,7 @@
  header.site .right .cta{display:inline-flex;align-items:center;gap:6px;color:var(--bg);background:var(--ink);border-radius:6px;padding:7px 14px;font-size:13px;font-weight: 500}
 
  section.cover{padding:88px 0 56px;border-bottom:1px solid var(--line);position:relative;overflow:hidden}
- section.cover::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 980px 480px at 24% 18%,rgba(230, 233, 238, 0.12),transparent 60%);pointer-events:none}
+ section.cover::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 980px 480px at 24% 18%,var(--line-2),transparent 60%);pointer-events:none}
  section.cover .wrap{position:relative}
  .eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:0;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
  .eyebrow .num{color:var(--accent)}
@@ -108,12 +108,12 @@
  tbody td code{white-space:nowrap}
 
  .kw{font-family:var(--mono);font-size:0.86em;color:var(--accent);font-weight: 500;letter-spacing:0}
- .normative{padding:14px 18px;border-left:2px solid var(--accent);background:rgba(230, 233, 238, 0.06);border-radius:0 6px 6px 0;margin:14px 0;font-size:14px;color:var(--ink)}
+ .normative{padding:14px 18px;border-left:2px solid var(--accent);background:var(--line-1);border-radius:0 6px 6px 0;margin:14px 0;font-size:14px;color:var(--ink)}
  .normative b{color:var(--ink);font-weight: 500}
  .note{padding:12px 16px;border-left:2px solid var(--ink-faint);background:var(--bg-elev);border-radius:0 6px 6px 0;margin:14px 0;font-size:13.5px;color:var(--ink-mute)}
  .note b{color:var(--ink)}
 
- .pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0;color:var(--accent);background:var(--accent-soft);border:1px solid rgba(230, 233, 238, 0.18);padding:3px 8px;border-radius:3px;line-height:1}
+ .pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0;color:var(--accent);background:var(--accent-soft);border:1px solid var(--line-3);padding:3px 8px;border-radius:3px;line-height:1}
  .pill.warn{color:var(--warn);background:rgba(246,193,119,0.08);border-color:rgba(246,193,119,0.18)}
  .pill.bad{color:var(--bad);background:rgba(255,107,145,0.08);border-color:rgba(255,107,145,0.18)}
 
@@ -211,7 +211,7 @@
 
 <section id="abstract">
  <h2><span class="num">§0</span> Abstract</h2>
- <div style="margin:0 0 16px;padding:14px 18px;border:1px solid rgba(150, 158, 170,0.32);border-left:3px solid #56606c;border-radius:8px;background:rgba(150, 158, 170,0.06);font-size:14px;line-height:1.6"><b>v0.2 provenance (wave 144).</b> RS-1 is the normative spec for the full <code>.kolm</code> container. The v0.2 build ships the spec-conformant members that don't depend on the runtime weight bridge: manifest, recipe pack, eval suite, receipt + Ed25519 signature, optional <code>kolm-moe-1</code> composition, optional bundled <code>kolm-tokenizer-1</code>, and the <code>KOLMIDX</code> deterministic lookup container in the <code>index.sqlite-vec</code> slot. The base-model GGUF (<code>model.gguf</code>), trained LoRA adapter (<code>lora.bin</code>), and full sqlite-vec multimodal index are spec-conformant <i>conditional</i> members that ship through the runtime bridge. The MAY/MUST/REQUIRED/CONDITIONAL labels in the sections below are correct as written; the conditional members are what v0.2 leaves empty.</div>
+ <div style="margin:0 0 16px;padding:14px 18px;border:1px solid rgba(150, 158, 170,0.32);border-left:3px solid var(--ink-3,#56606c);border-radius:8px;background:rgba(150, 158, 170,0.06);font-size:14px;line-height:1.6"><b>v0.2 provenance (wave 144).</b> RS-1 is the normative spec for the full <code>.kolm</code> container. The v0.2 build ships the spec-conformant members that don't depend on the runtime weight bridge: manifest, recipe pack, eval suite, receipt + Ed25519 signature, optional <code>kolm-moe-1</code> composition, optional bundled <code>kolm-tokenizer-1</code>, and the <code>KOLMIDX</code> deterministic lookup container in the <code>index.sqlite-vec</code> slot. The base-model GGUF (<code>model.gguf</code>), trained LoRA adapter (<code>lora.bin</code>), and full sqlite-vec multimodal index are spec-conformant <i>conditional</i> members that ship through the runtime bridge. The MAY/MUST/REQUIRED/CONDITIONAL labels in the sections below are correct as written; the conditional members are what v0.2 leaves empty.</div>
  <p>This document specifies <b>RS-1</b>, the wire format and protocol for <code>.kolm</code> artifacts. A <code>.kolm</code> is a single-file, deterministic, signed bundle: base model, personal LoRA adapter, recipe pack of deterministic-token drafts, multimodal recall index, eval suite, manifest with cryptographic anchors to a public registry. The compiler is <b>kolm</b>; the pipeline has eight normative stages (gather -spec -synthesize -k-sample -verify -fit -observe -sign).</p>
  <p>RS-1 satisfies three goals: <b>portability</b> (runs on commodity CPUs, consumer GPUs, mobile NPUs, no network),
  <b>verifiability</b> (third parties byte-reproduce from inputs; consumers verify output lineage offline),
@@ -228,7 +228,7 @@
  <p>Implementations MAY add capabilities, but MUST NOT rename fields, change zip layer ordering, or break receipt verification against <code>registry.kolm.ai</code>.</p>
  <div class="normative">
  <b>Status of this memo.</b> RS-1 published under MIT (code) and CC-BY-4.0 (text). Errata, additions, test suite at
- <code>github.com/kolm-ai/kolm-stack</code>. Spec follows SemVer; backward-incompatible changes increment major (RS-1 &rarr; RS-2) and require a registry epoch transition.
+ <code>github.com/kolm-ai/kolmogorov-stack</code>. Spec follows SemVer; backward-incompatible changes increment major (RS-1 &rarr; RS-2) and require a registry epoch transition.
  </div>
 </section>
 
@@ -491,7 +491,7 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
 
 <section id="conform">
  <h2><span class="num">§11</span> Conformance</h2>
- <p>The operational definition is the public test suite at <code>github.com/kolm-ai/kolm-stack/tree/main/conformance</code>. This section is the human-readable summary.</p>
+ <p>The operational definition is the public test suite at <code>github.com/kolm-ai/kolmogorov-stack/tree/main/conformance</code>. This section is the human-readable summary.</p>
 
  <h3>11.1 Compiler conformance</h3>
  <ul>
@@ -526,7 +526,7 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
  <li>[BGE-M3] Xiao, S. et al. <i>BGE M3-Embedding.</i> 2024.</li>
  <li>[SQLITE-VEC] Asg, A. <i>sqlite-vec: A vector search SQLite extension.</i> 2024.</li>
  <li>[JSON-SCHEMA-2020-12] <i>JSON Schema Draft 2020-12.</i> json-schema.org.</li>
- <li>Reproducibility appendix and conformance vectors at <code>github.com/kolm-ai/kolm-stack</code>.</li>
+ <li>Reproducibility appendix and conformance vectors at <code>github.com/kolm-ai/kolmogorov-stack</code>.</li>
  </ul>
 </section>
 
@@ -583,7 +583,7 @@ offset size field
 
  <p>Verification: compute <code>Ed25519(epoch_key, bytes[0..135])</code> and compare to <code>bytes[136..167]</code>. The epoch key is published at <code>registry.kolm.ai/epoch/&lt;anchor_date&gt;/key.json</code> and signed by the registry's long-term Ed25519 key.</p>
 
- <div class="note"><b>End of specification.</b> Errata and conformance vectors at <code>github.com/kolm-ai/kolm-stack</code>. Maintainers: <code>spec@kolm.ai</code>.</div>
+ <div class="note"><b>End of specification.</b> Errata and conformance vectors at <code>github.com/kolm-ai/kolmogorov-stack</code>. Maintainers: <code>spec@kolm.ai</code>.</div>
 </section>
 
 </article>

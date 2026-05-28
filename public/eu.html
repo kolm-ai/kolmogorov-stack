@@ -26,33 +26,33 @@
 
 <style>
  .eu-hero { padding: 96px 32px 56px; max-width: 1180px; margin: 0 auto; }
- .eu-hero .eyebrow { font-family: var(--mono); font-size: 11px; color: var(--violet, #e6e9ee); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 18px; padding: 4px 10px; display: inline-block; border: 1px solid rgba(230, 233, 238, 0.32); border-radius: 999px; background: rgba(230, 233, 238, 0.06); }
+ .eu-hero .eyebrow { font-family: var(--mono); font-size: 11px; color: var(--violet, var(--ink-1,#e6e9ee)); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 18px; padding: 4px 10px; display: inline-block; border: 1px solid var(--line-strong); border-radius: 999px; background: var(--line-1); }
  .eu-hero h1 { font-size: clamp(42px, 6vw, 76px); line-height: 1.04; margin: 0 0 22px; font-weight: 500; letter-spacing: -0.025em; max-width: 18ch; }
  .eu-hero h1 .accent { color: var(--violet, #b3a8ff); }
- .eu-hero .lede { font-size: clamp(16px, 1.6vw, 19px); color: var(--ink-mute, #aab0b8); max-width: 64ch; line-height: 1.6; margin: 0 0 28px; }
+ .eu-hero .lede { font-size: clamp(16px, 1.6vw, 19px); color: var(--ink-mute, var(--ink-3,#aab0b8)); max-width: 64ch; line-height: 1.6; margin: 0 0 28px; }
  .eu-hero .cta-row { display: flex; gap: 14px; flex-wrap: wrap; }
- .eu-section { max-width: 1180px; margin: 0 auto; padding: 56px 32px; border-top: 1px solid var(--line, rgba(255,255,255,0.08)); }
+ .eu-section { max-width: 1180px; margin: 0 auto; padding: 56px 32px; border-top: 1px solid var(--line, var(--line-2)); }
  .eu-section h2 { font-size: clamp(26px, 3vw, 38px); font-weight: 500; margin: 0 0 14px; line-height: 1.15; letter-spacing: -0.015em; }
- .eu-section .sec-lede { color: var(--ink-mute, #aab0b8); font-size: 15.5px; max-width: 70ch; line-height: 1.65; margin: 0 0 28px; }
+ .eu-section .sec-lede { color: var(--ink-mute, var(--ink-3,#aab0b8)); font-size: 15.5px; max-width: 70ch; line-height: 1.65; margin: 0 0 28px; }
  .eu-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
  @media (max-width: 880px) { .eu-cards { grid-template-columns: 1fr; } }
- .eu-card { padding: 24px 26px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 12px; background: var(--bg-2, #11151b); }
- .eu-card .pill { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--violet, #e6e9ee); margin-bottom: 10px; }
+ .eu-card { padding: 24px 26px; border: 1px solid var(--line, var(--line-2)); border-radius: 12px; background: var(--bg-2, #11151b); }
+ .eu-card .pill { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--violet, var(--ink-1,#e6e9ee)); margin-bottom: 10px; }
  .eu-card h3 { margin: 0 0 8px; font-size: 17px; font-weight: 500; }
- .eu-card p { margin: 0 0 12px; font-size: 13.5px; color: var(--ink-mute, #aab0b8); line-height: 1.6; }
- .eu-card a.deep { font-family: var(--mono); font-size: 12px; color: var(--accent, #e6e9ee); text-decoration: none; border-bottom: 1px solid rgba(230, 233, 238,0.3); }
- .eu-card a.deep:hover { border-bottom-color: var(--accent, #e6e9ee); }
+ .eu-card p { margin: 0 0 12px; font-size: 13.5px; color: var(--ink-mute, var(--ink-3,#aab0b8)); line-height: 1.6; }
+ .eu-card a.deep { font-family: var(--mono); font-size: 12px; color: var(--accent, var(--ink-1,#e6e9ee)); text-decoration: none; border-bottom: 1px solid var(--line-strong); }
+ .eu-card a.deep:hover { border-bottom-color: var(--accent, var(--ink-1,#e6e9ee)); }
  .eu-region { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 16px; }
  @media (max-width: 880px) { .eu-region { grid-template-columns: repeat(2, 1fr); } }
- .eu-region .reg { padding: 18px 20px; border: 1px solid var(--line); border-radius: 10px; background: rgba(0,0,0,0.18); }
+ .eu-region .reg { padding: 18px 20px; border: 1px solid var(--line); border-radius: 10px; background: var(--line-3); }
  .eu-region .reg .code { font-family: var(--mono); font-size: 11px; color: var(--ink-faint, #6a727c); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
- .eu-region .reg .name { font-size: 14.5px; color: var(--fg, #e6e9ee); line-height: 1.4; }
+ .eu-region .reg .name { font-size: 14.5px; color: var(--fg, var(--ink-1,#e6e9ee)); line-height: 1.4; }
  .eu-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 14px; }
- .eu-table td { padding: 12px 14px; border-bottom: 1px solid var(--line, rgba(255,255,255,0.08)); vertical-align: top; color: var(--ink-mute, #aab0b8); line-height: 1.55; }
- .eu-table td:first-child { color: var(--fg, #e6e9ee); font-family: var(--mono); font-size: 12.5px; width: 30%; }
+ .eu-table td { padding: 12px 14px; border-bottom: 1px solid var(--line, var(--line-2)); vertical-align: top; color: var(--ink-mute, var(--ink-3,#aab0b8)); line-height: 1.55; }
+ .eu-table td:first-child { color: var(--fg, var(--ink-1,#e6e9ee)); font-family: var(--mono); font-size: 12.5px; width: 30%; }
  .eu-cta-bar { margin: 56px auto; max-width: 980px; padding: 36px 32px; border: 1px solid var(--line); border-radius: 14px; background: var(--bg-2, #11151b); text-align: center; }
  .eu-cta-bar h2 { margin: 0 0 10px; font-size: 26px; font-weight: 500; }
- .eu-cta-bar p { color: var(--ink-mute, #aab0b8); font-size: 14.5px; max-width: 60ch; margin: 0 auto 20px; }
+ .eu-cta-bar p { color: var(--ink-mute, var(--ink-3,#aab0b8)); font-size: 14.5px; max-width: 60ch; margin: 0 auto 20px; }
  @media (max-width: 560px) {
  .eu-hero { padding: 56px 18px 32px; }
  .eu-section { padding: 36px 18px; }
@@ -231,7 +231,7 @@
 
  <section class="eu-cta-bar">
  <h2>Compile your first EU-resident artifact.</h2>
- <p>Free tier ships with EU residency as a region flag. The CLI verb is one line: <code style="font-family:var(--mono);font-size:13px;background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:4px">kolm compile --region eu-west-1 my-task.kolm</code></p>
+ <p>Free tier ships with EU residency as a region flag. The CLI verb is one line: <code style="font-family:var(--mono);font-size:13px;background:var(--surface-2);padding:2px 8px;border-radius:4px">kolm compile --region eu-west-1 my-task.kolm</code></p>
  <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
  <a href="/signup" class="btn primary electric">Get API key &rarr;</a>
  <a href="/quickstart" class="btn ghost">60-second quickstart</a>

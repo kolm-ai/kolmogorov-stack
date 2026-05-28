@@ -40,7 +40,7 @@
  text-decoration: none !important;
  font-family: var(--mono) !important;
  font-size: 0.94em !important;
- border-bottom: 1px solid rgba(17, 17, 17,0.32) !important;
+ border-bottom: 1px solid var(--line-strong) !important;
  transition: color 120ms, border-color 120ms;
 }
 .bxo-link:hover { color: #34d399 !important; border-color: rgba(52,211,153,0.6) !important; }
@@ -52,13 +52,13 @@ main > section.hero {
  padding: 144px 0 88px !important;
  position: relative !important;
  overflow: hidden !important;
- border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+ border-bottom: 1px solid var(--line-1) !important;
 }
-[data-theme=light] main > section.hero { border-bottom-color: rgba(0,0,0,0.06) !important; }
+[data-theme=light] main > section.hero { border-bottom-color: var(--line-1) !important; }
 main > section.hero::before {
  content: "";
  position: absolute; inset: 0;
- background-image: radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px);
+ background-image: radial-gradient(circle, var(--line-1) 1px, transparent 1px);
  background-size: 32px 32px;
  mask-image: radial-gradient(ellipse 900px 600px at 18% 30%, #000 0%, rgba(0,0,0,0.4) 55%, transparent 95%);
  -webkit-mask-image: radial-gradient(ellipse 900px 600px at 18% 30%, #000 0%, rgba(0,0,0,0.4) 55%, transparent 95%);
@@ -66,7 +66,7 @@ main > section.hero::before {
  z-index: 0;
 }
 [data-theme=light] main > section.hero::before {
- background-image: radial-gradient(circle, rgba(0,0,0,0.055) 1px, transparent 1px);
+ background-image: radial-gradient(circle, var(--line-1) 1px, transparent 1px);
 }
 main > section.hero .wrap { position: relative; z-index: 1; }
 @media (max-width: 720px) {
@@ -114,9 +114,9 @@ main > section.hero .eyebrow .pulse {
 /* Section rhythm 96/56 + hairlines */
 main > section.section {
  padding: 96px 0 !important;
- border-top: 1px solid rgba(255,255,255,0.05) !important;
+ border-top: 1px solid var(--line-1) !important;
 }
-[data-theme=light] main > section.section { border-top-color: rgba(0,0,0,0.06) !important; }
+[data-theme=light] main > section.section { border-top-color: var(--line-1) !important; }
 @media (max-width: 720px) {
  main > section.section { padding: 56px 0 !important; }
 }
@@ -175,14 +175,14 @@ main td code {
  font-size: 0.9em !important;
  padding: 2px 6px !important;
  border-radius: 4px !important;
- background: rgba(255,255,255,0.05) !important;
+ background: var(--line-1) !important;
  color: var(--ink, #e6e9ee) !important;
 }
 [data-theme=light] main p code,
 [data-theme=light] main .sec-lede code,
 [data-theme=light] main .lede code,
 [data-theme=light] main td code {
- background: rgba(0,0,0,0.05) !important;
+ background: var(--line-1) !important;
  color: #1f2429 !important;
 }
 
@@ -190,7 +190,7 @@ main td code {
 pre.terminal {
  font-family: var(--mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace) !important;
  background: #0a0c10 !important;
- border: 1px solid rgba(255,255,255,0.08) !important;
+ border: 1px solid var(--line-2) !important;
  border-radius: 12px !important;
  padding: 22px 24px !important;
  font-size: 13px !important;
@@ -200,7 +200,7 @@ pre.terminal {
 }
 [data-theme=light] pre.terminal {
  background: #1a1d24 !important;
- border-color: rgba(0,0,0,0.12) !important;
+ border-color: var(--line-2) !important;
  color: #e6e4dd !important;
 }
 [data-theme=light] pre.terminal .prompt { color: #34d399 !important; }
@@ -216,7 +216,7 @@ pre.terminal {
  display: inline-flex; align-items: center;
  margin-left: 10px;
  padding: 3px 8px;
- border: 1px solid rgba(17, 17, 17,0.4);
+ border: 1px solid var(--line-strong);
  border-radius: 4px;
  font-family: var(--mono);
  font-size: 10.5px;
@@ -228,9 +228,9 @@ pre.terminal {
 [data-theme=light] .bxo-tag { color: #059669; border-color: rgba(5,150,105,0.4); }
 .bxo-roadmap-banner {
  padding: 16px 20px;
- border: 1px solid rgba(17, 17, 17,0.22);
+ border: 1px solid var(--line-3);
  border-radius: 12px;
- background: rgba(17, 17, 17,0.05);
+ background: var(--line-1);
  color: var(--ink-mute, #aab0b8);
  font-size: 14px;
  line-height: 1.6;
@@ -241,21 +241,21 @@ pre.terminal {
 .bxo-roadmap-banner a {
  color: #111111;
  text-decoration: none;
- border-bottom: 1px solid rgba(17, 17, 17,0.32);
+ border-bottom: 1px solid var(--line-strong);
 }
 .bxo-roadmap-banner a:hover { color: #34d399; border-color: rgba(52,211,153,0.6); }
 
 /* btn.accent: emerald monochrome (legacy mint .btn.accent overridden) */
 main .btn.accent {
- background: rgba(17, 17, 17, 0.08) !important;
+ background: var(--line-2) !important;
  color: #111111 !important;
- border-color: rgba(17, 17, 17, 0.32) !important;
+ border-color: var(--line-strong) !important;
 }
 main .btn.accent:hover {
- background: rgba(17, 17, 17, 0.15) !important;
+ background: var(--line-3) !important;
  color: #34d399 !important;
- border-color: rgba(17, 17, 17, 0.5) !important;
- box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.10) !important;
+ border-color: var(--line-strong) !important;
+ box-shadow: 0 0 0 1px var(--line-2) !important;
 }
 [data-theme=light] main .btn.accent {
  background: rgba(5,150,105, 0.06) !important;
@@ -279,13 +279,13 @@ main .btn.accent:hover {
 .vs-tbl {
  border-radius: 16px !important;
  overflow: hidden;
- background: rgba(255,255,255,0.02) !important;
- border: 1px solid rgba(255,255,255,0.08) !important;
+ background: var(--line-1) !important;
+ border: 1px solid var(--line-2) !important;
 }
 [data-theme=light] .vs-tbl {
  background: #ffffff !important;
- border-color: rgba(0,0,0,0.08) !important;
- box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+ border-color: var(--line-2) !important;
+ box-shadow: 0 1px 2px var(--line-1) !important;
 }
 .vs-tbl thead th {
  font-family: var(--mono) !important;
@@ -294,24 +294,24 @@ main .btn.accent:hover {
  text-transform: uppercase !important;
  color: var(--ink-faint, #6a727c) !important;
  padding: 18px 20px !important;
- border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+ border-bottom: 1px solid var(--line-2) !important;
  font-weight: 400 !important;
  text-align: left !important;
 }
 [data-theme=light] .vs-tbl thead th {
  color: #6a727c !important;
- border-bottom-color: rgba(0,0,0,0.08) !important;
+ border-bottom-color: var(--line-2) !important;
 }
 .vs-tbl tbody td {
  padding: 20px !important;
- border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+ border-bottom: 1px solid var(--line-1) !important;
  font-size: 14.5px !important;
  line-height: 1.6 !important;
  color: var(--ink-mute, #aab0b8) !important;
 }
 [data-theme=light] .vs-tbl tbody td {
  color: #4b5158 !important;
- border-bottom-color: rgba(0,0,0,0.05) !important;
+ border-bottom-color: var(--line-1) !important;
 }
 .vs-tbl tbody td b { color: var(--ink, #e6e9ee) !important; }
 [data-theme=light] .vs-tbl tbody td b { color: #1f2429 !important; }
@@ -326,13 +326,13 @@ main .btn.accent:hover {
  margin-top: 64px;
  padding: 56px 32px !important;
  border-radius: 20px !important;
- background: linear-gradient(180deg, rgba(17, 17, 17,0.04), transparent) !important;
- border: 1px solid rgba(255,255,255,0.06) !important;
+ background: linear-gradient(180deg, var(--line-1), transparent) !important;
+ border: 1px solid var(--line-1) !important;
  text-align: center;
 }
 [data-theme=light] .bottom-cta {
  background: linear-gradient(180deg, rgba(5,150,105,0.04), transparent) !important;
- border-color: rgba(0,0,0,0.06) !important;
+ border-color: var(--line-1) !important;
 }
 .bottom-cta h2 {
  font-size: clamp(36px, 4.4vw, 56px) !important;
@@ -439,7 +439,7 @@ main > section.hero .actions {
  <p class="lede">Anyone (human or AI agent) authors a signed <code>.kolm</code> in four commands. JSON spec in, signed binary out, runs locally with zero egress, every output ships with a byte-walkable receipt chain. No account needed for local builds.</p>
  <div class="actions">
  <a href="/quickstart" class="btn primary">quickstart</a>
- <a href="https://github.com/kolm-ai/kolm-stack/blob/main/docs/AUTHORING.md" class="btn ghost">authoring guide</a>
+ <a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/docs/AUTHORING.md" class="btn ghost">authoring guide</a>
  <a href="/docs" class="btn accent">cookbook</a>
  </div>
  </div>
@@ -452,7 +452,7 @@ main > section.hero .actions {
  <h2>Scaffold &rarr; compile &rarr; run &rarr; serve.</h2>
  <p class="sec-lede">Local builds use a per-user receipt secret at <code>~/.kolm/config.json</code> (mode 0600). Set <code>RECIPE_RECEIPT_SECRET</code> in your environment for a teammate's verifier to accept the same artifact.</p>
 
-<pre class="terminal"><span class="prompt">$</span> npm i -g github:kolm-ai/kolm-stack
+<pre class="terminal"><span class="prompt">$</span> npm i -g github:kolm-ai/kolmogorov-stack
 <span class="prompt">$</span> kolm new my-redactor --from redactor
 <span class="ok">wrote</span> ./my-redactor.spec.json <span class="comment"># a working spec, edit to taste</span>
 
@@ -578,7 +578,7 @@ main > section.hero .actions {
  "size_bytes": 4188
 }</pre>
 
- <p class="sec-lede" style="margin-top:24px;">Full reference in <a href="https://github.com/kolm-ai/kolm-stack/blob/main/docs/AUTHORING.md"><code>docs/AUTHORING.md</code></a>: spec field rules, sandbox surface (<code>lib.patterns</code>, <code>lib.parseFloatSafe</code>, <code>lib.pack</code>, <code>lib.index</code>, <code>lib.params</code>), pack/index containers, receipt chain, every compiler error code.</p>
+ <p class="sec-lede" style="margin-top:24px;">Full reference in <a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/docs/AUTHORING.md"><code>docs/AUTHORING.md</code></a>: spec field rules, sandbox surface (<code>lib.patterns</code>, <code>lib.parseFloatSafe</code>, <code>lib.pack</code>, <code>lib.index</code>, <code>lib.params</code>), pack/index containers, receipt chain, every compiler error code.</p>
  </div>
  </section>
 
@@ -742,7 +742,7 @@ Task: <describe the task in one paragraph>
  <h2>Ship one. Ship a hundred.</h2>
  <p class="lead">Four templates, seconds to compile. Spec validator catches wrong-shape before sealing; receipt chain catches the rest. Read the authoring guide, scaffold a template, edit a regex, ship.</p>
  <div class="actions">
- <a href="https://github.com/kolm-ai/kolm-stack/blob/main/docs/AUTHORING.md" class="btn primary">authoring guide</a>
+ <a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/docs/AUTHORING.md" class="btn primary">authoring guide</a>
  <a href="/docs" class="btn ghost">vertical cookbooks</a>
  <a href="/leaderboard" class="btn accent">browse registry</a>
  </div>

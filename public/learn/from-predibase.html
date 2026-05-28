@@ -45,8 +45,8 @@
 }
 </script>
 <style>
- :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
- [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669}
+ :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:var(--line-2);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:var(--line-2);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669}
  body{background:var(--bg);color:var(--ink);font:16.5px/1.7 -apple-system,Inter,system-ui,sans-serif;margin:0}
  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
@@ -60,7 +60,7 @@
  h1{font-size:38px;line-height:1.12;font-weight:500;letter-spacing:-0.02em;margin:0 0 12px;max-width:680px}
  .subtitle{font-size:16.5px;color:var(--ink-mute);margin:0 0 14px;line-height:1.55;max-width:640px}
  .stamp{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:8px 0 0;letter-spacing:0.04em}
- .promise{margin:32px 0 0;padding:20px 24px;border-left:2px solid var(--accent);background:rgba(17, 17, 17,0.04);font-size:15.5px;line-height:1.65;color:var(--ink-mute)}
+ .promise{margin:32px 0 0;padding:20px 24px;border-left:2px solid var(--accent);background:var(--line-1);font-size:15.5px;line-height:1.65;color:var(--ink-mute)}
  .promise b{color:var(--ink);font-weight:500}
  h2{font-size:21px;font-weight:500;letter-spacing:-0.01em;margin:48px 0 12px;color:var(--ink)}
  .step-head{display:flex;align-items:baseline;gap:14px;margin:48px 0 12px}
@@ -76,9 +76,9 @@
  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:0 0 14px;color:var(--ink);position:relative}
  pre code{background:transparent;border:0;padding:0}
  pre.cmd::before{content:"$";color:var(--accent);margin-right:10px;user-select:none}
- pre.out{background:transparent;border-style:dashed;border-color:rgba(17, 17, 17,0.18);color:var(--ink-mute);font-size:12.5px}
+ pre.out{background:transparent;border-style:dashed;border-color:var(--line-3);color:var(--ink-mute);font-size:12.5px}
  pre.out::before{display:none}
- .checkpoint{margin:14px 0 24px;padding:12px 16px;background:rgba(17, 17, 17,0.05);border-left:2px solid var(--accent);font-family:var(--mono);font-size:12.5px;color:var(--ink-mute);line-height:1.55}
+ .checkpoint{margin:14px 0 24px;padding:12px 16px;background:var(--line-1);border-left:2px solid var(--accent);font-family:var(--mono);font-size:12.5px;color:var(--ink-mute);line-height:1.55}
  .checkpoint b{color:var(--accent);font-weight:500;margin-right:10px}
  table{width:100%;border-collapse:collapse;margin:0 0 22px;font-size:14px}
  th,td{border-bottom:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top;color:var(--ink-mute)}
@@ -141,7 +141,7 @@
 <b>What changes.</b> Predibase requires you to keep your dataset in their managed storage, run training on their GPUs, and serve through their endpoints. <code>.kolm</code> moves all three onto your machine. Your dataset stays where you put it; compile runs locally or via a rentable cloud GPU through <code>kolm</code> with the artifact returned to you; serving is a 30 KB zipped artifact you run anywhere.
 </div>
 
-<div style="margin:24px 0;padding:16px 18px;border:1px solid rgba(150, 158, 170,0.32);border-left:3px solid #56606c;border-radius:8px;background:rgba(150, 158, 170,0.06);font-size:14px;line-height:1.55;color:var(--ink-mute)"><b style="color:var(--ink)">v0.2 provenance (wave 144).</b> The v0.2 <code>kolm compile</code> path produces a <i>recipe-class</i> artifact: deterministic compiled code, an Ed25519-signed manifest + receipt, an optional <code>kolm-moe-1</code> composition block across N expert recipes, an optional bundled <code>kolm-tokenizer-1</code> byte-level BPE, a <code>KOLMIDX</code> deterministic lookup container, and the K-score gate. Loading your Predibase LoRA adapter weights into the runtime as a trained student bundle (the <code>recipe + base ref</code> row in the table below) ships through the runtime bridge. This guide gives you the data-portability half (export, normalize, compile a recipe over your examples); the weight-bridge half lights up alongside.</div>
+<div style="margin:24px 0;padding:16px 18px;border:1px solid rgba(150, 158, 170,0.32);border-left:3px solid var(--ink-3,#56606c);border-radius:8px;background:rgba(150, 158, 170,0.06);font-size:14px;line-height:1.55;color:var(--ink-mute)"><b style="color:var(--ink)">v0.2 provenance (wave 144).</b> The v0.2 <code>kolm compile</code> path produces a <i>recipe-class</i> artifact: deterministic compiled code, an Ed25519-signed manifest + receipt, an optional <code>kolm-moe-1</code> composition block across N expert recipes, an optional bundled <code>kolm-tokenizer-1</code> byte-level BPE, a <code>KOLMIDX</code> deterministic lookup container, and the K-score gate. Loading your Predibase LoRA adapter weights into the runtime as a trained student bundle (the <code>recipe + base ref</code> row in the table below) ships through the runtime bridge. This guide gives you the data-portability half (export, normalize, compile a recipe over your examples); the weight-bridge half lights up alongside.</div>
 
 <h2 style="margin-top:48px">Mental model</h2>
 <table>

@@ -10,8 +10,8 @@
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <link rel="canonical" href="https://kolm.ai/integrations/github-actions">
 <style>
- :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
- [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669}
+ :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:var(--line-2);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:var(--line-2);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669}
  body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Inter,system-ui,sans-serif;margin:0}
  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
@@ -34,7 +34,7 @@
  pre .c{color:var(--ink-faint)}
  pre .g{color:var(--accent)}
  pre .k{color:#ec7373}
- .checkpoint{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px dashed rgba(17, 17, 17,0.32);border-radius:8px;background:rgba(17, 17, 17,0.05);font-size:13.5px;color:var(--ink-mute);margin:0 0 8px}
+ .checkpoint{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px dashed var(--line-strong);border-radius:8px;background:var(--line-1);font-size:13.5px;color:var(--ink-mute);margin:0 0 8px}
  .checkpoint b{color:var(--accent);font-weight:500;font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;text-transform:uppercase}
  .actions{display:flex;gap:12px;margin:24px 0 0;flex-wrap:wrap}
  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--ink);transition:all 160ms}
@@ -107,7 +107,7 @@
  - uses: actions/checkout@v4
  - uses: actions/setup-node@v4
  with: { node-version: <span class="g">'20'</span> }
- - run: npm install -g github:kolm-ai/kolm-stack
+ - run: npm install -g github:kolm-ai/kolmogorov-stack
  - <span class="k">name</span>: compile + verify
  env:
  KOLM_API_KEY: ${{ secrets.KOLM_API_KEY }}
@@ -144,7 +144,7 @@
  runs-on: ubuntu-22.04
  steps:
  - uses: actions/checkout@v4
- - run: npm install -g github:kolm-ai/kolm-stack
+ - run: npm install -g github:kolm-ai/kolmogorov-stack
  - <span class="k">name</span>: compile + sign + bind
  env:
  KOLM_API_KEY: ${{ secrets.KOLM_API_KEY }}
@@ -179,7 +179,7 @@
  runs-on: ubuntu-22.04
  steps:
  - uses: actions/checkout@v4
- - run: npm install -g github:kolm-ai/kolm-stack
+ - run: npm install -g github:kolm-ai/kolmogorov-stack
  - run: |
  for art in releases/**/*.kolm; do
  kolm inspect "$art" || { echo "FAIL: $art" >&2; exit 1; }

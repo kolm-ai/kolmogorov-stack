@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Publish a .kolm artifact &middot; Open-source AI workbench &middot; kolm.ai</title>
 <meta name="description" content="Publish a signed .kolm artifact to the kolm marketplace. Required metadata, signature verification, K-Score match check, license declaration, and pricing toggle. Upload disabled in beta -- email rodneyyesep@gmail.com to">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
@@ -41,7 +42,7 @@
   .up-form textarea,
   .up-form select {
     width: 100%;
-    background: rgba(255,255,255,0.02);
+    background: var(--line-1);
     border: 1px solid var(--line-1);
     border-radius: 6px;
     padding: 11px 13px;
@@ -252,7 +253,7 @@
         <p class="hint" style="margin-top:8px">Publishers receive 70 percent of paid downloads, net of payment processor fees.</p>
       </fieldset>
 
-      <div class="up-honesty">
+      <div class="up-caveat">
         <b>Upload disabled in beta.</b> This form is a UI shell. Submitting opens your local mail client and pre-fills a message to rodneyyesep@gmail.com to request beta participation. The marketplace is in private beta; public listings open Q3 2026.
       </div>
 

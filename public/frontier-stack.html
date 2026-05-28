@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#050607;color:#e6e9ee}html{color-scheme:dark}</style>
+<style>html{color-scheme:light dark}html,body{background:#f3f5f7;color:#111}@media (prefers-color-scheme:dark){html,body{background:#0e1116;color:#e6e9ee}}[data-theme="light"] html,[data-theme="light"] body{background:#f3f5f7;color:#111}[data-theme="dark"] html,[data-theme="dark"] body{background:#0e1116;color:#e6e9ee}</style>
 <title>Frontier stack: every technique kolm uses, at every step · kolm.ai</title>
 <meta name="description" content="The working inventory of methods the compiler reaches for. Synthetic data, alignment objectives, evaluation gates, signing, and inference runtimes.">
 <meta property="og:title" content="Frontier stack: every technique kolm uses, at every step · kolm.ai">
@@ -23,8 +23,8 @@
 
 <style>
  :root {
- --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
- --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --bg: #0e1116; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: var(--line-1); --line-strong: var(--line-2);
  --ink: #e6e9ee; --ink-mute: #aab0b8; --ink-faint: #6a727c;
  --good: #e6e9ee;
  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -66,12 +66,12 @@
  .tech p { margin: 4px 0 8px; font-size: 13px; color: var(--ink-mute); line-height: 1.5 }
  .tech .ref { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); border-bottom: 1px dashed var(--line); display: inline-block }
  .tech .ref:hover { color: var(--ink-mute) }
- .tech.on { border-color: var(--good); background: linear-gradient(180deg, rgba(230, 233, 238,0.03), transparent) }
- .tech.on h4 .tag { color: var(--good); border-color: rgba(230, 233, 238,0.35) }
+ .tech.on { border-color: var(--good); background: linear-gradient(180deg, var(--line-1), transparent) }
+ .tech.on h4 .tag { color: var(--good); border-color: var(--line-strong) }
 
  .legend { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); margin: 22px 0 0 }
  .legend span { display: inline-block; padding: 2px 8px; border: 1px solid var(--line); border-radius: 999px; margin-right: 8px }
- .legend .on { color: var(--good); border-color: rgba(230, 233, 238,0.35) }
+ .legend .on { color: var(--good); border-color: var(--line-strong) }
 
  .footer-cta { padding: 56px 0 80px; border-top: 1px solid var(--line) }
  .footer-cta h2 { margin: 0 0 8px }
@@ -80,7 +80,7 @@
 
  /* light theme */
  [data-theme=light] body { background: #f3f5f7; color: #1c1d1c }
- [data-theme=light] { --bg: #f3f5f7; --bg-elev: #efeae0; --bg-card: #efeae0; --line: rgba(0,0,0,0.08); --line-strong: rgba(0,0,0,0.12); --ink: #1c1d1c; --ink-mute: #585a55; --ink-faint: #8b8d86; --good: #1f9a7c }
+ [data-theme=light] { --bg: #f3f5f7; --bg-elev: #e8ebef; --bg-card: #ffffff; --line: var(--line-2); --line-strong: var(--line-2); --ink: #1c1d1c; --ink-mute: #585a55; --ink-faint: #8b8d86; --good: #1f9a7c }
  [data-theme=light] .tech.on { background: linear-gradient(180deg, rgba(31,154,124,0.04), transparent) }
 </style>
 <script type="application/ld+json">

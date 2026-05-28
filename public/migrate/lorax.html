@@ -14,8 +14,8 @@
 <link rel="canonical" href="https://kolm.ai/migrate/lorax">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
- :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:rgba(17, 17, 17,0.10);--warn:#a8b3c2;--warn-soft:rgba(168, 179, 194,0.10);--bad:#ff6b91;--bad-soft:rgba(255,107,145,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
- [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10);--warn:#b8770b;--warn-soft:rgba(184,119,11,0.10);--bad:#c8385c;--bad-soft:rgba(200,56,92,0.10)}
+ :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:var(--line-2);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:var(--line-2);--warn:#a8b3c2;--warn-soft:rgba(168, 179, 194,0.10);--bad:#ff6b91;--bad-soft:rgba(255,107,145,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:var(--line-2);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10);--warn:#b8770b;--warn-soft:rgba(184,119,11,0.10);--bad:#c8385c;--bad-soft:rgba(200,56,92,0.10)}
  *{box-sizing:border-box}
  body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
  .wrap{max-width:960px;margin:0 auto;padding:0 24px}
@@ -48,7 +48,7 @@
  @media(max-width:760px){.grid-2{grid-template-columns:1fr}}
  .col{padding:22px 22px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev)}
  .col h3{margin:0 0 14px;font-size:16px;font-weight:500;color:var(--ink);letter-spacing:-0.01em}
- .col h3 .tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);border:1px solid rgba(17, 17, 17,0.30);padding:2px 8px;border-radius:3px;margin-left:8px;vertical-align:middle}
+ .col h3 .tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);border:1px solid var(--line-strong);padding:2px 8px;border-radius:3px;margin-left:8px;vertical-align:middle}
  .col h3 .tag.add{color:var(--warn);background:var(--warn-soft);border-color:rgba(168, 179, 194,0.30)}
  .col ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.6;color:var(--ink-mute)}
  .col ul li{margin-bottom:8px}
@@ -215,7 +215,7 @@ $ <b>docker run</b> --gpus all -v ./adapters:/data \
 <section class="section">
  <div class="wrap">
  <h2>Where LoRAX alone is the right answer.</h2>
- <div class="honest">
+ <div class="caveat">
  <p><b>Stay with LoRAX alone</b> when your team controls the LoRA training pipeline, the data isn't regulated, no auditor is asking for a receipt, and you don't need the artifact to be portable beyond your serving cluster. LoRAX is excellent on its own &middot; running it bare is the cheapest path to multi-tenant adapter serving and the production-readiness pieces kolm adds carry build-time cost (signing, attestation, redactor pre-pass). If none of those land on your roadmap, you're paying for receipts no one is going to read.</p>
  <p><b>Stay with LoRAX alone</b> if your one-and-only deploy target is the LoRAX cluster itself and you have no air-gap, no edge, no on-prem mirror requirement. The .kolm format earns its keep when the artifact has to travel. If it never leaves your hosted cluster, the portability tax is wasted.</p>
  </div>

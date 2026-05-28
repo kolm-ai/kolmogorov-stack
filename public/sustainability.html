@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Sustainability · Open-source AI workbench · kolm.ai</title>
 <meta name="description" content="Sustainability and CO2 footprint for kolm distillations. Estimate model uses GPU TDP, run duration, and regional grid carbon intensity. Plain +/- 30 percent error bars. Never carbon-neutral without offset receipts.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
@@ -42,7 +43,7 @@
     padding: 18px 20px;
     border: 1px solid var(--line-1);
     border-radius: 10px;
-    background: rgba(255,255,255,0.015);
+    background: var(--line-1);
     font-family: var(--fr-font-mono);
     font-size: 13px;
     color: var(--ink-2);
@@ -240,8 +241,8 @@ co2_kg_estimate = <b>(gpu_tdp_watts</b> * <b>duration_seconds</b> / 3600 / 1000<
   </div>
 </section>
 
-<!-- 5. HONEST CONTRACT -->
-<section class="fr-section" id="honesty">
+<!-- 5. CAVEATS CONTRACT -->
+<section class="fr-section" id="caveats">
   <div class="fr-container">
     <div class="fr-section__head">
       <span class="fr-eyebrow">Plain contract</span>
@@ -271,7 +272,7 @@ co2_kg_estimate = <b>(gpu_tdp_watts</b> * <b>duration_seconds</b> / 3600 / 1000<
         <p class="fr-spec-list__p">If grid_region is unknown and the global-average fallback also fails, the manifest field is set to null and the viewer renders "CO2 estimate unavailable". We do not invent a number to fill space.</p>
       </li>
     </ul>
-    <div class="sus-honesty">
+    <div class="sus-caveat">
       <b>Plain framing.</b> CO2 estimates have a +/- 30 percent error bar by design. They are not a lifecycle assessment. They do not include embodied GPU or datacenter carbon. We will not call a model "carbon-neutral" without uploaded offset receipts that hash-bind to the artifact manifest.
     </div>
     <div class="sus-crosslink">

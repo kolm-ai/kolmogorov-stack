@@ -40,7 +40,7 @@
 .kpanel .pdesc{color:var(--ink-mute);font-size:13px;margin:0 0 12px}
 .ktable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
 .ktable th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);color:var(--ink-faint);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-size:10.5px}
-.ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,rgba(255,255,255,0.04));color:var(--ink)}
+.ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,var(--line-1));color:var(--ink)}
 .ktable td.num{text-align:right;font-variant-numeric:tabular-nums}
 .ktable tr:hover td{background:var(--bg-elev)}
 .barcell{position:relative;background:var(--bg-elev);border-radius:4px;height:14px;overflow:hidden}
@@ -139,7 +139,7 @@
   <strong>No usage in this period.</strong> Capture some traffic first &mdash; <code>kolm capture log</code> from the CLI, or wire the Wrapper SDK into your code path. Then come back and refresh.
 </div>
 
-<div id="error-state" class="empty" hidden style="border-color:#dc2626;color:#dc2626">
+<div id="error-state" class="empty" hidden style="border-color:var(--bad);color:var(--bad)">
   <strong>Chargeback report failed.</strong> <span id="error-msg"></span>
 </div>
 

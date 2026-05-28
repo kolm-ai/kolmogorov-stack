@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>kolm labs &middot; Open-source AI workbench &middot; kolm.ai</title>
 <meta name="description" content="kolm labs research grants fund work on efficient distillation, novel quantization, multimodal distill, and on-device inference benchmarks. Compute credits, GPU hours, no equity, no IP claim. Applications reviewed">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
@@ -46,7 +47,7 @@
   .lb-form textarea,
   .lb-form select {
     width: 100%;
-    background: rgba(255,255,255,0.02);
+    background: var(--line-1);
     border: 1px solid var(--line-1);
     border-radius: 6px;
     padding: 11px 13px;
@@ -64,7 +65,7 @@
   .lb-truthfulness { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-family: var(--fr-font-sans); font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-top: 20px; }
   .lb-truthfulness b { color: var(--ink-1); font-weight: 580; }
 
-  .lb-past-empty { padding: 24px; border: 1px solid var(--line-1); border-radius: 10px; background: rgba(255,255,255,0.015); }
+  .lb-past-empty { padding: 24px; border: 1px solid var(--line-1); border-radius: 10px; background: var(--line-1); }
   .lb-past-empty .badge { font-family: var(--fr-font-mono); font-size: 10.5px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--fr-amber); margin-bottom: 8px; display: inline-block; }
   .lb-past-empty h3 { margin: 0 0 8px; font-family: var(--fr-font-display); font-size: 22px; font-weight: 540; color: var(--ink-1); letter-spacing: -0.01em; }
   .lb-past-empty p { margin: 0; font-family: var(--fr-font-sans); font-size: 14px; color: var(--ink-2); line-height: 1.6; }
@@ -278,7 +279,7 @@
         <a href="mailto:grants@kolm.ai" class="fr-btn fr-btn--ghost">Or email grants@kolm.ai directly</a>
       </div>
 
-      <div class="lb-honesty">
+      <div class="lb-caveat">
         <b>Plain framing.</b> This form opens your local mail client and pre-fills a message to grants@kolm.ai. There is no backend collecting submissions in this wave; a human reads each email. Applications are reviewed monthly. We aim to respond within 30 days, sooner when we can.
       </div>
     </form>

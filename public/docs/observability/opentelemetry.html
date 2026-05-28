@@ -22,8 +22,8 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"OpenTelemetry semantic conventions","description":"How kolm emits OpenTelemetry attributes and an inference timeline span structure.","url":"https://kolm.ai/docs/observability/opentelemetry","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <link rel="stylesheet" href="/design-tokens.css">
 <style>
-:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:rgba(17, 17, 17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:var(--line-2);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:var(--line-2);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:var(--line-2);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
 .skip-link{position:absolute;left:-9999px}
@@ -158,10 +158,10 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p>Every <code>/v1/route/chat/completions</code> request emits one parent <code>kolm.inference</code> span plus four child sub-spans laid out on a monotonic timeline. Buyers see this as a stacked horizontal bar in any OTel UI:</p>
 
 <div class="timeline">parent span ── kolm.inference                                    [POST /v1/route/chat/completions]
-├── kolm.inference.queue        <span style="color:#111111">▇</span>
-├── kolm.inference.load <span style="color:#111111">▇</span>        (model paged into VRAM, or 0 if cached)
-├── kolm.inference.prefill            <span style="color:#111111">▇▇▇</span>   (prompt &rarr; KV cache compute)
-└── kolm.inference.decode                <span style="color:#111111">▇▇▇▇▇▇▇</span> (KV cache &rarr; output tokens)</div>
+├── kolm.inference.queue        <span style="color:var(--ink,#111111)">▇</span>
+├── kolm.inference.load <span style="color:var(--ink,#111111)">▇</span>        (model paged into VRAM, or 0 if cached)
+├── kolm.inference.prefill            <span style="color:var(--ink,#111111)">▇▇▇</span>   (prompt &rarr; KV cache compute)
+└── kolm.inference.decode                <span style="color:var(--ink,#111111)">▇▇▇▇▇▇▇</span> (KV cache &rarr; output tokens)</div>
 
 <p>The four sub-spans are emitted in order with zero overlap. Phase durations are also attached as <code>kolm.inference.phase_ms</code> on each child so a histogram query in Tempo/Honeycomb can slice latency by phase without needing the parent.</p>
 
@@ -193,7 +193,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <p>The same contract applies to capture content: kolm OTel spans carry the artifact CID and the routing decision, but never the raw prompt or response text. Capture-level inspection lives in <a href="/account/captures">/account/captures</a>, which is auth-gated and tenant-scoped &mdash; OTel is for telemetry, not for log replay.</p>
 
-<h2 id="honesty">No-silent-pass contract</h2>
+<h2 id="caveats">No-silent-pass contract</h2>
 <ul>
   <li>If no tracer is registered (<code>globalThis.__OTEL_TRACER__</code> missing AND <code>@opentelemetry/api</code> not importable), <code>createInferenceSpans</code> and <code>setRoutingAttributes</code> are no-ops &mdash; they return <code>false</code>, never throw, and never block the request path.</li>
   <li><code>KOLM_OTEL=0</code> (the default) keeps the native OTLP exporter disabled. Setting it to <code>1</code> starts a 5-second flush loop that posts spans + metrics in OTLP/HTTP JSON to <code>OTEL_EXPORTER_OTLP_ENDPOINT</code>.</li>

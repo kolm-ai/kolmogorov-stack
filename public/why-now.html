@@ -23,8 +23,8 @@
 
 <style>
  :root {
- --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
- --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --bg: #0e1116; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: var(--line-1); --line-strong: var(--line-2);
  --ink: #e6e9ee; --ink-mute: #aab0b8; --ink-faint: #6a727c;
  --accent: #e6e9ee; --accent-strong: #b8c0ca; --good: #e6e9ee; --bad: #ff6b91;
  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -73,7 +73,7 @@
  @media (max-width: 720px) { pre.code { white-space: pre-wrap; word-break: break-word; } }
  pre.code .c { color: var(--ink-faint); }
 
- .verdict { padding: 28px 32px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, rgba(230, 233, 238, 0.04), rgba(230, 233, 238, 0.01)); margin: 24px 0 0; }
+ .verdict { padding: 28px 32px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, var(--line-1), var(--line-1)); margin: 24px 0 0; }
  .verdict h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; color: var(--ink); }
  .verdict p { margin: 0 0 8px; font-size: 14.5px; color: var(--ink-mute); line-height: 1.6; }
  .verdict p:last-child { margin-bottom: 0; }

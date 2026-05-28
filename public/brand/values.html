@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Company values &middot; brand &middot; kolm.ai</title>
 <meta name="description" content="Three values we hold ourselves to: transparency, reproducibility, and user ownership. Public source code, public bench, public K-score formula, loud-fail envelopes by default, content-addressed artifacts, no IP claim on">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
@@ -24,8 +25,8 @@
     <link rel="stylesheet" href="/warm-paper.css">
 <style>
  :root {
- --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
- --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --bg: #0e1116; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: var(--line-1); --line-strong: var(--line-2);
  --ink: #e6e9ee; --ink-mute: #aab0b8; --ink-faint: #6a727c;
  --accent: #e6e9ee; --accent-strong: #b8c0ca; --good: #e6e9ee; --bad: #ff6b91; --warn: #a8b3c2;
  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -52,7 +53,7 @@
  .value-row .body ul { margin: 8px 0 12px; padding-left: 22px; color: var(--ink-mute); font-size: 15px; line-height: 1.7; max-width: 64ch; }
  .value-row .body ul li { margin-bottom: 6px; }
  .value-row .body ul li b { color: var(--ink); font-weight: 500; }
- .value-row .body code { font-family: var(--mono); font-size: 12.5px; background: #050607; border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
+ .value-row .body code { font-family: var(--mono); font-size: 12.5px; background: #0e1116; border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
  .value-row .body a { color: var(--good); }
 
  .pact-list { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 14px 0 0; }
@@ -61,7 +62,7 @@
  .pact-list .pact-item .v { font-size: 14.5px; color: var(--ink-mute); line-height: 1.55; }
  .pact-list .pact-item .v b { color: var(--ink); font-weight: 500; }
 
- .closing { padding: 22px 26px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, rgba(230, 233, 238, 0.04), rgba(230, 233, 238, 0.01)); margin: 56px 0 0; }
+ .closing { padding: 22px 26px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, var(--line-1), var(--line-1)); margin: 56px 0 0; }
  .closing h3 { margin: 0 0 8px; font-size: 17px; font-weight: 500; color: var(--ink); }
  .closing p { margin: 0 0 8px; font-size: 14.5px; color: var(--ink-mute); line-height: 1.6; }
  .closing p:last-child { margin-bottom: 0; }

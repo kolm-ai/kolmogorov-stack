@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Hardware compatibility &middot; Open-source AI workbench &middot; kolm.ai</title>
 <meta name="description" content="kolm hardware compatibility matrix: recommended GPUs, minimum spec for INT4 7B, VRAM RAM NVMe-mmap memory hierarchy, CPU-only fallback, air-gap notes, and the hardware partner program.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
@@ -21,7 +22,7 @@
   .hw-body h2 { font-size: 22px; font-weight: 540; margin: 40px 0 12px; letter-spacing: -0.01em; }
   .hw-body p, .hw-body li { font-size: 15px; line-height: 1.7; color: var(--ink-2); max-width: 76ch; }
   pre { background: #06080a; border: 1px solid var(--line-1); border-radius: 8px; padding: 16px 18px; overflow-x: auto; font: 12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color: #e9eef3; max-width: 760px; }
-  code { font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size: 13px; background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; }
+  code { font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size: 13px; background: var(--line-1); padding: 1px 6px; border-radius: 4px; }
   table { border-collapse: collapse; max-width: 760px; margin: 14px 0; font-size: 13.5px; }
   th,td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line-1); vertical-align: top; color: var(--ink-2); }
   th { color: var(--ink-1); font-weight: 500; }

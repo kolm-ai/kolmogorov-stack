@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Artifact marketplace &middot; Open-source AI workbench &middot; kolm.ai</title>
 <meta name="description" content="kolm artifact marketplace: browse signed .kolm distillations by vertical, K-Score, hardware, and teacher origin. Publishers receive 70 percent of paid downloads.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
@@ -46,7 +47,7 @@
     padding: 18px 20px;
     border: 1px solid var(--line-1);
     border-radius: 10px;
-    background: rgba(255,255,255,0.015);
+    background: var(--line-1);
     align-self: start;
     position: sticky;
     top: 96px;
@@ -75,7 +76,7 @@
   }
   .mk-side select, .mk-side input {
     width: 100%;
-    background: rgba(255,255,255,0.02);
+    background: var(--line-1);
     border: 1px solid var(--line-1);
     border-radius: 6px;
     padding: 9px 11px;
@@ -95,7 +96,7 @@
   }
   .mk-side button {
     width: 100%;
-    background: rgba(255,255,255,0.04);
+    background: var(--line-1);
     border: 1px solid var(--line-1);
     border-radius: 6px;
     padding: 10px 14px;
@@ -120,7 +121,7 @@
     padding: 10px 14px;
     border: 1px solid var(--line-1);
     border-radius: 8px;
-    background: rgba(255,255,255,0.01);
+    background: var(--line-1);
   }
   .mk-status-row .mk-status-text {
     font-family: var(--fr-font-mono);
@@ -129,7 +130,7 @@
     letter-spacing: 0.04em;
   }
   .mk-status-row select {
-    background: rgba(255,255,255,0.02);
+    background: var(--line-1);
     border: 1px solid var(--line-1);
     border-radius: 6px;
     padding: 7px 11px;
@@ -150,7 +151,7 @@
     padding: 18px 20px;
     border: 1px solid var(--line-1);
     border-radius: 10px;
-    background: rgba(255,255,255,0.015);
+    background: var(--line-1);
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -335,7 +336,7 @@
   </div>
 </section>
 
-<!-- 3. PUBLISH FLOW + HONESTY -->
+<!-- 3. PUBLISH FLOW + CAVEATS -->
 <section class="fr-section" id="publish">
   <div class="fr-container">
     <div class="fr-section__head">
@@ -348,7 +349,7 @@
       <a href="/k-score" class="fr-btn fr-btn--ghost">What is a K-Score</a>
       <a href="/verify-prod" class="fr-btn fr-btn--ghost">Verify an artifact</a>
     </div>
-    <div class="mk-honesty">
+    <div class="mk-caveat">
       <b>Revenue split.</b> Publishers receive 70 percent of paid downloads, net of payment processor fees. The remaining 30 percent funds marketplace hosting, signature verification, and dispute handling. <b>Forecast surface.</b> The MVP exposes a payout-cycle endpoint that computes the per-listing split and writes an audit row. No real Stripe payout is wired yet. <b>Anti-gaming.</b> Submitting a rating requires an account age of at least 7 days AND at least one prior download of the listing.
     </div>
   </div>

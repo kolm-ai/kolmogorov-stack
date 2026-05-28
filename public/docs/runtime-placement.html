@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Memory-aware runtime placement &middot; Open-source AI workbench &middot;</title>
 <meta name="description" content="Memory-aware runtime placement in kolm: probes GPU VRAM, system RAM, and NVMe bandwidth, then chooses full-GPU, hybrid auto-split, or NVMe-mmap placement. Pre-load heuristics predict the next artifact. Loud-fail envelope">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
@@ -36,7 +37,7 @@
     padding: 18px 20px;
     border: 1px solid var(--line-1);
     border-radius: 10px;
-    background: rgba(255,255,255,0.015);
+    background: var(--line-1);
     font-family: var(--fr-font-mono);
     font-size: 13px;
     color: var(--ink-2);
@@ -54,7 +55,7 @@
     padding: 18px 20px;
     border: 1px solid var(--line-1);
     border-radius: 10px;
-    background: rgba(255,255,255,0.015);
+    background: var(--line-1);
     margin-top: 12px;
     overflow-x: auto;
   }
@@ -236,7 +237,7 @@
   </div>
 </section>
 
-<!-- 6. HONEST ENVELOPE -->
+<!-- 6. CAVEATS ENVELOPE -->
 <section class="fr-section" id="envelope">
   <div class="fr-container">
     <div class="fr-section__head">
@@ -255,7 +256,7 @@
   "<b>logged_to</b>": "/tmp/kolm/runtime-placement.log"
 }
     </div>
-    <div class="rt-honesty">
+    <div class="rt-caveat">
       <b>Plain contract.</b> The runtime never silently picks a placement when probes fail. Every fallback is logged with the failing probe and the reason. Operators can grep the log to see whether a slow load was a placement bug or a genuine hardware limit. If the host falls below documented minimums, the runtime refuses to load with an envelope rather than thrashing the swap file.
     </div>
     <div class="rt-crosslink">

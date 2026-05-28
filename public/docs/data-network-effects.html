@@ -16,8 +16,8 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/design-tokens.css">
 <style>
-:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:rgba(17, 17, 17,0.10);--pending:#6b6b66;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10);--pending:#56606c}
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:var(--line-2);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:var(--line-2);--pending:#6b6b66;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:var(--line-2);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10);--pending:#56606c}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
 .skip-link{position:absolute;left:-9999px}
@@ -119,7 +119,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <pre>CODE17</pre>
 <p>See <a href="/docs/verticals">/docs/verticals</a> for the five vertical foundation students, their target K-Scores, and the marketplace stubs that flip from <code>pending_distill:true</code> once the fingerprint pipeline produces real compiles.</p>
 
-<h2 id="honesty">6. Caveats note</h2>
+<h2 id="caveats">6. Caveats note</h2>
 <div class="callout">
   <b>Lake disabled by default.</b> Set <code>KOLM_W757_LAKE_ENABLED=1</code> to opt your installation in. No data crosses tenant boundaries without consent. The opt-in registry is append-only and per-namespace; opting a namespace in does NOT implicitly opt other namespaces in. Opt-out is durable and observed by all future reads.
 </div>

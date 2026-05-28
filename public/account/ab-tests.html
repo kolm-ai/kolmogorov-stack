@@ -41,7 +41,7 @@
 .kpanel .pdesc{color:var(--ink-mute);font-size:13px;margin:0 0 12px}
 .ktable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
 .ktable th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);color:var(--ink-faint);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-size:10.5px}
-.ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,rgba(255,255,255,0.04));color:var(--ink)}
+.ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,var(--line-1));color:var(--ink)}
 .ktable tr:hover td{background:var(--bg-elev);cursor:pointer}
 .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
 .pill.ok{color:var(--good)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}.pill.mute{color:var(--ink-faint)}
@@ -131,7 +131,7 @@
     <strong>No A/B tests yet.</strong> Start your first one from the CLI:
     <pre style="margin:8px 0 0;padding:10px;background:var(--bg-elev);border:1px solid var(--line);border-radius:4px;color:var(--ink);font-family:var(--mono);font-size:12px;overflow-x:auto">kolm ab start --namespace prod --arm-a model-v1 --arm-b model-v2 --split 0.5</pre>
   </div>
-  <div id="w777-error" class="empty" hidden style="border-color:#dc2626;color:#dc2626"><strong>Request failed.</strong> <span id="w777-errmsg"></span></div>
+  <div id="w777-error" class="empty" hidden style="border-color:var(--bad);color:var(--bad)"><strong>Request failed.</strong> <span id="w777-errmsg"></span></div>
 </div>
 
 <div class="kpanel" id="w777-detail-panel" hidden>

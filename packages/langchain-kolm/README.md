@@ -5,7 +5,7 @@ First-party LangChain adapter for kolm.ai compiled artifacts. Drop a `.kolm` int
 ## Install
 
 ```bash
-git clone https://github.com/kolm-ai/kolm-stack
+git clone https://github.com/kolm-ai/kolmogorov-stack
 cd your-app
 npm install ../kolm-stack/packages/langchain-kolm langchain @langchain/core
 ```

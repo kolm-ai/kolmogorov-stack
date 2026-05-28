@@ -40,7 +40,7 @@
 .kpanel .pdesc{color:var(--ink-mute);font-size:13px;margin:0 0 12px}
 .ktable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
 .ktable th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);color:var(--ink-faint);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-size:10.5px}
-.ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,rgba(255,255,255,0.04));color:var(--ink)}
+.ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,var(--line-1));color:var(--ink)}
 .ktable tr:hover td{background:var(--bg-elev)}
 .jsd-pill{display:inline-block;padding:4px 12px;border-radius:999px;font-size:13px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;border:1.5px solid currentColor;font-weight:600}
 .jsd-pill.green{color:#111111}
@@ -172,7 +172,7 @@
   <strong>No drift data yet.</strong> Snapshot a training distribution and a production distribution first &mdash; then check drift to see the JSD pill and diverging tokens. <code>kolm drift-alert snapshot &lt;ns&gt; --kind training</code> from the CLI does the same thing.
 </div>
 
-<div id="error-state" class="empty" hidden style="border-color:#dc2626;color:#dc2626">
+<div id="error-state" class="empty" hidden style="border-color:var(--bad);color:var(--bad)">
   <strong>Drift check failed.</strong> <span id="error-msg"></span>
 </div>
 

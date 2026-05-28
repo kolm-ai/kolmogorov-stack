@@ -58,21 +58,21 @@ p{margin:.7em 0;color:var(--ink-mute)}
 .lede{font-size:1.18rem;color:var(--ink-mute);max-width:720px}
 .nav{margin-bottom:32px;font-size:.92rem}
 .nav a{color:var(--ink-mute);margin-right:18px}
-.terminal{background:#0a0c11;border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:18px;margin:24px 0;overflow:auto;box-shadow:0 18px 44px rgba(0,0,0,.18)}
+.terminal{background:#0a0c11;border:1px solid var(--line-3);border-radius:10px;padding:18px;margin:24px 0;overflow:auto;box-shadow:0 18px 44px var(--line-3)}
 .terminal pre{margin:0;font:13px/1.35 var(--mono);color:#f4f7ef!important;opacity:1!important;white-space:pre;letter-spacing:.01em}
 .player-controls{display:flex;gap:10px;align-items:center;margin-top:10px;font-size:.86rem;color:var(--ink-faint)}
-.player-controls button{background:var(--bg-elev);color:var(--ink);border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:4px 10px;font-family:var(--mono);font-size:.82rem;cursor:pointer}
+.player-controls button{background:var(--bg-elev);color:var(--ink);border:1px solid var(--line-2);border-radius:4px;padding:4px 10px;font-family:var(--mono);font-size:.82rem;cursor:pointer}
 .player-controls button:hover{border-color:var(--accent);color:var(--accent)}
 .grid6{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}
 @media (max-width:760px){.grid6{grid-template-columns:1fr 1fr}.terminal pre{font-size:11px}}
-.card{background:var(--bg-elev);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:16px}
+.card{background:var(--bg-elev);border:1px solid var(--line-1);border-radius:8px;padding:16px}
 .card h3{margin:0 0 .35em;color:var(--ink);font-size:.96rem;letter-spacing:-.01em}
 .card .keys{font-family:var(--mono);font-size:.86rem;color:var(--accent);margin-bottom:.35em}
 .card p{margin:0;font-size:.88rem;color:var(--ink-mute)}
-.install{background:#0a0c11;border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:14px 16px;font-family:var(--mono);font-size:.86rem;color:var(--ink);overflow-x:auto}
+.install{background:#0a0c11;border:1px solid var(--line-2);border-radius:6px;padding:14px 16px;font-family:var(--mono);font-size:.86rem;color:var(--ink);overflow-x:auto}
 .skip-link{position:absolute;left:-9999px;top:auto}
 .skip-link:focus{left:8px;top:8px;background:var(--bg-elev);padding:8px 12px;border-radius:4px}
-.hero{padding:8px 0 24px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:24px}
+.hero{padding:8px 0 24px;border-bottom:1px solid var(--line-2);margin-bottom:24px}
 .pill{display:inline-block;padding:2px 8px;border-radius:11px;font-size:.78em;font-weight:500;background:rgba(127,225,194,.14);color:var(--accent);margin-left:6px}
 ul{padding-left:1.4em;color:var(--ink-mute)}
 li{margin:.35em 0}
@@ -180,7 +180,7 @@ li{margin:.35em 0}
 
 <h2>Install &amp; run</h2>
 <pre class="install"># grab the CLI (the rule path · zero heavy deps)
-npm i -g github:kolm-ai/kolm-stack
+npm i -g github:kolm-ai/kolmogorov-stack
 
 # in any project where you ran `kolm proxy on`
 kolm tui

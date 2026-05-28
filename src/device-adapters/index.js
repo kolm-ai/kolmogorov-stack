@@ -6,12 +6,13 @@
 //   const result = await adapter.deploy(device, artifactPath, opts);
 
 const ADAPTER_PATHS = {
-  ssh:    './ssh-adapter.js',
-  local:  './local-adapter.js',
-  ollama: './ollama-adapter.js',
-  k8s:    './k8s-adapter.js',
-  runpod: './runpod-adapter.js',
-  modal:  './modal-adapter.js',
+  ssh:      './ssh-adapter.js',
+  local:    './local-adapter.js',
+  ollama:   './ollama-adapter.js',
+  k8s:      './k8s-adapter.js',
+  runpod:   './runpod-adapter.js',
+  modal:    './modal-adapter.js',
+  cerebras: './cerebras-adapter.js',
 };
 
 export async function adapterFor(type) {

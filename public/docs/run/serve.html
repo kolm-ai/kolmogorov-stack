@@ -17,8 +17,8 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/design-tokens.css">
 <style>
-:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230,233,238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:rgba(17,17,17,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:var(--line-2);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:var(--line-2);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:var(--line-2);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
 .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
@@ -96,6 +96,11 @@ curl http://localhost:8000/v1/chat/completions \
     <tr><td><code>--max-concurrency</code></td><td>32</td><td>In-flight request cap. Excess returns HTTP 429 with a retry-after.</td></tr>
     <tr><td><code>--report</code></td><td>on</td><td>Reports health + latency to your tenant. Set <code>--report off</code> for air-gapped pods.</td></tr>
     <tr><td><code>--passport</code></td><td>verify</td><td>Verifies the runtime passport against the artifact manifest before binding the port.</td></tr>
+    <tr><td><code>--optimize</code></td><td>off</td><td>Hardware-aware preset: turns on speculative auto, Shard KV (if available), prompt cache, and a VRAM-keyed batch size. Any explicit flag wins. See <a href="/docs/run/speed-optimization">Speed optimization</a>.</td></tr>
+    <tr><td><code>--speculative auto|&lt;model&gt;</code></td><td>off</td><td>Speculative decoding via a small draft model. <code>auto</code> picks a tokenizer-matching draft. 1.5&ndash;2.4&times; tok/s on accepting workloads. <a href="/docs/run/speed-optimization#speculative">Details</a>.</td></tr>
+    <tr><td><code>--kv-cache shard|standard</code></td><td>standard</td><td>Use the Shard <code>transformers.Cache</code> subclass for ~10&times; KV compression. HF runtime only; vLLM/SGLang/TGI/TRT-LLM fall back to standard with a stderr warning. <a href="/docs/run/speed-optimization#shard">Details</a>.</td></tr>
+    <tr><td><code>--prompt-cache auto|on|off</code></td><td>auto</td><td>vLLM <code>enable_prefix_caching</code>. Repeated system prompts and few-shot prefixes hit cache. <a href="/docs/run/speed-optimization#prompt-cache">Details</a>.</td></tr>
+    <tr><td><code>--max-batch N</code></td><td>8</td><td>vLLM <code>max_num_seqs</code> &mdash; the continuous-batching depth. <a href="/docs/run/speed-optimization#batch">Details</a>.</td></tr>
   </tbody>
 </table>
 
@@ -120,7 +125,7 @@ kolm gateway route set prod --split prod-a=0.9,prod-b=0.1</code></pre>
 
 <h2 id="next">Next</h2>
 <div class="related">
-  <a href="/docs/run/overview"><b>Run overview &rarr;</b><span>Top of the Run section.</span></a>
+  <a href="/docs/run/speed-optimization"><b>Speed optimization &rarr;</b><span>Speculative, Shard KV, prompt cache, NVFP4 gate, <code>kolm bench --speed</code>.</span></a>
   <a href="/docs/run/hardware"><b>Hardware &rarr;</b><span>Runtime / accelerator matrix.</span></a>
   <a href="/account/serve"><b>Serve dashboard &rarr;</b><span>Live pod table.</span></a>
 </div>

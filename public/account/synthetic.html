@@ -40,7 +40,7 @@
 .kpanel .pdesc{color:var(--ink-mute);font-size:13px;margin:0 0 12px}
 .ktable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
 .ktable th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);color:var(--ink-faint);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-size:10.5px}
-.ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,rgba(255,255,255,0.04));color:var(--ink)}
+.ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,var(--line-1));color:var(--ink)}
 .ktable tr:hover td{background:var(--bg-elev)}
 .gini-bar{height:18px;border-radius:9px;background:var(--bg-elev);overflow:hidden;border:1px solid var(--line);position:relative}
 .gini-bar > .fill{height:100%;background:linear-gradient(90deg,#111111 0%,#6b6b66 50%,#dc2626 100%);transition:width 0.3s}
@@ -183,7 +183,7 @@
   <strong>No coverage data yet.</strong> Capture some real traffic first &mdash; then refresh to see the bucket distribution. <code>kolm capture log</code> from the CLI, or wire the Wrapper SDK into your code path.
 </div>
 
-<div id="error-state" class="empty" hidden style="border-color:#dc2626;color:#dc2626">
+<div id="error-state" class="empty" hidden style="border-color:var(--bad);color:var(--bad)">
   <strong>Coverage refresh failed.</strong> <span id="error-msg"></span>
 </div>
 

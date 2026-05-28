@@ -96,11 +96,11 @@
  .hh-body code { font-family: var(--mono); font-size: 12.5px; padding: 1px 5px; background: rgba(0,0,0,0.25); border-radius: 3px; }
  [data-theme=light] .hh-card { background: rgba(150, 158, 170, 0.08); border-color: rgba(150, 158, 170, 0.45); }
  [data-theme=light] .hh-body { color: #1f2429; }
- [data-theme=light] .hh-body code { background: rgba(0,0,0,0.06); }
+ [data-theme=light] .hh-body code { background: var(--line-1); }
 
  .tax-classes { padding: 48px 0; }
  .tax-classes .wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
- .tax-card { border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 28px 32px; margin: 24px 0; background: rgba(255, 255, 255, 0.015); }
+ .tax-card { border: 1px solid var(--line-2); border-radius: 12px; padding: 28px 32px; margin: 24px 0; background: var(--line-1); }
  .tax-card .tag { display: inline-block; font-family: var(--mono); font-size: 11.5px; padding: 3px 9px; border-radius: 4px; letter-spacing: 0.04em; text-transform: lowercase; }
  .tax-card.rule .tag { background: rgba(99, 179, 237, 0.16); color: #93c5fd; }
  .tax-card.synth .tag { background: rgba(168, 85, 247, 0.16); color: #c4b5fd; }
@@ -109,18 +109,18 @@
  .tax-card h3 { font-size: 24px; margin: 12px 0 6px; }
  .tax-card .tax-one { font-size: 15.5px; color: var(--muted, #c7c0ad); margin: 6px 0 18px; }
  .tax-card .tax-evidence { font-size: 14.5px; line-height: 1.65; margin: 14px 0; }
- .tax-card .tax-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; padding: 14px 0 0; border-top: 1px solid rgba(255, 255, 255, 0.06); margin-top: 22px; }
+ .tax-card .tax-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; padding: 14px 0 0; border-top: 1px solid var(--line-1); margin-top: 22px; }
  .tax-meta div { font-family: var(--mono); font-size: 12px; color: var(--muted, #c7c0ad); }
  .tax-meta div b { color: var(--ink, #e6e9ee); font-weight: 500; }
  .tax-card code { font-family: var(--mono); font-size: 12.5px; padding: 1px 5px; background: rgba(0,0,0,0.25); border-radius: 3px; }
- [data-theme=light] .tax-card { background: rgba(0, 0, 0, 0.02); border-color: rgba(0, 0, 0, 0.08); }
- [data-theme=light] .tax-card code { background: rgba(0,0,0,0.06); }
+ [data-theme=light] .tax-card { background: var(--line-1); border-color: var(--line-2); }
+ [data-theme=light] .tax-card code { background: var(--line-1); }
 
  .tax-matrix { padding: 24px 0 48px; }
  .tax-matrix .wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
  .tax-matrix h2 { font-size: 22px; margin: 0 0 18px; }
  .tax-matrix table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 13px; }
- .tax-matrix th, .tax-matrix td { padding: 12px 14px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+ .tax-matrix th, .tax-matrix td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line-1); }
  .tax-matrix th { color: var(--muted, #c7c0ad); font-weight: 500; text-transform: lowercase; letter-spacing: 0.04em; font-size: 11.5px; }
  .tax-matrix .yes { color: #86efac; }
  .tax-matrix .no { color: #6b7280; }
@@ -128,9 +128,9 @@
  .tax-cli { padding: 24px 0 64px; }
  .tax-cli .wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
  .tax-cli h2 { font-size: 22px; margin: 0 0 14px; }
- .tax-cli pre { font-family: var(--mono); font-size: 13px; padding: 18px 20px; background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 8px; overflow-x: auto; line-height: 1.55; color: var(--ink, #e6e9ee); }
+ .tax-cli pre { font-family: var(--mono); font-size: 13px; padding: 18px 20px; background: rgba(0, 0, 0, 0.35); border: 1px solid var(--line-1); border-radius: 8px; overflow-x: auto; line-height: 1.55; color: var(--ink, #e6e9ee); }
  .tax-cli .tax-cli-cap { font-size: 13.5px; color: var(--muted, #c7c0ad); margin: 8px 0 0; }
- [data-theme=light] .tax-cli pre { background: rgba(0, 0, 0, 0.04); border-color: rgba(0, 0, 0, 0.08); color: #1f2429; }
+ [data-theme=light] .tax-cli pre { background: var(--line-1); border-color: var(--line-2); color: #1f2429; }
  </style>
 
  <section class="tax-classes" aria-label="the four classes">
@@ -260,14 +260,14 @@ evals: 11 cases</pre>
  .tax-tree h2 { font-size: 22px; margin: 0 0 6px; }
  .tax-tree .tree-cap { font-size: 13.5px; color: var(--muted, #c7c0ad); margin: 0 0 18px; }
  .tax-tree .tree-cap code { font-family: var(--mono); font-size: 12.5px; padding: 1px 5px; background: rgba(0,0,0,0.25); border-radius: 3px; }
- .tax-tree .tree { font-family: var(--mono); font-size: 13.5px; line-height: 1.85; padding: 22px 28px; background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 10px; color: var(--ink, #e6e9ee); overflow-x: auto; }
+ .tax-tree .tree { font-family: var(--mono); font-size: 13.5px; line-height: 1.85; padding: 22px 28px; background: rgba(0, 0, 0, 0.35); border: 1px solid var(--line-1); border-radius: 10px; color: var(--ink, #e6e9ee); overflow-x: auto; }
  .tax-tree .tree .step { color: var(--muted, #c7c0ad); }
  .tax-tree .tree .yes-line { color: #86efac; font-weight: 500; }
  .tax-tree .tree .no-line { color: #6b7280; }
  .tax-tree .tree .verdict { color: #cbd0d6; font-weight: 500; }
  .tax-tree .tree .field { color: #93c5fd; }
- [data-theme=light] .tax-tree .tree { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.08); color: #1f2429; }
- [data-theme=light] .tax-tree .tree-cap code { background: rgba(0,0,0,0.06); }
+ [data-theme=light] .tax-tree .tree { background: var(--line-1); border-color: var(--line-2); color: #1f2429; }
+ [data-theme=light] .tax-tree .tree-cap code { background: var(--line-1); }
 
  .tax-reject { padding: 24px 0 64px; }
  .tax-reject .wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
@@ -280,18 +280,18 @@ evals: 11 cases</pre>
  .tax-reject .rej-card .rej-cond { font-size: 14.5px; line-height: 1.55; margin: 0; }
  .tax-reject .rej-card .rej-cond code { font-family: var(--mono); font-size: 12.5px; padding: 1px 5px; background: rgba(0,0,0,0.25); border-radius: 3px; }
  [data-theme=light] .tax-reject .rej-card { background: rgba(255, 107, 145, 0.07); border-color: rgba(255, 107, 145, 0.35); }
- [data-theme=light] .tax-reject .rej-card .rej-cond code { background: rgba(0,0,0,0.06); }
- [data-theme=light] .tax-reject .rej-cap code { background: rgba(0,0,0,0.06); }
+ [data-theme=light] .tax-reject .rej-card .rej-cond code { background: var(--line-1); }
+ [data-theme=light] .tax-reject .rej-cap code { background: var(--line-1); }
 
  .tax-where { padding: 8px 0 56px; }
  .tax-where .wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
  .tax-where h2 { font-size: 22px; margin: 0 0 14px; }
  .tax-where .where-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
- .tax-where .where-card { border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 16px 18px; background: rgba(255,255,255,0.015); }
+ .tax-where .where-card { border: 1px solid var(--line-2); border-radius: 10px; padding: 16px 18px; background: var(--line-1); }
  .tax-where .where-card a { color: #93c5fd; text-decoration: none; font-family: var(--mono); font-size: 13px; }
  .tax-where .where-card a:hover { text-decoration: underline; }
  .tax-where .where-card p { font-size: 13.5px; color: var(--muted, #c7c0ad); margin: 6px 0 0; line-height: 1.5; }
- [data-theme=light] .tax-where .where-card { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.08); }
+ [data-theme=light] .tax-where .where-card { background: var(--line-1); border-color: var(--line-2); }
  </style>
 
  <section class="tax-tree" aria-label="class decision tree">

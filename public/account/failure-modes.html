@@ -44,7 +44,7 @@
 .ktable th[data-sort]:hover{color:var(--accent)}
 .ktable th[data-sort-active]::after{content:" \25BC";color:var(--accent)}
 .ktable th[data-sort-active="asc"]::after{content:" \25B2";color:var(--accent)}
-.ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,rgba(255,255,255,0.04));color:var(--ink)}
+.ktable td{padding:8px 8px;border-bottom:1px solid var(--line-soft,var(--line-1));color:var(--ink)}
 .ktable tr:hover td{background:var(--bg-elev);cursor:pointer}
 .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
 .pill.ok{color:var(--good)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}.pill.mute{color:var(--ink-faint)}
@@ -104,7 +104,7 @@
 <p class="lede">Two complementary lenses on where the student diverges most from the teacher. (below) buckets your tenant-wide capture stream by topic + length + vendor class. (artifact-keyed panel) takes an <code>artifact_cid</code>, runs the bakeoff rows through a heuristic keyword cluster, and links every regression directly to <a href="/docs/diagnose">/docs/diagnose</a>. See <a href="/docs/failure-modes">/docs/failure-modes</a> for the envelope spec.</p>
 
 
-<div class="kpanel" id="fm-panel" style="border-color:rgba(17, 17, 17,0.25)">
+<div class="kpanel" id="fm-panel" style="border-color:var(--line-3)">
   <h2>Artifact-keyed clusters <span style="font-family:var(--mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em;margin-left:8px"></span></h2>
   <p class="pdesc">Paste an <code>artifact_cid</code> below. We call <code>/v1/failure-modes/&lt;cid&gt;</code> and render the top-regression panel plus the per-cluster K-Score table. Clustering is <code>heuristic_keyword_v1</code> &mdash; explicitly labeled; fingerprinting is still a placeholder. Each row links to the diagnostic envelope at <code>/account/diagnose?cid=&lt;cid&gt;</code>.</p>
   <div class="toolbar">
@@ -153,7 +153,7 @@
   <div id="fm-empty" class="empty">
     <strong>Paste an artifact_cid above</strong> to run the report. If the artifact has no bakeoff yet, the envelope returns the explicit <code>no_bakeoff_results_yet</code> response with a hint to run <code>kolm bakeoff</code> first.
   </div>
-  <div id="fm-error" class="empty" hidden style="border-color:#dc2626;color:#dc2626"><strong>Request failed.</strong> <span id="fm-errmsg"></span></div>
+  <div id="fm-error" class="empty" hidden style="border-color:var(--bad);color:var(--bad)"><strong>Request failed.</strong> <span id="fm-errmsg"></span></div>
 </div>
 
 <p class="eyebrow">Tenant-wide cluster failure visualization</p>

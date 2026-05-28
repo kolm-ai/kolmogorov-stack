@@ -46,8 +46,8 @@
 
 <style>
  :root {
- --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
- --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --bg: #0e1116; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: var(--line-1); --line-strong: var(--line-2);
  --ink: #e6e9ee; --ink-mute: #aab0b8; --ink-faint: #6a727c;
  --accent: #e6e9ee; --good: #e6e9ee;
  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -85,7 +85,7 @@
  .install-card { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 12px; }
  .install-card h3 { margin: 0; font-size: 18px; font-weight: 500; color: var(--ink); }
  .install-card p { margin: 0; font-size: 13.5px; color: var(--ink-mute); line-height: 1.55; }
- .install-card .next { font-family: var(--mono); font-size: 11px; color: var(--good); text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 10px; background: rgba(230, 233, 238,0.08); border-radius: 999px; align-self: flex-start; }
+ .install-card .next { font-family: var(--mono); font-size: 11px; color: var(--good); text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 10px; background: var(--line-2); border-radius: 999px; align-self: flex-start; }
  pre.cmd { margin: 0; background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; font-family: var(--mono); font-size: 13px; color: var(--good); overflow-x: auto; }
  pre.cmd code { color: inherit; background: none; padding: 0; }
  .install-card .links { margin-top: auto; display: flex; gap: 12px; padding-top: 12px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 12px; color: var(--ink-faint); }
@@ -146,7 +146,7 @@
  <div class="install-card" data-w373="dl-cli">
  <h3>CLI &middot; Node 20+</h3>
 <p>The fastest path. Installs the <code style="font-family:var(--mono);background:var(--bg-card);padding:1px 5px;border-radius:4px">kolm</code> binary globally from the current source package; works on macOS, Windows, and Linux without admin.</p>
- <pre class="cmd" data-w373="dl-cli-cmd"><code>npm i -g github:kolm-ai/kolm-stack</code></pre>
+ <pre class="cmd" data-w373="dl-cli-cmd"><code>npm i -g github:kolm-ai/kolmogorov-stack</code></pre>
 <p style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">source install &middot; verify with <code>kolm --version</code> &middot; then <code>kolm login</code></p>
  <div class="links"><a href="/docs/cli">CLI docs &rarr;</a><a href="/quickstart">Quickstart &rarr;</a></div>
  </div>
@@ -154,7 +154,7 @@
  <div class="install-card" data-w373="dl-mac">
 <h3>macOS &middot; Apple silicon + Intel</h3>
 <p>Use the same source install on Apple silicon and Intel Macs. Signed desktop packaging requires release artifacts; the CLI path is the supported install today.</p>
- <pre class="cmd" data-w373="dl-mac-cmd"><code>npm i -g github:kolm-ai/kolm-stack</code></pre>
+ <pre class="cmd" data-w373="dl-mac-cmd"><code>npm i -g github:kolm-ai/kolmogorov-stack</code></pre>
 <span class="next" data-w373="dl-mac-next">Supported today via CLI</span>
  <div class="links"><a href="/docs/install/mac">Notes &rarr;</a></div>
  </div>
@@ -162,7 +162,7 @@
  <div class="install-card" data-w373="dl-windows">
 <h3>Windows &middot; x64 + ARM</h3>
 <p>Use the same source install in PowerShell with Node 20+. Signed installer channels require release artifacts; the CLI path is the supported install today.</p>
- <pre class="cmd" data-w373="dl-win-cmd"><code>npm i -g github:kolm-ai/kolm-stack</code></pre>
+ <pre class="cmd" data-w373="dl-win-cmd"><code>npm i -g github:kolm-ai/kolmogorov-stack</code></pre>
 <span class="next" data-w373="dl-win-next">Supported today via CLI</span>
  <div class="links"><a href="/docs/install/windows">Notes &rarr;</a></div>
  </div>
@@ -170,7 +170,7 @@
  <div class="install-card" data-w373="dl-linux">
 <h3>Linux &middot; source one-liner</h3>
 <p>Installs the CLI and runtime under <code>~/.kolm</code>. No root and no systemd unit by default.</p>
- <pre class="cmd" data-w373="dl-linux-cmd"><code>npm i -g github:kolm-ai/kolm-stack</code></pre>
+ <pre class="cmd" data-w373="dl-linux-cmd"><code>npm i -g github:kolm-ai/kolmogorov-stack</code></pre>
 <p style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)">source install &middot; <a href="/docs/install/linux" style="color:var(--accent)">/docs/install/linux</a></p>
  <div class="links"><a href="/docs/install/linux">Linux notes &rarr;</a><a href="/airgap">Air-gap install &rarr;</a></div>
  </div>

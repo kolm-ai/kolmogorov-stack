@@ -22,8 +22,8 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Model card auto-generation","description":"Hugging Face Model Card v0.3 for every .kolm artifact. Embeddable in OneTrust, ServiceNow AI Governance, IBM OpenPages.","url":"https://kolm.ai/docs/model-card","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <link rel="stylesheet" href="/design-tokens.css">
 <style>
-:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:rgba(17, 17, 17,0.10);--warn:#a8b3c2;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10);--warn:#a06b1a}
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:var(--line-2);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:var(--line-2);--warn:#a8b3c2;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:var(--line-2);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10);--warn:#a06b1a}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
 .skip-link{position:absolute;left:-9999px}
@@ -154,7 +154,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   </div>
 </div>
 
-<div class="honesty"><strong>Plain sentinel:</strong> any field the manifest does not yet carry comes through as the literal string <code>not_yet_disclosed</code>. We deliberately do NOT silently substitute an empty string or list &mdash; the auditor must be able to grep for <code>not_yet_disclosed</code> and see every gap in the card.</div>
+<div class="caveat"><strong>Plain sentinel:</strong> any field the manifest does not yet carry comes through as the literal string <code>not_yet_disclosed</code>. We deliberately do NOT silently substitute an empty string or list &mdash; the auditor must be able to grep for <code>not_yet_disclosed</code> and see every gap in the card.</div>
 
 <h2 id="environmental" data-w768="environmental-methodology">Environmental impact estimation</h2>
 <p>The <code>environmental_impact</code> section is an <em>estimate</em>, not a measurement. We compute it as:</p>

@@ -505,7 +505,7 @@ function fullPage(entries) {
       <p class="lede">kolm.ai ships waves of work; each wave is a coherent slice of product. Below is every wave we have shipped, newest first, with a one-line summary and the surfaces it touched. Every claim here resolves to a signed receipt at <a href="/spec/rs-1">/spec/rs-1</a>.</p>
       <div class="feed">
         <a href="/spec/rs-1">RS-1 receipt spec &rarr;</a>
-        <a href="https://github.com/kolm-ai/kolm-stack/releases">github releases &rarr;</a>
+        <a href="https://github.com/kolm-ai/kolmogorov-stack/releases">github releases &rarr;</a>
       </div>
     </div>
   </section>

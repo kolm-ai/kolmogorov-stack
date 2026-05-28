@@ -107,6 +107,15 @@ const TARGETS = [
     strengths: ['managed LoRA', 'fast launch', 'no GPU ownership'],
     evidence: ['src/platform-capabilities.js', 'cli/kolm.js'],
   },
+  {
+    id: 'cerebras-inference',
+    label: 'Cerebras Cloud Inference (CS-3 wafer-scale)',
+    category: 'managed_inference',
+    command: 'kolm cloud cerebras bind --namespace <ns> --model llama3.1-8b',
+    secret_refs: ['env:CEREBRAS_API_KEY'],
+    strengths: ['~2,200 tok/s on 8B and ~450 tok/s on 70B', 'wafer-scale CS-3', 'OpenAI-compatible /v1/chat/completions'],
+    evidence: ['src/cloud-providers/cerebras.js', 'src/device-adapters/cerebras-adapter.js'],
+  },
 ];
 
 function cleanArtifactId(artifactId) {
@@ -252,6 +261,13 @@ function targetSpecificSteps(target, ctx) {
     return [
       { id: 'quote', label: 'Quote GPU cost before spend', command: rowTrainCommand(target).replace(' --confirm', '') },
       { id: 'train', label: 'Run confirmed GPU job', command: rowTrainCommand(target) },
+    ];
+  }
+  if (target === 'cerebras-inference') {
+    return [
+      { id: 'cerebras-models', label: 'Probe Cerebras catalog', command: 'kolm cloud cerebras list-models' },
+      { id: 'cerebras-bind',   label: 'Bind namespace to a Cerebras model', command: `kolm cloud cerebras bind --namespace ${ctx.name} --model llama3.1-8b --artifact ${ctx.artifact}` },
+      { id: 'cerebras-verify', label: 'Verify the route',                 command: `kolm cloud cerebras chat --namespace ${ctx.name} --prompt "ping"` },
     ];
   }
   return [];

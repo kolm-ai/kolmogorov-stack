@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Runtime · kolm.ai</title>
 <meta name="description" content="Runtime adapters for a signed .kolm: vLLM, SGLang, TGI, TRT-LLM, llama.cpp, MLX. Load the artifact on your hardware; the receipt verifies offline. Build targets cover NVIDIA, AMD, Apple Silicon, and CPU.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
@@ -32,7 +33,7 @@
   .rt-list .fr-spec-list__delta--noeg    { color: #e8a86a; border-color: rgba(232,168,106,0.45); }
   .rt-list .fr-spec-list__delta--tee     { color: #c39bf8; border-color: rgba(195,155,248,0.45); }
   .rt-list .fr-spec-list__delta--plain  { color: var(--fr-mint, #6cbf8d); }
-  .rt-list code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); padding: 1px 6px; border: 1px solid var(--ks-line-1); border-radius: 4px; background: rgba(255,255,255,0.02); }
+  .rt-list code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); padding: 1px 6px; border: 1px solid var(--ks-line-1); border-radius: 4px; background: var(--line-1); }
   .rt-list a { color: var(--ks-accent); }
 </style>
 <style>
@@ -133,7 +134,7 @@
     <div class="eyebrow">Runtime &middot; load and serve a signed .kolm</div>
     <h1>One signed artifact. <b>Every runtime.</b></h1>
     <p class="lede">vLLM, SGLang, TGI, TRT-LLM, llama.cpp, MLX. The receipt verifies offline at load. We shell out to upstream binaries on pinned commits.</p>
-    <div style="margin:18px 0 8px; padding:14px 18px; background:#050607; border:1px solid var(--ks-line-2); border-radius:var(--ks-r-md); font-family:var(--ks-mono); font-size:13px; color:var(--ks-ink-2); overflow-x:auto; max-width: 64ch;"><span style="color:var(--ks-accent)">$</span> kolm verify support-triage.kolm<br><span style="color:var(--ks-accent)">$</span> kolm runtime up --target vllm support-triage.kolm <span style="color:var(--ks-ink-3)"># or llama.cpp, mlx, trt-llm</span></div>
+    <div style="margin:18px 0 8px; padding:14px 18px; background:var(--surface-input, var(--ks-bg-1)); border:1px solid var(--ks-line-2); border-radius:var(--ks-r-md); font-family:var(--ks-mono); font-size:13px; color:var(--ks-ink-2); overflow-x:auto; max-width: 64ch;"><span style="color:var(--ks-accent)">$</span> kolm verify support-triage.kolm<br><span style="color:var(--ks-accent)">$</span> kolm runtime up --target vllm support-triage.kolm <span style="color:var(--ks-ink-3)"># or llama.cpp, mlx, trt-llm</span></div>
     <div class="cta-row">
       <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
       <a href="/verify-prod" class="ks-btn ks-btn--ghost">Verify a sample .kolm</a>
@@ -258,6 +259,49 @@ ok: true &middot; artifact_cid bafkreieq&hellip;4f7c
   </div>
 </section>
 
+<section class="sec-section" id="speed">
+  <div class="ks-wrap">
+    <h2>Speed flags &mdash; opt-in, measured</h2>
+    <p class="sub">Five flags layer on top of the runtime: speculative decoding, Shard KV-cache compression, prompt caching, continuous batching, and a Blackwell-gated NVFP4 export. Each is independently measurable with <code>kolm bench --speed</code>. Defaults stay safe; <code>--optimize</code> picks hardware-aware values for all four.</p>
+    <ul class="fr-spec-list rt-list rt-speed-list">
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Speculative decoding</h3><span class="fr-spec-list__delta fr-spec-list__delta--throughput">1.5&ndash;2.4&times; tok/s &middot; HF + vLLM</span></div>
+        <p class="fr-spec-list__p">A small draft model proposes <code>k</code> tokens; the target verifies in one pass. <code>--speculative auto</code> picks a tokenizer-matching draft from the same family; cross-tokenizer drafts are refused. Acceptance is reported in <code>kolm bench --speed --json &middot; spec_accept_rate</code>.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Shard KV compression</h3><span class="fr-spec-list__delta fr-spec-list__delta--ondev">~10&times; KV memory &middot; HF only</span></div>
+        <p class="fr-spec-list__p">A <code>transformers.Cache</code> subclass: K-PCA + V-VQ256 per layer. Fresh cache per request for concurrent safety. vLLM/SGLang/TGI/TRT-LLM ship their own KV managers and ignore external caches; the serve loop logs a warning and falls back to standard.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Prompt caching</h3><span class="fr-spec-list__delta fr-spec-list__delta--latency">TTFT win &middot; vLLM</span></div>
+        <p class="fr-spec-list__p">vLLM <code>enable_prefix_caching</code> &mdash; system prompts and few-shot prefixes hit cache instead of recomputing. Big win on RAG with fixed scaffolds, no-op on RAG with rotating context.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>Continuous batching</h3><span class="fr-spec-list__delta fr-spec-list__delta--throughput">Throughput knob &middot; vLLM</span></div>
+        <p class="fr-spec-list__p"><code>--max-batch N</code> sets vLLM <code>max_num_seqs</code>. Default 8; raise to 16/32/64 for big-VRAM GPUs and many lightweight requests. Tail latency goes up with depth; the serve loop refuses to start if the projected peak exceeds VRAM and suggests a lower N.</p>
+      </li>
+      <li class="fr-spec-list__row">
+        <div class="fr-spec-list__head"><h3>NVFP4 on Blackwell</h3><span class="fr-spec-list__delta fr-spec-list__delta--nvidia">sm_100+ &middot; gated</span></div>
+        <p class="fr-spec-list__p">4-bit float with native tensor-core support on B100/B200/RTX 5090. <code>kolm export --target nvfp4</code> probes <code>nvidia-smi</code> and refuses on Hopper/Ada (where the runtime emulates FP4 on FP16 cores and is slower than FP8). Pass <code>--force</code> for calibration runs; the runtime passport records <code>blackwell_gate.forced:true</code>.</p>
+      </li>
+    </ul>
+    <div class="terminal">
+<pre><span class="c"># Apply hardware-aware defaults</span>
+<span class="prompt">$</span> kolm serve art_a1b2c3d4 --port 8000 <span class="k">--optimize</span>
+
+<span class="c"># Measure</span>
+<span class="prompt">$</span> kolm bench <span class="k">--speed</span> --endpoint http://localhost:8000 --model art_a1b2c3d4 --n 30 --json
+{
+  <span class="k">"ok"</span>: <span class="n">true</span>,
+  <span class="k">"ttft_ms"</span>:  { <span class="k">"mean"</span>: <span class="n">142</span>, <span class="k">"p50"</span>: <span class="n">138</span>, <span class="k">"p95"</span>: <span class="n">178</span>, <span class="k">"p99"</span>: <span class="n">196</span> },
+  <span class="k">"total_ms"</span>: { <span class="k">"mean"</span>: <span class="n">612</span>, <span class="k">"p50"</span>: <span class="n">598</span>, <span class="k">"p95"</span>: <span class="n">754</span>, <span class="k">"p99"</span>: <span class="n">802</span> },
+  <span class="k">"tok_s"</span>:    { <span class="k">"mean"</span>: <span class="n">104.2</span>, <span class="k">"p50"</span>: <span class="n">106.9</span> }
+}</pre>
+    </div>
+    <p class="sub" style="margin-top: var(--ks-4)">Full reference: <a href="/docs/run/speed-optimization">Speed optimization</a>. Per-flag deep dives: <a href="/docs/run/speed-optimization#speculative">speculative</a> &middot; <a href="/docs/run/speed-optimization#shard">Shard</a> &middot; <a href="/docs/run/speed-optimization#prompt-cache">prompt cache</a> &middot; <a href="/docs/run/speed-optimization#batch">batch</a> &middot; <a href="/docs/run/speed-optimization#nvfp4">NVFP4</a>.</p>
+  </div>
+</section>
+
 <section class="sec-section" id="receipt">
   <div class="ks-wrap">
     <h2>Receipt verification at load time</h2>
@@ -305,7 +349,7 @@ ok: true &middot; artifact_cid bafkreieq&hellip;4f7c
         <p class="fr-spec-list__p">If the compile step embedded a TEE attestation report, the adapter checks the runtime hardware matches the attested platform before serving. Mismatch refuses to start. See the <a href="/compile#attest">compile attestation section</a>.</p>
       </li>
       <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Real failure modes</h3><span class="fr-spec-list__delta fr-spec-list__delta--honest">PLAIN SCOPE &middot; live</span></div>
+        <div class="fr-spec-list__head"><h3>Real failure modes</h3><span class="fr-spec-list__delta fr-spec-list__delta--caveats">PLAIN SCOPE &middot; live</span></div>
         <p class="fr-spec-list__p">If the upstream binary segfaults, the adapter forwards the exit code and the last 64 KB of stderr to the operator. We do not swallow runtime crashes; the failure is yours to read and act on.</p>
       </li>
     </ul>

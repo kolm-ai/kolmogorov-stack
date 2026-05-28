@@ -291,6 +291,7 @@
       <a href="/docs/run/security">Security</a>
       <a href="/docs/run/runtimes">Runtime install</a>
       <a href="/docs/run/rollback">Rollback</a>
+      <a href="/docs/run/speed-optimization">Speed optimization</a>
       <a href="/docs/run/troubleshooting">Troubleshooting</a>
 
       <h4>Deploy</h4>
@@ -556,7 +557,7 @@
   cli.forEach(function(s){
     index.push({ t: 'CLI: ' + s, u: '/docs/cli/' + s });
   });
-  var run = ('overview,devices,deploy,fleet,testing,monitoring,updates,security,runtimes,rollback,troubleshooting').split(',');
+  var run = ('overview,devices,deploy,fleet,testing,monitoring,updates,security,runtimes,rollback,speed-optimization,troubleshooting').split(',');
   run.forEach(function(s){
     index.push({ t: 'Run: ' + titleize(s), u: '/docs/run/' + s });
   });

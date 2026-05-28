@@ -6,7 +6,7 @@ Pod::Spec.new do |s|
   s.homepage     = "https://kolm.ai"
   s.license      = { :type => "Apache-2.0" }
   s.author       = { "Kolm" => "security@kolm.ai" }
-  s.source       = { :git => "https://github.com/kolm-ai/kolm-stack.git", :tag => "v#{s.version}" }
+  s.source       = { :git => "https://github.com/kolm-ai/kolmogorov-stack.git", :tag => "v#{s.version}" }
   s.platforms    = { :ios => "14.0" }
   s.source_files = "ios/**/*.{h,m,mm,swift}"
   s.dependency "React-Core"

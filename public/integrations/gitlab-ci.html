@@ -39,7 +39,7 @@
  pre.term .c{color:var(--ink-faint,#6a727c)}
  pre.term .g{color:var(--accent,#111111)}
  pre.term .k{color:#ec7373}
- .checkpoint{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px dashed rgba(17, 17, 17,0.32);border-radius:8px;background:rgba(17, 17, 17,0.05);font-size:13.5px;color:var(--ink-mute,#aab0b8);margin:0 0 8px}
+ .checkpoint{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px dashed var(--line-strong);border-radius:8px;background:var(--line-1);font-size:13.5px;color:var(--ink-mute,#aab0b8);margin:0 0 8px}
  .checkpoint b{color:var(--accent,#111111);font-weight:500;font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;text-transform:uppercase}
  .actions{display:flex;gap:12px;margin:24px 0 0;flex-wrap:wrap}
  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;border:1px solid var(--line);color:var(--fg,#e6e9ee);transition:all 160ms}
@@ -100,7 +100,7 @@
  <span class="k">variables</span>:
  KOLM_BACKEND: local_cpu
  <span class="k">script</span>:
- - npm install -g github:kolm-ai/kolm-stack
+ - npm install -g github:kolm-ai/kolmogorov-stack
  - mkdir -p artifacts
  - |
  for r in recipes/*.recipe.json; do
@@ -142,7 +142,7 @@
  <span class="k">rules</span>:
  - <span class="k">if</span>: <span class="g">'$CI_COMMIT_TAG'</span>
  <span class="k">script</span>:
- - npm install -g github:kolm-ai/kolm-stack
+ - npm install -g github:kolm-ai/kolmogorov-stack
  - mkdir -p out
  - |
  for r in recipes/*.recipe.json; do
@@ -188,7 +188,7 @@
  <span class="k">rules</span>:
  - <span class="k">if</span>: <span class="g">'$CI_PIPELINE_SOURCE == "schedule"'</span>
  <span class="k">script</span>:
- - npm install -g github:kolm-ai/kolm-stack
+ - npm install -g github:kolm-ai/kolmogorov-stack
  - |
  fails=0
  for art in releases/**/*.kolm; do

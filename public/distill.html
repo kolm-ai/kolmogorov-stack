@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Distill · kolm.ai</title>
 <meta name="description" content="Turn captured rows into a quantized .kolm specialist. Teacher endpoints include Claude Opus 4.7, Sonnet 4.6, GPT-4.5, Gemini 2.5 Pro, and self-hosted vLLM, SGLang, TGI. Students cover Qwen2.5, Llama-3.3, and DeepSeek-R1.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
@@ -27,13 +28,13 @@
   .ds-mode-list .fr-spec-list__delta--merge     { color: #e8a86a; border-color: rgba(232,168,106,0.45); }
   .ds-mode-list .fr-spec-list__delta--mtp       { color: var(--fr-mint, #6cbf8d); }
   .ds-mode-list .fr-spec-list__delta--lowbit    { color: var(--fr-mint, #6cbf8d); }
-  .ds-mode-list .fr-cli { margin-top: 12px; font-family: var(--ks-mono); font-size: 12px; line-height: 1.6; padding: 10px 12px; background: #050607; border: 1px solid var(--ks-line-1); border-radius: 6px; color: var(--ks-ink); }
+  .ds-mode-list .fr-cli { margin-top: 12px; font-family: var(--ks-mono); font-size: 12px; line-height: 1.6; padding: 10px 12px; background: var(--surface-input, var(--ks-bg-1)); border: 1px solid var(--ks-line-1); border-radius: 6px; color: var(--ks-ink); }
   .ds-mode-list .fr-cli__prompt { color: var(--ks-accent); user-select: none; }
   .ds-mode-list .fr-cli__flag { color: var(--ks-accent); }
   .ds-mode-list .fr-cli__comment { color: var(--ks-ink-4); display: block; margin-top: 4px; }
   .ds-syn-list .fr-spec-list__delta--disclosed { color: var(--fr-mint, #6cbf8d); }
   .ds-syn-list .fr-spec-list__delta--truthfulness   { color: #e8a86a; border-color: rgba(232,168,106,0.45); }
-  .ds-syn-list .fr-cli { margin-top: 12px; font-family: var(--ks-mono); font-size: 12px; line-height: 1.6; padding: 10px 12px; background: #050607; border: 1px solid var(--ks-line-1); border-radius: 6px; color: var(--ks-ink); }
+  .ds-syn-list .fr-cli { margin-top: 12px; font-family: var(--ks-mono); font-size: 12px; line-height: 1.6; padding: 10px 12px; background: var(--surface-input, var(--ks-bg-1)); border: 1px solid var(--ks-line-1); border-radius: 6px; color: var(--ks-ink); }
   .ds-syn-list .fr-cli__prompt { color: var(--ks-accent); user-select: none; }
   .ds-syn-list .fr-cli__flag { color: var(--ks-accent); }
   .ds-syn-list .fr-cli__comment { color: var(--ks-ink-4); display: block; margin-top: 4px; }
@@ -72,7 +73,7 @@
   .sec-card code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); }
   .sec-card a { color: var(--ks-accent); }
 
-  .terminal { background: #050607; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); margin-top: var(--ks-4); overflow-x: auto; }
+  .terminal { background: var(--surface-input, var(--ks-bg-1)); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); margin-top: var(--ks-4); overflow-x: auto; }
   .terminal pre { margin: 0; font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.65; color: var(--ks-ink); }
   .terminal .c { color: var(--ks-ink-3); }
   .terminal .k { color: var(--ks-accent); }
@@ -400,7 +401,7 @@ verified    kolm verify support-triage.kolm</pre>
         </div>
       </li>
       <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>No silent passthrough</h3><span class="fr-spec-list__delta fr-spec-list__delta--honesty">NO-SILENT-PASS &middot; off by default</span></div>
+        <div class="fr-spec-list__head"><h3>No silent passthrough</h3><span class="fr-spec-list__delta fr-spec-list__delta--caveats">NO-SILENT-PASS &middot; off by default</span></div>
         <p class="fr-spec-list__p">The booster refuses to run if the augmentation would push the synthetic share above <code>--max-synthetic-ratio</code> (default 0.5). A run that exceeds the cap aborts before the teacher pass, so you do not pay for tokens you would not be able to ship. If you need a fully real corpus, set <code>--no-synthetic</code> and the runner falls back to refusing thin namespaces below the <code>--min-pairs</code> floor.</p>
         <div class="fr-status">
           <span class="fr-status__dot"></span>

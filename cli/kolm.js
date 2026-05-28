@@ -2888,11 +2888,11 @@ EXAMPLES
   kolm upgrade --json | jq .status # script-friendly
 
 Reads the current version from package.json. Fetches the latest version from
-the canonical install source (github.com/kolm-ai/kolm-stack main
+the canonical install source (github.com/kolm-ai/kolmogorov-stack main
 branch package.json) with a 5s timeout. If a newer version is available, it
 prints the upgrade command. It does NOT auto-upgrade (too many footguns).
 
-The canonical install is "npm i -g github:kolm-ai/kolm-stack", NOT
+The canonical install is "npm i -g github:kolm-ai/kolmogorov-stack", NOT
 the unrelated "kolm" package on the public npm registry.
 
 Status values: current, outdated, unknown (network or github unavailable).
@@ -2992,7 +2992,7 @@ USAGE
   kolm connect test {openai|anthropic|openrouter}
 
 EXAMPLES
-  npm install -g github:kolm-ai/kolm-stack
+  npm install -g github:kolm-ai/kolmogorov-stack
   export OPENAI_API_KEY=sk-...
   kolm connect start --detach
   export OPENAI_BASE_URL=http://127.0.0.1:8787/v1
@@ -3107,7 +3107,7 @@ EXAMPLES
   kolm update --dry-run            # preview only
   kolm update --json | jq .status  # script-friendly
 
-Runs \`npm i -g github:kolm-ai/kolm-stack\` against the npm on PATH,
+Runs \`npm i -g github:kolm-ai/kolmogorov-stack\` against the npm on PATH,
 streaming its output. On windows we shell through \`cmd /c\` so npm.cmd resolves.
 Exits non-zero if npm fails (usually a perms issue - try sudo or admin shell).
 
@@ -8433,6 +8433,44 @@ async function cmdCompile(args) {
       console.error(`error: --target must be one of: gguf, onnx, safetensors, coreml, mlx, executorch, tensorrt, native-c (alias c), native-rust (alias rust), wasm, all, OR a quant shortcut (gguf-q4km, gguf-iq4xs, exl2-Nbpw, gptq-4bit, awq-4bit, nvfp4, fp8, mlx-4bit, hqq) — got '${targetFlag}'`);
       process.exit(EXIT.BAD_ARGS);
     }
+    // W916-I1 — `--with-draft <model|auto|off>` (and `--speculative` alias)
+    // pre-resolves the draft pairing at compile time and stashes it for
+    // src/spec-compile.js to bind into the manifest. The serve path reads
+    // manifest.speculative_decoding when no --speculative flag is given,
+    // so a compile-time choice survives all the way to the runtime banner
+    // without the operator having to re-supply it.
+    try {
+      const draftFlag = pickFlag(args, '--with-draft') ?? pickFlag(args, '--speculative');
+      const kFlag = pickFlag(args, '--num-speculative-tokens');
+      if (draftFlag != null) {
+        const { resolveSpeculative, formatSpeculativeBanner } = await import('../src/speculative-decoding.js');
+        // Probe the spec's base_model — at compile time we don't yet know the
+        // serve-time runtime, so we use the generic 'vllm' gate (the registry
+        // is identical for vllm + transformers; both consume the same
+        // draft-model id at runtime).
+        const target = spec && (spec.base_model || spec.base || spec.target_model) || null;
+        const resolved = resolveSpeculative({
+          flag: draftFlag,
+          target,
+          runtime: 'vllm',
+          numSpeculativeTokens: kFlag ? Number(kFlag) : undefined,
+        });
+        // Stash via env so src/spec-compile.js can bind it into the manifest
+        // without a circular import back into the CLI module.
+        if (resolved.supported && resolved.draft_model) {
+          process.env.KOLM_COMPILE_SPECULATIVE_DRAFT = resolved.draft_model;
+          process.env.KOLM_COMPILE_SPECULATIVE_K = String(resolved.num_speculative_tokens);
+          process.env.KOLM_COMPILE_SPECULATIVE_MODE = resolved.mode;
+        } else if (resolved.mode === 'off') {
+          process.env.KOLM_COMPILE_SPECULATIVE_DRAFT = '';
+          process.env.KOLM_COMPILE_SPECULATIVE_K = '0';
+          process.env.KOLM_COMPILE_SPECULATIVE_MODE = 'off';
+        }
+        console.log(formatSpeculativeBanner(resolved));
+      }
+    } catch (e) {
+      console.log(`(speculative-decoding pre-resolution skipped: ${e.message})`);
+    }
     // S-1 — `kolm compile --target gguf-q4km --dry-run` short-circuit. Prints
     // the planned GGUF export steps without spawning llama.cpp. The dry-run
     // path stays GENERIC (any artifact) and uses src/export-gguf.js to build
@@ -9559,6 +9597,15 @@ async function cmdEval(args) {
 }
 
 async function cmdBenchmark(args) {
+  // W916-I6 — `kolm bench --speed` measures TTFT, tok/s, and p50/p95/p99
+  // latency against a live OpenAI-compatible /v1/chat/completions endpoint.
+  // The point of this verb is to prove the inference-speed flags
+  // (--speculative, --kv-cache shard, --prompt-cache, --max-batch) actually
+  // moved the numbers. Distinct-named (cmdW916BenchSpeed) so future bench
+  // sub-verbs cannot collide.
+  if (args && args.includes('--speed')) {
+    return cmdW916BenchSpeed(args);
+  }
   if (args && (args[0] === 'evidence' || args[0] === 'benchmark-evidence')) {
     return cmdBenchmarkEvidence(args.slice(1));
   }
@@ -9887,6 +9934,222 @@ async function cmdBenchmark(args) {
     appendRunLog({ command: 'bench', artifact: ap, runs: report.runs ?? null, k_composite: k, latency_us: lat, ok: true });
     await dispatchBench('PostBench', { command: 'bench', cwd: process.cwd(), artifact: ap, runs: report.runs, summary: report.summary || null }, { onResult: printHookResult });
   });
+}
+
+// W916-I6 — `kolm bench --speed` measures real inference speed against a
+// live OpenAI-compatible /v1/chat/completions endpoint. Reports TTFT,
+// tok/s, and p50/p95/p99 latency. The point: prove the speed flags
+// (--speculative, --kv-cache shard, --prompt-cache, --max-batch) moved
+// the numbers. Distinct-named so future bench sub-verbs cannot collide.
+//
+// Flags:
+//   --endpoint <url>    default http://127.0.0.1:8765
+//   --model <id>        default 'kolm-artifact' (matches serve.py /v1/models)
+//   --n <int>           default 30 (number of requests)
+//   --max-tokens <int>  default 64 per request
+//   --warmup <int>      default 3 (excluded from percentiles)
+//   --concurrency <int> default 1 (sequential; >1 enables batching probe)
+//   --prompt <str>      override default prompt
+//   --bearer <token>    Authorization: Bearer header
+//   --json              machine-readable envelope
+async function cmdW916BenchSpeed(args) {
+  const _pick = (name) => {
+    const i = args.indexOf(name);
+    if (i < 0) return null;
+    const v = args[i + 1];
+    if (v === undefined || (typeof v === 'string' && v.startsWith('--'))) return '';
+    return v;
+  };
+  const endpoint = _pick('--endpoint') || 'http://127.0.0.1:8765';
+  const model = _pick('--model') || 'kolm-artifact';
+  const n = Math.max(1, Number.parseInt(_pick('--n') || '30', 10) || 30);
+  const maxTokens = Math.max(1, Number.parseInt(_pick('--max-tokens') || '64', 10) || 64);
+  const warmup = Math.max(0, Number.parseInt(_pick('--warmup') || '3', 10) || 0);
+  const concurrency = Math.max(1, Number.parseInt(_pick('--concurrency') || '1', 10) || 1);
+  const prompt = _pick('--prompt') || 'Write one sentence about quantization.';
+  const bearer = _pick('--bearer') || process.env.KOLM_API_KEY || '';
+  const wantJson = args.includes('--json');
+
+  const url = endpoint.replace(/\/$/, '') + '/v1/chat/completions';
+  const headers = { 'Content-Type': 'application/json' };
+  if (bearer) headers['Authorization'] = `Bearer ${bearer}`;
+
+  // One non-streaming request → returns (ttft_ms estimated as total since
+  // non-streaming has no first-byte signal, total_ms, output_tokens,
+  // tok_s). We use streaming when the endpoint advertises it via SSE for
+  // a real TTFT. Falls back to total-as-TTFT when streaming fails.
+  async function oneRequest() {
+    const body = JSON.stringify({
+      model,
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: maxTokens,
+      stream: true,
+    });
+    const t0 = Date.now();
+    let ttftMs = null;
+    let outputTokens = 0;
+    let textLen = 0;
+    let ok = false;
+    let errorDetail = null;
+    try {
+      const res = await fetch(url, { method: 'POST', headers, body });
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        return {
+          ok: false, status: res.status, error: 'http_error',
+          detail: text.slice(0, 200), ttft_ms: null, total_ms: Date.now() - t0,
+          output_tokens: 0, tok_s: null,
+        };
+      }
+      const reader = res.body && res.body.getReader ? res.body.getReader() : null;
+      if (!reader) {
+        const text = await res.text();
+        ttftMs = Date.now() - t0;
+        try {
+          const j = JSON.parse(text);
+          outputTokens = j.usage?.completion_tokens || 0;
+          textLen = (j.choices?.[0]?.message?.content || '').length;
+        } catch { /* upstream returned non-JSON; tok_s will be null */ }
+        ok = true;
+      } else {
+        const decoder = new TextDecoder('utf-8');
+        let buf = '';
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          if (ttftMs === null) ttftMs = Date.now() - t0;
+          buf += decoder.decode(value, { stream: true });
+          let idx;
+          while ((idx = buf.indexOf('\n')) >= 0) {
+            const line = buf.slice(0, idx).trim();
+            buf = buf.slice(idx + 1);
+            if (!line.startsWith('data:')) continue;
+            const payload = line.slice(5).trim();
+            if (payload === '[DONE]') continue;
+            try {
+              const j = JSON.parse(payload);
+              const delta = j.choices?.[0]?.delta?.content || '';
+              if (delta) {
+                outputTokens += 1;  // rough proxy; real token count from usage when emitted
+                textLen += delta.length;
+              }
+              if (j.usage?.completion_tokens) outputTokens = j.usage.completion_tokens;
+            } catch { /* ignore partial chunk */ }
+          }
+        }
+        ok = true;
+      }
+    } catch (e) {
+      errorDetail = String(e && e.message || e);
+    }
+    const totalMs = Date.now() - t0;
+    const genMs = ttftMs != null ? (totalMs - ttftMs) : totalMs;
+    const tokS = (outputTokens > 0 && genMs > 0) ? (outputTokens / (genMs / 1000)) : null;
+    return {
+      ok, ttft_ms: ttftMs, total_ms: totalMs,
+      output_tokens: outputTokens, text_chars: textLen,
+      tok_s: tokS, error: errorDetail || null,
+    };
+  }
+
+  function pct(arr, p) {
+    if (!arr.length) return null;
+    const sorted = [...arr].sort((a, b) => a - b);
+    const idx = Math.min(sorted.length - 1, Math.floor(sorted.length * p / 100));
+    return sorted[idx];
+  }
+  function mean(arr) { return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null; }
+
+  if (!wantJson) {
+    console.log(`bench --speed: ${endpoint}/v1/chat/completions  model=${model}  n=${n}  max_tokens=${maxTokens}  warmup=${warmup}  concurrency=${concurrency}`);
+  }
+
+  // Warmup (results discarded).
+  for (let i = 0; i < warmup; i++) {
+    const r = await oneRequest();
+    if (!wantJson) {
+      if (r.ok) process.stdout.write('.');
+      else process.stdout.write('x');
+    }
+  }
+  if (!wantJson && warmup > 0) process.stdout.write('\n');
+
+  const results = [];
+  if (concurrency === 1) {
+    for (let i = 0; i < n; i++) {
+      const r = await oneRequest();
+      results.push(r);
+      if (!wantJson) process.stdout.write(r.ok ? '.' : 'x');
+    }
+  } else {
+    // Fire `concurrency` parallel requests in waves until n total.
+    let fired = 0;
+    while (fired < n) {
+      const batch = Math.min(concurrency, n - fired);
+      const wave = await Promise.all(Array.from({ length: batch }, () => oneRequest()));
+      results.push(...wave);
+      fired += batch;
+      if (!wantJson) for (const r of wave) process.stdout.write(r.ok ? '.' : 'x');
+    }
+  }
+  if (!wantJson) process.stdout.write('\n');
+
+  const okOnly = results.filter(r => r.ok);
+  const ttfts = okOnly.map(r => r.ttft_ms).filter(v => typeof v === 'number');
+  const totals = okOnly.map(r => r.total_ms).filter(v => typeof v === 'number');
+  const tokss = okOnly.map(r => r.tok_s).filter(v => typeof v === 'number');
+
+  const envelope = {
+    ok: okOnly.length > 0,
+    version: 'kolm-bench-speed-v1',
+    endpoint, model,
+    n_requested: n,
+    n_succeeded: okOnly.length,
+    n_failed: results.length - okOnly.length,
+    warmup,
+    concurrency,
+    ttft_ms: {
+      mean: mean(ttfts),
+      p50: pct(ttfts, 50),
+      p95: pct(ttfts, 95),
+      p99: pct(ttfts, 99),
+    },
+    total_ms: {
+      mean: mean(totals),
+      p50: pct(totals, 50),
+      p95: pct(totals, 95),
+      p99: pct(totals, 99),
+    },
+    tok_s: {
+      mean: mean(tokss),
+      p50: pct(tokss, 50),
+      p95: pct(tokss, 95),
+      p99: pct(tokss, 99),
+    },
+    errors: results.filter(r => !r.ok).slice(0, 5).map(r => ({
+      status: r.status || null, error: r.error || null, detail: r.detail || null,
+    })),
+    measured_at: new Date().toISOString(),
+  };
+
+  if (wantJson) {
+    console.log(JSON.stringify(envelope, null, 2));
+  } else {
+    console.log('');
+    console.log(`results: ${envelope.n_succeeded}/${envelope.n_requested} succeeded`);
+    const fmt = (v, u = 'ms') => v == null ? 'n/a' : `${v.toFixed(1)} ${u}`;
+    console.log(`  ttft   mean=${fmt(envelope.ttft_ms.mean)}  p50=${fmt(envelope.ttft_ms.p50)}  p95=${fmt(envelope.ttft_ms.p95)}  p99=${fmt(envelope.ttft_ms.p99)}`);
+    console.log(`  total  mean=${fmt(envelope.total_ms.mean)}  p50=${fmt(envelope.total_ms.p50)}  p95=${fmt(envelope.total_ms.p95)}  p99=${fmt(envelope.total_ms.p99)}`);
+    console.log(`  tok/s  mean=${fmt(envelope.tok_s.mean, '')}  p50=${fmt(envelope.tok_s.p50, '')}  p95=${fmt(envelope.tok_s.p95, '')}  p99=${fmt(envelope.tok_s.p99, '')}`);
+    if (envelope.n_failed > 0) {
+      console.log(`  ${envelope.n_failed} failed:`);
+      for (const e of envelope.errors) {
+        console.log(`    status=${e.status || '-'} error=${e.error || '-'}${e.detail ? ' detail=' + e.detail : ''}`);
+      }
+    }
+  }
+  process.exit(envelope.ok ? 0 : EXIT.EXECUTION);
 }
 
 async function cmdBenchmarkEvidence(args) {
@@ -11070,7 +11333,7 @@ async function cmdEject(args) {
   try {
     ({ default: AdmZip } = await import('adm-zip'));
   } catch (e) {
-    const err = new Error('adm-zip not available; reinstall kolm from a fresh global: npm i -g github:kolm-ai/kolm-stack');
+    const err = new Error('adm-zip not available; reinstall kolm from a fresh global: npm i -g github:kolm-ai/kolmogorov-stack');
     err.exitCode = EXIT.MISSING_PREREQ;
     throw err;
   }
@@ -12768,6 +13031,47 @@ async function _smokeOneCloudTarget(target, { dryRun = false } = {}) {
         };
       }
     }
+    if (target.kind === 'provider' && target.name === 'cerebras') {
+      const mod = await import('../src/cloud-providers/cerebras.js');
+      const det = mod.detect(process.env);
+      if (!det.ok || dryRun) {
+        return {
+          ok: false, target: targetLabel, latency_ms: Date.now() - t0,
+          detail: {
+            mode: dryRun ? 'dry-run' : 'no-key',
+            reason: det.reason || 'dry-run forced',
+            install_hint: det.install_hint || 'export CEREBRAS_API_KEY=csk-...',
+            docs_url: det.docs_url || 'https://inference-docs.cerebras.ai/',
+            would_do: 'GET https://api.cerebras.ai/v1/models',
+          },
+        };
+      }
+      try {
+        const prov = new mod.CerebrasProvider();
+        const r = await prov.listModels();
+        return {
+          ok: !!r.ok,
+          target: targetLabel,
+          latency_ms: Date.now() - t0,
+          detail: {
+            mode: 'live',
+            source: r.source,
+            models_visible: (r.models || []).length,
+            sample_ids: (r.models || []).slice(0, 3).map((m) => m.id),
+          },
+        };
+      } catch (e) {
+        return {
+          ok: false, target: targetLabel, latency_ms: Date.now() - t0,
+          detail: {
+            mode: 'live',
+            error: e.message,
+            code: e.code || 'cerebras_smoke_failed',
+            install_hint: e.install_hint || 'export CEREBRAS_API_KEY=csk-...',
+          },
+        };
+      }
+    }
     if (target.kind === 'storage' && target.name === 's3') {
       const storage = await import('../src/object-storage.js');
       const readiness = storage.objectStorageReadiness(process.env);
@@ -13198,7 +13502,7 @@ spec:
     // First positional arg that's not a flag is the artifact path.
     const artifact = args.find(a => !a.startsWith('--') && a !== 'serve');
     if (!artifact) {
-      console.error('usage: kolm serve --http <artifact.kolm> [--port 8765] [--host 127.0.0.1] [--kv-cache auto|shard|default]');
+      console.error('usage: kolm serve --http <artifact.kolm> [--port 8765] [--host 127.0.0.1] [--optimize] [--kv-cache auto|shard|default] [--speculative auto|off|<draft-model>] [--num-speculative-tokens N] [--prompt-cache auto|on|off] [--max-batch N]');
       nextStep({ run: 'kolm artifacts list', see: 'docs/run/serve.md' });
       process.exit(EXIT.BAD_ARGS);
     }
@@ -13210,6 +13514,41 @@ spec:
     }
     const py = process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
     const repoRoot = path.dirname(path.dirname(new URL(import.meta.url).pathname));
+
+    // W916-I7 — --optimize seeds sensible defaults for all four speed
+    // levers (--speculative auto, --kv-cache auto, --prompt-cache on, and
+    // a VRAM-derived --max-batch). User-set flags downstream still win
+    // because the per-flag blocks below check `args.includes(flag)`/
+    // pickFlag(args, flag) and we only inject when the flag is absent.
+    if (args.includes('--optimize')) {
+      if (!args.includes('--speculative') && !args.includes('--with-draft')) {
+        args.push('--speculative', 'auto');
+      }
+      if (!args.includes('--kv-cache')) {
+        args.push('--kv-cache', 'auto');
+      }
+      if (!args.includes('--prompt-cache')) {
+        args.push('--prompt-cache', 'auto');
+      }
+      if (!args.includes('--max-batch')) {
+        // VRAM-derived: 24+ GB → 16, 12–24 → 8, 8–12 → 4, <8 → 2. We re-
+        // detect here cheaply rather than wait for the hwSummary block
+        // below; that block runs after and won't overwrite us.
+        let maxBatch = 8;
+        try {
+          const { detectHardware } = await import('../src/forge-hardware.js');
+          const hw = detectHardware();
+          const vram = Number(hw.primary?.vram_gb || 0);
+          if (vram >= 24) maxBatch = 16;
+          else if (vram >= 12) maxBatch = 8;
+          else if (vram >= 8) maxBatch = 4;
+          else maxBatch = 2;
+        } catch { /* fall through to default 8 */ }
+        args.push('--max-batch', String(maxBatch));
+      }
+      console.log('--optimize: speculative=auto kv-cache=auto prompt-cache=auto max-batch=auto');
+      console.log('');
+    }
 
     // W869 — hardware auto-detect (Persona A). Inspect the primary GPU, pick a
     // sensible runtime + dtype + KV cache precision, surface the choice to the
@@ -13311,6 +13650,79 @@ spec:
       console.log('');
     } catch (e) {
       console.log(`(kv-cache policy skipped: ${e.message})`);
+    }
+
+    // W916-I1 — speculative decoding flag resolution. --speculative
+    // <auto|off|<model-id>>. Auto looks up the DRAFT_PAIRINGS registry;
+    // explicit id passes through; off forces no draft. The Python child
+    // reads KOLM_SERVE_SPECULATIVE_DRAFT before its own manifest probe.
+    try {
+      const specRaw = pickFlag(args, '--speculative') ?? pickFlag(args, '--with-draft');
+      const kFlag = pickFlag(args, '--num-speculative-tokens');
+      const { resolveSpeculative, formatSpeculativeBanner } = await import('../src/speculative-decoding.js');
+      // Best-effort target probe from the artifact manifest.
+      let targetModel = null;
+      try {
+        const { loadArtifact } = await import('../src/artifact-runner.js');
+        const bundle = loadArtifact(ap);
+        const m = bundle?.manifest || {};
+        targetModel = m.base_model || m.base || m.target_model || null;
+      } catch { /* fall through; resolveSpeculative handles null */ }
+      const resolved = resolveSpeculative({
+        flag: specRaw,
+        target: targetModel,
+        runtime: serveEnv.KOLM_SERVE_RUNTIME || 'vllm',
+        numSpeculativeTokens: kFlag ? Number(kFlag) : undefined,
+      });
+      if (resolved.supported && resolved.draft_model) {
+        serveEnv.KOLM_SERVE_SPECULATIVE_DRAFT = resolved.draft_model;
+        serveEnv.KOLM_NUM_SPECULATIVE_TOKENS = String(resolved.num_speculative_tokens);
+      } else if (resolved.mode === 'off') {
+        serveEnv.KOLM_SERVE_SPECULATIVE_DRAFT = '';
+        serveEnv.KOLM_NUM_SPECULATIVE_TOKENS = '0';
+      }
+      console.log(formatSpeculativeBanner(resolved));
+      console.log('');
+    } catch (e) {
+      console.log(`(speculative-decoding resolution skipped: ${e.message})`);
+    }
+
+    // W916-I3 — --prompt-cache <auto|on|off>. vLLM's prefix-cache reuses
+    // KV blocks for shared prompt prefixes (system prompt, few-shot
+    // examples, RAG context). serve.py reads KOLM_PROMPT_CACHE.
+    try {
+      const pcRaw = pickFlag(args, '--prompt-cache');
+      if (pcRaw !== undefined && pcRaw !== null) {
+        const v = String(pcRaw).toLowerCase();
+        if (!['auto', 'on', 'off'].includes(v)) {
+          console.error(`error: --prompt-cache must be one of: auto, on, off (got '${pcRaw}')`);
+          process.exit(EXIT.BAD_ARGS);
+        }
+        serveEnv.KOLM_PROMPT_CACHE = v;
+        console.log(`prompt cache: ${v === 'auto' ? 'auto (on for chat workloads)' : v}`);
+        console.log('');
+      }
+    } catch (e) {
+      console.log(`(prompt-cache flag skipped: ${e.message})`);
+    }
+
+    // W916-I4 — --max-batch N. vLLM continuous-batching width. Higher
+    // values raise throughput on bursty traffic at the cost of per-request
+    // latency tail. serve.py reads KOLM_MAX_NUM_SEQS (default 8).
+    try {
+      const mbRaw = pickFlag(args, '--max-batch');
+      if (mbRaw !== undefined && mbRaw !== null) {
+        const n = Number.parseInt(String(mbRaw), 10);
+        if (!Number.isFinite(n) || n < 1 || n > 1024) {
+          console.error(`error: --max-batch must be an integer in [1, 1024] (got '${mbRaw}')`);
+          process.exit(EXIT.BAD_ARGS);
+        }
+        serveEnv.KOLM_MAX_NUM_SEQS = String(n);
+        console.log(`continuous batching: max_num_seqs=${n}`);
+        console.log('');
+      }
+    } catch (e) {
+      console.log(`(max-batch flag skipped: ${e.message})`);
     }
 
     console.log(`booting HTTP serve for ${path.basename(ap)} via ${py} apps/runtime/serve.py`);
@@ -29400,6 +29812,200 @@ async function cmdCloud(args) {
     await cmdCloudTrain(rest);
     return;
   }
+  // W916-I9 - Cerebras Cloud Inference (CS-3 wafer-scale, OpenAI-compatible).
+  // Sub-verbs:
+  //   list-models                                  live /v1/models probe (fallback to bundled catalog if offline)
+  //   bind --namespace ns --model id [--max-tokens N] [--temperature 0.7]
+  //                                                persist namespace -> Cerebras model id binding
+  //   unbind --namespace ns                        remove binding file
+  //   get-binding --namespace ns                   print binding json
+  //   list-bindings                                list all local bindings
+  //   chat --model id --prompt "..." [--max-tokens N] [--temperature 0.7]
+  //                                                one-shot completion via /v1/chat/completions
+  //   estimate-cost --model id --input-tokens N --output-tokens N
+  //                                                quote per 2026-05 list pricing
+  if (sub === 'cerebras') {
+    const sub2 = rest[0];
+    const r2 = rest.slice(1);
+    const wantJson = r2.includes('--json');
+    if (!sub2 || sub2 === '--help' || sub2 === '-h' || sub2 === 'help') {
+      console.log('kolm cloud cerebras <list-models|bind|unbind|get-binding|list-bindings|chat|estimate-cost> [options]');
+      console.log('');
+      console.log('  list-models                                live /v1/models probe (fallback to bundled catalog if offline)');
+      console.log('  bind --namespace ns --model id             persist namespace -> Cerebras model id binding');
+      console.log('       [--max-tokens N] [--temperature 0.7]');
+      console.log('  unbind --namespace ns                      remove binding file');
+      console.log('  get-binding --namespace ns                 print binding json');
+      console.log('  list-bindings                              list all local bindings');
+      console.log('  chat --model id --prompt "..."             one-shot completion via /v1/chat/completions');
+      console.log('       [--max-tokens N] [--temperature 0.7]');
+      console.log('  estimate-cost --model id --input-tokens N --output-tokens N');
+      console.log('                                             quote per 2026-05 list pricing');
+      console.log('');
+      console.log('Env: CEREBRAS_API_KEY (or KOLM_CEREBRAS_TOKEN); KOLM_CEREBRAS_URL overrides https://api.cerebras.ai/v1');
+      console.log('Docs: https://inference-docs.cerebras.ai/');
+      return;
+    }
+    const cerebrasMod = await import('../src/cloud-providers/cerebras.js');
+    if (sub2 === 'list-models') {
+      let prov;
+      try { prov = new cerebrasMod.CerebrasProvider(); }
+      catch (e) {
+        if (wantJson) { console.log(JSON.stringify({ ok: false, error: e.message, code: e.code, install_hint: e.install_hint, docs_url: e.docs_url }, null, 2)); process.exit(EXIT.EXECUTION); }
+        console.error('error: ' + e.message);
+        console.error('hint:  ' + (e.install_hint || ''));
+        process.exit(EXIT.EXECUTION);
+      }
+      const out = await prov.listModels();
+      if (wantJson) { console.log(JSON.stringify(out, null, 2)); return; }
+      console.log(`cerebras models (source: ${out.source}${out.error ? '; error=' + out.error : ''})`);
+      for (const m of (out.models || [])) {
+        const tail = [m.params_b ? `${m.params_b}B params` : null, m.context ? `ctx=${m.context}` : null, m.tok_s_published ? `~${m.tok_s_published} tok/s` : null].filter(Boolean).join('  ');
+        console.log(`  ${m.id.padEnd(42)} ${tail}`);
+      }
+      return;
+    }
+    if (sub2 === 'bind') {
+      const namespace = flag(r2, '--namespace') || flag(r2, '--ns');
+      const model = flag(r2, '--model') || flag(r2, '--cerebras-model');
+      const artifactId = flag(r2, '--artifact') || flag(r2, '--artifact-id');
+      const maxTokens = Number(flag(r2, '--max-tokens') || 2048);
+      const temperature = Number(flag(r2, '--temperature') || 0.7);
+      if (!namespace || !model) {
+        console.error('error: --namespace and --model required');
+        console.error('       e.g. kolm cloud cerebras bind --namespace support --model llama3.1-8b');
+        process.exit(EXIT.BAD_ARGS);
+      }
+      let prov;
+      try { prov = new cerebrasMod.CerebrasProvider(); }
+      catch (e) {
+        if (wantJson) { console.log(JSON.stringify({ ok: false, error: e.message, code: e.code, install_hint: e.install_hint }, null, 2)); process.exit(EXIT.EXECUTION); }
+        console.error('error: ' + e.message);
+        console.error('hint:  ' + (e.install_hint || ''));
+        process.exit(EXIT.EXECUTION);
+      }
+      try {
+        const r = await prov.bindArtifact({ namespace, artifactId, model, maxTokens, temperature, metadata: { bound_via: 'cli' } });
+        if (wantJson) { console.log(JSON.stringify(r, null, 2)); return; }
+        console.log(`bound: namespace=${namespace}  model=${model}`);
+        console.log(`path:  ${r.binding_path}`);
+        console.log(`route: ${prov.baseUrl}/chat/completions`);
+        console.log('');
+        console.log('Next: kolm gateway dispatch --namespace ' + namespace + ' --prompt "ping"');
+      } catch (e) {
+        if (wantJson) { console.log(JSON.stringify({ ok: false, error: e.message, code: e.code }, null, 2)); process.exit(EXIT.EXECUTION); }
+        console.error('bind failed: ' + e.message); process.exit(EXIT.EXECUTION);
+      }
+      return;
+    }
+    if (sub2 === 'unbind') {
+      const namespace = flag(r2, '--namespace') || flag(r2, '--ns');
+      if (!namespace) { console.error('error: --namespace required'); process.exit(EXIT.BAD_ARGS); }
+      let prov;
+      try { prov = new cerebrasMod.CerebrasProvider(); } catch (e) { console.error('error: ' + e.message); process.exit(EXIT.EXECUTION); }
+      const r = await prov.unbindArtifact({ namespace });
+      if (wantJson) { console.log(JSON.stringify(r, null, 2)); return; }
+      if (r.ok) { console.log(`unbound: ${r.binding_path}`); }
+      else { console.log(`no binding found: ${r.binding_path}`); }
+      return;
+    }
+    if (sub2 === 'get-binding') {
+      const namespace = flag(r2, '--namespace') || flag(r2, '--ns');
+      if (!namespace) { console.error('error: --namespace required'); process.exit(EXIT.BAD_ARGS); }
+      let prov;
+      try { prov = new cerebrasMod.CerebrasProvider(); } catch (e) { console.error('error: ' + e.message); process.exit(EXIT.EXECUTION); }
+      const r = prov.getBinding({ namespace });
+      if (wantJson) { console.log(JSON.stringify(r, null, 2)); return; }
+      if (!r.ok) { console.log(`no binding: ${r.binding_path}`); process.exit(EXIT.NOT_FOUND); }
+      console.log(`namespace:      ${r.binding.namespace}`);
+      console.log(`cerebras_model: ${r.binding.cerebras_model}`);
+      console.log(`artifact_id:    ${r.binding.artifact_id || '(none)'}`);
+      console.log(`bound_at:       ${r.binding.bound_at}`);
+      console.log(`max_tokens:     ${r.binding.max_tokens}`);
+      console.log(`temperature:    ${r.binding.temperature}`);
+      console.log(`base_url:       ${r.binding.base_url}`);
+      console.log(`path:           ${r.binding_path}`);
+      return;
+    }
+    if (sub2 === 'list-bindings') {
+      let prov;
+      try { prov = new cerebrasMod.CerebrasProvider(); } catch (e) { console.error('error: ' + e.message); process.exit(EXIT.EXECUTION); }
+      const r = prov.listBindings();
+      if (wantJson) { console.log(JSON.stringify(r, null, 2)); return; }
+      console.log(`bindings dir: ${r.bindings_dir}`);
+      if (!r.bindings.length) { console.log('(no bindings)'); return; }
+      for (const b of r.bindings) {
+        console.log(`  ${String(b.namespace || '?').padEnd(24)} ${String(b.cerebras_model || '?').padEnd(42)} bound_at=${b.bound_at || '?'}`);
+      }
+      return;
+    }
+    if (sub2 === 'chat') {
+      const model = flag(r2, '--model') || flag(r2, '--cerebras-model');
+      const prompt = flag(r2, '--prompt');
+      const namespace = flag(r2, '--namespace') || flag(r2, '--ns');
+      const maxTokens = Number(flag(r2, '--max-tokens') || 512);
+      const temperature = Number(flag(r2, '--temperature') || 0.7);
+      let resolvedModel = model;
+      let resolvedMax = maxTokens, resolvedTemp = temperature;
+      let prov;
+      try { prov = new cerebrasMod.CerebrasProvider(); }
+      catch (e) {
+        if (wantJson) { console.log(JSON.stringify({ ok: false, error: e.message, code: e.code, install_hint: e.install_hint }, null, 2)); process.exit(EXIT.EXECUTION); }
+        console.error('error: ' + e.message);
+        console.error('hint:  ' + (e.install_hint || ''));
+        process.exit(EXIT.EXECUTION);
+      }
+      if (!resolvedModel && namespace) {
+        const b = prov.getBinding({ namespace });
+        if (b.ok) {
+          resolvedModel = b.binding.cerebras_model;
+          resolvedMax = b.binding.max_tokens || resolvedMax;
+          resolvedTemp = b.binding.temperature ?? resolvedTemp;
+        }
+      }
+      if (!resolvedModel) { console.error('error: --model required (or --namespace pointing to a bound model)'); process.exit(EXIT.BAD_ARGS); }
+      if (!prompt) { console.error('error: --prompt required'); process.exit(EXIT.BAD_ARGS); }
+      try {
+        const r = await prov.chatCompletion({
+          model: resolvedModel,
+          messages: [{ role: 'user', content: prompt }],
+          maxTokens: resolvedMax,
+          temperature: resolvedTemp,
+        });
+        if (wantJson) { console.log(JSON.stringify(r, null, 2)); return; }
+        const choice = r.response?.choices?.[0]?.message?.content || '(no content)';
+        console.log(`model:        ${resolvedModel}`);
+        console.log(`latency_ms:   ${r.latency_ms}`);
+        if (r.cerebras_tok_s != null) console.log(`tok_s:        ${r.cerebras_tok_s}  (server-reported)`);
+        if (r.response?.usage) console.log(`tokens:       in=${r.response.usage.prompt_tokens} out=${r.response.usage.completion_tokens} total=${r.response.usage.total_tokens}`);
+        console.log('---');
+        console.log(choice);
+      } catch (e) {
+        if (wantJson) { console.log(JSON.stringify({ ok: false, error: e.message, code: e.code, status: e.status, body: e.body }, null, 2)); process.exit(EXIT.EXECUTION); }
+        console.error('chat failed: ' + e.message); process.exit(EXIT.EXECUTION);
+      }
+      return;
+    }
+    if (sub2 === 'estimate-cost' || sub2 === 'cost' || sub2 === 'quote') {
+      const model = flag(r2, '--model') || flag(r2, '--cerebras-model');
+      const inputTokens = Number(flag(r2, '--input-tokens') || flag(r2, '--in') || 0);
+      const outputTokens = Number(flag(r2, '--output-tokens') || flag(r2, '--out') || 0);
+      if (!model) { console.error('error: --model required'); process.exit(EXIT.BAD_ARGS); }
+      const q = cerebrasMod.estimateCost({ model, inputTokens, outputTokens });
+      if (wantJson) { console.log(JSON.stringify({ ok: true, model, input_tokens: inputTokens, output_tokens: outputTokens, ...q }, null, 2)); return; }
+      console.log(`model:                       ${model}`);
+      console.log(`input_tokens:                ${inputTokens}`);
+      console.log(`output_tokens:               ${outputTokens}`);
+      console.log(`rate_per_mtok_input:         $${q.rate_per_mtok_input}`);
+      console.log(`rate_per_mtok_output:        $${q.rate_per_mtok_output}`);
+      console.log(`estimated_cost_usd:          $${q.estimated_cost_usd}`);
+      console.log(`basis:                       ${q.basis}`);
+      console.log(`docs_url:                    ${q.docs_url}`);
+      return;
+    }
+    console.error('unknown cloud cerebras subcommand:', sub2);
+    process.exit(EXIT.BAD_ARGS);
+  }
   // W785 - managed-distill cloud expansion. Maps to /v1/cloud/distill/* routes.
   // Subcommands: submit, status, list, cancel, meter.
   // The HONEST envelope (cloud_backend_status='no_pool_configured') is what the
@@ -33456,12 +34062,12 @@ function readPackageVersion() {
 }
 
 // Resolve the canonical latest version of kolm. The canonical install is
-// `npm i -g github:kolm-ai/kolm-stack` (NOT the unrelated `kolm`
+// `npm i -g github:kolm-ai/kolmogorov-stack` (NOT the unrelated `kolm`
 // npm package), so we read the version off the github main branch's
 // package.json. Falls back to null on any error.
 function fetchLatestNpmVersion(timeoutMs) {
     return new Promise((resolve) => {
-        const url = 'https://raw.githubusercontent.com/kolm-ai/kolm-stack/main/package.json';
+        const url = 'https://raw.githubusercontent.com/kolm-ai/kolmogorov-stack/main/package.json';
         const controller = new AbortController();
         const timer = setTimeout(() => { try { controller.abort(); } catch {} }, Math.max(500, Number(timeoutMs) || 5000)); // deliberate: cleanup
         fetch(url, { signal: controller.signal, headers: { 'accept': 'application/json' } })
@@ -33513,7 +34119,7 @@ async function cmdUpgrade(args) {
     if (status === 'outdated') {
         console.log(`a newer kolm release is available: ${latest}.`);
         console.log('upgrade with:');
-        console.log('  npm i -g github:kolm-ai/kolm-stack');
+        console.log('  npm i -g github:kolm-ai/kolmogorov-stack');
         console.log('  # or one-shot:');
         console.log('  kolm update');
         console.log('');
@@ -33526,7 +34132,7 @@ async function cmdUpgrade(args) {
     }
     console.log('could not reach github to check for updates.');
     console.log('to upgrade manually:');
-    console.log('  npm i -g github:kolm-ai/kolm-stack');
+    console.log('  npm i -g github:kolm-ai/kolmogorov-stack');
 }
 
 // ---------- seeds ----------
@@ -37130,7 +37736,7 @@ function _badArgs(msg) { const e = new Error(msg); e.exitCode = EXIT.BAD_ARGS; r
 // ---------- update ----------
 // `kolm update` self-installs the latest commit from the canonical github
 // source. This is the verb that actually does it (kolm upgrade only checks).
-// Direct path: spawn `npm i -g github:kolm-ai/kolm-stack` and
+// Direct path: spawn `npm i -g github:kolm-ai/kolmogorov-stack` and
 // stream npm's stdout/stderr through to the user. Exit code is whatever npm
 // returned. On Windows we shell through `cmd /c` so npm.cmd resolves.
 async function cmdUpdate(args) {
@@ -37138,7 +37744,7 @@ async function cmdUpdate(args) {
     const jsonOut = args.includes('--json');
     const dryRun = args.includes('--dry-run');
     const force = args.includes('--force');
-    const source = 'github:kolm-ai/kolm-stack';
+    const source = 'github:kolm-ai/kolmogorov-stack';
     const before = readPackageVersion();
 
     // W484 P0-3 - refuse to run `npm i -g` from a repo checkout. Without this
@@ -37175,7 +37781,7 @@ async function cmdUpdate(args) {
                         remedy,
                         repo_root: repoRoot,
                         package_name: pkgName,
-                        override: 'pass --force to bypass (will run `npm i -g github:kolm-ai/kolm-stack` and overwrite the global install)',
+                        override: 'pass --force to bypass (will run `npm i -g github:kolm-ai/kolmogorov-stack` and overwrite the global install)',
                     }, null, 2));
                     process.exit(EXIT.BAD_ARGS || 1);
                 }
@@ -37233,7 +37839,7 @@ async function cmdUpdate(args) {
             console.error(`npm exited with code ${r.status}. update did not complete.`);
             console.error('common fixes:');
             console.error('  - ensure node 20+ and npm 10+ are on PATH');
-            console.error('  - on macos/linux: try `sudo npm i -g github:kolm-ai/kolm-stack`');
+            console.error('  - on macos/linux: try `sudo npm i -g github:kolm-ai/kolmogorov-stack`');
             console.error('  - on windows: run an admin PowerShell, then re-run `kolm update`');
         }
         const e = new Error(`npm install failed (exit ${r.status})`);

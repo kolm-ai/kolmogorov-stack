@@ -76,6 +76,17 @@ export const RUNTIME_PASSPORT_FIELDS_V2 = Object.freeze([
   'max_context_tested',
   'perplexity_delta',
   'kv_cache',
+  // W916-I1 — speculative decoding sub-object built by
+  // src/speculative-decoding.js speculativePassportEntry({measured}).
+  // Always paired with the same artifact's `runtime` field; never
+  // back-fillable to a v1 passport without re-measurement.
+  'speculative_decoding',
+  // W916-I3 — prompt-cache state (boolean) + first-vs-second-call TTFT
+  // sub-object so a procurement reviewer can see the cache win.
+  'prompt_cache',
+  // W916-I4 — measured continuous-batching width and the throughput
+  // delta vs single-stream — empty when not measured.
+  'continuous_batching',
   'unsupported_features',
   'notes',
 ]);
@@ -485,6 +496,89 @@ export function addShardKvCacheToPassport(passport, measured) {
     ...passport,
     schema_version: RUNTIME_PASSPORT_SCHEMA_V2,
     kv_cache: measured,
+  };
+}
+
+/**
+ * addSpeculativeDecodingToPassport(passport, measured) -> passport (copy)
+ *
+ * Merge a speculative-decoding measurement (the object returned by
+ * src/speculative-decoding.js speculativePassportEntry()) into a
+ * passport's `speculative_decoding` field. Returns a shallow copy so
+ * the input passport is never mutated.
+ *
+ * Caller responsibility:
+ *   - call isSpeculativeSupported() first to gate the attach
+ *   - call speculativePassportEntry({measured}) to build the sub-object
+ *   - pass the resulting sub-object here
+ *
+ * Mirrors addShardKvCacheToPassport (same shape; v2 schema bump).
+ */
+export function addSpeculativeDecodingToPassport(passport, measured) {
+  if (!passport || typeof passport !== 'object') {
+    throw new Error('addSpeculativeDecodingToPassport: passport must be an object');
+  }
+  if (!measured || typeof measured !== 'object') {
+    throw new Error('addSpeculativeDecodingToPassport: measured speculative_decoding object required');
+  }
+  if (measured.method !== 'speculative_decoding') {
+    throw new Error(`addSpeculativeDecodingToPassport: measured.method must be 'speculative_decoding'; got ${measured.method}`);
+  }
+  return {
+    ...passport,
+    schema_version: RUNTIME_PASSPORT_SCHEMA_V2,
+    speculative_decoding: measured,
+  };
+}
+
+/**
+ * addPromptCacheToPassport(passport, measured) -> passport (copy)
+ *
+ * W916-I3 — attach a prompt-cache measurement. `measured` carries:
+ *   {
+ *     enabled:           boolean        // is prompt caching on?
+ *     backend:           string         // 'vllm-prefix' | 'llama-cpp-prompt-cache' | 'none'
+ *     ttft_first_call_ms:  number       // measured cold TTFT
+ *     ttft_second_call_ms: number       // measured warm TTFT (same prefix)
+ *     speedup:           number         // ttft_first / ttft_second
+ *   }
+ */
+export function addPromptCacheToPassport(passport, measured) {
+  if (!passport || typeof passport !== 'object') {
+    throw new Error('addPromptCacheToPassport: passport must be an object');
+  }
+  if (!measured || typeof measured !== 'object') {
+    throw new Error('addPromptCacheToPassport: measured prompt_cache object required');
+  }
+  return {
+    ...passport,
+    schema_version: RUNTIME_PASSPORT_SCHEMA_V2,
+    prompt_cache: measured,
+  };
+}
+
+/**
+ * addContinuousBatchingToPassport(passport, measured) -> passport (copy)
+ *
+ * W916-I4 — attach a continuous-batching measurement. `measured` carries:
+ *   {
+ *     enabled:                boolean
+ *     max_num_seqs:           number    // configured width
+ *     measured_throughput_x:  number    // tok/s @ batch / tok/s @ batch=1
+ *     concurrent_streams:     number    // probe load
+ *   }
+ */
+export function addContinuousBatchingToPassport(passport, measured) {
+  if (!passport || typeof passport !== 'object') {
+    throw new Error('addContinuousBatchingToPassport: passport must be an object');
+  }
+  if (!measured || typeof measured !== 'object') {
+    throw new Error('addContinuousBatchingToPassport: measured continuous_batching object required');
+  }
+  return {
+    ...passport,
+    schema_version: RUNTIME_PASSPORT_SCHEMA_V2,
+    continuous_batching: measured,
   };
 }
 

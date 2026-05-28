@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Model Forge · kolm.ai</title>
 <meta name="description" content="The kolm Model Forge. Pick a base, a teacher, a precision, a mode. Every bit-width from 1.0 to 8.0 and every distillation mode (reasoning, on-policy, multi-teacher, agentic, merge-first, MTP, low-bit-specialist)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
@@ -20,7 +21,8 @@
 <script defer src="/frontier.js"></script>
 <style>
   /* Page-local — only what frontier.css does not already give us. */
-  body { background: #07090c; }
+  body { background: var(--surface-0, #f3f5f7); }
+  [data-theme="dark"] body { background: var(--surface-0, #0e1116); }
 
   /* Hero — own to forge.html, mirrors the rhythm of the homepage but stands apart. */
   .forge-hero { padding: clamp(72px, 9vw, 144px) 24px clamp(48px, 6vw, 96px); border-bottom: 1px solid var(--line-1); position: relative; overflow: hidden; }
@@ -734,7 +736,7 @@ verify      kolm verify deepseek-r1-32b-int4.kolm</div>
         <div class="fr-eyebrow">Receipt fragment &middot; what gets signed</div>
         <span class="fr-pill">artifact_cid binds everything</span>
       </div>
-      <div class="fr-cli" style="background:#050607">
+      <div class="fr-cli">
 <span class="fr-cli__comment">// excerpt from a forge build receipt</span>
 {
   <span style="color:var(--fr-mint)">"compiler_version"</span>: "kolm-0.41.0",

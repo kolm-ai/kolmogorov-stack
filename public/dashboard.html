@@ -161,7 +161,7 @@
  <div class="to-spark-wrap" id="to-spark-wrap" hidden>
  <div class="to-spark-head"><span>Latency &middot; last 60 runs</span><span id="to-spark-peak">peak: ,</span></div>
  <svg viewbox="0 0 600 60" preserveaspectratio="none" style="width:100%;height:60px;display:block">
- <polyline id="to-spark-fill" fill="rgba(230, 233, 238,0.10)" stroke="none" points=""></polyline>
+ <polyline id="to-spark-fill" fill="var(--line-2)" stroke="none" points=""></polyline>
  <polyline id="to-spark-line" fill="none" stroke="#e6e9ee" stroke-width="1.4" stroke-linejoin="round" points=""></polyline>
  </svg>
  </div>
@@ -278,22 +278,22 @@
  .al-panel { position: relative }
  .al-drop {
  position: relative; margin: 8px 0 0;
- border: 1.5px dashed rgba(255,255,255,0.14);
+ border: 1.5px dashed var(--line-3);
  border-radius: 14px;
  padding: 44px 22px;
- background: linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.002));
+ background: linear-gradient(180deg, var(--line-1), var(--line-1));
  cursor: pointer;
  transition: border-color 200ms ease, background 200ms ease, transform 200ms ease;
  overflow: hidden;
  }
  .al-drop:hover, .al-drop:focus-visible {
  border-color: rgba(230, 233, 238,0.55);
- background: linear-gradient(180deg, rgba(230, 233, 238,0.045), rgba(230, 233, 238,0.005));
+ background: linear-gradient(180deg, var(--line-1), var(--line-1));
  outline: none;
  }
  .al-drop.al-active {
  border-color: var(--good);
- background: linear-gradient(180deg, rgba(230, 233, 238,0.08), rgba(230, 233, 238,0.015));
+ background: linear-gradient(180deg, var(--line-2), var(--line-1));
  transform: scale(1.005);
  }
  .al-drop.al-active .al-drop-glow {
@@ -301,7 +301,7 @@
  }
  .al-drop-glow {
  position: absolute; inset: -40%;
- background: radial-gradient(circle at 50% 50%, rgba(230, 233, 238,0.18), transparent 60%);
+ background: radial-gradient(circle at 50% 50%, var(--line-3), transparent 60%);
  filter: blur(40px);
  opacity: 0; pointer-events: none;
  transition: opacity 200ms ease;
@@ -313,7 +313,7 @@
  transform: translateY(-2px);
  }
  .al-drop-text { margin: 4px 0 0; font-size: 15px; color: var(--ink); font-weight: 500 }
- .al-drop-text code { font-family: var(--mono); font-size: 13px; padding: 1px 6px; border-radius: 4px; background: rgba(230, 233, 238,0.08); color: var(--good); border: 1px solid rgba(230, 233, 238,0.18) }
+ .al-drop-text code { font-family: var(--mono); font-size: 13px; padding: 1px 6px; border-radius: 4px; background: var(--line-2); color: var(--good); border: 1px solid var(--line-3) }
  .al-drop-sub { margin: 0; font-size: 12.5px; color: var(--ink-faint); font-family: var(--mono) }
  .al-link-btn {
  appearance: none; background: transparent; border: none; padding: 0;
@@ -352,7 +352,7 @@
  display: inline-flex; align-items: baseline; gap: 6px;
  padding: 5px 10px; border: 1px solid var(--line);
  border-radius: 999px; font-family: var(--mono); font-size: 11.5px;
- color: var(--ink-mute); background: rgba(255,255,255,0.012);
+ color: var(--ink-mute); background: var(--line-1);
  }
  .al-pill-l { color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.04em; font-size: 10px }
  .al-pill b { color: var(--ink); font-weight: 600 }
@@ -419,10 +419,10 @@
  .al-fineprint { margin: 4px 0 0; font-size: 11.5px; color: var(--ink-faint); font-family: var(--mono) }
  .al-fineprint a { color: var(--ink-mute); border-bottom: 1px dashed var(--line) }
 
- [data-theme=light] .al-drop { border-color: rgba(0,0,0,0.16); background: linear-gradient(180deg, rgba(0,0,0,0.015), transparent) }
+ [data-theme=light] .al-drop { border-color: var(--line-3); background: linear-gradient(180deg, var(--line-1), transparent) }
  [data-theme=light] .al-drop:hover { border-color: rgba(31,154,124,0.55); background: linear-gradient(180deg, rgba(31,154,124,0.05), transparent) }
  [data-theme=light] .al-drop.al-active { border-color: #1f9a7c; background: linear-gradient(180deg, rgba(31,154,124,0.08), transparent) }
- [data-theme=light] .al-pill { background: rgba(0,0,0,0.02) }
+ [data-theme=light] .al-pill { background: var(--line-1) }
  </style>
 
  <section id="welcome-banner" hidden style="margin:8px 0 18px;padding:16px 20px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card);display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap">
@@ -517,7 +517,7 @@
  .dash-chat-out:empty{display:none}
  .dash-chat-turn{display:flex;flex-direction:column;gap:4px;padding:9px 12px;border:1px solid var(--line);border-radius:6px}
  .dash-chat-turn.user{background:rgba(127,222,255,0.04);border-color:rgba(127,222,255,0.12)}
- .dash-chat-turn.kolm{background:var(--bg-elev,rgba(255,255,255,0.02))}
+ .dash-chat-turn.kolm{background:var(--bg-elev,var(--line-1))}
  .dash-chat-role{font-family:var(--mono);font-size:10px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em}
  .dash-chat-text{font-size:13.5px;line-height:1.55;color:var(--ink);white-space:pre-wrap;word-wrap:break-word}
  .dash-chat-next{display:flex;flex-direction:column;gap:3px;margin-top:6px;padding-left:8px;border-left:2px solid var(--line-strong);font-family:var(--mono);font-size:12px;color:var(--ink-mute)}
@@ -1170,19 +1170,19 @@
  .dc-train-tabs { display: flex; gap: 4px }
  .dc-tt { appearance: none; background: transparent; border: 1px solid var(--line); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-family: var(--mono); font-size: 11.5px; color: var(--ink-mute); transition: border-color 120ms, color 120ms }
  .dc-tt:hover { color: var(--ink); border-color: var(--ink-mute) }
- .dc-tt.active { color: var(--ink); border-color: var(--good); background: rgba(230, 233, 238,0.04) }
+ .dc-tt.active { color: var(--ink); border-color: var(--good); background: var(--line-1) }
  .dc-data-drop { padding: 16px; border: 1.5px dashed var(--line-strong); border-radius: 8px; text-align: center; cursor: pointer; transition: border-color 200ms, background 200ms }
- .dc-data-drop:hover, .dc-data-drop:focus-visible { border-color: var(--good); background: rgba(230, 233, 238,0.025); outline: none }
- .dc-data-drop.al-active { border-color: var(--good); background: rgba(230, 233, 238,0.05) }
+ .dc-data-drop:hover, .dc-data-drop:focus-visible { border-color: var(--good); background: var(--line-1); outline: none }
+ .dc-data-drop.al-active { border-color: var(--good); background: var(--line-1) }
  .dc-data-drop p { margin: 0; font-size: 13px; color: var(--ink-mute) }
  .dc-data-hint { margin-top: 6px !important; font-size: 11.5px; color: var(--ink-faint); font-family: var(--mono) }
- .dc-data-drop code { font-family: var(--mono); font-size: 11.5px; color: var(--good); background: rgba(230, 233, 238,0.06); padding: 0 4px; border-radius: 3px }
+ .dc-data-drop code { font-family: var(--mono); font-size: 11.5px; color: var(--good); background: var(--line-1); padding: 0 4px; border-radius: 3px }
  .dc-data-paste { width: 100%; background: var(--bg); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 6px; padding: 10px 12px; font-family: var(--mono); font-size: 12.5px; resize: vertical }
  .dc-data-paste-btn { margin-top: 8px }
  .dc-tmpl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px }
  @media (max-width: 720px) { .dc-tmpl-grid { grid-template-columns: 1fr } }
  .dc-tmpl { padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); cursor: pointer; color: var(--ink); font-family: var(--mono); font-size: 12px; text-align: left; transition: border-color 120ms, background 120ms }
- .dc-tmpl:hover { border-color: var(--good); background: rgba(230, 233, 238,0.04) }
+ .dc-tmpl:hover { border-color: var(--good); background: var(--line-1) }
  .dc-tmpl em { display: block; margin-top: 4px; font-style: normal; color: var(--ink-faint); font-size: 11px }
  .dc-data-preview summary { cursor: pointer; font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); padding: 6px 0; user-select: none }
  </style>
@@ -1505,8 +1505,8 @@
 
  function bubble(role, text) {
  var div = document.createElement('div');
- div.style.cssText = 'background:' + (role === 'user' ? 'rgba(127,222,255,0.06)' : 'rgba(255,255,255,0.03)') +
- ';border:1px solid ' + (role === 'user' ? 'rgba(127,222,255,0.18)' : 'rgba(255,255,255,0.08)') +
+ div.style.cssText = 'background:' + (role === 'user' ? 'rgba(127,222,255,0.06)' : 'var(--line-1)') +
+ ';border:1px solid ' + (role === 'user' ? 'rgba(127,222,255,0.18)' : 'var(--line-2)') +
  ';border-radius:6px;padding:10px 12px;white-space:pre-wrap;word-wrap:break-word';
  var label = document.createElement('div');
  label.style.cssText = 'font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);margin-bottom:4px;letter-spacing:0.04em;text-transform:uppercase';

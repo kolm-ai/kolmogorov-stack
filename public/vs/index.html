@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>kolm vs the field &middot; Open-source AI workbench &middot; kolm.ai</title>
 <meta name="description" content="kolm vs OpenAI API, Ollama, LM Studio, OpenRouter, Together AI. One matrix, six dimensions, plain framing. Pick the column that matters most for your team.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
@@ -24,8 +25,8 @@
     <link rel="stylesheet" href="/warm-paper.css">
 <style>
  :root {
- --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
- --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --bg: #0e1116; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: var(--line-1); --line-strong: var(--line-2);
  --ink: #e6e9ee; --ink-mute: #aab0b8; --ink-faint: #6a727c;
  --accent: #e6e9ee; --accent-strong: #b8c0ca; --good: #e6e9ee; --bad: #ff6b91;
  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -54,19 +55,19 @@
  table.matrix thead th.kc { color: var(--good); }
  table.matrix tbody td { padding: 14px 14px; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--ink-mute); line-height: 1.55; }
  table.matrix tbody td.dim { color: var(--ink); font-weight: 500; font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; width: 22%; }
- table.matrix tbody td.kc { background: rgba(230, 233, 238, 0.06); color: var(--ink); }
+ table.matrix tbody td.kc { background: var(--line-1); color: var(--ink); }
  table.matrix tbody td.kc b { color: var(--good); font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; display: block; margin-bottom: 4px; font-weight: 600; }
  table.matrix tbody tr:last-child td { border-bottom: 0; }
 
  .cmp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin: 18px 0 0; }
  .cmp-card { padding: 22px 24px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-elev); display: flex; flex-direction: column; gap: 10px; transition: border-color 120ms ease, transform 120ms ease; }
- .cmp-card:hover { border-color: rgba(230, 233, 238, 0.28); transform: translateY(-1px); }
+ .cmp-card:hover { border-color: var(--line-strong); transform: translateY(-1px); }
  .cmp-card .tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--good); }
  .cmp-card h3 { margin: 0; font-size: 16px; font-weight: 500; color: var(--ink); }
  .cmp-card p { margin: 0; font-size: 13.5px; color: var(--ink-mute); line-height: 1.6; }
  .cmp-card .go { margin-top: 6px; font-family: var(--mono); font-size: 11.5px; color: var(--good); }
 
- .verdict { padding: 28px 32px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, rgba(230, 233, 238, 0.04), rgba(230, 233, 238, 0.01)); margin: 24px 0 0; }
+ .verdict { padding: 28px 32px; border: 1px solid var(--line-strong); border-radius: 12px; background: linear-gradient(180deg, var(--line-1), var(--line-1)); margin: 24px 0 0; }
  .verdict h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; color: var(--ink); }
  .verdict p { margin: 0 0 8px; font-size: 14.5px; color: var(--ink-mute); line-height: 1.6; }
  .verdict p:last-child { margin-bottom: 0; }

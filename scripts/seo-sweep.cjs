@@ -70,7 +70,7 @@ function organizationLd() {
     name: 'kolm.ai',
     url: 'https://kolm.ai/',
     logo: 'https://kolm.ai/favicon.svg',
-    sameAs: ['https://github.com/kolm-ai/kolm-stack'],
+    sameAs: ['https://github.com/kolm-ai/kolmogorov-stack'],
     description: 'The AI compiler. Capture your real prompts, compile them into your own model, ship it on your hardware, audit every call.',
   };
 }

@@ -318,10 +318,10 @@
     grid.appendChild(row);
   }
 
-  function honestBars(){ const arr = []; for(let i=0;i<90;i++) arr.push('ok'); return arr; }
+  function okBars(){ const arr = []; for(let i=0;i<90;i++) arr.push('ok'); return arr; }
 
   function paintFallback(){
-    COMPONENTS.forEach(c => renderRow(c, 'ok', honestBars(), '99.97%'));
+    COMPONENTS.forEach(c => renderRow(c, 'ok', okBars(), '99.97%'));
     const now = new Date(); overallUpd.dateTime = now.toISOString(); overallUpd.textContent = now.toUTCString().slice(0,22);
   }
 
@@ -341,7 +341,7 @@
       const u = typeof c.uptime_90d === 'number' ? c.uptime_90d : 0.9997;
       totalUptime += u;
       const meta = COMPONENTS.find(x => x.id === c.id) || { name: c.id, sub: '' };
-      renderRow(meta, state, c.bars_90d || honestBars(), (u*100).toFixed(2)+'%');
+      renderRow(meta, state, c.bars_90d || okBars(), (u*100).toFixed(2)+'%');
     });
     const avg = (totalUptime/data.components.length*100).toFixed(2)+'%';
     overallUp.textContent = avg;

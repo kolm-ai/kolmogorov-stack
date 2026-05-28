@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Pipelines — Kolm</title>
 <meta name="description" content="pipeline orchestrator: classifier + specialists, weighted K-Score, flow diagram. List all pipelines in your tenant." />
 <meta name="kolm:wave" content="wave821" />
@@ -13,18 +14,18 @@
   body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; margin: 0; padding: 24px; max-width: 1024px; margin-inline: auto; }
   h1 { font-size: 24px; margin: 0 0 4px; }
   .lede { color: #666; margin: 0 0 24px; }
-  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; background: rgba(0,0,0,0.06); margin-left: 8px; vertical-align: middle; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; background: var(--line-1); margin-left: 8px; vertical-align: middle; }
   table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid rgba(0,0,0,0.08); }
+  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--line-2); }
   th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #555; }
-  tr:hover { background: rgba(0,0,0,0.03); }
+  tr:hover { background: var(--line-1); }
   a { color: #2a5edb; text-decoration: none; }
   a:hover { text-decoration: underline; }
-  .empty { padding: 32px; border: 1px dashed rgba(0,0,0,0.15); border-radius: 8px; color: #555; text-align: center; }
-  code { background: rgba(0,0,0,0.05); padding: 1px 4px; border-radius: 3px; font-size: 13px; }
+  .empty { padding: 32px; border: 1px dashed var(--line-3); border-radius: 8px; color: #555; text-align: center; }
+  code { background: var(--line-1); padding: 1px 4px; border-radius: 3px; font-size: 13px; }
   .err { color: #b00020; }
   .toolbar { display: flex; gap: 8px; margin: 16px 0; flex-wrap: wrap; }
-  button, .btn { font: inherit; padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.2); background: #fff; cursor: pointer; }
+  button, .btn { font: inherit; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--line-3); background: #fff; cursor: pointer; }
   button:hover { background: #f5f5f5; }
   .btn-primary { background: #2a5edb; color: white; border-color: #2a5edb; }
 </style>

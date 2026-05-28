@@ -33,8 +33,8 @@
 }
 </script>
 <style>
- :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
- [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669}
+ :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:var(--line-2);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:var(--line-2);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669}
  body{background:var(--bg);color:var(--ink);font:16.5px/1.7 -apple-system,Inter,system-ui,sans-serif;margin:0}
  .wrap{max-width:720px;margin:0 auto;padding:0 24px}
  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
@@ -49,7 +49,7 @@
  .subtitle{font-size:16.5px;color:var(--ink-mute);margin:0 0 14px;font-style:italic;line-height:1.55}
  .authors{font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin:0 0 6px;letter-spacing:0.04em}
  .stamp{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:6px 0 0;letter-spacing:0.04em}
- .abstract{margin:32px 0 0;padding:20px 24px;border-left:2px solid var(--accent);background:rgba(17, 17, 17,0.04);font-size:15.5px;line-height:1.65;color:var(--ink-mute)}
+ .abstract{margin:32px 0 0;padding:20px 24px;border-left:2px solid var(--accent);background:var(--line-1);font-size:15.5px;line-height:1.65;color:var(--ink-mute)}
  .abstract b{color:var(--ink);font-weight:500}
  h2{font-size:22px;font-weight:500;letter-spacing:-0.012em;margin:48px 0 12px;color:var(--ink)}
  h3{font-size:17px;font-weight:500;margin:24px 0 8px;color:var(--ink)}
@@ -119,7 +119,7 @@
 <h1>kolm codebase: the production architecture in one sitting.</h1>
 <p class="subtitle">An verifiable map of the shipped runtime. Modules, trust boundaries, persistence, compile pipeline, and CLI surface, with line counts and source links.</p>
 <p class="authors">kolm engineering . hello@kolm.ai</p>
-<p class="stamp">v1.0 . 2026-05-15 . citeable as <code>kolm.ai/spec/codebase</code> . source <a href="https://github.com/kolm-ai/kolm-stack" style="color:inherit">github.com/kolm-ai/kolm-stack</a></p>
+<p class="stamp">v1.0 . 2026-05-15 . citeable as <code>kolm.ai/spec/codebase</code> . source <a href="https://github.com/kolm-ai/kolmogorov-stack" style="color:inherit">github.com/kolm-ai/kolmogorov-stack</a></p>
 
 <div class="abstract">
 <b>What this is.</b> A buyer-grade architecture overview of the shipped kolm runtime. We deliberately favor "what runs in production" over "what we plan to ship." Five components do all the work: a Node.js HTTP server (<code>server.js</code> + <code>src/router.js</code>), a content-addressable artifact builder (<code>src/artifact.js</code>), a tenant- and billing-aware persistence layer (<code>src/store.js</code>), an HMAC receipt signer (<code>src/receipt.js</code>), and a single-binary CLI (<code>cli/kolm.js</code>). The runtime produces signed <code>.kolm</code> files conforming to <a href="/spec/rs-1" style="color:var(--accent)">RS-1</a>, gated by a compile-time K-score. Every byte in an artifact is hash-addressed; every inference receipt is HMAC-signed and re-verifiable offline. The whole codebase is Apache-2.0; nothing in this page requires a credential to read.
@@ -218,7 +218,7 @@
 <p>The compile is <b>K-gated</b> at the package stage: if the computed K-score falls below the recipe-declared <code>min_k</code> (default 0.85), the artifact is not written and the job ends in <code>status=failed.kgate</code> with the score breakdown in the failure body. Buyers see a precise reason ("accuracy axis 0.71 below floor 0.85") rather than a generic compile failure.</p>
 
 <h2>6. The CLI</h2>
-<p>The CLI is one file, <code>cli/kolm.js</code>, 9k lines. It ships as the <code>kolm</code> bin via <code>npm i -g github:kolm-ai/kolm-stack</code>. Verbs available today:</p>
+<p>The CLI is one file, <code>cli/kolm.js</code>, 9k lines. It ships as the <code>kolm</code> bin via <code>npm i -g github:kolm-ai/kolmogorov-stack</code>. Verbs available today:</p>
 
 <div class="tbl-wrap">
 <table>
@@ -293,7 +293,7 @@
 <h2>12. License</h2>
 <p>The entire codebase is <a href="https://www.apache.org/licenses/LICENSE-2.0" style="color:var(--accent)">Apache-2.0</a>. The <a href="/spec/rs-1" style="color:var(--accent)">RS-1 spec</a> is MIT. The intent is that any runtime, ours, a competitor's, an academic project, can implement the format without asking permission and ship the verifier in a regulated stack without legal review.</p>
 
-<div class="actions"><a class="btn primary" href="https://github.com/kolm-ai/kolm-stack" rel="noopener">Browse the source &rarr;</a><a class="btn" href="/spec/rs-1">RS-1 spec &rarr;</a><a class="btn" href="/verify-prod">Verify a .kolm &rarr;</a></div>
+<div class="actions"><a class="btn primary" href="https://github.com/kolm-ai/kolmogorov-stack" rel="noopener">Browse the source &rarr;</a><a class="btn" href="/spec/rs-1">RS-1 spec &rarr;</a><a class="btn" href="/verify-prod">Verify a .kolm &rarr;</a></div>
 
 </div>
 </section>

@@ -22,8 +22,8 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
  :root {
- --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
- --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --bg: #0e1116; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: var(--line-1); --line-strong: var(--line-2);
  --ink: #e6e9ee; --ink-mute: #aab0b8; --ink-faint: #6a727c;
  --accent: #e6e9ee; --accent-strong: #b8c0ca;
  --good: #e6e9ee; --warn: #ffb86b;
@@ -72,7 +72,7 @@
  .field .helper { display: block; margin-top: 6px; font-size: 11.5px; color: var(--ink-faint); font-family: var(--mono); }
  .field .helper b { color: var(--ink-mute); font-weight: 500; }
 
- .results { padding: 28px 28px 24px; border: 1px solid var(--accent); border-radius: 14px; background: linear-gradient(180deg, rgba(230, 233, 238, 0.06), transparent); }
+ .results { padding: 28px 28px 24px; border: 1px solid var(--accent); border-radius: 14px; background: linear-gradient(180deg, var(--line-1), transparent); }
  .results h2 { margin: 0 0 4px; font-size: 17px; font-weight: 500; color: var(--ink); }
  .results p.hint { margin: 0 0 18px; color: var(--ink-mute); font-size: 13px; }
 
@@ -100,7 +100,7 @@
  .res-bar-track { height: 16px; border-radius: 4px; background: var(--bg-card); border: 1px solid var(--line); overflow: hidden; }
  .res-bar-fill { height: 100%; transition: width 220ms ease-out; }
  .res-bar-fill.cloud { background: linear-gradient(90deg, rgba(255,184,107,0.85), rgba(255,184,107,0.45)); }
- .res-bar-fill.kolm { background: linear-gradient(90deg, rgba(230, 233, 238,0.85), rgba(230, 233, 238,0.45)); }
+ .res-bar-fill.kolm { background: linear-gradient(90deg, rgba(230, 233, 238,0.85), var(--line-strong)); }
  .res-bar-val { font-family: var(--mono); font-size: 13px; color: var(--ink); text-align: right; font-weight: 500; }
  .res-bar-cap { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin: 4px 0 0; padding-left: 68px; }
 
@@ -120,8 +120,8 @@
  .res-detail { padding: 16px 0 0; border-top: 1px solid var(--line); }
 
  .share { margin: 16px 0 0; }
- .share-btn { display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 12.5px; color: var(--good); border: 1px solid rgba(230, 233, 238, 0.32); border-radius: 7px; padding: 8px 14px; background: rgba(230, 233, 238, 0.05); transition: background 120ms, transform 120ms; }
- .share-btn:hover { background: rgba(230, 233, 238, 0.10); transform: translateY(-1px); }
+ .share-btn { display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 12.5px; color: var(--good); border: 1px solid var(--line-strong); border-radius: 7px; padding: 8px 14px; background: var(--line-1); transition: background 120ms, transform 120ms; }
+ .share-btn:hover { background: var(--line-2); transform: translateY(-1px); }
 
  .verifiable { margin: 38px 0 0; padding: 22px 26px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-elev); }
  .verifiable h3 { margin: 0 0 8px; font-size: 14px; font-weight: 500; color: var(--ink); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.04em; }

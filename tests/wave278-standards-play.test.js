@@ -49,7 +49,7 @@ test('W278 /spec/rs-1 banner links to /verify-cli and GitHub', () => {
 
 test('W278 /verify-cli has at least one install command', () => {
   // W380d: relaxed from exact curl-pipe snippet to behavior — the canonical
-  // install is `npm i -g github:kolm-ai/kolm-stack`. The page is
+  // install is `npm i -g github:kolm-ai/kolmogorov-stack`. The page is
   // free to surface npm, curl, brew, or docker — but at least one install
   // command must be present.
   const html = readPublic('verify-cli.html');

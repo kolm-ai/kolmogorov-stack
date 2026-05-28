@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Why kolm: the case for an open AI compiler over a hosted endpoint · kolm.ai</title>
 <meta name="description" content="Why regulated and security-minded teams pick kolm over a hosted endpoint or a hand-rolled fine-tune. Signed artifacts, deterministic eval gate, runs on your hardware, TCO written out, open source you can audit.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
@@ -106,7 +107,7 @@
     <span class="ks-eyebrow">For developers, engineers, data scientists, and compliance leads &middot; The case</span>
     <h1 class="ks-h1" style="margin-top: var(--ks-3); max-width: 24ch;">A compiler beats a hosted endpoint. Open beats opaque.</h1>
     <p class="ks-lede" style="max-width: 64ch;">Regulated, security-minded, and cost-aware teams reach for kolm over a hosted fine-tune or a hand-rolled stack. Every claim below is testable, shipped, and in the source tree.</p>
-    <pre style="margin-top:var(--ks-4);max-width:62ch;background:#0b0d11;border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md);padding:14px 18px;font-family:var(--ks-mono);font-size:13px;color:var(--ks-ink-2);line-height:1.6;overflow:auto;"><span style="color:var(--ks-ink-3)"># the case, in three commands</span>
+    <pre style="margin-top:var(--ks-4);max-width:62ch;background:var(--surface-input, var(--ks-bg-1));border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md);padding:14px 18px;font-family:var(--ks-mono);font-size:13px;color:var(--ks-ink-2);line-height:1.6;overflow:auto;"><span style="color:var(--ks-ink-3)"># the case, in three commands</span>
 $ kolm capture --tap openai     <span style="color:var(--ks-ink-3)"># mirror prompts you already pay for</span>
 $ kolm distill --teacher gpt-4o <span style="color:var(--ks-ink-3)"># compile a signed student</span>
 $ kolm run artifact.kolm        <span style="color:var(--ks-ink-3)"># on your laptop, your VPC, your edge</span></pre>
@@ -268,7 +269,7 @@ $ kolm run artifact.kolm        <span style="color:var(--ks-ink-3)"># on your la
       <span class="ks-eyebrow">Decide for yourself</span>
       <h2 class="ks-h2" style="font-size: clamp(28px, 4vw, 40px); margin: var(--ks-3) auto; max-width: 26ch;">Read the source, run the quickstart, read your first receipt.</h2>
       <p class="ks-prose" style="margin: 0 auto var(--ks-5); max-width: 60ch;">The case for kolm is a thing you can verify in about ten minutes of CLI time. No demo call required. No marketing.</p>
-      <pre style="display:inline-block;text-align:left;background:var(--ks-bg-2);border:1px solid var(--ks-line);border-radius:var(--ks-r-md);padding:14px 18px;font-family:ui-monospace,SF Mono,Menlo,Consolas,monospace;font-size:14px;color:var(--ks-ink-1);margin:0 auto var(--ks-5);">$ npm install -g github:kolm-ai/kolm-stack</pre>
+      <pre style="display:inline-block;text-align:left;background:var(--ks-bg-2);border:1px solid var(--ks-line);border-radius:var(--ks-r-md);padding:14px 18px;font-family:ui-monospace,SF Mono,Menlo,Consolas,monospace;font-size:14px;color:var(--ks-ink-1);margin:0 auto var(--ks-5);">$ npm install -g github:kolm-ai/kolmogorov-stack</pre>
       <p class="ks-prose" style="margin: 0 auto var(--ks-5); max-width: 60ch; font-size: 13px; color: var(--ks-ink-2);">Plain source install from GitHub. Kolm is not on the public npm/PyPI registries yet, so we ship from source until those channels are verified.</p>
       <div style="display: inline-flex; gap: var(--ks-3); flex-wrap: wrap; justify-content: center;">
         <a class="ks-btn ks-btn--primary ks-btn--lg" href="/quickstart">Open the quickstart <span class="ks-btn-arrow">&rarr;</span></a>

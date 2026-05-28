@@ -21,8 +21,8 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
  :root {
- --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
- --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --bg: #0e1116; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: var(--line-1); --line-strong: var(--line-2);
  --ink: #e6e9ee; --ink-mute: #aab0b8; --ink-faint: #6a727c;
  --accent: #e6e9ee; --accent-strong: #b8c0ca;
  --good: #e6e9ee; --warn: #ffd07a; --bad: #ff6b91;
@@ -68,7 +68,7 @@
  .stat .k { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint); }
  .stat .v { margin-top: 4px; font-size: 28px; font-weight: 500; color: var(--ink); font-family: var(--mono); line-height: 1; }
  .stat .v small { font-size: 13px; color: var(--ink-mute); margin-left: 8px; font-weight: 400; }
- .stat.ready { border-color: rgba(230, 233, 238,0.25); }
+ .stat.ready { border-color: var(--line-3); }
  .stat.ready .v { color: var(--good); }
 
  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
@@ -97,7 +97,7 @@
  table.tbl td.excerpt { font-family: var(--mono); font-size: 12px; color: var(--ink); }
  table.tbl td.actions { white-space: nowrap; }
  table.tbl tr.discarded td { opacity: 0.4; text-decoration: line-through; }
- table.tbl tr.kept td { background: rgba(230, 233, 238,0.04); }
+ table.tbl tr.kept td { background: var(--line-1); }
 
  .act { display: inline-flex; gap: 4px; }
  .act button, .act a { font-family: var(--mono); font-size: 11px; padding: 4px 9px; border-radius: 5px; border: 1px solid var(--line-strong); background: var(--bg-elev); color: var(--ink-mute); cursor: pointer; line-height: 1.4; }
@@ -179,7 +179,7 @@
  <h1>Your <span class="tone">captures inbox.</span></h1>
  <p class="lede"><b>Point your provider client at kolm. Every prompt &amp; response lands here.</b> Keep what matters, discard the noise, promote a winner into a recipe. At 1,000 pairs the inbox hands the namespace to the distill bridge, which returns a signed <code>.kolm</code> Specialist you can run on your own hardware.</p>
 
- <div id="signedout" class="panel" style="border-color:var(--accent-strong);background:rgba(230, 233, 238,0.04)">
+ <div id="signedout" class="panel" style="border-color:var(--accent-strong);background:var(--line-1)">
  <h3 style="margin:0 0 8px;color:var(--ink)">Sign in or create an account to see your captures stream live</h3>
  <p style="margin:0 0 16px">The captures inbox is per-tenant and gated by your API key. Once you sign in, calls to <code>kolm.ai/v1/capture/openai</code>, <code>kolm.ai/v1/capture/anthropic</code>, or <code>kolm.ai/v1/capture/openrouter</code> land here, namespaced and triage-ready.</p>
  <div style="display:flex;gap:10px;flex-wrap:wrap">

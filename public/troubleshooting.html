@@ -22,10 +22,10 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
  :root {
- --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
- --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
+ --bg: #0e1116; --bg-elev: #0b0f10; --bg-card: #101514;
+ --line: var(--line-1); --line-strong: var(--line-2);
  --ink: #e6e9ee; --ink-mute: #aab0b8; --ink-faint: #6a727c;
- --accent: #e6e9ee; --accent-soft: rgba(230, 233, 238, 0.10); --accent-strong: #b8c0ca;
+ --accent: #e6e9ee; --accent-soft: var(--line-2); --accent-strong: #b8c0ca;
  --good: #e6e9ee; --bad: #ff6b91;
  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
@@ -79,7 +79,7 @@
  .qa a { color: var(--accent); }
  .qa a:hover { color: var(--accent-strong); }
 
- .stuck { margin: 64px 0 80px; padding: 28px 28px; border: 1px solid var(--line-strong); border-radius: 10px; background: rgba(230, 233, 238,0.02); }
+ .stuck { margin: 64px 0 80px; padding: 28px 28px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--line-1); }
  .stuck h2 { margin: 0 0 10px; font-size: 22px; font-weight: 500; color: var(--ink); }
  .stuck p { margin: 0 0 14px; color: var(--ink-mute); font-size: 15px; line-height: 1.6; max-width: 62ch; }
  .stuck .row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
@@ -102,7 +102,7 @@
  "name": "command not found: kolm",
  "acceptedAnswer": {
  "@type": "Answer",
- "text": "The npm global bin is not on your PATH. Run npm config get prefix and add the bin directory to your shell profile. Reinstall with npm i -g github:kolm-ai/kolm-stack after fixing the prefix."
+ "text": "The npm global bin is not on your PATH. Run npm config get prefix and add the bin directory to your shell profile. Reinstall with npm i -g github:kolm-ai/kolmogorov-stack after fixing the prefix."
  }
  },
  {
@@ -216,7 +216,7 @@
  <div class="wrap">
  <span class="pill">Troubleshooting</span>
  <h1>When something <span class="tone">breaks.</span></h1>
- <p class="lede">Errors, causes, fixes. Real failure modes the product actually has. If your case is not listed, run <code>kolm doctor</code> first; if that comes back clean, mail <a href="mailto:dev@kolm.ai" style="color:var(--accent);">dev@kolm.ai</a> or open an issue on <a href="https://github.com/kolm-ai/kolm-stack/issues" style="color:var(--accent);">GitHub</a> with the failing command and the trailing 30 lines of output.</p>
+ <p class="lede">Errors, causes, fixes. Real failure modes the product actually has. If your case is not listed, run <code>kolm doctor</code> first; if that comes back clean, mail <a href="mailto:dev@kolm.ai" style="color:var(--accent);">dev@kolm.ai</a> or open an issue on <a href="https://github.com/kolm-ai/kolmogorov-stack/issues" style="color:var(--accent);">GitHub</a> with the failing command and the trailing 30 lines of output.</p>
  <ul class="toc" aria-label="Section nav">
  <li><a href="#install">Install</a></li>
  <li><a href="#auth">Auth &amp; API key</a></li>
@@ -237,7 +237,7 @@
  <h2>Install failures</h2>
  <div class="qa">
  <h3>command not found: kolm</h3>
- <p>The npm global bin is not on your <code>PATH</code>. Run <code>npm config get prefix</code> and add <code>$(prefix)/bin</code> to your shell profile, or reinstall with <code>npm i -g github:kolm-ai/kolm-stack</code> after fixing the prefix.</p>
+ <p>The npm global bin is not on your <code>PATH</code>. Run <code>npm config get prefix</code> and add <code>$(prefix)/bin</code> to your shell profile, or reinstall with <code>npm i -g github:kolm-ai/kolmogorov-stack</code> after fixing the prefix.</p>
  </div>
  <div class="qa">
  <h3>Node version mismatch</h3>
@@ -431,7 +431,7 @@ kolm airgap status</pre>
  <div class="row">
  <a href="/docs">Read the docs</a>
  <a href="/faq">Browse the FAQ</a>
- <a href="https://github.com/kolm-ai/kolm-stack/issues">Open a GitHub issue</a>
+ <a href="https://github.com/kolm-ai/kolmogorov-stack/issues">Open a GitHub issue</a>
  <a href="mailto:dev@kolm.ai">Email dev@kolm.ai</a>
  </div>
  </div>

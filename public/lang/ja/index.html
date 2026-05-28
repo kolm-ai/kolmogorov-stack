@@ -36,16 +36,16 @@
  .i18n-shell h1 .accent { color: var(--violet, #b3a8ff); }
  .i18n-shell .lede { font-size: clamp(15px, 1.5vw, 18px); color: var(--ink-mute, #aab0b8); max-width: 64ch; line-height: 1.85; margin: 0 0 28px; }
  .i18n-shell .cta-row { display: flex; gap: 14px; flex-wrap: wrap; }
- .lang-switch { display: flex; gap: 6px 14px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint, #6a727c); letter-spacing: 0.04em; margin: 0 0 24px; padding: 10px 14px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 8px; background: rgba(255,255,255,0.01); max-width: 62ch; flex-wrap: wrap; align-items: center; }
+ .lang-switch { display: flex; gap: 6px 14px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint, #6a727c); letter-spacing: 0.04em; margin: 0 0 24px; padding: 10px 14px; border: 1px solid var(--line, var(--line-2)); border-radius: 8px; background: var(--line-1); max-width: 62ch; flex-wrap: wrap; align-items: center; }
  .lang-switch .lbl { color: var(--ink-faint, #6a727c); text-transform: uppercase; margin-right: 4px; }
  .lang-switch a { color: var(--ink-mute, #aab0b8); text-decoration: none; border-bottom: 1px solid transparent; }
  .lang-switch a:hover, .lang-switch a.is-active { color: var(--ink, #e6e9ee); border-bottom-color: var(--accent, #e6e9ee); }
- .i18n-section { max-width: 1180px; margin: 0 auto; padding: 56px 32px; border-top: 1px solid var(--line, rgba(255,255,255,0.08)); }
+ .i18n-section { max-width: 1180px; margin: 0 auto; padding: 56px 32px; border-top: 1px solid var(--line, var(--line-2)); }
  .i18n-section h2 { font-size: clamp(24px, 2.6vw, 34px); font-weight: 500; margin: 0 0 14px; line-height: 1.3; letter-spacing: -0.005em; }
  .i18n-section .sec-lede { color: var(--ink-mute, #aab0b8); font-size: 15px; max-width: 70ch; line-height: 1.85; margin: 0 0 28px; }
  .i18n-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
  @media (max-width: 880px) { .i18n-cards { grid-template-columns: 1fr; } }
- .i18n-card { padding: 24px 26px; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 12px; background: var(--bg-2, #11151b); }
+ .i18n-card { padding: 24px 26px; border: 1px solid var(--line, var(--line-2)); border-radius: 12px; background: var(--bg-2, #11151b); }
  .i18n-card .pill { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--violet, #e6e9ee); margin-bottom: 10px; }
  .i18n-card h3 { margin: 0 0 8px; font-size: 17px; font-weight: 500; line-height: 1.4; }
  .i18n-card p { margin: 0; font-size: 13.5px; color: var(--ink-mute, #aab0b8); line-height: 1.8; }

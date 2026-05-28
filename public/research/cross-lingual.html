@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Cross-lingual distillation &middot; Open-source AI workbench &middot; kolm.ai</title>
 <meta name="description" content="Cross-lingual distillation for kolm: language distribution detector, opt-in synthetic translation (stamped synthetic_translation:true), multilingual mixture training, per-language K-Score in the artifact manifest. 32">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
@@ -36,7 +37,7 @@
     padding: 18px 20px;
     border: 1px solid var(--line-1);
     border-radius: 10px;
-    background: rgba(255,255,255,0.015);
+    background: var(--line-1);
     font-family: var(--fr-font-mono);
     font-size: 13px;
     color: var(--ink-2);
@@ -61,7 +62,7 @@
     border-radius: 5px;
     text-align: center;
     color: var(--ink-2);
-    background: rgba(255,255,255,0.015);
+    background: var(--line-1);
   }
   .cl-lang-grid span.first-class { color: var(--fr-mint); border-color: rgba(46,191,145,0.30); }
 
@@ -273,8 +274,8 @@
       <span class="first-class">ur</span><span class="first-class">id</span><span class="first-class">vi</span><span class="first-class">th</span>
       <span class="first-class">ja</span><span class="first-class">ko</span><span class="first-class">zh</span><span class="first-class">sw</span>
     </div>
-    <span class="cl-honesty-pill">Outside this list: English-only fallback with manifest.cross_lingual.coverage = "english_only_fallback"</span>
-    <div class="cl-honesty">
+    <span class="cl-caveat-pill">Outside this list: English-only fallback with manifest.cross_lingual.coverage = "english_only_fallback"</span>
+    <div class="cl-caveat">
       <b>Plain contract.</b> Synthetic translation rows are always stamped <code>synthetic_translation:true</code>. Per-language K-Score is computed from per-language held-out eval splits, never from a global average. Languages outside the listed 32 fall back to English-only with a manifest truthfulness flag and a user-visible pill -- the operator never deploys blind to a language we do not yet cover well.
     </div>
     <div class="cl-crosslink">

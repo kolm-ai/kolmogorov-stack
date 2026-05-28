@@ -22,8 +22,8 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Video distillation","description":"Capture video URLs, sample frames, distill a frame-grounded student, bake-off per content kind. Stamped w773-v1. Raw video bytes are never persisted.","url":"https://kolm.ai/docs/multimodal/video","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <link rel="stylesheet" href="/design-tokens.css">
 <style>
-:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:rgba(17, 17, 17,0.10);--warn:#6b6b66;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:var(--line-2);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:var(--line-2);--warn:#6b6b66;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:var(--line-2);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669;--accent-soft:rgba(5,150,105,0.10)}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
 .skip-link{position:absolute;left:-9999px}
@@ -195,7 +195,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <pre>CODE28</pre>
 
-<div class="honesty" data-w773="trainer-honesty">
+<div class="caveat" data-w773="trainer-caveat">
   <p>The trainer NEVER fabricates results. Dry-run emits a scaffold tagged <code>trainer_not_invoked:true</code> with <code>total_frames_estimated</code> sourced from the SAME density math the live run uses. Live mode either runs a real frame-extract-plus-distill loop or exits with <code>error:'torch_not_available'</code> (exit 3), <code>error:'no_video_captures'</code> (exit 4), <code>error:'cv2_not_available'</code> (exit 5), or <code>error:'teacher_load_failed'</code> (exit 6) &mdash; we will not silently no-op.</p>
 </div>
 
@@ -253,7 +253,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </table>
 
 <h2 id="tenant-fence">Tenant fence</h2>
-<div class="honesty" data-w773="tenant-fence">
+<div class="caveat" data-w773="tenant-fence">
   <p>Every video read does a per-row <code>tenant_id</code> filter even after the canonical event-store has already filtered. The defense-in-depth filter runs after the <code>listEvents</code> read so a future store schema change cannot silently flip "no leak" to "all leak". The <code>captureVideoMessage</code> chokepoint stamps the canonical event with <code>media_kind:'video'</code> + the tenant fence column so reads land deterministically.</p>
 </div>
 

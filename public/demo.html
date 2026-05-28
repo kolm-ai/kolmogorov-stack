@@ -31,8 +31,8 @@
 }
 </script>
 <style>
- :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
- [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669}
+ :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:var(--line-2);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:var(--line-2);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669}
  body{background:var(--bg);color:var(--ink);font:16.5px/1.7 -apple-system,Inter,system-ui,sans-serif;margin:0}
  .wrap{max-width:880px;margin:0 auto;padding:0 24px}
  .paper{padding:72px 0 64px}
@@ -130,7 +130,7 @@ Video uploads 2026-05-28. While that lands, you can watch a 70-second cinematic 
   <span></span>
   <div>
     <span class="ch-title">Install the CLI + sign up</span>
-    <code class="ch-cmd">npm i -g github:kolm-ai/kolm && kolm signup --email you@example.com</code>
+    <code class="ch-cmd">npm i -g github:kolm-ai/kolmogorov-stack && kolm signup --email you@example.com</code>
   </div>
   <span class="ch-time">0:00 &mdash; 0:18</span>
 </li>
@@ -186,7 +186,7 @@ Video uploads 2026-05-28. While that lands, you can watch a 70-second cinematic 
 
 <h2>Try it yourself, right now</h2>
 <p>Every command in the video is real. If you have an OpenAI app today, you can do steps 1-4 in ten minutes without leaving your editor:</p>
-<pre><code>npm i -g github:kolm-ai/kolm
+<pre><code>npm i -g github:kolm-ai/kolmogorov-stack
 kolm signup --email you@example.com
 kolm namespace create my-skill --primary-provider openai
 

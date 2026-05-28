@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Manifesto: why an open-source AI compiler is the only plain path · kolm.ai</title>
 <meta name="description" content="The model that decides should be the model that gets audited. The artifact that runs in your VPC should be the artifact your compliance team signed. Principles, written down so we can be held to them.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
@@ -106,7 +107,7 @@
       <a href="/quickstart" class="ks-btn ks-btn--primary ks-btn--lg">Compute your first artifact <span class="ks-btn-arrow">&rarr;</span></a>
       <a href="/why-kolm" class="ks-btn ks-btn--ghost ks-btn--lg">The case for kolm</a>
     </div>
-    <pre style="margin-top:var(--ks-5);max-width:60ch;background:#0b0d11;border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md);padding:14px 18px;font-family:var(--ks-mono);font-size:13px;color:var(--ks-ink-2);line-height:1.6;overflow:auto;"><span style="color:var(--ks-ink-3)"># the chain in two commands</span>
+    <pre style="margin-top:var(--ks-5);max-width:60ch;background:var(--surface-input, var(--ks-bg-1));border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md);padding:14px 18px;font-family:var(--ks-mono);font-size:13px;color:var(--ks-ink-2);line-height:1.6;overflow:auto;"><span style="color:var(--ks-ink-3)"># the chain in two commands</span>
 $ kolm compile spec.json     <span style="color:var(--ks-ink-3)"># spec &rarr; signed .kolm</span>
 $ kolm verify artifact.kolm  <span style="color:var(--ks-ink-3)"># receipt: ok, K=0.92</span></pre>
   </div>

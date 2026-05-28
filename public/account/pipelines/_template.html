@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Pipeline — Kolm</title>
 <meta name="description" content="pipeline detail: flow diagram (classifier → specialists), per-route K-Scores, pipeline-level weighted K-Score, run history." />
 <meta name="kolm:wave" content="wave821" />
@@ -14,19 +15,19 @@
   h1 { font-size: 24px; margin: 0 0 4px; }
   h2 { font-size: 18px; margin: 28px 0 8px; }
   .lede { color: #666; margin: 0 0 24px; }
-  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; background: rgba(0,0,0,0.06); margin-left: 8px; vertical-align: middle; }
-  .meta { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 12px 0 24px; padding: 12px; background: rgba(0,0,0,0.03); border-radius: 6px; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; background: var(--line-1); margin-left: 8px; vertical-align: middle; }
+  .meta { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 12px 0 24px; padding: 12px; background: var(--line-1); border-radius: 6px; }
   .meta dt { font-weight: 600; color: #555; }
   .meta dd { margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
   a { color: #2a5edb; text-decoration: none; }
   a:hover { text-decoration: underline; }
-  code { background: rgba(0,0,0,0.05); padding: 1px 4px; border-radius: 3px; font-size: 13px; }
+  code { background: var(--line-1); padding: 1px 4px; border-radius: 3px; font-size: 13px; }
   .err { color: #b00020; }
   .ok { color: #006a30; }
-  .flow { background: #fff; border: 1px solid rgba(0,0,0,0.12); border-radius: 8px; padding: 16px; margin: 12px 0; overflow-x: auto; }
-  .empty { padding: 24px; border: 1px dashed rgba(0,0,0,0.15); border-radius: 8px; color: #555; text-align: center; }
+  .flow { background: #fff; border: 1px solid var(--line-2); border-radius: 8px; padding: 16px; margin: 12px 0; overflow-x: auto; }
+  .empty { padding: 24px; border: 1px dashed var(--line-3); border-radius: 8px; color: #555; text-align: center; }
   table { width: 100%; border-collapse: collapse; }
-  th, td { padding: 6px 10px; text-align: left; border-bottom: 1px solid rgba(0,0,0,0.08); font-size: 13px; }
+  th, td { padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--line-2); font-size: 13px; }
   th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #555; }
   .kpi { display: inline-block; padding: 4px 10px; border-radius: 6px; background: rgba(42,94,219,0.1); color: #2a5edb; font-weight: 600; }
 </style>

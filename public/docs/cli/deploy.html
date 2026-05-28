@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>kolm deploy CLI reference &middot; Open-source AI workbench &middot; kolm.ai</title>
 <meta name="description" content="kolm deploy CLI reference: deploy a signed .kolm artifact to docker, kubernetes, or systemd targets. Pre-flight signature verify and memory probe. Loud-fail envelope on unknown target.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
@@ -21,7 +22,7 @@
   .cli-body h2 { font-size: 22px; font-weight: 540; margin: 40px 0 12px; letter-spacing: -0.01em; }
   .cli-body p, .cli-body li { font-size: 15px; line-height: 1.7; color: var(--ink-2); max-width: 76ch; }
   pre { background: #06080a; border: 1px solid var(--line-1); border-radius: 8px; padding: 16px 18px; overflow-x: auto; font: 12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color: #e9eef3; max-width: 760px; }
-  code { font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size: 13px; background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; }
+  code { font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size: 13px; background: var(--line-1); padding: 1px 6px; border-radius: 4px; }
   .cli-plain { padding: 16px 18px; border: 1px dashed var(--line-1); border-radius: 8px; font-size: 13.5px; color: var(--ink-2); line-height: 1.55; margin: 20px 0; max-width: 76ch; }
   .cli-plain b { color: var(--ink-1); font-weight: 580; }
 </style>
@@ -95,7 +96,7 @@ kolm deploy ./my-distill.kolm --dry-run --json</pre>
     </ul>
 
     <h2>Loud-fail envelope</h2>
-    <div class="cli-honest">
+    <div class="cli-caveat">
       <b>Unknown target.</b> If <code>--target</code> is set to a string outside the known set the CLI exits 64 with <code>{ok:false, error:'unknown_target', hint:'expected one of: docker, kubernetes, systemd'}</code>. We never silently fall back to a default target -- silent fall-back has historically caused deploys to land in the wrong cluster.
     </div>
 

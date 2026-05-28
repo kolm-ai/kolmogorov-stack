@@ -33,8 +33,8 @@
 }
 </script>
 <style>
- :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:rgba(230, 233, 238,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
- [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:rgba(0,0,0,0.08);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669}
+ :root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:var(--line-2);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+ [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:var(--line-2);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#059669}
  body{background:var(--bg);color:var(--ink);font:16.5px/1.7 -apple-system,Inter,system-ui,sans-serif;margin:0}
  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
  header.site{padding:18px 0;border-bottom:1px solid var(--line)}
@@ -50,7 +50,7 @@
  .stamp{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:6px 0 0;letter-spacing:0.04em}
  .pills{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 0}
  .pill{font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;padding:5px 10px;border:1px solid var(--line);border-radius:999px;color:var(--ink-mute);background:var(--bg-elev)}
- .pill.green{color:var(--accent);border-color:rgba(17, 17, 17,0.32)}
+ .pill.green{color:var(--accent);border-color:var(--line-strong)}
  h2{font-size:22px;font-weight:500;letter-spacing:-0.012em;margin:48px 0 12px;color:var(--ink)}
  h3{font-size:17px;font-weight:500;margin:24px 0 8px;color:var(--ink)}
  p{color:var(--ink-mute);margin:0 0 16px}
@@ -62,7 +62,7 @@
  pre{background:var(--bg-elev);border:1px solid var(--line);border-radius:8px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:0 0 16px;color:var(--ink)}
  pre code{background:transparent;border:0;padding:0}
  .install-card{margin:0 0 18px;padding:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg-elev)}
- .install-card .head{padding:10px 16px;background:rgba(17, 17, 17,0.06);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px;letter-spacing:0.04em;color:var(--ink);text-transform:uppercase}
+ .install-card .head{padding:10px 16px;background:var(--line-1);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px;letter-spacing:0.04em;color:var(--ink);text-transform:uppercase}
  .install-card pre{margin:0;border:0;border-radius:0;background:transparent}
  table{width:100%;border-collapse:collapse;margin:0 0 16px;font-size:14px}
  th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
@@ -147,7 +147,7 @@
 
 <div class="install-card">
  <div class="head">curl install (Linux, macOS)</div>
- <pre><code>npm i -g github:kolm-ai/kolm-stack</code></pre>
+ <pre><code>npm i -g github:kolm-ai/kolmogorov-stack</code></pre>
 </div>
 
 <div class="install-card">
@@ -221,7 +221,7 @@ kolm verify --help</code></pre>
 <p>Apache License 2.0. Use freely, redistribute freely, fork freely. The license file ships in every release tarball and inside the container at <code>/LICENSE</code>. No attribution required in derivative works (but appreciated).</p>
 
 <div class="actions">
- <a class="btn primary" href="https://github.com/kolm-ai/kolm-stack">View source on GitHub &rarr;</a>
+ <a class="btn primary" href="https://github.com/kolm-ai/kolmogorov-stack">View source on GitHub &rarr;</a>
  <a class="btn" href="/spec/rs-1">Read RS-1 spec &rarr;</a>
  <a class="btn" href="/spec/changelog">Change log &rarr;</a>
  <a class="btn" href="/verify-prod">Verify a .kolm in browser &rarr;</a>

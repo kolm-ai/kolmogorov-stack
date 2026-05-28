@@ -24,9 +24,9 @@ const REPLACEMENTS = [
   // bundle is not a real verb; the artifact verb is `kolm compile`/`kolm new`.
   [/\bkolm bundle\b/g, 'kolm compile'],
   // Distribution claims — only the GitHub path is verified today.
-  [/\bbrew install kolm\b/g, 'npm i -g github:kolm-ai/kolm-stack'],
-  [/\bpip install kolm\b/g, 'npm i -g github:kolm-ai/kolm-stack'],
-  [/curl -fsSL https:\/\/kolm\.ai\/install/g, 'npm i -g github:kolm-ai/kolm-stack'],
+  [/\bbrew install kolm\b/g, 'npm i -g github:kolm-ai/kolmogorov-stack'],
+  [/\bpip install kolm\b/g, 'npm i -g github:kolm-ai/kolmogorov-stack'],
+  [/curl -fsSL https:\/\/kolm\.ai\/install/g, 'npm i -g github:kolm-ai/kolmogorov-stack'],
   [/\binstall\.sh\b/g, 'install (npm)'],
   // PHI / VPC / BAA wording — narrower truth.
   [/PHI never leaves/g, 'PHI stays inside the customer-hosted bridge'],
