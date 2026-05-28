@@ -6350,6 +6350,31 @@ export function buildRouter() {
       const outputScan = pii.applyMode({ text: outputText, mode: nsConfig.redact_mode || 'detect_only' });
       phases.pii_out_ms = Date.now() - _tPiiOut;
 
+      // W921 P0 (C1): when the namespace redacts the OUTPUT to the client
+      // (redact_all -> action 'redact'), substitute the redacted text into the
+      // client-facing response (both JSON and SSE). Previously outputScan was
+      // computed but only folded into the receipt, so redact_all callers still
+      // received the UN-redacted PII/PHI while the signed receipt claimed
+      // redaction_applied — a fail-open leak. detect_only / redact_captures
+      // (action 'pass') keep the original output by design.
+      const _redactOut = outputScan.action === 'redact';
+      const clientOutputText = _redactOut ? String(outputScan.output_text || '') : outputText;
+      let clientJson = result.json;
+      if (_redactOut && result.json && typeof result.json === 'object') {
+        clientJson = { ...result.json };
+        if (Array.isArray(clientJson.choices)) {
+          clientJson.choices = clientJson.choices.map((c, i) => (i === 0 && c && c.message && typeof c.message.content === 'string')
+            ? { ...c, message: { ...c.message, content: clientOutputText } } : c);
+        }
+        if (Array.isArray(clientJson.content)) {
+          let _put = false;
+          clientJson.content = clientJson.content.map((blk) => {
+            if (blk && typeof blk.text === 'string') { const t = _put ? '' : clientOutputText; _put = true; return { ...blk, text: t }; }
+            return blk;
+          });
+        }
+      }
+
       // 6. Build receipt
       const _tSign = Date.now();
       const fallback_reason = (attempted.length > 1) ? (attempted[attempted.length - 1].fallback_reason || null) : null;
@@ -6469,7 +6494,7 @@ export function buildRouter() {
           // OpenAI-compat chat.completion.chunk deltas. Anthropic-compat
           // callers will still understand the OpenAI shape via the gateway
           // (we already back-translate in the W-M proxy path).
-          const text = String(outputText || '');
+          const text = String(clientOutputText || '');
           const completionId = 'chatcmpl-' + (receipt.receipt_id || 'kolm');
           const model = String(receipt.model || (body.model || 'unknown'));
           const created = Math.floor(Date.now() / 1000);
@@ -6555,7 +6580,7 @@ export function buildRouter() {
         });
       } catch (_) {} // deliberate: cleanup
       res.status(result.status).json({
-        ...result.json,
+        ...clientJson,
         kolm_receipt: receipt,
         kolm_route_decision: receipt.route_decision,
         kolm_fallback_reason: receipt.fallback_reason,
