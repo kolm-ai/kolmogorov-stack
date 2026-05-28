@@ -9,14 +9,14 @@ The public package is intentionally small. It gives product code a typed client 
 The npm package is not published yet. Use a local checkout while the package is prepared:
 
 ```bash
-git clone https://github.com/kolm-ai/kolmogorov-stack
+git clone https://github.com/kolm-ai/kolm
 npm i file:./kolm-stack/sdk/node
 ```
 
 For local development:
 
 ```bash
-git clone https://github.com/kolm-ai/kolmogorov-stack
+git clone https://github.com/kolm-ai/kolm
 cd kolm-stack/sdk/node
 npm install
 npm test
@@ -109,7 +109,7 @@ class KolmClient {
 The production CLI is the repo-root `kolm` binary. This SDK package also includes a legacy recipe-registry helper exposed as `kolm-recipes` for registry experiments. New product flows should prefer:
 
 ```bash
-npm i -g github:kolm-ai/kolmogorov-stack
+npm i -g github:kolm-ai/kolm
 kolm config base https://kolm.ai
 kolm login
 ```

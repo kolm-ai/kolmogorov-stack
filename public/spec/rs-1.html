@@ -55,13 +55,13 @@
  footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
 
-<meta property="og:title" content="RS-1 v2.0: A Reproducible Signed-artifact format for · kolm.ai">
+<meta property="og:title" content="RS-1 v2.0: A Reproducible Signed-artifact format for">
 <meta property="og:description" content="The K-score formula, the .kolm artifact layout, the four recipe classes, the HMAC+Ed25519+sigstore signature cascade, the seeds.jsonl train/holdout...">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/spec/rs-1">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="RS-1 v2.0: A Reproducible Signed-artifact format for · kolm.ai">
+<meta name="twitter:title" content="RS-1 v2.0: A Reproducible Signed-artifact format for">
 <meta name="twitter:description" content="The K-score formula, the .kolm artifact layout, the four recipe classes, the HMAC+Ed25519+sigstore signature cascade, the seeds.jsonl train/holdout...">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="stylesheet" href="/ks.css">
@@ -100,7 +100,7 @@
 <div class="open-banner" style="margin:0 0 24px;padding:14px 18px;border:1px solid var(--line-strong);border-radius:8px;background:var(--line-1);font-size:13.5px;line-height:1.6;color:var(--ink-mute);font-family:var(--mono)">
  <b style="color:var(--accent)">RS-1 is an open standard (Apache-2.0).</b>
  The format spec, the K-score formula, the four-class taxonomy, and the reference verifier are all Apache-2.0 licensed.
- Read the reference verifier on <a href="https://github.com/kolm-ai/kolmogorov-stack" style="color:var(--accent)">GitHub</a>,
+ Read the reference verifier on <a href="https://github.com/kolm-ai/kolm" style="color:var(--accent)">GitHub</a>,
  install the free standalone verifier at <a href="/verify-cli" style="color:var(--accent)">/verify-cli</a>,
  or follow the change log at <a href="/spec/changelog" style="color:var(--accent)">/spec/changelog</a>.
 </div>
@@ -530,7 +530,7 @@ train = seeds \\ holdout</pre>
 <h3>10.1 How to participate</h3>
 <p>RS-1 is governed in the open and follows a Linux Foundation style process for proposed changes. Five participation surfaces are available:</p>
 <ul>
-<li><b>RFC process.</b> Any normative change to the spec (new manifest field, new recipe class, new verifier check, new signature layer, new K-score axis weight) goes through a numbered RFC pull request against <code>docs/rfcs/</code> in the <a href="https://github.com/kolm-ai/kolmogorov-stack">kolm-stack</a> repo. RFCs land with a 14-day public comment window. The current RFC template lives at <code>docs/rfcs/0000-template.md</code>.</li>
+<li><b>RFC process.</b> Any normative change to the spec (new manifest field, new recipe class, new verifier check, new signature layer, new K-score axis weight) goes through a numbered RFC pull request against <code>docs/rfcs/</code> in the <a href="https://github.com/kolm-ai/kolm">kolm-stack</a> repo. RFCs land with a 14-day public comment window. The current RFC template lives at <code>docs/rfcs/0000-template.md</code>.</li>
 <li><b>Mailing list.</b> Discussion and announcements are mirrored to <code>rs-1-discuss@kolm.ai</code> (subscribe via <code>hello@kolm.ai</code>). Archives are public-by-default; private threads only for security disclosures under the embargo policy at <a href="/security">/security</a>.</li>
 <li><b>Change log.</b> Every minor or major version bump is recorded at <a href="/spec/changelog">/spec/changelog</a> with a date, summary, and a diff link to the spec PR that landed it. v1.0 (2026-01-15), v1.1 (drift block), v2.0 (supersession + teacher fidelity), v2.1 (k-score-2 axes).</li>
 <li><b>Reference verifier.</b> The free standalone <code>kolm verify</code> CLI lives at <a href="/verify-cli">/verify-cli</a>; it verifies any <code>.kolm</code> artifact against this spec with zero login, zero telemetry, zero third-party runtime. Source is Apache-2.0; binary releases ship signed.</li>

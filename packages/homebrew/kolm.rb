@@ -1,6 +1,6 @@
 # Homebrew formula for the kolm CLI.
 #
-# Tap:    kolm-ai/kolmogorov-stack
+# Tap:    kolm-ai/kolm
 # Usage:  brew tap kolm-ai/kolm && brew install kolm
 #
 # This formula is intentionally minimal. The kolm CLI is a Node entry point
@@ -13,10 +13,10 @@
 class Kolm < Formula
   desc "Compile, sign, and verify .kolm artifacts. Receipts for every inference."
   homepage "https://kolm.ai"
-  url "https://github.com/kolm-ai/kolmogorov-stack/archive/refs/tags/v0.2.6.tar.gz"
+  url "https://github.com/kolm-ai/kolm/archive/refs/tags/v0.2.6.tar.gz"
   sha256 "0000000000000000000000000000000000000000000000000000000000000000"
   license "Apache-2.0"
-  head "https://github.com/kolm-ai/kolmogorov-stack.git", branch: "main"
+  head "https://github.com/kolm-ai/kolm.git", branch: "main"
 
   depends_on "node@20"
 

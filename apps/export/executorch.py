@@ -69,7 +69,7 @@ def export(artifact_dir: str | os.PathLike, out_dir: str | os.PathLike, **opts) 
     # specialized per model family (Qwen / Llama / Gemma / Phi).
     raise ExportError(
         "ExecuTorch export needs a model-family-specific wrapper. "
-        "Open a request on github.com/kolm-ai/kolmogorov-stack with "
+        "Open a request on github.com/kolm-ai/kolm with "
         "the base_model name from your manifest, and we'll ship the wrapper. "
         "Today supported via this pipeline: gguf (cross-platform), mlx (Apple)."
     )

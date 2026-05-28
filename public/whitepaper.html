@@ -10,13 +10,13 @@
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 
 <meta property="og:site_name" content="kolm">
-<meta property="og:title" content="The .kolm Specification (RS-1) · Whitepaper · kolm.ai">
+<meta property="og:title" content="The .kolm Specification (RS-1) · Whitepaper">
 <meta property="og:description" content="Formal technical specification of the .kolm artifact format, the K-score methodology, the 8-stage compile pipeline, and the Ed25519-chained receipt...">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/whitepaper">
 <link rel="canonical" href="https://kolm.ai/whitepaper">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
-<meta name="twitter:title" content="The .kolm Specification (RS-1) · Whitepaper · kolm.ai">
+<meta name="twitter:title" content="The .kolm Specification (RS-1) · Whitepaper">
 <meta name="twitter:description" content="Formal technical specification of the .kolm artifact format, the K-score methodology, the 8-stage compile pipeline, and the Ed25519-chained receipt...">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -228,7 +228,7 @@
  <p>Implementations MAY add capabilities, but MUST NOT rename fields, change zip layer ordering, or break receipt verification against <code>registry.kolm.ai</code>.</p>
  <div class="normative">
  <b>Status of this memo.</b> RS-1 published under MIT (code) and CC-BY-4.0 (text). Errata, additions, test suite at
- <code>github.com/kolm-ai/kolmogorov-stack</code>. Spec follows SemVer; backward-incompatible changes increment major (RS-1 &rarr; RS-2) and require a registry epoch transition.
+ <code>github.com/kolm-ai/kolm</code>. Spec follows SemVer; backward-incompatible changes increment major (RS-1 &rarr; RS-2) and require a registry epoch transition.
  </div>
 </section>
 
@@ -491,7 +491,7 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
 
 <section id="conform">
  <h2><span class="num">§11</span> Conformance</h2>
- <p>The operational definition is the public test suite at <code>github.com/kolm-ai/kolmogorov-stack/tree/main/conformance</code>. This section is the human-readable summary.</p>
+ <p>The operational definition is the public test suite at <code>github.com/kolm-ai/kolm/tree/main/conformance</code>. This section is the human-readable summary.</p>
 
  <h3>11.1 Compiler conformance</h3>
  <ul>
@@ -526,7 +526,7 @@ K = round( 100 · ( 0.60·T + 0.25·C + 0.15·L ) , 1 )</pre>
  <li>[BGE-M3] Xiao, S. et al. <i>BGE M3-Embedding.</i> 2024.</li>
  <li>[SQLITE-VEC] Asg, A. <i>sqlite-vec: A vector search SQLite extension.</i> 2024.</li>
  <li>[JSON-SCHEMA-2020-12] <i>JSON Schema Draft 2020-12.</i> json-schema.org.</li>
- <li>Reproducibility appendix and conformance vectors at <code>github.com/kolm-ai/kolmogorov-stack</code>.</li>
+ <li>Reproducibility appendix and conformance vectors at <code>github.com/kolm-ai/kolm</code>.</li>
  </ul>
 </section>
 
@@ -583,7 +583,7 @@ offset size field
 
  <p>Verification: compute <code>Ed25519(epoch_key, bytes[0..135])</code> and compare to <code>bytes[136..167]</code>. The epoch key is published at <code>registry.kolm.ai/epoch/&lt;anchor_date&gt;/key.json</code> and signed by the registry's long-term Ed25519 key.</p>
 
- <div class="note"><b>End of specification.</b> Errata and conformance vectors at <code>github.com/kolm-ai/kolmogorov-stack</code>. Maintainers: <code>spec@kolm.ai</code>.</div>
+ <div class="note"><b>End of specification.</b> Errata and conformance vectors at <code>github.com/kolm-ai/kolm</code>. Maintainers: <code>spec@kolm.ai</code>.</div>
 </section>
 
 </article>

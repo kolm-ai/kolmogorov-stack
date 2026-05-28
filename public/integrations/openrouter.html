@@ -8,13 +8,13 @@
 <meta name="description" content="Use kolm.ai with the OpenRouter routing conventions. HTTP-Referer and X-Title headers are preserved end to end so analytics still attribute traffic correctly.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="OpenRouter · kolm.ai">
+<meta property="og:title" content="OpenRouter">
 <meta property="og:description" content="Use kolm.ai with the OpenRouter routing conventions. HTTP-Referer and X-Title headers are preserved end to end so analytics still attribute traffic correctly.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/integrations/openrouter">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="OpenRouter · kolm.ai">
+<meta name="twitter:title" content="OpenRouter">
 <meta name="twitter:description" content="Use kolm.ai with the OpenRouter routing conventions. HTTP-Referer and X-Title headers are preserved end to end so analytics still attribute traffic correctly.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/integrations/openrouter">
@@ -114,7 +114,7 @@ client = OpenAI(
 )
 
 resp = client.chat.completions.create(
- model="anthropic/claude-3.5-sonnet",
+ model="anthropic/claude-opus-4-7",
  messages=[{"role": "user", "content": "Summarize this PR: ..."}],
 )
 
@@ -137,7 +137,7 @@ const client = new OpenAI({
 });
 
 const resp = await client.chat.completions.create({
- model: "anthropic/claude-3.5-sonnet",
+ model: "anthropic/claude-opus-4-7",
  messages: [{ role: "user", content: "Summarize this PR: ..." }],
 });</pre>
 </div></section>

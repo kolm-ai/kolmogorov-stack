@@ -7,7 +7,7 @@
 <title>Quickstart: install, capture, distill, run · kolm.ai</title>
 <meta name="description" content="Install the kolm CLI, route a single API call through the gateway, distill a specialist from your approved captures, quantize to INT4, and run the signed .kolm artifact locally. Ten minutes for a developer with an LLM">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
-<meta property="og:title" content="Quickstart · kolm.ai">
+<meta property="og:title" content="Quickstart">
 <meta property="og:description" content="Install, capture, distill, quantize, run. Ten minutes, end to end, with real receipts.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/quickstart">
@@ -219,17 +219,17 @@
             <button class="qs-tab" role="tab" aria-selected="false" data-tab="install-brew">brew</button>
             <button class="qs-tab" role="tab" aria-selected="false" data-tab="install-curl">curl</button>
           </div>
-          <pre class="ks-code qs-pane" data-pane="install-npm" data-active="true"><span class="pmpt">$</span> npm i -g github:kolm-ai/kolmogorov-stack
+          <pre class="ks-code qs-pane" data-pane="install-npm" data-active="true"><span class="pmpt">$</span> npm i -g github:kolm-ai/kolm
 <span class="pmpt">$</span> kolm --version
   <span class="ok">kolm 1.0.0  node 20.11.0</span></pre>
-          <pre class="ks-code qs-pane" data-pane="install-pip"><span class="pmpt">$</span> pip install git+https://github.com/kolm-ai/kolmogorov-stack@main#subdirectory=sdk/python  # GitHub source package; PyPI release pending
+          <pre class="ks-code qs-pane" data-pane="install-pip"><span class="pmpt">$</span> pip install git+https://github.com/kolm-ai/kolm@main#subdirectory=sdk/python  # GitHub source package; PyPI release pending
 <span class="pmpt">$</span> kolm --version
   <span class="ok">kolm 1.0.0  python 3.11.6</span></pre>
           <pre class="ks-code qs-pane" data-pane="install-brew"><span class="pmpt">$</span> brew install node          # runtime setup (no Kolm tap)
-<span class="pmpt">$</span> npm i -g github:kolm-ai/kolmogorov-stack
+<span class="pmpt">$</span> npm i -g github:kolm-ai/kolm
 <span class="pmpt">$</span> kolm --version
   <span class="ok">kolm 1.0.0</span></pre>
-          <pre class="ks-code qs-pane" data-pane="install-curl"><span class="pmpt">$</span> git clone https://github.com/kolm-ai/kolmogorov-stack
+          <pre class="ks-code qs-pane" data-pane="install-curl"><span class="pmpt">$</span> git clone https://github.com/kolm-ai/kolm
 <span class="pmpt">$</span> cd kolm-stack &amp;&amp; npm install &amp;&amp; npm link
 <span class="pmpt">$</span> kolm --version
   <span class="ok">kolm 1.0.0</span></pre>

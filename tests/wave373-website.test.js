@@ -84,7 +84,7 @@ test('W373 #4 - healthcare.html names ssn|mrn|name|dob|address detector classes'
 test('W373 #5 - download.html surfaces CLI, Mac, Windows, Linux install options', () => {
   // W380d: relaxed from exact-command match to behavior: each install card must
   // surface SOME install command. The canonical install
-  // (npm i -g github:kolm-ai/kolmogorov-stack) replaced the deprecated
+  // (npm i -g github:kolm-ai/kolm) replaced the deprecated
   // curl-pipe form, and the W373 task's npm/@kolm/cli is one of several valid
   // forms now. Tests assert presence of install affordances, not exact copy.
   for (const opt of ['cli', 'mac', 'windows', 'linux']) {

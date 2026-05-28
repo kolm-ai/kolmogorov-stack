@@ -9,13 +9,13 @@
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 
-<meta property="og:title" content="Mobile copilots · kolm.ai">
+<meta property="og:title" content="Mobile copilots">
 <meta property="og:description" content="Hermes-class behavior on a phone shipped since 2021. Offline, sub-100ms, no per-token bill, signed receipts.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/use-cases/mobile">
 <link rel="canonical" href="https://kolm.ai/use-cases/mobile">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
-<meta name="twitter:title" content="Mobile copilots · kolm.ai">
+<meta name="twitter:title" content="Mobile copilots">
 <meta name="twitter:description" content="Hermes-class behavior on a phone shipped since 2021. Offline, sub-100ms, no per-token bill, signed receipts.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -306,7 +306,7 @@
  <p class="sec-lede">Drop a <code>.kolm</code> in your bundle (or stream it on first launch via on-demand resources). Open it. Call it. The SDK handles model loading, NPU offload, receipt signing, recall. <em style="color:var(--ink-mute,#aab0b8)">(React Native module ships alongside the browser-WASM-via-WebView path; the API below is the locked surface.)</em></p>
  <div class="term" style="max-width:880px">
  <div class="hd"><span class="dot"></span><span>App.tsx</span></div>
- <pre><span class="cm">// 1. install: npm i github:kolm-ai/kolmogorov-stack (RN module ships alongside browser-WASM)</span>
+ <pre><span class="cm">// 1. install: npm i github:kolm-ai/kolm (RN module ships alongside browser-WASM)</span>
 <span class="pmt">import</span> { Specialist } <span class="pmt">from</span> <span class="ok">"@kolm/react-native"</span>;
 
 <span class="pmt">const</span> writer = <span class="pmt">await</span> Specialist.<span class="ok">load</span>(<span class="ok">"email-reply-1.0.0.kolm"</span>);

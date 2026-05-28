@@ -90,7 +90,7 @@
   .cap-reach-list .fr-spec-list__row.--sdk .fr-spec-list__delta { color: #b693ff; }
   .cap-reach-list .fr-spec-list__row.--boundary .fr-spec-list__delta { color: #a8b3c2; }
 </style>
-  <meta property="og:title" content="Capture · kolm.ai">
+  <meta property="og:title" content="Capture">
   <meta property="og:description" content="Drop-in OpenAI-compatible proxy that lands every prompt, completion, and tool call into a tenant-scoped event lake on your own disk. The starting point for distill, compile, and verify.">
   <meta property="og:image" content="https://kolm.ai/og/capture.svg">
   <meta property="og:url" content="https://kolm.ai/capture">
@@ -162,7 +162,7 @@
     <p class="sub">Run the proxy once. Change one base URL in your code. Every request your app already makes gets captured, scored, and made replayable. No SDK rewrites, no wrapper libraries.</p>
     <div class="terminal">
 <pre><span class="c"># 1. Install the CLI (Mac, Linux, Windows; Node 18+)</span>
-<span class="prompt">$</span> <span class="k">npm install -g github:kolm-ai/kolmogorov-stack</span>
+<span class="prompt">$</span> <span class="k">npm install -g github:kolm-ai/kolm</span>
 
 <span class="c"># 2. Start the local proxy. Listens on 11434, writes to ~/.kolm/events</span>
 <span class="prompt">$</span> <span class="k">kolm capture serve</span>

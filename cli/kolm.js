@@ -2888,11 +2888,11 @@ EXAMPLES
   kolm upgrade --json | jq .status # script-friendly
 
 Reads the current version from package.json. Fetches the latest version from
-the canonical install source (github.com/kolm-ai/kolmogorov-stack main
+the canonical install source (github.com/kolm-ai/kolm main
 branch package.json) with a 5s timeout. If a newer version is available, it
 prints the upgrade command. It does NOT auto-upgrade (too many footguns).
 
-The canonical install is "npm i -g github:kolm-ai/kolmogorov-stack", NOT
+The canonical install is "npm i -g github:kolm-ai/kolm", NOT
 the unrelated "kolm" package on the public npm registry.
 
 Status values: current, outdated, unknown (network or github unavailable).
@@ -2992,7 +2992,7 @@ USAGE
   kolm connect test {openai|anthropic|openrouter}
 
 EXAMPLES
-  npm install -g github:kolm-ai/kolmogorov-stack
+  npm install -g github:kolm-ai/kolm
   export OPENAI_API_KEY=sk-...
   kolm connect start --detach
   export OPENAI_BASE_URL=http://127.0.0.1:8787/v1
@@ -3107,7 +3107,7 @@ EXAMPLES
   kolm update --dry-run            # preview only
   kolm update --json | jq .status  # script-friendly
 
-Runs \`npm i -g github:kolm-ai/kolmogorov-stack\` against the npm on PATH,
+Runs \`npm i -g github:kolm-ai/kolm\` against the npm on PATH,
 streaming its output. On windows we shell through \`cmd /c\` so npm.cmd resolves.
 Exits non-zero if npm fails (usually a perms issue - try sudo or admin shell).
 
@@ -11333,7 +11333,7 @@ async function cmdEject(args) {
   try {
     ({ default: AdmZip } = await import('adm-zip'));
   } catch (e) {
-    const err = new Error('adm-zip not available; reinstall kolm from a fresh global: npm i -g github:kolm-ai/kolmogorov-stack');
+    const err = new Error('adm-zip not available; reinstall kolm from a fresh global: npm i -g github:kolm-ai/kolm');
     err.exitCode = EXIT.MISSING_PREREQ;
     throw err;
   }
@@ -34062,12 +34062,12 @@ function readPackageVersion() {
 }
 
 // Resolve the canonical latest version of kolm. The canonical install is
-// `npm i -g github:kolm-ai/kolmogorov-stack` (NOT the unrelated `kolm`
+// `npm i -g github:kolm-ai/kolm` (NOT the unrelated `kolm`
 // npm package), so we read the version off the github main branch's
 // package.json. Falls back to null on any error.
 function fetchLatestNpmVersion(timeoutMs) {
     return new Promise((resolve) => {
-        const url = 'https://raw.githubusercontent.com/kolm-ai/kolmogorov-stack/main/package.json';
+        const url = 'https://raw.githubusercontent.com/kolm-ai/kolm/main/package.json';
         const controller = new AbortController();
         const timer = setTimeout(() => { try { controller.abort(); } catch {} }, Math.max(500, Number(timeoutMs) || 5000)); // deliberate: cleanup
         fetch(url, { signal: controller.signal, headers: { 'accept': 'application/json' } })
@@ -34119,7 +34119,7 @@ async function cmdUpgrade(args) {
     if (status === 'outdated') {
         console.log(`a newer kolm release is available: ${latest}.`);
         console.log('upgrade with:');
-        console.log('  npm i -g github:kolm-ai/kolmogorov-stack');
+        console.log('  npm i -g github:kolm-ai/kolm');
         console.log('  # or one-shot:');
         console.log('  kolm update');
         console.log('');
@@ -34132,7 +34132,7 @@ async function cmdUpgrade(args) {
     }
     console.log('could not reach github to check for updates.');
     console.log('to upgrade manually:');
-    console.log('  npm i -g github:kolm-ai/kolmogorov-stack');
+    console.log('  npm i -g github:kolm-ai/kolm');
 }
 
 // ---------- seeds ----------
@@ -37736,7 +37736,7 @@ function _badArgs(msg) { const e = new Error(msg); e.exitCode = EXIT.BAD_ARGS; r
 // ---------- update ----------
 // `kolm update` self-installs the latest commit from the canonical github
 // source. This is the verb that actually does it (kolm upgrade only checks).
-// Direct path: spawn `npm i -g github:kolm-ai/kolmogorov-stack` and
+// Direct path: spawn `npm i -g github:kolm-ai/kolm` and
 // stream npm's stdout/stderr through to the user. Exit code is whatever npm
 // returned. On Windows we shell through `cmd /c` so npm.cmd resolves.
 async function cmdUpdate(args) {
@@ -37744,7 +37744,7 @@ async function cmdUpdate(args) {
     const jsonOut = args.includes('--json');
     const dryRun = args.includes('--dry-run');
     const force = args.includes('--force');
-    const source = 'github:kolm-ai/kolmogorov-stack';
+    const source = 'github:kolm-ai/kolm';
     const before = readPackageVersion();
 
     // W484 P0-3 - refuse to run `npm i -g` from a repo checkout. Without this
@@ -37781,7 +37781,7 @@ async function cmdUpdate(args) {
                         remedy,
                         repo_root: repoRoot,
                         package_name: pkgName,
-                        override: 'pass --force to bypass (will run `npm i -g github:kolm-ai/kolmogorov-stack` and overwrite the global install)',
+                        override: 'pass --force to bypass (will run `npm i -g github:kolm-ai/kolm` and overwrite the global install)',
                     }, null, 2));
                     process.exit(EXIT.BAD_ARGS || 1);
                 }
@@ -37839,7 +37839,7 @@ async function cmdUpdate(args) {
             console.error(`npm exited with code ${r.status}. update did not complete.`);
             console.error('common fixes:');
             console.error('  - ensure node 20+ and npm 10+ are on PATH');
-            console.error('  - on macos/linux: try `sudo npm i -g github:kolm-ai/kolmogorov-stack`');
+            console.error('  - on macos/linux: try `sudo npm i -g github:kolm-ai/kolm`');
             console.error('  - on windows: run an admin PowerShell, then re-run `kolm update`');
         }
         const e = new Error(`npm install failed (exit ${r.status})`);

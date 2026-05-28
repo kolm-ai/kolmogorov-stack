@@ -9,13 +9,13 @@
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta name="robots" content="index,follow">
-<meta property="og:title" content="GitLab CI reference · kolm.ai">
+<meta property="og:title" content="GitLab CI reference">
 <meta property="og:description" content="Reference .gitlab-ci.yml snippets for kolm. Verify-on-MR, release-with-binder, scheduled quarterly re-verify. Blocks merges on K-score regression, posts...">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/integrations/gitlab-ci">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="GitLab CI reference · kolm.ai">
+<meta name="twitter:title" content="GitLab CI reference">
 <meta name="twitter:description" content="Reference .gitlab-ci.yml snippets for kolm. Verify-on-MR, release-with-binder, scheduled quarterly re-verify. Blocks merges on K-score regression, posts...">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/integrations/gitlab-ci">
@@ -100,7 +100,7 @@
  <span class="k">variables</span>:
  KOLM_BACKEND: local_cpu
  <span class="k">script</span>:
- - npm install -g github:kolm-ai/kolmogorov-stack
+ - npm install -g github:kolm-ai/kolm
  - mkdir -p artifacts
  - |
  for r in recipes/*.recipe.json; do
@@ -142,7 +142,7 @@
  <span class="k">rules</span>:
  - <span class="k">if</span>: <span class="g">'$CI_COMMIT_TAG'</span>
  <span class="k">script</span>:
- - npm install -g github:kolm-ai/kolmogorov-stack
+ - npm install -g github:kolm-ai/kolm
  - mkdir -p out
  - |
  for r in recipes/*.recipe.json; do
@@ -188,7 +188,7 @@
  <span class="k">rules</span>:
  - <span class="k">if</span>: <span class="g">'$CI_PIPELINE_SOURCE == "schedule"'</span>
  <span class="k">script</span>:
- - npm install -g github:kolm-ai/kolmogorov-stack
+ - npm install -g github:kolm-ai/kolm
  - |
  fails=0
  for art in releases/**/*.kolm; do

@@ -8,7 +8,7 @@
 <meta name="description" content="Six shipped kolm bindings — Node, Python, MCP, VS Code, single-header C, Rust — plus Swift and Kotlin in progress. Apache-2.0. One gateway, one verifier, one receipt schema.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
-<meta property="og:title" content="SDKs · kolm.ai">
+<meta property="og:title" content="SDKs">
 <meta property="og:description" content="Bindings for the kolm AI compiler. Six shipped today; mobile in progress.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/sdks">
@@ -193,7 +193,7 @@
           <span class="fr-spec-list__delta">@kolm/kolm-sdk v0.2.0 &middot; Apache-2.0 &middot; shipped</span>
         </div>
         <p class="fr-spec-list__p">The reference binding. Promise-based, typed, OAuth + API key auth, streaming responses, retry policies with exponential backoff. The VS Code extension sits on top of it. Install from source today; npm publish in flight.</p>
-        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> npm install github:kolm-ai/kolmogorov-stack<span class="fr-cli__flag">#path:sdk/node</span>
+        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> npm install github:kolm-ai/kolm<span class="fr-cli__flag">#path:sdk/node</span>
 <span class="fr-cli__comment"># npm pending: npm install @kolm/kolm-sdk</span></pre>
         <div class="fr-spec-list__specs" style="margin-top:10px"><span><strong>Runtime</strong>node &gt;= 18</span><span><strong>Module</strong>esm + cjs</span><span><strong>Types</strong>typescript</span><span><strong>Coverage</strong>all /v1/*</span></div>
         <a href="/api" class="fr-spec-list__cta">/api reference</a>
@@ -217,7 +217,7 @@
           <span class="fr-spec-list__delta">@kolm/recipe-mcp v0.2.0 &middot; Apache-2.0 &middot; shipped</span>
         </div>
         <p class="fr-spec-list__p">For Claude Desktop and any IDE that speaks MCP. Exposes the kolm verbs as MCP tools so a Claude-resident developer can capture, distill, compile, score, and verify without leaving the editor. Install from source today; npm publish in flight.</p>
-        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> npm install <span class="fr-cli__flag">-g</span> github:kolm-ai/kolmogorov-stack<span class="fr-cli__flag">#path:sdk/mcp</span>
+        <pre class="fr-cli"><span class="fr-cli__prompt">$</span> npm install <span class="fr-cli__flag">-g</span> github:kolm-ai/kolm<span class="fr-cli__flag">#path:sdk/mcp</span>
 <span class="fr-cli__comment"># then register it in your MCP host config</span>
 <span class="fr-cli__comment"># npm pending: npm install -g @kolm/recipe-mcp</span></pre>
         <div class="fr-spec-list__specs" style="margin-top:10px"><span><strong>Runtime</strong>node &gt;= 18</span><span><strong>Transport</strong>stdio</span><span><strong>Hosts</strong>Claude Desktop, IDE Claude</span></div>

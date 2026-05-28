@@ -233,7 +233,7 @@ function buildPage(model, format) {
       "description": "${safe(description)}",
       "totalTime": "PT5M",
       "step": [
-        { "@type": "HowToStep", "position": 1, "name": "Install kolm", "text": "Install the kolm CLI from source: pip install git+https://github.com/kolm-ai/kolm@main#subdirectory=sdk/python or npm i -g github:kolm-ai/kolmogorov-stack." },
+        { "@type": "HowToStep", "position": 1, "name": "Install kolm", "text": "Install the kolm CLI from source: pip install git+https://github.com/kolm-ai/kolm@main#subdirectory=sdk/python or npm i -g github:kolm-ai/kolm." },
         { "@type": "HowToStep", "position": 2, "name": "Sign up", "text": "Sign up at https://kolm.ai/signup to obtain an API key. Self-serve, free tier available." },
         { "@type": "HowToStep", "position": 3, "name": "Run compile", "text": "Run: ${safe(cmd)}" },
         { "@type": "HowToStep", "position": 4, "name": "Verify the receipt", "text": "Run: kolm verify ./artifact.kolm — confirms SHA-256 chain + ed25519 signature + K-score." },
@@ -318,7 +318,7 @@ ${est.receipt ? `<p class="muted">Reference receipt: <code>${safe(est.receipt)}<
 
 <h2>Step-by-step</h2>
 <ol>
-  <li><strong>Install kolm.</strong> <code>npm i -g github:kolm-ai/kolmogorov-stack</code> or <code>pip install git+https://github.com/kolm-ai/kolm@main#subdirectory=sdk/python</code>.</li>
+  <li><strong>Install kolm.</strong> <code>npm i -g github:kolm-ai/kolm</code> or <code>pip install git+https://github.com/kolm-ai/kolm@main#subdirectory=sdk/python</code>.</li>
   <li><strong>Sign up.</strong> <a href="/signup">Create an account</a> and copy your API key. Free tier available.</li>
   <li><strong>Run compile.</strong> <code>${safe(cmd)}</code></li>
   <li><strong>Verify the receipt.</strong> <code>kolm verify ./artifact.kolm</code> &mdash; confirms SHA-256 chain, ed25519 signature, K-score.</li>

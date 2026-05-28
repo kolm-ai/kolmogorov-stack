@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
-<meta property="og:title" content="SOAP note redactor kolm cookbook · kolm.ai">
+<meta property="og:title" content="SOAP note redactor kolm cookbook">
 <meta property="og:description" content="Compile a deterministic local model that takes a SOAP clinical note in, strips the 18 HIPAA identifiers from S/O/A/P sections, returns the same structure...">
 <meta property="og:type" content="website">
 <link rel="canonical" href="https://kolm.ai/cookbook/soap-redactor">
@@ -27,7 +27,7 @@
  "totalTime": "PT4M",
  "tool": [{"@type": "HowToTool","name": "kolm CLI"}],
  "step": [
- {"@type": "HowToStep","name": "Install","text": "npm i -g github:kolm-ai/kolmogorov-stack"},
+ {"@type": "HowToStep","name": "Install","text": "npm i -g github:kolm-ai/kolm"},
  {"@type": "HowToStep","name": "Compile","text": "kolm build soap-redactor --from soap-redactor --yes"},
  {"@type": "HowToStep","name": "Run","text": "kolm run soap-redactor.kolm soap-note.txt"}
  ]
@@ -38,7 +38,7 @@
 <meta property="og:url" content="https://kolm.ai/cookbook/soap-redactor">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="SOAP note redactor kolm cookbook · kolm.ai">
+<meta name="twitter:title" content="SOAP note redactor kolm cookbook">
 <meta name="twitter:description" content="Compile a deterministic local model that takes a SOAP clinical note in, strips the 18 HIPAA identifiers from S/O/A/P sections, returns the same structure...">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="stylesheet" href="/ks.css">

@@ -9,11 +9,11 @@
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 
-<meta property="og:title" content="Troubleshooting · kolm.ai">
+<meta property="og:title" content="Troubleshooting">
 <meta property="og:description" content="Errors, causes, fixes for kolm install, login, compile, run, verify, serve, airgap, and compute backends. The friction map.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Troubleshooting · kolm.ai">
+<meta name="twitter:title" content="Troubleshooting">
 <meta name="twitter:description" content="Errors, causes, fixes for kolm install, login, compile, run, verify, serve, airgap, and compute backends. The friction map.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <meta property="og:url" content="https://kolm.ai/troubleshooting">
@@ -102,7 +102,7 @@
  "name": "command not found: kolm",
  "acceptedAnswer": {
  "@type": "Answer",
- "text": "The npm global bin is not on your PATH. Run npm config get prefix and add the bin directory to your shell profile. Reinstall with npm i -g github:kolm-ai/kolmogorov-stack after fixing the prefix."
+ "text": "The npm global bin is not on your PATH. Run npm config get prefix and add the bin directory to your shell profile. Reinstall with npm i -g github:kolm-ai/kolm after fixing the prefix."
  }
  },
  {
@@ -216,7 +216,7 @@
  <div class="wrap">
  <span class="pill">Troubleshooting</span>
  <h1>When something <span class="tone">breaks.</span></h1>
- <p class="lede">Errors, causes, fixes. Real failure modes the product actually has. If your case is not listed, run <code>kolm doctor</code> first; if that comes back clean, mail <a href="mailto:dev@kolm.ai" style="color:var(--accent);">dev@kolm.ai</a> or open an issue on <a href="https://github.com/kolm-ai/kolmogorov-stack/issues" style="color:var(--accent);">GitHub</a> with the failing command and the trailing 30 lines of output.</p>
+ <p class="lede">Errors, causes, fixes. Real failure modes the product actually has. If your case is not listed, run <code>kolm doctor</code> first; if that comes back clean, mail <a href="mailto:dev@kolm.ai" style="color:var(--accent);">dev@kolm.ai</a> or open an issue on <a href="https://github.com/kolm-ai/kolm/issues" style="color:var(--accent);">GitHub</a> with the failing command and the trailing 30 lines of output.</p>
  <ul class="toc" aria-label="Section nav">
  <li><a href="#install">Install</a></li>
  <li><a href="#auth">Auth &amp; API key</a></li>
@@ -237,7 +237,7 @@
  <h2>Install failures</h2>
  <div class="qa">
  <h3>command not found: kolm</h3>
- <p>The npm global bin is not on your <code>PATH</code>. Run <code>npm config get prefix</code> and add <code>$(prefix)/bin</code> to your shell profile, or reinstall with <code>npm i -g github:kolm-ai/kolmogorov-stack</code> after fixing the prefix.</p>
+ <p>The npm global bin is not on your <code>PATH</code>. Run <code>npm config get prefix</code> and add <code>$(prefix)/bin</code> to your shell profile, or reinstall with <code>npm i -g github:kolm-ai/kolm</code> after fixing the prefix.</p>
  </div>
  <div class="qa">
  <h3>Node version mismatch</h3>
@@ -431,7 +431,7 @@ kolm airgap status</pre>
  <div class="row">
  <a href="/docs">Read the docs</a>
  <a href="/faq">Browse the FAQ</a>
- <a href="https://github.com/kolm-ai/kolmogorov-stack/issues">Open a GitHub issue</a>
+ <a href="https://github.com/kolm-ai/kolm/issues">Open a GitHub issue</a>
  <a href="mailto:dev@kolm.ai">Email dev@kolm.ai</a>
  </div>
  </div>

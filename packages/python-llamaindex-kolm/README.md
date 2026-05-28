@@ -5,7 +5,7 @@ First-party LlamaIndex adapter for kolm.ai compiled artifacts. Drop a `.kolm` in
 ## Install
 
 ```bash
-git clone https://github.com/kolm-ai/kolmogorov-stack
+git clone https://github.com/kolm-ai/kolm
 pip install -e ./kolm-stack/packages/python-llamaindex-kolm[llamaindex]
 ```
 

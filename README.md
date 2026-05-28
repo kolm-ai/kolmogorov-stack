@@ -3,7 +3,7 @@
 The AI compiler. Compile a task into a signed `.kolm` artifact you own, run it offline on any device, verify every output.
 
 ```bash
-npm i -g github:kolm-ai/kolmogorov-stack
+npm i -g github:kolm-ai/kolm
 kolm build my-redactor --from redactor --yes     # one-shot: scaffold + seeds + compile + verify
 kolm run my-redactor.kolm '{"text":"call 555-1212"}'
 ```
@@ -83,25 +83,25 @@ Open:
 ### CLI install (any OS)
 
 ```bash
-npm i -g github:kolm-ai/kolmogorov-stack
+npm i -g github:kolm-ai/kolm
 kolm version
 ```
 
 This repository is public. The shortcut above resolves to
-`https://github.com/kolm-ai/kolmogorov-stack` and `npm` clones it over HTTPS
+`https://github.com/kolm-ai/kolm` and `npm` clones it over HTTPS
 with no auth. If the install hangs silently:
 
 1. Re-run with `--verbose` to see what npm is stuck on:
    ```bash
-   npm i -g github:kolm-ai/kolmogorov-stack --verbose
+   npm i -g github:kolm-ai/kolm --verbose
    ```
 2. Use the explicit HTTPS URL (skips git-protocol negotiation on some networks):
    ```bash
-   npm i -g git+https://github.com/kolm-ai/kolmogorov-stack.git
+   npm i -g git+https://github.com/kolm-ai/kolm.git
    ```
 3. Or fetch a tarball directly (no git required at all):
    ```bash
-   npm i -g https://github.com/kolm-ai/kolmogorov-stack/archive/refs/heads/main.tar.gz
+   npm i -g https://github.com/kolm-ai/kolm/archive/refs/heads/main.tar.gz
    ```
 4. After install completes:
    ```bash

@@ -2,7 +2,7 @@
 //
 // Usage from the user's POV:
 //
-//   npm install -g github:kolm-ai/kolmogorov-stack
+//   npm install -g github:kolm-ai/kolm
 //   kolm connect start
 //   export OPENAI_BASE_URL=http://127.0.0.1:8787/v1
 //   export ANTHROPIC_BASE_URL=http://127.0.0.1:8787

@@ -44,13 +44,13 @@
  footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 </style>
 
-<meta property="og:title" content="GitHub Actions reference · kolm.ai">
+<meta property="og:title" content="GitHub Actions reference">
 <meta property="og:description" content="Reference workflows for kolm in CI. Compile, sign, verify, post receipts to PRs, gate merges on K-score floors.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/integrations/github-actions">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="GitHub Actions reference · kolm.ai">
+<meta name="twitter:title" content="GitHub Actions reference">
 <meta name="twitter:description" content="Reference workflows for kolm in CI. Compile, sign, verify, post receipts to PRs, gate merges on K-score floors.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="stylesheet" href="/ks.css">
@@ -107,7 +107,7 @@
  - uses: actions/checkout@v4
  - uses: actions/setup-node@v4
  with: { node-version: <span class="g">'20'</span> }
- - run: npm install -g github:kolm-ai/kolmogorov-stack
+ - run: npm install -g github:kolm-ai/kolm
  - <span class="k">name</span>: compile + verify
  env:
  KOLM_API_KEY: ${{ secrets.KOLM_API_KEY }}
@@ -144,7 +144,7 @@
  runs-on: ubuntu-22.04
  steps:
  - uses: actions/checkout@v4
- - run: npm install -g github:kolm-ai/kolmogorov-stack
+ - run: npm install -g github:kolm-ai/kolm
  - <span class="k">name</span>: compile + sign + bind
  env:
  KOLM_API_KEY: ${{ secrets.KOLM_API_KEY }}
@@ -179,7 +179,7 @@
  runs-on: ubuntu-22.04
  steps:
  - uses: actions/checkout@v4
- - run: npm install -g github:kolm-ai/kolmogorov-stack
+ - run: npm install -g github:kolm-ai/kolm
  - run: |
  for art in releases/**/*.kolm; do
  kolm inspect "$art" || { echo "FAIL: $art" >&2; exit 1; }

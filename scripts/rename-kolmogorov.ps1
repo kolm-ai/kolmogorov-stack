@@ -15,8 +15,8 @@ $REPLACEMENTS = @(
     @{ From = '@kolm/';                  To = '@kolm/' }
     @{ From = 'kolm/swebench-reproducer'; To = 'kolm/swebench-reproducer' }
     @{ From = 'kolm-ai/kolm-bench-reproducer'; To = 'kolm-ai/kolm-bench-reproducer' }
-    @{ From = 'kolm-ai/kolmogorov-stack';   To = 'kolm-ai/kolmogorov-stack' }
-    @{ From = 'github.com/kolm-ai/kolmogorov-stack';   To = 'github.com/kolm-ai/kolmogorov-stack' }
+    @{ From = 'kolm-ai/kolm';   To = 'kolm-ai/kolm' }
+    @{ From = 'github.com/kolm-ai/kolm';   To = 'github.com/kolm-ai/kolm' }
     @{ From = 'github.com/kolm-ai/';        To = 'github.com/kolm-ai/' }
     @{ From = 'docs.kolm.dev';           To = 'docs.kolm.dev' }
     @{ From = 'kolm.dev';                To = 'kolm.dev' }

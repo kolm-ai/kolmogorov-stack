@@ -13,13 +13,13 @@
 <meta name="author" content="Kolm">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm">
-<meta property="og:title" content="How we benchmark · kolm.ai">
+<meta property="og:title" content="How we benchmark">
 <meta property="og:description" content="The methodology behind every percentage on this site. n=150 SWE-bench Lite, seed=42, swebench 4.1.0 evaluator. What the harness measures, what it does not,...">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/articles/how-we-benchmark">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="How we benchmark · kolm.ai">
+<meta name="twitter:title" content="How we benchmark">
 <meta name="twitter:description" content="The methodology behind every percentage on this site. n=150 SWE-bench Lite, seed=42, swebench 4.1.0 evaluator. What the harness measures, what it does not,...">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/articles/how-we-benchmark">
@@ -245,7 +245,7 @@
  <p>The full reproducer is one command. It will take ~90 minutes and ~$30 in Anthropic API credit at current Opus-4.7 prices. <b>You bring your own key.</b> We never see it; the harness writes it into the local environment of the spawned Docker containers and never out of process.</p>
 
  <pre><span class="com"># install the CLI (one-liner, ~10s)</span>
-npm i -g github:kolm-ai/kolmogorov-stack
+npm i -g github:kolm-ai/kolm
 
 <span class="com"># bring your own key, then run the reproducer</span>
 export ANTHROPIC_API_KEY=sk-ant-...

@@ -52,7 +52,7 @@ runs:
       shell: bash
       run: |
         if ! command -v kolm >/dev/null 2>&1; then
-          npm i -g github:kolm-ai/kolmogorov-stack
+          npm i -g github:kolm-ai/kolm
         else
           echo "kolm CLI already on PATH ($(kolm --version 2>/dev/null || echo unknown))"
         fi

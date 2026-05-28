@@ -24,7 +24,7 @@ winget install --manifest packages/winget --accept-package-agreements
 
 ## Submitting to the public registry
 
-1. Tag a release on `kolm-ai/kolmogorov-stack` (`v0.2.x`) with portable
+1. Tag a release on `kolm-ai/kolm` (`v0.2.x`) with portable
    zips for x64 + arm64 attached.
 2. Compute SHA-256 of each zip:
    ```powershell

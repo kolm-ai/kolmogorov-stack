@@ -217,7 +217,7 @@ class Kolm:
                 "ok": False,
                 "error": "cli_not_installed",
                 "hint": "kolm CLI not installed; required for run. "
-                "Run: npm i -g github:kolm-ai/kolmogorov-stack",
+                "Run: npm i -g github:kolm-ai/kolm",
             }
         artifact_resolved = Path(path_str).expanduser().resolve()
         r = subprocess.run(
@@ -371,7 +371,7 @@ class Kolm:
     def _cli_or_raise(self, op: str) -> str:
         cli = self._cli_or_none()
         if not cli:
-            raise KolmError(503, f"kolm CLI not installed; required for {op}. Run: npm i -g github:kolm-ai/kolmogorov-stack")
+            raise KolmError(503, f"kolm CLI not installed; required for {op}. Run: npm i -g github:kolm-ai/kolm")
         return cli
 
 

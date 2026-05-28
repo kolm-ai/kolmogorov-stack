@@ -9,11 +9,11 @@
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 
-<meta property="og:title" content="RS-1 artifact specification · kolm.ai">
+<meta property="og:title" content="RS-1 artifact specification">
 <meta property="og:description" content="RS-1 normative text, BNF grammar, JSON schemas, receipt format, and the RFC process for RS-2. MIT-licensed.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="RS-1 artifact specification · kolm.ai">
+<meta name="twitter:title" content="RS-1 artifact specification">
 <meta name="twitter:description" content="RS-1 normative text, BNF grammar, JSON schemas, receipt format, and the RFC process for RS-2. MIT-licensed.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <meta property="og:url" content="https://kolm.ai/spec">
@@ -219,7 +219,7 @@
  <div class="top"><span class="name">Frontier reference</span><span class="tag">research</span></div>
  <p class="desc">The forty-two techniques kolm ships, grouped by training, decoding, serving, evaluation, data, and observability. Paper, file path, and gating condition for each.</p>
  </a>
- <a class="card" href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/public/docs/rs-1.md" rel="noopener">
+ <a class="card" href="https://github.com/kolm-ai/kolm/blob/main/public/docs/rs-1.md" rel="noopener">
  <div class="top"><span class="name">Source on GitHub</span><span class="tag">MIT</span></div>
  <p class="desc">Read the spec on GitHub, propose changes via PR, raise issues against the language.</p>
  </a>
@@ -257,7 +257,7 @@
  <h2>RFC process</h2>
  <p>RS-1 is the floor; everything beyond gets a numbered RFC.</p>
  <ul>
- <li><strong>Open</strong> a discussion on <a href="https://github.com/kolm-ai/kolmogorov-stack/discussions" rel="noopener" style="color:var(--ink);text-decoration:underline">GitHub Discussions</a>. One paragraph: what changes, what breaks.</li>
+ <li><strong>Open</strong> a discussion on <a href="https://github.com/kolm-ai/kolm/discussions" rel="noopener" style="color:var(--ink);text-decoration:underline">GitHub Discussions</a>. One paragraph: what changes, what breaks.</li>
  <li><strong>Draft</strong> a PR against <code>public/docs/</code> with the new spec as <code>rs-N.md</code> and a JSON Schema if applicable. Mark the prose as <em>draft</em> in the front matter.</li>
  <li><strong>Iterate</strong> until the breaking-change column is empty or unanimous. Two reviewers sign off.</li>
  <li><strong>Promote</strong> by removing the draft marker and bumping the registry signature key version. The reproducibility floor (§6 of RS-1) holds across the bump.</li>

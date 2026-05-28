@@ -18,7 +18,7 @@
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 
 <link rel="canonical" href="https://kolm.ai/signup">
-<meta property="og:title" content="Sign in guide · kolm.ai">
+<meta property="og:title" content="Sign in guide">
 <meta property="og:description" content="Sign in to kolm or create a Free, Pro, or Team account. Enterprise starts with an architecture review for SSO, BAA/DPA, customer-hosted compile, and SLA scope.">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta property="og:type" content="website">
@@ -89,7 +89,7 @@
  }
 }
 </script>
-<meta name="twitter:title" content="Sign in guide · kolm.ai">
+<meta name="twitter:title" content="Sign in guide">
 <meta name="twitter:description" content="Sign in to kolm or create a Free, Pro, or Team account. Enterprise starts with an architecture review for SSO, BAA/DPA, customer-hosted compile, and SLA scope.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="preload" href="/ks.css" as="style">
@@ -204,7 +204,7 @@
  <div class="cli-details-body">
  <div id="cli-bridge">
  <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px">Use it from the CLI</div>
- <pre id="cli-snippet" style="margin:0;padding:12px 14px;background:var(--surface-input, var(--ks-bg-1));border:1px solid var(--line);border-radius:8px;color:var(--ks-ink, #e6e9ee);font-family:var(--mono);font-size:13px;overflow-x:auto;white-space:pre;line-height:1.55"><code id="cli-snippet-code">npm i -g github:kolm-ai/kolmogorov-stack
+ <pre id="cli-snippet" style="margin:0;padding:12px 14px;background:var(--surface-input, var(--ks-bg-1));border:1px solid var(--line);border-radius:8px;color:var(--ks-ink, #e6e9ee);font-family:var(--mono);font-size:13px;overflow-x:auto;white-space:pre;line-height:1.55"><code id="cli-snippet-code">npm i -g github:kolm-ai/kolm
 kolm login --key ks_...
 kolm init
 kolm new my-skill --from classifier
@@ -419,7 +419,7 @@ kolm compile --spec my-skill.spec.json</code></pre>
  var snippet = $('cli-snippet-code');
  if (snippet) {
  snippet.textContent =
- 'npm i -g github:kolm-ai/kolmogorov-stack\n' +
+ 'npm i -g github:kolm-ai/kolm\n' +
  'kolm login --key ' + key + '\n' +
  'kolm init\n' +
  'kolm new my-skill --from classifier\n' +

@@ -9,11 +9,11 @@
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 
-<meta property="og:title" content="Compute: rent training and inference, one CLI · kolm.ai">
+<meta property="og:title" content="Compute: rent training and inference, one CLI">
 <meta property="og:description" content="Train and serve on your local box, on Modal, RunPod, Vast, Lambda, Together, Replicate, fal, or your own SSH host. One CLI. Quote before you spend. Receipts pin the backend.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Compute: rent training and inference, one CLI · kolm.ai">
+<meta name="twitter:title" content="Compute: rent training and inference, one CLI">
 <meta name="twitter:description" content="Train and serve on your local box, on Modal, RunPod, Vast, Lambda, Together, Replicate, fal, or your own SSH host. One CLI. Quote before you spend.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <meta property="og:url" content="https://kolm.ai/compute">
@@ -310,7 +310,7 @@ $ kolm compute rent --spec my.spec.json --backend vast --budget 0.50 --confirm
  Numbers are end-to-end (input parse + match + output)."
 }</pre>
  <p>~1.17M calls/sec, p50 of 1&micro;s, p99 of 2&micro;s for the four-pattern PHI redactor. Those are measured numbers from one box; expect variance with V8 JIT warm-up, recipe complexity, and host load. Generative artifacts (those that bundle a LoRA pack and call vLLM or llama.cpp) trade microseconds for tokens-per-second on the same axis. Run <code>node scripts/bench-tps.mjs --generative --url http://localhost:8765 --n 32</code> against a serve endpoint to get that path; numbers depend on the device the serve loop ran on, which the receipt pins.</p>
- <p>Both modes write a JSON record suitable for committing to <code>docs/bench/</code> and publishing on this page. The raw record from the run above lives at <a href="https://github.com/kolm-ai/kolmogorov-stack/blob/main/docs/bench/tps-phi-redactor.json" rel="noopener" style="color:var(--ink);text-decoration:underline">docs/bench/tps-phi-redactor.json</a>.</p>
+ <p>Both modes write a JSON record suitable for committing to <code>docs/bench/</code> and publishing on this page. The raw record from the run above lives at <a href="https://github.com/kolm-ai/kolm/blob/main/docs/bench/tps-phi-redactor.json" rel="noopener" style="color:var(--ink);text-decoration:underline">docs/bench/tps-phi-redactor.json</a>.</p>
 
  <h2>Why renting</h2>
  <ul>

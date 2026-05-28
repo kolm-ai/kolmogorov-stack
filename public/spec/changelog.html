@@ -9,13 +9,13 @@
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <link rel="canonical" href="https://kolm.ai/spec/changelog">
-<meta property="og:title" content="RS-1 spec change log: v1.0 to v2.1 · kolm.ai">
+<meta property="og:title" content="RS-1 spec change log: v1.0 to v2.1">
 <meta property="og:description" content="RS-1 spec change log. Every minor and major version: v1.0 (frozen 2026-01-15) v1.1 (drift block) v2.0 (supersession + teacher fidelity) v2.1 (k-score-2...">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/spec/changelog">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="RS-1 spec change log: v1.0 to v2.1 · kolm.ai">
+<meta name="twitter:title" content="RS-1 spec change log: v1.0 to v2.1">
 <meta name="twitter:description" content="RS-1 spec change log. Every minor and major version: v1.0 (frozen 2026-01-15) v1.1 (drift block) v2.0 (supersession + teacher fidelity) v2.1 (k-score-2...">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -157,7 +157,7 @@
 <li>&sect;7.1 + &sect;7.2 moved from planning labels to implementation-confirmed subsections &sect;7.6 and &sect;7.7.</li>
 <li>v2.0 verifiers accept v2.1 manifests by ignoring unknown fields; v2.1 is additive and backward-compatible at the read path.</li>
 </ul>
-<p class="links"><a href="https://github.com/kolm-ai/kolmogorov-stack/compare/spec-v2.0...spec-v2.1">view diff: v2.0 to v2.1</a><a href="/spec/rs-1">read spec</a></p>
+<p class="links"><a href="https://github.com/kolm-ai/kolm/compare/spec-v2.0...spec-v2.1">view diff: v2.0 to v2.1</a><a href="/spec/rs-1">read spec</a></p>
 </div>
 
 <div class="entry" id="v2-0">
@@ -172,7 +172,7 @@
 <li>Canonical-JSON serialization frozen across JavaScript, Python, Rust reference verifiers; interop test suite enforces byte-identical CIDs.</li>
 <li>Breaking against v1.x: v1.x manifests claiming the v2.x schema string are rejected. New artifacts must declare <code>version: "2.0"</code> and ship a four-class artifact_class.</li>
 </ul>
-<p class="links"><a href="https://github.com/kolm-ai/kolmogorov-stack/compare/spec-v1.1...spec-v2.0">view diff: v1.1 to v2.0</a><a href="/spec/rs-1">read spec</a></p>
+<p class="links"><a href="https://github.com/kolm-ai/kolm/compare/spec-v1.1...spec-v2.0">view diff: v1.1 to v2.0</a><a href="/spec/rs-1">read spec</a></p>
 </div>
 
 <div class="entry" id="v1-1">
@@ -184,7 +184,7 @@
 <li>Verifier check #14 added: drift block schema validation when present.</li>
 <li>Backward compatible: v1.0 verifiers accept v1.1 manifests by ignoring the drift block.</li>
 </ul>
-<p class="links"><a href="https://github.com/kolm-ai/kolmogorov-stack/compare/spec-v1.0...spec-v1.1">view diff: v1.0 to v1.1</a></p>
+<p class="links"><a href="https://github.com/kolm-ai/kolm/compare/spec-v1.0...spec-v1.1">view diff: v1.0 to v1.1</a></p>
 </div>
 
 <div class="entry" id="v1-0">
@@ -198,7 +198,7 @@
 <li>Runtime receipt: <code>{manifest_cid, input_sha, output_sha, ts, k_score, signature}</code>.</li>
 <li>Reference verifier in JavaScript (Node 20+), pure stdlib.</li>
 </ul>
-<p class="links"><a href="https://github.com/kolm-ai/kolmogorov-stack/compare/initial...spec-v1.0">view diff: initial to v1.0</a></p>
+<p class="links"><a href="https://github.com/kolm-ai/kolm/compare/initial...spec-v1.0">view diff: initial to v1.0</a></p>
 </div>
 
 <h2>Compatibility policy</h2>
@@ -214,7 +214,7 @@
 <div class="actions">
  <a class="btn primary" href="/spec/rs-1">Read RS-1 v2.1 &rarr;</a>
  <a class="btn" href="/verify-cli">Install kolm verify &rarr;</a>
- <a class="btn" href="https://github.com/kolm-ai/kolmogorov-stack/tree/main/docs/rfcs">Browse RFCs &rarr;</a>
+ <a class="btn" href="https://github.com/kolm-ai/kolm/tree/main/docs/rfcs">Browse RFCs &rarr;</a>
 </div>
 
 </div>
