@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>What to do with 1B tokens of Portkey logs &middot; kolm.ai</title>
+<meta name="description" content="Your LLM gateway export is a distill corpus in disguise. Here is the 5-command path from helicone-logs.jsonl to a self-hosted model that does the same job.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="What to do with 1B tokens of Portkey logs &middot; kolm.ai">
+<meta property="og:description" content="Your LLM gateway export is a distill corpus in disguise. Five commands from helicone-logs.jsonl to a self-hosted model.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/blog/distill-from-gateway-logs">
+<meta property="og:image" content="https://kolm.ai/og/distill-from-gateway-logs.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="What to do with 1B tokens of Portkey logs">
+<meta name="twitter:description" content="Your LLM gateway export is a distill corpus in disguise. Five commands from helicone-logs.jsonl to a self-hosted model.">
+<meta name="twitter:image" content="https://kolm.ai/og/distill-from-gateway-logs.svg">
+<link rel="canonical" href="https://kolm.ai/blog/distill-from-gateway-logs">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="kolm.ai blog" href="/feed.xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"What to do with 1B tokens of Portkey logs","description":"Your LLM gateway export is a distill corpus in disguise. Five commands from helicone-logs.jsonl to a self-hosted model that does the same job.","url":"https://kolm.ai/blog/distill-from-gateway-logs","datePublished":"2026-06-04","dateModified":"2026-06-04","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<style>
+:root{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:var(--line-2);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#1f2937;--accent-soft:rgba(31,41,55,0.06);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=dark]{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:var(--line-2);--bg:#0e1116;--bg-elev:#161a20;--accent:#cbd5e1;--accent-soft:rgba(203,213,225,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.wrap{max-width:780px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.crumbs a:hover{color:var(--ink)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
+.meta{font-family:var(--mono);font-size:11.5px;letter-spacing:0.10em;color:var(--ink-faint);margin:0 0 32px}
+h1{font-size:38px;line-height:1.10;font-weight:520;letter-spacing:-0.02em;margin:0 0 18px;color:var(--ink)}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);margin:0 0 36px}
+h2{font-size:22px;font-weight:540;letter-spacing:-0.015em;margin:44px 0 12px;color:var(--ink);scroll-margin-top:80px}
+h3{font-size:16px;font-weight:540;letter-spacing:-0.005em;margin:28px 0 8px;color:var(--ink)}
+p{color:var(--ink-mute);font-size:15.5px;line-height:1.68}
+pre{background:#0b0e12;color:#e9eef3;border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15.5px;line-height:1.72}
+li{margin:6px 0}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-mute)}
+th{color:var(--ink);font-weight:540}
+td code{font-size:12px}
+.kolm-post a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+.kolm-post a:hover{border-bottom-color:var(--accent)}
+.kolm-post a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+.back{display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:0.10em;color:var(--ink-faint);text-decoration:none;margin-bottom:24px;border-bottom:1px dashed var(--line);padding-bottom:1px}
+.back:hover{color:var(--ink)}
+.back:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+.endnote{margin-top:48px;padding:18px 20px;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev);font-size:14px;color:var(--ink-mute);line-height:1.6}
+.endnote b{color:var(--ink);font-weight:540}
+.callout{margin:24px 0;padding:14px 18px;border-left:3px solid var(--accent);background:var(--bg-elev);font-size:14.5px;color:var(--ink-mute);border-radius:0 6px 6px 0}
+.callout b{color:var(--ink);font-weight:540}
+.step{font-family:var(--mono);font-size:11.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-faint);margin:32px 0 2px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0 18px}
+.pair > div{display:flex;flex-direction:column;min-width:0}
+.pair .label{font-family:var(--mono);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 6px}
+.pair pre{margin:0;flex:1}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+hr.rule{border:none;border-top:1px solid var(--line);margin:36px 0}
+.related{margin-top:40px;padding-top:24px;border-top:1px solid var(--line)}
+.related h2{font-size:13px;font-family:var(--mono);letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px;font-weight:540}
+.related ul{list-style:none;padding:0;margin:0}
+.related li{margin:6px 0;font-size:14.5px}
+.related a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+.related a:hover{border-bottom-color:var(--accent)}
+</style>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="skip-link">Skip to content</a>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<a href="/blog" class="back">&larr; kolm.ai blog</a>
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/blog">blog</a> / distill-from-gateway-logs</div>
+<p class="eyebrow">Migration &middot; LLM gateways</p>
+<h1>What to do with 1B tokens of Portkey logs</h1>
+<p class="meta"><time datetime="2026-06-04">2026-06-04</time> &middot; ~6 minute read &middot; kolm engineering</p>
+
+<article class="kolm-post">
+
+<p class="lede">Your LLM gateway export is a distill corpus in disguise. Here is the 5-command path from <code>helicone-logs.jsonl</code> to a self-hosted model that does the same job. If you have terabytes of Portkey, Helicone, LiteLLM, or OpenRouter traces sitting in cold storage, you already paid for the teacher signal. This post explains the shape of those logs, why they are training data, and the exact commands to turn them into a Qwen2.5-7B QLoRA running on a GPU you control.</p>
+
+<h2>The shape of a gateway log row</h2>
+
+<p>Every LLM gateway records the same five things per call: which model was hit, what messages went in, what came back, how many tokens were used, how long it took. The column names differ, the substance does not. Side-by-side, the smallest meaningful Portkey trace row and the smallest Helicone request row look like this:</p>
+
+<div class="pair">
+  <div>
+    <p class="label">Portkey trace row</p>
+<pre><code>{
+  "trace_id": "trc_8c3e",
+  "model": "gpt-4o",
+  "request": {
+    "messages": [
+      {"role":"system","content":"You are a refund agent."},
+      {"role":"user","content":"Order 1182 never arrived."}
+    ]
+  },
+  "response": {
+    "choices":[{"message":{
+      "role":"assistant",
+      "content":"I can see order 1182 shipped 6 days ago. Could you confirm the delivery address?"
+    }}]
+  },
+  "usage": {"prompt_tokens":48,"completion_tokens":23,"total_tokens":71},
+  "latency_ms": 612
+}</code></pre>
+  </div>
+  <div>
+    <p class="label">Helicone request row</p>
+<pre><code>{
+  "request_id": "req_a91f",
+  "model": "claude-3-5-sonnet",
+  "request_body": {
+    "messages": [
+      {"role":"user","content":"Order 1182 never arrived."}
+    ],
+    "system": "You are a refund agent."
+  },
+  "response_body": {
+    "content":[{"type":"text",
+      "text":"I can see order 1182 shipped 6 days ago. Could you confirm the delivery address?"
+    }]
+  },
+  "usage": {"input_tokens":48,"output_tokens":23},
+  "latencyMs": 587
+}</code></pre>
+  </div>
+</div>
+
+<p>Same five fields in both: model, messages (prompt), response, usage, latency. LiteLLM and OpenRouter export the same shape with different key names. The kolm importer normalizes all four into one capture-lake schema.</p>
+
+<h2>Why this is training data, not observability data</h2>
+
+<p>Every row in your gateway export is a <code>{prompt &rarr; response}</code> pair from a teacher model you have already paid for. That is the textbook definition of a distill dataset. The gateways pitched the export as a debug log because their product surface is observability dashboards, latency charts, cost attribution. That framing is correct, but it is incomplete. The bytes on disk are exactly what a supervised fine-tuning pipeline takes as input.</p>
+
+<p>If your team made ten thousand calls to GPT-4o yesterday answering customer questions, you have ten thousand worked examples of how a frontier model handles your domain, in your voice, against your real users. The hardest part of a distill project, getting high-quality teacher signal at scale, is already done. You are not building a corpus. You are loading one.</p>
+
+<div class="callout">
+<b>The reframe.</b> Gateway logs were sold as "see what your model is doing." They are also "see what your model is doing, and ship a smaller one that does the same thing for a tenth of the inference cost." Nothing changed about the bytes. The second use case just was not part of the original sales motion.
+</div>
+
+<h2>Five-command walkthrough</h2>
+
+<p>Each command is a single CLI invocation. Inputs and outputs are JSONL or single files; you can resume any step independently.</p>
+
+<pre><code>kolm import --from helicone ./helicone-logs.jsonl --out captures.jsonl
+kolm distill spec --in captures.jsonl --teacher cerebras:llama-3.3-70b --out spec.json
+kolm distill collect --spec spec.json --out pairs.jsonl
+kolm distill train --spec spec.json --pairs pairs.jsonl --out adapter
+kolm deploy --adapter adapter --target ollama</code></pre>
+
+<p>What each step does, in one line:</p>
+
+<ul>
+  <li><b>import.</b> Reads the Helicone export, drops rows without a usable assistant response, writes the normalized capture lake JSONL. Swap <code>--from helicone</code> for <code>portkey</code>, <code>litellm</code>, or <code>openrouter</code>.</li>
+  <li><b>distill spec.</b> Picks the base student (Qwen2.5-7B by default), the teacher council, the LoRA hyperparameters, and the eval block. The spec is the reproducibility artifact; it gets bundled into the final passport.</li>
+  <li><b>distill collect.</b> Runs the teacher (here Cerebras Llama-3.3-70B for sub-second latency) over the captures and emits training pairs with provenance fields. If you skip this step and pass the gateway export directly, the original gateway responses are used as the teacher signal verbatim.</li>
+  <li><b>distill train.</b> LoRA r=16 on Qwen2.5-7B at bf16, gradient checkpointing on. Fits on a 5090 or a $0.39/hr RunPod 4090.</li>
+  <li><b>deploy.</b> One artifact, multiple deploy targets. <code>--target ollama</code> for the desktop runtime; <code>--target vllm</code> or <code>--target gguf-q4km</code> are also wired.</li>
+</ul>
+
+<h2>Cost math at 1B prompt tokens</h2>
+
+<p>Worked example with round numbers. If your Portkey export covers ~1B prompt tokens at $0.30 / 1M (OpenAI gpt-4o input pricing as of mid-2026), you have already paid roughly $300 to generate the teacher signal. That spend is sunk; it is on a credit card statement somewhere. Re-running the same calls today through any provider would cost the same $300 again.</p>
+
+<p>Distilling that corpus into a Qwen2.5-7B QLoRA on a $0.39/hr cloud GPU takes about twelve hours of wall time for a typical support-shaped dataset, so the training run is on the order of $5. Once trained, inference moves from a per-token API bill to a single self-hosted GPU. The break-even against gpt-4o on inference depends on your traffic volume, but the training step itself is roughly two orders of magnitude cheaper than the spend that produced the teacher signal in the first place.</p>
+
+<p>The point is not that distillation is free. It is that the expensive part already happened and is sitting in cold storage waiting to be used a second time.</p>
+
+<h2>What we ship</h2>
+
+<p>Four working importers, one schema:</p>
+
+<ul>
+  <li><b>Portkey.</b> Trace export JSONL, both the legacy <code>trace_id</code> shape and the newer span-per-call shape.</li>
+  <li><b>Helicone.</b> Request log JSONL from the dashboard export or the <code>/v1/request</code> API.</li>
+  <li><b>LiteLLM.</b> Spend log JSONL and the proxy server access log format.</li>
+  <li><b>OpenRouter.</b> Generation export JSONL with the OpenRouter-specific provider-routing metadata preserved as side fields.</li>
+</ul>
+
+<p>Kong AI Gateway and TrueFoundry are open issues; if you have a sample export from either, attach it to the issue and the importer typically lands within a week. Related landings: <a href="/gateway-migration">/gateway-migration</a> for the comparison page, <a href="/openai-migration">/openai-migration</a> if you are coming from the closing fine-tuning surface, <a href="/docs/recipes/openai-finetune-migration">/docs/recipes/openai-finetune-migration</a> for the annotated reproducible recipe.</p>
+
+<h2>Receipts cover every log row to every distill row to every inference</h2>
+
+<p>Every row that enters the pipeline gets an Ed25519-signed receipt. The capture row, the training pair derived from it, the eval datum that exercised it, and the inference call that later used the trained model are all linked by content-addressed IDs in an immutable lineage chain. If an auditor asks "where did this response come from?" the answer is a verifiable chain back to the original gateway log line. The receipt format is documented at <a href="/docs/receipts">/docs/receipts</a>; verification is signature-only with no auth required.</p>
+
+<h2>Start with your gateway export</h2>
+
+<p>Two entry points:</p>
+
+<ul>
+  <li><a href="/gateway-migration">Start with your gateway export</a> &mdash; the landing page with importer status, sample exports, and the full five-command walkthrough.</li>
+  <li><a href="/docs/recipes/openai-finetune-migration">Read the migration recipe</a> &mdash; the reproducible recipe with annotated outputs, common failure modes, and verification steps.</li>
+</ul>
+
+<div class="endnote">
+<b>Caveats.</b> The $0.30 / 1M input-token figure is the OpenAI gpt-4o list price as of 2026-05-28; volume discounts and provider variation are real. The "~$5 training run" figure assumes a support-shaped dataset of ~30k pairs on a single 4090; larger corpora, larger bases, and council distillation (multiple teachers) all scale the bill linearly. Distilled students are smaller than the teacher and will underperform on out-of-distribution tasks; the eval block in the spec is the gate that tells you which workflows are safe to migrate now and which need a larger base.
+</div>
+
+</article>
+
+<div class="related">
+  <h2>Related</h2>
+  <ul>
+    <li><a href="/gateway-migration">Gateway migration landing</a></li>
+    <li><a href="/openai-migration">OpenAI fine-tuning migration</a></li>
+    <li><a href="/docs/recipes/openai-finetune-migration">Recipe: OpenAI fine-tune migration</a></li>
+    <li><a href="/blog/2026-05-28-openai-finetuning-shutdown">OpenAI is sunsetting fine-tuning. Land here.</a></li>
+    <li><a href="/docs/receipts">Signed receipts</a></li>
+  </ul>
+</div>
+
+<hr class="rule">
+<a href="/blog" class="back">&larr; back to kolm.ai blog</a>
+
+</div></main>
+
+</body>
+</html>

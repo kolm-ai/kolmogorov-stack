@@ -135,12 +135,15 @@ test('10. /format/v2 light-theme switch IIFE appears in <head> before body style
 
 test('11. /format/v2 declares the consistent design system tokens --accent, --warn, --bad', () => {
   const html = read(FORMAT_V2);
-  assert.match(html, /--accent:\s*#10b981/,
-    'format/v2.html must declare --accent: #10b981');
-  assert.match(html, /--warn:\s*#f0b86b/,
-    'format/v2.html must declare --warn: #f0b86b');
-  assert.match(html, /--bad:\s*#ff6b91/,
-    'format/v2.html must declare --bad: #ff6b91');
+  // Value-agnostic: the semantic palette has since evolved (WCAG-contrast
+  // darkening + cool-slate dark variants per W850). Assert each token is
+  // DECLARED WITH SOME HEX, not pinned to a superseded literal.
+  assert.match(html, /--accent:\s*#[0-9a-fA-F]{3,8}/,
+    'format/v2.html must declare --accent with a hex value');
+  assert.match(html, /--warn:\s*#[0-9a-fA-F]{3,8}/,
+    'format/v2.html must declare --warn with a hex value');
+  assert.match(html, /--bad:\s*#[0-9a-fA-F]{3,8}/,
+    'format/v2.html must declare --bad with a hex value');
 });
 
 test('12. sw.js CACHE wave-floor is >= 187 (regex on kolm-v7 cache slug)', () => {

@@ -801,7 +801,7 @@ test('W749 #16 — public/account/synthetic.html exists with brand-lock + gap re
   for (const needle of [
     'kolm.ai',
     'class="ks-nav"',
-    'ks-footer',
+    'ks-foot',                                   // W902 unified footer class (ks-foot, not ks-footer)
     'Open-source AI workbench',                  // W749 eyebrow brand lock
     'Frontier AI on your own infrastructure',    // W749 H1 brand lock
     '/v1/synthetic/coverage',                    // coverage fetch
@@ -830,7 +830,7 @@ test('W749 #17 — public/docs/synthetic.html exists with brand-lock + honesty c
   for (const needle of [
     'kolm.ai',
     'class="ks-nav"',
-    'ks-footer',
+    'ks-foot',                                   // W902 unified footer class (ks-foot, not ks-footer)
     'Open-source AI workbench',                  // W749 eyebrow brand lock
     'Frontier AI on your own infrastructure',    // W749 H1 brand lock
     'w749-v1',                                   // version stamp

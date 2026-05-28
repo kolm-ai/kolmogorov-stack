@@ -153,19 +153,38 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <p>Trade-off: we sacrifice absolute accuracy for zero dependencies and sub-millisecond latency. The detector is for routing decisions and capture analytics, not for forensic translation work. When confidence is below <code>min_confidence</code> (default <code>0.4</code>), we return <code>{lang:null, fallback:true}</code> &mdash; never silently pick a wrong language.</p>
 
-<pre>CODE21</pre>
+<pre><code>POST /v1/lang/detect
+{ "text": "El refund por la compra de ayer" }
+&rarr;
+{
+  "ok": true,
+  "lang": "es",
+  "confidence": 0.75,
+  "kind": "stopword",
+  "fallback": false,
+  "version": "w760-v1"
+}</code></pre>
 
 <h2 id="thresholds">Per-language confidence thresholds for fallback</h2>
 <p data-w760="per-lang-threshold-doc">The runtime router currently uses one global confidence threshold (<code>0.7</code> by default) &mdash; below that, the request routes to the teacher instead of the local student.-3 scales this threshold per-language so weaker languages fall back more aggressively:</p>
 
-<pre>CODE23</pre>
+<pre><code>threshold(lang) = default_threshold * clamp(k_lang / k_pooled, 0.5, 1.5)
+
+# Examples (default_threshold = 0.7):
+#   k_lang = 0.91, k_pooled = 0.85  &rarr; ratio 1.07  &rarr; threshold 0.75
+#   k_lang = 0.42, k_pooled = 0.85  &rarr; ratio 0.49 (clamped to 0.5)  &rarr; threshold 0.35</code></pre>
 
 <p>The clamp ensures a single very-weak language can't drop the threshold to zero (which would route everything to teacher and rack up cost), and a very-strong language can't push it to <code>1.0</code> (which would always-fallback). The router reads this per-call so the routing decision sees the language of THIS request, not a stale snapshot.</p>
 
 <h2 id="augment">Synthetic multilingual augmentation</h2>
 <p>If your corpus is 95% English, you can't fix that by re-training harder &mdash; you need more non-English rows.-2 fans out source rows through a translation backend (dependency-injected, same lineage as the synthetic capture loop) so the student sees parallel examples in every target language:</p>
 
-<pre>CODE25</pre>
+<pre><code>POST /v1/lang/augment-multilingual
+{
+  "namespace": "billing",
+  "target_langs": ["es", "fr", "de"],
+  "confirm": true
+}</code></pre>
 
 <p>Without <code>confirm:true</code>, the route returns a <strong>dry run plan</strong> &mdash; row count, target count, estimated cost &mdash; without calling the translator. With <code>confirm:true</code> AND a wired translator (<code>req.app.locals._w760_translator_caller</code> in tests, <code>KOLM_TRANSLATOR_CMD</code> in production), the augmenter fans out and returns the augmented rows.</p>
 
@@ -237,7 +256,16 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <h2 id="w774-per-lang-eval" data-w774="per-lang-eval-header">Per-language eval (Wilson 95% CI gated at n&ge;30)</h2>
 <p data-w774="per-lang-eval-body">Every per-language score is gated at the same Wilson n&ge;30 floor as <a href="#w774-target-langs"></a>&#39;s per-language K-Score. Below the floor the language is moved into <code>languages_skipped_below_n30:[]</code> &mdash; never reported with a CI. <code>compareLanguageDelta()</code> diffs two eval outputs and flags significant per-language deltas; the heuristic is conservative (delta wider than either CI band).</p>
-<pre data-w774="per-lang-eval-shape">CODE60</pre>
+<pre data-w774="per-lang-eval-shape"><code>{
+  "ok": true,
+  "version": "w774-v1",
+  "by_lang": {
+    "en": { "n": 124, "score": 0.91, "ci95_low": 0.86, "ci95_high": 0.95 },
+    "es": { "n": 42,  "score": 0.62, "ci95_low": 0.47, "ci95_high": 0.75 }
+  },
+  "gated_at_n": 30,
+  "languages_skipped_below_n30": [{ "lang": "ko", "n": 14 }]
+}</code></pre>
 
 <h2 id="w774-bakeoff" data-w774="bakeoff-header">Multilingual bake-off</h2>
 <p data-w774="bakeoff-body">Head-to-head compare two artifacts on multilingual captures. <code>runXlangBakeoff()</code> partitions captures by detected language, judges both outputs per row, then emits a per-language winner plus a <code>multilingual_consistency_score</code> (0..1) reflecting how uniformly the overall winner wins across languages. Requires &ge;2 distinct detected languages &mdash; otherwise returns <code>no_multilingual_captures</code> (loud-fail envelope; use <a href="/docs/api">/v1/bakeoff</a> for single-language head-to-head).</p>
@@ -286,6 +314,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -305,7 +334,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

@@ -329,8 +329,36 @@
 </script>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a href="#main" class="ks-skip">Skip to content</a>
+
+<!-- W918 OpenAI migration banner -->
+<div id="w918MigrationBanner" role="region" aria-label="OpenAI fine-tuning migration announcement" style="background: var(--ks-bg-1); border-bottom: 1px solid var(--ks-line-2); font-family: var(--ks-sans); font-size: 13.5px; line-height: 1.5; color: var(--ks-ink-2);">
+  <div style="max-width: 1200px; margin: 0 auto; padding: 10px 20px; display: flex; align-items: center; justify-content: center; gap: 16px;">
+    <a href="/openai-migration" style="color: var(--ks-ink); text-decoration: none; border-bottom: 1px solid var(--ks-accent-edge); transition: border-color 140ms;">OpenAI is closing fine-tuning. We help you land. <span aria-hidden="true">&rarr;</span></a>
+    <button type="button" id="w918BannerClose" aria-label="Dismiss migration banner" style="appearance: none; background: transparent; border: 1px solid transparent; color: var(--ks-ink-3); cursor: pointer; min-width: 44px; min-height: 44px; padding: 10px; border-radius: 6px; font-family: var(--ks-mono); font-size: 16px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; transition: color 140ms, border-color 140ms;">&times;</button>
+  </div>
+</div>
+<script>
+  (function () {
+    try {
+      var banner = document.getElementById('w918MigrationBanner');
+      var btn = document.getElementById('w918BannerClose');
+      if (!banner || !btn) return;
+      if (localStorage.getItem('w918_banner_dismissed') === '1') {
+        banner.style.display = 'none';
+        return;
+      }
+      btn.addEventListener('click', function () {
+        try { localStorage.setItem('w918_banner_dismissed', '1'); } catch (_) {}
+        banner.style.display = 'none';
+      });
+      btn.addEventListener('focus', function () { btn.style.borderColor = 'var(--ks-accent-edge)'; btn.style.color = 'var(--ks-ink)'; });
+      btn.addEventListener('blur', function () { btn.style.borderColor = 'transparent'; btn.style.color = 'var(--ks-ink-3)'; });
+    } catch (_) { /* no-op */ }
+  })();
+</script>
 
 <!-- ================== Nav ================== -->
 <div class="ks-nav-wrap">
@@ -1582,7 +1610,6 @@
         <a href="/docs">Docs</a>
         <a href="/sdks">SDKs</a>
         <a href="/recipes">Recipes</a>
-        <a href="/playground">Playground</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
         <a href="/blog">Blog</a>
@@ -1614,7 +1641,6 @@
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/about">About</a>
         <a href="/press">Press</a>

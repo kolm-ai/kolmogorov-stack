@@ -100,13 +100,22 @@ test('7. card carries W167 (backend) and W174 (this wave) wave stamps', () => {
 test('8. card reuses the existing design tokens (--mono, --ink, --bg, --accent, --warn, --bad)', () => {
   const html = read(VERIFY);
   // Token definitions must include warn + bad now (W174 extended the palette).
-  assert.ok(html.includes('--warn:#f0b86b') && html.includes('--bad:#ff6b91'),
-    'verify-prod.html :root must define --warn and --bad for the drift pills');
+  // Value-agnostic: the semantic palette has since evolved (WCAG-contrast
+  // darkening + cool-slate dark variants per W850). Assert the tokens are
+  // DECLARED WITH SOME HEX, not pinned to a superseded literal.
+  assert.match(html, /--warn:\s*#[0-9a-fA-F]{3,8}/,
+    'verify-prod.html :root must define --warn for the drift pills');
+  assert.match(html, /--bad:\s*#[0-9a-fA-F]{3,8}/,
+    'verify-prod.html :root must define --bad for the drift pills');
   assert.ok(html.includes('--accent-soft') && html.includes('--warn-soft') && html.includes('--bad-soft'),
     'verify-prod.html :root must define *-soft backgrounds for the drift pills');
-  // Light-theme overrides for new tokens.
-  assert.ok(html.includes('--warn:#b8770b') && html.includes('--bad:#c8385c'),
-    'verify-prod.html [data-theme=light] must override --warn and --bad');
+  // Light-theme overrides for new tokens. The page declares --warn/--bad more
+  // than once (dark :root + light override); assert each appears at least
+  // twice with some hex value rather than pinning the override literal.
+  assert.ok((html.match(/--warn:\s*#[0-9a-fA-F]{3,8}/g) || []).length >= 2,
+    'verify-prod.html must declare --warn for both dark and light themes');
+  assert.ok((html.match(/--bad:\s*#[0-9a-fA-F]{3,8}/g) || []).length >= 2,
+    'verify-prod.html must declare --bad for both dark and light themes');
   // Card must consume tokens not hard-coded colors.
   for (const tok of ['var(--accent)', 'var(--warn)', 'var(--bad)',
     'var(--ink)', 'var(--mono)', 'var(--bg-elev)']) {

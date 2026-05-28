@@ -89,19 +89,31 @@ test('W409z #5 - each recipe page has the W208 viewport meta tag', () => {
 });
 
 test('W409z #6 - each recipe page has the W228 brand-anchor disambiguator', () => {
+  // W903 (commit 966457dd, scripts/w903-strip-brand-anchor.cjs) deliberately
+  // removed the hidden W170-era <span class="brand-anchor">...Not Kolm
+  // therapeutics...</span> SEO hack from all 90 public HTML pages per user
+  // mandate ("served its purpose but looks unprofessional now"). Brand-collision
+  // disambiguation now lives in two deliberate, visible surfaces that W903 kept:
+  //   1. the nav brand anchor   aria-label="kolm.ai: the AI compiler"
+  //   2. a footer line linking to the dedicated
+  //      /articles/kolm-ai-vs-kolm-therapeutics disambiguation page.
+  // Assert the current mechanism, preserving the original positional intent
+  // (a brand anchor after <body> and before <main>).
+  const NAV_BRAND = 'aria-label="kolm.ai: the AI compiler"';
   for (const slug of SLUGS) {
     const html = readSlug(slug);
-    assert.match(html, /class="brand-anchor"/,
-      `${slug}.html missing W228 brand-anchor span`);
-    // The brand-anchor must sit in the first 1200 chars of <body> to satisfy
-    // the W228 sweep. We check loosely by asserting it appears before <main>.
+    assert.ok(html.includes(NAV_BRAND),
+      `${slug}.html missing W228 nav brand disambiguator`);
+    assert.match(html, /\/articles\/kolm-ai-vs-kolm-therapeutics/,
+      `${slug}.html missing W903 brand-collision disambiguation link`);
+    // The nav brand anchor must sit after <body> and before <main>.
     const bodyIdx = html.indexOf('<body');
-    const anchorIdx = html.indexOf('class="brand-anchor"');
+    const anchorIdx = html.indexOf(NAV_BRAND);
     const mainIdx = html.indexOf('<main');
     assert.ok(bodyIdx > 0 && anchorIdx > bodyIdx,
-      `${slug}.html brand-anchor not after <body>`);
+      `${slug}.html brand anchor not after <body>`);
     assert.ok(mainIdx === -1 || anchorIdx < mainIdx,
-      `${slug}.html brand-anchor must appear before <main>`);
+      `${slug}.html brand anchor must appear before <main>`);
   }
 });
 

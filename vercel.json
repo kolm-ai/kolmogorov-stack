@@ -50,11 +50,6 @@
       "permanent": true
     },
     {
-      "source": "/agents",
-      "destination": "/product",
-      "permanent": true
-    },
-    {
       "source": "/evolve",
       "destination": "/product",
       "permanent": true
@@ -231,6 +226,14 @@
     }
   ],
   "rewrites": [
+    { "source": "/openai-migration", "destination": "/openai-migration.html" },
+    { "source": "/agents", "destination": "/agents.html" },
+    { "source": "/gateway-migration", "destination": "/gateway-migration.html" },
+    { "source": "/hobbyist", "destination": "/hobbyist.html" },
+    { "source": "/account/org", "destination": "/account/org.html" },
+    { "source": "/account/members", "destination": "/account/members.html" },
+    { "source": "/blog/distilling-agents", "destination": "/blog/2026-06-02-distilling-agents.html" },
+    { "source": "/blog/distill-from-gateway-logs", "destination": "/blog/2026-06-04-distill-from-gateway-logs.html" },
     {
       "source": "/favicon.ico",
       "destination": "/favicon.svg"

@@ -438,7 +438,7 @@ test('W740 #12 — /docs/import.html exists with brand-lock strings', () => {
   for (const needle of [
     'kolm.ai',                                // brand
     'class="ks-nav"',                         // nav shell
-    'ks-footer',                              // footer shell
+    'ks-foot',                                // footer shell (W902 ks-footer -> ks-foot migration)
     'Open-source AI workbench',               // brand-lock eyebrow
     'Frontier AI on your own infrastructure', // brand-lock h1
     'not_kolm_compiled',                      // W740-2 honesty lock

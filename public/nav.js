@@ -95,7 +95,7 @@ installSurfaceGuard();
       '</div>',
       '<div>',
       '<h4>Company</h4>',
-      '<ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/manifesto">Manifesto</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li></ul>',
+      '<ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/product">About</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li></ul>',
       '</div>',
       '</div>',
       '<div class="ks-footer__bottom">',
@@ -117,6 +117,40 @@ installSurfaceGuard();
   })();
 
  (function ensureSolutionsNav() { return; })();
+
+ var header = document.querySelector('header.site-header, header.site');
+ if (!header) return;
+ var brandLink = header.querySelector('a.brand, a.logo');
+ if (brandLink && brandLink.textContent.replace(/\s+/g, '').toLowerCase() === 'kolm') {
+ brandLink.textContent = 'kolm.ai';
+ }
+
+ var isLegacy = header.classList.contains('site') && !header.classList.contains('site-header');
+ var nav = isLegacy ? header.querySelector('.left nav, nav') : header.querySelector('.site-nav');
+ var actions = isLegacy ? header.querySelector('.right') : header.querySelector('.site-actions');
+ if (!nav) return;
+ if (!actions && !isLegacy) {
+ actions = document.createElement('div');
+ actions.className = 'site-actions';
+ var wrapForActions = header.querySelector('.wrap') || header;
+ wrapForActions.appendChild(actions);
+ }
+ if (!actions) return;
+
+ var path = (window.location.pathname || '/').replace(/\/+$/, '') || '/';
+var prdRe = /^\/(product|whitepaper|motion|capture|captures|quickstart|compile|distill|training|train|run|recall|serve|evolve|anatomy|k-score|build-your-own|integrations|use-cases|healthcare|finance)(\/|$)/;
+var solRe = /^\/(use-cases|healthcare|finance|legal|defense|edge|devtools|insure|health-insurance|saas|eu|gov|compare|vs-|how-vs|migrate|case-studies|frontier-stack|sovereign-ai|why-now|why-kolm)(\/|$)/;
+var modRe = /^\/(models|runtimes|frontier-stack|compute|device|hub|registry|marketplace|atlas)(\/|$)/;
+var devRe = /^\/(docs|research|training|train|spec|api|sdk|articles|cookbook|architecture|launch|troubleshooting|faq|press|changelog|benchmarks|leaderboard|kscore-bench|kscore-leaderboard)(\/|$)/;
+ var entRe = /^\/(enterprise|customers|roi|baa|teams|tunnels|byoc|airgap|hipaa-mapping|soc2|security|subprocessors|trust|threat-model|slsa|sbom|compliance|compliance-packs|self-host|cloud)(\/|$)/;
+ var prRe = /^\/pricing(\/|$)/;
+ var topSection = prRe.test(path) ? 'pricing'
+ : entRe.test(path) ? 'enterprise'
+ : modRe.test(path) ? 'models'
+ : solRe.test(path) ? 'solutions'
+ : prdRe.test(path) ? 'product'
+ : devRe.test(path) ? 'docs'
+ : '';
 
  var anchors = nav.querySelectorAll('a');
  for (var i = 0; i < anchors.length; i++) {

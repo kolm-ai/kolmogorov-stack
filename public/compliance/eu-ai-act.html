@@ -147,7 +147,31 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   </div>
 </div>
 
-<pre>CODE6</pre>
+<pre><code>POST /v1/compliance/ai-act/risk-score
+{
+  "manifest": {
+    "task_category": "medical_diagnosis",
+    "vertical": "healthcare"
+  }
+}
+&rarr;
+{
+  "ok": true,
+  "risk_category": "high",
+  "task_category": "medical_diagnosis",
+  "reasoning": "manifest.task_category='medical_diagnosis' maps to risk_category='high' per Annex III + Article 5 catalog",
+  "transparency_requirements": [
+    "disclose_ai_interaction_to_user",
+    "mark_synthetic_content",
+    "maintain_annex_iv_documentation",
+    "log_runtime_decisions_for_audit",
+    "register_in_eu_database",
+    "publish_instructions_for_use"
+  ],
+  "human_oversight_required": true,
+  "conformity_assessment_required": true,
+  "version": "w766-v1"
+}</code></pre>
 
 <h2 id="technical-documentation" data-w766="technical-documentation">Technical documentation export</h2>
 <div class="section-card" data-w766="technical-documentation-card">
@@ -168,7 +192,24 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   <span class="field-pill">postmarket_monitoring_plan</span>
 </div>
 
-<pre>CODE10</pre>
+<pre><code>POST /v1/compliance/ai-act/export
+{
+  "manifest": { /* contents of .kolm manifest.json */ },
+  "format": "json"
+}
+&rarr;
+{
+  "ok": true,
+  "version": "w766-v1",
+  "generated_at": "2026-05-24T...",
+  "risk_assessment": { "risk_category": "high", ... },
+  "annex_iv": {
+    "intended_purpose": "Triage suspected pneumonia from chest X-ray.",
+    "system_architecture": { "base_model": "qwen-7b", "quantization": "int4" },
+    "training_data_summary": "not_yet_disclosed",
+    ...
+  }
+}</code></pre>
 
 <h2 id="human-in-loop" data-w766="human-in-loop">Human-in-the-loop configuration</h2>
 <div class="section-card" data-w766="human-in-loop-card">
@@ -177,7 +218,20 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   <p>Article 14 requires that high-risk systems "can be effectively overseen by natural persons". This subsystem is the runtime knob &mdash; for any (tenant, namespace), set a confidence threshold in nats. When the runtime confidence router records a decision below the threshold, the row is tagged <code>human_in_loop_triggered</code> and surfaced for review. Threshold validated &isin; [0, 10] nats &mdash; out-of-range rejects loudly with an loud-fail envelope.</p>
 </div>
 
-<pre>CODE12</pre>
+<pre><code>POST /v1/compliance/ai-act/human-in-loop
+{
+  "namespace": "billing-agent",
+  "threshold_nats": 1.5,
+  "confirm": true
+}
+&rarr;
+{
+  "ok": true,
+  "namespace": "billing-agent",
+  "threshold_nats": 1.5,
+  "persisted_event_id": "evt_...",
+  "version": "w766-v1"
+}</code></pre>
 
 <h2 id="governance-report" data-w766="governance-report">Data governance reports</h2>
 <div class="section-card" data-w766="governance-report-card">
@@ -186,7 +240,23 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   <p>The report pulls captures from the event store under a tenant-fenced query, then re-checks <code>row.tenant_id</code> on every row inside the aggregation loop. A schema bug in future revisions cannot leak across tenants. Aggregates: <code>count_total</code>, <code>count_high_risk</code>, <code>count_human_in_loop_triggered</code>, <code>average_confidence_at_decision</code>, <code>oldest_capture_at</code>, <code>newest_capture_at</code>, plus a per-namespace breakdown.</p>
 </div>
 
-<pre>CODE20</pre>
+<pre><code>GET /v1/compliance/ai-act/governance-report?namespace=billing-agent&amp;from=2026-01-01&amp;to=2026-06-01
+&rarr;
+{
+  "ok": true,
+  "report": {
+    "tenant_id": "tenant_...",
+    "namespace": "billing-agent",
+    "count_total": 1287,
+    "count_high_risk": 42,
+    "count_human_in_loop_triggered": 8,
+    "average_confidence_at_decision": 0.86,
+    "oldest_capture_at": "2026-01-04T...",
+    "newest_capture_at": "2026-05-23T...",
+    "by_namespace": { "billing-agent": 1287 }
+  },
+  "version": "w766-v1"
+}</code></pre>
 
 <h2 id="caveats">No-silent-pass contract</h2>
 <div class="caveat">
@@ -210,7 +280,10 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   </tbody>
 </table>
 
-<pre>CODE35</pre>
+<pre><code>kolm ai-act export-docs path/to/manifest.json
+kolm ai-act risk-score path/to/manifest.json
+kolm ai-act human-in-loop billing-agent 1.5
+kolm ai-act governance-report billing-agent</code></pre>
 
 <div class="related">
   <a href="/compliance/nist-ai-rmf"><b>NIST AI RMF mapping</b><span>How kolm artifacts and receipts map to the NIST framework.</span></a>

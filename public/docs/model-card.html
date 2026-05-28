@@ -158,7 +158,11 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <h2 id="environmental" data-w768="environmental-methodology">Environmental impact estimation</h2>
 <p>The <code>environmental_impact</code> section is an <em>estimate</em>, not a measurement. We compute it as:</p>
-<pre>CODE13</pre>
+<pre><code>estimated_co2_kg = compute_hours * gpu_class_kw * grid_co2_kg_per_kwh
+                 = compute_hours * gpu_class_kw * 0.475
+
+# 0.475 kg CO2 / kWh is the IEA 2024 World Energy Outlook global grid average.
+# gpu_class_kw is the vendor TDP under sustained training load, single-card draw.</code></pre>
 <p>Every emission carries two stamps that prevent the estimate from being mistaken for a measurement:</p>
 <ul>
   <li><code>methodology: "static_grid_average_w768_v1"</code> &mdash; surfaces the methodology version so a future revision can be diffed.</li>
@@ -250,13 +254,45 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p>Three paths: the local CLI for offline / CI use, the HTTP API for tenant-scoped builds, and a stdlib-only Python script for runners that don't have Node.</p>
 
 <h3>CLI (offline, pure-compute)</h3>
-<pre>CODE73</pre>
+<pre><code># Generate a JSON model card from a manifest:
+kolm mc generate ./my.kolm/manifest.json
+
+# Markdown body (HF-standard):
+kolm mc generate ./my.kolm/manifest.json --format markdown
+
+# Hugging Face Hub-ready (YAML frontmatter + markdown body):
+kolm mc generate ./my.kolm/manifest.json --format huggingface --out README.md
+
+# Include the environmental estimate:
+kolm mc generate ./my.kolm/manifest.json --include-environmental
+
+# Fetch the JSON schema (auth-gated):
+kolm mc schema
+
+# Fetch a governance platform mapping (auth-gated):
+kolm mc governance-map onetrust
+kolm mc governance-map servicenow_ai_governance
+kolm mc governance-map ibm_openpages</code></pre>
 
 <h3>HTTP API (authenticated)</h3>
-<pre>CODE74</pre>
+<pre><code>POST /v1/model-card/generate
+{ "manifest": { ...kolm manifest... },
+  "format":   "json",
+  "include_environmental": true }
+&rarr;
+{ "ok": true, "version": "w768-v1", "format": "json",
+  "generated_at": "2026-05-24T...Z",
+  "card": { "model_details": {...}, ..., "environmental_impact": {...} } }
+
+GET /v1/model-card/schema
+GET /v1/model-card/governance-mappings?platform=onetrust</code></pre>
 
 <h3>Python (stdlib-only)</h3>
-<pre>CODE75</pre>
+<pre><code>python3 apps/export/model_card.py \
+  --manifest ./my.kolm/manifest.json \
+  --format huggingface \
+  --include-environmental \
+  --out README.md</code></pre>
 
 <h2 id="api" data-w768="api-surface">API + CLI surface</h2>
 <table>

@@ -625,7 +625,7 @@ test('W750-followup #19 — public/docs/copyright-scan.html exists w/ brand-lock
   for (const needle of [
     'kolm.ai',
     'class="ks-nav"',
-    'ks-footer',
+    'ks-foot',                                   // footer class (W902 unified ks-footer→ks-foot across 642 pages)
     'Open-source AI workbench',                  // brand eyebrow lock
     'Frontier AI on your own infrastructure',    // brand H1 lock
     'w750-followup-v1',                          // version stamp
@@ -635,7 +635,7 @@ test('W750-followup #19 — public/docs/copyright-scan.html exists w/ brand-lock
     'CODE_COPYRIGHT_REGEX',                      // pattern-pack name shown
     'Not legal advice',                          // heuristic disclaimer (canonical text)
     'Local-only',                                // privacy disclaimer
-    'W808',                                      // W808 integration note
+    'id="w808"',                                 // integration-note section anchor (visible "W808" tag scrubbed by public-surface polish 3a57dd4f — internal release-tag noise strip)
     'staged_captures',                           // pipeline integration mention
     'KOLM_W750_COPYRIGHT_DETECTOR',              // gating env-var
     '/v1/copyright/scan',                        // API surface mention

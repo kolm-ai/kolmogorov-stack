@@ -97,9 +97,15 @@ for (const harness of HARNESSES) {
       'must include the dark-theme ink token (warm paper or cool slate)',
     );
     assert.ok(html.includes('--bg:#0b0d10'), 'must include the dark-theme bg token');
+    // Accent migrated W262 warm-paper mint (#10b981) -> W850 cool-slate black
+    // (#111111) -> W899 monochrome (#e6e9ee, accent == ink). All three are valid
+    // kolm dark-theme accents; the contract is "page declares a kolm accent token."
     assert.ok(
-      html.includes('--accent:#10b981') || html.includes('--accent:#111111') || html.includes('--accent:#111'),
-      'must include the kolm accent token (mint or cool-slate black)',
+      html.includes('--accent:#10b981')
+        || html.includes('--accent:#111111')
+        || html.includes('--accent:#111')
+        || html.includes('--accent:#e6e9ee'),
+      'must include the kolm accent token (mint, cool-slate black, or monochrome)',
     );
     assert.ok(html.includes("data-theme='light'") || html.includes('data-theme="light"'),
       'must include the light-theme switch IIFE');
@@ -310,14 +316,18 @@ test('W262 wiring - vercel.json has all 5 install rewrites', () => {
 });
 
 test('W262 wiring - public/sw.js CACHE constant bumped to >= wave262', () => {
-  // Wave-floor pattern per W171 lesson: later wave bumps must not regress
-  // this test. We assert the cache string has the canonical kolm-v7- prefix
-  // and that the wave segment is a number >= 262.
+  // Version-floor pattern per W171 lesson and the wave886/wave888s convention:
+  // later bumps must not regress this test. The slug suffix migrated from the
+  // `waveNNN` form to the abbreviated `wNNN` form (W917), so we pin on the
+  // canonical `kolm-v<n>-` prefix plus the numeric CACHE_VERSION floor instead
+  // of the literal `waveNNN` slug segment.
   const sw = fs.readFileSync(SW, 'utf8');
-  const m = sw.match(/const CACHE = 'kolm-v\d+-[^']*?wave(\d+)/);
+  const m = sw.match(/const CACHE = '(kolm-v\d+-[^']*)'/);
   assert.ok(m, 'sw.js must have the canonical CACHE constant');
-  const wave = Number(m[1]);
-  assert.ok(wave >= 262, `sw.js CACHE wave must be >= 262 (got ${wave})`);
+  const vm = sw.match(/const CACHE_VERSION = (\d+)/);
+  assert.ok(vm, 'sw.js must declare a numeric CACHE_VERSION');
+  const version = Number(vm[1]);
+  assert.ok(version >= 152, `sw.js CACHE_VERSION must be >= 152 (got ${version})`);
 });
 
 test('W262 wiring - cli/kolm.js HARNESS_SNIPPETS registers claude-desktop / vscode / windsurf', () => {

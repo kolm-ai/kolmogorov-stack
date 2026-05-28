@@ -65,13 +65,16 @@ test('Wave4 #3 — PLAN_ALIASES no longer maps business -> enterprise', () => {
     'No standalone `business: \'enterprise\'` mapping is allowed anywhere in router.js');
 });
 
-test('Wave4 #4 — enterprise stays sales-led (self_serve: false) at $1,499', () => {
+test('Wave4 #4 — enterprise stays sales-led (self_serve: false), custom-priced', () => {
   // Enterprise stays the sales-led row for regulated / BAA / SAML buyers.
-  // Don't accidentally flip it to self_serve while wiring Business.
+  // Don't accidentally flip it to self_serve. Pricing ladder moved Business
+  // to the priced self-serve slot and Enterprise to Custom (price_usd_month:
+  // null / price_label 'Custom') — assert the sales-led + custom invariant,
+  // not a hard-coded dollar figure.
   assert.match(ROUTER_SRC, /enterprise:\s*\{[^}]*self_serve:\s*false[^}]*\}/,
     'PLAN_CATALOG.enterprise must remain self_serve: false');
-  assert.match(ROUTER_SRC, /enterprise:\s*\{[^}]*price_usd_month:\s*1499[^}]*\}/,
-    'PLAN_CATALOG.enterprise must set price_usd_month: 1499');
+  assert.match(ROUTER_SRC, /enterprise:\s*\{[^}]*price_usd_month:\s*null[^}]*\}/,
+    'PLAN_CATALOG.enterprise must be custom-priced (price_usd_month: null)');
 });
 
 // ---------- AMOUNT_TO_PLAN cents → plan id --------------------------------

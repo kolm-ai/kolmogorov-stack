@@ -814,9 +814,14 @@ test('W766 #22 — public/compliance/eu-ai-act.html exists w/ brand-lock + ancho
   // Brand lock.
   assert.ok(html.includes('Open-source AI workbench'),
     'eu-ai-act.html MUST carry the brand-locked eyebrow');
-  // Anti-collision (Kolm therapeutics is a wholly unrelated entity).
-  assert.ok(/Not\s+Kolm\s+therapeutics/i.test(html),
-    'eu-ai-act.html MUST carry a "Not Kolm therapeutics" anti-collision line');
+  // NOTE (W903): the hidden "Not Kolm therapeutics" brand-anchor SEO span was a
+  // W170-era screen-reader hack. Per a direct user mandate (2026-05-27) it
+  // "served its purpose but looks unprofessional now" and was deliberately
+  // stripped from every rendered surface by scripts/w903-strip-brand-anchor.cjs
+  // (commit 966457dd). Disambiguation now lives on the dedicated
+  // /articles/kolm-ai-vs-kolm-therapeutics.html page, not as a hidden span.
+  // The former assertion that this page carry an inline "Not Kolm therapeutics"
+  // anti-collision line is therefore stale and has been removed.
   // Required hidden test anchors (one per W766 sub-item that has a UI surface).
   for (const a of [
     'data-w766="risk-classification"',

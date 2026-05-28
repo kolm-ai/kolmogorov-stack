@@ -441,7 +441,7 @@ test('W742 #13 — /docs/gateway-mode.html exists with brand-lock + 4-mode table
     'Frontier AI on your own infrastructure.', // H1 brand lock
     'kolm.ai',                            // brand
     'class="ks-nav"',                     // nav shell
-    'ks-footer',                          // footer shell
+    'ks-foot',                            // footer shell (W902 unified ks-footer→ks-foot across 642 static pages)
     'KOLM_GATEWAY_MODE',                  // env var
     'kolm gateway',                       // CLI
     '/v1/gateway/mode',                   // API

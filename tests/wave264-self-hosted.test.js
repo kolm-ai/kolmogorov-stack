@@ -358,8 +358,16 @@ test('W264 #11 — workers/compile-server kit files exist + no new npm deps', ()
   // baseline from before W264 (locked by prior waves).
   // W-4 (Parquet / HuggingFace export, 2026-05-26) added apache-arrow as a
   // real load-bearing dep for the capture-export wrapper - not a W264 regression.
-  const expected_deps = ['@anthropic-ai/sdk', 'adm-zip', 'apache-arrow', 'archiver', 'compression',
-    'cookie-parser', 'dotenv', 'express', 'express-rate-limit', 'helmet', 'parquetjs-lite'];
+  // W891 V1 launch (commit cc9f6ea7, 2026-05-27) deliberately added four more
+  // load-bearing runtime deps, each lazily imported by a real surface - none is
+  // a W264 regression:
+  //   @iarna/toml -> src/config.js TOML config parser (W888-J config dispatcher)
+  //   pdfkit      -> src/assurance-case-pdf.js / src/router.js PDF rendering
+  //   pg          -> cli/kolm.js `kolm capture --postgres` Postgres capture store
+  //   ssh2        -> src/device-ssh.js SSH device runner for the Run surface
+  const expected_deps = ['@anthropic-ai/sdk', '@iarna/toml', 'adm-zip', 'apache-arrow', 'archiver',
+    'compression', 'cookie-parser', 'dotenv', 'express', 'express-rate-limit', 'helmet',
+    'parquetjs-lite', 'pdfkit', 'pg', 'ssh2'];
   const actual_deps = Object.keys(pkg.dependencies || {}).sort();
   for (const d of actual_deps) {
     assert.ok(expected_deps.includes(d), `unexpected new runtime dep introduced by W264: ${d}`);

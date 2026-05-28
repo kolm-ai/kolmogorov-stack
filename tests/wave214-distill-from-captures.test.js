@@ -122,9 +122,13 @@ test('W214 #9 - POST refuses < min_pairs with 400 not_enough_captures', () => {
 });
 
 test('W214 #10 - cmdDistill routes --from-captures to cmdDistillFromCaptures', () => {
-  // Dispatch from cmdDistill.
+  // Dispatch from cmdDistill. The verb's dispatch table has grown as newer
+  // distill subverbs (W918 agent, W233 detach, T1.6 recipe, W787/W720/W455,
+  // etc.) were added above the W214 line, pushing --from-captures past the old
+  // 2000-char window. Widen to cover the full dispatch region rather than pin
+  // the line to a fixed offset (the behavioral assertions below are unchanged).
   const distillIdx = CLI_SRC.indexOf('async function cmdDistill(');
-  const distillHead = CLI_SRC.slice(distillIdx, distillIdx + 2000);
+  const distillHead = CLI_SRC.slice(distillIdx, distillIdx + 4000);
   assert.match(distillHead, /--from-captures/);
   assert.match(distillHead, /cmdDistillFromCaptures/);
   // Function exists.

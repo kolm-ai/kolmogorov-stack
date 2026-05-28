@@ -531,7 +531,9 @@ test('W739 #13 — public/docs/lineage.html exists with brand-lock strings + req
     '/ks.css',
     '/docs-shell.css',
     '<link rel="canonical" href="https://kolm.ai/docs/lineage">',
-    'class="ks-footer"',
+    // W902 ("kolm-ai org transition") renamed the footer BEM block
+    // ks-footer -> ks-foot site-wide (767 pages). The literal pin is stale.
+    'class="ks-foot"',
   ]) {
     assert.ok(html.includes(anchor),
       `lineage.html must contain brand-lock anchor "${anchor}"`);

@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
+<title>Gateway log migration: Portkey/Helicone &rarr; distilled · kolm.ai</title>
+<meta name="description" content="Portkey, Helicone, LiteLLM, OpenRouter logs are a distill corpus. Run kolm import, distill, deploy &mdash; same job, one-tenth the inference cost.">
+<meta name="keywords" content="Portkey migration, Helicone migration, LiteLLM logs, OpenRouter logs, LLM gateway distillation, gateway captures, kolm import, distill from gateway, open-source distillation">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Gateway logs are training data &mdash; land them on kolm">
+<meta property="og:description" content="Portkey, Helicone, LiteLLM, OpenRouter &mdash; export the traces, run kolm import, ship a distilled model that does the same job at one-tenth the inference cost.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/gateway-migration">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="kolm.ai: turn LLM gateway logs into a distilled model you own.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="Gateway logs are training data &mdash; land them on kolm">
+<meta name="twitter:description" content="Portkey, Helicone, LiteLLM, OpenRouter logs distill into a portable model. Apache-2.0, signed receipts, your GPU.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/gateway-migration">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/design-tokens.css" as="style">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/wave889-vertical.css">
+<script src="/nav.js" defer></script>
+<style>
+  /* W918 P3.6 Gateway migration page styles. Cool-slate W850 only. */
+  .gm-scarcity { position: relative; padding: 10px 0; background: var(--ks-accent-soft); border-bottom: 1px solid var(--ks-accent-edge); }
+  .gm-scarcity__inner { display: flex; align-items: center; justify-content: center; gap: var(--ks-3); font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.5; color: var(--ks-ink-2); flex-wrap: wrap; text-align: center; }
+  .gm-scarcity__inner b { color: var(--ks-ink); font-weight: 580; }
+  .gm-scarcity__inner a { color: var(--ks-accent); border-bottom: 1px solid var(--ks-accent-edge); padding-bottom: 1px; transition: border-color 140ms; }
+  .gm-scarcity__inner a:hover { border-bottom-color: var(--ks-accent); }
+
+  .gm-hero { padding: clamp(48px, 6vw, 88px) 0 clamp(32px, 4vw, 56px); position: relative; }
+  .gm-hero__bg { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(60% 80% at 20% 0%, color-mix(in srgb, var(--ks-accent) 5%, transparent), transparent 70%); }
+  .gm-eyebrow { display: inline-block; font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-accent); padding: 5px 11px; border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-pill); background: var(--ks-accent-soft); margin-bottom: var(--ks-4); }
+  .gm-h1 { font-family: var(--ks-sans); font-size: clamp(34px, 5.2vw, 56px); font-weight: 580; letter-spacing: -0.022em; line-height: 1.06; color: var(--ks-ink); margin: 0 0 var(--ks-5); max-width: 22ch; }
+  .gm-h1 b { color: var(--ks-accent); font-weight: 580; }
+  .gm-dek { font-family: var(--ks-sans); font-size: clamp(16px, 1.6vw, 19px); line-height: 1.65; color: var(--ks-ink-2); margin: 0 0 var(--ks-6); max-width: 64ch; }
+  .gm-dek b { color: var(--ks-ink); font-weight: 540; }
+  .gm-dek code { background: color-mix(in srgb, var(--ks-ink, #111) 6%, transparent); color: var(--ks-ink); padding: 2px 7px; border-radius: 5px; font-family: var(--ks-mono); font-size: 13.5px; }
+  .gm-ctas { display: flex; gap: var(--ks-3); flex-wrap: wrap; }
+
+  .gm-section { padding: clamp(36px, 4.5vw, 72px) 0; border-top: 1px solid var(--ks-line-2); }
+  .gm-section__eyebrow { display: block; font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin: 0 0 var(--ks-3); }
+  .gm-section__h2 { font-family: var(--ks-sans); font-size: clamp(26px, 3.2vw, 38px); font-weight: 560; letter-spacing: -0.018em; line-height: 1.14; color: var(--ks-ink); margin: 0 0 var(--ks-4); max-width: 28ch; }
+  .gm-section__lede { font-family: var(--ks-sans); font-size: 16.5px; line-height: 1.7; color: var(--ks-ink-2); max-width: 64ch; margin: 0 0 var(--ks-6); }
+  .gm-section__lede a { color: var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge); transition: border-color 140ms; }
+  .gm-section__lede a:hover { border-bottom-color: var(--ks-accent); }
+
+  /* Importers grid */
+  .gm-importers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ks-4); }
+  @media (max-width: 720px) { .gm-importers { grid-template-columns: 1fr; } }
+  .gm-imp { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); padding: var(--ks-5) var(--ks-6); display: flex; flex-direction: column; gap: var(--ks-3); min-height: 168px; }
+  .gm-imp__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--ks-3); }
+  .gm-imp__name { font-family: var(--ks-sans); font-size: 18px; font-weight: 580; letter-spacing: -0.012em; color: var(--ks-ink); margin: 0; }
+  .gm-imp__tag { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-accent); padding: 2px 8px; border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-pill); background: var(--ks-accent-soft); }
+  .gm-imp__desc { font-family: var(--ks-sans); font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); margin: 0; flex: 1; }
+  .gm-imp__cmd { background: var(--ks-bg-2); border: 1px solid var(--ks-line-1); border-radius: var(--ks-r-md, 6px); padding: 9px 12px; font-family: var(--ks-mono); font-size: 12px; line-height: 1.5; color: var(--ks-ink); overflow-x: auto; white-space: pre; }
+  .gm-imp__cmd .pmpt { color: var(--ks-accent); user-select: none; padding-right: 8px; }
+
+  /* Five-command terminal block */
+  .gm-code-frame { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); overflow: hidden; }
+  .gm-code-frame__bar { display: flex; align-items: center; justify-content: space-between; gap: var(--ks-3); padding: 10px 16px; border-bottom: 1px solid var(--ks-line-1); background: var(--ks-bg-2); }
+  .gm-code-frame__label { font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.06em; color: var(--ks-ink-3); }
+  .gm-code-frame__tag { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-accent); padding: 2px 9px; border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-pill); background: var(--ks-accent-soft); }
+  pre.ks-code.gm-code { margin: 0; padding: var(--ks-5) var(--ks-6); background: transparent; border: 0; border-radius: 0; color: var(--ks-ink); font-family: var(--ks-mono); font-size: 13px; line-height: 1.85; overflow-x: auto; white-space: pre; }
+  pre.ks-code.gm-code .pmpt { color: var(--ks-accent); user-select: none; padding-right: 8px; }
+  pre.ks-code.gm-code .cmt { color: var(--ks-ink-3); }
+
+  /* 3-row compare table */
+  .gm-cmp-wrap { overflow-x: auto; background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); }
+  .gm-cmp { width: 100%; border-collapse: collapse; font-family: var(--ks-sans); font-size: 14px; }
+  .gm-cmp th { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); text-align: left; padding: 16px 18px; border-bottom: 1px solid var(--ks-line-2); font-weight: 500; vertical-align: bottom; }
+  .gm-cmp th.kc { color: var(--ks-accent); }
+  .gm-cmp td { padding: 14px 18px; border-bottom: 1px solid var(--ks-line-1); vertical-align: top; line-height: 1.55; color: var(--ks-ink-2); font-size: 13.5px; }
+  .gm-cmp td.ax { font-weight: 580; color: var(--ks-ink); min-width: 160px; }
+  .gm-cmp td.k { color: var(--ks-ink); background: var(--ks-accent-soft); border-left: 1px solid var(--ks-accent-edge); border-right: 1px solid var(--ks-accent-edge); }
+  .gm-cmp tr:last-child td { border-bottom: 0; }
+  .gm-cmp tr:last-child td.k { border-bottom: 1px solid var(--ks-accent-edge); }
+
+  /* Not-yet importers panel */
+  .gm-not-yet { padding: var(--ks-6); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); max-width: 760px; }
+  .gm-not-yet ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--ks-3); }
+  .gm-not-yet li { font-family: var(--ks-sans); font-size: 15px; line-height: 1.65; color: var(--ks-ink-2); display: grid; grid-template-columns: 22px 1fr; gap: var(--ks-3); align-items: start; }
+  .gm-not-yet li b { color: var(--ks-ink); font-weight: 580; }
+  .gm-not-yet__mark { width: 18px; height: 18px; border-radius: var(--ks-r-pill); border: 1.5px solid var(--ks-line-2); color: var(--ks-ink-3); display: flex; align-items: center; justify-content: center; font-family: var(--ks-mono); font-size: 11px; font-weight: 600; margin-top: 2px; }
+  .gm-not-yet__cta { margin: var(--ks-5) 0 0; font-family: var(--ks-sans); font-size: 14.5px; color: var(--ks-ink-2); line-height: 1.65; }
+  .gm-not-yet__cta a { color: var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge); }
+  .gm-not-yet__cta a:hover { border-bottom-color: var(--ks-accent); }
+
+  /* Footer CTA strip */
+  .gm-foot-cta { padding: clamp(48px, 5vw, 80px) 0; border-top: 1px solid var(--ks-line-2); text-align: center; }
+  .gm-foot-cta h2 { font-family: var(--ks-sans); font-size: clamp(28px, 3.2vw, 40px); font-weight: 560; letter-spacing: -0.018em; color: var(--ks-ink); margin: 0 0 var(--ks-3); }
+  .gm-foot-cta p { font-family: var(--ks-sans); font-size: 16px; line-height: 1.65; color: var(--ks-ink-2); max-width: 56ch; margin: 0 auto var(--ks-6); }
+  .gm-foot-cta .gm-ctas { justify-content: center; }
+
+  /* Focus rings: visible on every interactive control */
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--ks-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Touch targets */
+  .ks-btn, .gm-scarcity__inner a, .gm-imp a, .gm-not-yet__cta a { min-height: 44px; }
+  .ks-btn { display: inline-flex; align-items: center; }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  }
+
+  .test-anchor { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Gateway log migration: turn LLM gateway captures into a distilled model",
+  "headline": "Your gateway is sitting on a distill corpus.",
+  "description": "Portkey, Helicone, LiteLLM, OpenRouter logs are a distill corpus. Run kolm import, distill, deploy on your GPU.",
+  "url": "https://kolm.ai/gateway-migration",
+  "datePublished": "2026-05-28",
+  "dateModified": "2026-05-28",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "kolm.ai",
+    "url": "https://kolm.ai/"
+  },
+  "author": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "url": "https://kolm.ai/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<!-- ================== Scarcity bar ================== -->
+<div class="gm-scarcity" role="region" aria-label="OpenAI fine-tuning sunset notice">
+  <div class="ks-wrap">
+    <div class="gm-scarcity__inner">
+      <span><b>OpenAI is closing fine-tuning.</b> <a href="/openai-migration">Land here &rarr;</a></span>
+    </div>
+  </div>
+</div>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow" aria-hidden="true">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+        <svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+      </button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a>
+    <a href="/studio">Studio</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/docs">Docs</a>
+    <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
+    <a href="/signup?intent=login">Sign in</a>
+    <a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
+
+<main id="main">
+
+  <!-- ================== 2. Hero ================== -->
+  <section class="gm-hero">
+    <div class="gm-hero__bg" aria-hidden="true"></div>
+    <div class="ks-wrap">
+      <span class="gm-eyebrow">Gateway logs are training data</span>
+      <h1 class="gm-h1">Your gateway is sitting on <b>a distill corpus.</b></h1>
+      <p class="gm-dek">
+        Portkey, Helicone, LiteLLM, OpenRouter &mdash; export the traces, run <code>kolm import</code>, ship a model that does the same job at one-tenth the inference cost. The gateway already captured the inputs, the outputs, the model tags, and the request metadata. That is the dataset. kolm reads it, distills a student against your chosen teachers, and hands back a portable artifact you run on your own GPU.
+      </p>
+      <div class="gm-ctas">
+        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/docs/recipes/openai-finetune-migration">Run the import <span class="ks-btn-arrow" aria-hidden="true">&rarr;</span></a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/docs/cloud-compile">Read the spec <span aria-hidden="true">&rarr;</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================== 3. Four importers shipped ================== -->
+  <section class="gm-section" aria-labelledby="gm-imp-h">
+    <div class="ks-wrap">
+      <span class="gm-section__eyebrow">Shipped &middot; 2026-05</span>
+      <h2 class="gm-section__h2" id="gm-imp-h">Four importers, no glue code.</h2>
+      <p class="gm-section__lede">Each importer reads the gateway&apos;s native export, normalizes the request/response pairs into a kolm capture corpus, and skips malformed rows with a per-row error log. Zero-dep Node, runs from any shell. The output is a single JSONL file that downstream <a href="/docs/cloud-compile">distill specs</a> and <a href="/cerebras-teacher">Cerebras teacher runs</a> consume without further transformation.</p>
+      <div class="gm-importers">
+        <article class="gm-imp" aria-labelledby="gm-imp-portkey">
+          <header class="gm-imp__head">
+            <h3 class="gm-imp__name" id="gm-imp-portkey">Portkey</h3>
+            <span class="gm-imp__tag">Shipped</span>
+          </header>
+          <p class="gm-imp__desc">Portkey Logs export (JSONL). Reads request body, response choices, model tag, and latency &mdash; emits capture pairs keyed by trace id.</p>
+          <div class="gm-imp__cmd"><span class="pmpt">$</span>kolm import --from portkey ./logs.jsonl</div>
+        </article>
+        <article class="gm-imp" aria-labelledby="gm-imp-helicone">
+          <header class="gm-imp__head">
+            <h3 class="gm-imp__name" id="gm-imp-helicone">Helicone</h3>
+            <span class="gm-imp__tag">Shipped</span>
+          </header>
+          <p class="gm-imp__desc">Helicone Requests CSV/JSONL export. Pulls prompt and completion fields, model column, and the custom properties you set on the call.</p>
+          <div class="gm-imp__cmd"><span class="pmpt">$</span>kolm import --from helicone ./logs.jsonl</div>
+        </article>
+        <article class="gm-imp" aria-labelledby="gm-imp-litellm">
+          <header class="gm-imp__head">
+            <h3 class="gm-imp__name" id="gm-imp-litellm">LiteLLM</h3>
+            <span class="gm-imp__tag">Shipped</span>
+          </header>
+          <p class="gm-imp__desc">LiteLLM proxy callback logs (JSONL) or DB dump. Handles the OpenAI-compatible shape and the proxy&apos;s metadata block.</p>
+          <div class="gm-imp__cmd"><span class="pmpt">$</span>kolm import --from litellm ./logs.jsonl</div>
+        </article>
+        <article class="gm-imp" aria-labelledby="gm-imp-openrouter">
+          <header class="gm-imp__head">
+            <h3 class="gm-imp__name" id="gm-imp-openrouter">OpenRouter</h3>
+            <span class="gm-imp__tag">Shipped</span>
+          </header>
+          <p class="gm-imp__desc">OpenRouter activity export (JSONL). Carries the routed model id and the upstream provider tag so multi-teacher attribution survives.</p>
+          <div class="gm-imp__cmd"><span class="pmpt">$</span>kolm import --from openrouter ./logs.jsonl</div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================== 4. Five-command loop ================== -->
+  <section class="gm-section" aria-labelledby="gm-loop-h">
+    <div class="ks-wrap">
+      <span class="gm-section__eyebrow">End to end</span>
+      <h2 class="gm-section__h2" id="gm-loop-h">From log to distilled model in five commands.</h2>
+      <p class="gm-section__lede">One copyable block. Swap <code>helicone</code> for any of <code>portkey</code>, <code>litellm</code>, or <code>openrouter</code>. Resumable at every step, signed receipts at every step.</p>
+      <div class="gm-code-frame">
+        <div class="gm-code-frame__bar">
+          <span class="gm-code-frame__label">terminal &middot; bash</span>
+          <span class="gm-code-frame__tag">Copy &amp; run</span>
+        </div>
+        <pre class="ks-code gm-code"><span class="cmt"># 1. Import the gateway log as a kolm capture corpus.</span>
+<span class="pmpt">$</span> kolm import --from helicone ./helicone-logs.jsonl
+
+<span class="cmt"># 2. Draft a distill spec: base model + teachers.</span>
+<span class="pmpt">$</span> kolm distill spec
+
+<span class="cmt"># 3. Collect teacher completions over the corpus.</span>
+<span class="pmpt">$</span> kolm distill collect
+
+<span class="cmt"># 4. Train the student (LoRA or full-merge).</span>
+<span class="pmpt">$</span> kolm distill train
+
+<span class="cmt"># 5. Deploy the portable artifact to your runtime of choice.</span>
+<span class="pmpt">$</span> kolm deploy</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================== 5. Why gateways alone are not enough ================== -->
+  <section class="gm-section" aria-labelledby="gm-cmp-h">
+    <div class="ks-wrap">
+      <span class="gm-section__eyebrow">Side by side</span>
+      <h2 class="gm-section__h2" id="gm-cmp-h">Why gateways alone are not enough.</h2>
+      <p class="gm-section__lede">A gateway routes, meters, and logs. It does not produce a model you own. The three rows below are the gap that kolm closes &mdash; cryptographic provenance via <a href="/docs/receipts">signed receipts</a>, a portable artifact that survives outside any vendor, and training on the hardware you already pay for.</p>
+      <div class="gm-cmp-wrap">
+        <table class="gm-cmp" aria-label="Compare LLM gateway capabilities to kolm">
+          <thead>
+            <tr>
+              <th scope="col">Feature</th>
+              <th scope="col">Gateway</th>
+              <th scope="col" class="kc">kolm</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="ax">Model lineage receipts</td>
+              <td>Trace id, request log; no per-call signature</td>
+              <td class="k">Ed25519-signed receipt on every distill, eval, and inference call</td>
+            </tr>
+            <tr>
+              <td class="ax">Portable artifact</td>
+              <td>None &mdash; routes to upstream APIs</td>
+              <td class="k">HuggingFace weights, GGUF (Q4_K_M / Q5_K_M / Q8_0), Ollama Modelfile, vLLM, TGI, TRT-LLM</td>
+            </tr>
+            <tr>
+              <td class="ax">BYOC training</td>
+              <td>Not in scope</td>
+              <td class="k">Train on your GPU (RTX 5090, H100, A100), your cloud, or air-gap &mdash; no callbacks</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================== 6. Not yet ================== -->
+  <section class="gm-section" aria-labelledby="gm-not-yet-h">
+    <div class="ks-wrap">
+      <span class="gm-section__eyebrow">Roadmap, factual</span>
+      <h2 class="gm-section__h2" id="gm-not-yet-h">What we don&apos;t import yet.</h2>
+      <p class="gm-section__lede">The four importers above cover the gateways customers asked for first. The list below is what is not in the box today.</p>
+      <div class="gm-not-yet">
+        <ul>
+          <li><span class="gm-not-yet__mark" aria-hidden="true">&middot;</span><span><b>Kong AI Gateway</b> &mdash; plugin-shaped Kong logs. Not in tree.</span></li>
+          <li><span class="gm-not-yet__mark" aria-hidden="true">&middot;</span><span><b>TrueFoundry</b> and <b>custom in-house gateways</b> &mdash; bring a schema, we will quote an importer.</span></li>
+        </ul>
+        <p class="gm-not-yet__cta">Want one? <a href="https://github.com/kolm-ai/kolmogorov-stack/issues/new" rel="noopener">Open an issue</a> with a 10-row export sample &mdash; the importer interface is 80 lines and we will pair on it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================== 7. Footer CTA strip ================== -->
+  <section class="gm-foot-cta" aria-labelledby="gm-foot-cta-h">
+    <div class="ks-wrap">
+      <h2 id="gm-foot-cta-h">Start with your existing log file.</h2>
+      <p>If you have a gateway export, you have a distill corpus. Pick the path: do it yourself with the migration page, or get on a call and we will scope the run with you.</p>
+      <div class="gm-ctas">
+        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/openai-migration">Start with your existing log file <span class="ks-btn-arrow" aria-hidden="true">&rarr;</span></a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/book-demo">Talk to us</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="test-anchor" aria-hidden="true">
+  <span data-test="w918-gateway-migration">Gateway log migration</span>
+  <span data-test="w918-importers-shipped">Portkey Helicone LiteLLM OpenRouter</span>
+  <span data-test="w918-five-commands">kolm import distill spec collect train deploy</span>
+  <span data-test="w918-not-yet">Kong TrueFoundry custom</span>
+  <a href="/openai-migration" data-test="w918-cta-openai-migration">/openai-migration</a>
+  <a href="/docs/recipes/openai-finetune-migration" data-test="w918-recipe-link">/docs/recipes/openai-finetune-migration</a>
+  <a href="/docs/cloud-compile" data-test="w918-spec-link">/docs/cloud-compile</a>
+  <a href="/cerebras-teacher" data-test="w918-cerebras-link">/cerebras-teacher</a>
+  <a href="/docs/receipts" data-test="w918-receipts-link">/docs/receipts</a>
+  <a href="/book-demo" data-test="w918-book-demo">/book-demo</a>
+  <a href="https://github.com/kolm-ai/kolmogorov-stack/issues/new" data-test="w918-issue-link">github issue</a>
+</div>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
+        <a href="/blog">Blog</a>
+        <a href="/changelog">Changelog</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Mobile nav toggle. Pattern lifted from openai-migration.html.
+  (function(){
+    var btn = document.getElementById('navToggle');
+    var sheet = document.getElementById('navSheet');
+    if (!btn || !sheet) return;
+    btn.addEventListener('click', function(){
+      var open = sheet.style.display === 'block';
+      sheet.style.display = open ? 'none' : 'block';
+      btn.setAttribute('aria-expanded', String(!open));
+    });
+  })();
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function(){ navigator.serviceWorker.register('/sw.js').catch(function(){}); });
+  }
+</script>
+
+</body>
+</html>

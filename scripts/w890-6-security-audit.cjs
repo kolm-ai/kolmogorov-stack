@@ -578,7 +578,7 @@ function auditHeaders() {
       allow_methods: 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
       max_age_seconds: 86400,
       options_preflight_short_circuit: corsOptionsShortCircuit,
-      narrowing_recommendation: 'Production may consider narrowing to explicit kolm.ai + api.kolm.ai origins via env override (KOLM_CORS_ALLOW_ORIGIN). Wildcard is currently acceptable because: (1) auth flows use header-based bearer tokens, not cookies cross-origin; (2) the public SDK surface is meant to be reachable from arbitrary client origins; (3) the CSP frame-ancestors none + X-Frame-Options DENY prevent clickjacking; (4) no Access-Control-Allow-Credentials header is set so wildcard does not enable cookie leakage.',
+      narrowing_recommendation: 'Production may consider narrowing to the explicit kolm.ai origin via env override (KOLM_CORS_ALLOW_ORIGIN). Wildcard is currently acceptable because: (1) auth flows use header-based bearer tokens, not cookies cross-origin; (2) the public SDK surface is meant to be reachable from arbitrary client origins; (3) the CSP frame-ancestors none + X-Frame-Options DENY prevent clickjacking; (4) no Access-Control-Allow-Credentials header is set so wildcard does not enable cookie leakage.',
     },
     additional_headers: {
       x_content_type_options_nosniff: xContentType,

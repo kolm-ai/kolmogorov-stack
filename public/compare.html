@@ -174,6 +174,16 @@
         </thead>
         <tbody>
           <tr>
+            <td class="ax">OpenAI fine-tuning (sunsetting Jan 2027) &mdash; landing pad after shutdown</td>
+            <td class="k"><b>Successor</b><span class="ico ico-y"></span>Apache-2.0 stack; <code>kolm import --from openai-finetune</code> ingests <code>fine_tuning_data.jsonl</code>; portable distilled artifact, Ed25519 receipts, BYOC. ~$0.08 / 1M tokens INT4 7B on owned hardware. <a href="/openai-migration" style="color:var(--ks-accent);border-bottom:1px solid var(--ks-accent-edge);">Migration guide &rarr;</a></td>
+            <td class="pc"><b>Market event</b><span class="ico ico-p"></span>OpenAI closed self-serve fine-tuning to new users; existing fine-tuning users lose access in Jan 2027. Closed weights, per-token billing, no portable artifact, no signed lineage, no BYOC.</td>
+            <td><span class="ico ico-p"></span>Hosted fine-tune product; closed-source control plane; per-token billing; weights stay on Fireworks.</td>
+            <td><span class="ico ico-p"></span>Hosted fine-tune + inference; closed-source control plane; per-token billing; weights stay on Together.</td>
+            <td><span class="ico ico-n"></span>Serving layer only; no fine-tune migration path.</td>
+            <td><span class="ico ico-p"></span>Re-run training yourself on HF + Axolotl; no managed migration tooling.</td>
+            <td><span class="ico ico-n"></span>Vendor-proprietary fine-tune (Vertex / Bedrock / Azure OpenAI); same lock-in shape as the surface OpenAI just deprecated.</td>
+          </tr>
+          <tr>
             <td class="ax">Signed, content-addressed artifact per build</td>
             <td class="k"><b>Yes</b><span class="ico ico-y"></span>Every .kolm carries Ed25519 receipt + CID; verifiable years later.</td>
             <td class="pc"><b>kolm pioneered</b><span class="ico ico-y"></span>No prior art at this layer. ML artifacts ship as tarballs of weights, not signed envelopes.</td>
@@ -665,7 +675,7 @@
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/contact">Contact</a>
         <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub &rarr;</a>

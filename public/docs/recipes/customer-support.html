@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Customer support replier &middot; recipes &middot; kolm.ai</title>
+<meta name="description" content="Turn your closed-ticket corpus into a small student model that drafts replies in your team's voice and runs on your own GPU.">
+<link rel="canonical" href="https://kolm.ai/docs/recipes/customer-support">
+<meta property="og:title" content="Customer support replier &middot; recipes">
+<meta property="og:description" content="Distill a small replier that sounds like your team and runs on your hardware. Closed tickets in, signed GGUF out.">
+<meta property="og:url" content="https://kolm.ai/docs/recipes/customer-support">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Customer support replier &middot; recipes">
+<meta name="twitter:description" content="Distill a small replier that sounds like your team and runs on your hardware. Closed tickets in, signed GGUF out.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/docs-shell.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/docs-shell.js"></script>
+<style>
+.step{padding:18px 22px;border:1px solid var(--ks-line-2);border-radius:12px;background:var(--ks-bg-1);margin:14px 0}
+.step .num{font-family:var(--ks-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ks-ink-2);background:var(--ks-bg-2);padding:3px 8px;border-radius:4px;border:1px solid var(--ks-line-2);display:inline-block;margin-bottom:8px}
+.step h3{margin:6px 0 8px}
+pre{background:var(--ks-bg-2);color:var(--ks-ink);border:1px solid var(--ks-line-2);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--ks-mono);margin:14px 0 18px}
+.alt-cmd{font-family:var(--ks-mono);font-size:12px;color:var(--ks-ink-3);margin:-6px 0 8px}
+.caveat{margin-top:6px;padding:14px 18px;border-left:3px solid var(--ks-ink-3);background:var(--ks-bg-2);border-radius:0 8px 8px 0;font-size:14.5px;color:var(--ks-ink-2)}
+.shipline{display:grid;grid-template-columns:160px 1fr;gap:10px 18px;padding:14px 0;border-bottom:1px solid var(--ks-line-2)}
+.shipline:last-child{border-bottom:0}
+.shipline b{color:var(--ks-ink);font-weight:540}
+.shipline span{color:var(--ks-ink-2)}
+:focus-visible{outline:2px solid var(--ks-ink);outline-offset:3px;border-radius:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
+
+<main id="main" class="docs-page" data-w918="customer-support">
+<nav aria-label="Breadcrumb" class="crumbs">
+ <a href="/docs">Docs</a> / <a href="/docs/recipes">Recipes</a> / <span>Customer support replier</span>
+</nav>
+<header class="page-h">
+ <p class="eyebrow">Open-source AI compiler</p>
+ <h1>Distill a customer-support replier.</h1>
+ <p class="lede">Take a directory of closed tickets (or your existing OpenAI fine-tuning JSONL) and compile a small student model that drafts replies in your team's voice. The output is a signed GGUF you own, runnable in Ollama, vLLM, llama.cpp, or any GGUF-aware runtime &mdash; with a verifiable receipt that ties the artifact back to its training spec.</p>
+</header>
+
+<section data-w918="need">
+ <h2>What you need</h2>
+ <ul>
+   <li><b>kolm CLI</b> &mdash; <code>npm i -g github:kolm-ai/kolm</code> or build from source. Confirm with <code>kolm version</code>.</li>
+   <li><b>API key</b> &mdash; <code>kolm login</code> or sign up at <a href="/signup">/signup</a>. The key authorizes capture, distill, and signing.</li>
+   <li><b>Teacher provider keys</b> &mdash; <code>ANTHROPIC_API_KEY</code>, <code>OPENAI_API_KEY</code>, and <code>CEREBRAS_API_KEY</code> exported in the shell. Missing keys cause the matching teacher to be skipped (with a warning), not fail the run.</li>
+   <li><b>GPU for the training step</b> &mdash; one card with 16&nbsp;GB+ VRAM (RTX 4090 / 5090) or a $0.39/hr RunPod community GPU. Import, spec, collect, and export are CPU-bound.</li>
+   <li><b>Dataset shape</b> &mdash; either an OpenAI fine-tuning JSONL (<code>{"messages":[...]}</code> chat or <code>{"prompt":..., "completion":...}</code> legacy) <em>or</em> a JSONL of closed-ticket pairs with at least 800&ndash;2000 rows. A thumbs-up / CSAT field is recommended but not required.</li>
+ </ul>
+</section>
+
+<section data-w918="steps">
+ <h2>Step-by-step</h2>
+
+ <div class="step">
+   <span class="num">Step 1</span>
+   <h3>Import your historical conversations</h3>
+   <p>Pick the path that matches what you already have. If you ran an OpenAI fine-tune (now sunsetting January 2027), use the importer to land its training set into a kolm capture lake. If your tickets live in a CSV/JSONL export from Zendesk, Front, or Help Scout, use <code>kolm capture log --import</code> directly.</p>
+   <pre><code># Path A &mdash; existing OpenAI fine-tuning JSONL
+kolm import --from openai-finetune ./historical-finetune.jsonl \
+  --out ./captures.jsonl \
+  --namespace support</code></pre>
+   <p class="alt-cmd">or, if you have raw closed tickets:</p>
+   <pre><code># Path B &mdash; closed-ticket JSONL export
+kolm capture log \
+  --namespace support \
+  --import ./closed-tickets.jsonl</code></pre>
+   <p>Both paths produce capture rows in the <code>support</code> namespace that the distill pipeline can read. Inspect counts with <code>kolm capture status --namespace support</code>.</p>
+ </div>
+
+ <div class="step">
+   <span class="num">Step 2</span>
+   <h3>Generate a distill spec</h3>
+   <p>The spec pins the base model, the teacher council, the per-teacher row budget, and the hyperparameters. The defaults below come from the Trinity-500 council recipe and have shipped real artifacts on the same vocabulary.</p>
+   <pre><code>kolm distill spec \
+  --base qwen2.5-7b-instruct \
+  --teachers anthropic:claude-sonnet-4-6,openai:gpt-4o,cerebras:llama-3.3-70b \
+  --rows 800,600,600 \
+  --namespace support \
+  --out spec.json</code></pre>
+   <p>The <code>--rows 800,600,600</code> flag caps how many rows each teacher will be asked to produce, in declared teacher order. Cerebras is the fastest of the three (sub-second per row), so it can carry weight without slowing the run.</p>
+ </div>
+
+ <div class="step">
+   <span class="num">Step 3</span>
+   <h3>Collect the council's responses</h3>
+   <p>Run every imported prompt through every configured teacher. The output is a single JSONL with prompt, three teacher responses, the council-merged response, and per-teacher provenance (request id, model id, latency).</p>
+   <pre><code>kolm distill collect \
+  --spec spec.json \
+  --out captures.jsonl</code></pre>
+   <p>Expect a few minutes for a 2000-row corpus across three teachers. The collector backs off automatically on rate-limit and resumes with <code>--resume</code>. Cost on a 2000-row council typically lands at $4&ndash;$8.</p>
+ </div>
+
+ <div class="step">
+   <span class="num">Step 4</span>
+   <h3>Train the student with QLoRA</h3>
+   <p>QLoRA on Qwen2.5-7B-Instruct fits in roughly 16&nbsp;GB of VRAM with grad-checkpointing and microbatch 1. The trainer signs the resulting adapter with your tenant's Ed25519 key and pins the spec hash + capture hash + base-model commit into the receipt chain.</p>
+   <pre><code>kolm distill train \
+  --spec spec.json \
+  --captures captures.jsonl \
+  --qlora</code></pre>
+   <p>One epoch on 2000 council pairs takes about 90 seconds on an RTX 5090 and around 4&ndash;5 minutes on an RTX 4090. The signed <code>.kolm</code> artifact is written to <code>~/.kolm/artifacts/</code>; the path is printed on success.</p>
+ </div>
+
+ <div class="step">
+   <span class="num">Step 5</span>
+   <h3>Export to GGUF for local serving</h3>
+   <p>Convert the signed adapter to a Q4_K_M GGUF that runs in Ollama, LM Studio, llama.cpp, and any other GGUF-aware runtime. Q4_K_M is the right starting point for replier workloads &mdash; small enough to fit a 7B on an 8&nbsp;GB card, large enough to keep tone fidelity.</p>
+   <pre><code>kolm export ~/.kolm/artifacts/&lt;artifact&gt;.kolm \
+  --backend gguf \
+  --quant q4_k_m \
+  --out support-replier.gguf</code></pre>
+   <p>Pair with <code>--backend mlx</code> for Apple Silicon, <code>--backend onnx</code> for ONNX Runtime, <code>--backend tensorrt</code> for NVIDIA serving, or <code>--backend coreml</code> for iPhone/iPad.</p>
+ </div>
+
+ <div class="step">
+   <span class="num">Step 6</span>
+   <h3>Serve with Ollama and smoke-test</h3>
+   <p>Wrap the GGUF in an Ollama Modelfile, register it, and run a one-shot prompt to confirm the artifact is responsive.</p>
+   <pre><code>cat &gt; Modelfile &lt;&lt;'EOF'
+FROM ./support-replier.gguf
+TEMPLATE """{{ if .System }}&lt;|im_start|&gt;system
+{{ .System }}&lt;|im_end|&gt;
+{{ end }}{{ if .Prompt }}&lt;|im_start|&gt;user
+{{ .Prompt }}&lt;|im_end|&gt;
+{{ end }}&lt;|im_start|&gt;assistant
+"""
+PARAMETER stop "&lt;|im_end|&gt;"
+EOF
+
+ollama create support-replier -f Modelfile
+ollama run support-replier "test"</code></pre>
+   <p>From here, point your support tool's webhook at <code>http://localhost:11434/api/generate</code> (or wrap it in a thin proxy) and ship in shadow mode first &mdash; let the model draft, the human review, and log the diff back as new captures with <code>kolm capture log --namespace support</code>.</p>
+ </div>
+</section>
+
+<section data-w918="ship">
+ <h2>What you ship</h2>
+ <div class="shipline"><b>Artifact</b><span><code>support-replier.gguf</code> (~4&nbsp;GB Q4_K_M on Qwen2.5-7B) + signed <code>.kolm</code> manifest with spec, captures hash, teacher provenance, and Ed25519 signature.</span></div>
+ <div class="shipline"><b>Modelfile</b><span>One Ollama Modelfile that pins the chat template and stop tokens. Drops straight into any Ollama-aware tool.</span></div>
+ <div class="shipline"><b>Receipt</b><span>HMAC chain (task &rarr; seeds &rarr; recipes &rarr; evals &rarr; package) verifiable offline with <code>kolm verify support-replier.kolm</code>.</span></div>
+ <div class="shipline"><b>Deploy targets</b><span>Ollama (local + macOS), vLLM (production GPU serving), llama.cpp (edge + CPU), LM Studio (desktop UI), WebGPU via <code>kolm export --backend onnx</code>.</span></div>
+ <h3>Caveats</h3>
+ <div class="caveat">The distilled student inherits its teachers' blind spots. If only one provider's key is configured, the council collapses to one lineage and the student's tone narrows. Re-run with at least two teachers from different lineages for production-grade output.</div>
+ <div class="caveat">Closed-ticket corpora skew toward fast resolutions. To keep the model useful on hard cases, oversample escalated tickets (CSAT &le; 3, or tier-2+) when you build the import JSONL.</div>
+ <div class="caveat">The receipt verifies the artifact's signature and chain, not the underlying customer data. Run <code>kolm import --redact phi,pii</code> in step 1 if your tickets contain PHI/PII you do not want crossing teacher boundaries.</div>
+ <div class="caveat">Re-distill on a cadence. Frontier teachers update every few weeks. A weekly cron of <code>kolm distill collect --since 7d</code> followed by <code>kolm distill train</code> keeps the student in step with drifting production.</div>
+</section>
+
+<section data-w918="next">
+ <h2>Related</h2>
+ <ul>
+   <li><a href="/docs/recipes">Browse the recipe library</a> &mdash; doc Q&amp;A, classification, agent / tool-use, and more.</li>
+   <li><a href="/openai-migration">OpenAI fine-tuning migration guide</a> &mdash; the long-form walkthrough behind step&nbsp;1's importer path.</li>
+   <li><a href="/docs/recipes/doc-qa">Doc Q&amp;A recipe</a> &mdash; same loop, grounded in your own corpus.</li>
+   <li><a href="/templates">Template catalog</a> &mdash; the spec.json + seed schema + holdout that ships with each recipe.</li>
+ </ul>
+</section>
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
+        <a href="/blog">Blog</a>
+        <a href="/faq">FAQ</a>
+        <a href="/changelog">Changelog</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/status">Status</a>
+        <a href="/subprocessors">Subprocessors</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/about">About</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/press">Press</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai - Apache-2.0 - Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

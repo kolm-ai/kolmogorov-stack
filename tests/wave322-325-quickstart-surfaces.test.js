@@ -53,8 +53,13 @@ for (const surface of SURFACES) {
     }
     // JSON-LD TechArticle
     assert.match(html, /"@type":"TechArticle"/, 'JSON-LD TechArticle block required (W225/W226)');
-    // Brand anchor (W228) — kolm.ai appears in first 1200 chars of body
-    const bodyStart = html.split('<body>')[1] || '';
+    // Brand anchor (W228) — kolm.ai appears in first 1200 chars of body.
+    // The body tag carries attributes since the W605-W611 ks.css frontend
+    // migration (<body class="ks">), so match the opening <body ...> tag
+    // rather than a bare literal split.
+    const bodyOpen = html.match(/<body\b[^>]*>/);
+    assert.ok(bodyOpen, 'body landmark required');
+    const bodyStart = html.slice(html.indexOf(bodyOpen[0]) + bodyOpen[0].length);
     assert.ok(bodyStart.slice(0, 1200).includes('kolm.ai'),
       'kolm.ai must appear in first 1200 body chars (W228 brand disambig)');
   });

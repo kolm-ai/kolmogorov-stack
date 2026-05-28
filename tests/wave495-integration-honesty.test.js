@@ -74,7 +74,10 @@ test('W495 #4 - adapter READMEs and metadata point at the real source repo', () 
     'packages/python-llamaindex-kolm/README.md',
   ]) {
     const text = read(rel);
-    assert.match(text, /github\.com\/kolm-ai\/kolm-stack/);
+    // W917 renamed the canonical GitHub repo kolm-ai/kolmogorov-stack -> kolm-ai/kolm
+    // (commit 4154c665: "preempt kolm-ai/kolm rename ... in-repo refs now point at the
+    // canonical kolm-ai/kolm directly"). Assert the current canonical repo URL.
+    assert.match(text, /github\.com\/kolm-ai\/kolm\b/);
     assert.match(text, /not published under Kolm control/i);
   }
 
@@ -85,7 +88,8 @@ test('W495 #4 - adapter READMEs and metadata point at the real source repo', () 
     'packages/python-llamaindex-kolm/pyproject.toml',
   ]) {
     const text = read(rel);
-    assert.match(text, /kolm-ai\/kolm-stack/);
+    // W917 canonical repo rename: metadata points at kolm-ai/kolm (not the old -stack slug).
+    assert.match(text, /kolm-ai\/kolm\b/);
     assert.doesNotMatch(text, OLD_REPO_RE);
   }
 });

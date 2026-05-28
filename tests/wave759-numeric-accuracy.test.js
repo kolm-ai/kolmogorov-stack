@@ -674,9 +674,9 @@ test('W759 #21 — public/docs/numeric-accuracy.html exists w/ brand-lock + calc
   for (const needle of [
     'kolm.ai',
     'class="ks-nav"',
-    'ks-footer',
+    'ks-foot',                                   // W902 unified footer class (was ks-footer; w902-unify-footer.cjs across 642 pages)
     'Open-source AI workbench',                  // brand eyebrow lock
-    'Frontier AI on your own infrastructure',    // brand H1 lock (footer tagline)
+    'The open-source AI compiler.',              // W902 unified footer tagline (replaced 'Frontier AI on your own infrastructure.')
     'Numerical accuracy in compiled artifacts',  // page H1 (per spec)
     'w759-v1',                                   // version stamp
     'calculator',                                // tool name shown

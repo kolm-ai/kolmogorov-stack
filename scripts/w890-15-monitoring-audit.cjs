@@ -448,7 +448,7 @@ non-2xx, and forward to PagerDuty/Slack/email.
 - **Datadog Synthetics** — 60s interval, deepest correlation with metrics
   scrape (the \`/metrics\` exporter feeds the same dashboard).
 
-Self-hosted alternative: a cron'd \`curl -fsS https://api.kolm.ai/health\`
+Self-hosted alternative: a cron'd \`curl -fsS https://kolm.ai/health\`
 piped to a Slack webhook is acceptable for self-hosters; the spec is "ping
 every 60s and page on red", not a specific vendor.
 
@@ -480,7 +480,7 @@ every 60s and page on red", not a specific vendor.
 External ping every 60s is required per the W890-15 scope. The setup itself
 runs in the provider console; the runbook documents the contract:
 
-- **Probe URL:** \`https://api.kolm.ai/health\`
+- **Probe URL:** \`https://kolm.ai/health\`
 - **Probe method:** GET, no auth, no body
 - **Interval:** 60s (matches the W888 K-1 spec)
 - **Pass criterion:** HTTP 200 + JSON body with \`ok:true\`
@@ -702,7 +702,7 @@ contract so the setup is mechanical:
 
 - [ ] Provision Sentry org/project; set \`SENTRY_DSN\` in deploy env.
 - [ ] Configure external uptime monitor (Betterstack/Pingdom/Datadog) at
-      \`https://api.kolm.ai/health\` with 60s interval.
+      \`https://kolm.ai/health\` with 60s interval.
 - [ ] Wire PagerDuty escalation policy + Slack \`#ops-alerts\` channel.
 - [ ] Stand up Grafana scraping \`/metrics\` with \`KOLM_METRICS_BEARER\`.
 - [ ] Build the dashboards in §6.

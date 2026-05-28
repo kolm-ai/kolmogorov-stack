@@ -79,7 +79,11 @@ test('W868 #4 - receipt artifact markup is rendered in HTML body', () => {
   assert.ok(/class="kolm-receipt-strip[^"]*"/.test(html),
     `homepage must render the .kolm-receipt-strip artifact (W846 receipt focal)`);
   // The receipt JSON must include the audit-trail keys callers rely on.
-  for (const key of ['artifact', 'hash', 'k_score', 'signed_by']) {
+  // W911 (commit 4e9627da) deliberately rewrote the receipt from a flat schema
+  // to the canonical nested artifact-spec shape: the old top-level "signed_by"
+  // string became a structured "signature" object (algo/key/value). Pin the
+  // current signing-proof key, not the retired literal.
+  for (const key of ['artifact', 'hash', 'k_score', 'signature']) {
     assert.ok(new RegExp(`"${key}"`).test(html),
       `inline receipt must show the "${key}" key (proof of audit-trail content)`);
   }
@@ -88,10 +92,16 @@ test('W868 #4 - receipt artifact markup is rendered in HTML body', () => {
 // ----------------------------------------------------------------------------
 // 5) sw.js slug carries wave868 token (regex, not explicit slug)
 // ----------------------------------------------------------------------------
-test('W868 #5 - sw.js CACHE slug contains wave868 token', () => {
+test('W868 #5 - sw.js CACHE slug carries wave868-or-later token', () => {
   const sw = fs.readFileSync(SW_JS, 'utf8');
-  assert.ok(/wave868\b/.test(sw),
-    `sw.js CACHE slug must include "wave868" token`);
+  // W604/W829 anti-brittleness: scan all wave tokens, assert max >= 868.
+  // The literal `wave868` slug long since rolled forward (W911, W917, ...),
+  // so a hard-coded token pin is stale by design — use regex + threshold.
+  const waves = [...sw.matchAll(/wave(\d{3,4})/g)].map((m) => parseInt(m[1], 10));
+  assert.ok(waves.length > 0, 'sw.js must carry at least one wave token');
+  const maxWave = Math.max(...waves);
+  assert.ok(maxWave >= 868,
+    `sw.js CACHE wave must reach >= 868 (saw max wave${maxWave})`);
 });
 
 // ----------------------------------------------------------------------------

@@ -350,9 +350,12 @@ test('W829 #9 — sw.js wave token matches `wave(\\d{3,4})` and includes a token
   assert.ok(matches.length > 0, 'sw.js must contain at least one wave token');
   const maxWave = Math.max(...matches);
   assert.ok(maxWave >= 829, `sw.js highest wave token ${maxWave} must be >= 829`);
-  // And the specific W829 suffix the wave-plan asked for must be present.
-  assert.ok(raw.includes('wave829-multimodal-pipeline'),
-    'sw.js must include the wave829-multimodal-pipeline suffix per the W829 plan');
+  // NOTE: per the W604/W829 convention documented in this file's header, the
+  // sw.js version pin is regex+threshold ONLY — never a literal wave suffix.
+  // The cache slug naturally advances every wave (now wave918+), so asserting
+  // the literal `wave829-multimodal-pipeline` token would be a stale lock-in
+  // that future waves are forced to touch. The threshold check above is the
+  // contract.
 });
 
 // ---------------------------------------------------------------------------

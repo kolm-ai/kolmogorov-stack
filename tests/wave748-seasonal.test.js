@@ -612,7 +612,10 @@ test('W748 #18 — public/account/seasonal.html exists with brand-lock + viz', (
     '/v1/seasonal/variant',                     // dashboard wires variant creation
     'namespace',                                // ?namespace= URL param
     'ks-nav',                                   // nav shell
-    'brand-anchor',                             // brand-anchor hidden span
+    // 'brand-anchor' span deliberately stripped in W903 (commit 966457dd —
+    // "title + brand-anchor strip"; scripts/w903-strip-brand-anchor.cjs removed
+    // the "Not Kolm therapeutics" disambiguation spans across 90 HTML pages).
+    // The sibling /docs/seasonal page (#17) never pinned it, so the lock is stale.
     'season-bar',                               // time-series viz container
     'N-hemisphere',                             // honest bias note
     'Recommended variant',                      // recommendation panel

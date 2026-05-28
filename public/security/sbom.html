@@ -131,13 +131,35 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p>Three paths: CLI, HTTP API, and a stdlib-only Python script that runs anywhere Python 3.10+ is on PATH (so CI runners without Node can still emit).</p>
 
 <h3>CLI</h3>
-<pre>CODE11</pre>
+<pre><code># Emit a CycloneDX SBOM from a kolm manifest:
+kolm sbom emit --manifest path/to/manifest.json --format cyclonedx-json --output sbom.json
+
+# SPDX 2.3:
+kolm sbom emit --manifest path/to/manifest.json --format spdx-json --output sbom.spdx.json
+
+# SBOM of the kolm install itself (package-lock.json):
+kolm sbom repo --format cyclonedx-json &gt; kolm-stack-sbom.json
+
+# Validate a previously-emitted SBOM:
+kolm sbom verify --sbom sbom.json</code></pre>
 
 <h3>HTTP API (authenticated)</h3>
-<pre>CODE12</pre>
+<pre><code>POST /v1/sbom/emit
+{ "manifest": { ...kolm manifest... }, "format": "cyclonedx-json" }
+&rarr;
+{ "ok": true, "version": "w763-v1", "format": "cyclonedx-json",
+  "sbom": { ... }, "component_count": 47 }
+
+GET  /v1/sbom/repo                  # SBOM of the running install
+POST /v1/sbom/verify                # body: { "sbom": { ... } }</code></pre>
 
 <h3>Python (stdlib-only)</h3>
-<pre>CODE13</pre>
+<pre><code>python3 apps/export/sbom.py \
+  --manifest path/to/manifest.json \
+  --package-lock package-lock.json \
+  --requirements requirements.txt \
+  --format cyclonedx-json \
+  --output kolm-stack-sbom.json</code></pre>
 
 <h2 id="workflow">GitHub workflow for SBOM-on-release</h2>
 <p><code>.github/workflows/sbom.yml</code> runs on every <code>push</code> to <code>main</code> and on every <code>release</code> event:</p>
@@ -219,6 +241,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -238,7 +261,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

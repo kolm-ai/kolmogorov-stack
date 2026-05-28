@@ -430,7 +430,10 @@ test('W736 #14 — public/docs/guardrails.html exists with brand-lock content + 
     '/ks.css',
     '/docs-shell.css',
     '<link rel="canonical" href="https://kolm.ai/docs/guardrails">',
-    'class="ks-footer"',
+    // W902 migrated the site-wide footer class from `ks-footer` to `ks-foot`
+    // across 209 docs pages (commit fe519704). The brand-lock anchor is now
+    // the current convention shared by all /docs pages.
+    'class="ks-foot"',
   ]) {
     assert.ok(html.includes(anchor),
       `guardrails.html must contain brand-lock anchor "${anchor}"`);

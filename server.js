@@ -439,6 +439,27 @@ app.get('/r/:hash', (req, res, next) => {
 // behind every new vercel.json rewrite (e.g. /agents /train /why-kolm /docs/api
 // /compare/* /case-studies/* /security/* /spec/* /benchmarks/*). Conservative: only
 // matches GET requests for paths without an extension and rejects traversal (..).
+// W918 Wave 2 — explicit pretty-path rewrites for routes whose slug does not
+// map 1:1 to public/<slug>.html (the dated blog posts) plus the new top-level
+// Wave 2 pages. Registered before the generic fallback so they win; keeps
+// self-host / Docker / Railway-direct in lockstep with the vercel.json rewrites.
+const W918_PRETTY_REWRITES = [
+  ['/agents', 'agents.html'],
+  ['/gateway-migration', 'gateway-migration.html'],
+  ['/hobbyist', 'hobbyist.html'],
+  ['/account/org', 'account/org.html'],
+  ['/account/members', 'account/members.html'],
+  ['/blog/distilling-agents', 'blog/2026-06-02-distilling-agents.html'],
+  ['/blog/distill-from-gateway-logs', 'blog/2026-06-04-distill-from-gateway-logs.html'],
+];
+for (const [route, file] of W918_PRETTY_REWRITES) {
+  app.get(route, (_req, res, next) => {
+    const f = path.join(__dirname, 'public', file);
+    if (fs.existsSync(f)) { res.set('Cache-Control', 'public, max-age=60, must-revalidate'); return res.sendFile(f); }
+    return next();
+  });
+}
+
 app.get('*', (req, res, next) => {
   if (req.method !== 'GET') return next();
   const p = req.path;

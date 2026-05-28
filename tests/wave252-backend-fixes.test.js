@@ -87,6 +87,12 @@ test('W252 #1 — stripe webhook returns 503 when idempotency op throws AND tena
   // throws otherwise). This is the cleanest way to force the next write op
   // inside withTransaction() to throw without monkeypatching ESM bindings.
   // Both primary AND backup must be invalid so the recovery path also fails.
+  //
+  // W896 made the JSON store boot-resilient: a corrupt table is quarantined
+  // and the loader returns an empty array instead of throwing, UNLESS
+  // KOLM_STORE_STRICT=1 is set (the documented opt-in that makes corruption
+  // fatal at read time). To exercise the genuine 503 rollback path this test
+  // must run the server under KOLM_STORE_STRICT=1 — see env below.
   fs.writeFileSync(path.join(dataDir, 'stripe_events.json'), '{"not":"an array"}', 'utf8');
   fs.writeFileSync(path.join(dataDir, 'stripe_events.json.bak'), '{"also":"broken"}', 'utf8');
 
@@ -100,6 +106,7 @@ test('W252 #1 — stripe webhook returns 503 when idempotency op throws AND tena
       KOLM_DATA_DIR: dataDir,
       KOLM_HOME: home,
       KOLM_STORE_DRIVER: 'json',
+      KOLM_STORE_STRICT: '1',
       STRIPE_WEBHOOK_SECRET: WEBHOOK_SECRET,
     },
     stdio: ['ignore', 'pipe', 'pipe'],

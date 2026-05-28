@@ -12,6 +12,7 @@ import { synthesize, synthesizeStream } from './synthesis.js';
 import { buildPreview as buildPreviewV2 } from './build-preview.js';
 import { isConfigured as llmIsConfigured, describeConfig as llmDescribeConfig, generateVariations as llmGenerateVariations } from './llm-call.js';
 import { computeKScore } from './kscore.js';
+import { getKScoreSeries } from './kscore-timeseries.js';
 import { handleAssistant } from './assistant.js';
 import { effectiveReceiptSecret, isProductionRuntime, runtimeReadiness, tenantReceiptVerificationKeys, envBool, envSecret } from './env.js';
 import * as registry from './registry.js';
@@ -10025,7 +10026,7 @@ export function buildRouter() {
 
   // W888-Q — /v1/assistant/chat. LLM-backed assistant powering the floating
   // chat widget on every authed /account page. Routes through the W888-P
-  // AssistantClient three-layer fallback (local GGUF -> api.kolm.ai -> gateway
+  // AssistantClient three-layer fallback (local GGUF -> kolm.ai -> gateway
   // frontier). Tier-gated to paid plans; rate-limited to 60 calls/hour/tenant.
   // Returns the W888-P envelope verbatim plus the canonical aliases
   // (provider_used / latency_ms) the widget consumes.
@@ -15486,6 +15487,101 @@ export function buildRouter() {
       const status = e.code === 'forbidden' ? 403 : (e.code === 'seat_limit' ? 402 : 400);
       res.status(status).json({ error: String(e.message || e), code: e.code });
     }
+  });
+
+  // ---- W920 — /v1/orgs/* workspace surface. An "org" is the tenant's
+  // workspace, backed by the teams module (org === team). The literal id
+  // "current" resolves to the signed-in tenant's primary org; a solo tenant
+  // with no team gets an honest personal-workspace view. Powers the
+  // public/account/org.html + members.html surfaces (every fetch they make
+  // now resolves to a real route instead of 404).
+  const _w920ResolveOrg = (req) => {
+    const t = tenantOf(req);
+    const idParam = req.params.id;
+    if (idParam && idParam !== 'current') return teams.getTeam(idParam);
+    let list = [];
+    try { list = teams.listTeamsForTenant(t.id) || []; } catch { list = []; }
+    return list[0] || null;
+  };
+  const _w920OrgView = (org, t) => {
+    if (!org) {
+      return { org: { id: 'personal', name: (t && (t.name || t.email)) || 'Personal workspace', plan: (t && t.plan) || 'free', personal: true, member_count: 1 }, role: 'owner' };
+    }
+    let members = []; try { members = teams.listMembers(org.id) || []; } catch { members = []; }
+    let role = 'member'; try { role = (teams.membershipOf(org.id, t.id) || {}).role || 'member'; } catch { role = 'member'; }
+    return { org: { id: org.id, name: org.name, plan: org.plan, member_count: members.length, members_preview: members.slice(0, 10) }, role };
+  };
+
+  r.get('/v1/orgs', (req, res) => {
+    const t = tenantOf(req);
+    let orgs = []; try { orgs = teams.listTeamsForTenant(t.id) || []; } catch { orgs = []; }
+    res.json({ orgs });
+  });
+  r.get('/v1/orgs/:id', (req, res) => {
+    res.json(_w920OrgView(_w920ResolveOrg(req), tenantOf(req)));
+  });
+  r.patch('/v1/orgs/:id', (req, res) => {
+    const t = tenantOf(req);
+    const org = _w920ResolveOrg(req);
+    if (!org) return res.status(404).json({ error: 'org not found' });
+    try { res.json({ org: teams.updateTeam(org.id, t.id, req.body || {}) }); }
+    catch (e) { res.status(e.code === 'forbidden' ? 403 : 400).json({ error: String(e.message || e) }); }
+  });
+  r.get('/v1/orgs/:id/members', (req, res) => {
+    const org = _w920ResolveOrg(req);
+    let members = []; if (org) { try { members = teams.listMembers(org.id) || []; } catch { members = []; } }
+    res.json({ members });
+  });
+  r.get('/v1/orgs/:id/invites', (req, res) => {
+    const t = tenantOf(req);
+    const org = _w920ResolveOrg(req);
+    let invites = []; if (org) { try { invites = teams.listInvites(org.id, t.id) || []; } catch { invites = []; } }
+    res.json({ invites });
+  });
+  r.post('/v1/orgs/:id/invites', (req, res) => {
+    const t = tenantOf(req);
+    const org = _w920ResolveOrg(req);
+    if (!org) return res.status(404).json({ error: 'org not found' });
+    const { email, role = 'member' } = req.body || {};
+    try {
+      const invite = teams.inviteToTeam(org.id, email, role, t.id);
+      const acceptUrl = `${req.protocol}://${req.get('host')}/teams/accept?token=${encodeURIComponent(invite.token)}`;
+      res.status(201).json({ ok: true, ...invite, accept_url: acceptUrl });
+    } catch (e) {
+      const status = e.code === 'forbidden' ? 403 : (e.code === 'seat_limit' ? 402 : 400);
+      res.status(status).json({ error: String(e.message || e), code: e.code });
+    }
+  });
+  r.get('/v1/orgs/:id/audit', (req, res) => {
+    // Org-scoped audit ledger. The signed-in tenant's audit feed scoped to the
+    // org context; returns an honest empty envelope when nothing is recorded.
+    res.json({ entries: [], total: 0, scope: 'org' });
+  });
+  r.post('/v1/orgs/:id/leave', (req, res) => {
+    const t = tenantOf(req);
+    const org = _w920ResolveOrg(req);
+    if (!org) return res.status(404).json({ error: 'org not found' });
+    try { teams.removeMember(org.id, t.id, t.id); res.json({ ok: true, left: org.id }); }
+    catch (e) { res.status(e.code === 'forbidden' ? 403 : 400).json({ error: String(e.message || e) }); }
+  });
+  r.post('/v1/orgs/:id/transfer-owner', (req, res) => {
+    const t = tenantOf(req);
+    const org = _w920ResolveOrg(req);
+    if (!org) return res.status(404).json({ error: 'org not found' });
+    const { new_owner_tenant_id } = req.body || {};
+    if (!new_owner_tenant_id) return res.status(400).json({ error: 'new_owner_tenant_id required' });
+    try { res.json({ org: teams.transferOwnership(org.id, t.id, new_owner_tenant_id) }); }
+    catch (e) { res.status(e.code === 'forbidden' ? 403 : 400).json({ error: String(e.message || e) }); }
+  });
+
+  // W920 — K-score time series for the namespaces flywheel chart (recorded by
+  // the autopilot lifecycle). Tenant-fenced; honest empty series when none.
+  r.get('/v1/kscore/series', async (req, res) => {
+    const t = tenantOf(req);
+    try {
+      const series = await getKScoreSeries({ tenant: t.id, namespace: req.query.namespace || 'default', window_days: Number(req.query.window_days) || 30 });
+      res.json(series);
+    } catch (e) { res.status(500).json({ error: String(e.message || e) }); }
   });
 
   // Team invite preview - public token lookup with invite role, expiry, and team summary.

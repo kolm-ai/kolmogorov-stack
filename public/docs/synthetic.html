@@ -119,37 +119,131 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   </tbody>
 </table>
 
-<pre>CODE13</pre>
+<pre><code>GET /v1/synthetic/coverage/billing?bucket_strategy=category
+{
+  "ok": true,
+  "namespace": "billing",
+  "total": 247,
+  "buckets": [
+    {"name": "refund", "count": 200, "pct": 0.81, "rarity_score": 0.04},
+    {"name": "general", "count": 45, "pct": 0.18, "rarity_score": 0.32},
+    {"name": "escalation", "count": 2, "pct": 0.008, "rarity_score": 0.87}
+  ],
+  "rare_buckets": [
+    {"name": "escalation", "count": 2, "rarity_score": 0.87},
+    ...
+  ],
+  "gini_coefficient": 0.661,
+  "bucket_strategy": "category",
+  "version": "w749-v1"
+}
+</code></pre>
 
 <h2 id="rarity">Rarity score + up-weighting math</h2>
 <p>Each bucket carries a <code>rarity_score</code> in roughly <code>[0, 1]</code>:</p>
 
-<pre>CODE16</pre>
+<pre><code>rarity_score(bucket) = -log(pct + 1e-6) / log(total)
+
+# pct ∈ [0, 1]    -  fraction of captures in this bucket
+# total           -  total capture count
+# epsilon (1e-6)  -  guards log(0) for zero-count buckets when target_categories is used
+</code></pre>
 
 <p>The training sampler can then up-weight rare buckets so the model sees them proportionally more often than their raw frequency would dictate:</p>
 
-<pre>CODE17</pre>
+<pre><code>importance_weight(capture) = 1.0 + rarity_score(capture.bucket) * 2
+
+# Common bucket  (rarity ~= 0): weight ~= 1.0  (no boost)
+# Rare bucket    (rarity ~= 1): weight ~= 3.0  (3x boost)
+# Capped at 5.0  to prevent gradient explosion on degenerate corpora.
+</code></pre>
 
 <p>This is a sampler weight, not a loss weight &mdash; rare captures appear in the training batches more often, but each example contributes the same gradient. (Loss-weighting can be added by multiplying the gradient by the same factor; we keep the two knobs separate so practitioners can tune them independently.)</p>
 
 <h2 id="gaps">Gap detection + the "Generate 50?" UI</h2>
 <p>Gap detection answers a focused question: "which categories have fewer than N captures?" The default N is <strong>50</strong> &mdash; below this threshold a category is considered under-served and surfaced for synthetic top-up. You can pass either a list of <code>target_categories</code> (forces missing categories to appear with count=0) or omit it (only shows categories the corpus already has, under-served).</p>
 
-<pre>CODE19</pre>
+<pre><code>GET /v1/synthetic/gaps/billing?target_categories=refund,escalation,billing,general
+{
+  "ok": true,
+  "namespace": "billing",
+  "total_captures": 247,
+  "gaps": [
+    {"category": "escalation", "current_count": 2,   "suggested_count": 50, "gap": 48, "present": true},
+    {"category": "billing",    "current_count": 0,   "suggested_count": 50, "gap": 50, "present": false},
+    {"category": "general",    "current_count": 45,  "suggested_count": 50, "gap": 5,  "present": true}
+  ],
+  "version": "w749-v1"
+}
+</code></pre>
 
 <p>The dashboard at <a href="/account/synthetic">/account/synthetic</a> renders one card per gap with a "Generate 50?" button that opens the confirm modal &mdash; matching the spec verbatim ("I see you have 200 refund queries but zero escalation &mdash; generate 50 escalation examples from teacher?").</p>
 
 <h2 id="spend">Spend warning &mdash; the confirm gate</h2>
 <div class="warn"><strong>Synthetic generation costs money.</strong> Each row calls the teacher (currently Anthropic Claude when wired) and bills against your hosted-inference budget. <code>POST /v1/synthetic/generate</code> deliberately refuses to incur charges without <code>confirm:true</code> in the body. Without confirm, the route returns <code>200 OK</code> with <code>{ ok: false, error: "synthetic_costs_money", estimated_cost_usd }</code> &mdash; a preview, not a charge. Re-submit with <code>confirm: true</code> to actually run the batch.</div>
 
-<pre>CODE25</pre>
+<pre><code># Preview (no charge):
+POST /v1/synthetic/generate
+{
+  "namespace": "billing",
+  "category": "escalation",
+  "target_count": 50
+}
+→ 200 OK
+{
+  "ok": false,
+  "error": "synthetic_costs_money",
+  "hint": "synthetic generation calls the teacher and incurs cost; re-send with {confirm:true} to proceed",
+  "namespace": "billing",
+  "category": "escalation",
+  "target_count": 50,
+  "estimated_cost_usd": 0.10,
+  "cost_per_row_usd": 0.002,
+  "version": "w749-v1"
+}
+
+# Actually run (charged):
+POST /v1/synthetic/generate
+{
+  "namespace": "billing",
+  "category": "escalation",
+  "target_count": 50,
+  "confirm": true
+}
+→ 200 OK
+{
+  "ok": true,
+  "namespace": "billing",
+  "category": "escalation",
+  "generation_id": "a3b9f7c1e2d4a8e0",
+  "generated": [ /* 50 rows, each kolm_synthetic:true */ ],
+  "actual_count": 50,
+  "cost_usd_est": 0.10,
+  "version": "w749-v1"
+}
+</code></pre>
 
 <p>The CLI mirrors this protocol verbatim. Without <code>--confirm</code>, the dispatcher prints a yellow <strong>&#9888;</strong> warning to stderr AND sends the request without the confirm flag, so the user sees the cost estimate in the envelope before they commit. With <code>--confirm</code>, the request fires for real.</p>
 
 <h2 id="commit">Commit &mdash; staging to event-store</h2>
 <p>Generation does NOT immediately write to the event-store. A successful generate returns a <code>generation_id</code> and stages the batch in-process. The caller must explicitly <code>POST /v1/synthetic/commit</code> with the same id to persist:</p>
 
-<pre>CODE30</pre>
+<pre><code>POST /v1/synthetic/commit
+{
+  "namespace": "billing",
+  "generation_id": "a3b9f7c1e2d4a8e0"
+}
+→ 200 OK
+{
+  "ok": true,
+  "namespace": "billing",
+  "generation_id": "a3b9f7c1e2d4a8e0",
+  "persisted_count": 50,
+  "persisted_event_ids": [ "ev_...", ... ],
+  "errors": [],
+  "version": "w749-v1"
+}
+</code></pre>
 
 <p>The staging Map is in-process only by design. If the server restarts before commit, the generated rows are dropped &mdash; no orphaned synthetic data lands silently in your corpus. Generate + commit are expected to happen in the same session.</p>
 
@@ -206,6 +300,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -225,7 +320,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

@@ -269,6 +269,7 @@ test('W409bb #5 — router-loading tests authenticate (not silently 401)', () =>
     '/v1/audio/',
     '/v1/moderations',
     '/v1/loop/try', // public try-it-now form
+    '/v1/assistant', // W888-R public docs-search assistant (auth.js PUBLIC_API: /v1/assistant/chat-docs)
     '/v1/marketplace', // public marketplace browse + download
     '/v1/build/preview', // builder preview is public (no save)
     '/v1/label-queue', // labeling queue — authed but test is informational
@@ -279,7 +280,11 @@ test('W409bb #5 — router-loading tests authenticate (not silently 401)', () =>
   ].map(s => s.replace(/\//g, '\\/')).join('|'));
   for (const f of files) {
     const src = readText(f);
-    if (!/from\s+['"][^'"]*router\.js['"]|buildRouter\s*\(/.test(src)) continue;
+    // Match imports of src/router.js (the real router) OR a buildRouter() call.
+    // The path boundary [\/](?:src[\/])? before `router.js` excludes sibling
+    // modules whose filename merely ends in "router.js" (e.g. the OpenRouter
+    // importer at src/importers/openrouter.js, which does NOT mount the router).
+    if (!/from\s+['"][^'"]*[\/]router\.js['"]|buildRouter\s*\(/.test(src)) continue;
     // Test mounts the router. It MUST either (a) provision an anon tenant,
     // (b) set Authorization Bearer, (c) hit a deliberately-public route
     // like /health or /v1/lake/* (un-authed by router design), or (d)

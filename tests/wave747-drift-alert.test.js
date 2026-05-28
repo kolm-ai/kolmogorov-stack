@@ -772,7 +772,7 @@ test('W747 #20 — public/account/drift-alert.html exists with brand-lock + JSD 
   for (const needle of [
     'kolm.ai',
     'class="ks-nav"',
-    'ks-footer',
+    'ks-foot',                                   // footer shell (W902 unified ks-footer -> ks-foot, commit fe519704)
     'Open-source AI workbench',                  // W747 eyebrow brand lock
     'Frontier AI on your own infrastructure',    // W747 H1 brand lock
     '/v1/drift-alert',                           // fetch surface
@@ -797,7 +797,7 @@ test('W747 #21 — public/docs/drift-alert.html exists with brand-lock + math + 
   for (const needle of [
     'kolm.ai',
     'class="ks-nav"',
-    'ks-footer',
+    'ks-foot',                                   // footer shell (W902 unified ks-footer -> ks-foot, commit fe519704)
     'Open-source AI workbench',                  // W747 eyebrow brand lock
     'Frontier AI on your own infrastructure',    // W747 H1 brand lock
     'w747-v1',                                   // version stamp
@@ -806,7 +806,7 @@ test('W747 #21 — public/docs/drift-alert.html exists with brand-lock + math + 
     'webhook',                                   // webhook schema
     'kolm_alert',                                // webhook payload key
     'distribution_shift',                        // webhook payload value
-    'W709',                                      // W709 routing tie-in note
+    'routing-decision tie-in',                   // W709 routing tie-in note (commit 3a57dd4f scrubbed the internal "W709" wave-tag from public copy; section heading + id="w709" anchor remain)
     'drift_warning',                             // tie-in field
     '/v1/drift-alert',                           // API surface
   ]) {

@@ -116,7 +116,15 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   </tbody>
 </table>
 
-<pre>CODE10</pre>
+<pre><code># Discover everything Ollama has on disk (no parse, no wrap).
+kolm migrate from-ollama --dry-run
+
+# Override the root if Ollama is somewhere non-default.
+kolm migrate from-ollama --path /mnt/models/.ollama/models --dry-run
+
+# Wrap a specific model by &lt;name:tag&gt;. Emits the not_kolm_compiled manifest.
+kolm migrate from-ollama --name llama3.2:3b
+</code></pre>
 
 <h2 id="lmstudio">From LM Studio</h2>
 <p>LM Studio writes models in a <code>&lt;publisher&gt;/&lt;repo&gt;/&lt;file&gt;.gguf</code> tree (sometimes with a per-variant subdirectory). We walk the configured root and pick up every <code>*.gguf</code> we find; the parent directory chain becomes the <code>publisher</code> + <code>repo</code> context on the wrapped manifest. The default-path candidate list covers the layouts LM Studio has shipped on each platform; <code>--path</code> overrides the entire list.</p>
@@ -131,21 +139,53 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   </tbody>
 </table>
 
-<pre>CODE23</pre>
+<pre><code># Discover everything LM Studio has on disk.
+kolm migrate from-lmstudio --dry-run
+
+# Override the root.
+kolm migrate from-lmstudio --path "/Volumes/Models/lm-studio/models" --dry-run
+
+# Wrap a specific file (matched by basename or full path).
+kolm migrate from-lmstudio --name llama-3.2-3b-instruct-q4_k_m
+</code></pre>
 
 <h2 id="doctor">Health check</h2>
 <p><code>kolm migrate doctor</code> reports which default roots exist on this host and how many models we found in each  -  useful for confirming the right Ollama / LM Studio install is being picked up before you start wrapping things.</p>
 
-<pre>CODE25</pre>
+<pre><code>kolm migrate doctor
+</code></pre>
 
 <h2 id="caveats">Plain manifests, every time</h2>
 <p>A migrated model inherits the-2 truthfulness lock:</p>
 
-<pre>CODE26</pre>
+<pre><code>{
+  "ok": true,
+  "manifest_version": "w740-v1",
+  "not_kolm_compiled": true,
+  "k_score": null,
+  "holdout": null,
+  "source_tool": "ollama",
+  "source_name": "llama3.2:3b",
+  "source_format": "gguf",
+  "source_sha256": "&lt;64-hex&gt;",
+  "source_path": "/abs/path/blobs/sha256-...",
+  "imported_at": "2026-05-24T12:34:56.789Z",
+  "migrate_version": "w743-v1",
+  "version": "w740-v1"
+}
+</code></pre>
 
 <p><strong>Migration alone never earns a K-Score.</strong> The wrap exists so the migrated model can ride through catalog / inspect / signature flows immediately  -  but to claim it is kolm-compiled, you have to run <code>kolm distill</code> on real seeds and let the artifact earn a K-Score on a holdout, exactly like a fresh distill would.</p>
 
-<pre>CODE28</pre>
+<pre><code># 1. Migrate the existing Ollama model  -  wrapped not_kolm_compiled manifest.
+kolm migrate from-ollama --name llama3.2:3b
+
+# 2. Re-distill against your captured traffic (this is where the K-Score is earned).
+kolm distill --base ~/.ollama/models/blobs/sha256-&lt;hex&gt; --seeds ./seeds.jsonl --out llama-distilled.kolm
+
+# 3. Optional: export back to GGUF for Ollama / LM Studio / llama.cpp.
+kolm export llama-distilled.kolm --backend gguf --quant q4_k_m --out ./exports
+</code></pre>
 
 <h2 id="privacy">Privacy: migration is local</h2>
 <p>Discovery walks the filesystem only. Manifests, blob digests, and the path of every GGUF stay on the box; no model name, no SHA, and no file content is sent anywhere. The <code>/v1/migrate/{discover,wrap}</code> routes accept paths from the caller and run the same code; they exist so a self-hosted dashboard or CI runner can drive the migration without shelling out, but they still touch only the local filesystem.</p>
@@ -217,6 +257,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -236,7 +277,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

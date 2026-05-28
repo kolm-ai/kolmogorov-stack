@@ -66,9 +66,16 @@ h1{font-size:34px;line-height:1.12;font-weight:520;letter-spacing:-0.02em;margin
 <p class="eyebrow">kolm.ai blog</p>
 <h1>Receipts, distillation, the wrapper.</h1>
 <p class="lede">Engineering notes from the team building kolm. Routing, training recipes, evidence formats, and the boring details that determine whether any of it actually works in production.</p>
-<p class="sub">5 posts &middot; <a href="/feed.xml">RSS</a> &middot; <a href="/changelog">Changelog</a></p>
+<p class="sub">6 posts &middot; <a href="/feed.xml">RSS</a> &middot; <a href="/changelog">Changelog</a></p>
 
 <ol class="post-list" reversed>
+
+<li class="post">
+<p class="date">2026-05-28 <span class="reading">7 min read</span></p>
+<h2><a href="/blog/2026-05-28-openai-finetuning-shutdown">OpenAI is sunsetting fine-tuning. Here is how to land on open-source.</a></h2>
+<p>OpenAI has closed self-serve fine-tuning to new users and will close it to existing customers in January 2027. If you have a fine_tuning_data.jsonl in production today, you have roughly seven months to land somewhere that will still exist in February 2027. This post walks the six-command migration into kolm: import the dataset, generate a distill spec, collect council responses from Claude + GPT-4o + Cerebras Llama-3.3-70B, train a smaller student model, evaluate parity, deploy. The artifact runs on a GPU you own, exports to GGUF and vLLM, and carries a signed receipt for every training run.</p>
+<a class="more" href="/blog/2026-05-28-openai-finetuning-shutdown">Read &rarr;</a>
+</li>
 
 <li class="post">
 <p class="date">2026-05-26 <span class="reading">8 min read</span></p>

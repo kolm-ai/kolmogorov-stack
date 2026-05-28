@@ -457,7 +457,7 @@ test('W741 #12 — public/docs/diagnose.html exists with brand-lock + schema con
   for (const needle of [
     'kolm.ai',                  // brand
     'class="ks-nav"',           // nav shell
-    'ks-footer',                // footer shell
+    'ks-foot',                  // footer shell (W902 unified ks-footer→ks-foot BEM across 642 pages, commit fe519704)
     'AI workbench',             // W741 brand lock
     'Frontier AI on your own infrastructure', // W741 H1 brand lock (footer tagline)
     'w741-v1',                  // version stamp

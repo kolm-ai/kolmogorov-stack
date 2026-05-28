@@ -117,6 +117,15 @@ function bodyOf(html) {
   return body;
 }
 
+// Redirect stubs (intentional dup-retirement pages) carry a
+// <meta http-equiv="refresh"> in the head and instantly navigate away
+// (usually paired with <meta name="robots" content="noindex...">). A
+// viewport meta is moot on a page the browser never paints, so these are
+// excluded from SEO/a11y content requirements like the viewport check.
+function isRedirectStub(html) {
+  return /<meta\b[^>]*http-equiv\s*=\s*["']refresh["'][^>]*>/i.test(html);
+}
+
 test('1. every public/*.html declares <html lang="en"> (or correct localized lang for /lang/<locale>/* pages)', () => {
   // W277 shipped internationalization scaffolding under public/lang/<locale>/
   // where each localized page declares <html lang="<locale>">. The a11y rule
@@ -144,6 +153,8 @@ test('2. every public/*.html has viewport meta with width=device-width', () => {
   const offenders = [];
   for (const f of ALL_HTML) {
     const html = read(f);
+    // Redirect stubs navigate away instantly — viewport is moot. Skip them.
+    if (isRedirectStub(html)) continue;
     const vp = html.match(/<meta\b[^>]*name\s*=\s*["']viewport["'][^>]*>/i);
     if (!vp) { offenders.push(rel(f) + ' (no viewport)'); continue; }
     if (!/width\s*=\s*device-width/i.test(vp[0])) offenders.push(rel(f) + ' (no device-width)');

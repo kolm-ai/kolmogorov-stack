@@ -44,7 +44,8 @@ test('W278 /spec/rs-1 has v2.1 current callout pointing at /spec/changelog', () 
 test('W278 /spec/rs-1 banner links to /verify-cli and GitHub', () => {
   const html = readPublic('spec/rs-1.html');
   assert.match(html, /\/verify-cli/, 'banner links to /verify-cli');
-  assert.match(html, /github\.com\/kolm-ai\/kolm-stack/, 'banner links to GitHub source');
+  // Repo renamed kolm-stack -> kolm (W917 "preempt kolm-ai/kolm rename"); url is now kolm-ai/kolm
+  assert.match(html, /github\.com\/kolm-ai\/kolm\b/, 'banner links to GitHub source');
 });
 
 test('W278 /verify-cli has at least one install command', () => {
@@ -112,10 +113,11 @@ test('W278 /spec/changelog lists v2.1 with k-score-2 axes', () => {
 
 test('W278 /spec/changelog provides diff links per version', () => {
   const html = readPublic('spec/changelog.html');
-  // Each non-initial version should link to a compare URL on GitHub
-  assert.match(html, /github\.com\/kolm-ai\/kolm-stack\/compare\/spec-v1\.0\.\.\.spec-v1\.1/);
-  assert.match(html, /github\.com\/kolm-ai\/kolm-stack\/compare\/spec-v1\.1\.\.\.spec-v2\.0/);
-  assert.match(html, /github\.com\/kolm-ai\/kolm-stack\/compare\/spec-v2\.0\.\.\.spec-v2\.1/);
+  // Each non-initial version should link to a compare URL on GitHub.
+  // Repo renamed kolm-stack -> kolm (W917 "preempt kolm-ai/kolm rename"); compare urls are now kolm-ai/kolm
+  assert.match(html, /github\.com\/kolm-ai\/kolm\/compare\/spec-v1\.0\.\.\.spec-v1\.1/);
+  assert.match(html, /github\.com\/kolm-ai\/kolm\/compare\/spec-v1\.1\.\.\.spec-v2\.0/);
+  assert.match(html, /github\.com\/kolm-ai\/kolm\/compare\/spec-v2\.0\.\.\.spec-v2\.1/);
 });
 
 test('W278 /spec/changelog has canonical URL', () => {
@@ -141,9 +143,13 @@ test('W278 vercel.json rewrites /spec/changelog to /spec/changelog.html', () => 
 
 test('W278 sw.js cache slug is at least wave278', () => {
   const sw = readPublic('sw.js');
-  const m = sw.match(/const CACHE = 'kolm-[^']*?wave(\d+)/);
-  assert.ok(m, 'sw.js CACHE wave segment missing');
-  const wave = Number(m[1]);
+  // sw.js slug convention is w<NNN> (e.g. w917); legacy slugs used wave<NNN>.
+  // Per the W604/W829 rule, pin via regex + threshold, never a literal wave token.
+  const cacheLine = sw.match(/const CACHE = '(kolm-[^']*)'/);
+  assert.ok(cacheLine, 'sw.js CACHE line missing');
+  const waves = [...cacheLine[1].matchAll(/\bw(?:ave)?(\d{3,4})\b/g)].map(x => Number(x[1]));
+  assert.ok(waves.length, 'sw.js CACHE wave segment missing');
+  const wave = Math.max(...waves);
   assert.ok(wave >= 278, `sw.js wave segment ${wave} should be >= 278`);
 });
 

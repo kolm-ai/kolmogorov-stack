@@ -1179,8 +1179,10 @@ test('W834 #24 — public/sw.js carries -wave834- suffix + W604 wave token regex
   freshDir();
   assert.ok(fs.existsSync(SW_PATH), `expected ${SW_PATH}`);
   const sw = fs.readFileSync(SW_PATH, 'utf8');
-  assert.ok(/wave834-regulatory/.test(sw),
-    'sw.js CACHE must include the wave834-regulatory suffix');
+  // W604 anti-brittleness (per this file's header + the documented repo
+  // convention): the sw.js CACHE slug rolls forward every wave, so we MUST
+  // NOT pin the literal `wave834-regulatory` suffix. The slug currently rides
+  // at wave918+; the only durable lock is the regex + numeric threshold below.
   // W604: family lock uses regex + numeric threshold, never an explicit array.
   // Extract every wave-N token from the CACHE slug and assert at least one is
   // numerically >= 834.
@@ -1208,19 +1210,43 @@ test('W834 #24 — public/sw.js carries -wave834- suffix + W604 wave token regex
 });
 
 // =============================================================================
-// 25) KOLM_W707_SYSTEM_UPGRADE_PLAN.md marks W834 SHIPPED 2026-05-24
+// 25) W834 is recorded as a shipped wave in the durable wave-registry ledger
+//     + all six sub-item source modules are present in the tree.
 // =============================================================================
+//
+// The original internal plan doc (KOLM_W707_SYSTEM_UPGRADE_PLAN.md) was
+// DELIBERATELY removed from the tree and gitignored (`KOLM_*_PLAN.md` —
+// "Internal planning / audit docs — never publish", commit 3a57dd4f
+// "Public-surface polish"). Pinning a gitignored, intentionally-scrubbed
+// internal artifact is stale. The durable SHIPPED evidence that genuinely
+// persists in the tracked tree is the wave-registry ledger entry (state green)
+// plus the six W834 source modules themselves — which is what we lock here.
 
-test('W834 #25 — KOLM_W707_SYSTEM_UPGRADE_PLAN.md marks W834 SHIPPED 2026-05-24', () => {
+test('W834 #25 — wave-registry records W834 shipped + all six W834 source modules present', () => {
   freshDir();
-  assert.ok(fs.existsSync(PLAN_PATH), `expected ${PLAN_PATH}`);
-  const plan = fs.readFileSync(PLAN_PATH, 'utf8');
-  assert.ok(/W834[\s\S]{0,200}SHIPPED 2026-05-24/.test(plan),
-    'plan must mark W834 SHIPPED 2026-05-24');
-  // All six sub-items must individually carry the SHIPPED stamp.
-  for (let i = 1; i <= 6; i++) {
-    const re = new RegExp(`W834-${i}[\\s\\S]{0,500}SHIPPED 2026-05-24`);
-    assert.ok(re.test(plan),
-      `plan must mark W834-${i} SHIPPED 2026-05-24`);
+  const REGISTRY_PATH = path.join(REPO_ROOT, 'docs', 'internal', 'wave-registry.json');
+  assert.ok(fs.existsSync(REGISTRY_PATH), `expected ${REGISTRY_PATH}`);
+  const registry = JSON.parse(fs.readFileSync(REGISTRY_PATH, 'utf8'));
+  const waves = Array.isArray(registry) ? registry : (registry.waves || []);
+  const w834 = waves.find((w) => w && w.canonical_wave_id === 'W834');
+  assert.ok(w834, 'wave-registry must carry a W834 entry');
+  // Ledger must record W834 as a shipped/green wave and bind it to this test.
+  assert.ok(/green|shipped/i.test(String(w834.state)),
+    `W834 registry state must be green/shipped; got ${JSON.stringify(w834.state)}`);
+  assert.ok(Array.isArray(w834.test_files)
+    && w834.test_files.includes('tests/wave834-regulatory.test.js'),
+    `W834 ledger entry must bind tests/wave834-regulatory.test.js; got ${JSON.stringify(w834.test_files)}`);
+  // All six W834 sub-item source modules must be present in the tree — this is
+  // the real, durable proof the regulatory toolkit shipped.
+  for (const mod of [
+    'src/reg-eu-aiact-docs.js',       // W834-1
+    'src/reg-risk-classify.js',        // W834-2
+    'src/reg-hil.js',                  // W834-3
+    'src/reg-data-governance.js',      // W834-4
+    'src/reg-model-card-extended.js',  // W834-5
+    'src/reg-grc-connectors.js',       // W834-6
+  ]) {
+    assert.ok(fs.existsSync(path.join(REPO_ROOT, mod)),
+      `W834 sub-item module must be present in the tree: ${mod}`);
   }
 });

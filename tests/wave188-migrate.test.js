@@ -2,7 +2,7 @@
 // Locks in the W144 Doc 3 Shift 3 migration-from-competitor surface so the
 // 5-competitor /how-vs-* series (W169) now has a paired migration path
 // at /migrate/<slug>. Each assertion ties one piece of rendered prose to a
-// frozen W169 honesty pattern (complement framing for LoRAX, Rubrik mention
+// frozen W169 balanced-scope pattern (complement framing for LoRAX, Rubrik mention
 // for Predibase, capture-then-compile for OpenPipe, named DIY components,
 // always-safe --teacher=local: for hyperscaler), or to a load-bearing
 // design token / theme switch / cache-floor / cross-link.
@@ -119,16 +119,16 @@ test('9. Each per-competitor page has the survives/adds two-column comparison', 
   }
 });
 
-test('10. Each per-competitor page names at least one "stay with competitor" honest-scope case', () => {
+test('10. Each per-competitor page names at least one "stay with competitor" balanced-scope case', () => {
   // Per W169 lesson: every competitor surface should name 2-4 cases
-  // where the competitor is the right answer. The honest-scope section is
-  // marked by the "Where ... is the right answer" h2 plus the .honest block.
+  // where the competitor is the right answer. The balanced-scope section is
+  // marked by the "Where ... is the right answer" h2 plus the .caveat block.
   for (const slug of SLUGS) {
     const html = read(COMPETITOR_PAGES[slug]);
     assert.match(html, /Where[\s\S]{0,80}is the right answer\./i,
-      `migrate/${slug}.html must include a "Where ... is the right answer" honest-scope section`);
-    assert.match(html, /<div class="honest">/,
-      `migrate/${slug}.html must include a styled .honest block citing at least one stay-with-competitor case`);
+      `migrate/${slug}.html must include a "Where ... is the right answer" balanced-scope section`);
+    assert.match(html, /<div class="caveat">/,
+      `migrate/${slug}.html must include a styled .caveat block citing at least one stay-with-competitor case`);
   }
 });
 
@@ -180,7 +180,7 @@ test('14. No em-dashes in load-bearing copy on any page', () => {
   }
 });
 
-test('15. Hyperscaler page cites --teacher=local: licensing fallback (W169 honesty)', () => {
+test('15. Hyperscaler page cites --teacher=local: licensing fallback (W169 balanced scope)', () => {
   const html = read(COMPETITOR_PAGES.hyperscaler);
   assert.ok(html.includes('--teacher=local:'),
     'migrate/hyperscaler.html must cite the --teacher=local: always-safe licensing fallback');

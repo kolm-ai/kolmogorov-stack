@@ -178,13 +178,25 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="exporter-setup">Exporter setup</h2>
 <p>kolm ships a kolm-native OTLP/HTTP exporter (no SDK dependency, ~200 LOC) that sends to an OTel collector. Enable it with two env vars:</p>
 
-<pre>CODE25</pre>
+<pre><code>export KOLM_OTEL=1
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://otel-collector.example.com:4318
+# Optional auth headers (comma-separated key=value pairs).
+export OTEL_EXPORTER_OTLP_HEADERS="x-api-key=abc123,x-team=eval"
+# Optional service-name override (default 'kolm').
+export OTEL_SERVICE_NAME=kolm-prod
+# Optional extra resource attributes.
+export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=prod,service.version=2.11.0"
+</code></pre>
 
 <p>kolm also honors <code>@opentelemetry/api</code> if you install it for your own instrumentation &mdash; we don't bundle it, but if your process has a tracer registered via <code>trace.setGlobalTracerProvider(...)</code>, kolm uses it to emit the attributes and timeline through your existing pipeline. The two paths coexist: install nothing extra and you get our native OTLP export; install <code>@opentelemetry/api</code> and you get both.</p>
 
 <p>Inspect the runtime state from the CLI:</p>
 
-<pre>CODE29</pre>
+<pre><code>kolm otel status
+# Prints {ok, version, otel_api_detected, tracer_registered, native_enabled}.
+kolm otel attributes
+# Prints the kolm.* attribute namespace as JSON for codegen / docs sync.
+</code></pre>
 
 <h2 id="privacy">Privacy note</h2>
 <div class="privacy">
@@ -239,6 +251,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -258,7 +271,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

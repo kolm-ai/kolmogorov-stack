@@ -130,7 +130,32 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="envelope">Envelope shape</h2>
 <p>The same envelope is returned by <code>GET /v1/drift-alert/:namespace</code> and the <code>kolm drift-alert check</code> CLI path. Field stability is part of the contract.</p>
 
-<pre>CODE20</pre>
+<pre><code>{
+  "ok": true,
+  "drift_alert_version": "w747-v1",
+  "namespace": "billing",
+  "kl": 0.4123,
+  "jsd": 0.1832,
+  "jsd_threshold": 0.15,
+  "should_alert": true,
+  "top_diverging_tokens": [
+    { "token": "refund", "p_train": 0.0041, "p_prod": 0.0234, "delta": 0.0193 },
+    { "token": "policy", "p_train": 0.0038, "p_prod": 0.0201, "delta": 0.0163 },
+    { "token": "billing late", "p_train": 0.0012, "p_prod": 0.0118, "delta": 0.0106 }
+  ],
+  "suggestions": [
+    "Your student sees 471% more \"refund\" queries than trained. Capture 200 more \"refund\" examples.",
+    "Your student sees 429% more \"policy\" queries than trained. Capture 150 more \"policy\" examples.",
+    "Your student sees 883% more \"billing late\" queries than trained. Capture 100 more \"billing late\" examples."
+  ],
+  "snapshots": {
+    "training":   { "generated_at": "2026-05-01T12:00:00.000Z", "sketch_total": 18234 },
+    "production": { "generated_at": "2026-05-24T18:30:00.000Z", "sketch_total":  2147 }
+  },
+  "webhooks_delivered": 1,
+  "generated_at": "2026-05-24T18:42:11.503Z"
+}
+</code></pre>
 
 <h3 id="empty-states">Plain absence: missing_snapshot</h3>
 <p>When the requested namespace has only a training snapshot (no production yet) or only a production snapshot (no training reference), the route returns HTTP 200 with <code>{ ok: false, error: "missing_snapshot", missing: "production", hint: "POST /v1/drift-alert/snapshot {kind:'production'}" }</code> &mdash; not a 404. The HTTP call itself succeeded; the hint tells the caller exactly which side is missing and what to do next.</p>
@@ -138,7 +163,25 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="webhooks">Webhook delivery</h2>
 <p>Register a webhook to be notified when <code>jsd &gt;= threshold</code>. Each webhook URL has its own threshold; when multiple webhooks are registered for the same namespace, the <strong>lowest</strong> threshold wins &mdash; the most conservative caller sets the alert floor. A second registration of the same URL UPDATES the existing row (threshold change), it does not duplicate.</p>
 
-<pre>CODE23</pre>
+<pre><code># Register
+POST /v1/drift-alert/webhooks
+{
+  "namespace": "billing",
+  "webhook_url": "https://hooks.example.com/kolm-drift",
+  "jsd_threshold": 0.12
+}
+
+# Delivered payload when alert fires
+POST https://hooks.example.com/kolm-drift
+{
+  "kolm_alert": "distribution_shift",
+  "namespace": "billing",
+  "jsd": 0.1832,
+  "top_diverging": [ { "token": "refund", "delta": 0.0193 }, ... ],
+  "suggestions": [ "Your student sees 471% more \"refund\" queries...", ... ],
+  "ts": "2026-05-24T18:42:11.503Z"
+}
+</code></pre>
 
 <p><strong>Best-effort, no retries.</strong> Delivery uses a 5-second <code>AbortController</code> timeout and fires once. The route does not block the response on webhook completion &mdash; the per-webhook fetch runs in a fire-and-forget async IIFE. If your endpoint is down, the alert is dropped. The durable signal lives in the snapshot ledger; the webhook is the optional push channel.</p>
 
@@ -221,6 +264,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -240,7 +284,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

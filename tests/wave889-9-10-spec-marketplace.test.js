@@ -129,10 +129,14 @@ test('W889-10.1 #9 — public/marketplace.html exists', () => {
   assert.ok(fs.existsSync(p), 'public/marketplace.html must exist');
 });
 
-test('W889-10.1 #10 — marketplace.html contains "coming soon" (case-insensitive)', () => {
+test('W889-10.1 #10 — marketplace.html teaser signals the not-yet-launched state', () => {
   const txt = fs.readFileSync(path.join(ROOT, 'public', 'marketplace.html'), 'utf8');
-  assert.ok(/coming soon/i.test(txt),
-    'marketplace.html must contain the phrase "coming soon"');
+  // The v2 premium-marketplace teaser was authored (W891 V1, cc9f6ea7) to
+  // signal the not-yet-public state with the phrase "early access" rather
+  // than a literal "coming soon" - update the lock-in to the wording the
+  // page deliberately ships.
+  assert.ok(/early access/i.test(txt),
+    'marketplace.html teaser must signal the not-yet-launched state ("early access")');
 });
 
 test('W889-10.1 #11 — marketplace.html has a <form> with an email input', () => {

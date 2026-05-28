@@ -121,7 +121,10 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
     <h2 id="enable">Enable air-gap mode</h2>
     <p>Flip the kill-switch, inspect what is set, and confirm the environment refuses outbound:</p>
-    <pre>CODE6</pre>
+    <pre><code>kolm airgap enable     # writes ~/.kolm/airgap.env
+kolm airgap status     # inspect runtime env vars
+kolm airgap test       # network-leak audit (W779; shape-only by default)
+kolm airgap disable    # remove ~/.kolm/airgap.env</code></pre>
     <p>
       <code>kolm airgap enable</code> writes <code>~/.kolm/airgap.env</code> with the four offline switches:
       <code>KOLM_AIRGAP=1</code>, <code>TRANSFORMERS_OFFLINE=1</code>, <code>HF_DATASETS_OFFLINE=1</code>,
@@ -141,9 +144,11 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       <li><code>README.txt</code> &mdash; one-page operator note: how to verify + unpack</li>
     </ul>
     <p>Pack on the source host:</p>
-    <pre>CODE19</pre>
+    <pre><code>kolm pack --sneakernet ~/.kolm/artifacts/support-bot.kolm --out ./support-bot.sneakernet.tar</code></pre>
     <p>Unpack on the target host (verifies signature against artifact bytes):</p>
-    <pre>CODE20</pre>
+    <pre><code>kolm unpack --sneakernet ./support-bot.sneakernet.tar
+# or extract into a directory:
+kolm unpack --sneakernet ./support-bot.sneakernet.tar --dest-dir ~/inbox</code></pre>
     <div class="caveat">
       <strong>No-silent-pass contract.</strong> <code>unpack</code> sets <code>verified:false</code> when the
       embedded signature does not match the actual artifact bytes. The unpack helper REFUSES to write the
@@ -161,7 +166,15 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       local Ollama daemon (or any HTTP endpoint that speaks Ollama's <code>/api/generate</code> shape),
       and kolm will treat it as the teacher for distillation pairs.
     </p>
-    <pre>CODE28</pre>
+    <pre><code># Start Ollama on the air-gapped machine:
+ollama serve            # default port 11434
+
+# Tell kolm where the local teacher lives:
+export KOLM_LOCAL_TEACHER_URL=http://127.0.0.1:11434
+export KOLM_LOCAL_TEACHER_MODEL=llama3      # optional; defaults to llama3
+
+# Capture pairs from the local teacher (no internet involved):
+kolm capture --prompt "summarize this email" --teacher local-ollama</code></pre>
     <p>The capture path uses the same <code>wrapFetch</code> seam that the network-leak audit uses, so
     even with <code>KOLM_AIRGAP=1</code> the request to <code>KOLM_LOCAL_TEACHER_URL</code> is explicitly
     allowed (same-host + listed-URL match). Every other URL still throws
@@ -179,11 +192,30 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
       Pass <code>--probe</code> to also attempt a real probe and confirm the wrapper actually blocks
       non-loopback URLs.
     </p>
-    <pre>CODE37</pre>
+    <pre><code>kolm airgap test
+# {
+#   "ok": true,
+#   "leaked": false,
+#   "hits": [],
+#   "probed_urls": [],
+#   "airgap_active": true,
+#   "local_teacher_url": "http://127.0.0.1:11434",
+#   "version": "w779-v1"
+# }
+
+kolm airgap test --probe
+# Attempts a HEAD against a synthetic remote URL. Should throw
+# airgap_blocks_network; "leaked":false confirms the wrapper held.</code></pre>
     <p>The audit accepts the same hostnames the runtime allows: <code>localhost</code>,
     <code>127.0.0.1</code>, <code>0.0.0.0</code>, <code>::1</code>, plus whatever
     <code>KOLM_LOCAL_TEACHER_URL</code> resolves to. Any other URL throws the loud-fail envelope:</p>
-    <pre>CODE43</pre>
+    <pre><code>{
+  "ok": false,
+  "error": "airgap_blocks_network",
+  "blocked_url": "https://api.openai.com/v1/...",
+  "hint": "Set KOLM_AIRGAP=0 or capture from local-Ollama at $KOLM_LOCAL_TEACHER_URL",
+  "version": "w779-v1"
+}</code></pre>
 
     <h2 id="env">Environment switches</h2>
     <table>
@@ -240,6 +272,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -259,7 +292,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

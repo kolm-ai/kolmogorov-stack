@@ -54,6 +54,15 @@
 .readonly-note{display:inline-block;padding:3px 9px;border:1px solid var(--line-strong);border-radius:4px;font-size:11px;color:var(--ink-faint);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;margin-left:8px}
 .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--bg-card)}
 .table-wrap table{margin:0}
+.role-chip{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;letter-spacing:.02em;background:#e5e7eb;color:#374151}
+.role-chip--owner{background:#dbeafe;color:#1e40af}
+.role-chip--admin{background:#e0e7ff;color:#3730a3}
+.role-chip--member{background:#e5e7eb;color:#374151}
+.role-chip--billing{background:#cffafe;color:#155e75}
+.stat-strip{display:flex;gap:12px;flex-wrap:wrap;margin:0 0 16px}
+.stat-tile{flex:1;min-width:140px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.stat-tile__label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);font-family:var(--mono);margin:0 0 6px}
+.stat-tile__value{display:block;font-size:22px;font-weight:600;color:var(--ink);font-family:var(--mono);font-variant-numeric:tabular-nums}
 @media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}}
 </style>
 <meta name="twitter:card" content="summary_large_image">
@@ -100,6 +109,8 @@
  <li><a href="/account">Settings</a></li>
  <li><a href="/account/api-keys">API keys</a></li>
  <li><a href="/account/audit-log" aria-current="page">Audit log</a></li>
+ <li><a href="/account/members">Members</a></li>
+ <li><a href="/account/org">Org</a></li>
  <li><a href="/account/security/2fa">Two-factor (2FA)</a></li>
  <li><a href="/account/billing">Billing</a></li>
  <li><a href="/account/overview">Overview</a></li>
@@ -109,6 +120,13 @@
 <section class="acct-content">
 <h1>Audit log. <span class="readonly-note">read-only</span></h1>
 <p class="lede">Every account-level action on this tenant: who did what, from where, when. The log is append-only and immutable; admins cannot edit or delete entries. Use this for incident review, SOC 2 control evidence, and HIPAA accounting-of-disclosures. Retention is 365 days by default (configurable on Enterprise).</p>
+
+<div class="stat-strip" aria-label="Audit log summary">
+ <div class="stat-tile"><span class="stat-tile__label">Today</span><span class="stat-tile__value" data-today-count>&mdash;</span></div>
+ <div class="stat-tile"><span class="stat-tile__label">7 days</span><span class="stat-tile__value" data-week-count>&mdash;</span></div>
+ <div class="stat-tile"><span class="stat-tile__label">30 days</span><span class="stat-tile__value" data-month-count>&mdash;</span></div>
+ <div class="stat-tile"><span class="stat-tile__label">Org events (7d)</span><span class="stat-tile__value" data-orgevents-count>&mdash;</span></div>
+</div>
 
 <div class="kpanel">
  <h2>Filters</h2>
@@ -141,6 +159,15 @@
  <option value="2fa.enrolled">2fa.enrolled</option>
  <option value="2fa.disabled">2fa.disabled</option>
  <option value="password.reset">password.reset</option>
+ <optgroup label="Organization">
+ <option value="org.create">Org created</option>
+ <option value="member.add">Member added</option>
+ <option value="member.remove">Member removed</option>
+ <option value="member.role.change">Role changed</option>
+ <option value="invite.create">Invite sent</option>
+ <option value="invite.accept">Invite accepted</option>
+ <option value="owner.transfer">Ownership transferred</option>
+ </optgroup>
  </select>
  </label>
  <label>Actor
@@ -191,6 +218,7 @@
 
 <div id="empty-state" class="empty" hidden data-empty-state>
  <strong>No audit entries in the selected window.</strong> Try widening the time range or clearing the action filter. New sign-ins, key rotations, and plan changes appear here within a few seconds.
+ <div id="empty-state-org" hidden style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)">No organization events yet. <a href="/account/org">Set up your org &rarr;</a></div>
 </div>
 
 <h2 style="margin-top:30px">CLI mirror</h2>
@@ -212,6 +240,7 @@ kolm audit --verify
  <li><strong>API keys.</strong> created, rotated, revoked; the prefix is recorded, never the secret.</li>
  <li><strong>Plan &amp; billing.</strong> plan.changed, billing.event (invoice issued, payment failed, refund).</li>
  <li><strong>Team.</strong> member.added, member.removed, role.changed.</li>
+ <li><strong>Organization.</strong> org.create, member.add, member.remove, member.role.change, invite.create, invite.accept, owner.transfer.</li>
  <li><strong>Compliance.</strong> baa.signed (with hash of the signed PDF), dpa.signed, byoc.enrolled.</li>
  <li><strong>Data control.</strong> tenant.deleted, dataset.exported, dataset.purged.</li>
 </ul>
@@ -228,11 +257,36 @@ kolm audit --verify
  var key=null; try{key=localStorage.getItem("ks_api_key")||localStorage.getItem("kolm-key")||localStorage.getItem("kolm_api_key")||localStorage.getItem("apiKey")||localStorage.getItem("recipeApiKey");}catch(_){}
  var rows=document.getElementById("log-rows");
  var empty=document.getElementById("empty-state");
+ var emptyOrg=document.getElementById("empty-state-org");
+ var ORG_ACTIONS={"org.create":1,"member.add":1,"member.remove":1,"member.role.change":1,"invite.create":1,"invite.accept":1,"owner.transfer":1};
 
  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
  function fmtTs(t){if(!t)return "&ndash;";try{var d=new Date(t);return d.toISOString().replace("T"," ").slice(0,19);}catch(_){return esc(String(t));}}
  function headers(){var h={"Accept":"application/json"};if(key)h["Authorization"]="Bearer "+key;return h;}
- function pillFor(a){if(/revoked|removed|disabled|failed|deleted/.test(a))return "bad";if(/created|added|signed|enrolled|login/.test(a))return "ok";if(/rotated|changed|reset/.test(a))return "warn";return "mute";}
+ function pillFor(a){if(/revoked|removed|disabled|failed|deleted/.test(a))return "bad";if(/created|added|signed|enrolled|login/.test(a))return "ok";if(/rotated|changed|reset|transfer/.test(a))return "warn";return "mute";}
+ function roleChip(role){if(!role)return "";var r=String(role).toLowerCase();var cls="role-chip role-chip--"+(/(owner|admin|member|billing)/.test(r)?r.match(/(owner|admin|member|billing)/)[1]:"member");return ' <span class="'+cls+'">'+esc(role)+'</span>';}
+ function actorCell(e){var who=e.actor||e.user||"&ndash;";var role=e.actor_role||e.role||"";return esc(who)+roleChip(role);}
+ function isOrgAction(a){return !!ORG_ACTIONS[a];}
+ function tsMs(t){try{return new Date(t).getTime()||0;}catch(_){return 0;}}
+ function hydrateStats(items){
+   var now=Date.now();
+   var dayMs=86400000;
+   var today=0, week=0, month=0, orgWeek=0;
+   for (var i=0; i<items.length; i++){
+     var e=items[i];
+     var ts=tsMs(e.ts||e.timestamp);
+     if (!ts) continue;
+     var ageDays=(now-ts)/dayMs;
+     if (ageDays<=1) today++;
+     if (ageDays<=7) { week++; if (isOrgAction(e.action)) orgWeek++; }
+     if (ageDays<=30) month++;
+   }
+   function set(sel,v){var n=document.querySelector(sel);if(n)n.textContent=String(v);}
+   set('[data-today-count]',today);
+   set('[data-week-count]',week);
+   set('[data-month-count]',month);
+   set('[data-orgevents-count]',orgWeek);
+ }
 
  function qs(){
  var p=new URLSearchParams();
@@ -244,26 +298,55 @@ kolm audit --verify
  }
 
  function render(items){
- if(!items||!items.length){rows.innerHTML="";empty.hidden=false;return;}
+ var activeAction=document.getElementById("f-action").value;
+ var orgFilterActive=isOrgAction(activeAction);
+ if(!items||!items.length){
+   rows.innerHTML="";
+   empty.hidden=false;
+   if (emptyOrg) emptyOrg.hidden = !orgFilterActive;
+   hydrateStats([]);
+   return;
+ }
  empty.hidden=true;
+ if (emptyOrg) emptyOrg.hidden=true;
  rows.innerHTML=items.map(function(e){
  return "<tr>"+
  "<td>"+fmtTs(e.ts||e.timestamp)+"</td>"+
- "<td>"+esc(e.actor||e.user||"&ndash;")+"</td>"+
+ "<td>"+actorCell(e)+"</td>"+
  "<td><span class=\"pill "+pillFor(e.action||"")+"\">"+esc(e.action||"&ndash;")+"</span></td>"+
  "<td>"+esc(e.target||"&ndash;")+"</td>"+
  "<td>"+esc(e.ip||e.source_ip||"&ndash;")+"</td>"+
  "<td>"+esc(e.geo||"&ndash;")+"</td>"+
  "</tr>";
  }).join("");
+ hydrateStats(items);
  }
 
+ function fetchOrgEvents(){
+   return fetch("/v1/orgs/current/audit?"+qs(),{headers:headers()}).then(function(r){
+     if (r.status===401 || r.status>=500 || !r.ok) return [];
+     return r.json().then(function(j){return (j&&(j.entries||j.items))||j||[];}).catch(function(){return [];});
+   }).catch(function(){return [];});
+ }
+ function mergeRows(a,b){
+   var seen={};
+   var out=[];
+   function push(arr){for(var i=0;i<arr.length;i++){var e=arr[i];var k=(e.id||"")+"|"+(e.ts||e.timestamp||"")+"|"+(e.action||"");if(seen[k])continue;seen[k]=1;out.push(e);}}
+   push(a||[]); push(b||[]);
+   out.sort(function(x,y){return tsMs(y.ts||y.timestamp)-tsMs(x.ts||x.timestamp);});
+   return out;
+ }
  function load(){
  if(!key){
  rows.innerHTML='<tr><td colspan="6" style="text-align:center;padding:18px"><a href="/signin?next='+encodeURIComponent(location.pathname)+'">Sign in</a> to view your audit log.</td></tr>';
  return;
  }
- fetch("/v1/account/audit-log?"+qs(),{headers:headers()}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();}).then(function(j){render((j&&(j.entries||j.items))||j||[]);}).catch(function(){
+ fetch("/v1/account/audit-log?"+qs(),{headers:headers()}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();}).then(function(j){
+   var base=(j&&(j.entries||j.items))||j||[];
+   fetchOrgEvents().then(function(orgRows){
+     render(orgRows && orgRows.length ? mergeRows(base, orgRows) : base);
+   });
+ }).catch(function(){
  // No live data; show empty state with CLI hint
  render([]);
  });
@@ -364,6 +447,7 @@ kolm audit --verify
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -383,7 +467,7 @@ kolm audit --verify
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
@@ -399,6 +483,7 @@ kolm audit --verify
 
 <div hidden data-w221-anchors="account" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
     
+    <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
       <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
@@ -494,6 +579,7 @@ kolm audit --verify
       </div>
     </div>
     </nav>
+    <!-- KOLM_NAV_END (W221) -->
     
 </div>
 </body>

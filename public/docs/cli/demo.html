@@ -26,6 +26,7 @@
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <a class="skip-link" href="#main">Skip to content</a>
     
+    <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
       <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
@@ -121,6 +122,7 @@
       </div>
     </div>
     </nav>
+    <!-- KOLM_NAV_END (W221) -->
     
 <main id="main" class="docs-cli-page" data-w401f="cli-verb" data-verb="demo">
 <nav aria-label="Breadcrumb" class="crumbs">
@@ -141,7 +143,13 @@
 <h1>kolm demo</h1>
 <p>The canonical close-the-loop demo. Seeds the local event lake with ~150 synthetic log-triage events so <code>optimize</code>, <code>dataset</code>, <code>bakeoff</code>, <code>build</code>, <code>run</code>, and <code>what</code> all have real data to chew on without you having to wire a proxy first. Every event is tagged <code>source_type=simulated</code>, so the receipt chain never claims this corpus came from production.</p>
 <h2>Usage</h2>
-<pre>CODE7</pre>
+<pre><code>
+kolm demo list available demo flows
+kolm demo list same as the no-arg form
+kolm demo seed-log-triage [--count N] seed N events (default 150)
+kolm demo seed-log-triage --namespace foo override default namespace
+kolm demo reset --confirm purge the demo-log-triage namespace
+</code></pre>
 <h2>Flags</h2>
 <ul>
 <li><code>--count N</code> events to append (clamped to 20..5000, default 150). 100+</li>
@@ -152,7 +160,16 @@
 <li><code>--confirm</code> required by <code>kolm demo reset</code> (the only destructive subverb).</li>
 </ul>
 <h2>Examples</h2>
-<pre>CODE18</pre>
+<pre><code>
+kolm demo seed-log-triage
+kolm lake stats
+kolm optimize
+kolm dataset create demo-log-triage
+kolm bakeoff demo-log-triage
+kolm build demo-log-triage
+kolm run demo-log-triage.kolm &quot;ERROR db timeout on checkout&quot;
+kolm what
+</code></pre>
 <h2>What it seeds</h2>
 <ul>
 <li>21 log archetypes spanning 6 categories: <code>db</code>, <code>network</code>, <code>auth</code>,</li>

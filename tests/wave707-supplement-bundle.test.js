@@ -32,10 +32,17 @@ function readPublic(name) {
   return fs.readFileSync(path.join(PUBLIC_DIR, name), 'utf8');
 }
 
-test('W707 #1 supplement.css present with w707 version marker', () => {
+test('W707 #1 supplement.css present with WF feature-section markers', () => {
   const css = readPublic('supplement.css');
   assert.ok(css.length > 1000, 'supplement.css should be non-trivial');
-  assert.ok(/w707/i.test(css), 'should carry w707 marker');
+  // The internal "W707" wave tag was deliberately scrubbed from this public
+  // surface in commit 3a57dd4f ("drops internal version tags / release-tag
+  // noise from user-visible strings"). Pin the durable WF feature-section
+  // markers the supplement bundle is actually built around instead — regex +
+  // threshold, never a literal internal wave/release tag (W604/W829 rule).
+  const wfMarkers = [...css.matchAll(/\bWF(\d{2})\b/g)].map(m => +m[1]);
+  const uniqueWf = new Set(wfMarkers);
+  assert.ok(uniqueWf.size >= 4, `should carry >= 4 distinct WF feature markers, got ${uniqueWf.size}`);
 });
 
 test('W707 #2 supplement.js present with w707-supp version + idempotency guard', () => {

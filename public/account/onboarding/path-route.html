@@ -72,7 +72,7 @@ h1{font-size:28px;font-weight:500;letter-spacing:-0.01em;margin:0 0 8px;color:va
 
 <p class="ob-eyebrow">Path C &middot; Route LLM traffic</p>
 <h1>API key, one SDK call, verify the receipt.</h1>
-<p class="lede">No install. The gateway lives at <code>https://api.kolm.ai/v1</code>. Point any OpenAI/Anthropic SDK at it with your <code>ks_</code> key and every call comes back with a signed receipt. The verifier is the same on the CLI and on the website.</p>
+<p class="lede">No install. The gateway lives at <code>https://kolm.ai/v1</code>. Point any OpenAI/Anthropic SDK at it with your <code>ks_</code> key and every call comes back with a signed receipt. The verifier is the same on the CLI and on the website.</p>
 
 <div class="progress-bar" aria-label="Onboarding progress">
   <div class="seg" data-step="1"></div>
@@ -105,7 +105,7 @@ h1{font-size:28px;font-weight:500;letter-spacing:-0.01em;margin:0 0 8px;color:va
     <pre><code>import OpenAI from "openai";
 
 const openai = new OpenAI({
-  baseURL: "https://api.kolm.ai/v1",
+  baseURL: "https://kolm.ai/v1",
   apiKey:  process.env.KOLM_API_KEY,
 });
 
@@ -115,7 +115,7 @@ const r = await openai.chat.completions.create({
 });
 console.log(r.choices[0].message.content);</code></pre>
     <button class="copy-btn" data-copy="import OpenAI from &quot;openai&quot;;
-const openai = new OpenAI({ baseURL: &quot;https://api.kolm.ai/v1&quot;, apiKey: process.env.KOLM_API_KEY });
+const openai = new OpenAI({ baseURL: &quot;https://kolm.ai/v1&quot;, apiKey: process.env.KOLM_API_KEY });
 const r = await openai.chat.completions.create({ model: &quot;gpt-4o-mini&quot;, messages: [{ role: &quot;user&quot;, content: &quot;hello kolm&quot; }] });
 console.log(r.choices[0].message.content);">Copy</button>
   </div>
@@ -124,7 +124,7 @@ console.log(r.choices[0].message.content);">Copy</button>
 import os
 
 client = OpenAI(
-    base_url="https://api.kolm.ai/v1",
+    base_url="https://kolm.ai/v1",
     api_key=os.environ["KOLM_API_KEY"],
 )
 
@@ -135,16 +135,16 @@ r = client.chat.completions.create(
 print(r.choices[0].message.content)</code></pre>
     <button class="copy-btn" data-copy="from openai import OpenAI
 import os
-client = OpenAI(base_url=&quot;https://api.kolm.ai/v1&quot;, api_key=os.environ[&quot;KOLM_API_KEY&quot;])
+client = OpenAI(base_url=&quot;https://kolm.ai/v1&quot;, api_key=os.environ[&quot;KOLM_API_KEY&quot;])
 r = client.chat.completions.create(model=&quot;gpt-4o-mini&quot;, messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;hello kolm&quot;}])
 print(r.choices[0].message.content)">Copy</button>
   </div>
   <div class="tab-panel" data-tab-panel="curl">
-    <pre><code>curl https://api.kolm.ai/v1/chat/completions \
+    <pre><code>curl https://kolm.ai/v1/chat/completions \
   -H "authorization: Bearer $KOLM_API_KEY" \
   -H "content-type: application/json" \
   -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"hello kolm"}]}'</code></pre>
-    <button class="copy-btn" data-copy="curl https://api.kolm.ai/v1/chat/completions -H 'authorization: Bearer $KOLM_API_KEY' -H 'content-type: application/json' -d '{&quot;model&quot;:&quot;gpt-4o-mini&quot;,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;hello kolm&quot;}]}'">Copy</button>
+    <button class="copy-btn" data-copy="curl https://kolm.ai/v1/chat/completions -H 'authorization: Bearer $KOLM_API_KEY' -H 'content-type: application/json' -d '{&quot;model&quot;:&quot;gpt-4o-mini&quot;,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;hello kolm&quot;}]}'">Copy</button>
   </div>
   <button class="done-btn" data-mark="2" style="margin-top:6px">Mark step done</button>
 </section>
@@ -245,6 +245,7 @@ kolm verify rcpt_01... --json</code></pre>
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -264,7 +265,7 @@ kolm verify rcpt_01... --json</code></pre>
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

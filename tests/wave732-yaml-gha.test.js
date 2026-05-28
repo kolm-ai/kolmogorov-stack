@@ -185,7 +185,7 @@ test('W732 #6 — kolm-distill.yml exists with kolm-distill job + push-trigger c
   for (const needle of [
     'name: kolm-distill',                     // workflow name
     'KOLM_API_KEY',                            // secret name in template
-    'Configure KOLM_API_KEY secret',           // NON-NEGOTIABLE comment per spec
+    'secret named `KOLM_API_KEY`',             // setup comment: configure the KOLM_API_KEY secret (W908 reworded from "Configure KOLM_API_KEY secret")
     'workflow_dispatch',                       // safe default trigger
     'push:',                                   // documented push trigger (commented out OK)
     'kolm-distill:',                           // job key

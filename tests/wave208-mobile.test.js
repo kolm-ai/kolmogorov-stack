@@ -118,6 +118,15 @@ function stripScripts(html) {
   return html.replace(/<script\b[\s\S]*?<\/script>/gi, '');
 }
 
+// Redirect stubs (intentional dup-retirement pages) carry a
+// <meta http-equiv="refresh"> in the head and instantly navigate away
+// (usually paired with <meta name="robots" content="noindex...">). A
+// viewport meta is moot on a page the browser never paints, so these are
+// excluded from the viewport requirement.
+function isRedirectStub(html) {
+  return /<meta\b[^>]*http-equiv\s*=\s*["']refresh["'][^>]*>/i.test(html);
+}
+
 // Extract the body of every @media rule. Walks the string char-by-char to
 // match nested braces correctly. Returns [{ width, body }] for each @media
 // (max-width:Npx) block found.
@@ -147,6 +156,8 @@ test('1. every public/*.html declares <meta name="viewport"> with width=device-w
   const offenders = [];
   for (const f of ALL_HTML) {
     const html = read(f);
+    // Redirect stubs navigate away instantly — viewport is moot. Skip them.
+    if (isRedirectStub(html)) continue;
     const vp = html.match(/<meta\b[^>]*name\s*=\s*["']viewport["'][^>]*>/i);
     if (!vp) { offenders.push(rel(f) + ' (no viewport)'); continue; }
     if (!/width\s*=\s*device-width/i.test(vp[0])) offenders.push(rel(f) + ' (no device-width)');

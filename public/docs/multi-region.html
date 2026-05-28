@@ -106,7 +106,10 @@
 
 <h2 data-w780="cloudflare-worker">Cloudflare Workers adapter</h2>
 <p>Starter template at <a href="https://github.com/kolm-ai/kolm/blob/main/tools/edge/cloudflare-worker.js"><code>tools/edge/cloudflare-worker.js</code></a>. Drop into a Workers project, wire the gateway map via <code>wrangler.toml</code> vars, deploy behind the per-region hostname.</p>
-<pre>CODE31</pre>
+<pre><code># wrangler.toml fragment
+[vars]
+KOLM_REGION = "eu-west-1"
+KOLM_REGION_GATEWAY_URLS = '{"us":"https://us.kolm.ai","eu":"https://eu.kolm.ai","apac":"https://ap.kolm.ai"}'</code></pre>
 <p>Routing decision honors <code>x-kolm-residency</code> as a HARD constraint (returns HTTP 451 when no matching gateway) and <code>x-kolm-prefer-region</code> as a soft hint. Response carries <code>x-kolm-routed-region</code> and <code>x-kolm-routed-reason</code> so downstream code can audit the decision.</p>
 
 <h2 data-w780="lambda-at-edge">Lambda@Edge adapter</h2>
@@ -123,11 +126,17 @@
 <p>The join logic is plain about each rung: the returned envelope carries <code>reason</code> (one of <code>w769_namespace_default</code>, <code>w769_tenant_inference</code>, <code>w769_global_uses_current_region</code>) so callers can audit which rung made the decision.</p>
 
 <h2 data-w780="cli">CLI</h2>
-<pre>CODE49</pre>
+<pre><code>$ kolm region status
+$ kolm region gateways
+$ kolm region route &lt;request_hash&gt; --residency eu --prefer apac
+$ kolm region test-failover</code></pre>
 <p>The <code>kolm region status</code> and <code>kolm region gateways</code> calls hit the hosted <code>/v1/region/*</code> routes when <code>$KOLM_API_KEY</code> is set. Otherwise they fall back to the LOCAL module so an operator can sanity-check the gateway map before the daemon comes up. <code>test-failover</code> always runs locally because cross-region probing from a hosted daemon would amplify a flap into a thunder.</p>
 
 <h2 data-w780="api">API</h2>
-<pre>CODE55</pre>
+<pre><code>GET  /v1/region/status     -> { region, gateway_url, capture_residency, version }
+GET  /v1/region/gateways   -> { gateways: {us, eu, apac}, region_count, version }
+POST /v1/region/route      -> { region, gateway_url, reason, version }
+  body: { request_hash, residency_requirement?, prefer_region? }</code></pre>
 <p>All auth-gated. <code>residency_requirement</code> is a HARD constraint  -  a request tagged <code>eu</code> against a gateway map without an <code>eu</code> entry returns HTTP 400 with <code>{ok:false,error:"no_gateway_for_residency_requirement",available_regions:[...]}</code>. We NEVER silently downgrade.</p>
 
 <h2 data-w780="see-also">See also</h2>
@@ -164,6 +173,7 @@
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -183,7 +193,7 @@
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

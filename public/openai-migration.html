@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
+<title>kolm &mdash; OpenAI fine-tuning migration | open-source distillation · kolm.ai</title>
+<meta name="description" content="OpenAI is sunsetting self-serve fine-tuning. kolm is the open-source landing pad &mdash; import your fine_tuning_data.jsonl, distill on your GPU, run anywhere.">
+<meta name="keywords" content="OpenAI fine-tuning migration, OpenAI fine-tuning alternative, OpenAI fine-tuning shutdown, open-source distillation, fine_tuning_data.jsonl, GGUF export, vLLM, TGI, Ollama">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="OpenAI fine-tuning migration &mdash; land on kolm">
+<meta property="og:description" content="OpenAI is sunsetting self-serve fine-tuning. kolm is the open-source landing pad. Bring your fine_tuning_data.jsonl, walk out with a portable distilled model that runs on your GPU.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/openai-migration">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="kolm.ai: open-source landing pad for OpenAI fine-tuning refugees.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="OpenAI fine-tuning migration &mdash; land on kolm">
+<meta name="twitter:description" content="The open-source landing pad for OpenAI fine-tuning refugees. Import your JSONL, distill on your GPU, run anywhere.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/openai-migration">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/design-tokens.css" as="style">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/frontier.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/frontier.js"></script>
+<script src="/nav.js" defer></script>
+<style>
+  /* W918 P1.3 OpenAI migration page styles. Cool-slate W850 only. */
+  .om-hero { padding: clamp(56px, 6.5vw, 96px) 0 clamp(32px, 4vw, 56px); position: relative; }
+  .om-hero__bg { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(60% 80% at 20% 0%, color-mix(in srgb, var(--ks-accent) 5%, transparent), transparent 70%); }
+  .om-eyebrow { display: inline-block; font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-accent); padding: 5px 11px; border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-pill); background: var(--ks-accent-soft); margin-bottom: var(--ks-4); }
+  .om-h1 { font-family: var(--ks-sans); font-size: clamp(36px, 5.4vw, 60px); font-weight: 580; letter-spacing: -0.022em; line-height: 1.06; color: var(--ks-ink); margin: 0 0 var(--ks-5); max-width: 22ch; }
+  .om-h1 b { color: var(--ks-accent); font-weight: 580; }
+  .om-dek { font-family: var(--ks-sans); font-size: clamp(16px, 1.6vw, 19px); line-height: 1.65; color: var(--ks-ink-2); margin: 0 0 var(--ks-6); max-width: 62ch; }
+  .om-dek b { color: var(--ks-ink); font-weight: 540; }
+  .om-ctas { display: flex; gap: var(--ks-3); flex-wrap: wrap; }
+
+  .om-section { padding: clamp(36px, 4.5vw, 72px) 0; border-top: 1px solid var(--ks-line-2); }
+  .om-section__eyebrow { display: block; font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin: 0 0 var(--ks-3); }
+  .om-section__h2 { font-family: var(--ks-sans); font-size: clamp(26px, 3.2vw, 38px); font-weight: 560; letter-spacing: -0.018em; line-height: 1.14; color: var(--ks-ink); margin: 0 0 var(--ks-4); max-width: 26ch; }
+  .om-section__lede { font-family: var(--ks-sans); font-size: 16.5px; line-height: 1.7; color: var(--ks-ink-2); max-width: 62ch; margin: 0 0 var(--ks-6); }
+
+  /* Shutdown facts panel */
+  .om-facts { padding: var(--ks-6); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); display: grid; grid-template-columns: 1fr; gap: var(--ks-4); max-width: 760px; }
+  .om-fact { display: grid; grid-template-columns: 28px 1fr; gap: var(--ks-3); align-items: start; }
+  .om-fact__mark { width: 22px; height: 22px; border-radius: var(--ks-r-pill); border: 1.5px solid var(--ks-accent-edge); background: var(--ks-accent-soft); color: var(--ks-accent); display: flex; align-items: center; justify-content: center; font-family: var(--ks-mono); font-size: 12px; font-weight: 600; margin-top: 2px; }
+  .om-fact__body { font-family: var(--ks-sans); font-size: 15.5px; line-height: 1.65; color: var(--ks-ink-2); }
+  .om-fact__body b { color: var(--ks-ink); font-weight: 580; }
+
+  /* 5-step migration */
+  .om-steps { list-style: none; padding: 0; margin: 0; counter-reset: omstep; }
+  .om-step { counter-increment: omstep; display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: var(--ks-5) var(--ks-6); padding: var(--ks-6) 0; border-top: 1px solid var(--ks-line-2); }
+  .om-step:last-child { border-bottom: 1px solid var(--ks-line-2); }
+  .om-step::before { content: counter(omstep, decimal-leading-zero); font-family: var(--ks-mono); font-size: 13px; font-weight: 600; color: var(--ks-accent); letter-spacing: 0.08em; padding-top: 4px; }
+  .om-step__body h3 { margin: 0 0 var(--ks-2); font-family: var(--ks-sans); font-size: 20px; font-weight: 580; letter-spacing: -0.012em; color: var(--ks-ink); }
+  .om-step__body p { margin: 0 0 var(--ks-3); font-family: var(--ks-sans); font-size: 15.5px; line-height: 1.7; color: var(--ks-ink-2); }
+  .om-step__body code { background: color-mix(in srgb, var(--ks-ink, #111) 6%, transparent); color: var(--ks-ink); padding: 3px 8px; border-radius: 5px; font-family: var(--ks-mono); font-size: 12.5px; display: inline-block; max-width: 100%; overflow-x: auto; white-space: nowrap; vertical-align: baseline; }
+  @media (max-width: 720px) {
+    .om-step { grid-template-columns: 1fr; gap: var(--ks-2); padding: var(--ks-5) 0; }
+    .om-step::before { padding-top: 0; }
+  }
+
+  /* Code sample block. Pattern matches quickstart.html: <pre class="ks-code"> with <span class="pmpt"> */
+  .om-code-wrap { margin: 0; padding: 0; }
+  .om-code-frame { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); overflow: hidden; }
+  .om-code-frame__bar { display: flex; align-items: center; justify-content: space-between; gap: var(--ks-3); padding: 10px 16px; border-bottom: 1px solid var(--ks-line-1); background: var(--ks-bg-2); }
+  .om-code-frame__label { font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.06em; color: var(--ks-ink-3); }
+  .om-code-frame__tag { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-accent); padding: 2px 9px; border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-pill); background: var(--ks-accent-soft); }
+  pre.ks-code.om-code { margin: 0; padding: var(--ks-5) var(--ks-6); background: transparent; border: 0; border-radius: 0; color: var(--ks-ink); font-family: var(--ks-mono); font-size: 13px; line-height: 1.75; overflow-x: auto; white-space: pre; }
+  pre.ks-code.om-code .pmpt { color: var(--ks-accent); user-select: none; padding-right: 8px; }
+  pre.ks-code.om-code .cmt { color: var(--ks-ink-3); }
+
+  /* Signed receipts panel */
+  .om-rcpt { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: var(--ks-8); align-items: start; }
+  @media (max-width: 880px) { .om-rcpt { grid-template-columns: 1fr; gap: var(--ks-5); } }
+  .om-rcpt__copy p { margin: 0 0 var(--ks-3); font-family: var(--ks-sans); font-size: 15.5px; line-height: 1.7; color: var(--ks-ink-2); }
+  .om-rcpt__copy p b { color: var(--ks-ink); font-weight: 540; }
+  .om-rcpt__copy a { color: var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge); transition: border-color 140ms; }
+  .om-rcpt__copy a:hover { border-bottom-color: var(--ks-accent); }
+  .om-rcpt__envelope { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); padding: var(--ks-5) var(--ks-6); font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.7; color: var(--ks-ink); overflow-x: auto; }
+  .om-rcpt__envelope .k { color: var(--ks-ink-2); }
+  .om-rcpt__envelope .v { color: var(--ks-accent); }
+  .om-rcpt__envelope .s { color: var(--ks-ink-3); }
+  .om-rcpt__caption { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); margin: 10px 0 0; }
+
+  /* 3-column compare */
+  .om-cmp { width: 100%; border-collapse: collapse; font-family: var(--ks-sans); font-size: 14px; }
+  .om-cmp-wrap { overflow-x: auto; background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); }
+  .om-cmp th { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); text-align: left; padding: 16px 18px; border-bottom: 1px solid var(--ks-line-2); font-weight: 500; vertical-align: bottom; }
+  .om-cmp th.kc { color: var(--ks-accent); }
+  .om-cmp td { padding: 14px 18px; border-bottom: 1px solid var(--ks-line-1); vertical-align: top; line-height: 1.55; color: var(--ks-ink-2); font-size: 13.5px; }
+  .om-cmp td.ax { font-weight: 580; color: var(--ks-ink); min-width: 160px; }
+  .om-cmp td.k { color: var(--ks-ink); background: var(--ks-accent-soft); border-left: 1px solid var(--ks-accent-edge); border-right: 1px solid var(--ks-accent-edge); }
+  .om-cmp tr:last-child td { border-bottom: 0; }
+  .om-cmp tr:last-child td.k { border-bottom: 1px solid var(--ks-accent-edge); }
+  .om-cmp__foot { padding: 12px 18px 0; font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.04em; color: var(--ks-ink-3); }
+  .om-cmp__foot a { color: var(--ks-accent); border-bottom: 1px solid var(--ks-accent-edge); padding-bottom: 1px; text-decoration: none; }
+  .om-cmp__foot a:hover { border-bottom-color: var(--ks-accent); }
+
+  /* Footer CTA strip */
+  .om-foot-cta { padding: clamp(48px, 5vw, 80px) 0; border-top: 1px solid var(--ks-line-2); text-align: center; }
+  .om-foot-cta h2 { font-family: var(--ks-sans); font-size: clamp(28px, 3.2vw, 40px); font-weight: 560; letter-spacing: -0.018em; color: var(--ks-ink); margin: 0 0 var(--ks-3); }
+  .om-foot-cta p { font-family: var(--ks-sans); font-size: 16px; line-height: 1.65; color: var(--ks-ink-2); max-width: 56ch; margin: 0 auto var(--ks-6); }
+  .om-foot-cta .om-ctas { justify-content: center; }
+
+  /* Focus rings: visible on every interactive control */
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--ks-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  }
+
+  .test-anchor { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "OpenAI fine-tuning migration: land on kolm",
+  "description": "OpenAI is sunsetting self-serve fine-tuning. kolm is the open-source landing pad. Import your fine_tuning_data.jsonl, distill on your GPU, run anywhere.",
+  "url": "https://kolm.ai/openai-migration",
+  "datePublished": "2026-05-28",
+  "dateModified": "2026-05-28",
+  "author": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "url": "https://kolm.ai/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow" aria-hidden="true">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+        <svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+      </button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a>
+    <a href="/studio">Studio</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/docs">Docs</a>
+    <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
+    <a href="/signup?intent=login">Sign in</a>
+    <a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
+
+<main id="main">
+
+  <!-- ================== 1. Hero ================== -->
+  <section class="om-hero">
+    <div class="om-hero__bg" aria-hidden="true"></div>
+    <div class="ks-wrap">
+      <span class="om-eyebrow">Migration &middot; 2026</span>
+      <h1 class="om-h1">OpenAI is sunsetting fine-tuning. <b>Land here.</b></h1>
+      <p class="om-dek">
+        OpenAI&apos;s self-serve fine-tuning is <b>closed to new users now</b>, and <b>existing users have until January 2027</b> before the API turns off. kolm is the open-source landing pad. Bring your <code>fine_tuning_data.jsonl</code>, walk out with a portable distilled model that runs on your GPU, your cloud, or your edge. Apache-2.0, signed receipts, no per-token bill.
+      </p>
+      <div class="om-ctas">
+        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/quickstart">Migrate in 5 minutes <span class="ks-btn-arrow" aria-hidden="true">&rarr;</span></a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/docs/recipes/openai-finetune-migration">Read the migration recipe</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================== 2. Shutdown facts ================== -->
+  <section class="om-section" aria-labelledby="om-facts-h">
+    <div class="ks-wrap">
+      <span class="om-section__eyebrow">Shutdown facts</span>
+      <h2 class="om-section__h2" id="om-facts-h">What OpenAI announced.</h2>
+      <p class="om-section__lede">Three sentences that explain why you are reading this page today.</p>
+      <div class="om-facts" role="list">
+        <div class="om-fact" role="listitem">
+          <span class="om-fact__mark" aria-hidden="true">1</span>
+          <p class="om-fact__body"><b>Closed to new fine-tuning users</b> &mdash; as of OpenAI&apos;s 2026 policy update. New accounts can no longer create fine-tuning jobs against the self-serve API.</p>
+        </div>
+        <div class="om-fact" role="listitem">
+          <span class="om-fact__mark" aria-hidden="true">2</span>
+          <p class="om-fact__body"><b>Existing fine-tuning users have until January 2027</b> &mdash; after that the surface goes dark. Pre-existing custom models on the platform need a new home before the cutoff.</p>
+        </div>
+        <div class="om-fact" role="listitem">
+          <span class="om-fact__mark" aria-hidden="true">3</span>
+          <p class="om-fact__body"><b>kolm is open-source (Apache 2.0)</b>, runs on your hardware, and exports portable artifacts: HuggingFace weights, GGUF (Q4_K_M / Q5_K_M / Q8_0), Ollama Modelfile, vLLM, TGI, and TRT-LLM. No vendor swap, no second lock-in.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================== 3. 5-step migration ================== -->
+  <section class="om-section" aria-labelledby="om-steps-h">
+    <div class="ks-wrap">
+      <span class="om-section__eyebrow">Migration path</span>
+      <h2 class="om-section__h2" id="om-steps-h">Five steps from OpenAI JSONL to a model you own.</h2>
+      <p class="om-section__lede">Each step is one CLI call. The whole loop runs end-to-end on a $0.39/hr cloud GPU or a workstation 5090 in under an hour for a 50k-row corpus.</p>
+      <ol class="om-steps" aria-label="Five-step migration">
+        <li class="om-step">
+          <div class="om-step__body">
+            <h3>Export your fine-tuning data from OpenAI.</h3>
+            <p>Download the JSONL you uploaded for any fine-tuning job. Both <em>chat</em> and <em>completion</em> formats are supported. Your evals carry over the same way.</p>
+            <code>cp fine_tuning_data.jsonl ./data.jsonl</code>
+          </div>
+        </li>
+        <li class="om-step">
+          <div class="om-step__body">
+            <h3>Import the JSONL into a kolm capture corpus.</h3>
+            <p>The importer is pure-Node, zero-dep, and skips malformed rows with a per-row error log. You end up with the same training pairs in kolm capture format, ready for any distill spec.</p>
+            <code>kolm import --from openai-finetune ./data.jsonl --out ./captures.jsonl</code>
+          </div>
+        </li>
+        <li class="om-step">
+          <div class="om-step__body">
+            <h3>Draft a distill spec &mdash; base model plus teachers.</h3>
+            <p>Pick a base (Qwen 2.5 7B, Llama 3.1 8B, Phi-3.5) and one or more teacher models. Multi-teacher council distillation is one flag &mdash; the OpenAI fine-tuning API only ever distilled from a single model.</p>
+            <code>kolm distill spec --base qwen2.5-7b --teacher claude-4-7 --teacher gpt-5 --out spec.json</code>
+          </div>
+        </li>
+        <li class="om-step">
+          <div class="om-step__body">
+            <h3>Train the distilled student.</h3>
+            <p>Reads the spec, streams captures, writes a LoRA adapter (or a full merge) and a signed <code>.kolm</code> artifact. Resumable, deterministic, every step logged to a receipt chain.</p>
+            <code>kolm distill train --spec spec.json --captures ./captures.jsonl</code>
+          </div>
+        </li>
+        <li class="om-step">
+          <div class="om-step__body">
+            <h3>Export to GGUF / Ollama / vLLM / TGI and deploy.</h3>
+            <p>One verb, every common target. The exported weights are yours &mdash; commit them, mirror them, run them on a Pi 5 or a Jetson Orin. No callbacks, no per-token meter.</p>
+            <code>kolm export --to gguf --quant Q4_K_M ./run_*.kolm &amp;&amp; kolm deploy --target ollama</code>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ================== 4. Code sample ================== -->
+  <section class="om-section" aria-labelledby="om-code-h">
+    <div class="ks-wrap">
+      <span class="om-section__eyebrow">Reproducible</span>
+      <h2 class="om-section__h2" id="om-code-h">The whole migration in six commands.</h2>
+      <p class="om-section__lede">Copy this block into a terminal. Replace <code>YOUR_KEY</code> with the API key kolm hands you after <code>kolm signup</code>.</p>
+      <div class="om-code-frame">
+        <div class="om-code-frame__bar">
+          <span class="om-code-frame__label">terminal &middot; bash</span>
+          <span class="om-code-frame__tag">Copy &amp; run</span>
+        </div>
+        <pre class="ks-code om-code"><span class="cmt"># 1. Install the kolm CLI (Node 20+ or Python 3.11+).</span>
+<span class="pmpt">$</span> npm i -g github:kolm-ai/kolm
+
+<span class="cmt"># 2. Authenticate.</span>
+<span class="pmpt">$</span> kolm login --key YOUR_KEY
+
+<span class="cmt"># 3. Import your existing OpenAI fine-tuning JSONL.</span>
+<span class="pmpt">$</span> kolm import --from openai-finetune ./fine_tuning_data.jsonl --out ./captures.jsonl
+
+<span class="cmt"># 4. Draft a distill spec (multi-teacher council, your choice of base).</span>
+<span class="pmpt">$</span> kolm distill spec --base qwen2.5-7b --teacher claude-4-7 --teacher gpt-5 --out spec.json
+
+<span class="cmt"># 5. Train the student. Resumable; emits signed receipts at each step.</span>
+<span class="pmpt">$</span> kolm distill train --spec spec.json --captures ./captures.jsonl
+
+<span class="cmt"># 6. Export to a portable target and run it.</span>
+<span class="pmpt">$</span> kolm export --to gguf --quant Q4_K_M ./run_latest.kolm
+<span class="pmpt">$</span> kolm run ./run_latest.kolm --prompt "hello, world"</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================== 5. Signed receipts ================== -->
+  <section class="om-section" aria-labelledby="om-rcpt-h">
+    <div class="ks-wrap">
+      <span class="om-section__eyebrow">Provable lineage</span>
+      <h2 class="om-section__h2" id="om-rcpt-h">Every step emits a signed receipt.</h2>
+      <p class="om-section__lede">No silent step in the loop &mdash; you can verify any artifact end-to-end.</p>
+      <div class="om-rcpt">
+        <div class="om-rcpt__copy">
+          <p>Every distill run, every eval pair, and every inference call emits an <b>Ed25519-signed receipt</b>. A receipt commits to the inputs (capture hashes, teacher prompts, base model digest), the operation, and the outputs (model digest, eval scores, output hash). The chain is append-only and verifiable offline.</p>
+          <p>When you migrate off OpenAI you typically need to prove to your buyer, your security team, or your regulator that the new model behaves equivalently to the fine-tuning baseline. The receipt chain is that proof &mdash; not a screenshot, not a spreadsheet.</p>
+          <p>Full schema and verification recipe at <a href="/docs/receipts">/docs/receipts</a>. The Ed25519 public key is published in the kolm CLI and in CI; verification needs no network.</p>
+        </div>
+        <div>
+          <pre class="om-rcpt__envelope" aria-label="Example signed receipt envelope (JSON)">{
+  <span class="k">"cid"</span><span class="s">:</span> <span class="v">"rcpt_01KYC1ZVTGDCW3FX06JQSC"</span><span class="s">,</span>
+  <span class="k">"op"</span><span class="s">:</span> <span class="v">"distill.train"</span><span class="s">,</span>
+  <span class="k">"ts"</span><span class="s">:</span> <span class="v">"2026-05-28T15:42:11Z"</span><span class="s">,</span>
+  <span class="k">"input"</span><span class="s">: {</span>
+    <span class="k">"spec_sha256"</span><span class="s">:</span> <span class="v">"3f9a2b...e4c1"</span><span class="s">,</span>
+    <span class="k">"captures_sha256"</span><span class="s">:</span> <span class="v">"7d18cc...0a2b"</span><span class="s">,</span>
+    <span class="k">"base_model"</span><span class="s">:</span> <span class="v">"qwen2.5-7b@sha256:b1c8..."</span><span class="s">,</span>
+    <span class="k">"teachers"</span><span class="s">: [</span><span class="v">"claude-4-7"</span><span class="s">,</span> <span class="v">"gpt-5"</span><span class="s">]</span>
+  <span class="s">},</span>
+  <span class="k">"output"</span><span class="s">: {</span>
+    <span class="k">"artifact_sha256"</span><span class="s">:</span> <span class="v">"8e4d1f...22a9"</span><span class="s">,</span>
+    <span class="k">"params"</span><span class="s">:</span> <span class="v">7615616512</span><span class="s">,</span>
+    <span class="k">"eval_pass_rate"</span><span class="s">:</span> <span class="v">0.973</span>
+  <span class="s">},</span>
+  <span class="k">"prev"</span><span class="s">:</span> <span class="v">"rcpt_01KYC1ZTH0G2WJ58V4M9XQ"</span><span class="s">,</span>
+  <span class="k">"sig"</span><span class="s">:</span> <span class="v">"ed25519:9c7f...3a1e"</span>
+}</pre>
+          <p class="om-rcpt__caption">Verify with <code>kolm verify rcpt_01KYC1ZVTGDCW3FX06JQSC</code></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================== 6. Compare panel ================== -->
+  <section class="om-section" aria-labelledby="om-cmp-h">
+    <div class="ks-wrap">
+      <span class="om-section__eyebrow">Side by side</span>
+      <h2 class="om-section__h2" id="om-cmp-h">OpenAI fine-tuning &middot; kolm &middot; Vertex Tuning.</h2>
+      <p class="om-section__lede">The fields that matter most when picking a landing pad. Full matrix on <a href="/compare.html" style="color:var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge);">/compare</a>.</p>
+      <div class="om-cmp-wrap">
+        <table class="om-cmp" aria-label="Compare OpenAI fine-tuning, kolm, and Vertex Tuning">
+          <thead>
+            <tr>
+              <th scope="col">Capability</th>
+              <th scope="col">OpenAI fine-tuning</th>
+              <th scope="col" class="kc">kolm</th>
+              <th scope="col">Vertex Tuning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="ax">Cost model</td>
+              <td>Per-training-token + per-inference-token, ongoing</td>
+              <td class="k">One distill run + your own GPU $/hr, no per-token meter</td>
+              <td>Per-training-hour + per-inference-token, ongoing</td>
+            </tr>
+            <tr>
+              <td class="ax">Lock-in</td>
+              <td>Weights stay on OpenAI; sunsetting Jan 2027</td>
+              <td class="k">None &mdash; weights are yours, runtime is open source</td>
+              <td>Weights stay on Vertex; tied to GCP project</td>
+            </tr>
+            <tr>
+              <td class="ax">Portability</td>
+              <td>API-only, OpenAI endpoint</td>
+              <td class="k">HF, GGUF, Ollama, vLLM, TGI, TRT-LLM, single-binary</td>
+              <td>Vertex prediction endpoints, limited export</td>
+            </tr>
+            <tr>
+              <td class="ax">Signed lineage</td>
+              <td>Job ID; no per-call cryptographic receipt</td>
+              <td class="k">Ed25519 receipt on every distill / eval / inference call</td>
+              <td>Audit log; no per-call cryptographic receipt</td>
+            </tr>
+            <tr>
+              <td class="ax">BYOC (run on your cloud)</td>
+              <td>No</td>
+              <td class="k">Yes &mdash; any GPU, any region, air-gap supported</td>
+              <td>Limited &mdash; GCP regions only</td>
+            </tr>
+            <tr>
+              <td class="ax">BAA available</td>
+              <td>Enterprise-tier negotiation</td>
+              <td class="k">Yes, on Business and Enterprise plans</td>
+              <td>Yes, under GCP BAA</td>
+            </tr>
+            <tr>
+              <td class="ax">Open source</td>
+              <td>No</td>
+              <td class="k">Yes &mdash; Apache 2.0, entire stack</td>
+              <td>No</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="om-cmp__foot">Caveats: vendor capability rows reference published docs as of 2026-05-28. <a href="/compare.html">See the full compare matrix &rarr;</a></p>
+    </div>
+  </section>
+
+  <!-- ================== Footer CTA ================== -->
+  <section class="om-foot-cta" aria-labelledby="om-foot-cta-h">
+    <div class="ks-wrap">
+      <h2 id="om-foot-cta-h">Ready when you are.</h2>
+      <p>Five minutes from your existing <code>fine_tuning_data.jsonl</code> to a portable distilled model. Or talk to a human about a custom migration plan, a BAA, or an air-gap deployment.</p>
+      <div class="om-ctas">
+        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/quickstart">Start migration <span class="ks-btn-arrow" aria-hidden="true">&rarr;</span></a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/contact">Talk to a human</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="test-anchor" aria-hidden="true">
+  <span data-test="w918-openai-migration">OpenAI fine-tuning migration</span>
+  <span data-test="w918-shutdown-date">January 2027</span>
+  <span data-test="w918-import-cmd">kolm import --from openai-finetune</span>
+  <span data-test="w918-receipts">Ed25519</span>
+  <a href="/quickstart" data-test="w918-cta-quickstart">/quickstart</a>
+  <a href="/docs/recipes/openai-finetune-migration" data-test="w918-recipe-link">/docs/recipes/openai-finetune-migration</a>
+  <a href="/compare.html" data-test="w918-compare-link">/compare.html</a>
+  <a href="/contact" data-test="w918-contact">/contact</a>
+</div>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
+        <a href="/blog">Blog</a>
+        <a href="/changelog">Changelog</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Mobile nav toggle. Pattern lifted from index.html and quickstart.html.
+  (function(){
+    var btn = document.getElementById('navToggle');
+    var sheet = document.getElementById('navSheet');
+    if (!btn || !sheet) return;
+    btn.addEventListener('click', function(){
+      var open = sheet.style.display === 'block';
+      sheet.style.display = open ? 'none' : 'block';
+      btn.setAttribute('aria-expanded', String(!open));
+    });
+  })();
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function(){ navigator.serviceWorker.register('/sw.js').catch(function(){}); });
+  }
+</script>
+
+</body>
+</html>

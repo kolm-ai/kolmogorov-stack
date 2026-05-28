@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cloud compile &middot; RunPod, Modal, Together &middot; kolm.ai</title>
+<meta name="description" content="Run kolm compile against a hosted GPU when your local machine cannot fit the source model.">
+<link rel="canonical" href="https://kolm.ai/docs/cloud-compile">
+<meta property="og:title" content="Cloud compile · RunPod, Modal, Together">
+<meta property="og:description" content="Three cloud GPU paths for kolm compile when your local hardware will not fit the source model.">
+<meta property="og:url" content="https://kolm.ai/docs/cloud-compile">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Cloud compile · RunPod, Modal, Together">
+<meta name="twitter:description" content="Three cloud GPU paths for kolm compile when your local hardware will not fit the source model.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/docs-shell.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/docs-shell.js"></script>
+<style>
+.step{padding:18px 22px;border:1px solid var(--line,var(--line-2));border-radius:12px;background:var(--bg-elev,#101316);margin:14px 0}
+.step .num{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#111111;background:var(--line-2);padding:3px 8px;border-radius:4px;border:1px solid var(--line-strong);display:inline-block;margin-bottom:8px}
+.step h3{margin:6px 0 8px}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line,var(--line-2));border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;margin:14px 0 18px}
+table.cost{width:100%;border-collapse:collapse;margin:14px 0 18px;font-size:13.5px}
+table.cost th,table.cost td{border:1px solid var(--line,var(--line-2));padding:8px 12px;text-align:left;font-variant-numeric:tabular-nums}
+table.cost th{background:var(--line-2);font-weight:600}
+.example-note{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:11px;color:#6a727c;letter-spacing:0.06em;text-transform:uppercase;margin-top:18px}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
+
+<main id="main" class="docs-page" data-w918="cloud-compile">
+<nav aria-label="Breadcrumb" class="crumbs">
+ <a href="/docs">Docs</a> / <span>Cloud compile</span>
+</nav>
+<header class="page-h">
+ <p class="eyebrow">Open-source AI compiler</p>
+ <h1>Cloud compile.</h1>
+ <p class="lede">Run <code>kolm compile</code> against a hosted GPU when your local machine cannot host the source model. The kolm side is a thin driver; the cloud provider owns the GPU pool and the billing. Three providers are wired today: RunPod, Modal, and Together. Pick by GPU shape, by billing model, and by which one you already have an account with.</p>
+</header>
+
+<section data-w918="when">
+ <h2>When you need it</h2>
+ <p>Reach for cloud compile when any of these is true.</p>
+ <ul>
+   <li>You do not have a local NVIDIA GPU (no 4090 / 5090 / A6000 / H100).</li>
+   <li>The source model is larger than ~24 GB in bf16 (DeepSeek-R1-32B, Llama-3.1-70B, Qwen-2.5-72B) and will not fit on consumer cards even at NF4.</li>
+   <li>You want a one-shot quantize for an artifact you will keep and serve forever, and you would rather rent an H100 for three minutes than buy hardware.</li>
+ </ul>
+ <p>If your model is &le; 7B and you have any modern GPU, run locally instead. It will be faster and free.</p>
+</section>
+
+<section data-w918="runpod">
+ <h2>RunPod</h2>
+ <div class="step">
+   <span class="num">Provider 1</span>
+   <h3>What it is for</h3>
+   <p>RunPod rents whole pods (a container plus a GPU plus a network volume) by the second. Best when you want spot-priced GPU time, a persistent volume that survives reboots, or a long-running interactive session for iterative compile work. RunPod gives you ssh into the pod, which means you can attach a debugger or run kolm verify in the same shell as the compile.</p>
+   <h3>Command</h3>
+   <pre><code>kolm compile --cloud runpod \
+  --model deepseek-ai/DeepSeek-R1-Distill-Qwen-32B \
+  --quant nf4-int4 \
+  --gpu a100-80gb \
+  --out ./out/r1-32b-int4
+</code></pre>
+   <p>The driver provisions a pod, mounts a persistent volume named <code>kolm-compile-out</code>, runs the quantize, and stitches the artifact back to your local <code>--out</code> directory. Pass <code>--keep-pod</code> if you want to leave the pod running for a follow-up bake-off.</p>
+   <h3>Cost ballpark</h3>
+   <table class="cost">
+     <thead><tr><th scope="col">GPU</th><th scope="col">On-demand hourly</th><th scope="col">Spot hourly</th><th scope="col">32B NF4 quantize</th></tr></thead>
+     <tbody>
+       <tr><td>RTX 4090 24GB</td><td>~$0.50</td><td>~$0.30</td><td>not enough VRAM for 32B</td></tr>
+       <tr><td>A40 48GB</td><td>~$0.50</td><td>~$0.30</td><td>~8-12 min</td></tr>
+       <tr><td>A100 80GB</td><td>~$2-3</td><td>~$1-2</td><td>~4-6 min</td></tr>
+       <tr><td>H100 80GB</td><td>~$3-5</td><td>~$2-3</td><td>~3 min</td></tr>
+     </tbody>
+   </table>
+   <h3>When to pick it</h3>
+   <p>Pick RunPod when you want the cheapest GPU-hour, when you need a persistent pod for back-to-back compiles, or when you want ssh access for debugging. Pick something else if you do not want to manage pod lifecycle.</p>
+ </div>
+</section>
+
+<section data-w918="modal">
+ <h2>Modal</h2>
+ <div class="step">
+   <span class="num">Provider 2</span>
+   <h3>What it is for</h3>
+   <p>Modal is a function-as-a-service GPU platform. You define a Python function decorated with a GPU type, and Modal handles cold-start, autoscaling, billing per GPU-second, and artifact storage in a <code>modal.Volume</code>. Best when you want zero pod management, predictable cold-start under a minute, and per-second billing with no idle charge.</p>
+   <h3>Command</h3>
+   <pre><code>kolm compile --cloud modal \
+  --model deepseek-ai/DeepSeek-R1-Distill-Qwen-32B \
+  --quant nf4-int4 \
+  --gpu h100 \
+  --out ./out/r1-32b-int4
+</code></pre>
+   <p>The driver authenticates against <code>~/.modal.toml</code> (or <code>MODAL_TOKEN_ID</code> + <code>MODAL_TOKEN_SECRET</code> env vars), runs the function, writes the artifact to a Modal Volume named <code>kolm-compile-out</code>, and pulls it back to your <code>--out</code> directory. For gated HuggingFace models, create a Modal Secret named <code>huggingface</code> containing <code>HF_TOKEN</code>.</p>
+   <h3>Cost ballpark</h3>
+   <table class="cost">
+     <thead><tr><th scope="col">GPU</th><th scope="col">Hourly</th><th scope="col">32B NF4 quantize (typical)</th></tr></thead>
+     <tbody>
+       <tr><td>L4</td><td>~$1</td><td>not enough VRAM for 32B</td></tr>
+       <tr><td>A100 40GB</td><td>~$2-3</td><td>~5-8 min</td></tr>
+       <tr><td>A100 80GB</td><td>~$3-4</td><td>~4-6 min</td></tr>
+       <tr><td>H100</td><td>~$5-8</td><td>~3 min</td></tr>
+     </tbody>
+   </table>
+   <p>A typical 32B quantize finishes in well under one GPU-hour, so the all-in Modal cost is usually in the single-dollar range, plus a few cents of network egress when the driver pulls the artifact back.</p>
+   <h3>When to pick it</h3>
+   <p>Pick Modal when you want the lowest operational overhead, when you only need the GPU for the duration of the quantize, or when you already have a Modal account for other workloads. Pick something else if you need ssh-into-pod debugging or persistent compute between runs.</p>
+ </div>
+</section>
+
+<section data-w918="together">
+ <h2>Together</h2>
+ <div class="step">
+   <span class="num">Provider 3</span>
+   <h3>What it is for</h3>
+   <p>Together runs a managed fine-tune and quantize API on their own GPU fleet. You ship the model name and a quant spec; Together runs the job and stores the artifact in their object store, then signs a presigned URL for the driver to download. Best when you want a single API call with no GPU shape selection, no pod lifecycle, and no Modal-style function authoring.</p>
+   <h3>Command</h3>
+   <pre><code>kolm compile --cloud together \
+  --model deepseek-ai/DeepSeek-R1-Distill-Qwen-32B \
+  --quant nf4-int4 \
+  --out ./out/r1-32b-int4
+</code></pre>
+   <p>The driver reads <code>TOGETHER_API_KEY</code> from your environment, submits a quantize job to Together's API, polls until done, and stitches the artifact back to <code>--out</code>. Together selects the GPU shape based on the source-model size; you cannot pick the SKU.</p>
+   <h3>Cost ballpark</h3>
+   <table class="cost">
+     <thead><tr><th scope="col">Model size class</th><th scope="col">Per-job pricing</th><th scope="col">Typical wallclock</th></tr></thead>
+     <tbody>
+       <tr><td>&le; 7B</td><td>~$1-3</td><td>~3-6 min</td></tr>
+       <tr><td>8B - 13B</td><td>~$3-6</td><td>~5-10 min</td></tr>
+       <tr><td>20B - 34B</td><td>~$6-12</td><td>~8-15 min</td></tr>
+       <tr><td>65B - 72B</td><td>~$15-30</td><td>~15-30 min</td></tr>
+     </tbody>
+   </table>
+   <h3>When to pick it</h3>
+   <p>Pick Together when you want one API call and a finished artifact with no infrastructure decisions, or when you already use Together for inference and want unified billing. Pick something else if you want spot pricing (RunPod is cheaper per GPU-hour), or if you want fine control over the GPU shape (Modal lets you pick).</p>
+ </div>
+</section>
+
+<section data-w918="picking">
+ <h2>How to pick</h2>
+ <ul>
+   <li><b>Cheapest GPU-hour</b> &mdash; RunPod spot.</li>
+   <li><b>Lowest operational overhead</b> &mdash; Modal.</li>
+   <li><b>One API call, no infra decisions</b> &mdash; Together.</li>
+   <li><b>You already have an account with one of them</b> &mdash; that one.</li>
+ </ul>
+ <p class="example-note">All prices indicative as of 2026-05; check the provider site for current rates. kolm does not bill or proxy. The provider bills your provider account directly.</p>
+</section>
+
+<section data-w918="caveats">
+ <h2>Caveats / Limitations</h2>
+ <ul>
+   <li><b>GGUF profiles are deferred</b> on the Modal and Together paths. V1 covers <code>nf4-int4</code>, <code>int4</code>, and <code>int8</code> via bitsandbytes. GGUF (<code>q4_k_m</code>, <code>q5_k_m</code>, <code>q8_0</code>) needs llama.cpp <code>convert.py</code> plus <code>quantize</code> and ships on the RunPod path first.</li>
+   <li><b>No retry / resume.</b> A cold-start timeout means you re-invoke the driver. The provider does not refund cold-start time.</li>
+   <li><b>No metering inside kolm.</b> kolm does not bill or proxy. Treat the cost tables above as indicative, not contractual.</li>
+   <li><b>Gated-model auth is per-secret.</b> The driver does not auto-forward your local <code>HF_TOKEN</code>. Set the provider's secret store as shown in each section.</li>
+ </ul>
+</section>
+
+<section data-w918="related">
+ <h2>Related</h2>
+ <ul>
+   <li><a href="/docs/quickstart/">Quickstart hub</a> &mdash; per-SDK five-minute walkthroughs.</li>
+   <li><a href="/docs/cli/compile">CLI compile reference</a> &mdash; every flag, every default.</li>
+   <li><a href="/benchmarks">Benchmarks</a>
+<a href="/compare">Compare</a> &mdash; reproducible quantize and inference numbers.</li>
+   <li><a href="/docs/receipts/">Receipts</a> &mdash; every cloud compile emits a signed receipt you can verify.</li>
+ </ul>
+</section>
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/blog">Blog</a>
+        <a href="/faq">FAQ</a>
+        <a href="/changelog">Changelog</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/status">Status</a>
+        <a href="/subprocessors">Subprocessors</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/about">About</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/press">Press</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai - Apache-2.0 - Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

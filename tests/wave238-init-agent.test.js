@@ -203,7 +203,11 @@ test('W238 CLI wires init-agent verb + dispatch + cmdInitAgent + HELP block', ()
 
 test('W238 COMPLETION_VERBS and COMPLETION_SUBS include init-agent', () => {
   const src = fs.readFileSync(path.join(ROOT, 'cli/kolm.js'), 'utf8');
-  const cidx = src.indexOf('COMPLETION_VERBS');
+  // Anchor on the array *declaration*, not the first textual mention of
+  // COMPLETION_VERBS — a later `_loadKnownVerbs()` comment references the name
+  // far above the literal, so indexOf('COMPLETION_VERBS') lands on prose and the
+  // 2000-char window never reaches the verb entries.
+  const cidx = src.indexOf('const COMPLETION_VERBS = [');
   const tail = src.slice(cidx, cidx + 2000);
   assert.ok(tail.includes("'init-agent'"), 'COMPLETION_VERBS missing init-agent');
   assert.ok(src.includes("'init-agent': ['chatbot'"), 'COMPLETION_SUBS missing init-agent template list');

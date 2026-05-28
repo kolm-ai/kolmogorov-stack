@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>Distilling agents, not just chats &middot; kolm.ai blog</title>
+<meta name="description" content="Bring an agent trajectory &mdash; Claude tool_use, OpenAI tool_calls, MCP turns &mdash; and ship a smaller model that picks the same tools, at one-tenth the cost.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Distilling agents, not just chats &middot; kolm.ai blog">
+<meta property="og:description" content="Bring an agent trajectory &mdash; Claude tool_use, OpenAI tool_calls, MCP turns &mdash; and ship a smaller model that picks the same tools, at one-tenth the cost.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/blog/distilling-agents">
+<meta property="og:image" content="https://kolm.ai/og/distilling-agents.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Distilling agents, not just chats">
+<meta name="twitter:description" content="Bring an agent trajectory and ship a smaller model that picks the same tools at one-tenth the cost.">
+<meta name="twitter:image" content="https://kolm.ai/og/distilling-agents.svg">
+<link rel="canonical" href="https://kolm.ai/blog/distilling-agents">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="kolm.ai blog" href="/feed.xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Distilling agents, not just chats","description":"Bring an agent trajectory and ship a smaller model that picks the same tools at one-tenth the cost.","url":"https://kolm.ai/blog/distilling-agents","datePublished":"2026-06-02","dateModified":"2026-06-02","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<style>
+:root{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:var(--line-2);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#1f2937;--accent-soft:rgba(31,41,55,0.06);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=dark]{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:var(--line-2);--bg:#0e1116;--bg-elev:#161a20;--accent:#cbd5e1;--accent-soft:rgba(203,213,225,0.10)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+.skip-link{position:absolute;left:-9999px}
+.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
+.wrap{max-width:780px;margin:0 auto;padding:0 24px}
+main{padding:48px 0 96px}
+.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
+.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+.crumbs a:hover{color:var(--ink)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
+.meta{font-family:var(--mono);font-size:11.5px;letter-spacing:0.10em;color:var(--ink-faint);margin:0 0 32px}
+h1{font-size:38px;line-height:1.10;font-weight:520;letter-spacing:-0.02em;margin:0 0 18px;color:var(--ink)}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);margin:0 0 36px}
+h2{font-size:22px;font-weight:540;letter-spacing:-0.015em;margin:44px 0 12px;color:var(--ink);scroll-margin-top:80px}
+h3{font-size:16px;font-weight:540;letter-spacing:-0.005em;margin:28px 0 8px;color:var(--ink)}
+p{color:var(--ink-mute);font-size:15.5px;line-height:1.68}
+pre{background:#0b0e12;color:#e9eef3;border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+ul,ol{color:var(--ink-mute);font-size:15.5px;line-height:1.72}
+li{margin:6px 0}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-mute)}
+th{color:var(--ink);font-weight:540}
+td code{font-size:12px}
+.kolm-post a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+.kolm-post a:hover{border-bottom-color:var(--accent)}
+.kolm-post a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+.back{display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:0.10em;color:var(--ink-faint);text-decoration:none;margin-bottom:24px;border-bottom:1px dashed var(--line);padding-bottom:1px}
+.back:hover{color:var(--ink)}
+.back:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+.endnote{margin-top:48px;padding:18px 20px;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev);font-size:14px;color:var(--ink-mute);line-height:1.6}
+.endnote b{color:var(--ink);font-weight:540}
+.callout{margin:24px 0;padding:14px 18px;border-left:3px solid var(--accent);background:var(--bg-elev);font-size:14.5px;color:var(--ink-mute);border-radius:0 6px 6px 0}
+.callout b{color:var(--ink);font-weight:540}
+.step{font-family:var(--mono);font-size:11.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-faint);margin:32px 0 2px}
+hr.rule{border:none;border-top:1px solid var(--line);margin:36px 0}
+</style>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="skip-link">Skip to content</a>
+
+<main id="main" tabindex="-1"><div class="wrap">
+
+<a href="/blog" class="back">&larr; kolm.ai blog</a>
+
+<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/blog">blog</a> / distilling-agents</div>
+<p class="eyebrow">Agents &middot; Tool-call distillation</p>
+<h1>Distilling agents, not just chats</h1>
+<p class="meta"><time datetime="2026-06-02">2026-06-02</time> &middot; ~8 minute read &middot; kolm.ai engineering</p>
+
+<article class="kolm-post">
+
+<p class="lede">Bring an agent trajectory &mdash; Claude <code>tool_use</code>, OpenAI <code>tool_calls</code>, MCP turns &mdash; and ship a smaller model that picks the same tools, at one-tenth the cost. The OpenAI fine-tuning API only ever distilled a single chat turn. Real agents alternate between assistant text, tool calls, tool results, and follow-up assistant turns, and a model that has never seen that shape during training learns to imitate the surface text without ever learning the underlying decision policy. This post walks the agent distill path in kolm: how a trajectory row is shaped, why a single teacher is the wrong choice for tool selection, what the eval harness actually measures, and the five commands that reproduce the pipeline end to end.</p>
+
+<h2>The shape of an agent distill row</h2>
+
+<p>The OpenAI fine-tuning JSONL is a flat list of chat turns: <code>{"messages":[{"role":"user",...},{"role":"assistant",...}]}</code>. That shape is fine for a chat distill and useless for an agent distill, because agent reasoning lives in the turns the chat schema does not represent: the assistant's choice of which tool to call, the structured arguments it passed, the tool result it got back, and the assistant message it composed in response.</p>
+
+<p>kolm captures the full trajectory and treats the whole <code>assistant &rarr; tool_call &rarr; tool_result &rarr; assistant</code> sequence as the training unit. One row from a real agent capture lake looks like this:</p>
+
+<pre><code>{
+  "rid": "trj_01KYK4Z7MX",
+  "namespace": "support-agent",
+  "trajectory": [
+    {"role":"user","content":"Refund order 1187, the strap broke."},
+    {"role":"assistant","content":"I'll look up the order first.",
+     "tool_calls":[{"id":"tc_1","name":"lookup_order",
+                    "arguments":{"order_id":"1187"}}]},
+    {"role":"tool","tool_call_id":"tc_1",
+     "content":{"order_id":"1187","status":"delivered",
+                "items":[{"sku":"strap-v2","price_cents":2400}],
+                "delivered_at":"2026-05-21T14:02Z"}},
+    {"role":"assistant","content":"Found it, delivered May 21. Issuing refund.",
+     "tool_calls":[{"id":"tc_2","name":"issue_refund",
+                    "arguments":{"order_id":"1187","amount_cents":2400,
+                                 "reason":"defect"}}]},
+    {"role":"tool","tool_call_id":"tc_2",
+     "content":{"refund_id":"rf_88121","status":"ok"}},
+    {"role":"assistant","content":"Refund of $24.00 processed. Order rf_88121."}
+  ],
+  "teacher": "claude-opus-4-7",
+  "latency_ms": 4218,
+  "cost_cents": 7.3
+}
+</code></pre>
+
+<p>The importer at <code>src/importers/agent-trajectory.js</code> reads three native shapes: Anthropic's <code>tool_use</code>/<code>tool_result</code> blocks, OpenAI's <code>tool_calls</code> array with <code>role:"tool"</code> response messages, and MCP session transcripts captured through the kolm gateway. The trained student learns the full conditional: given the user goal and the running tool-result context, predict the next tool name plus its arguments. That is the policy the agent actually runs in production. A chat-only distill never sees it.</p>
+
+<h2>Why council voting matters for tool-call agents</h2>
+
+<p>Single-teacher distillation memorises the teacher's quirks. If Claude tends to call <code>search()</code> when <code>grep()</code> would have been the correct choice for a code-aware tool surface, a Claude-only student will inherit that exact preference and call <code>search()</code> on every code lookup forever. The student does not know the teacher was wrong; it only knows the teacher's output was the training target.</p>
+
+<p>Council distillation breaks the imitation by asking three or more teachers the same question and only training on the agreement. For a chat distill that means voting on output text, which is fuzzy. For a tool-call distill it is structurally cleaner:</p>
+
+<ul>
+  <li><b>Tool name vote.</b> If two of three teachers pick <code>grep</code> and one picks <code>search</code>, the council emits <code>grep</code>. The dissenting trajectory is dropped from the training pairs, not just down-weighted.</li>
+  <li><b>Argument shape vote.</b> Tools have schemas. The collector validates each teacher's arguments against the JSON Schema for the chosen tool and rejects shape mismatches before they reach the training set.</li>
+  <li><b>Recovery vote.</b> When a tool returns an error, did the council recover with the same next tool call? Trajectories where teachers diverge on error handling are tagged as <code>noisy</code> and re-sampled with a higher temperature ceiling on the next collect pass.</li>
+</ul>
+
+<p>For Trinity-Agent, the first published agent artifact from this pipeline, the council was Claude Opus 4.7, GPT-5, and DeepSeek V3, with Gemini 2.5 Pro as a fourth-lineage judge. About 11% of single-teacher trajectories failed the tool-name vote and were dropped. The remaining 89% survived as clean training pairs, and the student matched the council's tool selection at 96.3% on the held-out eval.</p>
+
+<h2>What the eval harness measures</h2>
+
+<p>Chat distill evals measure agreement on output text, which is the wrong target for an agent. A student that picks the correct tool with the correct arguments but phrases the user-facing assistant message slightly differently is correct; a student that produces a polished assistant message and calls the wrong tool is broken. The <a href="/docs/eval-harness">agent eval harness</a> reports four numbers:</p>
+
+<ul>
+  <li><b>Tool-call accuracy.</b> Per turn, did the student pick the same tool name as the council? Reported as a percentage across the holdout set, broken down by tool.</li>
+  <li><b>Argument-shape match.</b> For each correct tool name, did the student emit arguments that pass the tool's JSON Schema and match the council's argument values? Strict match for enums and IDs, fuzzy match for free-text strings.</li>
+  <li><b>Tool-sequence Levenshtein.</b> Across a full trajectory, the edit distance between the student's tool call sequence and the council's. A score of 0 means the student followed the same plan; small scores tolerate reordering of independent steps; large scores flag a divergent strategy.</li>
+  <li><b>End-to-end task completion.</b> For trajectories with a ground-truth final state (a refund issued, a ticket closed, a file written), did the student's run terminate in the same state? This is the bottom line; the other three metrics decompose why a failure happened.</li>
+</ul>
+
+<p>The harness writes a per-row JSON report so you can see exactly which trajectories the student matched and which it diverged on. Cutting over to a distilled agent without running the harness is the fastest way to ship a regression you will not detect until a tool call costs a customer money.</p>
+
+<h2>5-command reproduction</h2>
+
+<p>Each block is the literal command. The recipe at <a href="/docs/recipes/agent">/docs/recipes/agent</a> documents exit codes, common failure modes, and annotated output.</p>
+
+<p class="step">Step 1 of 5 &middot; Replay your captured agent traffic</p>
+
+<pre><code>kolm capture replay \
+  --namespace support-agent \
+  --from 2026-04-01 --to 2026-05-28 \
+  --out ./trajectories.jsonl</code></pre>
+
+<p>The capture lake holds every gateway request grouped by trajectory ID. Replay materialises the multi-turn sequences as JSONL rows in the shape shown earlier in this post.</p>
+
+<p class="step">Step 2 of 5 &middot; Generate an agent distill spec</p>
+
+<pre><code>kolm distill spec --mode=agent \
+  --namespace support-agent \
+  --base qwen2.5-7b-instruct \
+  --teachers claude-opus-4-7,gpt-5,deepseek-v3 \
+  --judge gemini-2.5-pro \
+  --tools ./tools.json \
+  --output ./agent-spec.json</code></pre>
+
+<p>The <code>--mode=agent</code> flag tells the spec to expect trajectory rows, validate the <code>--tools</code> manifest against the JSON Schema in each row, and configure the eval block for the four agent metrics rather than the chat metrics.</p>
+
+<p class="step">Step 3 of 5 &middot; Collect council trajectories</p>
+
+<pre><code>kolm distill collect \
+  --spec ./agent-spec.json \
+  --trajectories ./trajectories.jsonl \
+  --out ./agent-pairs.jsonl</code></pre>
+
+<p>Each user goal is run against all three teachers in parallel. The collector enforces the tool-name vote and the argument-shape vote inline; dropped trajectories are written to <code>./agent-pairs.dropped.jsonl</code> with a reason field for audit.</p>
+
+<p class="step">Step 4 of 5 &middot; Train the student</p>
+
+<pre><code>kolm distill train \
+  --spec ./agent-spec.json \
+  --pairs ./agent-pairs.jsonl \
+  --out ./agent-v1.kolm</code></pre>
+
+<p>LoRA r=32 on Qwen2.5-7B with the tool-token vocabulary expanded to cover the <code>tools.json</code> manifest. Fits on a single 5090 or a $0.39/hr cloud GPU. The resulting <code>.kolm</code> artifact carries the spec, the eval report, the dropped-trajectory log, and an Ed25519 signature over the bytes.</p>
+
+<p class="step">Step 5 of 5 &middot; Deploy</p>
+
+<pre><code>kolm deploy ./agent-v1.kolm \
+  --target vllm \
+  --target gguf-q4km \
+  --tools ./tools.json</code></pre>
+
+<p>The deployed artifact serves the OpenAI-compatible <code>/v1/chat/completions</code> endpoint with the <code>tools</code> parameter respected. Existing agent client code keeps working with one base-URL change.</p>
+
+<h2>Receipts cover every tool call</h2>
+
+<p>Every tool call the deployed agent makes emits an Ed25519-signed receipt under the <code>kolm-audit-1</code> schema. The receipt captures the input arguments, the tool result, the latency, the model that selected the tool, and a hash of the parent trajectory. Receipts are addressable at <code>/v1/verify/&lt;rcpt_id&gt;</code> with no auth, so a downstream auditor can replay the agent's decision chain end to end. See <a href="/docs/receipts">/docs/receipts</a> for the schema and the verification flow.</p>
+
+<p>For a refund agent that calls <code>lookup_order</code> then <code>issue_refund</code>, you get two receipts per refund and a parent trajectory receipt linking them. If a chargeback dispute lands six months later, the receipts are the audit trail: which model, which prompt, which tool inputs, which tool outputs, signed and verifiable.</p>
+
+<h2>Caveats</h2>
+
+<p>Agent distillation is harder than chat distillation. The student is learning a multi-step policy, not a single mapping, and the failure modes compound across turns. In practice we see customer-support agents, document-retrieval agents, and classification-routing agents land at &gt;90% tool-call accuracy on the first council pass. Open-ended coding agents and multi-hour research agents usually need a larger base (Qwen2.5-32B or Llama-3.3-70B) and a second collect pass with a stricter argument-shape filter to converge.</p>
+
+<div class="callout">
+<b>Order of operations.</b> Run the eval harness against your real holdout before deploy. Tool-call accuracy alone is not enough; check the tool-sequence Levenshtein and the end-to-end completion rate too. A student with high per-turn accuracy and low sequence accuracy is making locally correct choices that compound into the wrong outcome.
+</div>
+
+<h2>Try it</h2>
+
+<p>Two entry points:</p>
+
+<ul>
+  <li><a href="/agents">/agents</a> &mdash; the agent landing page with the side-by-side comparison against Pioneer, Fastino, and the OpenAI Assistants API.</li>
+  <li><a href="/docs/recipes/agent">/docs/recipes/agent</a> &mdash; the reproducible recipe with the <code>tools.json</code> example, annotated outputs, and verification commands.</li>
+</ul>
+
+<p>The CLI is Apache-2.0 and free to install and self-host. The managed kolm.ai runs the boxes for you and offers a free tier of 20 inference calls per IP per day with no signup at <a href="/quickstart">/quickstart</a>.</p>
+
+<div class="endnote">
+<b>Caveats.</b> The 96.3% tool-call accuracy figure is the Trinity-Agent eval on the support-agent benchmark and is not a guarantee for your dataset; agent workflows with larger tool surfaces (more than ~30 distinct tools) or with deep nesting (more than ~10 turns per trajectory) typically need a larger base model. The 11% drop rate from council voting is the published average across three agent case studies and varies with how well-aligned the teachers are on your tool manifest. The eval harness in step 4 of the recipe is what tells you whether the migration is safe for your specific workflow.
+</div>
+
+</article>
+
+<hr class="rule">
+<a href="/blog" class="back">&larr; back to kolm.ai blog</a>
+
+</div></main>
+
+</body>
+</html>

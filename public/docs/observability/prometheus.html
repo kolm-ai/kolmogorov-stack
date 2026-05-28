@@ -105,7 +105,19 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="scrape-config">Scrape config</h2>
 <p>Add a job to your <code>prometheus.yml</code>. The endpoint speaks <code>text/plain; version=0.0.4</code> so Prometheus 2.x and 3.x both scrape it natively without exporters.</p>
 
-<pre>CODE4</pre>
+<pre><code>scrape_configs:
+  - job_name: 'kolm'
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['kolm.example.com:443']
+    scheme: https
+    # Optional: if you set KOLM_METRICS_BEARER on the kolm side, send the
+    # matching bearer here so 401s don't pollute your scrape errors.
+    authorization:
+      type: Bearer
+      credentials: 'your-shared-bearer-token-here'
+</code></pre>
 
 <p>To gate the endpoint, set <code>KOLM_METRICS_BEARER=&lt;random-token&gt;</code> on the kolm process. The plain dev-default is no auth so local <code>curl localhost:8080/metrics</code> just works. On a missing or mismatched bearer the endpoint returns HTTP 401 with <code>{ok:false, error:'invalid_metrics_bearer'}</code> so a misconfigured scraper fails loud.</p>
 
@@ -156,7 +168,11 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <p>You can also list the registered shape from the CLI:</p>
 
-<pre>CODE25</pre>
+<pre><code>kolm metrics list
+# Prints JSON with every metric's name, type, label names, and bucket array.
+kolm metrics show
+# Pipes renderMetrics() to stdout. Useful for cron + log shipping.
+</code></pre>
 
 <h2 id="grafana">Grafana dashboard import</h2>
 <p>The repo ships a ready-to-import Grafana dashboard at <code>dashboards/kolm-runtime.json</code>. It targets schema v38 (Grafana 10) and contains six panels &mdash; one per metric above.</p>
@@ -251,6 +267,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -270,7 +287,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

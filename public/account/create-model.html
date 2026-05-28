@@ -247,6 +247,7 @@
           <small>Parsed locally for preview. The file uploads only when you compile.</small>
           <input type="file" id="dropzone-input" accept=".csv,.jsonl,.json,.tsv,.parquet,.xlsx" hidden>
         </label>
+        <p class="empty" data-empty-state style="margin:10px 0 0;color:var(--ink-faint);font-size:12.5px">No dataset yet. Drop a file above, or export your support tickets, chat logs, or labeled examples and bring them here to compile your first model.</p>
         <div id="upload-summary" hidden>
           <div class="file-meta">
             <div class="cell"><div class="k">File</div><div class="v" id="meta-name">&mdash;</div></div>
@@ -277,7 +278,7 @@
     <section class="cm-pane cm-connect" data-pane="connect" data-active="false" role="tabpanel" aria-labelledby="tab-connect">
       <div class="kpanel">
         <h2>Connect a tool.</h2>
-        <p class="pdesc">Live connector pulls coming soon &mdash; pick one to be notified when it ships. In the meantime, <a href="#" data-go-tab="upload" style="color:var(--accent)">upload an export</a> from the same tool.</p>
+        <p class="pdesc">Bring data in today by <a href="#" data-go-tab="upload" style="color:var(--accent)">uploading an export</a> from any of these tools. Pick a tool below to get notified when its one-click live connector lands.</p>
         <div class="grid" id="connect-grid">
           <button class="tile" data-connector="zendesk"><div class="logo">Z</div><div class="name">Zendesk</div><div class="pill">Notify me</div></button>
           <button class="tile" data-connector="intercom"><div class="logo">I</div><div class="name">Intercom</div><div class="pill">Notify me</div></button>
@@ -916,7 +917,8 @@
       </div>
       <div class="ks-foot__col">
         <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a><a href="/docs">Docs</a><a href="/sdks">SDKs</a><a href="/models">Models</a><a href="/benchmarks">Benchmarks</a><a href="/blog">Blog</a>
+        <a href="/quickstart">Quickstart</a><a href="/docs">Docs</a><a href="/sdks">SDKs</a><a href="/models">Models</a><a href="/benchmarks">Benchmarks</a>
+<a href="/compare">Compare</a><a href="/blog">Blog</a>
       </div>
       <div class="ks-foot__col">
         <h4>Trust</h4>
@@ -924,7 +926,7 @@
       </div>
       <div class="ks-foot__col">
         <h4>Company</h4>
-        <a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a><a href="/manifesto">Manifesto</a><a href="/why-kolm">Why kolm</a><a href="/press">Press</a><a href="/contact">Contact</a>
+        <a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a><a href="/about">About</a><a href="/why-kolm">Why kolm</a><a href="/press">Press</a><a href="/contact">Contact</a>
       </div>
     </div>
     <div class="ks-foot__base">
@@ -933,5 +935,107 @@
     </div>
   </div>
 </footer>
+
+<div hidden data-w221-anchors="account" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training loop</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Run</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+
+</div>
 </body>
 </html>

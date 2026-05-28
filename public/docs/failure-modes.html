@@ -120,7 +120,81 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="envelope">Envelope shape</h2>
 <p>Same envelope is returned by <code>POST /v1/failure-modes</code>, <code>GET /v1/failure-modes/:cid</code>, and the <code>kolm failure-modes &lt;cid&gt; --json</code> CLI path. Field stability is part of the contract. The canonical example below is the spec-prescribed support-bot story: 0.97 on refunds vs 0.62 on billing disputes.</p>
 
-<pre>CODE19</pre>
+<pre><code>{
+  "ok": true,
+  "failure_modes_version": "w745-v1",
+  "artifact_cid": "bafkreigh2akiscaildc3xy7p4nntwvjp7m5kw5kbsmm5kkkkkkkkkkkkkk",
+  "overall_k_score": 0.8047,
+  "clustering": "heuristic_keyword_v1",
+  "cluster_count": 4,
+  "clusters": [
+    {
+      "cluster_id": "cluster_a1b2c3d4",
+      "top_keywords": ["refund", "refund return", "return"],
+      "count": 312,
+      "sample_cids": ["cap_001", "cap_002", "cap_003"],
+      "n": 312,
+      "k_score": 0.9712,
+      "k_score_ci_lo": 0.9498,
+      "k_score_ci_hi": 0.9851,
+      "delta_vs_overall": -0.1665
+    },
+    {
+      "cluster_id": "cluster_b2c3d4e5",
+      "top_keywords": ["billing", "billing dispute", "dispute"],
+      "count": 84,
+      "sample_cids": ["cap_017", "cap_021", "cap_044"],
+      "n": 84,
+      "k_score": 0.6204,
+      "k_score_ci_lo": 0.5117,
+      "k_score_ci_hi": 0.7204,
+      "delta_vs_overall": 0.1843
+    },
+    {
+      "cluster_id": "cluster_c3d4e5f6",
+      "top_keywords": ["shipping", "shipping address", "address"],
+      "count": 47,
+      "sample_cids": ["cap_088", "cap_091", "cap_104"],
+      "n": 47,
+      "k_score": 0.8412,
+      "k_score_ci_lo": 0.7361,
+      "k_score_ci_hi": 0.9118,
+      "delta_vs_overall": -0.0365
+    },
+    {
+      "cluster_id": "cluster_d4e5f6a7",
+      "top_keywords": ["pricing", "pricing question", "question"],
+      "count": 12,
+      "sample_cids": ["cap_201", "cap_204", "cap_209"],
+      "n": 12,
+      "k_score": 0.7833,
+      "k_score_ci_lo": null,
+      "k_score_ci_hi": null,
+      "delta_vs_overall": 0.0214
+    }
+  ],
+  "top_regressions": [
+    {
+      "cluster_id": "cluster_b2c3d4e5",
+      "top_keywords": ["billing", "billing dispute", "dispute"],
+      "n": 84,
+      "k_score": 0.6204,
+      "delta_vs_overall": 0.1843,
+      "sample_cids": ["cap_017", "cap_021", "cap_044"]
+    },
+    {
+      "cluster_id": "cluster_d4e5f6a7",
+      "top_keywords": ["pricing", "pricing question", "question"],
+      "n": 12,
+      "k_score": 0.7833,
+      "delta_vs_overall": 0.0214,
+      "sample_cids": ["cap_201", "cap_204", "cap_209"]
+    }
+  ],
+  "diagnostic_link": "/account/diagnose?cid=bafkreigh2akiscaildc3xy7p4nntwvjp7m5kw5kbsmm5kkkkkkkkkkkkkk",
+  "generated_at": "2026-05-24T18:42:11.503Z"
+}
+</code></pre>
 
 <p>The headline number here is 0.80, but the report's first row reads "billing dispute 0.62, delta +0.18 vs overall." That is the actionable slice. The refund cluster has 312 rows and ships at 0.97 &mdash; promote-eligible. The billing cluster needs targeted captures + maybe a re-distill.</p>
 
@@ -182,6 +256,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -201,7 +276,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

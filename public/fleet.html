@@ -4,17 +4,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.background='#0e1116';document.documentElement.style.colorScheme='dark';}else{document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f3f5f7';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<title>Fleet · Deploy your kolm artifact anywhere — cloud, on-prem, or edge · kolm.ai</title>
-<meta name="description" content="One CLI to push a signed .kolm to RunPod, a Jetson, an A100 cluster, or your laptop. BYOC. Multi-device sync. OTA updates. Health monitoring. Rollback. You pay your cloud bills directly.">
+<title>kolm fleet &mdash; multi-model management with signed receipts · kolm.ai</title>
+<meta name="description" content="Run one model. Run a hundred. Per-namespace drift, per-model signed receipts, cross-model eval, version diffs &mdash; one dashboard for teams running 10&ndash;1000 distilled variants in production.">
+<meta name="keywords" content="kolm fleet, multi-model management, model fleet, model drift detection, version diff, cross-model eval, signed inference receipts, distilled model fleet">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<link rel="canonical" href="https://kolm.ai/fleet">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/wave889-vertical.css">
-<link rel="canonical" href="https://kolm.ai/fleet">
-<meta property="og:title" content="Fleet · Deploy your kolm artifact anywhere">
-<meta property="og:description" content="One CLI to push a signed .kolm to RunPod, a Jetson, an A100 cluster, or your laptop. BYOC. Multi-device sync. OTA updates. Health monitoring. Rollback.">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:title" content="kolm fleet &mdash; multi-model management with signed receipts">
+<meta property="og:description" content="Run one model. Run a hundred. Per-namespace drift, per-model signed receipts, cross-model eval, version diffs &mdash; one dashboard for teams running 10&ndash;1000 distilled variants.">
 <meta property="og:url" content="https://kolm.ai/fleet">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://kolm.ai/og/fleet.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kolm fleet &mdash; multi-model management with signed receipts">
+<meta name="twitter:description" content="One dashboard for teams whose product runs 10&ndash;1000 distilled variants. Drift, diffs, cross-model eval.">
+<meta name="twitter:image" content="https://kolm.ai/og/fleet.svg">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -23,143 +35,83 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/fleet",
-  "description": "One CLI to push a signed .kolm to RunPod, a Jetson, an A100 cluster, or your laptop. BYOC. Multi-device sync. OTA updates. Health monitoring. Rollback.",
+  "description": "Multi-model fleet management for teams running 10-1000 distilled variants. Per-namespace drift detection, per-model signed receipts, cross-model eval, version diffs.",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
   "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" }
 }
 </script>
 <style>
-/* Cool-slate diagram + hardware grid for /fleet — scoped to this page only. */
-.fleet-diagram{margin:8px 0 24px;padding:24px;background:#f3f5f7;border:1px solid #dde1e7;border-radius:14px;overflow:hidden}
-.fleet-diagram svg{display:block;width:100%;max-width:920px;margin:0 auto;height:auto;font-family:ui-sans-serif,system-ui,-apple-system,sans-serif}
-.fleet-diagram .hint{margin:14px auto 0;max-width:760px;text-align:center;color:#525a64;font-size:13px;line-height:1.55}
-.fleet-diagram .hint b{color:#1f2937;font-weight:600}
+/* Scoped helpers for /fleet. Cool-slate only; no warm-paper tokens. */
+.fleet-pains{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:18px}
+.fleet-pain{padding:18px 20px;background:#f3f5f7;border:1px solid #dde1e7;border-radius:10px}
+.fleet-pain b{display:block;font-size:13px;color:#1f2937;font-weight:600;margin-bottom:6px;letter-spacing:-0.005em}
+.fleet-pain p{margin:0;font-size:13.5px;color:#525a64;line-height:1.6}
 
-.hw-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px}
-.hw-card{background:#f3f5f7;border:1px solid #dde1e7;border-radius:10px;padding:14px 14px 16px}
-.hw-card .vendor{font-size:10.5px;text-transform:uppercase;letter-spacing:0.09em;color:#56606c;margin-bottom:8px;font-weight:600}
-.hw-card h4{margin:0 0 8px;font-size:14px;color:#1f2937;font-weight:600;letter-spacing:-0.01em}
-.hw-card ul{list-style:none;margin:0;padding:0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:#525a64;line-height:1.7}
-.hw-card li{display:flex;justify-content:space-between;gap:8px;padding:1px 0}
-.hw-card li span:last-child{color:#a8b3c2;font-size:10.5px}
-@media (max-width:880px){.hw-grid{grid-template-columns:repeat(2,1fr)}}
-
-.deploy-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px}
-.deploy-tile{background:#f3f5f7;border:1px solid #dde1e7;border-radius:10px;padding:16px}
-.deploy-tile .tag{display:inline-block;font-size:10.5px;text-transform:uppercase;letter-spacing:0.09em;color:#56606c;margin-bottom:8px;font-weight:600}
-.deploy-tile h3{margin:0 0 6px;font-size:15px;color:#1f2937;font-weight:600}
-.deploy-tile p{margin:0 0 10px;font-size:13px;color:#525a64;line-height:1.55}
-.deploy-tile .cmd{display:block;background:#eef1f4;border:1px solid #e6eaef;border-radius:6px;padding:8px 10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:#1f2937;overflow-x:auto;white-space:nowrap}
-@media (max-width:880px){.deploy-tiles{grid-template-columns:1fr}}
-
-.foot-note{margin-top:16px;padding:14px 16px;background:#eef1f4;border-left:3px solid #56606c;border-radius:0 8px 8px 0;font-size:13px;color:#525a64;line-height:1.6}
-.foot-note b{color:#1f2937}
+.fleet-pricing{margin-top:8px;padding:22px 24px;background:#f3f5f7;border:1px solid #dde1e7;border-radius:12px;font-size:15.5px;line-height:1.7;color:#1f2937}
+.fleet-pricing p{margin:0 0 10px;color:#1f2937}
+.fleet-pricing p:last-child{margin-bottom:0}
+.fleet-pricing strong{font-weight:600;color:#0e1116}
+.fleet-pricing .tier-num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+.fleet-pricing a{color:#1f2937;border-bottom:1px solid #56606c}
+.fleet-pricing a:hover{color:#0e1116;border-bottom-color:#0e1116}
+.fleet-pricing a:focus-visible{outline:2px solid #1f2937;outline-offset:2px;border-radius:2px}
+@media (prefers-color-scheme: dark){
+  .fleet-pain{background:#1a1d22;border-color:#2a2f36}
+  .fleet-pain b{color:#e6e9ee}
+  .fleet-pain p{color:#a8b3c2}
+  .fleet-pricing{background:#1a1d22;border-color:#2a2f36;color:#e6e9ee}
+  .fleet-pricing p,.fleet-pricing strong{color:#e6e9ee}
+  .fleet-pricing a{color:#cfd6d8;border-bottom-color:#a8b3c2}
+  .fleet-pricing a:hover{color:#ffffff;border-bottom-color:#ffffff}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;scroll-behavior:auto !important}
+}
 </style>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<a href="#main" class="ks-skip" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <div data-include-nav></div>
+
+<main id="main">
 
 <section class="v-hero">
   <div class="v-wrap">
-    <span class="v-eyebrow">Fleet management</span>
-    <h1 class="v-h1">Deploy your kolm artifact anywhere — cloud, on-prem, or edge.</h1>
-    <p class="v-lede">One signed <code>.kolm</code>. One CLI verb. Push it to a RunPod H100, a rack of A100s in your colo, a Jetson Orin on a robot, or every laptop on your team. Watch the rollout, gate on K-Score, rollback the second it slips.</p>
+    <span class="v-eyebrow">Fleet &middot; Multi-model</span>
+    <h1 class="v-h1">Run one model. Run a hundred. Watch them all.</h1>
+    <p class="v-lede">kolm fleet management is for teams whose product runs 10&ndash;1000 distilled variants. Per-namespace drift, per-model receipts, one dashboard.</p>
     <div class="v-ctas">
-      <a class="v-btn v-btn--primary" href="/account/signup">Try it free</a>
-      <a class="v-btn v-btn--ghost" href="/docs/devices">Read the fleet docs -&gt;</a>
+      <a class="v-btn v-btn--primary" href="/demo-live">See a fleet demo</a>
+      <a class="v-btn v-btn--ghost" href="/docs/run/fleet">Read fleet docs &rarr;</a>
     </div>
-    <div class="v-caveat">Caveats: rolling and canary deploys require devices registered via <code>kolm devices add</code>. SSH, agent, and MQTT transports supported. RunPod and Kubernetes paths require an API key or kubeconfig configured in <a href="/account/settings/integrations">integrations</a>.</div>
+    <div class="v-caveat">Caveats: drift and cross-model eval require captures flowing into kolm via the gateway, an SDK, or an importer (Portkey, Helicone, LiteLLM, OpenAI fine-tune JSONL). Receipts are emitted on every inference once gateway routing is on.</div>
   </div>
 </section>
 
 <section class="v-section">
   <div class="v-wrap">
     <div class="v-shead">
-      <span class="v-eyebrow">One artifact, three destinations</span>
-      <h2 class="v-h2">The same <code>.kolm</code> ships to cloud, on-prem, or edge.</h2>
-      <p>The artifact is signed once. Where it runs is a CLI flag. The receipt format is identical across destinations.</p>
+      <span class="v-eyebrow">The fleet problem</span>
+      <h2 class="v-h2">If you&rsquo;ve felt any of these&hellip;</h2>
+      <p>You are not running one model anymore. You are running a portfolio &mdash; specialists per customer, per feature, per language, per release train &mdash; and the tooling never caught up.</p>
     </div>
-    <div class="fleet-diagram" role="img" aria-label="One artifact deployed to cloud, on-prem, and edge destinations from a single source.">
-      <svg viewbox="0 0 920 360" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <defs>
-          <marker id="arr" viewbox="0 0 10 10" refx="9" refy="5" markerwidth="7" markerheight="7" orient="auto-start-reverse">
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="#56606c" />
-          </marker>
-          <linearGradient id="line-grad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="#a8b3c2" />
-            <stop offset="100%" stop-color="#56606c" />
-          </linearGradient>
-        </defs>
-
-        <!-- Source artifact -->
-        <rect x="40" y="140" width="220" height="80" rx="10" fill="#eef1f4" stroke="#56606c" stroke-width="1.5" />
-        <text x="150" y="170" text-anchor="middle" fill="#56606c" font-size="11" font-weight="600" letter-spacing="0.08em">SIGNED ARTIFACT</text>
-        <text x="150" y="195" text-anchor="middle" fill="#1f2937" font-size="16" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-weight="600">qwen-3b-int4.kolm</text>
-        <text x="150" y="212" text-anchor="middle" fill="#525a64" font-size="11" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">sha256: 9f3a...c4d2</text>
-
-        <!-- Connector lines -->
-        <path d="M 260 165 L 410 80" stroke="url(#line-grad)" stroke-width="1.5" fill="none" marker-end="url(#arr)" />
-        <path d="M 260 180 L 410 180" stroke="url(#line-grad)" stroke-width="1.5" fill="none" marker-end="url(#arr)" />
-        <path d="M 260 195 L 410 280" stroke="url(#line-grad)" stroke-width="1.5" fill="none" marker-end="url(#arr)" />
-
-        <!-- Cloud destination -->
-        <rect x="410" y="40" width="220" height="80" rx="10" fill="#f3f5f7" stroke="#a8b3c2" stroke-width="1.2" />
-        <text x="520" y="64" text-anchor="middle" fill="#56606c" font-size="10.5" font-weight="600" letter-spacing="0.08em">CLOUD</text>
-        <text x="520" y="86" text-anchor="middle" fill="#1f2937" font-size="14" font-weight="600">RunPod · H100 · serverless</text>
-        <text x="520" y="105" text-anchor="middle" fill="#525a64" font-size="11" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">~$0.30/hr · OpenAI-compatible URL</text>
-
-        <!-- On-prem destination -->
-        <rect x="410" y="140" width="220" height="80" rx="10" fill="#f3f5f7" stroke="#a8b3c2" stroke-width="1.2" />
-        <text x="520" y="164" text-anchor="middle" fill="#56606c" font-size="10.5" font-weight="600" letter-spacing="0.08em">ON-PREM</text>
-        <text x="520" y="186" text-anchor="middle" fill="#1f2937" font-size="14" font-weight="600">A100 cluster · SSH · k8s</text>
-        <text x="520" y="205" text-anchor="middle" fill="#525a64" font-size="11" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">your colo · your bills · your data</text>
-
-        <!-- Edge destination -->
-        <rect x="410" y="240" width="220" height="80" rx="10" fill="#f3f5f7" stroke="#a8b3c2" stroke-width="1.2" />
-        <text x="520" y="264" text-anchor="middle" fill="#56606c" font-size="10.5" font-weight="600" letter-spacing="0.08em">EDGE</text>
-        <text x="520" y="286" text-anchor="middle" fill="#1f2937" font-size="14" font-weight="600">Jetson Orin · Mac mini · Pi</text>
-        <text x="520" y="305" text-anchor="middle" fill="#525a64" font-size="11" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">no internet · MQTT heartbeat</text>
-
-        <!-- Health loop back -->
-        <rect x="690" y="140" width="190" height="80" rx="10" fill="#eef1f4" stroke="#56606c" stroke-width="1.5" />
-        <text x="785" y="170" text-anchor="middle" fill="#56606c" font-size="11" font-weight="600" letter-spacing="0.08em">FLEET LEDGER</text>
-        <text x="785" y="193" text-anchor="middle" fill="#1f2937" font-size="14" font-weight="600">K-Score · p95 · errors</text>
-        <text x="785" y="211" text-anchor="middle" fill="#525a64" font-size="11" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">rollback on regression</text>
-
-        <path d="M 630 80 Q 700 80 720 130" stroke="#a8b3c2" stroke-width="1.2" fill="none" stroke-dasharray="3 3" marker-end="url(#arr)" />
-        <path d="M 630 180 L 690 180" stroke="#a8b3c2" stroke-width="1.2" fill="none" stroke-dasharray="3 3" marker-end="url(#arr)" />
-        <path d="M 630 280 Q 700 280 720 230" stroke="#a8b3c2" stroke-width="1.2" fill="none" stroke-dasharray="3 3" marker-end="url(#arr)" />
-      </svg>
-      <p class="hint">One <b>signed artifact</b> &middot; three destination classes &middot; one <b>fleet ledger</b> that knows which SHA lives on which device and what its K-Score is right now.</p>
-    </div>
-  </div>
-</section>
-
-<section class="v-section">
-  <div class="v-wrap">
-    <div class="v-shead">
-      <span class="v-eyebrow">The deploy targets</span>
-      <h2 class="v-h2">Pick a destination. The verb is the same.</h2>
-      <p>Every target accepts the same .kolm artifact. The CLI auto-resolves credentials from <a href="/account/settings/integrations">integrations</a>.</p>
-    </div>
-    <div class="deploy-tiles">
-      <div class="deploy-tile">
-        <span class="tag">Cloud</span>
-        <h3>RunPod · one-click</h3>
-        <p>POST to <code>/v1/deploy/runpod</code> or click "Deploy to RunPod" on any artifact page. You get an OpenAI-compatible URL in under 90 seconds. Billed directly by RunPod (~$0.30/hr A4000, $1.89/hr H100).</p>
-        <code class="cmd">kolm fleet deploy out.kolm --to runpod --gpu A100</code>
+    <div class="fleet-pains">
+      <div class="fleet-pain">
+        <b>Model X drifted last week and nobody noticed.</b>
+        <p>The input distribution shifted, the K-Score quietly dropped four points, and the first signal was a customer ticket. No alert fired because nothing was watching that namespace.</p>
       </div>
-      <div class="deploy-tile">
-        <span class="tag">On-prem</span>
-        <h3>SSH · Kubernetes</h3>
-        <p>Register a device with <code>kolm devices add --ssh user@host</code> or apply the kolm operator to your cluster. The artifact ships as a single file. No agent daemon required for SSH mode.</p>
-        <code class="cmd">kolm fleet deploy out.kolm --to prod-cluster --rolling 10%</code>
+      <div class="fleet-pain">
+        <b>You have 40 variants and no way to compare them.</b>
+        <p>Different teachers, different recipes, different training pairs, different release dates. Picking which one to promote next is a spreadsheet exercise rebuilt every quarter.</p>
       </div>
-      <div class="deploy-tile">
-        <span class="tag">Edge</span>
-        <h3>Jetson · Mac mini · Pi</h3>
-        <p>The same .kolm runs on a Jetson Orin Nano, an M-series Mac mini, or a Pi 5 with an USB Coral. The runtime auto-selects target profile from <code>nvcc --version</code> / <code>uname -m</code>.</p>
-        <code class="cmd">kolm fleet deploy out.kolm --to edge --canary 3 --soak 24h</code>
+      <div class="fleet-pain">
+        <b>The eval ran on Tuesday, but only on five of them.</b>
+        <p>Eval suites get wired to whichever model the on-call cares about. The other thirty-five sit there with last month&rsquo;s numbers next to next month&rsquo;s traffic mix.</p>
+      </div>
+      <div class="fleet-pain">
+        <b>A new version shipped and nobody can say what changed.</b>
+        <p>Training pairs, hyperparams, base model SHA, eval delta &mdash; the answer lives in three Slack threads and one engineer&rsquo;s laptop.</p>
       </div>
     </div>
   </div>
@@ -168,141 +120,34 @@
 <section class="v-section">
   <div class="v-wrap">
     <div class="v-shead">
-      <span class="v-eyebrow">Hardware compatibility</span>
-      <h2 class="v-h2">NVIDIA · AMD · Apple Silicon · edge.</h2>
-      <p>Each row is a target profile the compiler emits. Pick by <code>kolm compile --target-profile &lt;name&gt;</code> or let the runtime auto-detect.</p>
-    </div>
-    <div class="hw-grid">
-      <div class="hw-card">
-        <div class="vendor">NVIDIA · datacenter</div>
-        <h4>H100 / A100 / L40S</h4>
-        <ul>
-          <li><span>H100 80GB HBM3</span><span>FP8</span></li>
-          <li><span>A100 80GB PCIe</span><span>INT4 NF4</span></li>
-          <li><span>L40S 48GB</span><span>INT4 GPTQ</span></li>
-          <li><span>H200 141GB</span><span>FP8</span></li>
-        </ul>
-      </div>
-      <div class="hw-card">
-        <div class="vendor">NVIDIA · workstation</div>
-        <h4>RTX 5090 / 4090 / 3090</h4>
-        <ul>
-          <li><span>RTX 5090 32GB</span><span>INT4 NF4</span></li>
-          <li><span>RTX 4090 24GB</span><span>INT4 NF4</span></li>
-          <li><span>RTX 3090 24GB</span><span>INT4 AWQ</span></li>
-          <li><span>RTX 4070 Ti 16GB</span><span>INT4 GGUF</span></li>
-        </ul>
-      </div>
-      <div class="hw-card">
-        <div class="vendor">AMD · datacenter</div>
-        <h4>MI300X / MI250</h4>
-        <ul>
-          <li><span>MI300X 192GB</span><span>INT4 GGUF</span></li>
-          <li><span>MI250 128GB</span><span>INT4 GGUF</span></li>
-          <li><span>MI210 64GB</span><span>INT4 GGUF</span></li>
-          <li><span>ROCm 6.0+</span><span>llama.cpp</span></li>
-        </ul>
-      </div>
-      <div class="hw-card">
-        <div class="vendor">Apple Silicon</div>
-        <h4>M-series · MLX</h4>
-        <ul>
-          <li><span>M4 Pro / Max</span><span>MLX 4-bit</span></li>
-          <li><span>M3 Ultra</span><span>MLX 4-bit</span></li>
-          <li><span>M2 / M1</span><span>MLX 4-bit</span></li>
-          <li><span>iPhone (Core ML)</span><span>palettize 4-bit</span></li>
-        </ul>
-      </div>
-      <div class="hw-card">
-        <div class="vendor">NVIDIA · edge</div>
-        <h4>Jetson · Orin</h4>
-        <ul>
-          <li><span>Orin AGX 64GB</span><span>TRT-LLM INT4</span></li>
-          <li><span>Orin NX 16GB</span><span>TRT-LLM INT4</span></li>
-          <li><span>Orin Nano 8GB</span><span>GGUF Q4</span></li>
-          <li><span>Xavier NX 16GB</span><span>GGUF Q4</span></li>
-        </ul>
-      </div>
-      <div class="hw-card">
-        <div class="vendor">CPU / accelerator</div>
-        <h4>x86 · ARM · Coral</h4>
-        <ul>
-          <li><span>x86_64 + AVX-512</span><span>llama.cpp Q4</span></li>
-          <li><span>ARM64 (Pi 5)</span><span>llama.cpp Q4</span></li>
-          <li><span>Coral USB TPU</span><span>TFLite int8</span></li>
-          <li><span>Intel Arc</span><span>OpenVINO INT4</span></li>
-        </ul>
-      </div>
-      <div class="hw-card">
-        <div class="vendor">Cloud · serverless</div>
-        <h4>RunPod · Modal</h4>
-        <ul>
-          <li><span>RunPod A4000</span><span>$0.30/hr</span></li>
-          <li><span>RunPod A100 80GB</span><span>$1.89/hr</span></li>
-          <li><span>RunPod H100 80GB</span><span>$3.89/hr</span></li>
-          <li><span>Modal A100 40GB</span><span>$1.10/hr</span></li>
-        </ul>
-      </div>
-      <div class="hw-card">
-        <div class="vendor">Cloud · bare-metal</div>
-        <h4>Lambda · CoreWeave · Vast</h4>
-        <ul>
-          <li><span>Lambda H100 SXM</span><span>$2.49/hr</span></li>
-          <li><span>CoreWeave H200</span><span>$3.05/hr</span></li>
-          <li><span>Vast RTX 4090</span><span>$0.34/hr</span></li>
-          <li><span>Vast A100 80GB</span><span>$1.45/hr</span></li>
-        </ul>
-      </div>
-    </div>
-    <div class="foot-note">
-      <b>BYOC pricing.</b> You pay your cloud provider or your hardware bill directly &mdash; we never mark up GPU time. kolm.ai charges only for the control plane (Studio, registry, gateway) on plans that include hosting. <a href="/pricing">See pricing</a>.
-    </div>
-  </div>
-</section>
-
-<section class="v-section">
-  <div class="v-wrap">
-    <div class="v-shead">
-      <span class="v-eyebrow">The six verbs</span>
-      <h2 class="v-h2">Everything the CLI does for fleet, top to bottom.</h2>
-      <p>The fleet is a flat list of device IDs with tags. Each verb takes <code>--all</code>, <code>--tag &lt;name&gt;</code>, or an explicit device list.</p>
+      <span class="v-eyebrow">What kolm fleet does</span>
+      <h2 class="v-h2">Four primitives. Every model in the fleet, every release, every namespace.</h2>
+      <p>The fleet ledger is the source of record. Every inference, distill, eval, and deploy lands on it as a signed receipt that any auditor can re-verify offline.</p>
     </div>
     <div class="v-trio">
       <div class="v-card">
-        <span class="ctag">Inventory</span>
-        <h3>kolm fleet status</h3>
-        <p>Lists every device, current .kolm SHA, last heartbeat, K-Score on the most recent benchmark, and reachable status. JSON with <code>--json</code>.</p>
-        <div class="cmd">kolm fleet status --tag prod</div>
+        <span class="ctag">Per-model receipts</span>
+        <h3>Every inference signed</h3>
+        <p>Each call emits an Ed25519 receipt attributable to the model SHA, the distill spec that produced it, and the training data hash. Replay later, prove the answer, drop into an audit packet.</p>
+        <div class="cmd">kolm verify rcpt_01KYC1ZVTGDCW3FX06JQSC</div>
       </div>
       <div class="v-card">
-        <span class="ctag">Rolling deploy</span>
-        <h3>kolm fleet deploy --rolling</h3>
-        <p>10% &rarr; 25% &rarr; 50% &rarr; 100% with a wait window between stages. Configurable per-stage success threshold. Stops on first device-class failure.</p>
-        <div class="cmd">kolm fleet deploy out.kolm --rolling 10%</div>
+        <span class="ctag">Drift detection</span>
+        <h3>Watch the input distribution</h3>
+        <p><code>kolm fleet drift</code> compares this week&rsquo;s prod inputs against the prior window per namespace. Configurable threshold; alert fires before the quality regression reaches the customer.</p>
+        <div class="cmd">kolm fleet drift --namespace support --window 7d</div>
       </div>
       <div class="v-card">
-        <span class="ctag">Canary</span>
-        <h3>kolm fleet deploy --canary</h3>
-        <p>Picks N tagged canary devices, runs them at the new build for a soak window, then promotes to fleet only if K-Score holds. <code>--canary 3 --soak 24h</code> typical.</p>
-        <div class="cmd">kolm fleet deploy out.kolm --canary 3 --soak 24h</div>
+        <span class="ctag">Cross-model eval</span>
+        <h3>One suite, N models</h3>
+        <p>Run the same eval set across every model in the fleet. The output is an agreement matrix &mdash; pairwise disagreement counts, K-Score per model, holdout pass/fail per case.</p>
+        <div class="cmd">kolm fleet eval --suite support-v3 --all</div>
       </div>
       <div class="v-card">
-        <span class="ctag">Watch</span>
-        <h3>kolm fleet monitor</h3>
-        <p>Streams per-device K-Score, latency, and error counts. Use during a rollout, or tail continuously for ongoing health. <code>--json</code> emits per-tick events.</p>
-        <div class="cmd">kolm fleet monitor --tag prod --since 1h</div>
-      </div>
-      <div class="v-card">
-        <span class="ctag">Rollback</span>
-        <h3>kolm fleet rollback</h3>
-        <p>Reverts every device to the previous .kolm SHA recorded in the fleet ledger. Survives partial rollouts &mdash; devices on the new build get reverted, devices on the old build are skipped.</p>
-        <div class="cmd">kolm fleet rollback --tag prod</div>
-      </div>
-      <div class="v-card">
-        <span class="ctag">Stop</span>
-        <h3>kolm fleet stop</h3>
-        <p>Halts an in-progress rolling deploy at the current stage. The fleet ledger records the partial state so a subsequent <code>kolm fleet deploy --resume</code> picks up where it stopped.</p>
-        <div class="cmd">kolm fleet stop --tag prod</div>
+        <span class="ctag">Version diff</span>
+        <h3>What actually changed between v1 and v2</h3>
+        <p><code>kolm fleet diff modelA@v1 modelA@v2</code> prints the delta: added/removed training pairs, hyperparam changes, base SHA, eval agreement on the shared holdout. Hash-pinned, reproducible.</p>
+        <div class="cmd">kolm fleet diff support-router@v1 support-router@v2</div>
       </div>
     </div>
   </div>
@@ -311,79 +156,15 @@
 <section class="v-section">
   <div class="v-wrap">
     <div class="v-shead">
-      <span class="v-eyebrow">A rollout, end to end</span>
-      <h2 class="v-h2">Compile once. Canary three. Soak. Promote. Rollback if it ever slips.</h2>
-      <p>This is the recipe one team uses to push a 7B specialist to 1,200 retail edge boxes every two weeks.</p>
+      <span class="v-eyebrow">Pricing</span>
+      <h2 class="v-h2">Built for the team running 25 variants. Free for the team running five.</h2>
+      <p>Fleet management is in every plan. Caps are on the number of models the ledger tracks, not on traffic or seats.</p>
     </div>
-    <div class="v-flows">
-      <div class="v-flow">
-        <span class="who">1</span>
-        <h3>Compile + sign</h3>
-        <div class="io">in: distilled model &middot; out: signed .kolm</div>
-        <p><code>kolm compile model/ --target-profile jetson-orin-nx -o out.kolm</code></p>
-      </div>
-      <div class="v-flow">
-        <span class="who">2</span>
-        <h3>Canary three devices</h3>
-        <div class="io">in: out.kolm &middot; out: soak ledger entry</div>
-        <p><code>kolm fleet deploy out.kolm --canary 3 --soak 24h</code></p>
-      </div>
-      <div class="v-flow">
-        <span class="who">3</span>
-        <h3>Monitor the soak</h3>
-        <div class="io">in: fleet &middot; out: live K-Score stream</div>
-        <p><code>kolm fleet monitor --tag canary --since 24h</code></p>
-      </div>
-      <div class="v-flow">
-        <span class="who">4</span>
-        <h3>Promote to rolling</h3>
-        <div class="io">in: passed canary &middot; out: 10/25/50/100 rollout</div>
-        <p><code>kolm fleet deploy out.kolm --rolling 10% --gate k-score:0.92</code></p>
-      </div>
-      <div class="v-flow">
-        <span class="who">5</span>
-        <h3>Rollback on regression</h3>
-        <div class="io">in: failed gate &middot; out: previous SHA on every device</div>
-        <p><code>kolm fleet rollback --tag prod</code> (or automatic when <code>--gate</code> trips)</p>
-      </div>
-      <div class="v-flow">
-        <span class="who">6</span>
-        <h3>Receipts for audit</h3>
-        <div class="io">in: deploy id &middot; out: signed deploy receipt</div>
-        <p><code>kolm verify deploy_01KYZ...</code> &mdash; who pushed which SHA when to which device.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="v-section">
-  <div class="v-wrap">
-    <div class="v-shead">
-      <span class="v-eyebrow">What the gate watches</span>
-      <h2 class="v-h2">A K-Score floor + p95 latency cap + error-rate ceiling.</h2>
-      <p>The gate is what makes the rollout safe. Three numbers per device, evaluated every stage.</p>
-    </div>
-    <div class="v-compl">
-      <div>
-        <div class="label">K-Score floor</div>
-        <b>--gate k-score:0.92</b>
-        <p>Min on-policy quality on your eval set. Computed from the most recent <code>kolm test</code> recorded for the device.</p>
-      </div>
-      <div>
-        <div class="label">Latency cap</div>
-        <b>--gate p95-ms:800</b>
-        <p>p95 ms-per-request across the soak window. Trips on the first device that exceeds.</p>
-      </div>
-      <div>
-        <div class="label">Error rate</div>
-        <b>--gate error-rate:0.01</b>
-        <p>Errors per 100 requests. Bounded against the device's baseline before deploy, not against zero.</p>
-      </div>
-      <div>
-        <div class="label">Custom</div>
-        <b>--gate &lt;name&gt;:&lt;op&gt;:&lt;value&gt;</b>
-        <p>Plug in your own metric. The fleet ledger stores whatever <code>kolm gate eval</code> emits, so any custom check fits the same shape.</p>
-      </div>
+    <div class="fleet-pricing">
+      <p><strong>Free</strong> &mdash; up to <span class="tier-num">5</span> models tracked. Drift, eval, diff, receipts. Local-first; no credit card.</p>
+      <p><strong>Team</strong> &mdash; <span class="tier-num">$99/mo</span>. Up to <span class="tier-num">25</span> models tracked. Slack alerts on drift, scheduled eval runs, audit export.</p>
+      <p><strong>Enterprise</strong> &mdash; unlimited models + RBAC, SSO/SAML, SCIM, audit log retention, on-prem control plane. <a href="/contact">Talk to sales</a>.</p>
+      <p>See the full breakdown on the <a href="/pricing">pricing page</a>.</p>
     </div>
   </div>
 </section>
@@ -391,18 +172,22 @@
 <section class="v-cta-row">
   <div class="v-wrap">
     <div class="v-shead">
-      <span class="v-eyebrow">Next</span>
-      <h2 class="v-h2">Compile once. Roll out the way you choose. Roll back the second it slips.</h2>
-      <p>Target profiles for the device class are at <a href="/edge">/edge</a>. CI integration so the .kolm gets built on every merge is at <a href="/ci">/ci</a>. Manage RunPod and Kubernetes credentials at <a href="/account/settings/integrations">/account/settings/integrations</a>.</p>
+      <span class="v-eyebrow">Get started</span>
+      <h2 class="v-h2">Manage your fleet from one place.</h2>
+      <p>Point the gateway at your existing models, or import a Portkey / Helicone / LiteLLM export. The fleet ledger populates on the first inference.</p>
     </div>
     <div class="v-ctas">
-      <a class="v-btn v-btn--primary" href="/account/signup">Try it free</a>
-      <a class="v-btn v-btn--ghost" href="/docs/devices">Open the fleet docs -&gt;</a>
+      <a class="v-btn v-btn--primary" href="/quickstart">Start free</a>
+      <a class="v-btn v-btn--ghost" href="/contact">Talk to sales &rarr;</a>
     </div>
   </div>
 </section>
+
+</main>
 
 <div data-include-footer></div>
 <script src="/nav.js" defer></script>
 </body>
 </html>
+</content>
+</invoke>

@@ -442,7 +442,7 @@ test('W735 #12 — /docs/agents.html exists with brand-lock content', () => {
   for (const needle of [
     'kolm.ai',
     'class="ks-nav"',
-    'ks-footer',
+    'ks-foot',           // canonical footer class (W902 migrated ks-footer -> ks-foot)
     'tool-use',          // topic
     'ASSISTANT_TOOL_CALL',
     'TOOL_RESULT',

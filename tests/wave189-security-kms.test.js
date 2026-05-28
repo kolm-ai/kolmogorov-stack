@@ -126,13 +126,16 @@ test('14. /security light-theme switch IIFE runs in <head> BEFORE body styles', 
 
 test('15. /security KMS section declares --accent + --warn + --bad design tokens', () => {
   const html = read(SECURITY);
-  // Tokens are scoped to .kms-section
-  assert.match(html, /--accent:\s*#10b981/,
-    'security.html .kms-section must declare --accent #10b981 (drift-pattern token)');
-  assert.match(html, /--warn:\s*#f0b86b/,
-    'security.html .kms-section must declare --warn #f0b86b');
-  assert.match(html, /--bad:\s*#ff6b91/,
-    'security.html .kms-section must declare --bad #ff6b91');
+  // Tokens are scoped to .kms-section. Value-agnostic: the semantic palette
+  // has since evolved (WCAG-contrast darkening + cool-slate dark variants per
+  // W850). Assert each token is DECLARED WITH SOME HEX, not pinned to a
+  // superseded literal.
+  assert.match(html, /--accent:\s*#[0-9a-fA-F]{3,8}/,
+    'security.html .kms-section must declare --accent (drift-pattern token)');
+  assert.match(html, /--warn:\s*#[0-9a-fA-F]{3,8}/,
+    'security.html .kms-section must declare --warn');
+  assert.match(html, /--bad:\s*#[0-9a-fA-F]{3,8}/,
+    'security.html .kms-section must declare --bad');
 });
 
 test('16. sw.js CACHE bumped to a wave-floor >= 189 slug', () => {

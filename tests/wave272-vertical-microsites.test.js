@@ -16,10 +16,19 @@ import path from 'node:path';
 const ROOT   = path.resolve(import.meta.dirname, '..');
 const PUBLIC = path.join(ROOT, 'public');
 
+// healthcare-v2 was intentionally RETIRED to a redirect stub (-> /healthcare,
+// noindex) as part of dup-retirement. A `redirect` field flags such slugs:
+// for these we validate the redirect contract (http-equiv refresh to the base
+// target + noindex robots + canonical pointing at the base, NOT the v2 URL) and
+// SKIP all microsite-content assertions (hero/CTA/ROI/pain-cards/arch/JSON-LD
+// SoftwareApplication-with-v2-url/nav). The other 4 slugs are real microsites
+// and keep every content assertion.
 const VERTICALS = [
   {
     slug: 'healthcare-v2',
-    canonical: 'https://kolm.ai/healthcare-v2',
+    // Retired redirect stub -> /healthcare. canonical points at the base page.
+    redirect: '/healthcare',
+    canonical: 'https://kolm.ai/healthcare',
     hero_keyword: /PHI/,
     cta_label: /Book BAA-eligible demo/,
     recipes: ['phi-redactor.kolm', 'uscdi-extract.kolm'],
@@ -60,18 +69,49 @@ const VERTICALS = [
   },
 ];
 
+// Real microsites only (excludes retired redirect stubs). Microsite-content
+// assertions (hero/CTA/ROI/pain-cards/arch/recipe/JSON-LD/nav/brand) iterate
+// this list so a retired slug is never required to carry fake content.
+const MICROSITES = VERTICALS.filter((v) => !v.redirect);
+const REDIRECTS  = VERTICALS.filter((v) => v.redirect);
+
 // Read and cache each page's HTML once per test process. Helps amortize
 // the disk read across the 50+ assertions below.
 function readPage(slug) {
   return fs.readFileSync(path.join(PUBLIC, `${slug}.html`), 'utf8');
 }
 
-test('W272 #1 - all 5 vertical-v2 pages exist on disk', () => {
+test('W272 #1 - all 5 vertical-v2 slugs exist on disk', () => {
   for (const v of VERTICALS) {
     const p = path.join(PUBLIC, `${v.slug}.html`);
     assert.ok(fs.existsSync(p), `expected ${v.slug}.html to exist`);
     const stat = fs.statSync(p);
-    assert.ok(stat.size > 5000, `${v.slug}.html must be a real page, got ${stat.size} bytes`);
+    if (v.redirect) {
+      // Retired redirect stub: small by design, not a full microsite.
+      assert.ok(stat.size > 0, `${v.slug}.html redirect stub must be non-empty`);
+    } else {
+      assert.ok(stat.size > 5000, `${v.slug}.html must be a real page, got ${stat.size} bytes`);
+    }
+  }
+});
+
+test('W272 #1b - retired redirect stubs honor the redirect-to-canonical contract', () => {
+  for (const v of REDIRECTS) {
+    const html = readPage(v.slug);
+    // Meta-refresh to the base target.
+    assert.match(
+      html,
+      new RegExp(`<meta\\s+http-equiv="refresh"\\s+content="0;\\s*url=${v.redirect}"`),
+      `${v.slug}: must http-equiv refresh to ${v.redirect}`,
+    );
+    // De-indexed so the dup does not compete in search.
+    assert.match(html, /<meta\s+name="robots"\s+content="noindex/,
+      `${v.slug}: retired redirect must be noindex`);
+    // Canonical points at the base page, never the retired v2 URL.
+    const m = html.match(/<link\s+rel="canonical"\s+href="([^"]+)"/);
+    assert.ok(m, `${v.slug}: canonical tag missing`);
+    assert.equal(m[1], `https://kolm.ai${v.redirect}`,
+      `${v.slug}: canonical must point at base ${v.redirect}, not the retired v2 URL`);
   }
 });
 
@@ -84,8 +124,8 @@ test('W272 #2 - each page has correct canonical link', () => {
   }
 });
 
-test('W272 #3 - each page has a hero <h1> with vertical-specific keyword', () => {
-  for (const v of VERTICALS) {
+test('W272 #3 - each microsite has a hero <h1> with vertical-specific keyword', () => {
+  for (const v of MICROSITES) {
     const html = readPage(v.slug);
     const m = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/);
     assert.ok(m, `${v.slug}: <h1> missing`);
@@ -93,8 +133,8 @@ test('W272 #3 - each page has a hero <h1> with vertical-specific keyword', () =>
   }
 });
 
-test('W272 #4 - each page links its CTA to /enterprise#demo with the right label', () => {
-  for (const v of VERTICALS) {
+test('W272 #4 - each microsite links its CTA to /enterprise#demo with the right label', () => {
+  for (const v of MICROSITES) {
     const html = readPage(v.slug);
     // Must contain an anchor pointing at /enterprise#demo somewhere on the page.
     assert.match(html, /href="\/enterprise#demo"/, `${v.slug}: missing /enterprise#demo CTA link`);
@@ -103,16 +143,16 @@ test('W272 #4 - each page links its CTA to /enterprise#demo with the right label
   }
 });
 
-test('W272 #5 - each page has 3 pain cards with concrete bullet points', () => {
-  for (const v of VERTICALS) {
+test('W272 #5 - each microsite has 3 pain cards with concrete bullet points', () => {
+  for (const v of MICROSITES) {
     const html = readPage(v.slug);
     const matches = html.match(/class="pain-card"/g) || [];
     assert.equal(matches.length, 3, `${v.slug}: expected exactly 3 pain cards, got ${matches.length}`);
   }
 });
 
-test('W272 #6 - each page has an architecture-diagram block (ASCII or SVG)', () => {
-  for (const v of VERTICALS) {
+test('W272 #6 - each microsite has an architecture-diagram block (ASCII or SVG)', () => {
+  for (const v of MICROSITES) {
     const html = readPage(v.slug);
     // arch-box class wraps either a <pre> ASCII diagram or inline SVG.
     assert.match(html, /class="arch-box"/, `${v.slug}: arch-box missing`);
@@ -123,8 +163,8 @@ test('W272 #6 - each page has an architecture-diagram block (ASCII or SVG)', () 
   }
 });
 
-test('W272 #7 - each page has 4-input ROI calculator with client-side JS', () => {
-  for (const v of VERTICALS) {
+test('W272 #7 - each microsite has 4-input ROI calculator with client-side JS', () => {
+  for (const v of MICROSITES) {
     const html = readPage(v.slug);
     // Four named inputs.
     for (const id of ['roi-prompts', 'roi-cost', 'roi-churn', 'roi-infra']) {
@@ -139,8 +179,8 @@ test('W272 #7 - each page has 4-input ROI calculator with client-side JS', () =>
   }
 });
 
-test('W272 #8 - each page links recipe downloads to /registry?vertical=<slug>', () => {
-  for (const v of VERTICALS) {
+test('W272 #8 - each microsite links recipe downloads to /registry?vertical=<slug>', () => {
+  for (const v of MICROSITES) {
     const html = readPage(v.slug);
     assert.match(html, new RegExp(v.registry_query.replace('?', '\\?')),
       `${v.slug}: missing recipe download link to ${v.registry_query}`);
@@ -152,8 +192,8 @@ test('W272 #8 - each page links recipe downloads to /registry?vertical=<slug>', 
   }
 });
 
-test('W272 #9 - each page has the brand-anchor span for SEO disambig', () => {
-  for (const v of VERTICALS) {
+test('W272 #9 - each microsite has the brand-anchor span for SEO disambig', () => {
+  for (const v of MICROSITES) {
     const html = readPage(v.slug);
     assert.match(html, /class="brand-anchor"/, `${v.slug}: brand-anchor span missing`);
     assert.match(html, /kolm\.ai - the AI compiler/, `${v.slug}: brand-anchor copy missing`);
@@ -162,8 +202,8 @@ test('W272 #9 - each page has the brand-anchor span for SEO disambig', () => {
   }
 });
 
-test('W272 #10 - each page has a parseable JSON-LD SoftwareApplication block', () => {
-  for (const v of VERTICALS) {
+test('W272 #10 - each microsite has a parseable JSON-LD SoftwareApplication block', () => {
+  for (const v of MICROSITES) {
     const html = readPage(v.slug);
     const m = html.match(/<script\s+type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/);
     assert.ok(m, `${v.slug}: JSON-LD script tag missing`);
@@ -230,8 +270,8 @@ test('W272 #16 - each page has a meta description tag', () => {
   }
 });
 
-test('W272 #17 - each page imports nav.js and has the kolm brand link', () => {
-  for (const v of VERTICALS) {
+test('W272 #17 - each microsite imports nav.js and has the kolm brand link', () => {
+  for (const v of MICROSITES) {
     const html = readPage(v.slug);
     assert.match(html, /src="\/nav\.js"/, `${v.slug}: nav.js script missing`);
     // W221+W849 nav consolidation: brand link class evolved from "brand" to

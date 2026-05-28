@@ -456,7 +456,7 @@ test('W745 #13 — public/account/failure-modes.html exists with W745 panel + W7
     '/v1/failure-modes',                            // fetch target
     'kfetch',                                       // shared fetch helper
     'cid',                                          // URL query param
-    'w745-panel',                                   // W745 dashboard panel id
+    'fm-panel',                                     // W745 dashboard panel id (internal w745- DOM prefix stripped to fm- in 3a57dd4f public-surface polish)
     'heuristic_keyword_v1',                         // honesty placeholder
     '/account/diagnose',                            // W745-4 bridge to W741
   ]) {

@@ -86,8 +86,12 @@ test('W301 #10 — sitemap.xml includes /value-loop', () => {
   assert.match(sm, /<loc>https:\/\/kolm\.ai\/value-loop<\/loc>/);
 });
 
-test('W301 #11 — 5-anchor W221 nav is intact (Product/Models/Docs/Pricing/Enterprise)', () => {
-  for (const a of ['/product', '/models', '/docs', '/pricing', '/enterprise']) {
+// W902 redline + the documented /product→/about rename (KOLM_DATA_ENGINE_PLAN.md
+// "Rename /product → /about") superseded the old W221 5-anchor nav. The /product
+// link was deliberately removed and its content moved to /about; the other four
+// anchors persist in the unified ks-foot footer.
+test('W301 #11 — 5-anchor canonical nav is intact (About/Models/Docs/Pricing/Enterprise)', () => {
+  for (const a of ['/about', '/models', '/docs', '/pricing', '/enterprise']) {
     assert.ok(html.includes(`href="${a}"`), `nav must include href="${a}"`);
   }
 });

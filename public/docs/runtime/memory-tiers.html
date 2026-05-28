@@ -132,7 +132,9 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="auto-place">Auto-Placement</h2>
 <p>Auto-Placement is the decision rule that picks the highest tier where the artifact fits. It runs before the model loads, prints a one-line reasoning summary, and surfaces a structured envelope for machine consumers. The flag is on by default for <code>kolm run</code>.</p>
 
-<pre>CODE7</pre>
+<pre><code>kolm run my-artifact.kolm --input "your prompt"
+# Auto-Placement is on by default. Equivalent to:
+# kolm run my-artifact.kolm --auto-place --input "your prompt"</code></pre>
 
 <h3 id="decision-rule">The decision rule</h3>
 <ol>
@@ -173,7 +175,11 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="placement-only">Placement-only dry-run</h2>
 <p>You can preview the decision without loading the artifact. Useful in CI, capacity planning, and operator scripts that need to validate a host can run a given model before scheduling work.</p>
 
-<pre>CODE17</pre>
+<pre><code>kolm run my-artifact.kolm --auto-place --placement-only
+# placement: vram
+# expected_tok_per_s: 95
+# tiers: { vram_gb: 32, ram_gb: 64, nvme_gb: 512, network_gbps: null }
+# reasoning: fits in 32GB VRAM with 14.1GB headroom &mdash; expected ~95 tok/s</code></pre>
 
 <p>The <code>--placement-only</code> flag exits with status 0 after printing the decision. No artifact resolution, no recipe load, no inference. Add <code>--json</code> if you want the full envelope for machine consumers.</p>
 
@@ -242,6 +248,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -261,7 +268,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

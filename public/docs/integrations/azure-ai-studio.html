@@ -106,35 +106,57 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <div class="step">
  <span class="num">Step 1</span>
  <h3>Export the artifact in Azure ML shape</h3>
-<pre>CODE9</pre>
+<pre><code>kolm export --artifact art_8f3a... --format azureml --out ./kolm-azureml/</code></pre>
  <p>The exporter writes an Azure ML model folder: <code>model/</code> (the student weights), <code>code/score.py</code> (the scoring script Azure invokes per request), <code>conda.yaml</code> (the runtime dependency manifest), and <code>manifest.json</code> (kolm's compile receipt).</p>
 </div>
 
 <div class="step">
  <span class="num">Step 2</span>
  <h3>Upload to Azure Blob Storage</h3>
-<pre>CODE14</pre>
+<pre><code>az storage blob upload-batch \
+  --account-name mykolmstorage \
+  --destination kolm-artifacts \
+  --source ./kolm-azureml/ \
+  --destination-path art_8f3a/</code></pre>
  <p>Use the same region as the target Azure ML workspace to avoid cross-region transfer costs. The default storage account that Azure ML provisions per workspace is fine.</p>
 </div>
 
 <div class="step">
  <span class="num">Step 3</span>
  <h3>Register the custom model in Azure ML Studio</h3>
-<pre>CODE15</pre>
+<pre><code>az ml model create \
+  --name kolm-art-8f3a \
+  --version 1 \
+  --type custom_model \
+  --path azureml://datastores/workspaceblobstore/paths/art_8f3a/ \
+  --workspace-name my-workspace \
+  --resource-group my-rg</code></pre>
  <p>The model now appears under Models in Azure AI Studio (and Azure Machine Learning Studio) and is ready to attach to an endpoint.</p>
 </div>
 
 <div class="step">
  <span class="num">Step 4</span>
  <h3>Deploy as a managed online endpoint</h3>
-<pre>CODE16</pre>
+<pre><code>az ml online-endpoint create --name kolm-art-8f3a --auth-mode aad_token
+az ml online-deployment create \
+  --name v1 \
+  --endpoint kolm-art-8f3a \
+  --model azureml:kolm-art-8f3a:1 \
+  --instance-type Standard_NC4as_T4_v3 \
+  --instance-count 1 \
+  --environment azureml:huggingface-transformers-gpu:latest</code></pre>
  <p>Provisioning takes 6-12 minutes. Track with <code>az ml online-endpoint show -n kolm-art-8f3a</code>; the state moves Creating to Succeeded. The endpoint URL appears under <code>scoring_uri</code>.</p>
 </div>
 
 <div class="step">
  <span class="num">Step 5</span>
  <h3>Test inference</h3>
-<pre>CODE19</pre>
+<pre><code>from kolm import Client
+import azure.identity
+token = azure.identity.DefaultAzureCredential().get_token("https://ml.azure.com/.default").token
+c = Client(base_url="https://kolm-art-8f3a.eastus.inference.ml.azure.com/score", bearer=token)
+r = c.invoke({"input": "Summarize this ticket in one sentence: ..."})
+print(r["output"], r["k_score"])</code></pre>
  <p>The Azure managed endpoint accepts a bearer token from Azure AD. The kolm SDK forwards the JSON envelope unchanged, so the response shape (<code>output</code>, <code>k_score</code>, <code>artifact_hash</code>, <code>latency_ms</code>) is identical to the REST API.</p>
 </div>
 
@@ -206,6 +228,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -225,7 +248,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

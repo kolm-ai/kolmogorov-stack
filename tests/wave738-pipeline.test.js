@@ -541,7 +541,7 @@ test('W738 #11 — /docs/pipelines.html exists with brand-lock content + schema 
   for (const needle of [
     'kolm.ai',                  // brand
     'class="ks-nav"',           // nav shell
-    'ks-footer',                // footer shell
+    'ks-foot',                  // footer shell (W902 footer unification: ks-footer -> ks-foot)
     'kolm.pipeline.yaml',       // schema filename
     'classifier',               // pipeline part
     'routes',                   // pipeline part

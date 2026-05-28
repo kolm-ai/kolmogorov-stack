@@ -391,9 +391,14 @@ test('W830 #12 - W604 brand-anchor + Frontier H1 regex pattern present', () => {
     path.join(REPO_ROOT, 'public', 'account', 'federated', 'consortium.html'),
     'utf8'
   );
-  // W604 invariant: every account page carries a Frontier brand-anchor span.
-  assert.match(html, /class=["']brand-anchor["']/, 'must carry brand-anchor span');
-  assert.match(html, /Frontier AI on your own infrastructure/, 'brand-anchor must contain Frontier line');
+  // W604 invariant: every account page carries the Frontier brand line. The
+  // offscreen `brand-anchor` span was deliberately stripped in W903 (commit
+  // 966457dd "brand-anchor strip" via scripts/w903-strip-brand-anchor.cjs)
+  // because it duplicated the now-always-present visible H1. The brand lock
+  // is therefore asserted against the visible H1, not the removed span.
+  assert.match(html, /<h1[^>]*>Frontier AI on your own infrastructure\.?<\/h1>/i,
+    'visible H1 must carry the Frontier brand line');
+  assert.match(html, /Frontier AI on your own infrastructure/, 'page must contain Frontier line');
   // W775 marker (brand-eyebrow) is also expected on workbench pages.
   assert.match(html, /class=["']brand-eyebrow["']/, 'must carry brand-eyebrow class');
 });

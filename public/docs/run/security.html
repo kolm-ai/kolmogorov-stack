@@ -131,7 +131,7 @@ td code{font-size:12px}
   <thead><tr><th>Direction</th><th>Port / Path</th><th>Recommendation</th></tr></thead>
   <tbody>
     <tr><td>control box &rarr; device</td><td>22/tcp (SSH)</td><td>Allow from a fixed deploy network or jump host; rate-limit elsewhere.</td></tr>
-    <tr><td>device &rarr; tenant</td><td>443/tcp to <code>api.kolm.ai</code> (or your self-host)</td><td>Required for check-in + OTA. Block other egress when running closed-network.</td></tr>
+    <tr><td>device &rarr; tenant</td><td>443/tcp to <code>kolm.ai</code> (or your self-host)</td><td>Required for check-in + OTA. Block other egress when running closed-network.</td></tr>
     <tr><td>gateway &rarr; pod</td><td>pod port (default 8000)</td><td>Restrict to gateway IPs only. Pair with mTLS on hostile networks.</td></tr>
     <tr><td>operators &rarr; pod</td><td>same port</td><td>Block from operator workstations; route through gateway so every call lands in receipts.</td></tr>
     <tr><td>pod &rarr; outbound</td><td>egress</td><td>Block by default; allow only model/runtime dependency mirrors during runtime install (see <a href="/docs/run/runtimes">runtimes</a>).</td></tr>
@@ -172,6 +172,7 @@ td code{font-size:12px}
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -191,7 +192,7 @@ td code{font-size:12px}
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

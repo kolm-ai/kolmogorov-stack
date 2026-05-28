@@ -257,9 +257,13 @@ test('W787 #13 - public/docs/efficiency.html exists with W787 IDs + brand H1', (
   // W604 brand contract: eyebrow + H1 from MEMORY.
   assert.match(html, /Open-source AI workbench/);
   assert.match(html, /Frontier AI on your own infrastructure/);
-  // All three W787 IDs surfaced as pills (regex+threshold pattern -- not array match).
-  const w787Matches = html.match(/W787-[123]/g) || [];
-  assert.ok(w787Matches.length >= 3, `expected at least 3 W787-N pills, got ${w787Matches.length}`);
+  // Three section pills surfaced (regex+threshold pattern -- not array match).
+  // NOTE: the internal "W787" wave prefix was deliberately scrubbed from the
+  // user-visible pill text in commit 3a57dd4f ("Public-surface polish ... drops
+  // internal release-tag noise from user-visible strings"). The three numbered
+  // section pills (-1/-2/-3) remain; we pin the count, not the internal tag.
+  const pillMatches = html.match(/<span class="pill ok">-[123]<\/span>/g) || [];
+  assert.ok(pillMatches.length >= 3, `expected at least 3 numbered section pills, got ${pillMatches.length}`);
   // The CLI sample teaches every flag.
   assert.match(html, /--precision/);
   assert.match(html, /--gradient-checkpointing/);

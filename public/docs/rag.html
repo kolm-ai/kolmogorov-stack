@@ -105,16 +105,40 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="why">Why RAG-aware distillation</h2>
 <p>A distill pipeline that sees only <code>{prompt, response}</code> learns a closed-book version of your task. The student memorises that "What is our refund policy?" maps to a specific paragraph, then drifts the moment the underlying policy changes. The retrieved context is the bridge: with <code>{prompt, retrieved, response}</code> the student learns the <em>shape</em> of "given these chunks, produce a response grounded in them" and generalises across new versions of the corpus.</p>
 
-<p>The capture path persists the retrieved chunks alongside prompt + response on every capture row. At distill time, the-2 training-data formatter prefixes each chunk as a <code>&lt;RETRIEVED&gt;</code> block so the student sees the same in-context shape the teacher did. Privacy: kolm.ai never logs raw retrieved text &mdash; only <code>len(retrieved)</code> and per-item source URLs appear in operator logs / audit trails. The text content lives only on the persisted capture row (where it belongs &mdash; it <em>is</em> training data).</p>
+<p>The capture path persists the retrieved chunks alongside prompt + response on every capture row. At distill time, the training-data formatter prefixes each chunk as a <code>&lt;RETRIEVED&gt;</code> block so the student sees the same in-context shape the teacher did. Privacy: kolm.ai never logs raw retrieved text &mdash; only <code>len(retrieved)</code> and per-item source URLs appear in operator logs / audit trails. The text content lives only on the persisted capture row (where it belongs &mdash; it <em>is</em> training data).</p>
 
 <h2 id="capture">Capture with retrieved context</h2>
-<p>The two first-party SDKs ship a <code>captureWithContext</code> helper. Both encode the retrieved array as base64 JSON onto the <code>kolm-retrieved-context</code> request header so structured chunks survive HTTP escaping.</p>
+<p>The two first-party SDKs ship a capture-with-context helper &mdash; <code>captureWithContext</code> in the Node SDK and <code>capture_with_context</code> in the Python SDK. Both encode the retrieved array as base64 JSON onto the <code>kolm-retrieved-context</code> request header so structured chunks survive HTTP escaping.</p>
 
 <h3 id="python">Python</h3>
-<pre>CODE6</pre>
+<pre><code>from kolm import Kolm
+
+client = Kolm()  # reads KOLM_API_KEY from the environment
+
+client.capture_with_context(
+    prompt="When did kolm.ai launch?",
+    retrieved=[
+        {"source": "kolm.ai/changelog", "text": "Launched 2026-05", "score": 0.92},
+        {"source": "kolm.ai/about", "text": "kolm.ai is the open-source AI compiler.", "score": 0.71},
+    ],
+    response="kolm.ai launched in May 2026.",
+    namespace="customer-support",
+)</code></pre>
 
 <h3 id="javascript">JavaScript / Node</h3>
-<pre>CODE7</pre>
+<pre><code>import { Kolm } from "@kolmogorov/sdk";
+
+const client = new Kolm(); // reads KOLM_API_KEY from the environment
+
+await client.captureWithContext({
+  prompt: "When did kolm.ai launch?",
+  retrieved: [
+    { source: "kolm.ai/changelog", text: "Launched 2026-05", score: 0.92 },
+    { source: "kolm.ai/about", text: "kolm.ai is the open-source AI compiler.", score: 0.71 },
+  ],
+  response: "kolm.ai launched in May 2026.",
+  namespace: "customer-support",
+});</code></pre>
 
 <h2 id="header">Header format</h2>
 <p>The SDK helpers serialize <code>retrieved</code> as JSON and base64-encode it onto the <code>kolm-retrieved-context</code> request header. If you are calling the API from a custom client, the contract is:</p>
@@ -133,23 +157,40 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <p>Example raw payload before base64 encoding:</p>
 
-<pre>CODE15</pre>
+<pre><code>[
+  { "source": "kolm.ai/changelog", "text": "Launched 2026-05", "score": 0.92 },
+  { "source": "kolm.ai/about", "text": "kolm.ai is the open-source AI compiler.", "score": 0.71 }
+]</code></pre>
 
 <p>On a malformed header the server returns HTTP 400 with the loud-fail envelope:</p>
 
-<pre>CODE16</pre>
+<pre><code>HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "ok": false,
+  "error": "invalid_retrieved_context_header"
+}</code></pre>
 
 <p>Absence is <strong>not</strong> an error &mdash; non-RAG requests skip the header and the capture row stores <code>retrieved_context: null</code>. The training-data formatter falls through to the legacy <code>USER: ... ASSISTANT: ...</code> shape for those rows, so existing distill flows keep working untouched.</p>
 
 <h2 id="training-format">Training-data format</h2>
 <p>At distill time, <code>formatCaptureForTraining(capture)</code> emits one row per capture. When <code>retrieved_context</code> is present each chunk is rendered as a <code>&lt;RETRIEVED&gt;</code> block before the USER / ASSISTANT turn:</p>
 
-<pre>CODE22</pre>
+<pre><code>&lt;RETRIEVED source=kolm.ai/changelog score=0.92&gt;
+Launched 2026-05
+&lt;/RETRIEVED&gt;
+&lt;RETRIEVED source=kolm.ai/about score=0.71&gt;
+kolm.ai is the open-source AI compiler.
+&lt;/RETRIEVED&gt;
+
+USER: When did kolm.ai launch?
+ASSISTANT: kolm.ai launched in May 2026.</code></pre>
 
 <p>The student sees the retrieved chunks in the same shape at every training step, which teaches it to attend to whatever you place between the <code>&lt;RETRIEVED&gt;</code> tags at inference time. At serve time you wrap real retriever output in the same tags &mdash; the student generalises across new corpus versions because it learned the structural pattern, not the specific text.</p>
 
 <h2 id="bakeoff">Bakeoff axis: context-faithfulness</h2>
-<p>The-5 bakeoff axis adds a <code>context_faithfulness</code> column to <code>kolm bakeoff</code> results. For every contestant call that carries a retrieved-context payload, the bakeoff computes the fraction of response tokens that appear in the retrieved corpus.</p>
+<p>The bakeoff axis adds a <code>context_faithfulness</code> column to <code>kolm bakeoff</code> results. For every contestant call that carries a retrieved-context payload, the bakeoff computes the fraction of response tokens that appear in the retrieved corpus.</p>
 
 <table>
   <thead><tr><th>Value</th><th>Meaning</th></tr></thead>
@@ -215,6 +256,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -234,7 +276,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

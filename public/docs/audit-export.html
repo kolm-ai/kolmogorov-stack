@@ -122,28 +122,29 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
     <h3>RFC 4180 CSV</h3>
     <p>Eleven-column header row, CRLF line terminator, double-quote wrap on embedded commas / quotes / newlines, doubled quotes inside wrapped cells. Loads cleanly into Excel, Google Sheets, pandas, and any RFC 4180 parser.</p>
     <p class="mime">Content-Type: text/csv; charset=utf-8</p>
-    <pre>CODE2</pre>
+    <pre><code>ts_iso,tenant_id,operator_id,op,target_kind,target_id,outcome,...
+2026-05-24T12:00:00Z,t_abc,u_42,compile.completed,artifact,a_99,success,...</code></pre>
   </div>
   <div class="format-card">
     <code class="tag">cef</code>
     <h3>ArcSight CEF v0</h3>
     <p>One header per event: <code>CEF:0|kolm.ai|kolm|&lt;version&gt;|&lt;sigid&gt;|&lt;name&gt;|&lt;severity&gt;|&lt;extension&gt;</code>. Extension is space-joined <code>key=value</code> with backslash-escape on <code>=</code>. Severity is 5 for normal ops, 8 for auth/admin/security/sso/scim/key prefixes, 10 for critical-suffix ops.</p>
     <p class="mime">Content-Type: text/plain; charset=utf-8</p>
-    <pre>CODE7</pre>
+    <pre><code>CEF:0|kolm.ai|kolm|w770-v1|compile.completed|compile.completed|5|rt=2026-05-24T12:00:00Z cs1=t_abc cs1Label=tenant_id suser=u_42</code></pre>
   </div>
   <div class="format-card">
     <code class="tag">leef</code>
     <h3>QRadar LEEF v2.0</h3>
     <p>Header: <code>LEEF:2.0|kolm.ai|kolm|&lt;version&gt;|&lt;eventId&gt;|^|&lt;extension&gt;</code>. Caret (<code>^</code>) is the literal delimiter slot AND the extension separator. Pair encoding is <code>key=value</code> with backslash-escape on <code>^</code> inside values.</p>
     <p class="mime">Content-Type: text/plain; charset=utf-8</p>
-    <pre>CODE13</pre>
+    <pre><code>LEEF:2.0|kolm.ai|kolm|w770-v1|compile.completed|^|devTime=2026-05-24T12:00:00Z^tenant_id=t_abc^usrName=u_42^cat=compile.completed</code></pre>
   </div>
   <div class="format-card">
     <code class="tag">json</code>
     <h3>JSONL (NDJSON)</h3>
     <p>One JSON object per line, newline-terminated. Splunk + Loki + Vector + Fluent Bit + Promtail ingest this natively without a parser plugin. Field ordering matches the CSV column ordering.</p>
     <p class="mime">Content-Type: application/x-ndjson; charset=utf-8</p>
-    <pre>CODE15</pre>
+    <pre><code>{"ts_iso":"2026-05-24T12:00:00Z","tenant_id":"t_abc","operator_id":"u_42","op":"compile.completed","target_kind":"artifact","target_id":"a_99","outcome":"success","source_ip":null,"user_agent":null,"request_id":null,"meta_hash":"abcd..."}</code></pre>
   </div>
 </div>
 
@@ -169,7 +170,12 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="cli">CLI</h2>
 <p>The <code>kolm audit-export</code> verb (alias: <code>ae</code>, two-word: <code>kolm audit export</code>) thinly wraps the auth-gated routes. <code>--out</code> writes the body to disk; without it, the body streams to stdout.</p>
 
-<pre>CODE23</pre>
+<pre><code>kolm audit export csv --from 2026-01-01 --out audit.csv
+kolm audit export cef --from 2026-05-01 --to 2026-05-31 --out may.cef
+kolm audit-export export leef --max 5000 --out audit.leef
+kolm audit-export preview json --from 2026-05-20
+kolm ae formats                       # list supported formats + CSV columns
+kolm ae export json --out events.jsonl</code></pre>
 
 <h2 id="api">API</h2>
 <table data-w770="api">
@@ -181,7 +187,13 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   </tbody>
 </table>
 
-<pre>CODE33</pre>
+<pre><code>curl -H "Authorization: Bearer $KOLM_API_KEY" \
+     "https://kolm.ai/v1/audit/export?format=cef&amp;from=2026-05-01&amp;to=2026-05-31" \
+     -o may.cef
+
+curl -H "Authorization: Bearer $KOLM_API_KEY" \
+     "https://kolm.ai/v1/audit/export/formats"
+</code></pre>
 
 <h2 id="tenant-fence">Tenant fence</h2>
 <div class="caveat">

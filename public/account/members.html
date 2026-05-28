@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
+<title>Members &middot; Account &middot; kolm.ai</title>
+<meta name="description" content="Manage your kolm.ai organization: view members, change roles, remove people, and invite teammates. Owners and admins only.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/account/members">
+<meta property="og:title" content="Members &middot; Account" />
+<meta property="og:description" content="Manage your kolm.ai organization: view members, change roles, remove people, and invite teammates." />
+<meta property="og:image" content="https://kolm.ai/brand-hero.png" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://kolm.ai/account/members" />
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Members &middot; Account">
+<meta name="twitter:description" content="Manage your kolm.ai organization: view members, change roles, remove people, and invite teammates.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Members - Account - kolm.ai","description":"Manage your kolm.ai organization: view members, change roles, remove people, and invite teammates.","url":"https://kolm.ai/account/members","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Members","item":"https://kolm.ai/account/members"}]}}</script>
+<style>
+.acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
+#account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
+#account-sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin:0 0 10px}
+#account-sidebar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:var(--ink-mute);text-decoration:none;font-family:var(--mono);font-size:12.5px}
+#account-sidebar a:hover{background:var(--bg-elev);color:var(--ink)}
+#account-sidebar a[aria-current=page]{background:var(--bg-elev);color:var(--accent);border-left:2px solid var(--accent);padding-left:8px}
+.acct-content h1{margin:0 0 4px;font-size:28px;letter-spacing:0}
+.acct-content h2{font-size:16px;margin:22px 0 10px}
+.acct-content h3{font-size:14px;margin:16px 0 8px}
+.acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
+.acct-content .crumb{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em;margin:0 0 10px}
+.acct-content .crumb a{color:var(--ink-faint);text-decoration:none;border-bottom:1px dashed var(--line)}
+.acct-content .crumb a:hover{color:var(--accent);border-color:var(--accent)}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#e6e9ee);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.metric-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:20px}
+.metric-card{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;min-height:74px}
+.metric-card .label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin-bottom:6px}
+.metric-card .value{font-size:22px;font-weight:600;font-family:var(--mono);color:var(--ink)}
+.kpanel{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
+.kpanel h2{margin:0 0 12px;font-size:15px}
+.kpanel .pdesc{color:var(--ink-mute);font-size:13px;margin:0 0 12px;line-height:1.55}
+.ktable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+.ktable th{text-align:left;padding:8px 8px;border-bottom:1px solid var(--line);color:var(--ink-faint);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-size:10.5px;background:var(--bg-elev)}
+.ktable td{padding:10px 8px;border-bottom:1px solid var(--line);color:var(--ink);vertical-align:top;word-break:break-word}
+.ktable tr:hover td{background:var(--bg-elev)}
+.ktable th.sortable{cursor:pointer;user-select:none}
+.ktable th.sortable:hover{color:var(--accent)}
+.ktable th.sortable[aria-sort=ascending]::after{content:" \2191";color:var(--accent)}
+.ktable th.sortable[aria-sort=descending]::after{content:" \2193";color:var(--accent)}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--bg-card)}
+.table-wrap table{margin:0}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
+.pill.ok{color:var(--good)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}.pill.mute{color:var(--ink-faint)}
+.pill.role-owner{color:var(--accent)}
+.pill.role-admin{color:var(--good)}
+.pill.role-member{color:var(--ink-mute)}
+.pill.role-billing{color:var(--warn)}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:7px 14px;border-radius:5px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:none;line-height:1}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#0b0d10}
+.btn.primary:hover{filter:brightness(1.1);color:#0b0d10}
+.btn.bad{color:var(--bad);border-color:var(--bad)}
+.btn.sm{min-height:30px;padding:5px 10px;font-size:11.5px}
+.touch{min-width:44px;min-height:44px}
+.empty{background:var(--bg-card);border:1px dashed var(--line);border-radius:8px;padding:18px;color:var(--ink-mute);font-size:13.5px;line-height:1.6}
+.empty code{background:var(--bg-elev);padding:2px 6px;border-radius:3px;font-size:12.5px;color:var(--accent)}
+.empty strong{color:var(--ink);font-weight:600}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+.toolbar input[type=search],.toolbar input[type=text],.toolbar input[type=email],.toolbar select{background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);padding:8px 12px;border-radius:5px;font-family:var(--mono);font-size:14px;min-height:38px;min-width:160px}
+.toolbar label{font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);display:flex;flex-direction:column;gap:4px}
+.invite-form{display:grid;grid-template-columns:minmax(220px,1fr) minmax(140px,180px) auto;gap:12px;align-items:end}
+.invite-form label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink-mute);font-family:var(--mono)}
+.invite-form input,.invite-form select{background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);padding:10px 12px;border-radius:5px;font-family:var(--mono);font-size:14px;min-height:44px;width:100%}
+.invite-form input:focus,.invite-form select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.invite-form button{min-height:44px;padding:0 18px}
+.row-actions{display:flex;justify-content:flex-end}
+.row-actions details{position:relative}
+.row-actions summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:5px;border:1px solid transparent;color:var(--ink-mute);font-family:var(--mono);font-size:18px}
+.row-actions summary::-webkit-details-marker{display:none}
+.row-actions summary:hover{border-color:var(--line);background:var(--bg-elev);color:var(--ink)}
+.row-actions summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row-actions[open] summary{border-color:var(--line);background:var(--bg-elev);color:var(--ink)}
+.row-actions .menu{position:absolute;right:0;top:48px;background:var(--bg-card);border:1px solid var(--line);border-radius:6px;padding:6px;min-width:220px;box-shadow:0 8px 24px rgba(0,0,0,0.18);z-index:30;display:flex;flex-direction:column;gap:2px}
+.row-actions .menu button,.row-actions .menu a{display:flex;align-items:center;justify-content:flex-start;background:transparent;border:0;color:var(--ink);font-family:var(--mono);font-size:12px;padding:9px 12px;min-height:38px;border-radius:4px;cursor:pointer;text-decoration:none;text-align:left}
+.row-actions .menu button:hover,.row-actions .menu a:hover{background:var(--bg-elev);color:var(--accent)}
+.row-actions .menu button:focus-visible,.row-actions .menu a:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.row-actions .menu .sep{height:1px;background:var(--line);margin:4px 0}
+.row-actions .menu .danger{color:var(--bad)}
+.row-actions .menu .danger:hover{background:var(--bg-elev);color:var(--bad)}
+.role-legend{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.role-legend .item{padding:12px;border:1px solid var(--line);border-radius:6px;background:var(--bg-elev)}
+.role-legend .item h3{margin:0 0 6px;font-size:13.5px;color:var(--ink);display:flex;align-items:center;gap:8px}
+.role-legend .item p{margin:0;font-size:12.5px;color:var(--ink-mute);line-height:1.55}
+.user-cell{display:flex;flex-direction:column;gap:2px}
+.user-cell .name{color:var(--ink);font-weight:600}
+.user-cell .email{color:var(--ink-mute);font-size:11.5px}
+.confirm-dialog{border:1px solid var(--line-strong);border-radius:8px;background:var(--bg-card);color:var(--ink);padding:0;max-width:440px;width:90vw}
+.confirm-dialog::backdrop{background:rgba(8,10,14,0.55)}
+.confirm-dialog .body{padding:20px 22px}
+.confirm-dialog h3{margin:0 0 8px;font-size:16px;color:var(--ink)}
+.confirm-dialog p{margin:0 0 16px;color:var(--ink-mute);font-size:13.5px;line-height:1.55}
+.confirm-dialog .actions{display:flex;gap:10px;justify-content:flex-end;padding:14px 22px;border-top:1px solid var(--line);background:var(--bg-elev);border-radius:0 0 8px 8px}
+.help{font-size:12px;color:var(--ink-faint);margin:6px 0 0;line-height:1.55}
+.unauth{padding:32px;text-align:center;border:1px dashed var(--line);border-radius:8px;background:var(--bg-card)}
+.unauth h2{margin:0 0 8px;font-size:18px;color:var(--ink)}
+.unauth p{margin:0 0 16px;color:var(--ink-mute);font-size:13.5px}
+.no-org{padding:24px;border:1px dashed var(--line);border-radius:8px;background:var(--bg-card)}
+.no-org h2{margin:0 0 8px;font-size:16px;color:var(--ink)}
+.no-org p{margin:0;color:var(--ink-mute);font-size:13.5px;line-height:1.6}
+.no-org a{color:var(--accent);font-weight:600}
+body[data-role=member] [data-owner-admin-only]{display:none !important}
+body[data-role=billing] [data-owner-admin-only]{display:none !important}
+body[data-auth=anon] .acct-content > section:not(.unauth-section){display:none}
+body[data-auth=anon] .unauth-section{display:block}
+body[data-org=none] .acct-content > section:not(.no-org-section){display:none}
+body[data-org=none] .no-org-section{display:block}
+.unauth-section,.no-org-section{display:none}
+@media (max-width:980px){.metric-grid{grid-template-columns:repeat(3,1fr)}.role-legend{grid-template-columns:1fr}.invite-form{grid-template-columns:1fr}}
+@media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}}
+@media (max-width:520px){.metric-grid{grid-template-columns:repeat(2,1fr)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{transition:none !important;animation:none !important}}
+</style>
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/nav.js"></script>
+</head>
+<body class="kolm-account-surface ks" data-role="member" data-auth="unknown" data-org="unknown">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<main id="main">
+<p id="loading-status" aria-live="polite" class="ks-loading-status" hidden></p>
+<div class="acct-shell">
+<nav id="account-sidebar" aria-label="Account sections">
+  <h2>Account</h2>
+  <ul>
+    <li><a href="/account/overview">Overview</a></li>
+    <li><a href="/account/org">Organization</a></li>
+    <li><a href="/account/members" aria-current="page">Members</a></li>
+    <li><a href="/account/api-keys">API keys</a></li>
+    <li><a href="/account/audit-log">Audit log</a></li>
+    <li><a href="/account/security/2fa">Two-factor (2FA)</a></li>
+    <li><a href="/account/billing">Billing</a></li>
+  </ul>
+</nav>
+
+<section class="acct-content">
+
+<section class="unauth-section unauth" aria-label="Sign in required">
+  <h2>Sign in to manage members</h2>
+  <p>Inviting teammates, changing roles, and removing accounts is gated to signed-in organization owners and admins.</p>
+  <p><a class="btn primary" href="/signup">Create an account</a> &nbsp; <a class="btn" href="/signup?intent=login">Sign in</a></p>
+</section>
+
+<section class="no-org-section no-org" aria-label="No organization">
+  <h2>You're not part of an organization yet.</h2>
+  <p>Create one from your account to invite teammates, share artifacts, and pool billing. <a href="/account/org">Create one &rarr;</a></p>
+</section>
+
+<section aria-labelledby="page-title">
+  <p class="crumb"><a href="/account/overview">Account</a> / Members</p>
+  <h1 id="page-title">Members</h1>
+  <p class="lede">Everyone with access to this organization. Owners and admins can invite, change roles, and remove. Members and billing-only contacts have read access. Role changes and removals write to the <a href="/account/audit-log">audit log</a>.</p>
+</section>
+
+<section aria-labelledby="member-stats">
+  <h2 id="member-stats" class="sr-only" style="position:absolute;left:-9999px">Member counts</h2>
+  <div class="metric-grid" id="stat-strip" data-counter-count="6" aria-busy="true">
+    <div class="metric-card"><div class="label">Total</div><div class="value" id="stat-total">&mdash;</div></div>
+    <div class="metric-card"><div class="label">Owner</div><div class="value" id="stat-owner">&mdash;</div></div>
+    <div class="metric-card"><div class="label">Admin</div><div class="value" id="stat-admin">&mdash;</div></div>
+    <div class="metric-card"><div class="label">Member</div><div class="value" id="stat-member">&mdash;</div></div>
+    <div class="metric-card"><div class="label">Billing</div><div class="value" id="stat-billing">&mdash;</div></div>
+    <div class="metric-card"><div class="label">Pending invites</div><div class="value" id="stat-pending">&mdash;</div></div>
+  </div>
+</section>
+
+<section class="kpanel" data-owner-admin-only aria-labelledby="invite-heading">
+  <h2 id="invite-heading">Invite a teammate</h2>
+  <p class="pdesc">Send an email invite. The recipient creates or signs into a kolm.ai account, accepts, and lands at <code>/account/overview</code> scoped to this organization. Invites expire after 14 days. Posts to <code>POST /v1/orgs/:org_id/invites</code>.</p>
+
+  <form id="invite-form" class="invite-form" method="post" action="/v1/orgs/current/invites" aria-label="Invite teammate" novalidate>
+    <label for="invite-email">Email address
+      <input id="invite-email" name="email" type="email" required autocomplete="email" placeholder="teammate@company.com" aria-describedby="invite-email-help">
+    </label>
+    <label for="invite-role">Role
+      <select id="invite-role" name="role" required aria-describedby="invite-role-help">
+        <option value="owner" id="invite-role-owner" disabled>Owner (owner-only)</option>
+        <option value="admin">Admin</option>
+        <option value="member" selected>Member</option>
+        <option value="billing">Billing</option>
+      </select>
+    </label>
+    <button class="btn primary" type="submit" id="invite-submit">Send invite</button>
+    <p id="invite-email-help" class="help" style="grid-column:1/-1">Enter the work email of the person you want to add. They'll get a one-time link from <code>noreply@kolm.ai</code>.</p>
+    <p id="invite-role-help" class="help" style="grid-column:1/-1">Only existing owners can grant the Owner role. See the role legend below for permission scope.</p>
+    <p id="invite-status" class="help" role="status" aria-live="polite" style="grid-column:1/-1;min-height:18px"></p>
+  </form>
+
+  <h3 style="margin-top:18px">Pending invites</h3>
+  <div class="table-wrap">
+    <table class="ktable" aria-label="Pending invites">
+      <thead>
+        <tr>
+          <th scope="col">Email</th>
+          <th scope="col">Role</th>
+          <th scope="col">Sent</th>
+          <th scope="col">Expires</th>
+          <th scope="col" style="text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="invite-rows">
+        <tr><td colspan="5" style="text-align:center;color:var(--ink-faint);padding:14px">Loading pending invites&hellip;</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p id="invite-empty" class="help" hidden style="margin-top:8px">No pending invites.</p>
+</section>
+
+<section class="kpanel" aria-labelledby="members-heading">
+  <h2 id="members-heading">Members table</h2>
+  <p class="pdesc">Sort by joined date or role. Filter by name or email. Acting-user permission determines which row actions are available.</p>
+
+  <div class="toolbar" role="search" aria-label="Filter members">
+    <label for="member-filter" class="sr-only" style="position:absolute;left:-9999px">Filter members</label>
+    <input id="member-filter" type="search" placeholder="Filter by name or email&hellip;" aria-label="Filter members by name or email" autocomplete="off">
+    <label>Role
+      <select id="role-filter" aria-label="Filter by role">
+        <option value="">All roles</option>
+        <option value="owner">Owner</option>
+        <option value="admin">Admin</option>
+        <option value="member">Member</option>
+        <option value="billing">Billing</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="table-wrap">
+    <table class="ktable" id="members-table" aria-label="Organization members">
+      <thead>
+        <tr>
+          <th scope="col">Name &amp; email</th>
+          <th scope="col" class="sortable" data-sort="role" aria-sort="none" tabindex="0">Role</th>
+          <th scope="col" class="sortable" data-sort="joined" aria-sort="descending" tabindex="0">Joined</th>
+          <th scope="col">Last active</th>
+          <th scope="col" style="text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="member-rows">
+        <tr><td colspan="5" style="text-align:center;color:var(--ink-faint);padding:18px">Loading members&hellip;</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="members-empty" class="empty" hidden data-empty-state>
+    <strong>No one else yet.</strong> Send your first invite above and you'll see your teammate land here as soon as they accept.
+  </div>
+</section>
+
+<section class="kpanel" aria-labelledby="role-legend-heading">
+  <h2 id="role-legend-heading">Role legend</h2>
+  <p class="pdesc">Four roles, each with a scoped permission set. Full permission matrix is in the docs at <a href="/docs/rbac">/docs/rbac</a>.</p>
+  <div class="role-legend">
+    <div class="item">
+      <h3><span class="pill role-owner">Owner</span> Full control</h3>
+      <p>Manage every setting, billing, members, BYOC, BAA, and tenancy. Can promote others to Owner. At least one Owner is required at all times. Removing the last Owner is blocked at the API.</p>
+    </div>
+    <div class="item">
+      <h3><span class="pill role-admin">Admin</span> Operate the org</h3>
+      <p>Invite and remove members, change roles (Member, Billing, Admin &mdash; not Owner), manage API keys, view billing. Cannot delete the organization or transfer ownership.</p>
+    </div>
+    <div class="item">
+      <h3><span class="pill role-member">Member</span> Build and operate</h3>
+      <p>Read and write to artifacts, datasets, captures, deploys, and audit log entries scoped to this org. Cannot invite, remove, or change roles.</p>
+    </div>
+    <div class="item">
+      <h3><span class="pill role-billing">Billing</span> Finance access</h3>
+      <p>Read invoices, change payment method, view usage meters, download billing exports. No artifact, dataset, or capture access; no member management.</p>
+    </div>
+  </div>
+</section>
+
+</section>
+</div>
+</main>
+
+<dialog id="confirm-remove" class="confirm-dialog" aria-labelledby="confirm-title">
+  <div class="body">
+    <h3 id="confirm-title">Remove this member?</h3>
+    <p id="confirm-body">They will lose access to the organization immediately. Their captures, datasets, and artifacts stay with the org. They can be re-invited later.</p>
+  </div>
+  <div class="actions">
+    <button class="btn" type="button" id="confirm-cancel">Cancel</button>
+    <button class="btn bad" type="button" id="confirm-ok">Remove</button>
+  </div>
+</dialog>
+
+<dialog id="invite-link-dialog" class="confirm-dialog" aria-labelledby="link-title">
+  <div class="body">
+    <h3 id="link-title">Invite link</h3>
+    <p>Anyone with this link can accept the invite. Treat it like a password.</p>
+    <input id="invite-link-input" type="text" readonly style="width:100%;background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);padding:10px 12px;border-radius:5px;font-family:var(--mono);font-size:12.5px;min-height:44px">
+  </div>
+  <div class="actions">
+    <button class="btn" type="button" id="link-copy">Copy link</button>
+    <button class="btn primary" type="button" id="link-close">Done</button>
+  </div>
+</dialog>
+
+<script type="module">
+const $ = (s) => document.querySelector(s);
+const body = document.body;
+
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function fmtDate(iso) {
+  if (!iso) return "—";
+  try { const d = new Date(iso); if (isNaN(d)) return "—"; return d.toISOString().slice(0, 10); } catch (_) { return "—"; }
+}
+function fmtRelative(iso) {
+  if (!iso) return "never";
+  try {
+    const d = new Date(iso);
+    const diff = (Date.now() - d.getTime()) / 1000;
+    if (diff < 60) return "just now";
+    if (diff < 3600) return Math.floor(diff / 60) + "m ago";
+    if (diff < 86400) return Math.floor(diff / 3600) + "h ago";
+    if (diff < 86400 * 30) return Math.floor(diff / 86400) + "d ago";
+    return d.toISOString().slice(0, 10);
+  } catch (_) { return "—"; }
+}
+function rolePill(role) {
+  const r = String(role || "member").toLowerCase();
+  return '<span class="pill role-' + esc(r) + '">' + esc(r) + "</span>";
+}
+function getAuthHeaders() {
+  let key = null;
+  try { key = localStorage.getItem("kolm-key") || localStorage.getItem("ks_api_key") || localStorage.getItem("kolm_api_key") || localStorage.getItem("KOLM_API_KEY"); } catch (_) {}
+  const h = { Accept: "application/json" };
+  if (key) h["Authorization"] = "Bearer " + key;
+  return h;
+}
+async function safeFetch(url, opts = {}) {
+  opts.headers = Object.assign({}, getAuthHeaders(), opts.headers || {});
+  opts.credentials = opts.credentials || "include";
+  try {
+    const r = await fetch(url, opts);
+    if (r.status === 401 || r.status === 403) return { __unauth: true, status: r.status };
+    if (!r.ok) return { __error: true, status: r.status };
+    const ct = r.headers.get("content-type") || "";
+    return ct.indexOf("application/json") >= 0 ? await r.json() : await r.text();
+  } catch (e) {
+    return { __error: true, message: String(e && e.message || e) };
+  }
+}
+
+let allMembers = [];
+let allInvites = [];
+let actingRole = "member";
+let sortKey = "joined";
+let sortDir = "desc";
+
+function applyRoleVisibility(role) {
+  actingRole = role || "member";
+  body.setAttribute("data-role", actingRole);
+  const ownerOpt = $("#invite-role-owner");
+  if (ownerOpt) ownerOpt.disabled = actingRole !== "owner";
+}
+
+function renderStats() {
+  const counts = { owner: 0, admin: 0, member: 0, billing: 0 };
+  allMembers.forEach((m) => { const r = String(m.role || "member").toLowerCase(); if (counts[r] != null) counts[r]++; });
+  $("#stat-total").textContent = allMembers.length;
+  $("#stat-owner").textContent = counts.owner;
+  $("#stat-admin").textContent = counts.admin;
+  $("#stat-member").textContent = counts.member;
+  $("#stat-billing").textContent = counts.billing;
+  $("#stat-pending").textContent = allInvites.length;
+  $("#stat-strip").removeAttribute("aria-busy");
+}
+
+function renderMembers() {
+  const filter = ($("#member-filter").value || "").toLowerCase();
+  const roleFilter = $("#role-filter").value || "";
+  let rows = allMembers.filter((m) => {
+    if (roleFilter && String(m.role || "").toLowerCase() !== roleFilter) return false;
+    if (!filter) return true;
+    const hay = (m.name || "") + " " + (m.email || "");
+    return hay.toLowerCase().indexOf(filter) >= 0;
+  });
+  const roleOrder = { owner: 0, admin: 1, member: 2, billing: 3 };
+  rows.sort((a, b) => {
+    let av, bv;
+    if (sortKey === "role") { av = roleOrder[String(a.role || "member").toLowerCase()] ?? 99; bv = roleOrder[String(b.role || "member").toLowerCase()] ?? 99; }
+    else { av = new Date(a.joined_at || 0).getTime(); bv = new Date(b.joined_at || 0).getTime(); }
+    return sortDir === "asc" ? av - bv : bv - av;
+  });
+  const tbody = $("#member-rows");
+  if (!rows.length) {
+    tbody.innerHTML = "";
+    $("#members-empty").hidden = allMembers.length !== 1;
+    if (allMembers.length !== 1) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--ink-faint);padding:14px">No members match the current filter.</td></tr>';
+    }
+    return;
+  }
+  $("#members-empty").hidden = true;
+  tbody.innerHTML = rows.map((m) => {
+    const canManage = (actingRole === "owner" || actingRole === "admin") && !m.is_self;
+    const memberRole = String(m.role || "member").toLowerCase();
+    const availableRoles = actingRole === "owner" ? ["owner", "admin", "member", "billing"] : ["admin", "member", "billing"];
+    const roleSubmenu = availableRoles.filter((r) => r !== memberRole).map((r) => '<button type="button" data-change-role="' + esc(m.id || m.email) + '" data-new-role="' + esc(r) + '">Set as ' + esc(r) + "</button>").join("");
+    const actionsCell = canManage ? '<div class="row-actions"><details><summary aria-label="Actions for ' + esc(m.email || m.name || "member") + '" title="Actions">&hellip;</summary><div class="menu" role="menu">' + roleSubmenu + (roleSubmenu ? '<div class="sep"></div>' : "") + '<button type="button" class="danger" data-remove="' + esc(m.id || m.email) + '" data-name="' + esc(m.name || m.email) + '">Remove from organization</button></div></details></div>' : '<span class="help" style="display:block;text-align:right">&mdash;</span>';
+    return '<tr data-member-row="' + esc(m.id || m.email) + '">' +
+      '<td><div class="user-cell"><span class="name">' + esc(m.name || m.email || "Unnamed") + (m.is_self ? ' <span class="pill mute" style="margin-left:6px">you</span>' : "") + '</span><span class="email">' + esc(m.email || "") + '</span></div></td>' +
+      '<td>' + rolePill(m.role) + '</td>' +
+      '<td>' + esc(fmtDate(m.joined_at)) + '</td>' +
+      '<td>' + esc(fmtRelative(m.last_active_at)) + '</td>' +
+      '<td>' + actionsCell + '</td>' +
+    '</tr>';
+  }).join("");
+}
+
+function renderInvites() {
+  const tbody = $("#invite-rows");
+  if (!allInvites.length) {
+    tbody.innerHTML = "";
+    $("#invite-empty").hidden = false;
+    return;
+  }
+  $("#invite-empty").hidden = true;
+  tbody.innerHTML = allInvites.map((inv) => {
+    return '<tr data-invite-row="' + esc(inv.id || inv.email) + '">' +
+      '<td>' + esc(inv.email || "") + '</td>' +
+      '<td>' + rolePill(inv.role) + '</td>' +
+      '<td>' + esc(fmtDate(inv.sent_at || inv.created_at)) + '</td>' +
+      '<td>' + esc(fmtDate(inv.expires_at)) + '</td>' +
+      '<td style="text-align:right"><div class="row-actions"><details><summary aria-label="Actions for invite ' + esc(inv.email || "") + '" title="Actions">&hellip;</summary><div class="menu" role="menu">' +
+        '<button type="button" data-copy-link="' + esc(inv.accept_url || inv.link || "") + '">Copy invite link</button>' +
+        '<button type="button" data-resend="' + esc(inv.id || inv.email) + '">Resend invite</button>' +
+        '<div class="sep"></div>' +
+        '<button type="button" class="danger" data-revoke="' + esc(inv.id || inv.email) + '">Revoke invite</button>' +
+      '</div></details></div></td>' +
+    '</tr>';
+  }).join("");
+}
+
+async function loadData() {
+  const [whoami, members, invites] = await Promise.all([
+    safeFetch("/v1/whoami"),
+    safeFetch("/v1/orgs/current/members"),
+    safeFetch("/v1/orgs/current/invites"),
+  ]);
+  if (whoami && whoami.__unauth) { body.setAttribute("data-auth", "anon"); return; }
+  body.setAttribute("data-auth", "yes");
+  if (members && members.__error && members.status === 404) { body.setAttribute("data-org", "none"); return; }
+  body.setAttribute("data-org", "yes");
+  const myRole = (whoami && (whoami.org_role || whoami.role)) || "member";
+  applyRoleVisibility(String(myRole).toLowerCase());
+  const mlist = (members && (members.members || members.data || (Array.isArray(members) ? members : []))) || [];
+  const ilist = (invites && (invites.invites || invites.data || (Array.isArray(invites) ? invites : []))) || [];
+  allMembers = Array.isArray(mlist) ? mlist : [];
+  allInvites = Array.isArray(ilist) ? ilist : [];
+  renderStats();
+  renderMembers();
+  renderInvites();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  $("#member-filter").addEventListener("input", renderMembers);
+  $("#role-filter").addEventListener("change", renderMembers);
+
+  document.querySelectorAll("th.sortable").forEach((th) => {
+    const trigger = () => {
+      const key = th.getAttribute("data-sort");
+      if (sortKey === key) sortDir = sortDir === "asc" ? "desc" : "asc";
+      else { sortKey = key; sortDir = key === "joined" ? "desc" : "asc"; }
+      document.querySelectorAll("th.sortable").forEach((t) => t.setAttribute("aria-sort", "none"));
+      th.setAttribute("aria-sort", sortDir === "asc" ? "ascending" : "descending");
+      renderMembers();
+    };
+    th.addEventListener("click", trigger);
+    th.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); trigger(); } });
+  });
+
+  $("#invite-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const status = $("#invite-status");
+    const email = $("#invite-email").value.trim();
+    const role = $("#invite-role").value;
+    if (!email) { status.textContent = "Email is required."; return; }
+    status.textContent = "Sending invite…";
+    const r = await safeFetch("/v1/orgs/current/invites", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, role }) });
+    if (r && (r.__error || r.__unauth)) { status.textContent = "Could not send invite (status " + (r.status || "network") + ")."; return; }
+    status.textContent = "Invite sent to " + email + ".";
+    $("#invite-email").value = "";
+    loadData();
+  });
+
+  document.addEventListener("click", async (e) => {
+    const t = e.target.closest("[data-change-role],[data-remove],[data-resend],[data-revoke],[data-copy-link]");
+    if (!t) return;
+    if (t.hasAttribute("data-copy-link")) {
+      const url = t.getAttribute("data-copy-link");
+      if (url && navigator.clipboard) navigator.clipboard.writeText(url);
+      const dlg = $("#invite-link-dialog");
+      $("#invite-link-input").value = url || "";
+      if (dlg.showModal) dlg.showModal();
+      return;
+    }
+    if (t.hasAttribute("data-change-role")) {
+      const id = t.getAttribute("data-change-role");
+      const newRole = t.getAttribute("data-new-role");
+      await safeFetch("/v1/orgs/current/members/" + encodeURIComponent(id), { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: newRole }) });
+      loadData();
+      return;
+    }
+    if (t.hasAttribute("data-resend")) {
+      const id = t.getAttribute("data-resend");
+      await safeFetch("/v1/orgs/current/invites/" + encodeURIComponent(id) + "/resend", { method: "POST" });
+      loadData();
+      return;
+    }
+    if (t.hasAttribute("data-revoke")) {
+      const id = t.getAttribute("data-revoke");
+      await safeFetch("/v1/orgs/current/invites/" + encodeURIComponent(id), { method: "DELETE" });
+      loadData();
+      return;
+    }
+    if (t.hasAttribute("data-remove")) {
+      const id = t.getAttribute("data-remove");
+      const name = t.getAttribute("data-name") || "this member";
+      const dlg = $("#confirm-remove");
+      $("#confirm-body").textContent = name + " will lose access to the organization immediately. Their captures, datasets, and artifacts stay with the org. They can be re-invited later.";
+      dlg.returnValue = "";
+      if (dlg.showModal) dlg.showModal();
+      $("#confirm-ok").onclick = async () => {
+        await safeFetch("/v1/orgs/current/members/" + encodeURIComponent(id), { method: "DELETE" });
+        dlg.close();
+        loadData();
+      };
+      $("#confirm-cancel").onclick = () => dlg.close();
+      return;
+    }
+  });
+
+  $("#link-close")?.addEventListener("click", () => $("#invite-link-dialog").close());
+  $("#link-copy")?.addEventListener("click", () => { const v = $("#invite-link-input").value; if (v && navigator.clipboard) navigator.clipboard.writeText(v); });
+
+  loadData();
+});
+</script>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
+        <a href="/blog">Blog</a>
+        <a href="/faq">FAQ</a>
+        <a href="/changelog">Changelog</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/status">Status</a>
+        <a href="/subprocessors">Subprocessors</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/about">About</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/press">Press</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai - Apache-2.0 - Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+<div hidden data-w221-anchors="account" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+    
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training loop</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Run</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+    
+</div>
+</body>
+</html>

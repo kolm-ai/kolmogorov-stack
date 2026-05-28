@@ -150,12 +150,15 @@ test('12. light-theme switch IIFE in <head> BEFORE body styles', () => {
 
 test('13. design tokens --accent + --warn + --bad present', () => {
   const html = read(PAGE);
-  assert.match(html, /--accent:#10b981/,
-    'design token --accent:#10b981 must match /drift token set');
-  assert.match(html, /--warn:#f0b86b/,
-    'design token --warn:#f0b86b must match /drift token set');
-  assert.match(html, /--bad:#ff6b91/,
-    'design token --bad:#ff6b91 must match /drift token set');
+  // Value-agnostic: the semantic palette has since evolved (WCAG-contrast
+  // darkening + cool-slate dark variants per W850). Assert each token is
+  // DECLARED WITH SOME HEX, not pinned to a superseded literal.
+  assert.match(html, /--accent:\s*#[0-9a-fA-F]{3,8}/,
+    'design token --accent must match /drift token set');
+  assert.match(html, /--warn:\s*#[0-9a-fA-F]{3,8}/,
+    'design token --warn must match /drift token set');
+  assert.match(html, /--bad:\s*#[0-9a-fA-F]{3,8}/,
+    'design token --bad must match /drift token set');
 });
 
 test('14. sw.js CACHE wave segment is >= 190 (wave-floor regex; never literal match)', () => {

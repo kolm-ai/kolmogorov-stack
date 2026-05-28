@@ -255,9 +255,15 @@ test('W818 #10 — public/sw.js cache version bumped to a W818 marker', () => {
   const sw = path.join(REPO_ROOT, 'public', 'sw.js');
   assert.ok(fs.existsSync(sw), 'public/sw.js missing');
   const body = readFile(sw);
-  // Anti-brittleness — regex-only, no version-number equality, no explicit
-  // array of allowed names.
-  assert.ok(/wave818/i.test(body),
-    'public/sw.js cache version must mention wave818; got first 200 chars: '
+  // Anti-brittleness (W604/W829 convention) — regex+threshold, never a
+  // literal wave-slug equality. sw.js is bumped every wave; W818 only
+  // requires the cache marker to be at or beyond W818, so later bumps
+  // (W829/W835/W918/...) keep passing without touching this test.
+  const waves = [...body.matchAll(/wave(\d{3,4})/g)].map((m) => +m[1]);
+  assert.ok(waves.length > 0,
+    'public/sw.js must carry a wave marker; got first 200 chars: '
       + body.slice(0, 200));
+  assert.ok(Math.max(...waves) >= 818,
+    'public/sw.js cache version must be bumped to >= wave818; got max wave '
+      + Math.max(...waves));
 });

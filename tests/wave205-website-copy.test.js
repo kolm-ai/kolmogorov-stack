@@ -28,7 +28,13 @@ const PAGES = [
   { slug: 'manifesto',       file: 'manifesto.html',       floor: 16 * 1024 },
   { slug: 'pricing',         file: 'pricing.html',         floor: 60 * 1024 },
   { slug: 'enterprise',      file: 'enterprise.html',      floor: 24 * 1024 },
-  { slug: 'healthcare',      file: 'healthcare.html',      floor: 28 * 1024 },
+  // W921: floor 28KB -> 18KB. The 28KB floor was aspirational/stale and
+  // never matched a real committed page: healthcare.html has ranged
+  // 13.3KB (cb12b6a7) -> 16.3KB (HEAD) -> 20377B live, peaking now at its
+  // largest size ever. No content was lost; the floor was a guess that no
+  // version ever cleared. 18KB sits below the live ~20KB page (room for
+  // future trims) while still catching catastrophic delete.
+  { slug: 'healthcare',      file: 'healthcare.html',      floor: 18 * 1024 },
   { slug: 'health-insurance',file: 'health-insurance.html',floor: 28 * 1024 },
   { slug: 'quickstart',      file: 'quickstart.html',      floor: 32 * 1024 },
   { slug: 'k-score',         file: 'k-score.html',         floor: 32 * 1024 },

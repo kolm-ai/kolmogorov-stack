@@ -137,7 +137,12 @@ test('W236 CLI dispatches agent verb and lists subcommands in HELP', () => {
 
 test('W236 COMPLETION_VERBS and COMPLETION_SUBS include agent', () => {
   const src = fs.readFileSync(path.join(ROOT, 'cli/kolm.js'), 'utf8');
-  const cidx = src.indexOf('COMPLETION_VERBS');
+  // Anchor on the actual array declaration, not the first textual mention of
+  // the identifier — a W891 comment block (`in-process COMPLETION_VERBS table`)
+  // now precedes the real `const COMPLETION_VERBS = [` literal, so a bare
+  // indexOf('COMPLETION_VERBS') lands on the comment and misses the verbs.
+  const cidx = src.indexOf('const COMPLETION_VERBS = [');
+  assert.ok(cidx >= 0, 'COMPLETION_VERBS array declaration not found');
   const tail = src.slice(cidx, cidx + 2000);
   assert.ok(tail.includes("'agent'"), 'COMPLETION_VERBS missing agent');
   assert.ok(src.includes("agent:   ['export-hermes'"), 'COMPLETION_SUBS missing agent subverbs');

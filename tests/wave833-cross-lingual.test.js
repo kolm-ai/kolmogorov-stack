@@ -538,13 +538,22 @@ test('W833 #14 — all four /v1/lingual/* routes registered + 401 without auth',
 // 15) sw.js bumped
 // =============================================================================
 
-test('W833 #15 — public/sw.js carries the wave833 suffix', () => {
+test('W833 #15 — public/sw.js CACHE rolled forward at/past wave833 (regex+threshold)', () => {
   freshDir();
   const sw = fs.readFileSync(SW_PATH, 'utf8');
-  assert.ok(sw.includes('wave833'),
-    'expected wave833 token in public/sw.js CACHE string');
-  assert.ok(sw.includes('cross-lingual-v2'),
-    'expected cross-lingual-v2 suffix in CACHE string');
+  // W604/W829 anti-brittleness: the sw.js CACHE string is a single rolling
+  // pointer that only ever carries the CURRENT wave's slug — it does not
+  // retain a history of past wave suffixes. At W891 (commit cc9f6ea7, "V1 —
+  // completion manual ... ship-gate 52/52, deploy") the long accreted slug
+  // (which once contained wave833-cross-lingual-v2) was DELIBERATELY replaced
+  // with a fresh short slug, and it has rolled forward through W910/W917/W918
+  // since. Pin the CONVENTION (a wave slug at/past this wave's number) via
+  // regex + threshold, never a literal superseded token.
+  const waves = [...sw.matchAll(/wave(\d{3,4})/g)].map((m) => +m[1]);
+  assert.ok(waves.length > 0,
+    'expected at least one wave(\\d{3,4}) slug in public/sw.js CACHE string');
+  assert.ok(Math.max(...waves) >= 833,
+    `expected public/sw.js CACHE to carry a wave>=833 slug; got max ${Math.max(...waves)}`);
 });
 
 // =============================================================================

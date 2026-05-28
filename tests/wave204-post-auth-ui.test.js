@@ -139,7 +139,7 @@ test('12. /account light-theme switch IIFE runs pre-paint (in <head> before body
   const html = read(ACCOUNT);
   const headStart = html.indexOf('<head>');
   const headEnd = html.indexOf('</head>');
-  const bodyStart = html.indexOf('<body>');
+  const bodyStart = html.indexOf('<body');
   assert.ok(headStart >= 0 && headEnd > headStart && bodyStart > headEnd,
     'account.html must have well-formed <head>...</head> before <body>');
   const head = html.slice(headStart, headEnd);

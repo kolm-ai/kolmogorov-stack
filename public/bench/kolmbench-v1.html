@@ -217,7 +217,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   <b>Reference entry is internal smoke test.</b> The <code>kolm-reference</code>/<code>kolm-3b-base</code> entry in the leaderboard is an internal smoke-test row that proves the read/write contract works end-to-end. The leaderboard opens for external submissions on the reviewer-bot ship; until then submissions land via PR review.
 </div>
 <div class="note-caveat">
-  <b>v2 seed dataset is/.</b> The curated "most-challenging captures, anonymized, with consent" v2 seed dataset is blocked on the cross-namespace lake AND the consent toolkit. <code>getV2SeedTaskCandidates()</code> returns an plain <code>kolmbench_v2_consent_pipeline_not_shipped</code> envelope &mdash; we never silently fake a v2 seed set.
+  <b>v2 seed dataset is W757/W766-blocked.</b> The curated "most-challenging captures, anonymized, with consent" v2 seed dataset is blocked on the W757 cross-namespace lake AND the W766 consent toolkit. <code>getV2SeedTaskCandidates()</code> returns a plain <code>kolmbench_v2_consent_pipeline_not_shipped</code> envelope &mdash; we never silently fake a v2 seed set.
 </div>
 <div class="note-caveat">
   <b>Auto-scoring is offline pending the pack.</b> <code>scoreSubmission()</code> currently returns <code>k_score:null</code> with <code>reason:'kolmbench_v1_scoring_offline_pending_pack'</code>. The reference-judge pack lands with the reviewer-bot wave. Submissions before that are accepted with <code>verified:false</code> and require a self-hosted Ed25519 receipt or human review to enter the leaderboard.

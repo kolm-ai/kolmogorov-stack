@@ -1,0 +1,43 @@
+{
+  "_comment": [
+    "T1.5 — chain-of-thought contamination markers used by eval_adapter.py.",
+    "Two classes of signal:",
+    "  - hard:    a single occurrence is sufficient to mark the row contaminated.",
+    "             Reserved for unambiguous CoT tags emitted by DeepSeek-R1 / o1 /",
+    "             other reasoning models when their thinking trace leaks into the",
+    "             student's final answer.",
+    "  - soft:    a single occurrence is suggestive but not proof. Two or more",
+    "             distinct soft markers in the same output trip the gate. This",
+    "             keeps a legitimate 'Okay, here is...' or 'First, let me...'",
+    "             from being flagged unless it co-occurs with another tell.",
+    "",
+    "Edit this file to extend the gate; restart of eval_adapter.py picks up the",
+    "new patterns immediately (no rebuild). Patterns are Python regexes anchored",
+    "at the start of the output unless they include their own anchor."
+  ],
+  "hard": [
+    "<think>",
+    "</think>",
+    "<reasoning>",
+    "</reasoning>",
+    "<\\|thinking\\|>",
+    "<\\|reasoning\\|>"
+  ],
+  "soft_opener": [
+    "^Okay,?\\s+so\\b",
+    "^Alright,?\\s+so\\b",
+    "^Hmm,?\\s",
+    "^Wait,?\\s",
+    "^So\\s+(the\\s+user|first|basically)",
+    "^First,?\\s+I\\s+(should|need|will|have)",
+    "^Let\\s+me\\s+(think|consider|analyze|break)"
+  ],
+  "soft_inline": [
+    "\\bI\\s+need\\s+to\\s+think\\b",
+    "\\bLet's\\s+see\\b[.,]",
+    "\\bbreaking\\s+this\\s+down\\b",
+    "\\bstep[- ]by[- ]step\\b",
+    "Let me think step by step",
+    "Let me think through this"
+  ]
+}

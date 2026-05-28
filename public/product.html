@@ -139,6 +139,20 @@
   .p-compare__bar .pill { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ks-accent); padding: 3px 8px; border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-pill); background: var(--ks-accent-soft); }
   .p-compare pre { margin: 0; border: 0; border-radius: 0; }
 
+  /* ---------- about / mission ---------- */
+  .p-about { border-top: 1px solid var(--ks-line-1); }
+  .p-about__head { max-width: 60ch; margin-bottom: var(--ks-7); }
+  .p-about__head .ks-h2 { max-width: 24ch; }
+  .p-about__prose { max-width: 68ch; font-size: 17px; line-height: 1.7; color: var(--ks-ink-2); }
+  .p-about__prose p { margin: 0 0 var(--ks-4); }
+  .p-about__prose strong { color: var(--ks-ink); font-weight: 580; }
+  .p-about__prose code { font-family: var(--ks-mono); font-size: 13px; background: var(--ks-line-1); padding: 1px 5px; border-radius: 4px; color: var(--ks-ink); }
+  .p-about__prose a { color: var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge); transition: border-color 140ms; }
+  .p-about__prose a:hover { border-bottom-color: var(--ks-accent); }
+  .p-about__meta { margin-top: var(--ks-6); display: flex; flex-wrap: wrap; gap: var(--ks-3); align-items: center; font-family: var(--ks-mono); font-size: 13px; color: var(--ks-ink-3); }
+  .p-about__meta a { color: var(--ks-accent); border-bottom: 1px solid transparent; transition: border-color 140ms; }
+  .p-about__meta a:hover { border-bottom-color: var(--ks-accent-edge); }
+
   /* ---------- shared ---------- */
   .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 </style>
@@ -664,6 +678,25 @@
   </div>
 </section>
 
+<section class="ks-section p-about" id="about">
+  <div class="ks-wrap">
+    <div class="p-about__head">
+      <span class="ks-eyebrow">About kolm.ai</span>
+      <h2 class="ks-h2">The model that decides should be the model that gets audited.</h2>
+    </div>
+    <div class="p-about__prose">
+      <p>Kolm is a small team building an <strong>open-source AI compiler</strong>. We capture the prompts your product already sends to a frontier model, distill them into a private specialist trained on your traffic, and compile that specialist into a signed <code>.kolm</code> artifact you can deploy to your own hardware &mdash; cloud, on-prem, edge, or air-gapped.</p>
+      <p>Everything we ship lives in <a href="https://github.com/kolm-ai/kolm" rel="noopener noreferrer" target="_blank">one Apache-2.0 repo</a>. Every artifact carries an Ed25519 receipt. Every K-Score is reproducible from a content-addressed eval pack. That one line &mdash; the model that decides should be the model that gets audited &mdash; is the whole reason kolm exists.</p>
+      <p>We exist because most teams pay per token for a model they cannot see, sign, or stand behind. We think you should <strong>pay for compute, not tokens</strong>, and that the artifact running the decision should be the artifact your compliance team approved.</p>
+    </div>
+    <div class="p-about__meta">
+      <a href="mailto:hello@kolm.ai">hello@kolm.ai</a>
+      <span aria-hidden="true">&middot;</span>
+      <a href="https://github.com/kolm-ai/kolm" rel="noopener noreferrer" target="_blank">GitHub &mdash; Apache-2.0, no CLA</a>
+    </div>
+  </div>
+</section>
+
 <section class="ks-finale">
   <div class="ks-finale__inner">
     <h2 class="ks-finale__h2">Use the models. Keep the data advantage.</h2>
@@ -705,7 +738,7 @@
       <div class="ks-foot__col"><h4>Product</h4><a href="/gateway">Gateway</a><a href="/capture">Capture</a><a href="/distill">Distill</a><a href="/compile">Compile</a><a href="/runtimes">Runtime</a><a href="/registry">Registry</a></div>
       <div class="ks-foot__col"><h4>Build</h4><a href="/quickstart">Quickstart</a><a href="/docs">Docs</a><a href="/sdks">SDKs</a><a href="/models">Models</a><a href="/benchmarks">Benchmarks</a><a href="/blog">Blog</a><a href="/faq">FAQ</a><a href="/changelog">Changelog</a></div>
       <div class="ks-foot__col"><h4>Trust</h4><a href="/security">Security</a><a href="/soc2">SOC 2</a><a href="/hipaa-mapping">HIPAA</a><a href="/baa">BAA</a><a href="/privacy">Privacy</a><a href="/subprocessors">Subprocessors</a><a href="/verify-prod">Verify a .kolm</a></div>
-      <div class="ks-foot__col"><h4>Company</h4><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a><a href="/manifesto">Manifesto</a><a href="/why-kolm">Why kolm</a><a href="/press">Press</a><a href="/contact">Contact</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub &rarr;</a></div>
+      <div class="ks-foot__col"><h4>Company</h4><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a><a href="/about">About</a><a href="/why-kolm">Why kolm</a><a href="/press">Press</a><a href="/contact">Contact</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub &rarr;</a></div>
     </div>
     <div class="ks-foot__base">
       <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>

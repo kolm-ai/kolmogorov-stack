@@ -121,14 +121,39 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="caveats">No-silent-pass contract: not_kolm_compiled</h2>
 <p>Every wrapped manifest carries a single load-bearing field:</p>
 
-<pre>CODE16</pre>
+<pre><code>{
+  "ok": true,
+  "manifest_version": "w740-v1",
+  "manifest_id": "<sha256(source_sha + format + version)>",
+  "not_kolm_compiled": true,
+  "k_score": null,
+  "holdout": null,
+  "source_format": "gguf",
+  "source_sha256": "<64-hex>",
+  "source_path": "/abs/path/to/model.gguf",
+  "source_size_bytes": 1939525632,
+  "source_params_b": 3.21,
+  "source_quant": "q4_k_m",
+  "source_metadata_keys": ["general.architecture", "general.file_type", "..."],
+  "imported_at": "2026-05-24T12:34:56.789Z",
+  "version": "w740-v1"
+}
+</code></pre>
 
 <p>The <code>not_kolm_compiled:true</code> flag is the-2 truthfulness lock. Downstream tools (catalog, inspect, signature, K-Score gates) MUST treat a manifest with this flag set as a non-kolm-compiled artifact: no production-ready verdict, no automatic deploy, no aggregated K-Score. To claim the model is kolm-compiled you have to run it through <code>kolm distill</code> again on real seeds and let it earn a K-Score on a holdout the same way a fresh distill would.</p>
 
 <h2 id="round-trip">Round-trip: import -> distill -> export</h2>
 <p>The symmetric pair is intentional. A buyer who already has a GGUF model can land in kolm without losing the file, get the-2 plain manifest for the catalog, re-distill on their own seeds, and emit a new GGUF binary that is the kolm-compiled version of the same network.</p>
 
-<pre>CODE19</pre>
+<pre><code># 1. Import the existing GGUF  -  emits not_kolm_compiled manifest
+kolm import wrap ./llama-3.2-3b-q4_k_m.gguf --out imported.manifest.json
+
+# 2. Re-distill against your captured traffic (this is where the K-Score is earned)
+kolm distill --seeds ./seeds.jsonl --base ./llama-3.2-3b-q4_k_m.gguf --out new.kolm
+
+# 3. Export back to GGUF for llama.cpp / Ollama / LM Studio
+kolm export new.kolm --backend gguf --quant q4_k_m --out ./exports
+</code></pre>
 
 <p><strong>Fidelity is teacher-quality-bound, NOT bit-exact.</strong> The round-trip is a re-distillation, not a copy. The output GGUF will have different tensor weights from the input GGUF because <code>kolm distill</code> retrains against the teacher and the captured traffic; it does not preserve the exact numbers in the source binary. If you need bit-exact preservation, do not use kolm  -  copy the file. If you need a model that has actually passed through the kolm K-Score gate, this is the path.</p>
 
@@ -199,6 +224,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -218,7 +244,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

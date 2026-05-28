@@ -684,9 +684,10 @@ test('W825 #16 — public/sw.js cache token carries wave(\\d{3,4}) ≥ 825 (rege
   const maxWave = tokens.reduce((m, n) => Math.max(m, n), 0);
   assert.ok(maxWave >= 825,
     `expected at least one wave(\\d{3,4}) >= 825 in CACHE; got max=${maxWave}, tokens=${JSON.stringify(tokens)}`);
-  // The W825 slug must literally be in the CACHE string so review-by-grep works.
-  assert.ok(/wave825/.test(cacheLine[0]),
-    `sw.js CACHE must include wave825 slug; got ${cacheLine[0]}`);
+  // W604/W829 convention: version pin is regex + numeric threshold ONLY.
+  // The literal `wave825` slug is intentionally NOT asserted — sw.js bumps its
+  // CACHE token every wave (now wave918), so freezing on wave825 would break
+  // this test on the very next bump. The threshold check above is the contract.
 });
 
 // =============================================================================

@@ -664,7 +664,7 @@ test('W746 #19 — public/docs/staleness.html exists with brand-lock + formula',
     'Frontier AI on your own infrastructure.', // brand H1/tagline
     'kolm.ai',
     'ks-nav',                            // nav shell
-    'ks-footer',                         // footer shell
+    'ks-foot',                           // footer shell (W902 unified ks-footer -> ks-foot across 642 pages via scripts/w902-unify-footer.cjs)
     'recency',                           // W746-1
     'half_life_days',                    // formula parameter
     '0.5 ** (',                          // exponential decay formula
@@ -696,7 +696,7 @@ test('W746 #20 — public/account/staleness.html exists with brand-lock + timeli
     '/v1/staleness/apply-ttl',           // dashboard wires the destructive button
     'namespace',                         // ?namespace= URL param
     'ks-nav',                            // nav shell
-    'brand-anchor',                      // brand-anchor hidden span
+    'ks-nav__brand',                     // brand mark (W903 deliberately stripped the hidden brand-anchor disambiguation span across 90 pages via scripts/w903-strip-brand-anchor.cjs; brand identity now lives in the nav brand mark)
   ]) {
     assert.ok(html.includes(needle),
       `account/staleness.html must mention "${needle}" (UI contract lock)`);

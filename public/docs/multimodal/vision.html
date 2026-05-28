@@ -144,26 +144,61 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
     <p class="vendor-tag">openai / openrouter</p>
     <h3>image_url</h3>
     <p>Two shapes accepted. Object form carries an optional <code>detail</code> field for hint-grade sizing.</p>
-<pre>CODE14</pre>
+<pre><code>{
+  "role": "user",
+  "content": [
+    {"type": "text", "text": "What's in this image?"},
+    {"type": "image_url",
+     "image_url": {"url": "https://...png", "detail": "high"}}
+  ]
+}</code></pre>
   </div>
   <div class="capture-card">
     <p class="vendor-tag">anthropic</p>
     <h3>image (source: base64 | url)</h3>
     <p>Anthropic separates the source type from the payload. The vision-capture chokepoint hashes the URL or hashes a base64 descriptor (mime + estimate + source) so dedup works without ever storing the bytes.</p>
-<pre>CODE15</pre>
+<pre><code>{
+  "role": "user",
+  "content": [
+    {"type": "image",
+     "source": {"type": "base64",
+                "media_type": "image/png",
+                "data": "iVBORw0KGgo..."}},
+    {"type": "text", "text": "Describe."}
+  ]
+}</code></pre>
   </div>
   <div class="capture-card">
     <p class="vendor-tag">google</p>
     <h3>fileData / inlineData</h3>
     <p>Gemini distinguishes URL-pointer (<code>fileData</code>, often gs://) from inline (<code>inlineData</code>) image payloads. Both are normalized into the canonical capture shape.</p>
-<pre>CODE18</pre>
+<pre><code>{
+  "role": "user",
+  "parts": [
+    {"text": "What's this?"},
+    {"fileData": {
+       "mimeType": "image/jpeg",
+       "fileUri": "gs://my-bucket/photo.jpg"}}
+  ]
+}</code></pre>
   </div>
 </div>
 
 <h2 id="trainer">Trainer pipeline</h2>
 <p>The distill entry point is <code>apps/trainer/vlm_distill.py</code> &mdash; a stdlib-only Python wrapper that consumes a JSONL of captured vision turns. The <code>--dry-run</code> path NEVER imports torch; it validates input shape, counts vision rows, and emits a run-meta scaffold with <code>trainer_not_invoked:true</code>. Live mode imports torch + transformers + PIL lazily; missing deps exit 3 with an loud-fail envelope rather than silently degrading.</p>
 
-<pre>CODE22</pre>
+<pre><code># dry-run (stdlib-only; never imports torch)
+python apps/trainer/vlm_distill.py \
+  --captures vision_captures.jsonl \
+  --out run-meta.json \
+  --dry-run
+
+# live mode (requires torch + transformers + pillow)
+python apps/trainer/vlm_distill.py \
+  --captures vision_captures.jsonl \
+  --out run-meta.json \
+  --model claude-sonnet-4-6 \
+  --max-samples 5000</code></pre>
 
 <div class="caveat">
   <p>The trainer NEVER fabricates results. Dry-run emits a scaffold tagged <code>trainer_not_invoked:true</code>. Live mode either runs a real distill loop or exits with <code>error:'torch_not_available'</code> / <code>error:'live_trainer_not_wired'</code> &mdash; we will not silently no-op.</p>
@@ -186,7 +221,12 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="cli">CLI</h2>
 <p>The <code>kolm vlm</code> verb (alias: <code>kolm vision</code>) wraps the three auth-gated routes. Bake-off requires <code>--confirm</code> &mdash; matches the spend-protection pattern so a misclick or stray curl cannot fire the replay against every captured row.</p>
 
-<pre>CODE41</pre>
+<pre><code>kolm vlm captures --namespace prod                    # list vision rows
+echo '{"role":"user","content":[...]}' | kolm vlm detect
+
+kolm vlm bakeoff ./my.kolm --namespace prod --confirm
+kolm vlm bakeoff ./my.kolm --namespace prod --max 50 --confirm
+kolm vision captures                                  # alias works the same</code></pre>
 
 <h2 id="api">API</h2>
 <table data-w771="api">

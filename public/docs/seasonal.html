@@ -114,7 +114,13 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 
 <p>The date considered is <code>captured_at</code> &rarr; <code>created_at</code> &rarr; <code>Date.now()</code> (first non-null wins). Unparseable dates produce <code>season:null</code> and <code>seasonal_events:[]</code> &mdash; plain, never guessed.</p>
 
-<pre>CODE19</pre>
+<pre><code>// Server adds these fields automatically:
+{
+  ...,
+  season: "winter",
+  seasonal_events: ["black-friday", "cyber-monday"]
+}
+</code></pre>
 
 <p>Tagging is <strong>idempotent</strong>. A row that already carries a non-empty <code>season</code> string is left alone &mdash; the closer-to-source value always wins (matches teacher-version contract).</p>
 
@@ -140,7 +146,11 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="variants">Seasonal-variant namespaces</h2>
 <p>A <strong>seasonal-variant namespace</strong> is a sub-namespace named after the season or event it serves. Registering one tells the recommendation engine "this variant exists; if today matches, route to it":</p>
 
-<pre>CODE30</pre>
+<pre><code>kolm seasonal create-variant support black-friday
+# &rarr; {"ok":true,"namespace":"support","variant":"black-friday",
+#      "variant_namespace":"support/seasonal-black-friday",
+#      "kind":"event","version":"w748-v1"}
+</code></pre>
 
 <p>The variant name must be a known season (<code>winter</code>, <code>spring</code>, <code>summer</code>, <code>fall</code>) or a known event key (<code>black-friday</code>, etc.). Free-form labels are rejected with <code>HTTP 400 unknown_variant</code> &mdash; preventing typos that silently never match.</p>
 
@@ -155,7 +165,18 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   <li><strong>Plain null.</strong> No variant matched. <code>recommended:null</code> + a <code>reason</code> string that names the seasons + events checked + the variants registered. The dashboard renders this as an actionable empty state.</li>
 </ol>
 
-<pre>CODE41</pre>
+<pre><code>kolm seasonal recommend support
+# &rarr; {
+#   "ok": true, "namespace": "support",
+#   "season": "winter",
+#   "active_events": ["black-friday"],
+#   "recommendation": {
+#     "recommended": "black-friday",
+#     "reason": "active_event_match: black-friday (window 11/21..11/30)"
+#   },
+#   "version": "w748-v1"
+# }
+</code></pre>
 
 <p>The <code>reason</code> field is always populated, even on success &mdash; so the dashboard can show <em>why</em> the engine picked what it picked, not just <em>what</em>. Caveats over guessing.</p>
 
@@ -164,16 +185,56 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h3>GET /v1/seasonal/:namespace</h3>
 <p>Returns the seasonal distribution + active events + recommendation for the namespace.</p>
 
-<pre>CODE43</pre>
+<pre><code>curl -H "Authorization: Bearer $KOLM_API_KEY" \
+  https://kolm.ai/v1/seasonal/support
+
+# &rarr; {
+#   "ok": true,
+#   "namespace": "support",
+#   "total_captures": 142,
+#   "hemisphere": "north",
+#   "season": "winter",
+#   "active_events": ["holiday"],
+#   "distribution": {
+#     "by_season": {"winter":61,"spring":18,"summer":22,"fall":37,"_unknown":4},
+#     "by_event": {"black-friday":9,"holiday":12},
+#     "total": 142
+#   },
+#   "registered_variants": ["holiday","winter"],
+#   "recommendation": {"recommended":"holiday","reason":"active_event_match: holiday (window 12/15..1/5)"},
+#   "version": "w748-v1"
+# }
+</code></pre>
 
 <h3>POST /v1/seasonal/variant</h3>
 <p>Registers a seasonal-variant namespace. Body: <code>{namespace, variant}</code>. Variant must be a known season or event key.</p>
 
-<pre>CODE45</pre>
+<pre><code>curl -X POST -H "Authorization: Bearer $KOLM_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"namespace":"support","variant":"black-friday"}' \
+  https://kolm.ai/v1/seasonal/variant
+
+# &rarr; {
+#   "ok": true,
+#   "namespace": "support",
+#   "variant": "black-friday",
+#   "variant_namespace": "support/seasonal-black-friday",
+#   "kind": "event",
+#   "version": "w748-v1"
+# }
+</code></pre>
 
 <h2 id="cli">CLI</h2>
 
-<pre>CODE46</pre>
+<pre><code>kolm seasonal show &lt;namespace&gt;
+# &rarr; full envelope (distribution + events + recommendation)
+
+kolm seasonal create-variant &lt;namespace&gt; &lt;variant&gt;
+# &rarr; registers a seasonal-variant namespace
+
+kolm seasonal recommend &lt;namespace&gt;
+# &rarr; just the recommendation block (for automation)
+</code></pre>
 
 <h2 id="versioning">Version pin</h2>
 <p>Every seasonal envelope echoes <code>version: "w748-v1"</code>. The version string bumps to <code>w748-v2</code> only when the envelope shape, season vocabulary, or event registry changes in a non-additive way. Adding new optional fields keeps the version. Removing or renaming fields, OR changing the seasons array, OR adding/removing/changing an event window's start/end day &mdash; those bump the version.</p>

@@ -82,7 +82,20 @@ test('W511 #3 - OpenAPI uses x-kolm-source-indexed instead of x-kolm-stub', () =
   // new x-kolm-source-indexed flag only appears if a future addition slips in
   // un-commented. Either state is acceptable - we only fail if a route is BOTH
   // stub:true in the inventory AND the OpenAPI op uses old/missing flags.
-  const remaining = allRoutes().filter((candidate) => candidate.stub && operation(candidate.method, candidate.path));
+  //
+  // W890-9/W891 (V1 launch) added live deprecation aliases (e.g.
+  // POST /v1/auth/signup -> 410 Gone, redirect to /v1/signup). Those ops are
+  // deliberately curated with a richer deprecation contract (deprecated:true,
+  // x-kolm-replacement, a human-readable 410 summary) and the generator keeps
+  // them verbatim instead of overwriting them with the generic source-indexed
+  // stub summary. They are still stub:true in the inventory only because the
+  // source classifier indexes any un-commented handler. Exclude curated
+  // deprecation ops from the source-indexed invariant - forcing the generic
+  // flag/summary onto them would destroy the intentional deprecation docs.
+  const remaining = allRoutes().filter((candidate) => {
+    const op = operation(candidate.method, candidate.path);
+    return candidate.stub && op && !op.deprecated;
+  });
   for (const r of remaining) {
     const op = operation(r.method, r.path);
     assert.equal(op['x-kolm-stub'], undefined, `${r.method} ${r.path} still uses x-kolm-stub`);

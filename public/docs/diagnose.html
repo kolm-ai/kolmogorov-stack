@@ -113,7 +113,72 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="envelope">Diagnostic envelope shape</h2>
 <p>The same envelope is returned by <code>POST /v1/diagnose</code>, <code>GET /v1/diagnose/:cid</code>, and the <code>kolm diagnose --json</code> CLI path. Field stability is part of the contract &mdash; downstream dashboards and CI gates can rely on it.</p>
 
-<pre>CODE6</pre>
+<pre><code>{
+  "ok": true,
+  "diagnostic_version": "w741-v1",
+  "artifact_cid": "bafkreigh2akiscaildc3xy7p4nntwvjp7m5kw5kbsmm5kkkkkkkkkkkkkk",
+  "overall_k_score": 0.7234,
+  "per_category": [
+    {
+      "name": "multi-turn",
+      "n": 47,
+      "k_score": 0.6204,
+      "k_score_ci_lo": 0.5117,
+      "k_score_ci_hi": 0.7224,
+      "k_score_stddev": 0.1834,
+      "worst_sample_cids": ["847", "1203", "1567"]
+    },
+    {
+      "name": "tool-use",
+      "n": 22,
+      "k_score": 0.8101,
+      "k_score_ci_lo": null,
+      "k_score_ci_hi": null,
+      "k_score_stddev": 0.0921,
+      "worst_sample_cids": ["1882", "2017", "2103"]
+    },
+    {
+      "name": "general",
+      "n": 312,
+      "k_score": 0.9412,
+      "k_score_ci_lo": 0.9118,
+      "k_score_ci_hi": 0.9613,
+      "k_score_stddev": 0.0612,
+      "worst_sample_cids": ["91", "204", "778"]
+    }
+  ],
+  "worst_categories": [
+    { "name": "multi-turn", "k_score": 0.6204, "n": 47 },
+    { "name": "tool-use",   "k_score": 0.8101, "n": 22 },
+    { "name": "general",    "k_score": 0.9412, "n": 312 }
+  ],
+  "recommendations": [
+    {
+      "action": "capture_more",
+      "category": "multi-turn",
+      "target_count": 153,
+      "priority": "high",
+      "reason": "k_score 0.6204 &lt; threshold 0.85"
+    },
+    {
+      "action": "capture_more",
+      "category": "tool-use",
+      "target_count": 178,
+      "priority": "high",
+      "reason": "k_score 0.8101 &lt; threshold 0.85"
+    },
+    {
+      "action": "adjust_temperature",
+      "category": "multi-turn",
+      "from": 0.7,
+      "to": 0.4,
+      "priority": "medium",
+      "reason": "high variance in multi-turn category (stddev 0.1834 &gt; 0.15)"
+    }
+  ],
+  "generated_at": "2026-05-24T18:42:11.503Z"
+}
+</code></pre>
 
 <h2 id="categorize">How captures get bucketed</h2>
 <p>Categorisation is a pure heuristic over fields already on the capture record &mdash; no LLM calls, no on-the-fly classifier. The rules below are checked in order; first match wins. Determinism is the load-bearing property: the same capture set always produces the same buckets, regardless of when the diagnostic ran.</p>
@@ -220,6 +285,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -239,7 +305,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

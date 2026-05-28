@@ -239,12 +239,14 @@ test('W733 #7 — /docs/observability/opentelemetry.html exists with brand-lock 
   assert.ok(fs.existsSync(DOC_PATH),
     `expected doc file at ${DOC_PATH}`);
   const html = fs.readFileSync(DOC_PATH, 'utf8');
-  // Brand lock matches the W730 prometheus.html shell: ks-nav + ks-footer
-  // + canonical kolm.ai brand + topic words.
+  // Brand lock matches the W730 prometheus.html shell: ks-nav + ks-foot
+  // + canonical kolm.ai brand + topic words. Footer class migrated
+  // ks-footer -> ks-foot in W902 (commit fe519704, "kolm-ai org
+  // transition"); the static footer shell now ships ks-foot site-wide.
   for (const needle of [
     'kolm.ai',                          // brand
     'class="ks-nav"',                   // nav shell
-    'ks-footer',                        // footer shell
+    'ks-foot',                          // footer shell (W902 BEM rename)
     'OpenTelemetry',                    // topic word
     'w733-v1',                          // version stamp
     'OTEL_EXPORTER_OTLP_ENDPOINT',      // exporter env var

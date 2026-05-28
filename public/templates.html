@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.background='#0e1116';document.documentElement.style.colorScheme='dark';}else{document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f3f5f7';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
+<title>kolm templates &mdash; pre-baked distill recipes · kolm.ai</title>
+<meta name="description" content="kolm templates are pre-baked distill specs &mdash; a base model, a teacher council, hyperparameters, and a seed schema &mdash; for the workflows teams actually ship.">
+<meta name="keywords" content="distill template, distillation recipe, distill spec, customer support distill, doc qa distill, classification distill, agent distillation, kolm recipes">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/wave889-vertical.css">
+<link rel="canonical" href="https://kolm.ai/templates">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:title" content="kolm templates &mdash; pre-baked distill recipes">
+<meta property="og:description" content="Pre-baked distill specs for customer support, doc Q&amp;A, classification, and tool-use agents. Each template ships base model, teacher council, hyperparameters, seed schema, and a holdout eval set.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/templates">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="kolm templates: pre-baked distill recipes for customer support, doc Q&amp;A, classification, and agent workflows.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kolm templates &mdash; pre-baked distill recipes">
+<meta name="twitter:description" content="Skip the spec writing. Start a distill from a known-good recipe for customer support, doc Q&amp;A, classification, or tool-use agents.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "kolm distill template recipes",
+  "url": "https://kolm.ai/templates",
+  "description": "Pre-baked distill specs for the workflows teams actually ship.",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Customer support", "url": "https://kolm.ai/docs/recipes/customer-support" },
+    { "@type": "ListItem", "position": 2, "name": "Doc Q&A", "url": "https://kolm.ai/docs/recipes/doc-qa" },
+    { "@type": "ListItem", "position": 3, "name": "Classification", "url": "https://kolm.ai/docs/recipes/classify" },
+    { "@type": "ListItem", "position": 4, "name": "Agent / tool-use", "url": "https://kolm.ai/docs/recipes/agent" }
+  ],
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" }
+}
+</script>
+<style>
+  /* Page-scoped polish only. Inherits cool-slate tokens from ks.css + wave889-vertical.css. */
+  .tpl-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+  @media (max-width: 880px) { .tpl-grid { grid-template-columns: 1fr; } }
+  .tpl-card { display: flex; flex-direction: column; gap: 12px; padding: 26px 26px; background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: 12px; }
+  .tpl-card .ctag { font-family: var(--ks-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ks-ink-3); }
+  .tpl-card h3 { margin: 0; font-size: 20px; font-weight: 540; letter-spacing: -0.01em; color: var(--ks-ink); }
+  .tpl-card p { margin: 0; font-size: 14.5px; line-height: 1.6; color: var(--ks-ink-2); }
+  .tpl-card .stack { font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-3); line-height: 1.7; letter-spacing: 0.01em; }
+  .tpl-card .stack b { color: var(--ks-ink-2); font-weight: 540; }
+  .tpl-card .cmd { display: block; font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); background: var(--ks-bg-2); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--ks-line-2); overflow-x: auto; white-space: nowrap; }
+  .tpl-card .go { color: var(--ks-ink); border-bottom: 1px solid var(--ks-line-3); font-size: 13.5px; font-family: var(--ks-mono); align-self: flex-start; min-height: 44px; display: inline-flex; align-items: center; padding: 8px 0; }
+  .tpl-card .go:hover, .tpl-card .go:focus-visible { border-bottom-color: var(--ks-ink); }
+  .tpl-card .go:focus-visible { outline: 2px solid var(--ks-ink); outline-offset: 3px; border-radius: 2px; }
+
+  .tpl-why { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  @media (max-width: 880px) { .tpl-why { grid-template-columns: 1fr; } }
+  .tpl-why-card { padding: 24px 26px; border: 1px solid var(--ks-line-2); border-radius: 10px; background: var(--ks-bg-1); }
+  .tpl-why-card .label { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .tpl-why-card h3 { margin: 0 0 8px; font-size: 17px; font-weight: 540; letter-spacing: -0.01em; color: var(--ks-ink); }
+  .tpl-why-card p { margin: 0; font-size: 14.5px; line-height: 1.6; color: var(--ks-ink-2); }
+
+  .tpl-build { padding: 28px 28px; border: 1px solid var(--ks-line-2); border-radius: 12px; background: var(--ks-bg-1); }
+  .tpl-build h3 { margin: 0 0 10px; font-size: 19px; font-weight: 540; letter-spacing: -0.01em; color: var(--ks-ink); }
+  .tpl-build p { margin: 0 0 14px; font-size: 15px; line-height: 1.65; color: var(--ks-ink-2); }
+  .tpl-build p:last-child { margin-bottom: 0; }
+  .tpl-build code { background: var(--ks-bg-2); padding: 1px 6px; border-radius: 4px; font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); border: 1px solid var(--ks-line-2); }
+  .tpl-build a { color: var(--ks-ink); border-bottom: 1px solid var(--ks-line-3); }
+  .tpl-build a:hover, .tpl-build a:focus-visible { border-bottom-color: var(--ks-ink); }
+  .tpl-build a:focus-visible { outline: 2px solid var(--ks-ink); outline-offset: 3px; border-radius: 2px; }
+
+  /* Ensure visible focus rings on every primary anchor/button on this page. */
+  .v-btn:focus-visible { outline: 2px solid var(--ks-ink); outline-offset: 3px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .v-btn { transition: none; }
+    .v-btn:hover { transform: none; }
+  }
+</style>
+</head>
+<body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<div data-include-nav></div>
+
+<main id="main">
+
+<section class="v-hero">
+  <div class="v-wrap">
+    <span class="v-eyebrow">Templates &middot; Distill recipes</span>
+    <h1 class="v-h1">Start from a recipe. Skip the spec writing.</h1>
+    <p class="v-lede">kolm templates are pre-baked distill specs &mdash; a base model, a teacher council, hyperparameters, and a seed schema &mdash; for the workflows teams actually ship.</p>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/docs/recipes">Browse recipes</a>
+      <a class="v-btn v-btn--ghost" href="/contact">Submit a recipe &rarr;</a>
+    </div>
+    <div class="v-caveat">Recipes available today are listed below. The library lands one or two new recipes each wave. Have one you want next? <a href="/contact">Tell us.</a></div>
+  </div>
+</section>
+
+<section class="v-section" aria-labelledby="tpl-available-h">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Available templates</span>
+      <h2 class="v-h2" id="tpl-available-h">Four recipes cover most distill jobs.</h2>
+      <p>Each recipe is a directory of <code>spec.json</code>, a seed-generator script, a holdout eval set, and a one-liner CLI verb. Pick the closest one and edit the spec if you need to.</p>
+    </div>
+    <div class="tpl-grid">
+
+      <article class="tpl-card" aria-labelledby="tpl-cs-h">
+        <span class="ctag">Support</span>
+        <h3 id="tpl-cs-h">Customer support</h3>
+        <p>Q&amp;A for refunds, shipping, warranty, and billing. Seed schema pulls from order-id and SKU tables so synthetic asks reflect real catalog shape.</p>
+        <div class="stack">
+          <div><b>Base:</b> Qwen2.5-7B</div>
+          <div><b>Teachers:</b> Claude &middot; GPT-4o &middot; Cerebras Llama-3.3-70B</div>
+          <div><b>Loss:</b> SeqKD + on-policy correction</div>
+        </div>
+        <code class="cmd">kolm distill template customer-support</code>
+        <a class="go" href="/docs/recipes/customer-support">Read the recipe &rarr;</a>
+      </article>
+
+      <article class="tpl-card" aria-labelledby="tpl-docqa-h">
+        <span class="ctag">Doc Q&amp;A</span>
+        <h3 id="tpl-docqa-h">Doc Q&amp;A</h3>
+        <p>RAG-style answering grounded in a corpus you point at. Seed generator pre-chunks the corpus and pairs each chunk with multi-step asks.</p>
+        <div class="stack">
+          <div><b>Base:</b> Llama-3.1-8B</div>
+          <div><b>Teachers:</b> Claude &middot; GPT-4o</div>
+          <div><b>Loss:</b> SeqKD + citation-faithfulness reward</div>
+        </div>
+        <code class="cmd">kolm distill template doc-qa --corpus ./docs/</code>
+        <a class="go" href="/docs/recipes/doc-qa">Read the recipe &rarr;</a>
+      </article>
+
+      <article class="tpl-card" aria-labelledby="tpl-classify-h">
+        <span class="ctag">Classification</span>
+        <h3 id="tpl-classify-h">Classification</h3>
+        <p>Multi-class label prediction from short text. Seed generator balances the label distribution and hard-mines near-boundary examples from the teacher.</p>
+        <div class="stack">
+          <div><b>Base:</b> Qwen2.5-3B</div>
+          <div><b>Teachers:</b> GPT-4o &middot; Cerebras Llama-3.3-70B</div>
+          <div><b>Loss:</b> Cross-entropy on the label head + SeqKD on the rationale</div>
+        </div>
+        <code class="cmd">kolm distill template classify --labels ./labels.json</code>
+        <a class="go" href="/docs/recipes/classify">Read the recipe &rarr;</a>
+      </article>
+
+      <article class="tpl-card" aria-labelledby="tpl-agent-h">
+        <span class="ctag">Agent</span>
+        <h3 id="tpl-agent-h">Agent / tool-use</h3>
+        <p>Distill a tool-calling trajectory, not just a chat turn. Seed generator wraps each tool with a synthetic ask, captures the teacher's plan + call + observation loop.</p>
+        <div class="stack">
+          <div><b>Base:</b> Qwen2.5-7B</div>
+          <div><b>Teachers:</b> Claude &middot; GPT-4o</div>
+          <div><b>Loss:</b> Trajectory SeqKD with tool-arg exact-match reward</div>
+        </div>
+        <code class="cmd">kolm distill template agent --tools ./tools.json</code>
+        <a class="go" href="/docs/recipes/agent">Read the recipe &rarr;</a>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section class="v-section" aria-labelledby="tpl-why-h">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Why a template</span>
+      <h2 class="v-h2" id="tpl-why-h">Three reasons most teams should start here.</h2>
+      <p>You can always fork the spec later. Most teams discover they never need to.</p>
+    </div>
+    <div class="tpl-why">
+
+      <div class="tpl-why-card">
+        <div class="label">01 &middot; Hyperparameters</div>
+        <h3>Stop bikeshedding hyperparameters</h3>
+        <p>The templates ship known-good values for their workflow &mdash; learning rate, batch size, LoRA rank, context length, sampling temperature, KD loss weights. Tuned on real distill runs, not copy-pasted from the original transformer paper.</p>
+      </div>
+
+      <div class="tpl-why-card">
+        <div class="label">02 &middot; Seed schemas</div>
+        <h3>Seed schemas included</h3>
+        <p>Each template ships a seed-generator with diversity buckets (paraphrase, edge-case, adversarial), a fail-closed PHI redactor config, and an explicit train / holdout split. You bring the domain knobs; the schema covers the structure.</p>
+      </div>
+
+      <div class="tpl-why-card">
+        <div class="label">03 &middot; Eval harness</div>
+        <h3>Eval harness wired</h3>
+        <p>The template ships a holdout set and a wired eval harness. Run <code>kolm eval</code> after distill and you get teacher-vs-student agreement-rate, latency p50/p99, and a signed receipt that pins the holdout SHA to the run.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="v-section" aria-labelledby="tpl-build-h">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Build your own</span>
+      <h2 class="v-h2" id="tpl-build-h">A template is a directory. That is the whole spec.</h2>
+      <p>The templates that ship with kolm are just the first four. You can author and share your own.</p>
+    </div>
+    <div class="tpl-build">
+      <h3>What goes in a template directory</h3>
+      <p>A template is a directory with three things: a <code>spec.json</code> (base model, teachers, hyperparameters, output target), a seed-generator script (Python or Node) that emits training rows, and an eval set (JSONL with prompt + expected pairs). Drop it under <code>~/.kolm/templates/&lt;name&gt;/</code> and it shows up under <code>kolm distill template &lt;name&gt;</code>.</p>
+      <p>The full authoring guide &mdash; including how to ship a template as a Git repo and how to register one with the kolm recipe registry &mdash; is at <a href="/docs/recipes/authoring-a-template">/docs/recipes/authoring-a-template</a>.</p>
+    </div>
+  </div>
+</section>
+
+<section class="v-cta-row" aria-labelledby="tpl-close-h">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Next</span>
+      <h2 class="v-h2" id="tpl-close-h">Skip the spec, ship the model.</h2>
+      <p>The recipe library is at <a href="/docs/recipes">/docs/recipes</a>. The authoring guide for your own template is at <a href="/docs/recipes/authoring-a-template">/docs/recipes/authoring-a-template</a>.</p>
+    </div>
+    <div class="v-ctas">
+      <a class="v-btn v-btn--primary" href="/docs/recipes">Browse recipes</a>
+      <a class="v-btn v-btn--ghost" href="/docs/recipes/authoring-a-template">Read template authoring guide &rarr;</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<div data-include-footer></div>
+<script src="/nav.js" defer></script>
+</body>
+</html>

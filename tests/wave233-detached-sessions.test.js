@@ -92,7 +92,11 @@ test('W233 CLI wires resume / rescue / sessions verbs', () => {
 
 test('W233 cmdCompile detaches when --detach is passed', () => {
   const src = fs.readFileSync(path.join(ROOT, 'cli/kolm.js'), 'utf8');
-  const idx = src.indexOf('async function cmdCompile');
+  // Anchor on the exact signature `cmdCompile(args)` — a bare
+  // `indexOf('async function cmdCompile')` matches the sibling
+  // `cmdCompileOutputSchema` / `cmdCompileAuto` first and never reaches the
+  // real cmdCompile (which is where the --detach hand-off lives).
+  const idx = src.indexOf('async function cmdCompile(args)');
   const block = src.slice(idx, idx + 3000);
   assert.ok(block.includes("--detach"), 'cmdCompile must look at --detach');
   assert.ok(block.includes('KOLM_DETACHED'), 'cmdCompile must guard re-detach with KOLM_DETACHED env');
@@ -109,7 +113,10 @@ test('W233 cmdDistill detaches when --detach is passed', () => {
 
 test('W233 sessions / resume / rescue listed in COMPLETION_VERBS', () => {
   const src = fs.readFileSync(path.join(ROOT, 'cli/kolm.js'), 'utf8');
-  const idx = src.indexOf('COMPLETION_VERBS');
+  // Anchor on the array literal declaration — a bare
+  // `indexOf('COMPLETION_VERBS')` matches an earlier comment mention of the
+  // table and the 3000-char window never reaches the actual verb list.
+  const idx = src.indexOf('const COMPLETION_VERBS = [');
   const tail = src.slice(idx, idx + 3000);
   for (const v of ['resume', 'rescue', 'sessions']) {
     assert.ok(tail.includes(`'${v}'`), `COMPLETION_VERBS missing '${v}'`);

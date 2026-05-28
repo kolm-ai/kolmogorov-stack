@@ -68,17 +68,25 @@ test('W373 #3 - use-cases.html lists nine workflow cards', () => {
   assert.ok(count >= 9, `expected >=9 data-usecase markers, got ${count}`);
 });
 
-test('W373 #4 - healthcare.html names ssn|mrn|name|dob|address detector classes', () => {
-  // These five are the explicit classes the task calls out.
-  for (const cls of ['ssn', 'mrn', 'name', 'dob', 'address']) {
-    const re = new RegExp(`data-w373=["']hc-cls-${cls}["']`);
-    assert.match(HEALTHCARE, re, `healthcare must surface PHI class "${cls}"`);
-  }
-  // Total 17 detector classes.
-  const cls = (HEALTHCARE.match(/data-w373=["']hc-cls-[a-z0-9-]+["']/g) || []).length;
-  assert.equal(cls, 17, `expected 17 detector classes, got ${cls}`);
-  // claims-redactor.kolm callout.
-  assert.match(HEALTHCARE, /claims-redactor\.kolm/, 'claims-redactor.kolm callout must be present');
+test('W373 #4 - healthcare.html surfaces boundary PHI redaction over the HIPAA identifier set', () => {
+  // W891 V1 (cc9f6ea7) deliberately rebuilt healthcare.html on the W889
+  // vertical-page template ("10 vertical pages"). The old W373 PHI-detector
+  // vertical (an <ul> of 17 <li data-w373="hc-cls-*"> classes plus a
+  // claims-redactor.kolm callout) was intentionally replaced by a "PHI
+  // redaction at boundary" compliance card. We assert the equivalent CURRENT
+  // behavior, not the retired markup: the page must still commit to stripping
+  // the HIPAA identifier set at the capture boundary.
+  // 1) The full HIPAA identifier-strip claim ("18-identifier strip").
+  assert.match(HEALTHCARE, /18[\s-]*identifier strip/i,
+    'healthcare must commit to stripping the 18 HIPAA identifiers at the boundary');
+  // 2) The runnable redaction command that performs it.
+  assert.match(HEALTHCARE, /kolm capture log --redact phi/,
+    'healthcare must surface the `kolm capture log --redact phi` boundary redactor');
+  // 3) The detection engine behind it (Presidio + clinical-NER overlay).
+  assert.match(HEALTHCARE, /Presidio/i, 'healthcare must name the Presidio detector');
+  assert.match(HEALTHCARE, /clinical-NER/i, 'healthcare must name the clinical-NER overlay');
+  // 4) A concrete PHI redactor proof point (replaces the claims-redactor.kolm callout).
+  assert.match(HEALTHCARE, /PHI redactor/i, 'healthcare must surface a PHI redactor proof point');
 });
 
 test('W373 #5 - download.html surfaces CLI, Mac, Windows, Linux install options', () => {

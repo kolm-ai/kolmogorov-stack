@@ -102,7 +102,14 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p class="lede">Auto-distill a captured namespace into a local student artifact via the kolm trainer bridge. Captures from <code>kolm capture</code> cross a threshold, the trainer runs against a chosen base model, the result ships as a signed <code>.kolm</code> artifact.</p>
 
 <h2 id="usage">Usage</h2>
-<pre>CODE2</pre>
+<pre><code>kolm distill --namespace &lt;n&gt; [--base-model &lt;name&gt;] [--target &lt;size&gt;]
+
+kolm distill --local-worker --spec &lt;file&gt; --seeds &lt;file&gt; --out &lt;dir&gt;
+ [--mode stub|collect|full|doctor]
+ [--teacher &lt;vendor:model&gt;]
+ [--student-base &lt;name&gt;]
+ [--distillation-method lora|qlora|full-ft|prompt-distill]
+ [--split-seed N] [--redact phi|pci|multi|none|auto]</code></pre>
 
 <h2 id="defaults">Defaults</h2>
 <table>
@@ -121,28 +128,39 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
  <span class="num">Step 1</span>
  <h3>Capture pairs against a namespace</h3>
  <p>Point your existing app at the local proxy and let it accumulate (input, output) pairs against a named namespace.</p>
-<pre>CODE14</pre>
+<pre><code>kolm capture --provider openai --as ticket-classifier --namespace tickets
+# proxy listening on http://127.0.0.1:8787
+# point OPENAI_BASE_URL there in the app</code></pre>
 </div>
 
 <div class="step">
  <span class="num">Step 2</span>
  <h3>Wait for the threshold</h3>
  <p>Default distill threshold is 1000 captured pairs per namespace. Track progress.</p>
-<pre>CODE15</pre>
+<pre><code>kolm capture status --namespace tickets
+# pairs captured: 438 / 1000
+# pairs until distill: 562</code></pre>
 </div>
 
 <div class="step">
  <span class="num">Step 3</span>
  <h3>Distill the namespace</h3>
  <p>Once the threshold trips, run the distill. The trainer chooses a recipe (LoRA when full ML stack present, prompt-distill otherwise) and emits a signed artifact.</p>
-<pre>CODE16</pre>
+<pre><code>kolm distill --namespace tickets
+# base-model: Qwen/Qwen2.5-3B-Instruct
+# target: phi-3-mini
+# method: lora (trainer bridge ok)
+# K-score: 0.91 (pass; gate 0.88)
+# artifact: ~/.kolm/artifacts/tickets-2026-05-18.kolm</code></pre>
 </div>
 
 <div class="step">
  <span class="num">Step 4</span>
  <h3>Verify and ship</h3>
  <p>Re-check the receipt chain and inspect the artifact before promoting.</p>
-<pre>CODE17</pre>
+<pre><code>kolm verify ~/.kolm/artifacts/tickets-2026-05-18.kolm
+kolm inspect ~/.kolm/artifacts/tickets-2026-05-18.kolm
+kolm run ~/.kolm/artifacts/tickets-2026-05-18.kolm 'classify: order delayed'</code></pre>
 </div>
 
 <h2 id="redact">Redaction classes</h2>
@@ -195,6 +213,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -214,7 +233,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

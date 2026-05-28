@@ -34,12 +34,21 @@ const SW = fs.readFileSync(path.join(PUBLIC, 'sw.js'), 'utf8');
 // un-cut as a real 'Cloud distill' product page (referenced from
 // dashboard.html as a distinct managed-runtime surface). Mirrors the
 // /defense and /distill resurrection pattern above.
+// W893 note: '/edge' was previously cut (dup-of-/device) but has been un-cut
+// as a real edge-landing page. Commit 5d7b9359 ("W893-DEPLOY fix — remove
+// /edge → /device 308 redirect") deliberately removed the redirect so the new
+// public/edge.html (W893-Part6) is served directly. Removed from CUTS, same as
+// the /defense, /distill and /cloud resurrections above.
+// W211+ note: '/agents' was never actually cut — the /agents rewrite to
+// /agents.html has existed continuously since v0.2.0 (commit 133654e6) and no
+// /agents → /product redirect ever shipped in vercel.json. public/agents.html
+// is a substantive, maintained surface ("Distill tool-use, not just chats")
+// linked live from the published blog post 2026-06-02-distilling-agents.html.
+// Removed from CUTS as a real page, not a deleted dup.
 const CUTS = {
-  '/agents':      '/product',
   '/evolve':      '/product',
   '/bounty':      '/community',
   '/bounties':    '/community',
-  '/edge':        '/device',
   '/cookbook':    '/docs',
   '/serve':       '/runtimes',
   '/playground':  '/quickstart',
@@ -50,13 +59,16 @@ const CUTS = {
   '/openai':      '/compare/kolm-vs-openai-fine-tune',
 };
 
-test('W224 #1 - at least 13 pages cut from public/ (plan floor)', () => {
+test('W224 #1 - at least 11 pages cut from public/ (plan floor)', () => {
   // W400G note: /distill was un-cut (real concept page), dropping the count
   // from 15 to 14. W806: /cloud was un-cut (real product page), dropping to 13.
-  // The plan floor was originally 15; we lower it each time a reinstated page
-  // proves more valuable than maintaining an arbitrary cut count.
-  assert.ok(Object.keys(CUTS).length >= 13,
-    `cut list has ${Object.keys(CUTS).length} entries; floor is 13 post-W806`);
+  // W893: /edge un-cut (real edge-landing page, redirect removed in 5d7b9359).
+  // W211+: /agents removed (never actually cut — live page since v0.2.0).
+  // Both drops take the floor to 11. The plan floor was originally 15; we lower
+  // it each time a reinstated page proves more valuable than maintaining an
+  // arbitrary cut count.
+  assert.ok(Object.keys(CUTS).length >= 11,
+    `cut list has ${Object.keys(CUTS).length} entries; floor is 11 post-W893/agents`);
 });
 
 test('W224 #2 - cut .html files no longer exist in public/', () => {
@@ -88,19 +100,27 @@ test('W224 #4 - no orphan rewrites pointing to cut .html files', () => {
   }
 });
 
-test('W224 #5 - every 301 destination is itself a real surface (file or rewrite-resolvable)', () => {
+test('W224 #5 - every 301 destination is itself a real surface (file, rewrite, or redirect-resolvable)', () => {
   for (const [src, dest] of Object.entries(CUTS)) {
-    // Either the destination is a literal file under public/, OR there's a
-    // rewrite in vercel.json that maps it to one. (Some destinations like
-    // /docs use index.html under a directory; others are .html files.)
+    // A destination resolves if ANY of these hold:
+    //   1. a literal file under public/ (dest.html or dest/index.html), OR
+    //   2. a rewrite in vercel.json maps it to a file, OR
+    //   3. a permanent redirect forwards it on to another canonical surface.
+    // (3) covers deliberate redirect chains like /anatomy → /how-it-works →
+    // /quickstart: the how-it-works.html page was deleted in W605-W611 and the
+    // standalone /how-it-works rewrite was removed in W908c (commit 8f3496f5)
+    // because the existing /how-it-works → /quickstart redirect already serves
+    // legacy traffic. The destination is still a real, resolvable surface — it
+    // just resolves through one more 301 hop rather than directly to a file.
     const tryFiles = [
       path.join(PUBLIC, dest.replace(/^\//, '') + '.html'),
       path.join(PUBLIC, dest.replace(/^\//, ''), 'index.html'),
     ];
     const fileExists = tryFiles.some((p) => fs.existsSync(p));
     const rewriteResolves = VERCEL.rewrites.some((r) => r.source === dest);
-    assert.ok(fileExists || rewriteResolves,
-      `redirect ${src} → ${dest} has no file at ${tryFiles[0]} / ${tryFiles[1]} and no rewrite either`);
+    const redirectResolves = VERCEL.redirects.some((r) => r.source === dest);
+    assert.ok(fileExists || rewriteResolves || redirectResolves,
+      `redirect ${src} → ${dest} has no file at ${tryFiles[0]} / ${tryFiles[1]}, no rewrite, and no onward redirect`);
   }
 });
 
@@ -154,13 +174,17 @@ test('W224 #8 - W211+ tests follow the behavior-assertion pattern (sample audit)
   }
 });
 
-test('W224 #9 - cuts include the plan-named dup pairs (post-W400G)', () => {
-  // /edge (dup of /device), /cookbook (subsumed by /docs) remain cut.
+test('W224 #9 - cuts include the plan-named dup pairs (post-W400G/W893)', () => {
+  // /cookbook (subsumed by /docs) remains cut.
   // /distill was reinstated by W400G (distillation is a real concept page).
-  assert.equal(CUTS['/edge'], '/device');
+  // /edge was reinstated by W893 (real edge-landing page; the /edge → /device
+  // redirect was deliberately removed in commit 5d7b9359 so public/edge.html
+  // is served directly).
   assert.equal(CUTS['/cookbook'], '/docs');
   assert.equal(CUTS['/distill'], undefined,
     '/distill must not be in CUTS post-W400G (it is now a real page)');
+  assert.equal(CUTS['/edge'], undefined,
+    '/edge must not be in CUTS post-W893 (it is now a real edge-landing page)');
 });
 
 test('W224 #10 - vercel.json is still valid JSON after the cut + redirect surgery', () => {

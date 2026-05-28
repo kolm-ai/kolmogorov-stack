@@ -135,10 +135,21 @@ for (const page of PAGES) {
     }
   });
 
-  test(`W274 ${page.file} has brand-anchor disambiguation span`, () => {
+  test(`W274 ${page.file} carries canonical brand + consolidated disambiguation`, () => {
+    // W903 (commit 966457dd "brand-anchor strip") deliberately removed the 90
+    // visually-hidden "Not Kolm therapeutics" <span class="brand-anchor"> blocks
+    // across the site, consolidating brand disambiguation to the dedicated
+    // /articles/kolm-ai-vs-kolm-therapeutics.html page (kept intentionally per
+    // that commit). The legacy hidden span must therefore be ABSENT here, while
+    // the canonical kolm.ai brand mark stays on the page and the dedicated
+    // disambiguation article still exists.
     const html = readPage(page.file);
-    assert.match(html, /<span class="brand-anchor"[^>]*>/, 'brand-anchor span missing');
-    assert.match(html, /Kolm therapeutics/, 'brand-anchor body missing therapeutics disambiguation');
+    assert.doesNotMatch(html, /<span class="brand-anchor"[^>]*>/,
+      'legacy hidden brand-anchor span should be stripped (W903), not re-added');
+    assert.match(html, /kolm\.ai/, 'page must still carry the canonical kolm.ai brand mark');
+    const disambig = path.join(ROOT, 'public', 'articles', 'kolm-ai-vs-kolm-therapeutics.html');
+    assert.ok(fs.existsSync(disambig),
+      'dedicated kolm.ai vs Kolm therapeutics disambiguation article must remain');
   });
 
   test(`W274 ${page.file} ships JSON-LD with Article + BreadcrumbList`, () => {
@@ -165,7 +176,10 @@ for (const page of PAGES) {
   test(`W274 ${page.file} ships header nav + footer cross-links`, () => {
     const html = readPage(page.file);
     assert.match(html, /<header class="site-header">/, 'site header missing');
-    assert.match(html, /<footer class="site">/, 'site footer missing');
+    // W902 (commit fe519704 "Footer structure unified across 642 pages" via
+    // scripts/w902-unify-footer.cjs) renamed the footer class "site" -> the
+    // unified "site-footer" convention. Accept the current unified class name.
+    assert.match(html, /<footer class="site-footer">/, 'unified site footer missing');
     assert.match(html, /\/compare/, 'cross-link to /compare missing');
   });
 

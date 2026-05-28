@@ -90,12 +90,16 @@ test('W273 #7 - Free tier names 100 compiles / 1k captures / 1 GB / community su
 });
 
 test('W273 #8 - legacy Starter alias maps to Pro $49 with email support', () => {
+  // W889/W891 (commit cc9f6ea7): the pricing model deliberately migrated from
+  // "unlimited compiles" to a published metered compile-credit allotment
+  // (data-w889="compile-credits"). The Pro/Starter slot now names "50 compile
+  // credits" instead of "unlimited compiles" — assert the current metered model.
   const m = PRICING.match(/data-tier="starter"[\s\S]{0,2000}/);
   assert.ok(m, 'starter tier block must be findable');
   const block = m[0];
   assert.match(block, /maps to Pro/i, 'Starter alias must explicitly map to Pro');
   assert.match(block, /\$49\b/, 'Pro alias must name $49');
-  assert.match(block, /unlimited compiles/i, 'Pro alias must name unlimited compiles');
+  assert.match(block, /\d+\s*compile credits/i, 'Pro alias must name its compile-credit allotment (W889 metered model)');
   assert.match(block, /10\s*GB/i, 'Starter tier must name 10 GB storage');
   assert.match(block, /priority K-score/i, 'Pro alias must name priority K-score');
   assert.match(block, /email/i, 'Starter tier must name email support');
@@ -247,9 +251,15 @@ test('W273 #23 - JSON-LD BreadcrumbList block preserved', () => {
     'BreadcrumbList schema must remain in JSON-LD');
 });
 
-test('W273 #24 - brand-anchor span preserved (W228 anchor / W273 instruction)', () => {
-  assert.match(PRICING, /class=["']brand-anchor["']/,
-    'brand-anchor span must remain (do-not-strip per W273 brief)');
+test('W273 #24 - brand-anchor span deliberately stripped (W903 override of W273 brief)', () => {
+  // W903 (commit 966457dd, scripts/w903-strip-brand-anchor.cjs): the hidden
+  // "Not Kolm therapeutics" brand-anchor SEO disambiguation span was removed
+  // from every public/**/*.html page under explicit user mandate
+  // ("served its purpose but looks unprofessional now. Remove entirely").
+  // This supersedes the earlier W273 "do-not-strip" instruction, so lock in
+  // the deliberate removal instead of the stale preservation pin.
+  assert.doesNotMatch(PRICING, /class=["']brand-anchor["']/,
+    'brand-anchor span must be absent (deliberately stripped in W903)');
 });
 
 // =====================================================================
@@ -257,10 +267,19 @@ test('W273 #24 - brand-anchor span preserved (W228 anchor / W273 instruction)', 
 // =====================================================================
 
 test('W273 #25 - sw.js CACHE slug wave-floor >= 273', () => {
-  const m = SW.match(/const\s+CACHE\s*=\s*'kolm-v(\d+)-2026-05-\d+-frontend-v(\d+)-([a-z0-9-]+)'/);
-  assert.ok(m, 'CACHE slug must follow kolm-vN-YYYY-MM-DD-frontend-vN-slug pattern');
-  const versionN = parseInt(m[2], 10);
-  assert.ok(versionN >= 273, `sw.js frontend version must be >= 273 (saw ${versionN})`);
+  // Regex+threshold convention (W604/W829 family-lock): the slug moves forward
+  // every wave, so never pin a literal suffix. The slug format also migrated
+  // past the old "frontend-vN" segment (dropped ~W144/W910) and now references
+  // waves as wNNN (e.g. w917). Extract the wave token from the ACTIVE
+  // const CACHE = '...' declaration (not history comments) allowing both
+  // "wave" and "w" prefixes, and assert the floor.
+  const cacheDecl = SW.match(/const\s+CACHE\s*=\s*['"]([^'"]+)['"]/);
+  assert.ok(cacheDecl, 'sw.js must declare const CACHE = "..."');
+  const slug = cacheDecl[1];
+  const waveMatch = slug.match(/w(?:ave)?(\d{3,4})/);
+  assert.ok(waveMatch, `CACHE slug "${slug}" must include a wave token like wNNN/waveNNN`);
+  const waveN = parseInt(waveMatch[1], 10);
+  assert.ok(waveN >= 273, `sw.js CACHE slug wave token must be >= 273 (saw ${waveN} in "${slug}")`);
 });
 
 // =====================================================================

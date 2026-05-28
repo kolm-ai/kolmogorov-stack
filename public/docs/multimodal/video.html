@@ -186,14 +186,48 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   <p>Raw video bytes <strong>never</strong> enter the capture store. URL-source blocks land as a sha256 digest of the URL. Base64-source blocks land as a sha256 hash of a synthesized placeholder (<code>data:video/&lt;mime&gt;;base64,&lt;elided&gt;</code>) so dedup still works without storing the payload. The capture row carries <code>raw_video_bytes_persisted:false</code> explicitly &mdash; an auditor can grep for the flag and confirm.</p>
 </div>
 
-<pre>CODE21</pre>
+<pre><code>// Anthropic-style base64 block
+{
+  "role": "user",
+  "content": [
+    {"type": "text", "text": "What is happening in this clip?"},
+    {"type": "video",
+     "source": {
+       "type": "base64",
+       "media_type": "video/mp4",
+       "data": "AAAAGGZ0eXBtcDQy..."
+     }}
+  ]
+}
+
+// OpenAI-style URL block
+{
+  "role": "user",
+  "content": [
+    {"type": "text", "text": "Summarize the screencast."},
+    {"type": "video_url",
+     "video_url": {"url": "https://cdn.example.com/clip.mp4"}}
+  ]
+}</code></pre>
 
 <p>The <code>byte_count_estimate</code> field is capped at <strong>1 GiB</strong> (<code>MAX_BYTE_COUNT_ESTIMATE</code>). A hostile or accidentally-huge Content-Length header cannot force a 100 GiB downstream allocation; when the cap fires, the envelope sets <code>byte_count_capped:true</code> so the clamp is observable and never silent.</p>
 
 <h2 id="trainer">Trainer pipeline</h2>
 <p>The distill entry point is <code>apps/trainer/video_distill.py</code> &mdash; a stdlib-only Python wrapper that consumes a JSONL of captured video turns. The <code>--dry-run</code> path never imports torch, ffmpeg, or cv2; it parses the captures file, counts video rows by source (url / base64 / pre-captioned), and emits a structured envelope tagged <code>trainer_not_invoked:true</code>. Live mode imports torch + transformers + cv2 lazily; missing deps exit 3 / 5 / 6 with an loud-fail envelope rather than silently degrading.</p>
 
-<pre>CODE28</pre>
+<pre><code># dry-run (stdlib-only; never imports torch / cv2 / ffmpeg)
+python apps/trainer/video_distill.py \
+  --captures video_captures.jsonl \
+  --out run-meta.json \
+  --dry-run
+
+# live mode (requires torch + transformers + opencv-python + ffmpeg-python)
+python apps/trainer/video_distill.py \
+  --captures video_captures.jsonl \
+  --out student-weights/ \
+  --teacher-model gemini-1.5-pro \
+  --frame-sampler-spec spec.json \
+  --max-samples 1000</code></pre>
 
 <div class="caveat" data-w773="trainer-caveat">
   <p>The trainer NEVER fabricates results. Dry-run emits a scaffold tagged <code>trainer_not_invoked:true</code> with <code>total_frames_estimated</code> sourced from the SAME density math the live run uses. Live mode either runs a real frame-extract-plus-distill loop or exits with <code>error:'torch_not_available'</code> (exit 3), <code>error:'no_video_captures'</code> (exit 4), <code>error:'cv2_not_available'</code> (exit 5), or <code>error:'teacher_load_failed'</code> (exit 6) &mdash; we will not silently no-op.</p>
@@ -240,7 +274,15 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="cli">CLI usage</h2>
 <p>The <code>kolm video</code> verb wraps the three auth-gated routes plus a local <code>sampling-spec</code> generator. Bake-off requires <code>--confirm</code> &mdash; matches the spend-protection pattern so a misclick or stray curl cannot fire the replay against every captured video row.</p>
 
-<pre>CODE50</pre>
+<pre><code># local  -  pure JS, no network, no auth required
+kolm video sampling-spec --duration-s 600 --strategy adaptive --fps-target 1 --max-frames 64
+
+# auth'd
+kolm video captures --namespace prod
+echo '{"role":"user","content":[...]}' | kolm video detect --message-file -
+
+kolm video bakeoff --artifact-path ./student.kolm --namespace prod --confirm
+kolm video bakeoff --artifact-path ./student.kolm --namespace prod --max-n 50 --confirm</code></pre>
 
 <h2 id="api">API</h2>
 <table data-w773="api">

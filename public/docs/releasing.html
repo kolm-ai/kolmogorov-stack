@@ -100,16 +100,44 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <h2 id="quickstart">Quickstart</h2>
 <p>Three commands. Assume you've already built two artifacts (<code>model-v1</code> and <code>model-v2</code>).</p>
 
-<pre>CODE4</pre>
+<pre><code># 1. Open the test - 50/50 split, advisory sample target 1000 per arm
+kolm ab start --namespace prod --arm-a model-v1 --arm-b model-v2 --split 0.5
+
+# Returns: { ok:true, ab_test_id:"abt_&lt;hex&gt;", record:{...}, version:"w777-v1" }
+
+# 2. Route per-request via the deterministic FNV-1a hash. Same request_hash
+#    always lands on the same arm so a retried call stays on its arm.
+kolm ab assign abt_&lt;hex&gt; --request-hash user_42
+# Returns: { arm:"a", artifact_id:"model-v1", ab_test_id:"...", version:"w777-v1" }
+
+# 3. After ~30+ outcomes per arm, ask the gate what to do
+kolm stat-sig gate --ab-test-id abt_&lt;hex&gt;
+# Returns: { decision:"pass"|"fail"|"insufficient", p:0.0023, effect_size:0.18, ... }
+</code></pre>
 
 <p>When the gate returns <code>decision:"pass"</code>, promote arm B:</p>
 
-<pre>CODE6</pre>
+<pre><code>kolm ab promote abt_&lt;hex&gt; --arm b --reason "won_the_test"
+# All future kolm ab assign calls now freeze to arm B (artifact=model-v2).</code></pre>
 
 <h2 id="outcomes">Recording outcomes</h2>
 <p>Outcomes feed the gate. Every time you finish serving a request from arm A or arm B, record the K-Score and latency so the gate can score it later. The outcome event lands in the canonical event-store under <code>workflow_id="w777:ab"</code>; tenant fence enforces ownership.</p>
 
-<pre>CODE8</pre>
+<pre><code># From the SDK / your service layer
+POST /v1/ab-tests/&lt;ab_test_id&gt;/assignments?request_hash=&lt;h&gt;
+&rarr; { arm, artifact_id }
+
+# After your call returns
+POST /v1/capture/log
+{
+  "workflow_id": "w777:ab",
+  "ab_test_id": "abt_...",
+  "arm": "a"|"b",
+  "kscore": 0.93,
+  "latency_ms": 220,
+  ...
+}
+</code></pre>
 
 <h2 id="gate">The gate</h2>
 <p>The gate combines three checks. All three must pass to return <code>decision:"pass"</code>:</p>
@@ -139,7 +167,11 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   <li>The gate decision is <code>fail</code> AND arm B's mean is strictly less than arm A's mean.</li>
 </ol>
 
-<pre>CODE21</pre>
+<pre><code>kolm ab rollback abt_&lt;hex&gt;
+# rolled_back=yes  reason=arm_b_underperforms_and_was_promoted
+# &mdash; OR &mdash;
+# rolled_back=no   reason=arm_b_winning|arm_b_not_clearly_worse|insufficient_data
+</code></pre>
 
 <p>After a rollback, <code>kolm ab assign</code> returns <code>arm: "a"</code> for ALL request hashes regardless of bucket math, with <code>reason: "rolled_back_to_arm_a"</code>. The audit log captures the rollback under <code>workflow_id="w777:ab:rollback"</code>.</p>
 

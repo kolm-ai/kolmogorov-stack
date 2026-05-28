@@ -44,6 +44,7 @@
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 
     
+    <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
       <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
@@ -139,6 +140,7 @@
       </div>
     </div>
     </nav>
+    <!-- KOLM_NAV_END (W221) -->
     
 <a href="#main" class="ks-skip">Skip to content</a>
 
@@ -172,7 +174,7 @@
 <p>The <code>kolm-meta</code> trainer is a <strong>toy gradient-boosting regressor</strong> &mdash; depth-1 stumps, 50 trees, learning_rate 0.1, no column subsampling, no regularization. It is NOT XGBoost. Production-scale meta-distillation should move to <code>apps/trainer/meta_xgb.py</code> via a worker shell (same pattern as <code>workers/multimodal-redact-audio/</code>). The trainer is intentionally plain about its scope &mdash; the on-disk model file embeds a <code>honesty</code> block calling out the toy implementation.</p>
 
 <h2>Usage</h2>
-<pre>CODE4</pre>
+<pre><code>kolm meta &lt;status|rows|retrain|predict&gt; [--json]</code></pre>
 
 <h2>Sub-verbs</h2>
 <table>
@@ -190,7 +192,16 @@
 
 <h2>Scheduling</h2>
 <p>We do not schedule cron from Node. Instead, point a systemd timer (or cron) at <code>kolm meta retrain --json</code> once a week:</p>
-<pre>CODE24</pre>
+<pre><code># /etc/systemd/system/kolm-meta-retrain.timer
+[Unit]
+Description=Weekly kolm-meta retrain
+
+[Timer]
+OnCalendar=weekly
+Persistent=true
+
+[Install]
+WantedBy=timers.target</code></pre>
 
 <h2>HTTP routes</h2>
 <table>
@@ -233,6 +244,7 @@
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -252,7 +264,7 @@
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

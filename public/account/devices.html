@@ -5,18 +5,26 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
 <title>Devices · Account · kolm.ai</title>
-<meta name="description" content="Add and manage every device that runs a kolm artifact. SSH, Kubernetes, or RunPod cloud — same wizard, same cards, same deploy verb.">
+<meta name="description" content="Add and manage every device that runs a kolm artifact. SSH, Kubernetes, or RunPod cloud, with the same wizard, same cards, same deploy verb.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/account/devices">
 <meta property="og:title" content="Devices · Account" />
-<meta property="og:description" content="Add and manage every device that runs a kolm artifact. SSH, Kubernetes, or RunPod cloud — same wizard." />
+<meta property="og:description" content="Add and manage every device that runs a kolm artifact. SSH, Kubernetes, or RunPod cloud, with the same wizard." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://kolm.ai/account/devices" />
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Devices | Account | kolm.ai","description":"Add and manage every device that runs a kolm artifact. SSH, Kubernetes, or RunPod cloud, with the same wizard, the same cards, and the same deploy verb.","url":"https://kolm.ai/account/devices","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Devices","item":"https://kolm.ai/account/devices"}]}}</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/ks.css">
 <style>
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink-2,#1f2937);color:#f3f5f7;padding:8px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.kpanel{background:var(--surface-1,#ffffff);border:1px solid #e6eaef;border-radius:10px;padding:16px 18px;margin:0 0 18px}
+.kpanel h2{margin:0 0 6px;font-size:15px;color:var(--ink-2,#1f2937)}
+.kpanel .pdesc{margin:0 0 10px;color:#525a64;font-size:13px;line-height:1.55;max-width:64ch}
+.kpanel pre{margin:0;background:var(--surface-2,#eef1f4);border:1px solid #dde1e7;border-radius:8px;padding:12px 14px;overflow-x:auto}
+.kpanel code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--ink-2,#1f2937)}
 .acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px;color:var(--ink-2,#1f2937)}
 #account-sidebar{position:sticky;top:24px;background:var(--surface-1,#ffffff);border:1px solid #e6eaef;border-radius:10px;padding:14px;font-size:13px}
 #account-sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-3,#56606c);margin:0 0 10px}
@@ -102,25 +110,17 @@
 </head>
 <body class="kolm-account-surface ks">
 <a href="#main" class="ks-skip">Skip to content</a>
+<a href="#main" class="skip-link">Skip to content</a>
 <div data-include-nav></div>
 
 <main id="main">
 <p id="loading-status" aria-live="polite" hidden></p>
 <div class="acct-shell">
-<nav id="account-sidebar" aria-label="Account sections">
-  <h2>Account</h2>
-  <ul>
-    <li><a href="/account/overview">Overview</a></li>
-    <li><a href="/account/artifacts">Artifacts</a></li>
-    <li><a href="/account/devices" aria-current="page">Devices</a></li>
-    <li><a href="/account/billing">Billing</a></li>
-    <li><a href="/account/settings/integrations">Integrations</a></li>
-  </ul>
-</nav>
+<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured calls</a></li><li><a href="/account/privacy-events">Privacy events</a></li><li><a href="/account/repeated-workflows">Repeated workflows</a></li><li><a href="/account/opportunities">Opportunities</a></li><li><a href="/account/labeling">Labeling queue</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/simulations">Simulations</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/devices" aria-current="page">Devices</a></li><li><a href="/account/fleet">Fleet</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li></ul></nav>
 <section class="acct-content">
 <div class="crumbs"><a href="/account/overview">Account</a><span>/</span><span>Devices</span></div>
 <h1>Devices.</h1>
-<p class="lede">Every device that runs a <code>.kolm</code> artifact. Add a laptop, a RunPod pod, a colo cluster, or a Jetson on the edge &mdash; same wizard, same cards, same deploy verb. Bulk deploy to multiple devices in one click.</p>
+<p class="lede">Every device that runs a <code>.kolm</code> artifact. Add a laptop, a RunPod pod, a colo cluster, or a Jetson on the edge, with the same wizard, same cards, same deploy verb. Bulk deploy to multiple devices in one click.</p>
 
 <div class="toolbar">
   <button class="btn primary" id="btn-add" type="button">+ Add device</button>
@@ -128,6 +128,13 @@
   <button class="btn" id="btn-refresh" type="button">Refresh</button>
   <a class="btn" href="/account/settings/integrations">Manage integrations</a>
 </div>
+
+<section class="kpanel" data-panel="team-remote-ops">
+  <h2>Team remote ops</h2>
+  <p class="pdesc">Register laptops, servers, phones, and edge boxes for your whole team, then install artifacts over local, SSH, or HTTP paths without asking each user to become an infra operator.</p>
+  <pre><code>kolm tunnel new --team
+kolm install-device artifact.kolm --device m3-mac --via ssh</code></pre>
+</section>
 
 <div class="bulk-bar" id="bulk-bar" role="region" aria-label="Bulk actions">
   <span class="count" id="bulk-count">0 selected</span>
@@ -139,7 +146,7 @@
 <div class="dev-grid" id="dev-grid">
   <div class="skel"></div><div class="skel"></div><div class="skel"></div>
 </div>
-<div id="empty-state" class="empty" hidden>
+<div id="empty-state" class="empty" hidden data-empty-state>
   <strong>No devices registered yet.</strong>
   <p>Click <b>Add device</b> for a 3-step wizard, or <b>Detect this device</b> to auto-register the box you're reading this on.</p>
   <a class="btn primary" href="javascript:void(0)" onclick="openWizard()">Add your first device</a>
@@ -165,7 +172,7 @@
 
       <!-- SSH tab -->
       <div class="wiz-step show" data-step="ssh">
-        <p class="wiz-hint">Connect any Linux or macOS box over SSH. No agent daemon to install &mdash; we use your existing key. The host must be reachable from the kolm control plane (or run <code>kolm tunnel new</code> to expose a local box).</p>
+        <p class="wiz-hint">Connect any Linux or macOS box over SSH. No agent daemon to install, just your existing key. The host must be reachable from the kolm control plane (or run <code>kolm tunnel new</code> to expose a local box).</p>
         <div class="wiz-row"><label for="ssh-host">Host</label><input id="ssh-host" type="text" placeholder="gpu-1.example.com or 10.0.0.42" autocomplete="off" /></div>
         <div class="wiz-row"><label for="ssh-port">Port</label><input id="ssh-port" type="number" value="22" min="1" max="65535" /></div>
         <div class="wiz-row"><label for="ssh-user">User</label><input id="ssh-user" type="text" placeholder="ubuntu" autocomplete="off" /></div>
@@ -193,7 +200,7 @@
 
       <!-- RunPod tab -->
       <div class="wiz-step" data-step="runpod">
-        <p class="wiz-hint">Provision a serverless GPU pod from a <code>.kolm</code> artifact. You need a RunPod API key set at <a href="/account/settings/integrations">/account/settings/integrations</a>. Approximate cost: <b>~$0.30/hr (A4000)</b> &mdash; $3.89/hr (H100). Billed directly by RunPod.</p>
+        <p class="wiz-hint">Provision a serverless GPU pod from a <code>.kolm</code> artifact. You need a RunPod API key set at <a href="/account/settings/integrations">/account/settings/integrations</a>. Approximate cost: <b>~$0.30/hr (A4000)</b> to $3.89/hr (H100). Billed directly by RunPod.</p>
         <div class="wiz-row"><label for="rp-name">Name</label><input id="rp-name" type="text" placeholder="serving-prod-1" autocomplete="off" /></div>
         <div class="wiz-row"><label for="rp-gpu">GPU</label>
           <select id="rp-gpu">
@@ -260,7 +267,7 @@ function renderDevices(list){
       '<div class="dev-arts">'+(depCount?'<span class="ct">'+depCount+'</span> artifact'+(depCount===1?'':'s')+' deployed'+(hasArt?' · '+window.kesc(lastDep):''):'No artifacts deployed.')+'</div>'+
       '<div class="dev-actions">'+
         '<label class="sel"><input type="checkbox" data-select="'+window.kesc(id)+'" '+checked+' /> Select</label>'+
-        '<a class="btn sm" href="/account/devices/'+encodeURIComponent(id)+'">Open</a>'+
+        '<button class="btn sm" data-action="test-device" data-id="'+window.kesc(id)+'">Test</button>'+
         '<button class="btn sm" data-act="deploy" data-id="'+window.kesc(id)+'">Deploy</button>'+
         (hasArt?'<button class="btn sm bad" data-act="undeploy" data-id="'+window.kesc(id)+'">Undeploy</button>':'')+
       '</div>'+
@@ -292,6 +299,15 @@ document.addEventListener('change', function(e){
 });
 
 document.addEventListener('click', function(e){
+  var tb=e.target.closest('button[data-action="test-device"]'); if(tb){
+    var tid=tb.getAttribute('data-id');
+    tb.disabled=true; tb.textContent='Testing...';
+    window.kfetch('/v1/devices/'+encodeURIComponent(tid)+'/test',{method:'POST'})
+      .then(function(t){tb.textContent=(t&&t.reachable)?'Reachable':'Unreachable';tb.className='btn sm'+((t&&t.reachable)?'':' bad');})
+      .catch(function(){tb.textContent='Error';tb.className='btn sm bad';})
+      .finally(function(){setTimeout(function(){tb.disabled=false;tb.textContent='Test';tb.className='btn sm';},2400);});
+    return;
+  }
   var btn=e.target.closest('button[data-act]'); if(!btn)return;
   var act=btn.getAttribute('data-act');
   var id=btn.getAttribute('data-id');
@@ -427,6 +443,108 @@ refresh();
 </script>
 
 <div data-include-footer></div>
+
+<div hidden data-w221-anchors="account" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+
+    <!-- KOLM_NAV_BEGIN (W221) -->
+    <nav class="site-nav" aria-label="Primary">
+    <div class="nav-item nav-item--product has-mega">
+      <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
+      <div class="mega-menu" role="menu" aria-label="product menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/product">Overview</a>
+          <a href="/quickstart">Quickstart</a>
+          <a href="/capture">Gateway</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Build</p>
+          <a href="/training">Training loop</a>
+          <a href="/distill">Distill</a>
+          <a href="/compile">Compile</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Run</p>
+          <a href="/runtimes">Runtimes</a>
+          <a href="/docs/devices">Devices</a>
+          <a href="/trust">Verify</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--models has-mega">
+      <a class="nav-top" href="/models" aria-haspopup="true" aria-expanded="false">Models</a>
+      <div class="mega-menu" role="menu" aria-label="models menu">
+        <div class="mega-col">
+          <p class="mega-h">Choose</p>
+          <a href="/models">Model catalog</a>
+          <a href="/build-your-own">Build your own</a>
+          <a href="/docs/runtime">Runtime targets</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/compute">Compute</a>
+          <a href="/runtimes">Mobile and edge</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--docs has-mega">
+      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
+      <div class="mega-menu" role="menu" aria-label="docs menu">
+        <div class="mega-col">
+          <p class="mega-h">Start</p>
+          <a href="/capture">API gateway</a>
+          <a href="/docs/cli">CLI</a>
+          <a href="/docs/sdk">SDKs</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Reference</p>
+          <a href="/docs">Docs home</a>
+          <a href="/docs/api">API reference</a>
+          <a href="/api">HTTP routes</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Operate</p>
+          <a href="/integrations">Integrations</a>
+          <a href="/docs/privacy">Privacy membrane</a>
+          <a href="/docs/datasets">Datasets</a>
+          <a href="/docs/distillation">Distillation</a>
+          <a href="/docs/verify">Verification</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--pricing has-mega">
+      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
+      <div class="mega-menu" role="menu" aria-label="pricing menu">
+        <div class="mega-col">
+          <p class="mega-h">Buy</p>
+          <a href="/pricing">Plans</a>
+          <a href="/pricing#roi">ROI calculator</a>
+          <a href="/nonprofits">Nonprofits</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--enterprise has-mega">
+      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
+      <div class="mega-menu" role="menu" aria-label="enterprise menu">
+        <div class="mega-col">
+          <p class="mega-h">Deploy</p>
+          <a href="/enterprise">Enterprise overview</a>
+          <a href="/self-host">Self-host</a>
+          <a href="/airgap">Air-gap</a>
+        </div>
+        <div class="mega-col">
+          <p class="mega-h">Trust</p>
+          <a href="/trust">Trust center</a>
+          <a href="/security">Security</a>
+          <a href="/compliance">Compliance</a>
+          <a href="/baa">BAA</a>
+        </div>
+      </div>
+    </div>
+    </nav>
+    <!-- KOLM_NAV_END (W221) -->
+
+</div>
 <script src="/nav.js" defer></script>
 </body>
 </html>

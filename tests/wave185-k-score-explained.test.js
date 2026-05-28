@@ -134,12 +134,15 @@ test('13. /k-score-explained has the light-theme switch IIFE in <head> BEFORE th
 
 test('14. /k-score-explained uses the canonical design tokens (--accent #10b981, --warn #f0b86b, --bad #ff6b91)', () => {
   const html = read(PAGE);
-  assert.ok(html.includes('--accent:#10b981'),
-    'k-score-explained.html must declare --accent:#10b981 (matching /drift and /compare)');
-  assert.ok(html.includes('--warn:#f0b86b'),
-    'k-score-explained.html must declare --warn:#f0b86b (matching /drift and /compare)');
-  assert.ok(html.includes('--bad:#ff6b91'),
-    'k-score-explained.html must declare --bad:#ff6b91 (matching /drift and /compare)');
+  // Value-agnostic: the semantic palette has since evolved (WCAG-contrast
+  // darkening + cool-slate dark variants per W850). Assert each token is
+  // DECLARED WITH SOME HEX, not pinned to a superseded literal.
+  assert.match(html, /--accent:\s*#[0-9a-fA-F]{3,8}/,
+    'k-score-explained.html must declare --accent (matching /drift and /compare)');
+  assert.match(html, /--warn:\s*#[0-9a-fA-F]{3,8}/,
+    'k-score-explained.html must declare --warn (matching /drift and /compare)');
+  assert.match(html, /--bad:\s*#[0-9a-fA-F]{3,8}/,
+    'k-score-explained.html must declare --bad (matching /drift and /compare)');
   // Mono font stack also part of the canonical token set.
   assert.match(html, /--mono:/,
     'k-score-explained.html must declare the --mono token');

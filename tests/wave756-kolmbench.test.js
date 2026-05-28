@@ -30,7 +30,9 @@
 //  13) POST /v1/kolmbench/validate is auth-required (401 without)
 //  14) POST /v1/kolmbench/submit is auth + confirm:true gated
 //  15) public/bench/kolmbench-v1.html exists with brand-lock + leaderboard
-//      anchor + version stamp + W807/CC-BY-4.0 honesty notes
+//      anchor + version stamp + reviewer-bot/CC-BY-4.0 scope notes
+//      (internal 'W807' wave tag deliberately scrubbed from user-visible
+//       strings in commit 3a57dd4f)
 //  16) public/bench/leaderboard.json exists + valid JSON + version stamp
 //  17) .github/workflows/kolmbench-submission.yml exists with correct
 //      trigger paths + permissions + node-20 + validateSubmission call
@@ -546,7 +548,7 @@ test('W756 #14 — POST /v1/kolmbench/submit requires auth AND body.confirm:true
 // 15) public/bench/kolmbench-v1.html brand-lock + anchors
 // =============================================================================
 
-test('W756 #15 — public/bench/kolmbench-v1.html exists with brand-lock + leaderboard-table anchor + W807/CC-BY-4.0', () => {
+test('W756 #15 — public/bench/kolmbench-v1.html exists with brand-lock + leaderboard-table anchor + reviewer-bot/CC-BY-4.0', () => {
   freshDir();
   assert.ok(fs.existsSync(BENCH_HTML), `expected ${BENCH_HTML}`);
   const html = fs.readFileSync(BENCH_HTML, 'utf8');
@@ -557,7 +559,13 @@ test('W756 #15 — public/bench/kolmbench-v1.html exists with brand-lock + leade
     'w756-v1',                                   // version stamp
     'data-w756="kolmbench-spec"',                // spec anchor
     'data-w756="leaderboard-table"',             // leaderboard anchor
-    'W807',                                      // reviewer-bot honesty
+    'reviewer-bot',                              // reviewer-bot gating note
+                                                 // (internal 'W807' wave tag
+                                                 //  deliberately scrubbed from
+                                                 //  user-visible strings in
+                                                 //  commit 3a57dd4f "drops
+                                                 //  internal release-tag noise
+                                                 //  from user-visible strings")
     'CC-BY-4.0',                                 // license
     'F &middot; Faithfulness',                   // axis card
     'R &middot; Reliability',                    // axis card

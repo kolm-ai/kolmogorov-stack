@@ -359,11 +359,15 @@ test('W730 #12 — /docs/observability/prometheus.html exists with brand-lock co
   assert.ok(fs.existsSync(DOC_PATH),
     `expected doc file at ${DOC_PATH}`);
   const html = fs.readFileSync(DOC_PATH, 'utf8');
-  // Brand lock matches the W724 memory-tiers.html shell: ks-nav + ks-footer.
+  // Brand lock matches the W724 memory-tiers.html shell: ks-nav + ks-foot.
+  // The footer class is `ks-foot` (not `ks-footer`) after the W902 footer
+  // unification migrated 642 pages to the ks-foot__grid/col/brand/base shell
+  // (commit fe519704, scripts/w902-unify-footer.cjs). The reference shell
+  // memory-tiers.html itself uses <footer class="ks-foot">.
   for (const needle of [
     'kolm.ai',          // brand
     'class="ks-nav"',   // nav shell
-    'ks-footer',        // footer shell
+    'ks-foot',          // footer shell (unified W902 ks-foot__* structure)
     '/metrics',         // the endpoint we document
     'Prometheus',       // topic word
     'Grafana',          // topic word

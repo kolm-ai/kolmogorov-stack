@@ -8,17 +8,47 @@
 <meta name="description" content="HIPAA-eligible AI for health systems and digital therapeutics. PHI stays in your VPC. BAA on request. Distill clinical workflows from your captures, deploy on-prem, verify every inference with a signed receipt.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: light)">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
 <meta property="og:title" content="Healthcare AI">
 <meta property="og:description" content="HIPAA-eligible AI: PHI stays in your VPC, signed receipts on every inference, BAA on request.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/healthcare">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="kolm.ai: HIPAA-eligible AI for health systems.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="Healthcare AI: HIPAA-eligible, PHI on your hardware">
+<meta name="twitter:description" content="HIPAA-eligible AI: PHI stays in your VPC, signed receipts on every inference, BAA on request.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/healthcare">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/wave889-vertical.css">
+<style>
+  /* W918 P6.6 healthcare polish. Cool slate only. */
+  .w918-bar{background:#0f172a;color:#e2e8f0;text-align:center;padding:10px 16px;font-size:13.5px;line-height:1.4;font-weight:500;letter-spacing:.01em}
+  .w918-bar a{color:#bae6fd;text-decoration:underline;text-underline-offset:2px}
+  .w918-bar a:focus-visible{outline:2px solid #bae6fd;outline-offset:2px;border-radius:2px}
+  @media (prefers-reduced-motion: reduce){.w918-bar{transition:none}}
+  .hc-openai-ft{padding:clamp(36px,4.5vw,72px) 0;border-top:1px solid var(--ks-line-2)}
+  .hc-openai-ft .v-wrap{max-width:62ch}
+  .hc-openai-ft h2{font-family:var(--ks-sans);font-size:clamp(22px,2.6vw,30px);font-weight:560;letter-spacing:-0.018em;line-height:1.18;color:var(--ks-ink);margin:0 0 var(--ks-4)}
+  .hc-openai-ft p{font-family:var(--ks-sans);font-size:16px;line-height:1.7;color:var(--ks-ink-2);margin:0}
+  .hc-openai-ft p a{color:var(--ks-accent);text-decoration:underline;text-underline-offset:2px}
+  .hc-related{padding:clamp(28px,3.5vw,56px) 0;border-top:1px solid var(--ks-line-2)}
+  .hc-related__head{font-family:var(--ks-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ks-ink-3);margin:0 0 var(--ks-4);display:block}
+  .hc-related__list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:var(--ks-4);list-style:none;padding:0;margin:0}
+  .hc-related__list li a{display:block;padding:var(--ks-4);border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md);color:var(--ks-ink);text-decoration:none;font-family:var(--ks-sans);font-size:14.5px;line-height:1.5;transition:border-color .15s ease,background .15s ease}
+  .hc-related__list li a:hover{border-color:var(--ks-accent-edge);background:var(--ks-accent-soft)}
+  .hc-related__list li a b{display:block;font-weight:580;color:var(--ks-ink);margin-bottom:4px}
+  .hc-related__list li a span{font-size:12.5px;color:var(--ks-ink-3);font-family:var(--ks-mono);letter-spacing:.04em}
+  @media (prefers-reduced-motion: reduce){.hc-related__list li a{transition:none}}
+</style>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -43,6 +73,7 @@
 </head>
 <body class="ks">
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<div class="w918-bar" role="region" aria-label="kolm announcement"><span>OpenAI is closing fine-tuning to existing customers in January 2027. <a href="/openai-migration">Read the migration playbook &rarr;</a></span></div>
 
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
@@ -138,6 +169,13 @@
         <p>Covers on-prem, BYOC, and dedicated SaaS deployments. Ask and we send it the same day. <a href="/baa">View BAA</a></p>
       </div>
     </div>
+  </div>
+</section>
+
+<section class="hc-openai-ft">
+  <div class="v-wrap">
+    <h2>Why this matters more now</h2>
+    <p>OpenAI fine-tuning is closing. Healthcare teams who fine-tuned for clinical-note summarisation, prior-auth letters, or de-identification have an end-of-life date and no BAA-friendly successor in the OpenAI portfolio. kolm is the open-source landing pad: bring your existing fine-tuning JSONL, distill into a portable model that runs on your own infrastructure, sign every inference. <a href="/openai-migration">5-step migration recipe &rarr;</a></p>
   </div>
 </section>
 
@@ -254,6 +292,17 @@
     </div>
   </div>
 </section>
+
+<aside class="hc-related" aria-label="Related kolm surfaces">
+  <div class="v-wrap">
+    <span class="hc-related__head">Related &middot; W918 surfaces</span>
+    <ul class="hc-related__list">
+      <li><a href="/government"><b>FedRAMP-aligned air-gap deploy</b><span>/government</span></a></li>
+      <li><a href="/openai-migration"><b>OpenAI fine-tuning migration</b><span>/openai-migration</span></a></li>
+      <li><a href="/docs/receipts"><b>Signed receipts for every inference</b><span>/docs/receipts</span></a></li>
+    </ul>
+  </div>
+</aside>
 
 </main>
 

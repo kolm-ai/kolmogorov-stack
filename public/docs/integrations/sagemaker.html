@@ -106,35 +106,47 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <div class="step">
  <span class="num">Step 1</span>
  <h3>Export the artifact in SageMaker shape</h3>
-<pre>CODE5</pre>
+<pre><code>kolm export --artifact art_8f3a... --format sagemaker --out ./kolm-sagemaker.tar.gz</code></pre>
  <p>The exporter writes a <code>tar.gz</code> with <code>model/</code> (the student weights), <code>code/inference.py</code> (the SageMaker handler that hands requests to the kolm runtime), and <code>manifest.json</code> (kolm's receipt of what was compiled).</p>
 </div>
 
 <div class="step">
  <span class="num">Step 2</span>
  <h3>Upload to S3</h3>
-<pre>CODE10</pre>
+<pre><code>aws s3 cp ./kolm-sagemaker.tar.gz s3://my-kolm-bucket/artifacts/art_8f3a.tar.gz</code></pre>
  <p>SageMaker reads the bundle from S3 at deploy time. The bucket must be in the same region as the planned endpoint, or you pay cross-region transfer.</p>
 </div>
 
 <div class="step">
  <span class="num">Step 3</span>
  <h3>Create a SageMaker Model resource</h3>
-<pre>CODE11</pre>
+<pre><code>aws sagemaker create-model \
+  --model-name kolm-art-8f3a \
+  --primary-container '{"Image":"763104351884.dkr.ecr.us-east-1.amazonaws.com/huggingface-pytorch-inference:2.1.0-transformers4.37.0-gpu-py310-cu118-ubuntu22.04","ModelDataUrl":"s3://my-kolm-bucket/artifacts/art_8f3a.tar.gz","Environment":{"SAGEMAKER_PROGRAM":"inference.py"}}' \
+  --execution-role-arn arn:aws:iam::123456789012:role/SageMakerExecutionRole</code></pre>
  <p>The image is the AWS-managed Hugging Face PyTorch GPU container; it ships with transformers, accelerate, and bitsandbytes, which covers the kolm INT4 runtime path. Swap in a different container if your artifact uses vLLM or TGI.</p>
 </div>
 
 <div class="step">
  <span class="num">Step 4</span>
  <h3>Deploy as a real-time endpoint</h3>
-<pre>CODE12</pre>
+<pre><code>aws sagemaker create-endpoint-config \
+  --endpoint-config-name kolm-art-8f3a-cfg \
+  --production-variants '[{"VariantName":"v1","ModelName":"kolm-art-8f3a","InitialInstanceCount":1,"InstanceType":"ml.g5.xlarge"}]'
+
+aws sagemaker create-endpoint \
+  --endpoint-name kolm-art-8f3a \
+  --endpoint-config-name kolm-art-8f3a-cfg</code></pre>
  <p>Provisioning takes 4-8 minutes. Watch with <code>aws sagemaker describe-endpoint --endpoint-name kolm-art-8f3a</code>; status moves Creating to InService.</p>
 </div>
 
 <div class="step">
  <span class="num">Step 5</span>
  <h3>Test inference with the kolm SDK</h3>
-<pre>CODE14</pre>
+<pre><code>from kolm import Client
+c = Client(base_url="https://runtime.sagemaker.us-east-1.amazonaws.com/endpoints/kolm-art-8f3a/invocations", auth="aws-sigv4")
+r = c.invoke({"input": "Summarize this email in one sentence: ..."})
+print(r["output"], r["k_score"])</code></pre>
  <p>The SDK signs requests with SigV4 when you set <code>auth="aws-sigv4"</code>. The response envelope is the same shape the kolm REST API returns: <code>output</code>, <code>k_score</code>, <code>artifact_hash</code>, <code>latency_ms</code>.</p>
 </div>
 
@@ -206,6 +218,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -225,7 +238,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

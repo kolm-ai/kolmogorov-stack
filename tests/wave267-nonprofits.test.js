@@ -60,11 +60,16 @@ test('W267 #3 - canonical points to https://kolm.ai/nonprofits', () => {
     'canonical must be /nonprofits');
 });
 
-test('W267 #4 - brand-anchor span present (W228 invariant)', () => {
-  assert.match(NPP, /class=["']brand-anchor["']/,
-    'page must carry the brand-anchor span (kolm.ai vs Kolm therapeutics disambig)');
-  assert.match(NPP, /Not Kolm therapeutics/i,
-    'brand-anchor must name the disambig targets');
+test('W267 #4 - brand-disambig surfaced via dedicated article (W228 invariant)', () => {
+  // W903 (commit 966457dd, mandate 2026-05-27 "served its purpose but looks
+  // unprofessional now") deliberately stripped the hidden brand-anchor SEO span
+  // ("Not Kolm therapeutics") across the public surfaces via
+  // scripts/w903-strip-brand-anchor.cjs, KEEPING the dedicated
+  // /articles/kolm-ai-vs-kolm-therapeutics page as the intentional disambig.
+  // The W228 invariant now lives as a real, visible link to that article rather
+  // than an offscreen span — assert the surviving mechanism, not the stripped one.
+  assert.match(NPP, /href=["']\/articles\/kolm-ai-vs-kolm-therapeutics["']/,
+    'page must surface the kolm.ai vs Kolm therapeutics disambiguation (W228 invariant)');
 });
 
 test('W267 #5 - first 1200 chars of body contain "kolm.ai" (W228 invariant)', () => {

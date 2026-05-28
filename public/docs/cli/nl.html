@@ -112,7 +112,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p class="lede">Natural-language recipe scaffolder. Describe what you want in plain English, get a deterministic <code>spec.json</code> plus seed stub ready to drop into <code>kolm compile</code>. The default path is air-gapped and keyword-based, so the same brief always produces the same scaffold.</p>
 
 <h2 id="usage">Usage</h2>
-<pre>CODE2</pre>
+<pre><code>kolm nl "&lt;free text request&gt;" [--class &lt;c&gt;] [--out &lt;path&gt;] [--json] [--network|--no-network]</code></pre>
 
 <h2 id="flags">Flags</h2>
 <table>
@@ -127,10 +127,24 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </table>
 
 <h2 id="examples">Examples</h2>
-<pre>CODE15</pre>
+<pre><code>kolm nl "parse EDI 837 claims and emit JSON rows"
+kolm nl "draft an appeal letter for an 835 denial with code CO-97"
+kolm nl "compute HEDIS HBD measure for a diabetic cohort"
+kolm nl "redact PHI from clinical notes" --class rule --out scaffolds/phi.json</code></pre>
 
 <h2 id="schema">Output schema</h2>
-<pre>CODE16</pre>
+<pre><code>{
+ "ok": true,
+ "suggested_slug": "&lt;kebab-case slug&gt;",
+ "suggested_task_description": "&lt;the request, verbatim&gt;",
+ "recipe_class": "rule | synthesized_rule | compiled_rule | distilled_model",
+ "suggested_k_score_gate": 0.88,
+ "suggested_seed_examples": [{ "prompt": "...", "completion": "..." }, ...],
+ "next_steps": [ "kolm compile --spec ...", "kolm verify ..." ],
+ "class_inference_basis": "keyword:edi | class_hint | default",
+ "network_status": "air_gap | wired",
+ "note": "scaffolds are starting points. refine + verify before compile."
+}</code></pre>
 
 <h2 id="inference">How class inference works (air-gap path)</h2>
 <p>A keyword match over the request text picks the class in priority order:</p>
@@ -189,6 +203,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -208,7 +223,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

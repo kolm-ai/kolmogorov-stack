@@ -509,6 +509,7 @@ COMMANDS
   tune <sub>                       evolve a local adapter (init|capture-on|step|eval|promote|watch)
   rag <sub>                        airgapped local lookup (index|query|attach|list)
   team <sub>                       multi-tenant workspaces (create|list|show|invite|accept|members|role|remove)
+  org <sub>                        organization workspace — alias of team (list|create|members|invite|role|remove|transfer-owner)
   tunnel <sub>                     remote access to a self-hosted .kolm (new|list|start|close)
   cloud <sub>                      real GPU train + BYOC deploy (broker|train|targets|deploy|list|show|destroy)
   surfaces                         product journey map across account, CLI, TUI, API, cloud, privacy, and proof (--json)
@@ -2138,12 +2139,26 @@ If the bridge is unavailable, run \`kolm labels --namespace <n> --out corpus.jso
 and train locally with the on-prem trainer (Wave 2), or run the local worker
 directly (\`--local-worker\` flag above).
 
+DISTILL MODES (wave 918)
+  --mode=stub      dry-run: validate the spec + seeds, emit a planned manifest,
+                   make no teacher calls.
+  --mode=collect   call the teacher and write the teacher_call_log; stop before
+                   the trainer (collect-only).
+  --mode=full      collect + run the local trainer end to end.
+  --mode=doctor    diagnose the worker environment (Python ML stack, GPU, paths).
+  --mode=agent     distill multi-step tool-use trajectories. Each seed is an
+                   agent_turn (tool-use trajectory) rather than a single
+                   prompt→completion pair; the teacher's tool calls + tool
+                   results + final answer are captured so the student learns
+                   the whole agent loop, not just the final message.
+
 FLAGS
   --json     deterministic JSON envelope for scripts ({job_id, status, ...})
 
 EXAMPLES
   kolm distill --namespace support
   kolm distill --namespace support --json
+  kolm distill --local-worker --spec ./agent.spec.json --seeds ./traj.jsonl --mode=agent --out ./dist/
   kolm distill --local-worker --spec ./recipe.spec.json --seeds ./seeds.jsonl --out ./dist/
 
 SUBCOMMANDS — RUN TELEMETRY (wave 455)
@@ -3376,6 +3391,35 @@ EXAMPLES
   kolm team show acme
   kolm team invite acme alice@example.com --role admin
   kolm team queue list --json
+`,
+  org: `kolm org - organization workspace management. An organization is the
+workspace; \`kolm org\` is an alias of \`kolm team\` and shares the same backend.
+
+USAGE
+  kolm org <subcommand> [args]
+
+SUBCOMMANDS
+  list                                       list organizations you belong to
+  create <name> [--seats N]                  create a new organization workspace
+  members <slug>                             list members of an organization
+  invite <slug> <email> [--role member|admin|viewer]
+                                             invite someone to the organization
+  role <slug> <tenant_id> <role>             change a member's role
+  remove <slug> <tenant_id>                  remove a member
+  transfer-owner <slug> <new_owner_tenant_id>  transfer ownership
+
+All forms require a logged-in session (kolm login).
+
+FLAGS
+  --json     deterministic JSON envelope ([] / {orgs:[...]}) for scripts
+
+EXIT CODES
+  0 ok   1 user error   2 server error   5 sign-in required / not found
+
+EXAMPLES
+  kolm org list --json
+  kolm org create acme
+  kolm org invite acme alice@example.com --role admin
 `,
   group: `kolm group - compile groups: bundle namespaces that should compile as one model.
 
@@ -29230,6 +29274,56 @@ async function cmdGroup(args) {
   process.exit(EXIT.BAD_ARGS);
 }
 
+// W918 — `kolm org` is the organization workspace surface. The organization
+// IS the workspace, so `org` is an alias of `team` and shares the /v1/teams /
+// /v1/orgs backend. Bare/--help prints the org help block (SUBCOMMANDS); `list`
+// is handled here so it can speak the org envelope and exit 5 when signed out
+// without leaking a human sentence onto stdout; everything else delegates to
+// cmdTeam (workspace == team).
+async function cmdOrg(args) {
+  const sub = args.find(a => !a.startsWith('-')) ?? args[0];
+  const subIdx = sub ? args.indexOf(sub) : -1;
+  const rest = subIdx >= 0 ? args.slice(subIdx + 1) : args.slice(1);
+  if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
+    usage('org');
+    return;
+  }
+  if (sub === 'list' || sub === 'ls') {
+    const wantJson = args.includes('--json') || rest.includes('--json');
+    const c = loadConfig();
+    try {
+      const r = await api(c, 'GET', '/v1/orgs');
+      const orgs = (r && r.orgs) || [];
+      if (wantJson) {
+        console.log(JSON.stringify(orgs));
+      } else if (!orgs.length) {
+        console.log('(no organizations; create one with `kolm org create <name>`)');
+      } else {
+        for (const o of orgs) {
+          const slug = o.slug || o.id || '';
+          const role = o.your_role || o.role || '';
+          const name = o.name || '';
+          console.log(`${String(slug).padEnd(24)} ${String(role).padEnd(8)} ${name}`);
+        }
+      }
+    } catch (_) {
+      // Signed out / org backend unavailable: never print a human sentence on
+      // stdout. Emit an empty JSON array under --json, otherwise stay silent,
+      // and exit with NOT_FOUND (== sign-in required for this surface).
+      if (wantJson) process.stdout.write('[]');
+      process.exit(EXIT.NOT_FOUND);
+    }
+    return;
+  }
+  // Every other subcommand (create / members / invite / role / remove /
+  // transfer-owner) is the same operation as on a team. transfer-owner maps to
+  // the team `transfer` verb.
+  if (sub === 'transfer-owner') {
+    return cmdTeam(['transfer', ...rest]);
+  }
+  return cmdTeam(args);
+}
+
 async function cmdTeam(args) {
   // W384 — accept flags before the sub: scan for the first positional.
   const sub = args.find(a => !a.startsWith('-')) ?? args[0];
@@ -32034,6 +32128,9 @@ const COMPLETION_VERBS = [
   'quickstart',
   // W910-E — compile groups: bundle namespaces that should compile as one model.
   'group',
+  // W918 — `org` is the workspace, an alias of `team`. Dispatched to cmdOrg
+  // (which delegates everything except `list` straight to cmdTeam).
+  'org',
 ];
 const COMPLETION_SUBS = {
   auditor: ['keygen', 'sign', 'verify'],
@@ -32041,6 +32138,7 @@ const COMPLETION_SUBS = {
   compute: ['list', 'detect', 'pick', 'use', 'info', 'test', 'status'],
   airgap:  ['status', 'enable', 'disable', 'verify', 'test'],
   team:    ['create', 'list', 'show', 'invite', 'accept', 'members', 'role', 'remove', 'transfer', 'delete'],
+  org:     ['list', 'create', 'members', 'invite', 'role', 'remove', 'transfer-owner'],
   group:   ['create', 'list', 'ls', 'show', 'update', 'edit', 'delete', 'rm'],
   tunnel:  ['new', 'list', 'start', 'close'],
     cloud:   ['broker', 'compute-plan', 'train', 'readiness', 'doctor', 'storage', 'targets', 'deploy-plan', 'deploy', 'list', 'show', 'destroy'],
@@ -40450,7 +40548,7 @@ async function _dispatchVerb(verb, args) {
     mesh: cmdMesh, migrate: cmdMigrate, wrap: cmdWrap,
     tail: cmdTail, replay: cmdReplay, sync: cmdSync, profile: cmdProfile, bridges: cmdBridges,
     drift: cmdDrift, install: cmdInstall, tune: cmdTune, rag: cmdRag,
-    team: cmdTeam, group: cmdGroup, tunnel: cmdTunnel, cloud: cmdCloud, surfaces: cmdSurfaces,
+    team: cmdTeam, org: cmdOrg, group: cmdGroup, tunnel: cmdTunnel, cloud: cmdCloud, surfaces: cmdSurfaces,
     packages: cmdPackages, package: cmdPackages, evidence: cmdEvidence, airgap: cmdAirgap,
     compute: cmdCompute, doctor: cmdDoctor, loop: cmdLoop, logs: cmdLogs,
     ask: cmdAsk, chat: cmdChat, 'chat-tui': cmdChatTui, completion: cmdCompletion,
@@ -45659,8 +45757,10 @@ async function main() {
       // (line ~37395, cmdW734RagCapture). The legacy local-lookup arm that
       // used to sit here was unreachable (duplicate case label) and removed.
       case 'team':     await withErrorContext('team',     () => cmdTeam(rest)); break;
+      case 'org':      await withErrorContext('org',      () => cmdOrg(rest)); break;
       case 'tunnel':   await withErrorContext('tunnel',   () => cmdTunnel(rest)); break;
       case 'cloud':    await withErrorContext('cloud',    () => cmdCloud(rest)); break;
+      case 'group':    await withErrorContext('group',    () => cmdGroup(rest)); break;
       case 'surfaces': await withErrorContext('surfaces', () => cmdSurfaces(rest)); break;
       case 'packages':
       case 'package':  await withErrorContext('packages', () => cmdPackages(rest)); break;

@@ -112,7 +112,10 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 <p class="lede">Signing-key rotation lifecycle. Generates Ed25519 keypairs, records rotation receipts, and emits KMS wrap intents. The receipt-chain verifier (<code>kolm verify</code>) re-checks the active fingerprint against the manifest's signing block.</p>
 
 <h2 id="usage">Usage</h2>
-<pre>CODE1</pre>
+<pre><code>kolm keys list list keys + status + KMS target
+kolm keys rotate [--kms &lt;target&gt;] [--overlap-days &lt;N&gt;]
+kolm keys fingerprint print active key short fingerprint
+kolm keys export emit the rotation manifest as JSON</code></pre>
 
 <h2 id="flags">Flags</h2>
 <table>
@@ -125,7 +128,10 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </table>
 
 <h2 id="examples">Examples</h2>
-<pre>CODE12</pre>
+<pre><code>kolm keys list
+kolm keys rotate
+kolm keys rotate --kms aws-kms --overlap-days 60
+kolm keys fingerprint</code></pre>
 
 <h2 id="plain-scope">Plain scope</h2>
 <p>kolm emits the rotation receipt and writes the new key into <code>KOLM_HOME</code> for the local target. For hosted KMS targets the customer's KMS hook applies the wrapping; kolm does not call AWS, GCP, or Azure APIs from the CLI. Verify the wrap landed in your KMS before rotating production traffic.</p>
@@ -177,6 +183,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -196,7 +203,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

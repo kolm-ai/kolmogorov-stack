@@ -92,7 +92,7 @@ test('W526 #8 — running with --skip on every gate yields one parseable JSON li
   const allGates = [
     'lint:refs', 'control-files', 'openapi-sync', 'claim-verify',
     'sdk-manifest', 'test', 'sdk-smoke', 'local-surfaces',
-    'doctor', 'whoami', 'verify-claims', 'billing-tiers',
+    'ship-gate', 'doctor', 'whoami', 'verify-claims', 'billing-tiers',
   ];
   const r = spawnSync(process.execPath, [DRIVER, '--json', '--skip=' + allGates.join(',')], {
     cwd: REPO,

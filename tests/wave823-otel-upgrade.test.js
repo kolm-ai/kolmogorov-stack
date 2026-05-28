@@ -149,10 +149,10 @@ test('W823 #7 — alert thresholds match spec values', () => {
 
 test('W823 #8 — public/sw.js cache key bumped with wave823 suffix', () => {
   const raw = fs.readFileSync(SW_PATH, 'utf8');
-  assert.match(raw, /CACHE\s*=\s*['"][^'"]*wave823-otel-upgrade[^'"]*['"]/,
-    'sw.js CACHE constant must include "wave823-otel-upgrade"');
-  // Per the standing W604 anti-pattern, also assert via the regex-and-threshold
-  // marker pattern used elsewhere in the codebase (wave NNN >= 823).
+  // Per the standing W604/W829 anti-brittleness rule, the sw.js cache-key wave
+  // marker is asserted via regex-and-threshold (wave NNN >= 823), NOT a literal
+  // per-wave slug. sw.js is a shared file bumped every wave (currently far past
+  // 823), so pinning the literal "wave823-otel-upgrade" suffix is stale lock-in.
   const m = raw.match(/wave(\d{3,4})/g);
   assert.ok(m && m.length > 0, 'sw.js must contain at least one wave NNN token');
   const maxWave = m.reduce((acc, tok) => {

@@ -54,11 +54,11 @@ test('3. COMPLETION_VERBS contains "repl"', () => {
   assert.match(m[1], /'repl'/, 'COMPLETION_VERBS must include the repl verb');
 });
 
-test('4. HELP.repl block is present with USAGE + HONEST SCOPE sections', () => {
+test('4. HELP.repl block is present with USAGE + SCOPE sections', () => {
   const m = SRC.match(/repl:\s*`([\s\S]*?)`,/);
   assert.ok(m, 'HELP.repl must exist');
   assert.match(m[1], /^USAGE$/m, 'HELP.repl must include USAGE section');
-  assert.match(m[1], /^HONEST SCOPE$/m, 'HELP.repl must include HONEST SCOPE section');
+  assert.match(m[1], /^SCOPE$/m, 'HELP.repl must include a SCOPE (limitations) section');
 });
 
 test('5. `echo "exit" | kolm repl` exits cleanly (status 0)', async () => {

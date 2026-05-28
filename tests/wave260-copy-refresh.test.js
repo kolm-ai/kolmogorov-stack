@@ -315,10 +315,21 @@ test('W260 #27 - sw.js CACHE slug bumped to wave-floor >= 260', () => {
   // the new HTML pushes through. Slug name is not pinned because later
   // waves are allowed to bump the slug for their own reasons; we only
   // require the cache key to have moved.
-  const m = SW.match(/const\s+CACHE\s*=\s*'kolm-v(\d+)-2026-05-\d+-frontend-v(\d+)-([a-z0-9-]+)'/);
-  assert.ok(m, 'CACHE slug must follow kolm-vN-YYYY-MM-DD-frontend-vN-slug pattern');
-  const versionN = parseInt(m[2], 10);
-  assert.ok(versionN >= 260, `sw.js frontend version must be >= 260 (saw ${versionN})`);
+  //
+  // W891 (commit cc9f6ea7) deliberately migrated the CACHE slug format from
+  // `kolm-vN-YYYY-MM-DD-frontend-vN-<slug>` to `kolm-vN-YYYY-MM-DD-<slug>`
+  // (the `-frontend-vN-` segment was dropped). Later waves shortened the wave
+  // token from `waveNNN` to `wNNN` (W915/W916 -> `w915-w916-...`, W917 ->
+  // `w917-...`). Per the W604/W829 convention, version/slug pins must be
+  // regex+threshold against the embedded wave token, never a literal format
+  // pin. We extract every w(ave)NNN token in the slug and require the max to
+  // clear the 260 floor.
+  const mCache = SW.match(/const\s+CACHE\s*=\s*'(kolm-v\d+-2026-\d{2}-\d{2}-[a-z0-9-]+)'/);
+  assert.ok(mCache, 'CACHE slug must follow kolm-vN-YYYY-MM-DD-slug pattern');
+  const waves = [...mCache[1].matchAll(/\bw(?:ave)?(\d{3,4})\b/g)].map((m) => +m[1]);
+  assert.ok(waves.length > 0, 'CACHE slug must embed at least one w(ave)NNN wave token');
+  assert.ok(Math.max(...waves) >= 260,
+    `sw.js CACHE wave-floor must be >= 260 (saw ${Math.max(...waves)})`);
 });
 
 // =====================================================================

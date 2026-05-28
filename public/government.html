@@ -4,17 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.background='#0e1116';document.documentElement.style.colorScheme='dark';}else{document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f3f5f7';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<title>Government AI · FedRAMP-aware, run inside your boundary · kolm.ai</title>
-<meta name="description" content="Distill frontier models. Run them inside your accredited boundary. Verify every inference with a receipt your IG can replay. FedRAMP / StateRAMP / CJIS friendly.">
+<title>kolm for government &mdash; air-gap distillation with signed lineage · kolm.ai</title>
+<meta name="description" content="kolm is open-source (Apache 2.0). Distill on your own hardware, run inside your firewall, sign every inference with Ed25519. Built for federal, state, local, and adjacent agencies where prompts cannot leave the boundary.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://kolm.ai/government">
+<meta property="og:title" content="kolm for government &mdash; air-gap distillation with signed lineage">
+<meta property="og:description" content="Open-source distillation that runs fully offline and signs every step with Ed25519. For environments where sending a prompt to a hosted API is not the answer.">
+<meta property="og:image" content="https://kolm.ai/og/airgap.svg">
+<meta property="og:url" content="https://kolm.ai/government">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kolm for government &mdash; air-gap distillation with signed lineage">
+<meta name="twitter:description" content="Open-source distillation that runs fully offline and signs every step with Ed25519. For environments where sending a prompt to a hosted API is not the answer.">
+<meta name="twitter:image" content="https://kolm.ai/og/airgap.svg">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/wave889-vertical.css">
-  <link rel="canonical" href="https://kolm.ai/government">
-  <meta property="og:title" content="Government AI · FedRAMP-aware, run inside your boundary">
-  <meta property="og:description" content="Distill frontier models. Run them inside your accredited boundary. Verify every inference with a receipt your IG can replay. FedRAMP / StateRAMP / CJIS friendly.">
-  <meta property="og:image" content="https://kolm.ai/og/government.svg">
-  <meta property="og:url" content="https://kolm.ai/government">
-  <meta property="og:type" content="website">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -23,7 +31,8 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/government",
-  "description": "Distill frontier models. Run them inside your accredited boundary. Verify every inference with a receipt your IG can replay. FedRAMP / StateRAMP / CJIS friendly.",
+  "description": "Open-source distillation that runs fully offline and signs every step with Ed25519. For federal, state, and local government environments where prompts cannot leave the boundary.",
+  "license": "https://www.apache.org/licenses/LICENSE-2.0",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -36,28 +45,59 @@
   }
 }
 </script>
+<style>
+  /* W918 government polish — extends wave889-vertical without breaking siblings */
+  .gov-ref { display: grid; gap: 14px; }
+  .gov-ref-row { display: grid; grid-template-columns: 220px 1fr; gap: 22px; padding: 22px 24px; background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: 10px; }
+  @media (max-width: 720px) { .gov-ref-row { grid-template-columns: 1fr; gap: 8px; padding: 18px 20px; } }
+  .gov-ref-row .who { font-family: var(--ks-mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ks-ink-3); padding-top: 4px; }
+  .gov-ref-row .desc { font-size: 14.5px; line-height: 1.65; color: var(--ks-ink-2); }
+  .gov-ref-row .desc b { color: var(--ks-ink); font-weight: 540; }
+  .gov-limits { padding: 26px 28px; background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: 12px; max-width: 80ch; }
+  .gov-limits .label { font-family: var(--ks-mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ks-ink-3); margin-bottom: 10px; }
+  .gov-limits p { margin: 0 0 12px; font-size: 15px; line-height: 1.7; color: var(--ks-ink-2); }
+  .gov-limits p:last-child { margin-bottom: 0; }
+  .gov-limits ul { margin: 0 0 0 18px; padding: 0; font-size: 14.5px; line-height: 1.75; color: var(--ks-ink-2); }
+  .gov-limits li { margin-bottom: 6px; }
+  .gov-limits li::marker { color: var(--ks-ink-3); }
+  .gov-fedramp { padding: 26px 28px; background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: 12px; max-width: 80ch; }
+  .gov-fedramp p { margin: 0 0 12px; font-size: 15px; line-height: 1.7; color: var(--ks-ink-2); }
+  .gov-fedramp p:last-child { margin-bottom: 0; }
+  .gov-fedramp b { color: var(--ks-ink); font-weight: 540; }
+  .gov-fedramp .stamp { display: inline-block; font-family: var(--ks-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ks-ink-3); padding: 4px 10px; border: 1px solid var(--ks-line-3); border-radius: 999px; margin-bottom: 14px; }
+  /* Focus ring — replace outline:none, do NOT remove default */
+  .v-btn:focus-visible, .gov-ref-row a:focus-visible, .gov-limits a:focus-visible, .gov-fedramp a:focus-visible { outline: 2px solid var(--ks-accent, #d97757); outline-offset: 2px; border-radius: 4px; }
+  /* 44x44 minimum touch target preserved by v-btn padding (12px y + ~22px text) */
+  @media (prefers-reduced-motion: reduce) {
+    .v-btn:hover { transform: none; transition: none; }
+  }
+</style>
 </head>
 <body class="ks">
+<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
 <div data-include-nav></div>
 
-<section class="v-hero">
+<main id="main">
+
+<section class="v-hero" aria-labelledby="gov-hero-h1">
   <div class="v-wrap">
-    <span class="v-eyebrow">Federal &amp; state government</span>
-    <h1 class="v-h1">AI you can put on the SSP without holding your breath.</h1>
-    <p class="v-lede">Distill a small open model on your data. Run it inside your accredited boundary. Every inference produces a CID-pinned receipt your IG, OIG, or auditor can replay months later.</p>
+    <span class="v-eyebrow">Government &middot; Air-gap ready</span>
+    <h1 class="v-h1" id="gov-hero-h1">Distill on your hardware. Run behind your firewall. Sign every inference.</h1>
+    <p class="v-lede">kolm is open-source (Apache 2.0), runs fully air-gapped, signs every step with Ed25519. Built for environments where &ldquo;send a prompt to OpenAI&rdquo; is not the answer.</p>
     <div class="v-ctas">
       <a class="v-btn v-btn--primary" href="/account/signup?industry=government">Try it free</a>
       <a class="v-btn v-btn--ghost" href="/book-demo?industry=government">Speak to public sector team</a>
     </div>
-    <div class="v-caveat">Caveats: customer agency owns the ATO. kolm ships software + receipts; <a href="/security">control mapping</a> is documented per deployment package.</div>
+    <div class="v-caveat">Open source on <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a> &middot; Apache 2.0 &middot; air-gap recipe: <a href="/airgap">read the recipe</a> &middot; receipts: <a href="/verify">kolm verify</a></div>
   </div>
 </section>
 
-<section class="v-section">
+<section class="v-section" aria-labelledby="gov-cmd-h2">
   <div class="v-wrap">
     <div class="v-shead">
       <span class="v-eyebrow">Three commands</span>
-      <h2 class="v-h2">Distill. Run. Verify.</h2>
+      <h2 class="v-h2" id="gov-cmd-h2">Distill. Run. Verify.</h2>
       <p>Three CLI verbs cover the work. No managed cloud in the data path.</p>
     </div>
     <div class="v-trio">
@@ -66,123 +106,143 @@
         <h3>Train against your record set</h3>
         <p>Use your existing FOIA-released library, CFR, and program SOPs as the curriculum. Teacher signals stay outside the boundary.</p>
         <div class="cmd">kolm distill --base qwen3-8b --recipe gov-program</div>
-        <a class="go" href="/distill">Distill pipeline -&gt;</a>
+        <a class="go" href="/distill">Distill pipeline &rarr;</a>
       </div>
       <div class="v-card">
         <span class="ctag">02 / Run</span>
         <h3>Inside the boundary</h3>
         <p>Runs on your AWS GovCloud, Azure Gov, or on-prem GPU. No vendor telemetry, no model auto-update without your approval.</p>
         <div class="cmd">kolm run model.kolm --bind 10.0.0.0/8</div>
-        <a class="go" href="/run">Run surface -&gt;</a>
+        <a class="go" href="/run">Run surface &rarr;</a>
       </div>
       <div class="v-card">
         <span class="ctag">03 / Verify</span>
         <h3>Receipt per inference</h3>
         <p>Each call writes a receipt: prompt hash, model hash, output, timestamp, optional caller ID. Replayable for FOIA, IG, or congressional inquiry.</p>
         <div class="cmd">kolm verify rcpt_01KYC...</div>
-        <a class="go" href="/verify">Verify a receipt -&gt;</a>
+        <a class="go" href="/verify">Verify a receipt &rarr;</a>
       </div>
     </div>
   </div>
 </section>
 
-<section class="v-section">
+<section class="v-section" aria-labelledby="gov-what-h2">
   <div class="v-wrap">
     <div class="v-shead">
-      <span class="v-eyebrow">Compliance posture</span>
-      <h2 class="v-h2">Built to slot into the package you already have.</h2>
-      <p>What the architecture gives you. What still belongs to your ISSO.</p>
+      <span class="v-eyebrow">Capabilities</span>
+      <h2 class="v-h2" id="gov-what-h2">What kolm does for government</h2>
+      <p>Four properties that matter when the boundary is real.</p>
     </div>
-    <div class="v-compl">
-      <div>
-        <div class="label">FedRAMP</div>
-        <b>Moderate &amp; High compatible</b>
-        <p>Runs entirely inside your authorized boundary. AU-2, AU-3, AC-2 evidence emitted per call. We do not change your SC-7 posture.</p>
+    <div class="v-trio" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));">
+      <div class="v-card">
+        <span class="ctag">01 &middot; Air-gap deploy</span>
+        <h3>Zero network egress</h3>
+        <p>The full pipeline runs offline: collect, train, evaluate, deploy. A local teacher option (DeepSeek-R1-Distill-Qwen-32B INT4) fits on a single L40S, so the distillation signal never leaves the boundary either.</p>
+        <a class="go" href="/airgap">Airgapped mode &rarr;</a>
       </div>
-      <div>
-        <div class="label">StateRAMP</div>
-        <b>Compatible with state baselines</b>
-        <p>Same architecture as the federal posture. State CISOs reuse the same SSP narratives.</p>
+      <div class="v-card">
+        <span class="ctag">02 &middot; Signed lineage</span>
+        <h3>Ed25519 receipt per call</h3>
+        <p>Every distill, eval, and inference writes a signed receipt. Chain-of-custody is hash-linked: training-data hash &rarr; model hash &rarr; inference output hash. Replayable by your IG, OIG, or auditor.</p>
+        <a class="go" href="/verify">Verify a receipt &rarr;</a>
       </div>
-      <div>
-        <div class="label">CJIS</div>
-        <b>Compatible with §5.x controls</b>
-        <p>Inference stays in-boundary. Receipts give you AU-6 review and AC-2 account-management evidence per use.</p>
+      <div class="v-card">
+        <span class="ctag">03 &middot; Open-source core</span>
+        <h3>Apache 2.0, auditable</h3>
+        <p>Source on GitHub. No closed-source dependency anywhere on the training or inference path. Your security review reads the same code we ship.</p>
+        <a class="go" href="https://github.com/kolm-ai/kolm" rel="noopener">View source &rarr;</a>
       </div>
-      <div>
-        <div class="label">Section 508</div>
-        <b>UI ships WCAG 2.2 AA</b>
-        <p>Studio and CLI output meet accessibility expectations. Receipts are plain-text JSON; assistive tech reads them natively.</p>
+      <div class="v-card">
+        <span class="ctag">04 &middot; BYOC</span>
+        <h3>Your hardware, your keys</h3>
+        <p>Your GovCloud account, your on-prem GPUs, your KMS, your secrets. kolm runs where you put it. We do not operate a managed plane for your data.</p>
+        <a class="go" href="/byoc">BYOC architecture &rarr;</a>
       </div>
     </div>
   </div>
 </section>
 
-<section class="v-section">
+<section class="v-section" aria-labelledby="gov-fedramp-h2">
   <div class="v-wrap">
     <div class="v-shead">
-      <span class="v-eyebrow">Program workflows</span>
-      <h2 class="v-h2">Where agencies are using it.</h2>
-      <p>Six patterns running across federal, state, and local programs.</p>
+      <span class="v-eyebrow">FedRAMP &middot; NIST 800-53 posture</span>
+      <h2 class="v-h2" id="gov-fedramp-h2">What we actually claim about authorization.</h2>
+      <p>Stated plainly so your ATO writer knows what to inherit and what to own.</p>
     </div>
-    <div class="v-flows">
-      <div class="v-flow">
-        <span class="who">Benefits caseworker</span>
-        <h3>Eligibility narrative drafting</h3>
-        <p>Draft the eligibility decision narrative from intake forms, cite the CFR or state statute paragraph used.</p>
-        <div class="io">in: intake form &middot; out: narrative + statute citations</div>
+    <div class="gov-fedramp">
+      <span class="stamp">Plain statement</span>
+      <p><b>kolm OSS is not itself FedRAMP-authorized.</b> It is open-source software (Apache 2.0). Open-source software is not a FedRAMP service offering, so it cannot be on the marketplace as one.</p>
+      <p>What kolm does instead: it runs on <b>your authorized infrastructure</b> &mdash; AWS GovCloud (FedRAMP High), Azure Government, on-prem racks under your ATO. The package you authorize is your stack, not ours.</p>
+      <p>The audit story kolm gives you is the <b>receipt</b>: every inference produces an Ed25519-signed record of what model ran on what input at what time. That record is what your AU-2, AU-3, and AU-12 control narratives reference.</p>
+      <p>If it helps your team, we can sit with your ISSO and draft SSP language that maps kolm components (CLI, distillation worker, inference runtime, receipt store) to NIST 800-53 Rev 5 control families. That is a working session, not a certification.</p>
+    </div>
+  </div>
+</section>
+
+<section class="v-section" aria-labelledby="gov-arch-h2">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Reference architectures</span>
+      <h2 class="v-h2" id="gov-arch-h2">Three shapes that fit.</h2>
+      <p>Patterns we have walked partners through. Pick the one closest to your boundary.</p>
+    </div>
+    <div class="gov-ref">
+      <div class="gov-ref-row">
+        <div class="who">Federal civilian &middot; AWS GovCloud</div>
+        <div class="desc"><b>Air-gapped VPC inside GovCloud.</b> Distillation runs on GPU capacity inside that VPC (Modal-in-VPC or equivalent). Inference deploys to a Bedrock-equivalent on-prem runtime backed by vLLM or TGI. The pipeline never reaches a commercial region.</div>
       </div>
-      <div class="v-flow">
-        <span class="who">FOIA officer</span>
-        <h3>FOIA response triage</h3>
-        <p>Cluster incoming requests, suggest exemption (b)(5)/(b)(6)/(b)(7)(C) markings for human review, draft determination letters.</p>
-        <div class="io">in: request batch &middot; out: ranked exemption suggestions</div>
+      <div class="gov-ref-row">
+        <div class="who">DoD IL5 &middot; on-prem</div>
+        <div class="desc"><b>Fully on-prem, no cloud edge.</b> Local teacher (DeepSeek-R1-Distill-Qwen-32B INT4) on a single L40S. Distilled student deploys to classified hardware. Receipts written to a write-once volume inside the enclave.</div>
       </div>
-      <div class="v-flow">
-        <span class="who">311 / contact center</span>
-        <h3>Tier-1 deflection</h3>
-        <p>Answer the top 200 questions against the agency knowledge base. Refuses on out-of-scope topics and routes to a human.</p>
-        <div class="io">in: citizen message &middot; out: drafted reply + KB link</div>
-      </div>
-      <div class="v-flow">
-        <span class="who">Acquisition analyst</span>
-        <h3>RFP / SOW synthesis</h3>
-        <p>Compress 600-page RFPs into compliance matrices. Maps to past-performance library and identifies gap.</p>
-        <div class="io">in: RFP PDF &middot; out: compliance matrix</div>
-      </div>
-      <div class="v-flow">
-        <span class="who">Program inspector</span>
-        <h3>Field-report triage</h3>
-        <p>Cluster inspection reports, surface recurring findings, draft management notification letters.</p>
-        <div class="io">in: 500 reports &middot; out: thematic summary + draft letter</div>
-      </div>
-      <div class="v-flow">
-        <span class="who">ATO writer</span>
-        <h3>SSP &amp; POA&amp;M drafting</h3>
-        <p>Generate SSP control narratives and POA&amp;M entries from your scan output and system diagram.</p>
-        <div class="io">in: scan + diagram &middot; out: draft SSP §3 + POA&amp;M rows</div>
+      <div class="gov-ref-row">
+        <div class="who">State / local &middot; Azure Gov or GovCloud</div>
+        <div class="desc"><b>Single-tenant managed deploy.</b> kolm components run in your subscription / account, your KMS keys, your VNet / VPC. We help you stand it up; ongoing operation is yours.</div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="v-cta-row">
+<section class="v-section" aria-labelledby="gov-limits-h2">
   <div class="v-wrap">
     <div class="v-shead">
-      <span class="v-eyebrow">Get started</span>
-      <h2 class="v-h2">Pilot on a Moderate workload. Scale into your High enclave.</h2>
-      <p>Start free on the commercial side. Move the same model + receipts into your authorized boundary with no code change.</p>
+      <span class="v-eyebrow">What we don&rsquo;t claim</span>
+      <h2 class="v-h2" id="gov-limits-h2">Limitations.</h2>
+      <p>Stated up front so procurement does not get a surprise on call two.</p>
+    </div>
+    <div class="gov-limits">
+      <span class="label">Constraints</span>
+      <p>kolm OSS is not certified by any government. It is a tool you can deploy in environments that need certification &mdash; the certification belongs to the environment, not the tool.</p>
+      <ul>
+        <li>We do not store your training data. The pipeline reads from your storage and writes back to your storage.</li>
+        <li>We do not have access to your inference traffic. Inference runs in your process, on your hardware.</li>
+        <li>You audit us by reading the source. Apache 2.0 on <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a> &mdash; every file, every commit, every release.</li>
+        <li>kolm.ai (the company) does not have a FedRAMP authorization. The kolm runtime, distilled on your data and run on your hardware, inherits your authorization &mdash; not ours.</li>
+        <li>Any claim a vendor (including this page) makes about a control is just a claim until your assessor reviews the artifact. The receipts are the artifact.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="v-cta-row" aria-labelledby="gov-cta-h2">
+  <div class="v-wrap">
+    <div class="v-shead">
+      <span class="v-eyebrow">Next step</span>
+      <h2 class="v-h2" id="gov-cta-h2">Bring the model to your data.</h2>
+      <p>Whether you are an ATO writer, an ISSO, or a program lead &mdash; the conversation starts the same way.</p>
     </div>
     <div class="v-ctas">
       <a class="v-btn v-btn--primary" href="/account/signup?industry=government">Try it free</a>
       <a class="v-btn v-btn--ghost" href="/book-demo?industry=government">Speak to public sector team</a>
     </div>
     <div class="v-receipts">
-      <div class="label">Example receipt</div>
-      <p>Every inference: <code>kolm verify rcpt_01KYC1ZVTGDCW3FX06JQSC</code> &middot; <a href="/v1/verify/rcpt_01KYC1ZVTGDCW3FX06JQSC">view receipt -&gt;</a></p>
+      <div class="label">Receipts are the audit trail</div>
+      <p>Every inference: <code>kolm verify rcpt_01KYC1ZVTGDCW3FX06JQSC</code> &middot; <a href="/v1/verify/rcpt_01KYC1ZVTGDCW3FX06JQSC">view a live receipt &rarr;</a></p>
     </div>
   </div>
 </section>
+
+</main>
 
 <div data-include-footer></div>
 <script src="/nav.js" defer></script>

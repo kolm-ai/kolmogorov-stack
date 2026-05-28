@@ -69,6 +69,39 @@
 .ns-counts{font-family:var(--mono);font-size:11px;color:var(--ink-faint);line-height:1.5}
 .ns-reco{padding:8px 10px;background:var(--bg-elev);border-radius:6px;border:1px dashed var(--line);font-family:var(--mono);font-size:11.5px;color:var(--ink);overflow-wrap:anywhere}
 .ns-reco .label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin-bottom:4px}
+
+/* ---- Data Health panel + K-Score sparkline (cool-slate only) ---- */
+.kpanel--health{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:760px){.kpanel--health{grid-template-columns:1fr}}
+.dh-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 12px}
+.dh-head h2{margin:0;font-size:15px}
+.dh-ns{font-family:var(--mono);font-size:12px;color:var(--ink-mute,#56606c)}
+.dh-ns label{color:var(--ink-faint,#525a64)}
+.dh-ns select{background:var(--bg-elev,#eef1f4);border:1px solid var(--line,#dde1e7);color:var(--ink,#1f2937);padding:4px 8px;border-radius:4px;font-family:var(--mono);font-size:12px;margin-left:6px}
+.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px}
+@media (max-width:480px){.metric-grid{grid-template-columns:1fr}}
+.metric{display:flex;flex-direction:column;gap:5px}
+.metric .m-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.metric .m-label{font-size:10.5px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint,#525a64)}
+.metric .m-val{font-family:var(--mono);font-size:12.5px;color:var(--ink,#1f2937);font-variant-numeric:tabular-nums}
+.m-bar{position:relative;height:6px;border-radius:999px;background:#e6eaef;overflow:hidden}
+.m-bar>span{position:absolute;inset:0 auto 0 0;width:0;border-radius:999px;background:#1f2937;transition:width 480ms cubic-bezier(0.2,0.7,0.2,1)}
+.m-bar[data-status=warn]>span{background:#56606c}
+.m-bar[data-status=low]>span{background:#a8b3c2}
+.dh-chartwrap{display:flex;flex-direction:column;gap:10px}
+.dh-chart{position:relative;width:100%;aspect-ratio:220/72;min-height:72px;border:1px solid var(--line,#dde1e7);border-radius:8px;background:var(--bg-elev,#f3f5f7);padding:8px;box-sizing:border-box}
+.dh-chart svg.ks-spark{display:block;width:100%;height:100%}
+.dh-chart .dh-skel{position:absolute;inset:8px;border-radius:5px}
+.dh-chartmeta{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-family:var(--mono);font-size:11px;color:var(--ink-mute,#56606c)}
+.dh-chartmeta .dh-latest{color:var(--ink,#1f2937);font-variant-numeric:tabular-nums;font-size:13px}
+.dh-trend{font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em}
+.dh-trend[data-trend=up]{color:#2d6a48}
+.dh-trend[data-trend=down]{color:#8b2828}
+.dh-trend[data-trend=flat]{color:var(--ink-faint,#525a64)}
+.dh-est{font-family:var(--mono);font-size:12px;color:var(--ink-mute,#56606c);margin:14px 0 0;padding-top:12px;border-top:1px solid var(--line-soft,#e6eaef)}
+.dh-est b{color:var(--ink,#1f2937);font-variant-numeric:tabular-nums}
+.dh-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.dh-chartempty{font-family:var(--mono);font-size:11.5px;color:var(--ink-mute,#56606c);line-height:1.6}
 </style>
 <link rel="stylesheet" href="/ks.css">
     <link rel="stylesheet" href="/warm-paper.css">
@@ -109,6 +142,39 @@
 <h1>Namespaces.</h1>
 <p class="lede">Each namespace is one logical workload. Drift is scored over a 7-day lookback against a 30-day baseline using three signals: fallback-rate delta, distribution distance, and volume ratio. Status uses a 2&#963;/3&#963; SPC ladder over baseline variance.</p>
 
+<section class="kpanel kpanel--health" id="data-health" aria-labelledby="dh-title" hidden>
+  <div class="dh-left">
+    <div class="dh-head">
+      <h2 id="dh-title">Data health</h2>
+      <span class="dh-ns"><label for="dh-ns-select">namespace</label><select id="dh-ns-select" aria-label="Choose namespace for data health"></select></span>
+    </div>
+    <p class="pdesc">Coverage, balance, and freshness of the corpus feeding this namespace. The autopilot lifts each bar; the K-Score trend is the visible result.</p>
+    <div class="metric-grid">
+      <div class="metric"><div class="m-top"><span class="m-label">Quality</span><span class="m-val" id="dh-quality-v">&ndash;</span></div><div class="m-bar" id="dh-quality" role="img" aria-label="quality"><span></span></div></div>
+      <div class="metric"><div class="m-top"><span class="m-label">Coverage</span><span class="m-val" id="dh-coverage-v">&ndash;</span></div><div class="m-bar" id="dh-coverage" role="img" aria-label="coverage"><span></span></div></div>
+      <div class="metric"><div class="m-top"><span class="m-label">Balance</span><span class="m-val" id="dh-balance-v">&ndash;</span></div><div class="m-bar" id="dh-balance" role="img" aria-label="balance"><span></span></div></div>
+      <div class="metric"><div class="m-top"><span class="m-label">Freshness</span><span class="m-val" id="dh-freshness-v">&ndash;</span></div><div class="m-bar" id="dh-freshness" role="img" aria-label="freshness"><span></span></div></div>
+    </div>
+    <p class="dh-est">Estimated K-Score range <b id="dh-est-range">&ndash;</b> <span id="dh-est-note" style="color:var(--ink-faint,#525a64)"></span></p>
+    <div class="dh-actions">
+      <a class="btn" id="dh-add" href="/account/connectors">Add data</a>
+      <a class="btn" id="dh-curate" href="/account/labeling">Curate</a>
+      <a class="btn" id="dh-fill" href="/account/datasets">Fill gaps</a>
+      <button class="btn primary" id="dh-compile" type="button">Compile</button>
+    </div>
+  </div>
+  <div class="dh-right dh-chartwrap">
+    <div class="dh-head"><h2 style="font-size:13px">K-Score over time</h2></div>
+    <div class="dh-chart" id="dh-chart" aria-busy="true">
+      <div class="dh-skel skel"></div>
+    </div>
+    <div class="dh-chartmeta">
+      <span class="dh-latest" id="dh-latest">&ndash;</span>
+      <span class="dh-trend" id="dh-trend" data-trend="flat">&middot;</span>
+    </div>
+  </div>
+</section>
+
 <div class="toolbar">
   <button class="btn" type="button" id="ns-refresh">Refresh</button>
   <label style="display:flex;gap:6px;align-items:center;font-size:12px;color:var(--ink-mute)">lookback (days)
@@ -130,6 +196,7 @@
 </div>
 </main>
 
+<script src="/account/ks-sparkline.js"></script>
 <script>
 (function(){
   var key=null; try{key=localStorage.getItem("kolm-key")||localStorage.getItem("ks_api_key")||localStorage.getItem("kolm_api_key")||localStorage.getItem("KOLM_API_KEY");}catch(_){}
@@ -231,6 +298,114 @@
   baselineInput.addEventListener("change",load);
   load();
 })();
+
+/* ---- Data Health panel + K-Score sparkline ---- */
+(function(){
+  var panel=document.getElementById("data-health");
+  var sel=document.getElementById("dh-ns-select");
+  var chart=document.getElementById("dh-chart");
+  if(!panel||!sel||!chart||!window.kfetch)return;
+  var spark=window.KolmSparkline;
+
+  function setBar(id,val,status){
+    var bar=document.getElementById(id);
+    var out=document.getElementById(id+"-v");
+    if(!bar)return;
+    var pct=Math.max(0,Math.min(1,Number(val)||0));
+    var fill=bar.querySelector("span");
+    if(fill)fill.style.width=(pct*100).toFixed(1)+"%";
+    if(status)bar.setAttribute("data-status",status); else bar.removeAttribute("data-status");
+    bar.setAttribute("aria-label",bar.getAttribute("aria-label").split(":")[0]+": "+Math.round(pct*100)+" percent");
+    if(out)out.textContent=(pct*100).toFixed(0)+"%";
+  }
+
+  // Derive coarse health bars from a points series. These are display heuristics
+  // until /v1/datasets/health is wired centrally; the structure is the point.
+  function healthFrom(points){
+    var n=points.length;
+    var sum=spark?spark.summarize(points):{n:n,latest:null,min:null,max:null};
+    var latest=sum.latest;
+    var coverage=Math.max(0,Math.min(1,n/12));            // 12 runs = full coverage bar
+    var quality=(latest!=null&&isFinite(latest))?latest:0; // latest K-Score proxies quality
+    var spread=(sum.max!=null&&sum.min!=null)?(sum.max-sum.min):0;
+    var balance=Math.max(0,Math.min(1,1-spread));          // tighter band = better balance
+    var freshness=n>0?1:0;                                  // has any recent point
+    return {quality:quality,coverage:coverage,balance:balance,freshness:freshness,latest:latest,n:n,sum:sum};
+  }
+
+  function renderChart(points){
+    chart.removeAttribute("aria-busy");
+    if(!spark){chart.innerHTML='<div class="dh-chartempty">Chart unavailable.</div>';return;}
+    if(!points||!points.length){
+      chart.innerHTML='<div class="dh-chartempty"><strong>No K-Score history yet.</strong><br>Compile this namespace to record the first point.</div>';
+      document.getElementById("dh-latest").textContent="–";
+      var tr0=document.getElementById("dh-trend");tr0.textContent="no data";tr0.setAttribute("data-trend","flat");
+      return;
+    }
+    chart.innerHTML=spark.renderSparkline(points,{showLabel:true,showBaseline:true});
+    var sum=spark.summarize(points);
+    var latEl=document.getElementById("dh-latest");
+    latEl.textContent="K "+spark.fmtScore(sum.latest);
+    var tr=document.getElementById("dh-trend");
+    tr.setAttribute("data-trend",sum.trend);
+    tr.textContent=sum.trend==="up"?"↑ improving":(sum.trend==="down"?"↓ regressing":"→ flat");
+  }
+
+  function applyHealth(h){
+    setBar("dh-quality",h.quality,h.quality<0.4?"low":(h.quality<0.7?"warn":null));
+    setBar("dh-coverage",h.coverage,h.coverage<0.4?"low":(h.coverage<0.7?"warn":null));
+    setBar("dh-balance",h.balance,h.balance<0.4?"low":(h.balance<0.7?"warn":null));
+    setBar("dh-freshness",h.freshness,h.freshness<0.5?"low":null);
+    var range=document.getElementById("dh-est-range");
+    var note=document.getElementById("dh-est-note");
+    if(h.n>0&&h.sum&&h.sum.min!=null){
+      range.textContent=spark.fmtScore(h.sum.min)+" – "+spark.fmtScore(h.sum.max);
+      note.textContent="from "+h.n+" recorded "+(h.n===1?"run":"runs");
+    }else{
+      range.textContent="–";
+      note.textContent="compile to estimate";
+    }
+  }
+
+  function loadSeries(ns){
+    chart.setAttribute("aria-busy","true");
+    chart.innerHTML='<div class="dh-skel skel"></div>';
+    return window.kfetch("/v1/kscore/series?namespace="+encodeURIComponent(ns)+"&window_days=90")
+      .then(function(env){
+        var points=(env&&Array.isArray(env.points))?env.points:[];
+        renderChart(points);
+        applyHealth(healthFrom(points));
+      })
+      .catch(function(){
+        renderChart([]);
+        applyHealth(healthFrom([]));
+      });
+  }
+
+  function discover(){
+    return window.kfetch("/v1/datasets?limit=200").then(function(env){
+      var seen={};var rows=(env&&(env.datasets||env.data||env))||[];
+      if(Array.isArray(rows)){for(var i=0;i<rows.length;i++){var n=rows[i]&&(rows[i].namespace||rows[i].corpus_namespace);if(n)seen[n]=1;}}
+      return Object.keys(seen);
+    }).catch(function(){return [];});
+  }
+
+  discover().then(function(namespaces){
+    if(!namespaces.length){
+      // No namespaces: leave the panel hidden; the grid empty-state covers onboarding.
+      return;
+    }
+    panel.hidden=false;
+    sel.innerHTML=namespaces.map(function(n){return '<option value="'+window.kesc(n)+'">'+window.kesc(n)+'</option>';}).join("");
+    sel.addEventListener("change",function(){loadSeries(sel.value);});
+    var compileBtn=document.getElementById("dh-compile");
+    if(compileBtn)compileBtn.addEventListener("click",function(){
+      // Placeholder: deep-link to the artifact-jobs surface scoped to this ns.
+      location.href="/account/builds?namespace="+encodeURIComponent(sel.value);
+    });
+    loadSeries(namespaces[0]);
+  });
+})();
 </script>
 
 <footer class="ks-foot">
@@ -256,6 +431,7 @@
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -275,7 +451,7 @@
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>
@@ -292,6 +468,7 @@
 
 <div hidden data-w221-anchors="account" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
     
+    <!-- KOLM_NAV_BEGIN (W221) -->
     <nav class="site-nav" aria-label="Primary">
     <div class="nav-item nav-item--product has-mega">
       <a class="nav-top" href="/product" aria-haspopup="true" aria-expanded="false">Product</a>
@@ -387,6 +564,7 @@
       </div>
     </div>
     </nav>
+    <!-- KOLM_NAV_END (W221) -->
     
 </div>
 </body>

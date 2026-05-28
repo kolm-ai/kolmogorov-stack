@@ -437,10 +437,18 @@ test('W824 #20 — router.js wires registerK8sRoutes via one-line modular mount'
 // 21) sw.js wave token bumped
 // --------------------------------------------------------------------------
 
-test('W824 #21 — public/sw.js cache slug includes the wave824 suffix', () => {
+test('W824 #21 — public/sw.js cache slug bumped to wave ≥ 824 (regex+threshold, not a literal pin)', () => {
   const sw = fs.readFileSync(SW_PATH, 'utf8');
-  assert.ok(/-wave824-k8s/.test(sw),
-    'sw.js cache slug must include "-wave824-k8s" so clients invalidate');
+  // W604/W829 anti-brittleness convention (documented in sw.js itself):
+  // pin via `wave(\d{3,4})` + numeric threshold, NEVER a literal slug suffix
+  // like "-wave824-k8s". The cache slug deliberately advances each wave
+  // (W891 -> wave891-..., later wave918-...), so a literal pin goes stale by
+  // design. Assert that some wave token bumped the cache at or past 824.
+  const matches = Array.from(sw.matchAll(/wave(\d{3,4})/g)).map((m) => Number(m[1]));
+  assert.ok(matches.length >= 1, 'sw.js must mention at least one wave token');
+  const max = Math.max(...matches);
+  assert.ok(max >= 824,
+    'sw.js max wave token must be ≥ 824 so clients invalidate (got ' + max + ')');
 });
 
 // --------------------------------------------------------------------------

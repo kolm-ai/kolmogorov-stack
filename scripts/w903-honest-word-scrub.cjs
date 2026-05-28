@@ -173,9 +173,15 @@ for (const file of walk(ROOT, [])) {
   }
 
   // Unstash
-  after = after.replace(/(?:CODE|PRE|J|A)(\d+)/g, (_m, idx) => {
-    return stash[parseInt(idx, 10)];
-  });
+  // Unstash. Repeat until stable: a stashed <pre> can itself contain a
+  // stashed <code> sentinel (nested), and a single pass would strand the
+  // inner one. Bounded by stash depth so it always terminates.
+  const SENTINEL = new RegExp(String.fromCharCode(1) + '(?:CODE|PRE|J|A)(\\d+)' + String.fromCharCode(1), 'g');
+  for (let guard = 0; guard <= stash.length + 1; guard++) {
+    const next = after.replace(SENTINEL, (_m, idx) => stash[parseInt(idx, 10)]);
+    if (next === after) break;
+    after = next;
+  }
 
   if (after !== before) {
     fs.writeFileSync(file, after, 'utf8');

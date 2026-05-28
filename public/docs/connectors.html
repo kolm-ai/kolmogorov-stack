@@ -120,11 +120,15 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
 </div>
 
 <h2 id="start">Start the proxy</h2>
-<pre>CODE9</pre>
+<pre><code>kolm capture --provider openai --as ticket-classifier --namespace tickets
+# kolm proxy listening on http://127.0.0.1:8787
+# capture config written to ~/.kolm/capture/ticket-classifier.json</code></pre>
 <p>The first form picks a namespace and the upstream provider, and writes a small JSON file with the headers your app should send. Pass your real OpenAI, Anthropic, or OpenRouter key in the <code>x-upstream-api-key</code> header on each request; the Kolm API key goes in <code>Authorization: Bearer ks_*</code> or <code>Authorization: Bearer kao_*</code>.</p>
 
 <h2 id="verify">Verify the proxy sees traffic</h2>
-<pre>CODE13</pre>
+<pre><code>kolm capture status --namespace tickets
+# pairs captured: 38 / 1000
+# pairs until distill: 962</code></pre>
 <p>Once you cross the threshold (default 1000 pairs), <code>kolm distill --namespace tickets</code> auto-runs the LoRA trainer against the namespace.</p>
 
 <h2 id="streaming">Streaming and tool use</h2>
@@ -176,6 +180,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <a href="/sdks">SDKs</a>
         <a href="/models">Models</a>
         <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
         <a href="/blog">Blog</a>
         <a href="/faq">FAQ</a>
         <a href="/changelog">Changelog</a>
@@ -195,7 +200,7 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
         <h4>Company</h4>
         <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
+        <a href="/about">About</a>
         <a href="/why-kolm">Why kolm</a>
         <a href="/press">Press</a>
         <a href="/contact">Contact</a>

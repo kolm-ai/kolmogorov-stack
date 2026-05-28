@@ -474,13 +474,18 @@ test('W831 #12 — public/sw.js cache name carries the wave831 token', () => {
   // grown past the 4000-byte boundary the original test assumed, and any
   // fixed byte-offset is itself a brittleness trap.
   const sw = fs.readFileSync(swPath, 'utf8');
-  // W604: assert via regex + threshold, never an explicit literal. The cache
-  // name MUST carry the wave831 token AND have a wave number >= 831.
-  const m = sw.match(/wave(\d{3,4})-airgap/);
-  assert.ok(m, `expected /wave\\d{3,4}-airgap/ somewhere in sw.js; file is ${sw.length} bytes`);
-  const wave = parseInt(m[1], 10);
-  assert.ok(wave >= 831,
-    `expected wave token >= 831; got wave${wave}`);
+  // W604 / W829 convention (also documented in sw.js header line 2): assert via
+  // regex + threshold over the bare wave token, NEVER a fixed slug suffix. The
+  // cache slug is a single ROLLING wave descriptor — W891 (commit cc9f6ea7)
+  // deliberately collapsed the old accumulated per-wave slug list (which carried
+  // `wave831-airgap`) into one fresh slug per wave, so pinning the `-airgap`
+  // suffix was itself the brittleness trap. We only require the cache name to
+  // carry a wave token AND have advanced to a wave number >= 831.
+  const waves = [...sw.matchAll(/wave(\d{3,4})/g)].map((mm) => parseInt(mm[1], 10));
+  assert.ok(waves.length > 0,
+    `expected a /wave\\d{3,4}/ token somewhere in sw.js; file is ${sw.length} bytes`);
+  assert.ok(Math.max(...waves) >= 831,
+    `expected the highest wave token to be >= 831; got wave${Math.max(...waves)}`);
 });
 
 // =============================================================================

@@ -326,7 +326,30 @@ test('W828 #10 — bench_trace_aware.py prints BENCH_STUB_REQUIRES_REAL_DATA wit
 // 11) W828 marked SHIPPED in the plan
 // ============================================================================
 test('W828 #11 — KOLM_W707_SYSTEM_UPGRADE_PLAN.md marks W828 SHIPPED', () => {
+  // STALE LOCK-IN, fixed to the repo's documented convention.
+  //
+  // commit 3a57dd4f ("Public-surface polish: ... .gitignore blocks internal
+  // planning + audit artifacts from re-entering the tree") DELIBERATELY
+  // deleted KOLM_W707_SYSTEM_UPGRADE_PLAN.md (1696 deletions) and added the
+  // .gitignore rule `KOLM_*_PLAN.md`. Internal planning docs are intentionally
+  // never published, so this artifact is permanently absent from the tree by
+  // design. The previous hard `readFileSync` therefore ENOENTs forever.
+  //
+  // The W828 features themselves still ship and are exhaustively verified by
+  // tests #1–#10 (autoDetectReasoningCapability in src/capture.js,
+  // trace_aware_loss + REASONING_TRACE_LOSS_VERSION="w828-v1" in distill.py,
+  // CLI flag + env plumbing, bench scaffold). "SHIPPED" is now proven by
+  // those observable lock-ins, not by a status string in a removed doc.
+  //
+  // If a local (untracked) copy of the plan still happens to exist, we honor
+  // the original SHIPPED-marker checks; otherwise the deliberate removal is
+  // the expected state and the test passes.
   const planPath = path.join(process.cwd(), 'KOLM_W707_SYSTEM_UPGRADE_PLAN.md');
+  if (!fs.existsSync(planPath)) {
+    // Deliberately gitignored internal artifact (commit 3a57dd4f). Nothing to
+    // assert against — W828 ship status is locked in by tests #1–#10.
+    return;
+  }
   const planText = fs.readFileSync(planPath, 'utf8');
   // Must mark the wave SHIPPED at the heading level so the plan reader
   // sees status without scrolling sub-bullets.
@@ -352,8 +375,11 @@ test('W828 #11 — KOLM_W707_SYSTEM_UPGRADE_PLAN.md marks W828 SHIPPED', () => {
 test('W828 #12 — public/sw.js bumped with wave828-reasoning-v2 suffix', () => {
   const swPath = path.join(process.cwd(), 'public', 'sw.js');
   const swText = fs.readFileSync(swPath, 'utf8');
-  assert.ok(swText.includes('wave828-reasoning-v2'),
-    'public/sw.js CACHE name must include the wave828-reasoning-v2 suffix');
+  // NOTE: the literal `wave828-reasoning-v2` suffix pin was removed — sw.js
+  // uses the documented regex+threshold convention (see sw.js header comment:
+  // "wave token via regex+threshold ... NOT an explicit array"). The cache
+  // slug has legitimately rolled forward well past wave828 (currently
+  // wave918+), so we assert the threshold only, never a frozen literal.
   // Wave-token threshold lock-in (regex-based, future-compat): any
   // wave(NNN) token >= 828 satisfies the family-token contract.
   const tokens = swText.match(/wave(\d{3,4})/g) || [];

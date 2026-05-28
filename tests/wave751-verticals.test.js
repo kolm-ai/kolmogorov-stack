@@ -599,7 +599,11 @@ test('W751 #15 — all 5 public/verticals/<id>.html exist with brand-lock + mode
       'pending_distill',                   // honest pending status
       'Case study',                        // case-study skeleton heading
       '/marketplace/' + v.model_slug,      // CTA into marketplace listing
-      'W757',                              // honest blocker reference
+      'cross-namespace transfer math',     // blocker reference (W917/3a57dd4f
+                                           // public-surface polish scrubbed the
+                                           // internal W757/W715 wave tags from
+                                           // shipped HTML — the blocker is now
+                                           // described in plain words)
     ]) {
       assert.ok(html.includes(needle),
         `verticals/${v.id}.html must mention "${needle}"`);
@@ -627,8 +631,12 @@ test('W751 #16 — public/docs/verticals.html exists with brand-lock H1 + sortab
     'Frontier AI on your own infrastructure',    // brand H1 (the docs page uses the brand H1)
     'w751-v1',                                   // version stamp
     'pending_distill',                           // honest status
-    'W757',                                      // blocker
-    'W715',                                      // other blocker
+    // The internal W757/W715 wave tags were deliberately scrubbed from shipped
+    // HTML by 3a57dd4f ("Public-surface polish ... drops internal version
+    // tags"). The blocker is now described in plain product language; pin the
+    // surviving phrases instead of the internal wave-tag noise.
+    'fingerprinting',                            // blocker (vertical fingerprint pipeline)
+    'cross-namespace transfer math',             // other blocker
     'target_kscore',                             // sortable column key
     'sort',                                      // sort JS
   ]) {

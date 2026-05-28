@@ -149,7 +149,10 @@ test('W237 CLI wires mesh verb + 5 subcommands + HELP block', () => {
 
 test('W237 COMPLETION_VERBS and COMPLETION_SUBS include mesh', () => {
   const src = fs.readFileSync(path.join(ROOT, 'cli/kolm.js'), 'utf8');
-  const cidx = src.indexOf('COMPLETION_VERBS');
+  // Anchor on the actual array declaration, not the first textual mention of
+  // COMPLETION_VERBS (a W891 _loadKnownVerbs comment now precedes the literal).
+  const cidx = src.indexOf('const COMPLETION_VERBS = [');
+  assert.ok(cidx >= 0, 'COMPLETION_VERBS array declaration not found');
   const tail = src.slice(cidx, cidx + 2000);
   assert.ok(tail.includes("'mesh'"), 'COMPLETION_VERBS missing mesh');
   assert.ok(src.includes("mesh:    ['discover'"), 'COMPLETION_SUBS missing mesh subverbs');
