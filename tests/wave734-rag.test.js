@@ -385,7 +385,7 @@ test('W734 #11 — /docs/rag.html exists with brand-lock content', () => {
   for (const needle of [
     'kolm.ai',                  // brand
     'class="ks-nav"',           // nav shell
-    'ks-footer',                // footer shell
+    'ks-foot',                  // footer shell (W849 ks-foot BEM; ks-footer predates the footer migration)
     'kolm-retrieved-context',   // the header we document
     'RAG',                      // topic word
     'captureWithContext',       // Node SDK helper name
