@@ -6331,6 +6331,25 @@ export function buildRouter() {
       if (route.pre_routed_to_fallback && chain.length > 1) {
         chain = chain.slice(1);
       }
+      // 3b. W921 — semantic cost<->quality routing. Default route_mode (unset or
+      // 'static') => the chain is used exactly as selectRoute built it (byte-
+      // identical to today). When a namespace opts into 'cost_quality'/'semantic'
+      // the scorer reorders the chain by predicted quality-per-dollar; with no
+      // trained cluster stats yet it cold-starts back to the static order, so
+      // there is zero behavior change until a namespace is both opted-in AND
+      // trained. The decision is stamped on the receipt additively (non-signed).
+      let _routerDecision = null;
+      if (nsConfig.route_mode === 'cost_quality' || nsConfig.route_mode === 'semantic') {
+        try {
+          const _sr = await import('./semantic-router.js');
+          const _routeCfg = { ...nsConfig, ...cfgPF };
+          const _scored = _sr.scoreRoute({ namespaceConfig: _routeCfg, prompt: inputText, candidates: chain, callerConfidence: confidence, stats: null });
+          if (_scored && Array.isArray(_scored.ordered_chain) && _scored.ordered_chain.length) {
+            chain = _scored.ordered_chain;
+            _routerDecision = _sr.buildRouterDecisionBlock({ scored: _scored, alpha: _scored.alpha, cluster_id: _scored.cluster_id, n_samples: _scored.n_samples, embedder: _scored.embedder, cold_start: _scored.cold_start });
+          }
+        } catch (_) { /* routing is best-effort; keep the static chain */ }
+      }
       // Vercel function env vars land as lowercase (anthropic_api_key) while
       // local + Railway use UPPERCASE; walk 4 case variants per provider so
       // the dispatch path works on every host. Mirrors _w869FirstEnv in the
@@ -6468,6 +6487,7 @@ export function buildRouter() {
       phases.total_ms = Date.now() - t0;
       phases.wrapper_tax_ms = phases.total_ms - phases.chain_dispatch_ms;
       receipt.latency_breakdown = { ...phases };
+      if (_routerDecision) receipt.router_decision = _routerDecision;
       // W921 — emit OpenTelemetry GenAI semantic-convention metrics
       // (gen_ai.client.token.usage + gen_ai.client.operation.duration). No-op
       // when OTEL is unconfigured; fire-and-forget so telemetry never affects
@@ -6515,6 +6535,7 @@ export function buildRouter() {
       phases.total_ms = Date.now() - t0;
       phases.wrapper_tax_ms = phases.total_ms - phases.chain_dispatch_ms;
       receipt.latency_breakdown = { ...phases };
+      if (_routerDecision) receipt.router_decision = _routerDecision;
 
       // 8. Return
       // V1 launch / W-2: increment the gateway_calls meter and stamp the
