@@ -232,7 +232,7 @@ export async function putEmailRule(zone_id, rule) {
 
 // Default forward destination. Operators override with KOLM_EMAIL_FORWARD.
 function forwardTo() {
-  return process.env.KOLM_EMAIL_FORWARD || 'rodneyyesep@gmail.com';
+  return process.env.KOLM_EMAIL_FORWARD || 'dev@kolm.ai';
 }
 
 export function defaultEmailRules() {

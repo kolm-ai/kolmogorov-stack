@@ -146,7 +146,7 @@ test('W227 #11 - pillar W226 still cross-links every W227 article', () => {
 test('W227 #12 - each article has the 5-anchor canonical W221 nav', () => {
   for (const slug of SLUGS) {
     const html = read(slug);
-    for (const anchor of ['/product', '/models', '/docs', '/pricing', '/enterprise']) {
+    for (const anchor of ['/about', '/models', '/docs', '/pricing', '/enterprise']) {
       const re = new RegExp(`href="${anchor.replace(/\//g, '\\/')}"`);
       assert.match(html, re, `${slug} missing W221 nav anchor ${anchor}`);
     }

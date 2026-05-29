@@ -63,13 +63,15 @@ test('W223 #4 - install snippet shows `kolm tui` and a tmux/SSH/Tailscale form',
   assert.match(TUI_HTML, /Tailscale/i);
 });
 
-test('W223 #5 - cross-links to /captures + /quickstart + /foundations + /product', () => {
+test('W223 #5 - cross-links to /captures + /quickstart + /foundations + /about', () => {
   // Each of the four sibling surfaces the TUI sits between in the value loop
   // must be linked. Tested by anchor href, not link text (text can drift).
+  // /product was repointed to /about (the product page now lives at /about;
+  // /product 308-redirects there) per the W921 copy pass.
   assert.match(TUI_HTML, /href="\/captures"/);
   assert.match(TUI_HTML, /href="\/quickstart"/);
   assert.match(TUI_HTML, /href="\/foundations"/);
-  assert.match(TUI_HTML, /href="\/product"/);
+  assert.match(TUI_HTML, /href="\/about"/);
 });
 
 test('W223 #6 - vercel.json wires /tui → /tui.html', () => {

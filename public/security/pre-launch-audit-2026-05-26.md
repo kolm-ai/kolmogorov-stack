@@ -168,7 +168,7 @@ Status: PASS. Severity: none.
 
 ### 10. Public docs surface -- PASS
 
-- No real customer email patterns (`@gmail.com`, `@yahoo.com`, etc.) leaked. The only personal-domain email in public/ is the owner-published contact `rodneyyesep@gmail.com` (51 hits across /docs, /account, /security), which is deliberately the published kolm.ai contact -- not customer PII.
+- No real customer email patterns (`@gmail.com`, `@yahoo.com`, etc.) leaked. The only personal-domain email in public/ is the owner-published contact `dev@kolm.ai` (51 hits across /docs, /account, /security), which is deliberately the published kolm.ai contact -- not customer PII.
 - No `ks_*` API keys with 32 hex chars match in public/. Only example placeholders / prefix-truncated patterns appear (e.g. `ks_4b7bc3b1...` in public/docs/audit.html:100). This is fine as a documentation prefix; the truncation prevents key reuse.
 - No real `tenant_*` IDs in public/ except the documentation placeholder `tenant_4d3d8db6c820` (W547 prod tenant per the W547 wave note). Per MEMORY.md, that tenant has been rotated multiple times since W547; the surviving string is a prefix shown in docs, not a usable credential.
 

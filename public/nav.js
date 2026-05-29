@@ -804,7 +804,7 @@ return profile('platform', 'Product map', 'Gateway, compiler, runtime, proof.', 
     '<a class="ks-trust-ribbon__chip" href="/license"><span class="ks-trust-ribbon__dot" aria-hidden="true"></span>Apache-2.0</a>' +
     '<a class="ks-trust-ribbon__chip" href="/verify-prod"><span class="ks-trust-ribbon__dot" aria-hidden="true"></span>Ed25519-signed</a>' +
     '<a class="ks-trust-ribbon__chip" href="/pricing"><span class="ks-trust-ribbon__dot" aria-hidden="true"></span>No per-token bill</a>' +
-    '<a class="ks-trust-ribbon__chip" href="mailto:rodneyyesep@gmail.com"><span class="ks-trust-ribbon__dot" aria-hidden="true"></span>rodneyyesep@gmail.com</a>' +
+    '<a class="ks-trust-ribbon__chip" href="mailto:dev@kolm.ai"><span class="ks-trust-ribbon__dot" aria-hidden="true"></span>dev@kolm.ai</a>' +
    '</div>';
   foot.parentNode.insertBefore(ribbon, foot);
  })();

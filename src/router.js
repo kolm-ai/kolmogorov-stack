@@ -2730,7 +2730,7 @@ export function buildRouter() {
         ok: false,
         error: 'geo_restricted',
         country: countryCode,
-        contact: 'rodneyyesep@gmail.com',
+        contact: 'dev@kolm.ai',
       });
     }
     // Refuse to mint a second tenant for the same email. Silently re-issuing

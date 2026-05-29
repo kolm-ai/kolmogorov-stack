@@ -167,7 +167,7 @@ test('W708 #5 — signup with denylisted country returns HTTP 451 + geo_restrict
     assert.equal(blocked.json.ok, false);
     assert.equal(blocked.json.error, 'geo_restricted');
     assert.equal(blocked.json.country, 'IR');
-    assert.equal(blocked.json.contact, 'rodneyyesep@gmail.com');
+    assert.equal(blocked.json.contact, 'dev@kolm.ai');
 
     // Body-field form (no header) is also honored.
     const blockedBody = await postSignup({

@@ -103,8 +103,8 @@ test('W226 #11 - pillar has >= 8 section <h2> anchors (TOC-grade depth)', () => 
     `pillar should have >= 8 <h2> sections; saw ${h2s.length}`);
 });
 
-test('W226 #12 - cross-links to /product, /quickstart, /captures, /models, /compare, /drift, /runtimes, /spec/rs-1, /format/v2 present', () => {
-  for (const href of ['/product', '/quickstart', '/captures', '/models', '/compare', '/drift', '/runtimes', '/spec/rs-1', '/format/v2']) {
+test('W226 #12 - cross-links to /about, /quickstart, /captures, /models, /compare, /drift, /runtimes, /spec/rs-1, /format/v2 present', () => {
+  for (const href of ['/about', '/quickstart', '/captures', '/models', '/compare', '/drift', '/runtimes', '/spec/rs-1', '/format/v2']) {
     const re = new RegExp(`href="${href.replace(/\//g, '\\/')}"`);
     assert.match(HTML, re, `pillar must cross-link to ${href}`);
   }
