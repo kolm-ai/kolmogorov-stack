@@ -1,27 +1,52 @@
 // src/data-ingest.js
 //
-// W910 Track A — Data Ingestion.
+// W910 Track A — Data Ingestion. W921 — KOLM Data Engine INGEST stage.
 //
-// Three importer paths that turn real customer artifacts into the
-// {input, output, source}[] shape the rest of the compile pipeline already
-// understands. All three feed cmdCompile (cli/kolm.js) via the
-// --data / --describe / --docs flags; the combined form merges all three.
+// TWO layers live here:
 //
-// Exports:
-//   ingestData(filePath, opts)     - .csv/.tsv/.jsonl/.json (parquet rejected with hint)
-//   ingestDescribe(text, opts)     - synthetic seed expansion (teacher-backed if KOLM_TEACHER_BASE_URL)
-//   ingestDocs(folderPath, opts)   - .md/.txt/.html walk + Q&A extraction
-//   mergeAndDedupe(arrays)         - sha1(input) dedupe across sources
-//   synthesizeSpec(rows, opts)     - minimal spec.json so the pipeline can fall through
+//  1. The original "in-memory importer" surface (positional args) that turns
+//     customer artifacts into the {input, output, source}[] shape the compile
+//     pipeline understands. These feed cmdCompile (cli/kolm.js) via the
+//     --data / --describe / --docs flags; the combined form merges all three.
+//       ingestData(filePath, opts)     - .csv/.tsv/.jsonl/.json (parquet rejected with hint)
+//       ingestDescribe(text, opts)     - synthetic seed expansion (teacher-backed)
+//       ingestDocs(folderPath, opts)   - .md/.txt/.html walk + Q&A extraction
+//       mergeAndDedupe(arrays)         - sha1(input) dedupe across sources
+//       synthesizeSpec(rows, opts)     - minimal spec.json so the pipeline runs
+//
+//  2. The W921 INGEST stage: persistent, namespace-scoped raw-pairs that land in
+//     <KOLM_DATA_DIR>/<ns>/raw-pairs.jsonl, each line carrying a complete nested
+//     provenance block (see src/data-provenance.js). These are the {ok, n_written}
+//     object-arg entry points the Data Engine drives:
+//       ingestDescribe({namespace, description, n})       - SEED prompts (output '')
+//       ingestFile({namespace, file})                     - JSONL {input,output}
+//       ingestDocs({namespace, docs_dir})                 - chunk .md → reference output
+//       ingestFrom({namespace, source, file})             - provider export → input
+//       ingestPairs({namespace, pairs})                   - in-memory pairs source
+//       ingestCombined({namespace, sources:[...]})        - merge + dedupe by id
+//       readRawPairs(namespace) / rawPairsPath(namespace) - read / locate the JSONL
+//       validateProvenance(pair)                          - re-exported from provenance
+//
+//  ingestDescribe + ingestDocs are DUAL-SIGNATURE: an object arg carrying a
+//  `namespace` selects the W921 persistent path; the legacy positional string
+//  arg keeps the in-memory importer behavior intact for existing callers.
 //
 // No new npm deps. Reuses parseCsv + extractPairsFromJsonObjects + stripHtml
 // from src/seeds-mining.js so the parsing rules stay in one place.
 
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { parseCsv, extractPairsFromJsonObjects, extractPairsFromText, stripHtml } from './seeds-mining.js';
+import { recordProvenance, validateProvenance, summarizeProvenance } from './data-provenance.js';
+
+export const INGEST_VERSION = 'ingest-v1';
+
+// Re-export the provenance validator so callers (and the smoke) can import it
+// straight from the ingest surface; the contract is owned by data-provenance.js.
+export { validateProvenance, summarizeProvenance };
 
 const SUPPORTED_DATA_EXTS = new Set(['.csv', '.tsv', '.jsonl', '.ndjson', '.json']);
 const DOC_EXTS = new Set(['.md', '.txt', '.html', '.htm', '.rst', '.markdown']);
@@ -106,6 +131,424 @@ function filterRows(rawRows) {
   }
   stats.kept = out.length;
   return { rows: out, stats };
+}
+
+// =============================================================================
+// W921 INGEST stage — persistent, namespace-scoped raw-pairs.
+//
+// Every pair appended to <KOLM_DATA_DIR>/<ns>/raw-pairs.jsonl carries:
+//   id, input, output, source_type, ingested_at, source_ref,
+//   provenance:{ source_type, ingested_at, source_ref, extra }.
+// =============================================================================
+
+function _home() {
+  return process.env.HOME || process.env.USERPROFILE || os.homedir();
+}
+
+// Root for engine data. Honors KOLM_DATA_DIR (the smoke sets it to a temp dir
+// BEFORE importing this module), then KOLM_HOME, then ~/.kolm. The /<ns> dir
+// lives directly under this root so rawPairsPath('x') == <root>/x/raw-pairs.jsonl.
+function _dataRoot() {
+  if (process.env.KOLM_DATA_DIR) return path.resolve(process.env.KOLM_DATA_DIR);
+  if (process.env.KOLM_HOME) return path.join(path.resolve(process.env.KOLM_HOME), 'data');
+  return path.join(_home(), '.kolm', 'data');
+}
+
+function _safeNs(namespace) {
+  return String(namespace || 'default').replace(/[^a-zA-Z0-9_.-]/g, '_').slice(0, 128) || 'default';
+}
+
+// Path to the namespace's raw-pairs.jsonl under the data root. Pure (no IO).
+export function rawPairsPath(namespace) {
+  return path.join(_dataRoot(), _safeNs(namespace), 'raw-pairs.jsonl');
+}
+
+// Read all raw pairs for a namespace. A cold namespace yields []. Never throws.
+export function readRawPairs(namespace) {
+  const p = rawPairsPath(namespace);
+  let text;
+  try { text = fs.readFileSync(p, 'utf8'); }
+  catch { return []; }
+  const out = [];
+  for (const ln of text.split('\n')) {
+    const t = ln.trim();
+    if (!t) continue;
+    try { out.push(JSON.parse(t)); } catch { /* skip corrupt line */ }
+  }
+  return out;
+}
+
+// Stable id for a pair: explicit id wins (so callers can force dedupe);
+// otherwise sha1 over source_type + input + output keeps identical content from
+// re-appending on a re-run without depending on wall-clock.
+function _pairId(pair, sourceType) {
+  if (pair && pair.id != null && String(pair.id).trim()) return String(pair.id);
+  const basis = `${sourceType || ''} ${pair && pair.input != null ? String(pair.input) : ''} ${pair && pair.output != null ? String(pair.output) : ''}`;
+  return 'pr_' + sha1(basis).slice(0, 24);
+}
+
+// Normalize one raw pair into the on-disk line shape with a complete provenance
+// block. `sourceMeta` describes the origin (source_type + source_ref). Outputs
+// are preserved verbatim (including '' for seed prompts).
+function _toRawLine(pair, sourceMeta) {
+  const sourceType = sourceMeta.source_type;
+  const ingested_at = sourceMeta.ingested_at || new Date().toISOString();
+  const source_ref = String(pair.source_ref != null ? pair.source_ref
+    : (pair.source != null ? pair.source : sourceMeta.source_ref));
+  const id = _pairId(pair, sourceType);
+  const withProv = recordProvenance(
+    { id, input: pair.input != null ? String(pair.input) : '', output: pair.output != null ? String(pair.output) : '' },
+    { source_type: sourceType, source_ref, ingested_at, extra: sourceMeta.extra },
+  );
+  return withProv;
+}
+
+// Append normalized lines to the namespace JSONL, deduping by id WITHIN this
+// write AND against ids already on disk. Returns {n_written, dupes_skipped, ids}.
+function _appendRawPairs(namespace, pairs, sourceMeta) {
+  const target = rawPairsPath(namespace);
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+
+  const existing = new Set(readRawPairs(namespace).map(p => p && p.id).filter(Boolean));
+  const lines = [];
+  const ids = [];
+  let dupes = 0;
+  for (const raw of pairs) {
+    const line = _toRawLine(raw, sourceMeta);
+    if (existing.has(line.id)) { dupes++; continue; }
+    existing.add(line.id);
+    lines.push(JSON.stringify(line));
+    ids.push(line.id);
+  }
+  if (lines.length) fs.appendFileSync(target, lines.join('\n') + '\n', 'utf8');
+  return { n_written: lines.length, dupes_skipped: dupes, ids, path: target };
+}
+
+// ---- A2/W921: ingestDescribe({namespace, description, n}) — SEED prompts -----
+//
+// Writes n seed pairs whose OUTPUT IS EMPTY: they are prompts spanning the
+// described task, to be filled by a later AUGMENT/collect stage. This is the
+// object-arg signature; the legacy string-arg signature is handled below.
+async function ingestDescribeStage({ namespace, description, n = 8 } = {}) {
+  const desc = String(description || '').trim();
+  if (!desc) return { ok: false, error: 'description_required', version: INGEST_VERSION };
+  const count = Math.max(1, Math.min(2000, Number(n) || 8));
+  const ingested_at = new Date().toISOString();
+  const seeds = buildSeedPrompts(desc, count);
+  const res = _appendRawPairs(namespace, seeds, {
+    source_type: 'describe',
+    source_ref: 'describe:' + sha1(desc).slice(0, 16),
+    ingested_at,
+    extra: { description_sha256: sha256(desc), description_chars: desc.length },
+  });
+  return {
+    ok: true,
+    version: INGEST_VERSION,
+    source_type: 'describe',
+    namespace,
+    n_written: res.n_written,
+    dupes_skipped: res.dupes_skipped,
+    path: res.path,
+    rows: seeds.map((s, i) => ({ ...s, id: res.ids[i] })),
+  };
+}
+
+// Deterministic seed-prompt scaffolds: each one is a distinct angle on the
+// described task, phrased AS a prompt to be answered later. Outputs are empty.
+const _SEED_ANGLES = [
+  'a minimal, well-formed request',
+  'a typical everyday request',
+  'an edge-case request near a boundary',
+  'a malformed or ambiguous request',
+  'an unusually long, detailed request',
+  'a terse, one-line request',
+  'a request in casual, informal language',
+  'a request in formal, professional language',
+  'a request that references prior context',
+  'a request that asks for clarification',
+  'a high-stakes or urgent request',
+  'a request with an unsupported ask',
+];
+
+function buildSeedPrompts(description, n) {
+  const seeds = [];
+  for (let i = 0; i < n; i++) {
+    const angle = _SEED_ANGLES[i % _SEED_ANGLES.length];
+    const cycle = Math.floor(i / _SEED_ANGLES.length) + 1;
+    const suffix = cycle > 1 ? ` (variant ${cycle})` : '';
+    seeds.push({
+      // The input is a generation prompt; a later stage fills the empty output.
+      input: `For the task "${description}", produce ${angle}${suffix}.`,
+      output: '',
+      source: `describe:seed:${i + 1}`,
+    });
+  }
+  return seeds;
+}
+
+// ---- W921: ingestFile({namespace, file}) — JSONL of {input,output} ----------
+export async function ingestFile({ namespace, file } = {}) {
+  if (!file) return { ok: false, error: 'input_not_found', version: INGEST_VERSION };
+  const abs = path.resolve(file);
+  let text;
+  try { text = await fsp.readFile(abs, 'utf8'); }
+  catch { return { ok: false, error: 'input_not_found', version: INGEST_VERSION }; }
+
+  const ingested_at = new Date().toISOString();
+  const rows = [];
+  const lines = text.split(/\r?\n/);
+  for (let i = 0; i < lines.length; i++) {
+    const ln = lines[i].trim();
+    if (!ln || ln.startsWith('//') || ln.startsWith('#')) continue;
+    let parsed;
+    try { parsed = JSON.parse(ln); } catch { continue; }
+    for (const pair of extractPairsFromJsonObjects([parsed], path.basename(abs), i + 1)) {
+      rows.push({ input: pair.input, output: pair.output, source: pair.source });
+    }
+  }
+  const res = _appendRawPairs(namespace, rows, {
+    source_type: 'file',
+    source_ref: abs,
+    ingested_at,
+    extra: { file: path.basename(abs) },
+  });
+  return {
+    ok: true,
+    version: INGEST_VERSION,
+    source_type: 'file',
+    namespace,
+    n_written: res.n_written,
+    dupes_skipped: res.dupes_skipped,
+    path: res.path,
+  };
+}
+
+// ---- W921: ingestDocs({namespace, docs_dir}) — chunk .md → reference output -
+//
+// Each Markdown chunk becomes one pair: the heading is the input, the chunk
+// TEXT is the reference output (so every written pair has a non-empty output).
+async function ingestDocsStage({ namespace, docs_dir } = {}) {
+  const abs = path.resolve(docs_dir || '');
+  let st;
+  try { st = await fsp.stat(abs); } catch { return { ok: false, error: 'docs_dir_not_found', version: INGEST_VERSION }; }
+  if (!st.isDirectory()) return { ok: false, error: 'docs_dir_not_a_directory', version: INGEST_VERSION };
+
+  const files = await walkDocs(abs);
+  const ingested_at = new Date().toISOString();
+  const rows = [];
+  for (const f of files) {
+    let text;
+    try { text = await fsp.readFile(f, 'utf8'); } catch { continue; }
+    const ext = path.extname(f).toLowerCase();
+    if (ext === '.html' || ext === '.htm') text = stripHtml(text);
+    const chunks = chunkDocument(text, ext);
+    for (const c of chunks) {
+      const body = (c.text || c.body || '').trim();
+      if (!body) continue;
+      const input = (c.heading && c.heading.trim())
+        ? c.heading.trim()
+        : body.split(/\r?\n/)[0].slice(0, 200);
+      rows.push({
+        input: input || path.basename(f),
+        output: body,                       // chunk text IS the reference output
+        source: `${f}:${c.line || 1}`,
+      });
+    }
+  }
+  const res = _appendRawPairs(namespace, rows, {
+    source_type: 'docs',
+    source_ref: abs,
+    ingested_at,
+    extra: { docs_dir: abs, files_scanned: files.length },
+  });
+  return {
+    ok: true,
+    version: INGEST_VERSION,
+    source_type: 'docs',
+    namespace,
+    n_written: res.n_written,
+    dupes_skipped: res.dupes_skipped,
+    files_scanned: files.length,
+    path: res.path,
+  };
+}
+
+// ---- W921: ingestFrom({namespace, source, file}) — provider exports ---------
+//
+// Each supported provider exports request/response logs in its own shape. We
+// extract the USER INPUT (and the assistant output when present) so every
+// written pair carries a non-empty input.
+const FROM_SOURCES = new Set(['openai-finetune', 'portkey', 'helicone', 'litellm', 'hf']);
+
+function _lastUserContent(messages) {
+  if (!Array.isArray(messages)) return '';
+  let val = '';
+  for (const m of messages) {
+    if (m && m.role === 'user' && m.content != null) val = String(m.content);
+  }
+  // Fall back to the last non-system/non-assistant message if no explicit user.
+  if (!val) {
+    for (const m of messages) {
+      if (m && m.role !== 'assistant' && m.role !== 'system' && m.content != null) val = String(m.content);
+    }
+  }
+  return val;
+}
+
+function _firstAssistantContent(messages) {
+  if (!Array.isArray(messages)) return '';
+  for (const m of messages) {
+    if (m && m.role === 'assistant' && m.content != null) return String(m.content);
+  }
+  return '';
+}
+
+function _extractFromRecord(source, rec) {
+  if (!rec || typeof rec !== 'object') return null;
+  let input = '';
+  let output = '';
+  switch (source) {
+    case 'openai-finetune': {
+      input = _lastUserContent(rec.messages);
+      output = _firstAssistantContent(rec.messages);
+      break;
+    }
+    case 'portkey': {
+      const reqMsgs = rec.request && rec.request.messages;
+      input = _lastUserContent(reqMsgs);
+      const choice = rec.response && rec.response.choices && rec.response.choices[0];
+      output = (choice && choice.message && choice.message.content != null) ? String(choice.message.content) : '';
+      break;
+    }
+    case 'helicone': {
+      const req = rec.request || {};
+      input = req.prompt != null ? String(req.prompt) : _lastUserContent(req.messages);
+      const choice = rec.response && rec.response.choices && rec.response.choices[0];
+      output = choice ? String(choice.text != null ? choice.text : (choice.message && choice.message.content) || '') : '';
+      break;
+    }
+    case 'litellm': {
+      const reqMsgs = rec.request && rec.request.messages;
+      input = _lastUserContent(reqMsgs) || (rec.request && rec.request.prompt != null ? String(rec.request.prompt) : '');
+      output = (rec.response && rec.response.content != null) ? String(rec.response.content) : '';
+      break;
+    }
+    case 'hf': {
+      if (rec.prompt != null) { input = String(rec.prompt); output = rec.response != null ? String(rec.response) : ''; }
+      else if (rec.instruction != null) {
+        input = rec.input != null && String(rec.input).trim()
+          ? `${rec.instruction}\n\n${rec.input}`
+          : String(rec.instruction);
+        output = rec.output != null ? String(rec.output) : '';
+      } else if (rec.question != null) { input = String(rec.question); output = rec.answer != null ? String(rec.answer) : ''; }
+      else if (rec.input != null) { input = String(rec.input); output = rec.output != null ? String(rec.output) : ''; }
+      break;
+    }
+    default:
+      return null;
+  }
+  if (!input || !String(input).trim()) return null;
+  return { input: String(input), output: String(output || '') };
+}
+
+export async function ingestFrom({ namespace, source, file } = {}) {
+  if (!FROM_SOURCES.has(source)) {
+    return { ok: false, error: 'unsupported_source', supported: [...FROM_SOURCES], version: INGEST_VERSION };
+  }
+  if (!file) return { ok: false, error: 'input_not_found', version: INGEST_VERSION };
+  const abs = path.resolve(file);
+  let text;
+  try { text = await fsp.readFile(abs, 'utf8'); }
+  catch { return { ok: false, error: 'input_not_found', version: INGEST_VERSION }; }
+
+  const ingested_at = new Date().toISOString();
+  const rows = [];
+  const lines = text.split(/\r?\n/);
+  for (let i = 0; i < lines.length; i++) {
+    const ln = lines[i].trim();
+    if (!ln || ln.startsWith('//') || ln.startsWith('#')) continue;
+    let parsed;
+    try { parsed = JSON.parse(ln); } catch { continue; }
+    const pair = _extractFromRecord(source, parsed);
+    if (pair) rows.push({ ...pair, source: `${source}:${path.basename(abs)}:${i + 1}` });
+  }
+  const res = _appendRawPairs(namespace, rows, {
+    source_type: 'from:' + source,
+    source_ref: abs,
+    ingested_at,
+    extra: { provider: source, file: path.basename(abs) },
+  });
+  return {
+    ok: true,
+    version: INGEST_VERSION,
+    source_type: 'from:' + source,
+    namespace,
+    n_written: res.n_written,
+    dupes_skipped: res.dupes_skipped,
+    path: res.path,
+  };
+}
+
+// ---- W921: ingestPairs({namespace, pairs}) — in-memory source ---------------
+export async function ingestPairs({ namespace, pairs } = {}) {
+  const list = Array.isArray(pairs) ? pairs : [];
+  const ingested_at = new Date().toISOString();
+  const res = _appendRawPairs(namespace, list, {
+    source_type: 'pairs',
+    source_ref: 'pairs:in-memory',
+    ingested_at,
+    extra: { n_input: list.length },
+  });
+  return {
+    ok: true,
+    version: INGEST_VERSION,
+    source_type: 'pairs',
+    namespace,
+    n_written: res.n_written,
+    dupes_skipped: res.dupes_skipped,
+    path: res.path,
+  };
+}
+
+// ---- W921: ingestCombined({namespace, sources:[...]}) — merge + dedupe -------
+//
+// sources: [{kind:'file', file} | {kind:'pairs', pairs}]. Each contributes to
+// the SAME namespace; dedupe by explicit id is enforced across contributions
+// (an id seen in an earlier contribution drops the later duplicate).
+export async function ingestCombined({ namespace, sources } = {}) {
+  const list = Array.isArray(sources) ? sources : [];
+  const contributions = [];
+  let total = 0;
+
+  for (const src of list) {
+    if (!src || typeof src !== 'object') {
+      contributions.push({ kind: 'unknown', n_written: 0, dupes_skipped: 0, error: 'bad_source' });
+      continue;
+    }
+    let res;
+    if (src.kind === 'file') {
+      res = await ingestFile({ namespace, file: src.file });
+    } else if (src.kind === 'pairs') {
+      res = await ingestPairs({ namespace, pairs: src.pairs });
+    } else {
+      contributions.push({ kind: String(src.kind || 'unknown'), n_written: 0, dupes_skipped: 0, error: 'unsupported_kind' });
+      continue;
+    }
+    const nWritten = res && res.ok ? (res.n_written || 0) : 0;
+    const dupes = res && res.ok ? (res.dupes_skipped || 0) : 0;
+    total += nWritten;
+    contributions.push({ kind: src.kind, n_written: nWritten, dupes_skipped: dupes, ...(res && res.ok ? {} : { error: res && res.error }) });
+  }
+
+  return {
+    ok: true,
+    version: INGEST_VERSION,
+    source_type: 'combined',
+    namespace,
+    n_written: total,
+    contributions,
+    path: rawPairsPath(namespace),
+  };
 }
 
 // ---- A1: --data <file> -------------------------------------------------------
@@ -239,6 +682,11 @@ function parseJsonFile(text, filename) {
 // ---- A2: --describe "..." ----------------------------------------------------
 
 export async function ingestDescribe(description, opts = {}) {
+  // W921 dual-signature: an object arg carrying a `namespace` selects the
+  // persistent INGEST-stage path (writes empty-output seed prompts to disk).
+  if (description && typeof description === 'object' && !Array.isArray(description) && 'namespace' in description) {
+    return ingestDescribeStage(description);
+  }
   const desc = String(description || '').trim();
   if (!desc) throw new Error('ingestDescribe: description is empty');
   if (desc.length > 16000) throw new Error(`ingestDescribe: description is ${desc.length} chars; cap is 16000.`);
@@ -303,21 +751,23 @@ export async function ingestDescribe(description, opts = {}) {
   };
 }
 
-// W921 — object-arg wrapper consumed by the autopilot bootstrap. Normalizes the
-// ingestDescribe result into an {ok:true, ...} envelope (the bootstrap gates on
-// seed.ok === true). Errors propagate to the caller's try/catch.
-export async function ingestDescribeEngine({ tenant, namespace, description, n, count, budgetUsd, teacherBaseUrl, teacherKey, onProgress } = {}) {
-  const result = await ingestDescribe(description, {
-    count: n != null ? n : count,
+// W921 — object-arg entry consumed by the autopilot bootstrap. Seeds the
+// namespace's persistent raw-pairs.jsonl (empty-output prompts, no teacher
+// spend) and returns the {ok:true, rows, n_written, path, dupes_skipped}
+// envelope the bootstrap gates on (it reads seed.ok, seed.n_written,
+// seed.path, seed.dupes_skipped). Errors surface as {ok:false, error}.
+export async function ingestDescribeEngine({ tenant, namespace, description, n, count } = {}) {
+  const want = n != null ? n : count;
+  const result = await ingestDescribeStage({
     namespace,
-    tenant,
-    budgetUsd,
-    teacherBaseUrl,
-    teacherKey,
-    onProgress,
+    description,
+    n: want != null ? Number(want) : DEFAULT_SEED_TARGET_ENGINE,
   });
-  return { ok: true, ...result };
+  // Preserve tenant on the envelope for callers that thread it through.
+  return tenant != null ? { ...result, tenant } : result;
 }
+
+const DEFAULT_SEED_TARGET_ENGINE = 8;
 
 async function synthesizeViaTeacher(description, count, { teacherBase, teacherKey, onProgress }) {
   const out = [];
@@ -398,6 +848,12 @@ function bootstrapSeedsFromDescription(description, n) {
 // ---- A3: --docs <folder> -----------------------------------------------------
 
 export async function ingestDocs(folderPath, opts = {}) {
+  // W921 dual-signature: an object arg carrying `namespace`/`docs_dir` selects
+  // the persistent INGEST-stage path (writes chunk pairs to raw-pairs.jsonl).
+  if (folderPath && typeof folderPath === 'object' && !Array.isArray(folderPath)
+      && ('namespace' in folderPath || 'docs_dir' in folderPath)) {
+    return ingestDocsStage(folderPath);
+  }
   const abs = path.resolve(folderPath);
   let st;
   try { st = await fsp.stat(abs); }
