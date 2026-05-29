@@ -1,0 +1,25 @@
+// kolm public seed dataset: email-classifier
+// status: synthetic, public domain, illustrative only
+// purpose: starter examples for routing inbound email into a small label set.
+//          labels: billing, support, sales, spam, account, feedback, other.
+//          modeled after common helpdesk triage taxonomies (no real messages).
+// usage:   bootstrap with `kolm seeds bootstrap --task email-classifier`, then
+//          REPLACE these with your own real examples before training. K-score
+//          measured on synthetic data is not K-score measured on your data.
+// license: public domain (CC0). these rows do not describe any real person.
+{"input": "Subject: Double charge on my invoice\n\nI was billed twice for the October plan. Can you refund the duplicate charge?", "output": {"label": "billing"}, "tags": ["billing", "refund"]}
+{"input": "Subject: App keeps crashing on startup\n\nEvery time I open the desktop app it closes after a few seconds. I'm on the latest version.", "output": {"label": "support"}, "tags": ["support", "bug"]}
+{"input": "Subject: Interested in your Enterprise tier\n\nHi, we're a 200-person team evaluating tools for Q3. Could we book a demo and get volume pricing?", "output": {"label": "sales"}, "tags": ["sales", "demo"]}
+{"input": "Subject: CONGRATULATIONS you have WON $5,000,000\n\nClick here now to claim your prize before it expires!!! Limited time offer.", "output": {"label": "spam"}, "tags": ["spam", "phishing"]}
+{"input": "Subject: Reset my password\n\nI can't log in and the reset link in my email isn't working. Please help me regain access.", "output": {"label": "account"}, "tags": ["account", "login"]}
+{"input": "Subject: Love the new dashboard\n\nJust wanted to say the redesigned reports view is fantastic. Much easier to read now.", "output": {"label": "feedback"}, "tags": ["feedback", "praise"]}
+{"input": "Subject: Update my company billing address\n\nWe moved offices. Please change the address on file for future receipts to the new location.", "output": {"label": "billing"}, "tags": ["billing", "update"]}
+{"input": "Subject: API returning 500 errors since this morning\n\nOur integration started failing around 9am. Is there an outage on your end?", "output": {"label": "support"}, "tags": ["support", "outage"]}
+{"input": "Subject: Quote request for 50 seats\n\nCan you send pricing for an annual plan with 50 user seats and SSO included?", "output": {"label": "sales"}, "tags": ["sales", "quote"]}
+{"input": "Subject: Re: Re: invoice\n\nBuy cheap meds online, no prescription needed, fast shipping worldwide. Visit our store today.", "output": {"label": "spam"}, "tags": ["spam"]}
+{"input": "Subject: Delete my account and data\n\nI'd like to close my account and have all my personal data erased per your privacy policy.", "output": {"label": "account"}, "tags": ["account", "deletion"]}
+{"input": "Subject: Feature idea: dark mode\n\nIt would be great if the mobile app had a dark theme for nighttime use. Just a suggestion.", "output": {"label": "feedback"}, "tags": ["feedback", "feature-request"]}
+{"input": "Subject: Where is my receipt for last month?\n\nI never received an email receipt for the September payment. Can you resend it?", "output": {"label": "billing"}, "tags": ["billing", "receipt"]}
+{"input": "Subject: Export not downloading\n\nWhen I click Export to CSV nothing happens in Chrome. Works in Firefox though.", "output": {"label": "support"}, "tags": ["support", "bug"]}
+{"input": "Subject: hello\n\nhey just checking what your product actually does, saw it mentioned somewhere", "output": {"label": "other"}, "tags": ["other", "general"]}
+{"input": "Subject: Two-factor authentication not sending codes\n\nThe SMS codes for 2FA aren't arriving so I'm locked out of my account.", "output": {"label": "account"}, "tags": ["account", "2fa"]}

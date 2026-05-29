@@ -109,6 +109,10 @@ import * as forgeHardware from './forge-hardware.js';
 import * as forgeInspect from './forge-inspect.js';
 import * as forgeFit from './forge-fit.js';
 import * as forgeExperts from './forge-experts.js';
+// W921 — model merging primitive (TIES/DARE/SLERP/linear in delta-W space).
+// mergeAdapters() is local-CLI-only (spawnSync over merge_adapters.py); the
+// /v1/merge route enqueues it on a background fiber and returns 202 + merge_id.
+import * as modelMerge from './model-merge.js';
 // W729 — graceful degradation under load. enqueue() gates the hot inference
 // routes with a FIFO + priority lane queue; queue_full / queue_timeout
 // rejections surface as HTTP 429 + Retry-After via the loadQueueMiddleware
@@ -26098,14 +26102,110 @@ res.json({
         dry_run: !!body.dry_run,
       };
       if (body.dry_run) return res.json(envelope);
-      // Real merge is a compile job in disguise — it writes a new .kolm.
-      // For now, return 501 with the plan + how to execute via CLI until the
-      // background merge worker lands.
-      res.status(501).json({
-        ...envelope,
-        error: 'merge_execution_not_yet_wired',
-        hint: `run locally: kolm merge ${body.base} ${body.head} --method ${method}`,
+
+      // Real execution. mergeAdapters() is local-CLI-only — it spawns
+      // workers/distill/scripts/merge_adapters.py via spawnSync and may run for
+      // minutes on a GPU box. Mirror the compile job-queue pattern: persist a
+      // durable merge_jobs record, kick the merge on a background fiber
+      // (setImmediate), and return 202/accepted with a merge_id the caller can
+      // poll via GET /v1/merge/:id — never block the request thread, never 501.
+      const merge_id = 'merge_' + crypto.randomBytes(6).toString('hex');
+      const alphaNum = Number(body.alpha || 0.5);
+      // The route surfaces a 2-adapter blend (base + head). Map alpha onto the
+      // module's N-adapter weight vector: alpha is the blend toward head, so
+      // base gets (1-alpha) and head gets alpha. Map the route's method names
+      // onto model-merge's MERGE_METHODS (dare -> dare_ties, passthrough has no
+      // weight primitive so it lowers to a linear copy).
+      const methodMap = { linear: 'linear', slerp: 'slerp', ties: 'ties', dare: 'dare_ties', passthrough: 'linear' };
+      const mergeMethod = methodMap[method] || 'linear';
+      const weights = [Number((1 - alphaNum).toFixed(6)), Number(alphaNum.toFixed(6))];
+
+      const now = new Date().toISOString();
+      const record = {
+        id: merge_id,
+        merge_id,
+        tenant: req.tenant,
+        tenant_id: req.tenant_record?.id || null,
+        kind: 'model_merge',
+        status: 'queued',
+        method,
+        merge_method: mergeMethod,
+        alpha: alphaNum,
+        same_lineage: sameLineage,
+        base_path: body.base,
+        head_path: body.head,
+        output_dir: null,
+        result: null,
+        error: null,
+        created_at: now,
+        updated_at: now,
+      };
+      try { insert('merge_jobs', record); } catch (_) { /* table autocreated on first insert */ }
+
+      // Background fiber. spawnSync inside mergeAdapters is synchronous, so wrap
+      // it so the event loop yields the 202 first. All errors are captured into
+      // the durable record — they never crash the process.
+      setImmediate(() => {
+        try {
+          update('merge_jobs', x => x.id === merge_id, { status: 'running', updated_at: new Date().toISOString() });
+          const out = modelMerge.mergeAdapters({
+            adapters: [body.base, body.head],
+            method: mergeMethod,
+            weights,
+            density: (typeof body.density === 'number' && Number.isFinite(body.density)) ? body.density : 0.5,
+            svdRank: (typeof body.svd_rank === 'number') ? body.svd_rank : null,
+            baseModel: baseInfo.base_model || headInfo.base_model || null,
+            json: true,
+          });
+          if (out && out.ok) {
+            update('merge_jobs', x => x.id === merge_id, {
+              status: out.trainer_kicked ? 'completed' : 'planned',
+              output_dir: out.output_dir || null,
+              result: out,
+              updated_at: new Date().toISOString(),
+            });
+          } else {
+            update('merge_jobs', x => x.id === merge_id, {
+              status: 'failed',
+              error: (out && out.error) ? String(out.error) : 'merge_failed',
+              result: out || null,
+              updated_at: new Date().toISOString(),
+            });
+          }
+        } catch (e) {
+          try {
+            update('merge_jobs', x => x.id === merge_id, {
+              status: 'failed',
+              error: String(e && e.message ? e.message : e),
+              updated_at: new Date().toISOString(),
+            });
+          } catch (_) { /* swallow — never crash the background fiber */ }
+        }
       });
+
+      res.status(202).json({
+        ...envelope,
+        merge_id,
+        status: 'queued',
+        merge_method: mergeMethod,
+        weights: { [path.basename(body.base) || 'base']: weights[0], [path.basename(body.head) || 'head']: weights[1] },
+        poll: `/v1/merge/${merge_id}`,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: String(e.message || e) });
+    }
+  });
+
+  // GET /v1/merge/:id — poll a merge job created by POST /v1/merge (dry_run=false).
+  // Returns the durable merge_jobs record (status queued|running|completed|
+  // planned|failed). Tenant-scoped: a tenant can only read its own merge jobs.
+  r.get('/v1/merge/:id', authMiddleware, async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const id = String(req.params.id || '');
+      const rec = findOne('merge_jobs', x => x.id === id && !x._deleted);
+      if (!rec || rec.tenant !== req.tenant) return res.status(404).json({ ok: false, error: 'merge_not_found' });
+      res.json({ ok: true, ...rec });
     } catch (e) {
       res.status(500).json({ ok: false, error: String(e.message || e) });
     }

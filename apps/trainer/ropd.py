@@ -545,6 +545,132 @@ def _self_test() -> dict[str, Any]:
 
 
 # ===========================================================================
+# Real on-policy GRPO training loop (GPU). Reuses the tested pure core:
+# ropd_step() (rubric -> rewards -> advantages) + grpo_advantages(). The only
+# new pieces here are (a) student rollout sampling, (b) the teacher-text JUDGE
+# wired to a real model, and (c) the GRPO policy-gradient update.
+# ===========================================================================
+
+def ropd_train(cfg: "RopdConfig", rows, *, out_dir: str, student_base: str,
+               teacher_model: Optional[str], max_steps: int) -> dict:
+    """Run ROPD on a GPU. For each prompt: sample G student rollouts, take the
+    teacher reference(s), induce a rubric + verify each rollout with teacher
+    TEXT (ropd_step), then apply the GRPO update toward the student's own
+    high-advantage rollouts. Returns run-meta incl. the loss/reward trajectory.
+    Small + deterministic-by-seed so it completes on a single RTX 5090."""
+    import torch
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from peft import LoraConfig, TaskType, get_peft_model
+
+    dev = "cuda" if torch.cuda.is_available() else "cpu"
+    dtype = torch.bfloat16 if (dev == "cuda" and torch.cuda.is_bf16_supported()) else torch.float32
+    torch.manual_seed(cfg.seed)
+    teacher_id = teacher_model or student_base
+
+    stok = AutoTokenizer.from_pretrained(student_base)
+    if stok.pad_token is None:
+        stok.pad_token = stok.eos_token
+    ttok = AutoTokenizer.from_pretrained(teacher_id)
+    if ttok.pad_token is None:
+        ttok.pad_token = ttok.eos_token
+
+    base = AutoModelForCausalLM.from_pretrained(student_base, torch_dtype=dtype).to(dev)
+    lcfg = LoraConfig(task_type=TaskType.CAUSAL_LM, r=getattr(cfg, "lora_r", 16),
+                      lora_alpha=getattr(cfg, "lora_alpha", 32), lora_dropout=0.0,
+                      target_modules=["q_proj", "k_proj", "v_proj", "o_proj"])
+    student = get_peft_model(base, lcfg)
+    student.train()
+    if teacher_id == student_base:
+        teacher = base  # self-judge: reuse weights, no second copy in VRAM
+    else:
+        teacher = AutoModelForCausalLM.from_pretrained(teacher_id, torch_dtype=dtype).to(dev)
+    teacher.eval()
+    for p in teacher.parameters():
+        p.requires_grad = False
+
+    def _gen(model, tok, text, max_new, temp):
+        enc = tok.apply_chat_template([{"role": "user", "content": text}],
+                                      add_generation_prompt=True, return_tensors="pt",
+                                      return_dict=True).to(dev)
+        kw = dict(max_new_tokens=max_new, pad_token_id=tok.pad_token_id)
+        if temp and temp > 0:
+            kw.update(do_sample=True, temperature=temp, top_p=cfg.top_p)
+        else:
+            kw.update(do_sample=False)
+        with torch.no_grad():
+            out = model.generate(**enc, **kw)
+        return tok.decode(out[0][enc["input_ids"].shape[1]:], skip_special_tokens=True).strip()
+
+    def induce(prompt, refs, rollouts, *, min_items, max_items):
+        raw = _gen(teacher, ttok, build_rubricator_prompt(prompt, refs, rollouts,
+                   min_items=min_items, max_items=max_items), 400, 0.0)
+        try:
+            return parse_rubric(raw, min_items=min_items, max_items=max_items)
+        except Exception:
+            return heuristic_induce_rubric(prompt, refs, rollouts,
+                                           min_items=min_items, max_items=max_items)
+
+    def verify(prompt, cand, item):
+        raw = _gen(teacher, ttok, build_verifier_prompt(prompt, cand, item.criterion), 4, 0.0)
+        return 1 if raw.strip().startswith("1") else 0
+
+    def seq_logprob(prompt, completion):
+        # log p(completion | prompt) under the CURRENT student policy, with grad.
+        pids = stok.apply_chat_template([{"role": "user", "content": prompt}],
+                                        add_generation_prompt=True, return_tensors="pt",
+                                        return_dict=True)["input_ids"].to(dev)
+        cids = stok(completion, return_tensors="pt", add_special_tokens=False).input_ids.to(dev)
+        ids = torch.cat([pids, cids], dim=1)[:, :1024]
+        logits = student(ids).logits[:, :-1, :]
+        logp = torch.log_softmax(logits.float(), dim=-1)
+        tok_lp = logp.gather(-1, ids[:, 1:].unsqueeze(-1)).squeeze(-1)
+        comp_lp = tok_lp[:, pids.shape[1] - 1:]  # only the completion tokens
+        return comp_lp.mean() if comp_lp.numel() else logits.new_zeros(())
+
+    opt = torch.optim.AdamW([p for p in student.parameters() if p.requires_grad],
+                            lr=cfg.learning_rate)
+    G = max(2, min(cfg.num_rollouts, 4))
+    mc = min(cfg.max_completion_length, 96)
+    steps = min(len(rows), max_steps)
+    traj = []
+    opt.zero_grad()
+    for i in range(steps):
+        row = rows[i]
+        prompt = row["prompt"]
+        refs = (row.get("teacher_refs") or [])[:cfg.num_teacher_refs]
+        if not refs:
+            refs = [_gen(teacher, ttok, prompt, mc, 0.0)]
+        rollouts = [_gen(student, stok, prompt, mc, max(cfg.temperature, 0.7)) for _ in range(G)]
+        rollouts = [r for r in rollouts if r.strip()] or ["(no answer)"]
+        res = ropd_step(prompt, refs, rollouts, cfg=cfg, induce=induce, verify=verify)
+        advs = res["advantages"][:len(rollouts)]
+        losses = [-(float(a)) * seq_logprob(prompt, r) for r, a in zip(rollouts, advs)]
+        loss = torch.stack(losses).mean()
+        (loss / max(1, cfg.gradient_accumulation_steps)).backward()
+        if (i + 1) % max(1, cfg.gradient_accumulation_steps) == 0 or i == steps - 1:
+            torch.nn.utils.clip_grad_norm_([p for p in student.parameters() if p.requires_grad], 1.0)
+            opt.step()
+            opt.zero_grad()
+        traj.append({"step": i, "rubric_size": res["rubric_size"],
+                     "reward_mean": round(res["reward_mean"], 4),
+                     "loss": round(float(loss.detach()), 4),
+                     "advantages": [round(float(x), 3) for x in advs]})
+
+    os.makedirs(out_dir, exist_ok=True)
+    student.save_pretrained(out_dir)
+    vram = (torch.cuda.max_memory_allocated() / 1e9) if dev == "cuda" else 0.0
+    return {
+        "trainer_invoked": True, "device": dev, "dtype": str(dtype),
+        "student_base": student_base, "teacher_model": teacher_id,
+        "steps": steps, "rollouts_per_prompt": G, "max_completion_length": mc,
+        "vram_peak_gb": round(vram, 2), "trajectory": traj,
+        "reward_first": traj[0]["reward_mean"] if traj else None,
+        "reward_last": traj[-1]["reward_mean"] if traj else None,
+        "adapter_dir": out_dir,
+    }
+
+
+# ===========================================================================
 # CLI.
 # ===========================================================================
 
@@ -566,6 +692,11 @@ def _build_argparser() -> argparse.ArgumentParser:
                    help="Output directory for the updated adapter + run-meta.json.")
     p.add_argument("--student-base", type=str, default=RopdConfig.student_base,
                    help="HF id of the student base when --student is an adapter root.")
+    p.add_argument("--teacher-model", type=str, default=None,
+                   help="HF id of the teacher model that judges rubrics (text-only). "
+                        "Defaults to --student (self-judge) when unset.")
+    p.add_argument("--max-steps", type=int, default=8,
+                   help="Max prompts to train on in the real-run GRPO loop.")
     p.add_argument("--num-rollouts", type=int, default=RopdConfig.num_rollouts,
                    help="G student rollouts per prompt (ROPD default 8).")
     p.add_argument("--num-teacher-refs", type=int, default=RopdConfig.num_teacher_refs,
@@ -703,23 +834,18 @@ def main(argv: Optional[list[str]] = None) -> int:
                "import_error": str(e), "version": VERSION})
         return 3
 
-    # The real on-policy GRPO loop is GPU work the orchestrator runs after this
-    # agent. It (1) loads the student + a LoRA head, (2) for each prompt samples
-    # G rollouts via apps.trainer.distill.generate_student_responses, (3) calls
-    # the teacher-text JUDGE (kolm teacher-bridge) for ropd_step(), and (4)
-    # applies the GRPO update with the rubric reward via apps.trainer.grpo.
-    # We import the reused pieces here so the wiring is real, and write run-meta.
-    os.makedirs(args.out, exist_ok=True)
+    # Real on-policy GRPO loop: sample student rollouts, judge with teacher TEXT
+    # (ropd_step), apply the GRPO update toward high-advantage rollouts.
+    try:
+        train_meta = ropd_train(cfg, rows, out_dir=args.out, student_base=args.student,
+                                teacher_model=args.teacher_model, max_steps=args.max_steps)
+    except Exception as e:  # pragma: no cover -- GPU/real-run path
+        import traceback
+        _emit({"ok": False, "error": "ropd_train_failed", "detail": str(e),
+               "trace": traceback.format_exc()[-1200:], "version": VERSION})
+        return 4
     run_meta = dict(plan)
-    run_meta.update({
-        "ok": True,
-        "mode": "real_run",
-        "trainer_not_invoked": True,
-        "hint": ("GPU GRPO loop is launched by the orchestrator; this entrypoint "
-                 "validated args, parsed prompts, and staged run-meta. The pure "
-                 "ROPD scoring core (rubric -> reward -> advantage) is in "
-                 "ropd_step() and is GPU-free."),
-    })
+    run_meta.update({"ok": True, "mode": "real_run", **train_meta})
     meta_path = os.path.join(args.out, "run-meta.json")
     with open(meta_path, "w", encoding="utf-8") as f:
         json.dump(run_meta, f, indent=2, sort_keys=True)

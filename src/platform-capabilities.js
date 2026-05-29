@@ -115,8 +115,14 @@ export const MODEL_FRAMEWORK_TARGETS = Object.freeze([
     model_types: ['recipe', 'classifier', 'small-llm', 'embedding'],
     runtime_formats: ['wasm', 'webgpu'],
     env: [],
-    evidence: ['public/sdk.js', 'server.js', 'docs/kolm-format-v1.md'],
-    status: 'implemented',
+    evidence: ['public/sdk.js', 'public/device/webgpu-runner.js', 'public/device/webgpu-runner.html', 'server.js', 'docs/kolm-format-v1.md'],
+    // Honest status: the WASM wrapper SDK ships, and a minimal transformers.js
+    // on-device runner (CDN ESM, WebGPU backend with WASM fallback) now exists
+    // at public/device/webgpu-runner.{js,html}. It is a tiny-model demo path,
+    // not a full Kolm-artifact WebGPU inference engine, so this is not yet a
+    // production 'implemented' runtime for arbitrary recipes.
+    status: 'in_progress',
+    note: 'Minimal transformers.js WebGPU/WASM token-generation runner shipped (public/device/webgpu-runner.js); full Kolm-artifact in-browser inference is not yet implemented.',
   },
   {
     id: 'vllm',
