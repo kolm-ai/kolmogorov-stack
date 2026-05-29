@@ -95,7 +95,7 @@ installSurfaceGuard();
       '</div>',
       '<div>',
       '<h4>Company</h4>',
-      '<ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/product">About</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li></ul>',
+      '<ul><li><a href="/pricing">Pricing</a></li><li><a href="/docs">Docs</a></li><li><a href="/about">About</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li></ul>',
       '</div>',
       '</div>',
       '<div class="ks-footer__bottom">',
@@ -757,7 +757,7 @@ return profile('platform', 'Product map', 'Gateway, compiler, runtime, proof.', 
  // their intent-aware right-side (Quickstart vs Get started vs Talk to sales).
  (function unifyPrimaryNav() {
   var canonical = [
-   { href: '/product', label: 'Product' },
+   { href: '/about', label: 'About' },
    { href: '/use-cases', label: 'Use cases' },
    { href: '/pricing', label: 'Pricing' },
    { href: '/docs', label: 'Docs' },

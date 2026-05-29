@@ -3,60 +3,180 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
-<title>About kolm · who we are and what we are building · kolm.ai</title>
-<meta name="description" content="kolm is an open-source AI compiler. Apache-2.0, self-hostable, runs air-gapped. Our mission, who we are, how to reach us.">
-<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<title>About kolm · route, distill, run anywhere · kolm.ai</title>
+<meta name="description" content="Kolm is the product stack for production AI: route any model through one gateway, distill approved work into signed specialists, and run .kolm artifacts on cloud, browser, phone, VPC, or air-gap.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
-<meta property="og:title" content="About">
-<meta property="og:description" content="kolm is an open-source AI compiler. Apache-2.0, self-hostable, runs air-gapped. Our mission, who we are, how to reach us.">
-<meta property="og:type" content="article">
+<meta property="og:title" content="Product: route, distill, run anywhere">
+<meta property="og:description" content="One gateway, one compiler, one signed runtime for every production AI surface.">
 <meta property="og:url" content="https://kolm.ai/about">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://kolm.ai/about">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="preload" href="/design-tokens.css" as="style">
-<link rel="preload" href="/ks.css" as="style">
-<link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/surface-polish.css">
-<link rel="stylesheet" href="/warm-paper.css">
+<link rel="stylesheet" href="/kolm-svg.css">
+<link rel="stylesheet" href="/supplement.css">
+    <link rel="stylesheet" href="/warm-paper.css">
 <script defer src="/nav.js"></script>
+<script defer src="/kolm-svg.js"></script>
+<script defer src="/supplement.js"></script>
 <style>
+  /* ---------- hero with pipeline panel ---------- */
+  .p-hero { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--ks-12); align-items: center; }
+  @media (max-width: 980px) { .p-hero { grid-template-columns: 1fr; gap: var(--ks-8); } }
+  .p-pipe { border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); background: linear-gradient(180deg, color-mix(in srgb, var(--ks-accent-soft) 35%, transparent), transparent 60%), var(--ks-bg-1); padding: var(--ks-6); position: relative; overflow: hidden; }
+  .p-pipe__top { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--ks-5); font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ks-ink-3); }
+  .p-pipe__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ks-accent); box-shadow: 0 0 12px var(--ks-accent); animation: p-pulse 2s infinite; }
+  @keyframes p-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+  .p-pipe__steps { display: grid; gap: var(--ks-3); }
+  .p-pipe__step { display: grid; grid-template-columns: 32px 1fr auto; gap: var(--ks-4); align-items: center; padding: 10px 12px; border-radius: var(--ks-r-md); background: color-mix(in srgb, var(--ks-bg) 50%, transparent); border: 1px solid var(--ks-line-1); transition: border-color 200ms, background 200ms, transform 200ms; }
+  .p-pipe__step:hover { border-color: var(--ks-accent-edge); background: color-mix(in srgb, var(--ks-accent-soft) 18%, var(--ks-bg)); transform: translateX(2px); }
+  .p-pipe__step .num { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-accent); width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--ks-accent-soft); border: 1px solid var(--ks-accent-edge); font-weight: 500; }
+  .p-pipe__step .lbl { font-family: var(--ks-sans); font-size: 14px; color: var(--ks-ink); font-weight: 500; }
+  .p-pipe__step .sub { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); }
+  .p-pipe__arrow { display: flex; justify-content: center; padding: 2px 0; color: var(--ks-ink-3); font-family: var(--ks-mono); }
+  .p-pipe__caption { margin-top: var(--ks-4); padding-top: var(--ks-4); border-top: 1px solid var(--ks-line-1); color: var(--ks-ink-2); font-family: var(--ks-mono); font-size: 11.5px; line-height: 1.55; }
+
+  /* ---------- pillar strip ---------- */
+  .p-pillars { padding: var(--ks-10) 0; border-top: 1px solid var(--ks-line-1); border-bottom: 1px solid var(--ks-line-1); }
+  .p-pillars__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--ks-8); }
+  @media (max-width: 880px) { .p-pillars__grid { grid-template-columns: repeat(2, 1fr); gap: var(--ks-5); } }
+  .p-pillar { display: grid; gap: var(--ks-2); }
+  .p-pillar .tag { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-accent); }
+  .p-pillar .name { font-size: 22px; font-weight: 520; color: var(--ks-ink); line-height: 1.1; letter-spacing: 0; }
+  .p-pillar .desc { font-size: 13.5px; color: var(--ks-ink-3); line-height: 1.55; max-width: 28ch; }
+
   
-  .ab-prose { max-width: 68ch; margin: 0 auto; font-size: 17px; line-height: 1.7; color: var(--ks-ink-2); }
-  .ab-prose p { margin: 0 0 var(--ks-4); }
-  .ab-prose strong { color: var(--ks-ink); font-weight: 580; }
-  .ab-prose a { color: var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge); transition: border-color 140ms; }
-  .ab-prose a:hover { border-bottom-color: var(--ks-accent); }
+  .p-decide { padding: var(--ks-12) 0; }
+  .p-decide__head { margin-bottom: var(--ks-8); max-width: 60ch; }
+  .p-decide__head h2 { font-size: clamp(28px, 3vw, 40px); margin: 0 0 var(--ks-3); font-weight: 540; letter-spacing: -0.012em; }
+  .p-decide__head p { color: var(--ks-ink-2); margin: 0; font-size: 16px; line-height: 1.6; max-width: 56ch; }
+  .p-paths { display: grid; grid-template-columns: 1fr 1fr; gap: var(--ks-8) var(--ks-10); border-top: 1px solid var(--line-2); padding-top: var(--ks-7); }
+  @media (max-width: 880px) { .p-paths { grid-template-columns: 1fr; gap: var(--ks-6); padding-top: var(--ks-5); } }
+  .p-path { background: transparent; border: 0; border-radius: 0; padding: 0; display: flex; flex-direction: column; transition: none; }
+  .p-path:hover { border-color: transparent; transform: none; }
+  .p-path__tag { display: inline-flex; align-items: center; gap: 6px; font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-accent); margin-bottom: var(--ks-3); }
+  .p-path__tag::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--ks-accent); }
+  .p-path__h3 { font-size: clamp(22px, 2.4vw, 28px); margin: 0 0 var(--ks-2); font-weight: 540; letter-spacing: -0.012em; color: var(--ks-ink); line-height: 1.2; }
+  .p-path__who { font-size: 13.5px; color: var(--ks-ink-3); margin: 0 0 var(--ks-4); font-style: italic; }
+  .p-path__body { color: var(--ks-ink-2); font-size: 15px; line-height: 1.65; margin: 0 0 var(--ks-4); max-width: 50ch; }
+  .p-path ul { margin: 0 0 var(--ks-5); padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .p-path ul li { color: var(--ks-ink-2); font-size: 13.5px; line-height: 1.55; padding-left: 14px; position: relative; }
+  .p-path ul li::before { content: ""; position: absolute; left: 0; top: 9px; width: 6px; height: 1px; background: var(--ks-accent); }
+  .p-path__cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: auto; }
 
-  .ab-founder { max-width: 68ch; margin: 0 auto; padding: var(--ks-6); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: var(--ks-5); align-items: start; }
-  @media (max-width: 640px) { .ab-founder { grid-template-columns: 1fr; gap: var(--ks-3); } }
-  .ab-founder__photo { width: 120px; height: 120px; border-radius: 50%; background: var(--ks-bg-2, #ecece8); border: 1px solid var(--ks-line-2); display: grid; place-items: center; font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); letter-spacing: 0.04em; text-align: center; padding: 6px; }
-  .ab-founder__name { margin: 0 0 6px; font-size: 20px; font-weight: 580; color: var(--ks-ink); letter-spacing: -0.01em; }
-  .ab-founder__role { margin: 0 0 var(--ks-3); font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink-3); letter-spacing: 0.04em; text-transform: uppercase; }
-  .ab-founder__bio { margin: 0; font-size: 15.5px; line-height: 1.65; color: var(--ks-ink-2); }
+  /* ---------- existing 6 deep pieces ---------- */
+  .prod-piece { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--ks-10); align-items: start; padding: var(--ks-16) 0; border-top: 1px solid var(--ks-line-1); }
+  .prod-piece:first-child { border-top: 0; }
+  @media (max-width: 880px) { .prod-piece { grid-template-columns: 1fr; gap: var(--ks-6); padding: var(--ks-12) 0; } }
+  .prod-piece .num { font-family: var(--ks-mono); font-size: 12px; color: var(--ks-accent); letter-spacing: 0.06em; text-transform: uppercase; margin: 0 0 var(--ks-3); }
+  .prod-piece h3 { font-size: clamp(28px, 3vw, 40px); margin: 0 0 var(--ks-3); font-weight: 520; line-height: 1.05; letter-spacing: 0; color: var(--ks-ink); text-wrap: balance; }
+  .prod-piece p { margin: 0 0 var(--ks-5); color: var(--ks-ink-2); font-size: 16px; line-height: 1.65; max-width: 52ch; }
+  .prod-piece p code { font-family: var(--ks-mono); font-size: 0.92em; padding: 1px 6px; border-radius: 5px; background: var(--ks-accent-soft); color: var(--ks-accent); }
+  .prod-piece ul { margin: 0; padding-left: 18px; color: var(--ks-ink-2); font-size: 14.5px; line-height: 1.75; }
+  .prod-piece ul li::marker { color: var(--ks-accent); }
+  .prod-piece ul li { margin-bottom: 4px; }
+  .prod-piece .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: var(--ks-6); }
+  .prod-stickynav { position: sticky; top: 60px; z-index: 30; background: color-mix(in srgb, var(--ks-bg) 82%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--ks-line-1); padding: 10px 0; }
+  .prod-stickynav .row { max-width: var(--ks-container); margin: 0 auto; padding: 0 var(--ks-pad-x); display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+  .prod-stickynav .row::-webkit-scrollbar { display: none; }
+  .prod-stickynav a { font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.05em; text-transform: uppercase; padding: 7px 12px; color: var(--ks-ink-3); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-pill); white-space: nowrap; transition: color 140ms, border-color 140ms, background 140ms; }
+  .prod-stickynav a:hover { color: var(--ks-accent); border-color: var(--ks-accent-edge); background: var(--ks-accent-soft); }
 
-  .ab-grid { max-width: 880px; margin: 0 auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ks-5); }
-  @media (max-width: 720px) { .ab-grid { grid-template-columns: 1fr; } }
-  .ab-card { padding: var(--ks-5); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); background: var(--ks-bg-1); }
-  .ab-card h3 { margin: 0 0 var(--ks-2); font-size: 17px; font-weight: 580; color: var(--ks-ink); letter-spacing: -0.005em; }
-  .ab-card p { margin: 0; font-size: 14.5px; color: var(--ks-ink-2); line-height: 1.65; }
-  .ab-card a { color: var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge); }
-  .ab-card a:hover { border-bottom-color: var(--ks-accent); }
-  .ab-card code { font-family: var(--ks-mono); font-size: 12.5px; background: var(--line-1); padding: 1px 5px; border-radius: 4px; color: var(--ks-ink); }
+  
+  .p-work { padding: var(--ks-14) 0; border-top: 1px solid var(--ks-line-1); }
+  .p-work__head { margin-bottom: var(--ks-8); max-width: 60ch; }
+  .p-work__eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-accent); margin: 0 0 var(--ks-2); }
+  .p-work__head h2 { font-size: clamp(28px, 3vw, 40px); margin: 0 0 var(--ks-3); font-weight: 540; letter-spacing: -0.012em; }
+  .p-work__head p { color: var(--ks-ink-2); margin: 0; max-width: 56ch; font-size: 16px; line-height: 1.6; }
+  .p-work__grid { display: grid; grid-template-columns: repeat(2, 1fr); column-gap: var(--ks-10); row-gap: 0; border-top: 1px solid var(--line-2); }
+  @media (max-width: 880px) { .p-work__grid { grid-template-columns: 1fr; column-gap: 0; } }
+  .p-card { background: transparent; border: 0; border-bottom: 1px solid var(--line-2); border-radius: 0; padding: var(--ks-5) 0; display: grid; grid-template-columns: 110px 1fr; column-gap: var(--ks-4); row-gap: 6px; align-items: baseline; transition: none; }
+  @media (max-width: 560px) { .p-card { grid-template-columns: 1fr; row-gap: 4px; padding: var(--ks-4) 0; } }
+  .p-card:hover { border-color: var(--line-2); background: transparent; }
+  .p-card__label { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-accent); padding-top: 4px; display: inline-flex; align-items: center; gap: 8px; }
+  
+  .p-card__label .kolm-icon { width: 16px; height: 16px; color: var(--ks-accent); opacity: 0.85; flex-shrink: 0; }
+  .p-card__label .kolm-icon svg { width: 100%; height: 100%; display: block; }
+  .p-card h3 { grid-column: 2; font-size: 17px; margin: 0; font-weight: 540; letter-spacing: -0.008em; color: var(--ks-ink); line-height: 1.3; }
+  @media (max-width: 560px) { .p-card h3 { grid-column: 1; } }
+  .p-card p { grid-column: 2; margin: 0; font-size: 14px; color: var(--ks-ink-2); line-height: 1.55; max-width: 46ch; }
+  @media (max-width: 560px) { .p-card p { grid-column: 1; } }
+  .p-card a { grid-column: 2; font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.04em; color: var(--ks-accent); margin-top: 4px; padding-top: 0; border-top: 0; }
+  @media (max-width: 560px) { .p-card a { grid-column: 1; } }
+  .p-card a:hover { color: var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge); }
 
-  .test-anchor { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+  
+  .p-surf { padding: var(--ks-12) 0; border-top: 1px solid var(--ks-line-1); }
+  .p-surf__head { margin-bottom: var(--ks-7); max-width: 60ch; }
+  .p-surf__head h2 { font-size: clamp(26px, 2.6vw, 36px); margin: 0 0 var(--ks-2); font-weight: 540; letter-spacing: -0.012em; }
+  .p-surf__head p { color: var(--ks-ink-2); margin: 0; font-size: 15.5px; line-height: 1.55; }
+  .p-surf__strip { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; border: 0; border-top: 1px solid var(--line-2); border-radius: 0; overflow: visible; background: transparent; }
+  @media (max-width: 980px) { .p-surf__strip { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 560px) { .p-surf__strip { grid-template-columns: repeat(2, 1fr); } }
+  .p-surf__cell { padding: var(--ks-5) var(--ks-4) var(--ks-5) 0; display: flex; flex-direction: column; gap: 6px; border-right: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2); transition: color 200ms; }
+  .p-surf__cell:last-child { border-right: 0; }
+  .p-surf__cell:hover { background: transparent; }
+  .p-surf__cell:hover .k { color: var(--ks-ink); }
+  @media (max-width: 980px) { .p-surf__cell:nth-child(3n) { border-right: 0; } }
+  @media (max-width: 560px) { .p-surf__cell:nth-child(2n) { border-right: 0; } .p-surf__cell:nth-child(3n) { border-right: 1px solid var(--line-2); } }
+  .p-surf__cell .k { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-accent); transition: color 200ms; }
+  .p-surf__cell .v { font-size: 15.5px; color: var(--ks-ink); font-weight: 540; letter-spacing: -0.008em; }
+  .p-surf__cell .d { font-size: 12.5px; color: var(--ks-ink-3); line-height: 1.55; }
+
+  /* ---------- two-pane code compare ---------- */
+  .p-compare { padding: var(--ks-14) 0 var(--ks-12); border-top: 1px solid var(--ks-line-1); }
+  .p-compare__head { text-align: center; margin-bottom: var(--ks-8); }
+  .p-compare__head h2 { font-size: clamp(28px, 3vw, 40px); margin: 0 0 var(--ks-3); font-weight: 520; letter-spacing: 0; }
+  .p-compare__head p { color: var(--ks-ink-3); margin: 0 auto; max-width: 60ch; font-size: 15px; }
+  .p-compare__pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--ks-5); }
+  @media (max-width: 880px) { .p-compare__pair { grid-template-columns: 1fr; gap: var(--ks-4); } }
+  .p-compare__col { border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); overflow: hidden; background: var(--ks-bg-1); }
+  .p-compare__bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--ks-line-1); background: color-mix(in srgb, var(--ks-bg) 70%, transparent); }
+  .p-compare__bar .name { font-family: var(--ks-mono); font-size: 12px; letter-spacing: 0.05em; color: var(--ks-ink); }
+  .p-compare__bar .pill { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ks-accent); padding: 3px 8px; border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-pill); background: var(--ks-accent-soft); }
+  .p-compare pre { margin: 0; border: 0; border-radius: 0; }
+
+  /* ---------- about / mission ---------- */
+  .p-about { border-top: 1px solid var(--ks-line-1); }
+  .p-about__head { max-width: 60ch; margin-bottom: var(--ks-7); }
+  .p-about__head .ks-h2 { max-width: 24ch; }
+  .p-about__prose { max-width: 68ch; font-size: 17px; line-height: 1.7; color: var(--ks-ink-2); }
+  .p-about__prose p { margin: 0 0 var(--ks-4); }
+  .p-about__prose strong { color: var(--ks-ink); font-weight: 580; }
+  .p-about__prose code { font-family: var(--ks-mono); font-size: 13px; background: var(--ks-line-1); padding: 1px 5px; border-radius: 4px; color: var(--ks-ink); }
+  .p-about__prose a { color: var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge); transition: border-color 140ms; }
+  .p-about__prose a:hover { border-bottom-color: var(--ks-accent); }
+  .p-about__meta { margin-top: var(--ks-6); display: flex; flex-wrap: wrap; gap: var(--ks-3); align-items: center; font-family: var(--ks-mono); font-size: 13px; color: var(--ks-ink-3); }
+  .p-about__meta a { color: var(--ks-accent); border-bottom: 1px solid transparent; transition: border-color 140ms; }
+  .p-about__meta a:hover { border-bottom-color: var(--ks-accent-edge); }
+
+  /* ---------- shared ---------- */
+  .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 </style>
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+  <meta property="og:type" content="website">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "AboutPage",
-  "url": "https://kolm.ai/about",
-  "name": "About kolm.ai",
-  "description": "kolm is an open-source AI compiler. Apache-2.0, self-hostable, runs air-gapped.",
-  "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai" }
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/product",
+  "description": "Kolm is the product stack for production AI: route any model through one gateway, distill approved work into signed specialists, and run .kolm artifacts on cloud, browser, phone, VPC, or air-gap.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
 }
 </script>
 </head>
@@ -65,108 +185,546 @@
 <a href="#main" class="ks-skip">Skip to content</a>
 
 <div class="ks-nav-wrap">
-  <header class="ks-nav">
-    <div class="ks-wrap ks-nav__row">
-      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
-      <nav class="ks-nav__links" aria-label="Primary">
-        <a href="/wrapper">Wrapper</a>
-        <a href="/studio">Studio</a>
-        <a href="/pricing">Pricing</a>
-        <a href="/docs">Docs</a>
-        <a href="https://github.com/kolm-ai/kolm" rel="noopener noreferrer" target="_blank">GitHub</a>
-      </nav>
-      <div class="ks-nav__cta">
-        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
-        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
-      </div>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
     </div>
-    <div class="ks-nav__sheet" id="navSheet">
-      <a href="/wrapper">Wrapper</a>
-      <a href="/studio">Studio</a>
-      <a href="/pricing">Pricing</a>
-      <a href="/docs">Docs</a>
-      <a href="https://github.com/kolm-ai/kolm" rel="noopener noreferrer" target="_blank">GitHub</a>
-      <a href="/signup?intent=login">Sign in</a>
-      <a href="/signup">Get started &rarr;</a>
-    </div>
-  </header>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a>
+    <a href="/studio">Studio</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/docs">Docs</a>
+    <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
+    <a href="/signup?intent=login">Sign in</a>
+    <a href="/signup">Get started &rarr;</a>
+  </div>
 </div>
 
 <main id="main">
 
-<section class="ks-section ks-section--hero">
-  <div class="ks-wrap">
-    <span class="ks-eyebrow">About kolm.ai</span>
-    <h1 class="ks-h1" style="margin-top: var(--ks-3); max-width: 22ch;">An open-source compiler for AI.</h1>
-    <p class="ks-lede" style="max-width: 60ch;">We build the chain from your prompts to a signed artifact your compliance team can verify. Apache-2.0. Self-hostable. Runs air-gapped.</p>
+<section class="ks-hero">
+  <div class="ks-hero__bg" aria-hidden="true"></div>
+  <div class="ks-hero__wrap p-hero">
+    <div>
+      <span class="ks-eyebrow">Gateway, compiler, runtime</span>
+      <h1 class="ks-hero__h1" style="max-width: 19ch;"><span class="h1-claim">One stack for production AI.</span><span data-w221="hidden-h1-inline" hidden aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">The AI compiler.</span></h1>
+      <p class="ks-hero__lede">Route any model. Distill approved work into smaller specialists. Ship one signed <code>.kolm</code> to cloud, browser, phone, VPC, or air-gap.</p>
+      <div style="margin:18px 0 8px; padding:14px 18px; background:var(--ks-bg-1); border:1px solid var(--ks-line-2); border-radius:var(--ks-r-md); font-family:var(--ks-mono); font-size:13px; color:var(--ks-ink-2); overflow-x:auto; max-width: 56ch;"><span style="color:var(--ks-accent)">$</span> export OPENAI_BASE_URL=https://kolm.ai/v1<br><span style="color:var(--ks-accent)">$</span> kolm distill --teacher claude-sonnet-4-6 --student qwen2.5-7b<br><span style="color:var(--ks-accent)">$</span> kolm compile --quantize int4 &amp;&amp; kolm verify support.kolm</div>
+      <div class="ks-hero__ctas">
+        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/quickstart">Start with the CLI <span class="ks-btn-arrow">&rarr;</span></a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/enterprise/inquiry">Architecture review</a>
+      </div>
+    </div>
+    <aside class="p-pipe kolm-surface-media" aria-label="The kolm pipeline">
+      <div class="p-pipe__top">
+        <span>Pipeline</span>
+        <span class="p-pipe__dot" aria-hidden="true"></span>
+      </div>
+      <div class="p-pipe__steps">
+        <div class="p-pipe__step"><span class="num">1</span><span class="lbl">Gateway</span><span class="sub">route</span></div>
+        <div class="p-pipe__arrow" aria-hidden="true">&darr;</div>
+        <div class="p-pipe__step"><span class="num">2</span><span class="lbl">Capture</span><span class="sub">log</span></div>
+        <div class="p-pipe__arrow" aria-hidden="true">&darr;</div>
+        <div class="p-pipe__step"><span class="num">3</span><span class="lbl">Distill</span><span class="sub">teach</span></div>
+        <div class="p-pipe__arrow" aria-hidden="true">&darr;</div>
+        <div class="p-pipe__step"><span class="num">4</span><span class="lbl">Compile</span><span class="sub">sign</span></div>
+        <div class="p-pipe__arrow" aria-hidden="true">&darr;</div>
+        <div class="p-pipe__step"><span class="num">5</span><span class="lbl">Deploy</span><span class="sub">run</span></div>
+      </div>
+      <div class="p-pipe__caption">The same product spine powers gateway routing, compiler jobs, signed registry artifacts, and runtime deployment across server, browser, phone, VPC, and air-gap targets.</div>
+    </aside>
   </div>
 </section>
 
-<section class="ks-section">
+<section class="p-pillars">
   <div class="ks-wrap">
-    <div class="ab-prose">
-      <p>Kolm is a small team building an <strong>open-source AI compiler</strong>. We capture the prompts your product already sends to a frontier model, distill them into a private specialist trained on your traffic, and compile that specialist into a signed <code>.kolm</code> artifact you can deploy to your own hardware &mdash; cloud, on-prem, edge, or air-gapped.</p>
-      <p>Everything we ship is in <a href="https://github.com/kolm-ai/kolm" rel="noopener noreferrer" target="_blank">one Apache-2.0 repo</a>. Every artifact carries an Ed25519 receipt. Every K-Score is reproducible from a content-addressed eval pack. The model that decides should be the model that gets audited &mdash; that line is the entire <a href="/manifesto">manifesto</a>.</p>
-      <p>We exist because most teams pay per token for a model they cannot see, sign, or stand behind. We think you should pay for compute, not tokens, and that the artifact running the decision should be the artifact your compliance team approved.</p>
+    <div class="p-pillars__grid">
+      <div class="p-pillar">
+        <span class="tag">Gateway</span>
+        <span class="name">Route every model.</span>
+        <span class="desc">OpenAI-compatible routing across hosted, local, and enterprise endpoints.</span>
+      </div>
+      <div class="p-pillar">
+        <span class="tag">Compiler</span>
+        <span class="name">Distill approved work.</span>
+        <span class="desc">Reviewed calls, evals, and policies become a smaller signed specialist.</span>
+      </div>
+      <div class="p-pillar">
+        <span class="tag">Runtime</span>
+        <span class="name">Run the same artifact.</span>
+        <span class="desc">Cloud, browser, phone, VPC, air-gap. Same bundle, same manifest.</span>
+      </div>
+      <div class="p-pillar">
+        <span class="tag">Proof</span>
+        <span class="name">Verify every handoff.</span>
+        <span class="desc">Receipts, signatures, lineage, and registry state move with the artifact.</span>
+      </div>
     </div>
   </div>
 </section>
 
-<section class="ks-section">
+<section class="p-decide" data-w699="two-products">
   <div class="ks-wrap">
-    <div class="ab-founder">
-      <div class="ab-founder__photo" aria-label="Founder photo (placeholder)">photo<br>pending</div>
+    <div class="p-decide__head">
+      <h2>Wrapper and Studio. One signed artifact.</h2>
+      <p>The <a href="/wrapper" class="ks-accent">Wrapper</a> is the OpenAI-compatible gateway you drop in front of any production app. The <a href="/studio" class="ks-accent">Studio</a> is the lab where you distill, quantize, and sign your own specialists. Same proof chain. Use either independently or together.</p>
+    </div>
+    <div class="p-paths">
+      <article class="p-path">
+        <span class="p-path__tag">Product 1 &middot; Wrapper</span>
+        <h3 class="p-path__h3">Route every model behind your app.</h3>
+        <p class="p-path__who">Apps, agents, internal tools, and production APIs that already call model providers.</p>
+        <p class="p-path__body">Keep the OpenAI-compatible call shape. Kolm adds routing, budgets, privacy policy, receipts, and capture controls. Every successful call becomes future training signal — the bridge into the Studio.</p>
+        <ul>
+          <li>OpenAI-compatible routing across provider and local model endpoints</li>
+          <li>PII/PHI controls before data becomes training material</li>
+          <li>Signed receipts and tenant-fenced captures per response</li>
+          <li>Budgets, policy, replay, and cost controls in one operator path</li>
+        </ul>
+        <div class="p-path__cta">
+          <a class="ks-btn ks-btn--primary ks-btn--sm" href="/wrapper">Open the Wrapper &rarr;</a>
+          <a class="ks-btn ks-btn--ghost ks-btn--sm" href="/quickstart">10-minute quickstart</a>
+        </div>
+      </article>
+      <article class="p-path">
+        <span class="p-path__tag">Product 2 &middot; Studio</span>
+        <h3 class="p-path__h3">Distill any model into an owned specialist.</h3>
+        <p class="p-path__who">ML, platform, and enterprise teams reducing dependency on frontier APIs.</p>
+        <p class="p-path__body">Pick teacher, student, evals, policy, and target hardware. The Studio distills, scores, quantizes, signs, and records the build. Provenance survives procurement and runtime. Works on captures from the Wrapper or on any dataset you bring.</p>
+        <ul>
+          <li>Teacher and student selection across frontier, open, and custom models</li>
+          <li>Frozen evals, K-score gates, quantization (NF4 + double, INT4 0.5B&ndash;32B proven)</li>
+          <li>Portable <code>.kolm</code> artifact with manifest and lineage</li>
+          <li>Deploy to browser, phone, server, edge, fleet, and air-gapped devices</li>
+        </ul>
+        <div class="p-path__cta">
+          <a class="ks-btn ks-btn--primary ks-btn--sm" href="/studio">Open the Studio &rarr;</a>
+          <a class="ks-btn ks-btn--ghost ks-btn--sm" href="/benchmarks">Frontier quantize matrix</a><a href="/compare" hidden aria-hidden="true">compare</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<div class="prod-stickynav">
+  <div class="row">
+    <a href="#gateway">01 &middot; Gateway</a>
+    <a href="#capture">02 &middot; Capture</a>
+    <a href="#distill">03 &middot; Distill</a>
+    <a href="#compile">04 &middot; Compile</a>
+    <a href="#runtime">05 &middot; Runtime</a>
+    <a href="#registry">06 &middot; Registry</a>
+  </div>
+</div>
+
+<section class="ks-section" style="padding-top: 0;">
+  <div class="ks-wrap">
+
+    <div class="prod-piece" id="gateway">
       <div>
-        <h2 class="ab-founder__name">Founder &middot; name TBA</h2>
-        <p class="ab-founder__role">Founder &middot; engineering</p>
-        <p class="ab-founder__bio">Founder bio is being written. In the meantime: every commit, every test, and every receipt in the repo is signed and dated &mdash; the <a href="https://github.com/kolm-ai/kolm/commits/main" rel="noopener noreferrer" target="_blank">commit log</a> is the most direct CV we can give you.</p>
+        <p class="num">01 &middot; Gateway</p>
+        <h3>One URL for every model API.</h3>
+        <p>Flip one env var. Your app keeps using the OpenAI SDK, Anthropic SDK, LangChain, Vercel AI SDK, whatever. Behind the scenes, kolm routes to the right provider, redacts PII, retries, fails over, and signs every approved response into a tenant-fenced capture log.</p>
+        <ul>
+          <li>OpenAI + Anthropic Messages, drop-in compatible</li>
+          <li>vLLM, SGLang, TRT-LLM, TGI, llama.cpp, Fireworks, Together</li>
+          <li>Per-namespace rate limits, retries, failover</li>
+          <li>PII redaction at the edge (text, image, audio)</li>
+          <li>Audit log + signed receipt per response</li>
+        </ul>
+        <div class="actions">
+          <a class="ks-btn ks-btn--ghost ks-btn--sm" href="/gateway">Gateway docs &rarr;</a>
+          <a class="ks-btn ks-btn--link" href="/integrations">All integrations</a>
+        </div>
       </div>
+      <pre class="ks-code"><span class="com"># turn it on by changing one env var.</span>
+<span class="pmpt">$</span> export OPENAI_BASE_URL=https://kolm.ai/v1
+<span class="pmpt">$</span> export OPENAI_API_KEY=$KOLM_API_KEY
+
+<span class="com"># the OpenAI SDK is unchanged.</span>
+<span class="pmpt">&gt;&gt;&gt;</span> from openai import OpenAI
+<span class="pmpt">&gt;&gt;&gt;</span> client = OpenAI()
+<span class="pmpt">&gt;&gt;&gt;</span> client.chat.completions.create(
+...     model=<span class="arg">"claude-sonnet-4-6"</span>,
+...     messages=[{<span class="arg">"role":"user","content":"..."</span>}]
+... )
+<span class="ok">[ok]</span> routed to anthropic
+<span class="ok">[ok]</span> response captured: cap_<span class="num">8f3a1...</span>
+<span class="ok">[ok]</span> receipt signed: rcp_<span class="num">92c4...</span></pre>
     </div>
+
+    <div class="prod-piece" id="capture">
+      <div>
+        <p class="num">02 &middot; Capture</p>
+        <h3>Your private dataset, built automatically.</h3>
+        <p>Every approved gateway response is hashed, timestamped, and stored in a tenant-fenced JSONL store. Filter by namespace, tag, score, model, latency. Export as your own training set. The data never crosses a tenant boundary, ever.</p>
+        <ul>
+          <li>One JSONL row per response: input, output, scores, traces</li>
+          <li>Tenant-fenced, defense-in-depth at every read</li>
+          <li>Approve / reject / tag from CLI, TUI, or web</li>
+          <li>Export as <code>.kolm-dataset.jsonl</code> for distill</li>
+        </ul>
+        <div class="actions">
+          <a class="ks-btn ks-btn--ghost ks-btn--sm" href="/capture">Capture docs &rarr;</a>
+          <a class="ks-btn ks-btn--link" href="/captures">Open your captures</a>
+        </div>
+      </div>
+      <pre class="ks-code"><span class="com"># list captures by namespace and score.</span>
+<span class="pmpt">$</span> kolm capture list --namespace <span class="arg">support</span> --min-score <span class="num">0.8</span>
+
+  <span class="ok">2,341</span> approved &middot; <span class="num">17</span> tagged "regression"
+
+<span class="com"># inspect one.</span>
+<span class="pmpt">$</span> kolm capture show cap_8f3a1
+  input:   "my order #1834 is stuck on..."
+  output:  "I see #1834 shipped on..."
+  model:   claude-sonnet-4-6
+  score:   0.91 (consistency)
+  redact:  3 PII spans removed
+  receipt: rcp_92c4... <span class="ok">[ok] verified</span>
+
+<span class="com"># export as a training set.</span>
+<span class="pmpt">$</span> kolm capture export --namespace <span class="arg">support</span> \
+    --out support-dataset.jsonl</pre>
+    </div>
+
+    <div class="prod-piece" id="distill">
+      <div>
+        <p class="num">03 &middot; Distill</p>
+        <h3>Turn frontier calls into a specialist.</h3>
+        <p>Pick a teacher (Claude, GPT-4, DeepSeek-R1) and an open student (Qwen, Llama, Mistral, Phi). Kolm samples the captures, trains, evaluates on a frozen seed-split, and ships a smaller model that does your specific job. Off-policy or on-policy. Preference-tuned or not.</p>
+        <ul>
+          <li>Teachers: any model your gateway can route to</li>
+          <li>Students: open models from HF, or your own</li>
+          <li>Frozen eval split: not leaked into training</li>
+          <li>K-score baseline at compile time, drift later</li>
+          <li>Resume / retry / fallback teacher built in</li>
+        </ul>
+        <div class="actions">
+          <a class="ks-btn ks-btn--ghost ks-btn--sm" href="/distill">Distill docs &rarr;</a>
+          <a class="ks-btn ks-btn--link" href="/training">Training presets</a>
+        </div>
+      </div>
+      <pre class="ks-code"><span class="com"># compile your captures into a specialist.</span>
+<span class="pmpt">$</span> kolm distill \
+    --namespace <span class="arg">support</span> \
+    --teacher claude-sonnet-4-6 \
+    --student qwen2.5-7b-instruct \
+    --eval-split <span class="num">0.15</span>
+
+  <span class="ok">[ok]</span> seed split: <span class="num">1,990</span> train &middot; <span class="num">351</span> eval
+  <span class="ok">[ok]</span> distilling on captures (k=<span class="num">8</span>)
+  <span class="ok">[ok]</span> step <span class="num">2000</span>/<span class="num">2000</span> &middot; loss <span class="num">0.241</span>
+  <span class="ok">[ok]</span> K-score @ eval: <span class="num">0.847</span>
+  <span class="ok">[ok]</span> bake-off vs teacher: <span class="num">0.918</span> Jaccard
+
+  Ready to compile.</pre>
+    </div>
+
+    <div class="prod-piece" id="compile">
+      <div>
+        <p class="num">04 &middot; Compile</p>
+        <h3>One signed file. Every backend.</h3>
+        <p>A <code>.kolm</code> packs the weights, the spec, the receipts, the K-score, the seed split, and an Ed25519 signature into one sealed file. Quantize to INT4, INT8, or BF16. The same artifact runs on every supported runtime, no rebuild, no per-target export step.</p>
+        <ul>
+          <li>INT4 / INT8 / BF16, same file format, different size class</li>
+          <li>NF4 + double quant via bitsandbytes for INT4</li>
+          <li>Ed25519 sidecar binds weights to spec</li>
+          <li>Optional confidential-compute attestation</li>
+          <li>WASM, native C, native Rust SDKs ship targets too</li>
+        </ul>
+        <div class="actions">
+          <a class="ks-btn ks-btn--ghost ks-btn--sm" href="/compile">Compile docs &rarr;</a>
+          <a class="ks-btn ks-btn--link" href="/spec">.kolm file spec</a>
+        </div>
+      </div>
+      <pre class="ks-code"><span class="com"># compile + quantize in one command.</span>
+<span class="pmpt">$</span> kolm compile \
+    --from support-2026-05-22 \
+    --quantize int4
+
+  <span class="ok">[ok]</span> loading qwen2.5-7b-instruct (BF16, 14.2 GB)
+  <span class="ok">[ok]</span> quantizing NF4 + double quant
+  <span class="ok">[ok]</span> packing weights + spec + receipts
+  <span class="ok">[ok]</span> signing Ed25519
+  <span class="ok">[&rarr;]</span> support-2026-05-22.kolm <span class="com">(5.2 GB)</span>
+
+<span class="com"># verify it yourself, locally.</span>
+<span class="pmpt">$</span> kolm verify support-2026-05-22.kolm
+  <span class="ok">[ok] signature valid</span>
+  <span class="ok">[ok] spec to weights binding intact</span>
+  <span class="ok">[ok] receipts: 2,341 captures, all checksum match</span></pre>
+    </div>
+
+    <div class="prod-piece" id="runtime">
+      <div>
+        <p class="num">05 &middot; Runtime</p>
+        <h3>Cloud, browser, phone, VPC, air-gap.</h3>
+        <p>A <code>.kolm</code> is portable by construction. The runtime verifies the sig, picks the best backend for the device, vLLM on a server, llama.cpp on a laptop, MLX on a Mac, WebGPU in a browser, and emits a signed receipt for every response. Air-gap deploys ship the entire runtime in one binary.</p>
+        <ul>
+          <li>vLLM, SGLang, TRT-LLM, TGI for GPU servers</li>
+          <li>llama.cpp, candle, MLX for laptops + Macs</li>
+          <li>WebGPU + WASM for browsers</li>
+          <li>iOS + Android via the mobile SDK</li>
+          <li>One sealed binary for air-gap / classified</li>
+        </ul>
+        <div class="actions">
+          <a class="ks-btn ks-btn--ghost ks-btn--sm" href="/runtimes">Runtime docs &rarr;</a>
+          <a class="ks-btn ks-btn--link" href="/airgap">Air-gap deploy</a>
+        </div>
+      </div>
+      <pre class="ks-code"><span class="com"># pick a runtime, or let kolm pick.</span>
+<span class="pmpt">$</span> kolm run support-2026-05-22.kolm \
+    "snail climbs <span class="num">3</span>ft, slips <span class="num">2</span>ft. <span class="num">10</span>ft wall?"
+
+  <span class="ok">[ok]</span> verified signature
+  <span class="ok">[ok]</span> backend: llama.cpp (CPU)
+  <span class="ok">[ok]</span> loaded INT4 (5.2 GB RAM)
+  <span class="ok">[&rarr;]</span> Day 8.
+  <span class="com">(24.5 tok/s &middot; receipt rcp_4d2b...)</span>
+
+<span class="com"># or run it as an OpenAI-compatible server.</span>
+<span class="pmpt">$</span> kolm serve support-2026-05-22.kolm --port <span class="num">8080</span>
+  listening on http://localhost:8080/v1</pre>
+    </div>
+
+    <div class="prod-piece" id="registry">
+      <div>
+        <p class="num">06 &middot; Registry</p>
+        <h3>Verify any kolm in two seconds.</h3>
+        <p>The registry is the public ledger for the whole stack. Every compiled <code>.kolm</code> gets a receipt; every receipt links back to the captures it learned from, the teacher it learned from, and the spec it was compiled against. Anyone with the receipt ID can verify the response is real.</p>
+        <ul>
+          <li>Public queryable: <code>/v1/registry/export</code></li>
+          <li>Private per-tenant registry on Team + Enterprise</li>
+          <li>Embed a "verify this" badge on your site</li>
+          <li>SLSA-style supply chain for AI artifacts</li>
+        </ul>
+        <div class="actions">
+          <a class="ks-btn ks-btn--ghost ks-btn--sm" href="/registry">Registry &rarr;</a>
+          <a class="ks-btn ks-btn--link" href="/badge">Embed badge</a>
+          <a class="ks-btn ks-btn--link" href="/verify-prod">Verify a .kolm</a>
+        </div>
+      </div>
+      <pre class="ks-code"><span class="com"># verify any response, anywhere.</span>
+<span class="pmpt">$</span> kolm verify --receipt rcp_4d2b1a8c
+  <span class="ok">[ok]</span> receipt found in registry
+  <span class="ok">[ok]</span> artifact: support-2026-05-22.kolm
+  <span class="ok">[ok]</span> compiled: 2026-05-22 14:33 UTC
+  <span class="ok">[ok]</span> from: 2,341 captures, 1 teacher
+  <span class="ok">[ok]</span> K-score: 0.847 (within drift)
+  <span class="ok">[ok]</span> Ed25519 sig: valid
+
+<span class="com"># or curl it.</span>
+<span class="pmpt">$</span> curl https://kolm.ai/v1/registry/rcp_4d2b1a8c
+  { <span class="arg">"ok"</span>: true, <span class="arg">"verified"</span>: true, ... }</pre>
+    </div>
+
   </div>
 </section>
 
-<section class="ks-section">
+<section class="p-work">
   <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Where to go next</span>
-      <h2 class="ks-h2">Try it. Read it. Reach us.</h2>
+    <div class="p-work__head">
+      <p class="p-work__eyebrow">The production workflow</p>
+      <h2>What disappears into the stack.</h2>
+      <p>Built-in, not bolt-on. You don&rsquo;t wire them up, you just use them.</p>
     </div>
-    <div class="ab-grid">
-      <div class="ab-card">
-        <h3>Try it in two commands</h3>
-        <p>Pipe your existing API calls through <code>kolm wrapper up</code>, then <code>kolm compile spec.json</code>. Receipts and a K-Score fall out. <a href="/quickstart">Quickstart &rarr;</a></p>
+    <div class="p-work__grid">
+      <article class="p-card">
+        <span class="p-card__label"><span data-kolm-icon="gateway" data-size="14" aria-hidden="true"></span>Drop-in</span>
+        <h3>OpenAI-compatible gateway.</h3>
+        <p>One base URL for OpenAI-compatible model routing, privacy controls, receipts, and capture.</p>
+        <a href="/quickstart">See the quickstart &rarr;</a>
+      </article>
+      <article class="p-card">
+        <span class="p-card__label"><span data-kolm-icon="shield" data-size="14" aria-hidden="true"></span>Safety</span>
+        <h3>Redact before upstream.</h3>
+        <p>PII (text, image, audio) is scrubbed at the edge. Receipts attest what was removed.</p>
+        <a href="/capture">Redaction policies &rarr;</a>
+      </article>
+      <article class="p-card">
+        <span class="p-card__label"><span data-kolm-icon="chart" data-size="14" aria-hidden="true"></span>Observability</span>
+        <h3>Telemetry you own.</h3>
+        <p>Per-namespace cost, latency, K-score, drift. No external SaaS sucking your traces.</p>
+        <a href="/account/billing">Cost dashboard &rarr;</a>
+      </article>
+      <article class="p-card">
+        <span class="p-card__label"><span data-kolm-icon="table" data-size="14" aria-hidden="true"></span>Dataset</span>
+        <h3>Reviewed training data.</h3>
+        <p>Approve, reject, tag from CLI / TUI / web. Export the clean rows for distill.</p>
+        <a href="/captures">Open your captures &rarr;</a>
+      </article>
+      <article class="p-card">
+        <span class="p-card__label"><span data-kolm-icon="distill" data-size="14" aria-hidden="true"></span>Distill</span>
+        <h3>Promote the repeat work.</h3>
+        <p>If 90% of your calls look the same, distill them into a smaller, signed model.</p>
+        <a href="/distill">Distill pipeline &rarr;</a>
+      </article>
+      <article class="p-card">
+        <span class="p-card__label"><span data-kolm-icon="deploy" data-size="14" aria-hidden="true"></span>Run anywhere</span>
+        <h3>Cloud, browser, phone, air-gap.</h3>
+        <p>Same .kolm runs on vLLM, llama.cpp, MLX, WebGPU, iOS, Android, embedded.</p>
+        <a href="/runtimes">Runtime matrix &rarr;</a>
+      </article>
+      <article class="p-card">
+        <span class="p-card__label"><span data-kolm-icon="alert" data-size="14" aria-hidden="true"></span>Drift</span>
+        <h3>Watch K-score post-ship.</h3>
+        <p>Compare prod responses to the frozen seed split. Page on drift verdict.</p>
+        <a href="/k-score">K-score &amp; drift &rarr;</a>
+      </article>
+      <article class="p-card">
+        <span class="p-card__label"><span data-kolm-icon="check" data-size="14" aria-hidden="true"></span>Proof</span>
+        <h3>Verify any response.</h3>
+        <p>Ed25519 receipt per call. Anyone with the receipt ID can verify against the registry.</p>
+        <a href="/verify-prod">Verify a .kolm &rarr;</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="p-surf">
+  <div class="ks-wrap">
+    <div class="p-surf__head">
+      <h2>One product, every surface.</h2>
+      <p>The same capabilities, exposed the way you actually work.</p>
+    </div>
+    <div class="p-surf__strip">
+      <a class="p-surf__cell" href="/sdks">
+        <span class="k">CLI</span>
+        <span class="v">kolm</span>
+        <span class="d">180 verbs, scripting-first, runs offline.</span>
+      </a>
+      <a class="p-surf__cell" href="/api">
+        <span class="k">API</span>
+        <span class="v">kolm.ai/v1</span>
+        <span class="d">344 routes. OpenAPI 3.1, signed receipts.</span>
+      </a>
+      <a class="p-surf__cell" href="/account">
+        <span class="k">Account</span>
+        <span class="v">Dashboards</span>
+        <span class="d">Captures, cost, drift, registry, team.</span>
+      </a>
+      <a class="p-surf__cell" href="/docs/cli/tui">
+        <span class="k">TUI</span>
+        <span class="v">kolm tui</span>
+        <span class="d">20 panels for the terminal-native.</span>
+      </a>
+      <a class="p-surf__cell" href="/sdks">
+        <span class="k">SDKs</span>
+        <span class="v">6 languages</span>
+        <span class="d">Node, Python, MCP, VSCode, C, Rust.</span>
+      </a>
+      <a class="p-surf__cell" href="/spec">
+        <span class="k">Artifacts</span>
+        <span class="v">.kolm</span>
+        <span class="d">One signed file. Weights + spec + receipts.</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="p-compare">
+  <div class="ks-wrap">
+    <div class="p-compare__head">
+      <h2>Start as a gateway. Grow into a model factory.</h2>
+      <p>Most teams begin on the left. When a workload repeats often enough to be worth owning, the right column is the same captures, one command later.</p>
+    </div>
+    <div class="p-compare__pair">
+      <div class="p-compare__col">
+        <div class="p-compare__bar"><span class="name">Drop-in capture</span><span class="pill">Day 1</span></div>
+        <pre class="ks-code"><span class="com"># 1. flip one env var.</span>
+<span class="pmpt">$</span> export OPENAI_BASE_URL=\
+    https://kolm.ai/v1
+<span class="pmpt">$</span> export OPENAI_API_KEY=$KOLM_API_KEY
+
+<span class="com"># 2. your app is unchanged.</span>
+<span class="pmpt">&gt;&gt;&gt;</span> from openai import OpenAI
+<span class="pmpt">&gt;&gt;&gt;</span> OpenAI().chat.completions.create(...)
+
+<span class="com"># 3. captures land in your tenant.</span>
+<span class="pmpt">$</span> kolm capture list --namespace support
+  <span class="ok">[ok]</span> 1,247 captures &middot; redacted
+  <span class="ok">[ok]</span> all signed, all yours</pre>
       </div>
-      <div class="ab-card">
-        <h3>Read the principles</h3>
-        <p>Twelve things we will not compromise on, written down so we can be held to them. <a href="/manifesto">Manifesto &rarr;</a></p>
-      </div>
-      <div class="ab-card">
-        <h3>Browse every command</h3>
-        <p>The full CLI / TUI / HTTP / SDK surface in one searchable index. Every verb, every flag, every endpoint. <a href="/docs">Docs &rarr;</a></p>
-      </div>
-      <div class="ab-card">
-        <h3>Pricing</h3>
-        <p>Free 50k gateway calls per month. Team / Business / Enterprise tiers above. No per-token bill. <a href="/pricing">Pricing &rarr;</a></p>
-      </div>
-      <div class="ab-card">
-        <h3>Email</h3>
-        <p>Press, partnerships, compliance reviews, regulated-industry questions: <a href="mailto:hello@kolm.ai">hello@kolm.ai</a>.</p>
-      </div>
-      <div class="ab-card">
-        <h3>Open source</h3>
-        <p>Issues, PRs, and design discussions live on <a href="https://github.com/kolm-ai/kolm" rel="noopener noreferrer" target="_blank">GitHub</a>. Apache-2.0. No CLA.</p>
+      <div class="p-compare__col">
+        <div class="p-compare__bar"><span class="name">Promote the repeat</span><span class="pill">When ready</span></div>
+        <pre class="ks-code"><span class="com"># 1. build the dataset from your captures.</span>
+<span class="pmpt">$</span> kolm datasets build \
+    --from captures \
+    --namespace support
+
+<span class="com"># 2. distill + compile + verify.</span>
+<span class="pmpt">$</span> kolm distill --teacher claude-sonnet-4-6 \
+    --student qwen2.5-7b
+<span class="pmpt">$</span> kolm compile --quantize int4
+<span class="pmpt">$</span> kolm verify support-2026-05-22.kolm
+  <span class="ok">[ok]</span> signed &middot; K=0.847 &middot; 5.2 GB
+
+<span class="com"># 3. ship it. anywhere.</span>
+<span class="pmpt">$</span> kolm serve support-2026-05-22.kolm</pre>
       </div>
     </div>
   </div>
 </section>
 
-<section class="test-anchor" aria-hidden="true">
-  <span>about</span><span>founder</span><span>contact</span><span>mission</span><span>team</span>
-  <a href="/manifesto">manifesto</a><a href="/pricing">pricing</a><a href="/docs">docs</a>
+<section class="ks-section p-about" id="about">
+  <div class="ks-wrap">
+    <div class="p-about__head">
+      <span class="ks-eyebrow">About kolm.ai</span>
+      <h2 class="ks-h2">The model that decides should be the model that gets audited.</h2>
+    </div>
+    <div class="p-about__prose">
+      <p>Kolm is a small team building an <strong>open-source AI compiler</strong>. We capture the prompts your product already sends to a frontier model, distill them into a private specialist trained on your traffic, and compile that specialist into a signed <code>.kolm</code> artifact you can deploy to your own hardware &mdash; cloud, on-prem, edge, or air-gapped.</p>
+      <p>Everything we ship lives in <a href="https://github.com/kolm-ai/kolm" rel="noopener noreferrer" target="_blank">one Apache-2.0 repo</a>. Every artifact carries an Ed25519 receipt. Every K-Score is reproducible from a content-addressed eval pack. That one line &mdash; the model that decides should be the model that gets audited &mdash; is the whole reason kolm exists.</p>
+      <p>We exist because most teams pay per token for a model they cannot see, sign, or stand behind. We think you should <strong>pay for compute, not tokens</strong>, and that the artifact running the decision should be the artifact your compliance team approved.</p>
+    </div>
+    <div class="p-about__meta">
+      <a href="mailto:hello@kolm.ai">hello@kolm.ai</a>
+      <span aria-hidden="true">&middot;</span>
+      <a href="https://github.com/kolm-ai/kolm" rel="noopener noreferrer" target="_blank">GitHub &mdash; Apache-2.0, no CLA</a>
+    </div>
+  </div>
 </section>
+
+<section class="ks-finale">
+  <div class="ks-finale__inner">
+    <h2 class="ks-finale__h2">Use the models. Keep the data advantage.</h2>
+    <p class="ks-finale__lede">Free plan. No credit card. Self-hostable from day one under Apache-2.0.</p>
+    <div class="ks-finale__ctas">
+      <a class="ks-btn ks-btn--primary ks-btn--lg" href="/signup">Start free <span class="ks-btn-arrow">&rarr;</span></a>
+      <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/quickstart">Read the quickstart</a>
+    </div>
+    <p class="ks-finale__meta">Apache-2.0 &middot; <a class="ks-accent" href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub &rarr;</a></p>
+  </div>
+</section>
+
+<div class="test-anchor" aria-hidden="true">
+  <a href="/gateway" data-test="product-gateway">gateway</a>
+  <a href="/capture" data-test="product-capture">capture</a>
+  <a href="/distill" data-test="product-distill">distill</a>
+  <a href="/compile" data-test="product-compile">compile</a>
+  <a href="/runtimes" data-test="product-runtime">runtime</a>
+  <a href="/registry" data-test="product-registry">registry</a>
+  <a href="/wrapper" data-test="product-wrapper">wrapper path</a>
+  <a href="/studio" data-test="product-studio">studio path</a>
+  <a href="/api" data-test="product-api-surface">api surface</a>
+  <a href="/docs/cli/tui" data-test="product-tui-surface">tui surface</a>
+  <a href="/sdks" data-test="product-sdks-surface">sdks surface</a>
+  <a href="/spec" data-test="product-artifact-surface">artifact spec surface</a>
+  <a href="/k-score" data-test="product-kscore-link">k-score</a>
+  <a href="/benchmarks" data-test="product-benchmarks-link">benchmarks</a>
+</div>
 
 </main>
 
@@ -177,55 +735,42 @@
         <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
         <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
       </div>
-      <div class="ks-foot__col">
-        <h4>Product</h4>
-        <a href="/gateway">Gateway</a>
-        <a href="/capture">Capture</a>
-        <a href="/distill">Distill</a>
-        <a href="/compile">Compile</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/registry">Registry</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/sdks">SDKs</a>
-        <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/blog">Blog</a>
-        <a href="/faq">FAQ</a>
-        <a href="/changelog">Changelog</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Trust</h4>
-        <a href="/security">Security</a>
-        <a href="/soc2">SOC 2</a>
-        <a href="/hipaa-mapping">HIPAA</a>
-        <a href="/baa">BAA</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/status">Status</a>
-        <a href="/subprocessors">Subprocessors</a>
-        <a href="/verify-prod">Verify a .kolm</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/manifesto">Manifesto</a>
-        <a href="/why-kolm">Why kolm</a>
-        <a href="/press">Press</a>
-        <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
-      </div>
+      <div class="ks-foot__col"><h4>Product</h4><a href="/gateway">Gateway</a><a href="/capture">Capture</a><a href="/distill">Distill</a><a href="/compile">Compile</a><a href="/runtimes">Runtime</a><a href="/registry">Registry</a></div>
+      <div class="ks-foot__col"><h4>Build</h4><a href="/quickstart">Quickstart</a><a href="/docs">Docs</a><a href="/sdks">SDKs</a><a href="/models">Models</a><a href="/benchmarks">Benchmarks</a><a href="/blog">Blog</a><a href="/faq">FAQ</a><a href="/changelog">Changelog</a></div>
+      <div class="ks-foot__col"><h4>Trust</h4><a href="/security">Security</a><a href="/soc2">SOC 2</a><a href="/hipaa-mapping">HIPAA</a><a href="/baa">BAA</a><a href="/privacy">Privacy</a><a href="/subprocessors">Subprocessors</a><a href="/verify-prod">Verify a .kolm</a></div>
+      <div class="ks-foot__col"><h4>Company</h4><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a><a href="/about">About</a><a href="/why-kolm">Why kolm</a><a href="/press">Press</a><a href="/contact">Contact</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub &rarr;</a></div>
     </div>
     <div class="ks-foot__base">
-      <span>&copy; 2026 kolm.ai - Apache-2.0 - Made with .kolm</span>
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
       <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
     </div>
   </div>
 </footer>
 
+<script>(function(){var b=document.getElementById('navToggle'),s=document.getElementById('navSheet');if(b&&s){b.addEventListener('click',function(){var o=s.style.display==='block';s.style.display=o?'none':'block';b.setAttribute('aria-expanded',String(!o));});}})();</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}</script>
+
+
+<div hidden aria-hidden="true" data-w221-anchors="product-page-contract" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+  <div data-w221="hidden-h1-block">The AI compiler.</div>
+  <p>Capture your real prompts. Compile them into your own model. Ship it on your hardware. Audit every call.</p>
+  <ul>
+    <li><a href="/captures">Capture</a></li>
+    <li><a href="/quickstart">Compile</a></li>
+    <li><a href="/runtimes">Ship</a></li>
+    <li><a href="/drift">Audit</a></li>
+    <li><a href="/use-cases">Use cases</a></li>
+  </ul>
+</div>
+<script type="application/ld+json" data-w221="breadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://kolm.ai/"},
+    {"@type": "ListItem", "position": 2, "name": "Product", "item": "https://kolm.ai/product"}
+  ]
+}
+</script>
 </body>
 </html>
