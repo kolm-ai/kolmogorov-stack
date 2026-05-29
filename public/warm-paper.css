@@ -837,9 +837,9 @@ html:not([data-theme])   { color-scheme: light; }
 .fr-h1--hero, h1.fr-h1--hero, .display-hero {
   font-family: var(--ks-font-sans);
   font-weight: 280;
-  font-size: clamp(54px, 8.4vw, 124px);
-  line-height: 0.96;
-  letter-spacing: -0.045em;
+  font-size: clamp(34px, 5vw, 66px);
+  line-height: 1.07;
+  letter-spacing: -0.012em;
   color: var(--ink-1);
   text-wrap: balance;
   margin: 0 0 var(--ks-space-24, 24px) 0;
@@ -2523,9 +2523,9 @@ html[data-theme="dark"] .kolm-deep__cmd {
 .fr-h1--hero, h1.fr-h1--hero, .display-hero,
 .ks-hero__h1, .ks-hero h1.fr-h1--hero {
   font-weight: 280;
-  font-size: clamp(54px, 8.4vw, 124px);
-  line-height: 0.96;
-  letter-spacing: -0.045em;
+  font-size: clamp(34px, 5vw, 66px);
+  line-height: 1.07;
+  letter-spacing: -0.012em;
   max-width: 18ch;
   text-wrap: balance;
   font-feature-settings: "ss01", "ss02", "cv11", "cv05", "kern", "tnum";
@@ -2977,4 +2977,33 @@ body {
 @media (prefers-reduced-motion: reduce) {
   html::before, html::after { background-attachment: scroll; }
 }
+
+/* ============================================================================
+   W921 site fixes — nav toggle must not show on desktop; dark-mode contrast for
+   the frontier (fr-*) sections so they are never a flat black void.
+   ============================================================================ */
+
+/* The mobile menu toggle (hamburger) leaked onto the WIDE desktop nav. The
+   inline links already show above 900px, so force the toggle hidden there. */
+@media (min-width: 901px) {
+  /* #navToggle (id, specificity 1,0,0) is required to beat surface-polish.css's
+     `html.kolm-sota-ui-v560 :where(.btn,...) { display: inline-flex !important }`
+     (0,1,1), which was force-showing the hamburger on the desktop nav. */
+  #navToggle, .ks-nav__toggle { display: none !important; }
+}
+
+/* Dark mode: give fr-* cards a real (subtle) surface + light-on-dark borders so
+   pricing / artifact / FAQ blocks have visible structure instead of reading as
+   one black slab, and stop light-mode hover/border colors from leaking in. */
+[data-theme="dark"] .fr-tier,
+[data-theme="dark"] .fr-card {
+  background: rgba(255, 255, 255, 0.022);
+}
+[data-theme="dark"] .fr-tier { border-right-color: rgba(255, 255, 255, 0.08); }
+[data-theme="dark"] .fr-tier:nth-child(-n+2) { border-bottom-color: rgba(255, 255, 255, 0.08); }
+[data-theme="dark"] .fr-tier:hover { background: rgba(255, 255, 255, 0.05); }
+[data-theme="dark"] .fr-faq__row { border-color: rgba(255, 255, 255, 0.09); }
+[data-theme="dark"] .fr-faq__row:hover { background: rgba(255, 255, 255, 0.03); }
+[data-theme="dark"] .fr-numbered-list > li,
+[data-theme="dark"] .fr-numbered-list > li:last-child { border-color: rgba(255, 255, 255, 0.08); }
 
