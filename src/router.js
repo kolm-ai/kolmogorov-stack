@@ -6215,6 +6215,7 @@ export function buildRouter() {
       const guardrail = await import('./gateway-guardrail.js');
       const grec = await import('./gateway-receipt.js');
       const otel = await import('./otel.js');
+      const semcache = await import('./semantic-cache.js');
       const reg = await import('./provider-registry.js');
       // W-N: shared adapter helpers — clampTimeoutMs lives here. We pull
       // the inbound timeout_ms from either the body or the
@@ -6286,6 +6287,30 @@ export function buildRouter() {
           namespace: nsSlug,
           guardrail: guardrail.buildGuardrailReceiptField(guard),
         });
+      }
+
+      // 2c. W921 — semantic/exact prompt cache. Default mode 'off' => disabled
+      // (zero behavior change). On a hit, return the cached response and skip
+      // routing + the upstream call entirely (cost + latency savings). Best-
+      // effort: any cache error falls through to a normal live call.
+      const _cacheCfg = semcache.namespaceCacheConfig(nsConfig);
+      const _cacheTenant = (req.tenant_record && req.tenant_record.id) || req.tenant || 'public';
+      const _cacheModel = body.model || 'default';
+      let _cacheCanon = null;
+      let _cacheUserText = inputText;
+      if (_cacheCfg.mode !== 'off') {
+        try {
+          const _c = semcache.canonicalizeCacheInput(body);
+          _cacheCanon = _c.canonicalInput;
+          _cacheUserText = _c.userText || inputText;
+          const _hit = await semcache.semanticCacheLookup({ tenant: _cacheTenant, namespace: nsSlug, model: _cacheModel, canonicalInput: _cacheCanon, userText: _cacheUserText, config: _cacheCfg });
+          if (_hit && typeof _hit.status === 'string' && _hit.status.endsWith('_hit') && _hit.value) {
+            return res.status(200).json({
+              ...(_hit.value),
+              kolm_cache_hit: { mode: _cacheCfg.mode, similarity: _hit.similarity, source_receipt_id: _hit.source_receipt_id },
+            });
+          }
+        } catch (_) { _cacheCanon = _cacheCanon || null; /* cache miss-path: fall through to a live call */ }
       }
 
       // 3. Confidence + route selection. Adapt namespace.route_chain (array)
@@ -6451,6 +6476,14 @@ export function buildRouter() {
         otel.genAiTokenUsage({ provider: receipt.provider, requestModel: receipt.model, responseModel: receipt.model, operation: 'chat', inputTokens: receipt.input_tokens, outputTokens: receipt.output_tokens });
         otel.genAiOperationDuration({ provider: receipt.provider, requestModel: receipt.model, responseModel: receipt.model, operation: 'chat', durationMs: phases.chain_dispatch_ms });
       } catch (_) { /* telemetry is best-effort */ }
+      // W921 — populate the semantic cache on a successful live call (best-effort,
+      // only when enabled). Stores the redacted client response so a future hit
+      // returns exactly what this caller received.
+      if (_cacheCfg.mode !== 'off' && _cacheCanon && result.ok) {
+        try {
+          await semcache.semanticCacheWrite({ tenant: _cacheTenant, namespace: nsSlug, model: _cacheModel, canonicalInput: _cacheCanon, userText: _cacheUserText, value: clientJson, source_receipt_id: receipt.receipt_id, config: _cacheCfg });
+        } catch (_) { /* cache write is best-effort */ }
+      }
       try {
         store.insert('observations', {
           id: receipt.receipt_id,
