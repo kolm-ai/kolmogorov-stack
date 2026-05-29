@@ -62,6 +62,12 @@ import * as eventStore from './event-store.js';
 import activeLearning from './active-learning.js';
 import { minhashPredup } from './minhash-dedup.js';
 import { selectInformativeSubset } from './data-select.js';
+// The INGEST stage (data-ingest.js) is the single authority on where a namespace's
+// raw-pairs.jsonl lives. Reuse its path so curate reads exactly where ingest wrote,
+// in every KOLM_DATA_DIR config (data-ingest treats KOLM_DATA_DIR as the data root
+// directly: <root>/<ns>/raw-pairs.jsonl; curate's own _nsDir adds .kolm/data and so
+// diverged when KOLM_DATA_DIR was set).
+import { rawPairsPath as _ingestRawPairsPath } from './data-ingest.js';
 // ── opt-in W921 frontier curation modules (additive; default OFF) ─────────────
 import { selectDiverse as _selectDiverse } from './data-diversity-select.js';
 import { clusterAndLabel as _clusterAndLabel } from './data-cluster-label.js';
@@ -414,7 +420,7 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       select_method: 'k-center',  // 'k-center' | 'facility-location' | 'badge'
     }, opts || {});
 
-    const inFile = in_path || path.join(_nsDir(ns), 'raw-pairs.jsonl');
+    const inFile = in_path || _ingestRawPairsPath(ns);
     const outFile = out_path || path.join(_nsDir(ns), 'curated-pairs.jsonl');
 
     // Source: explicit array if given, else read the raw jsonl.
