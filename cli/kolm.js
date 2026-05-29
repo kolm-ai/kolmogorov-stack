@@ -21835,6 +21835,17 @@ async function cmdDistillTeacherCouncil(args) {
 // the envelope. The local module path is the default; --remote routes
 // through the corresponding /v1/distill/* route on the configured server.
 async function cmdDistillOnPolicy(args) {
+  // W921 NEXT-1 — black-box ROPD path. `kolm distill onpolicy --ropd ...` (and
+  // its alias `kolm distill onpolicy ropd ...`) dispatches the rubric-based
+  // on-policy distiller in src/distill-onpolicy.js (doctorRopd / buildRopdPrompts
+  // Jsonl / trainRopd). This is the path that works for kolm's dominant teacher
+  // regime (black-box API teachers — teacher TEXT only, no logits), unlike the
+  // white-box trainOnPolicy shell below which needs teacher logits. Detected
+  // BEFORE the white-box sub-switch so the two paths never collide.
+  if (args.includes('--ropd') || args[0] === 'ropd') {
+    const ropdArgs = (args[0] === 'ropd') ? args.slice(1) : args.filter((a) => a !== '--ropd');
+    return cmdDistillRopd(ropdArgs);
+  }
   const sub = args[0];
   const rest = args.slice(1);
   const wantJson = rest.includes('--json') || sub === 'doctor';
@@ -21867,6 +21878,7 @@ async function cmdDistillOnPolicy(args) {
     process.exit(out.ok ? 0 : 3);
   }
   console.error(`usage: kolm distill onpolicy {doctor|train [--pairs <jsonl> --student <path>]}`);
+  console.error(`       kolm distill onpolicy --ropd {doctor|train --seeds <jsonl> --student <path>}  (black-box on-policy KD, arXiv:2605.07396)`);
   process.exit(EXIT.BAD_ARGS);
 }
 
@@ -22051,6 +22063,136 @@ async function cmdDistillGrpo(args) {
     process.exit(EXIT.EXECUTION);
   }
   console.log(`ok  grpo run prepared (${built.count} prompts, reward=${rewards.join(',')}, loss=${lossType})`);
+  console.log('  run_dir:   ' + out.run_dir);
+  if (out.trainer_kicked === false || out.deferred) {
+    console.log('  status:    prompts + run dir written (trainer not installed)');
+    if (out.install_hint) console.log('  hint:      ' + out.install_hint.split('\n')[0]);
+  } else {
+    console.log('  status:    trainer kicked');
+  }
+}
+
+// W921 NEXT-1 — `kolm distill onpolicy --ropd` (ROPD: Rubric-based On-policy
+// Distillation, arXiv:2605.07396). Black-box on-policy KD: it induces prompt-
+// specific rubrics from teacher-vs-student TEXT contrasts, scores student
+// rollouts with teacher TEXT only (no logits / no tokenizer alignment), and
+// GRPO-optimizes the student toward its own best rollouts. This is the on-policy
+// path for kolm's dominant teacher regime (API teachers via teacher-bridge),
+// where the white-box trainOnPolicy shell (which needs teacher logits) cannot
+// run.
+//
+// Mirrors cmdDistillGrpo: build the prompts JSONL the trainer consumes (each
+// seed → {prompt, teacher_refs:[...]} from black-box teacher text) then route to
+// src/distill-onpolicy.js trainRopd(). Durable: trainRopd writes the run dir + a
+// clear no_trainer_installed envelope when torch/trl are absent.
+async function cmdDistillRopd(args) {
+  const sub = args[0];
+  const rest = args.slice(1);
+  if (sub === 'doctor') {
+    const remote = rest.includes('--remote');
+    if (remote) {
+      const c = loadConfig();
+      const r = await fetch(c.base.replace(/\/+$/, '') + '/v1/distill/onpolicy/doctor');
+      const j = await r.json();
+      console.log(JSON.stringify(j, null, 2));
+      return;
+    }
+    const { doctorRopd } = await import('../src/distill-onpolicy.js');
+    const out = doctorRopd();
+    console.log(JSON.stringify(out, null, 2));
+    process.exit(out.ready ? 0 : 3);
+  }
+  // default + `train` are the run path.
+  const train_args = (sub === 'train') ? rest : args;
+  const seedsFile = pickFlag(train_args, '--seeds') || pickFlag(train_args, '--prompts');
+  const student = pickFlag(train_args, '--student');
+  const studentBase = pickFlag(train_args, '--student-base') || null;
+  const numRolloutsFlag = pickFlag(train_args, '--num-rollouts');
+  const numTeacherRefsFlag = pickFlag(train_args, '--num-teacher-refs');
+  const rubricMinFlag = pickFlag(train_args, '--rubric-min-items');
+  const rubricMaxFlag = pickFlag(train_args, '--rubric-max-items');
+  const lrFlag = pickFlag(train_args, '--learning-rate');
+  const tempFlag = pickFlag(train_args, '--temperature');
+  const maxCompFlag = pickFlag(train_args, '--max-completion-length');
+  const noDifficultyAnchor = train_args.includes('--no-difficulty-anchor');
+  const ns = pickFlag(train_args, '--namespace') || 'default';
+  const outDir = pickFlag(train_args, '--out') || null;
+  const wantJson = train_args.includes('--json');
+  const { ROPD_OBJECTIVE, buildRopdPromptsJsonl, trainRopd } = await import('../src/distill-onpolicy.js');
+  if (!seedsFile || !student) {
+    console.error('usage: kolm distill onpolicy --ropd --seeds <jsonl> --student <path> [--student-base <hf-id>] [--num-rollouts 8] [--num-teacher-refs 4] [--rubric-min-items 4] [--rubric-max-items 12] [--learning-rate 1e-6] [--temperature 1.0] [--max-completion-length 1024] [--no-difficulty-anchor] [--namespace ns] [--out <dir>] [--json]');
+    console.error('  objective: ' + ROPD_OBJECTIVE + ' (black-box, teacher TEXT only — no logits; arXiv:2605.07396)');
+    console.error('  seeds:   JSONL of {prompt|input, teacher_refs:[...] | teacher | response | chosen}');
+    console.error('  also:    kolm distill onpolicy --ropd doctor');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  if (!fs.existsSync(seedsFile)) { console.error('not found: ' + seedsFile); process.exit(EXIT.NOT_FOUND); }
+  // Validate the numeric knobs CLI-side so a typo dies before the python spawn.
+  function _posInt(flag, val) {
+    if (val == null) return null;
+    const n = Number(val);
+    if (!Number.isInteger(n) || n <= 0) {
+      console.error(`error: ${flag} must be a positive integer (got '${val}')`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    return n;
+  }
+  const numRollouts = numRolloutsFlag != null ? _posInt('--num-rollouts', numRolloutsFlag) : 8;
+  if (numRollouts != null && numRollouts < 2) {
+    console.error('error: --num-rollouts must be >= 2 (GRPO needs a group)');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const numTeacherRefs = numTeacherRefsFlag != null ? _posInt('--num-teacher-refs', numTeacherRefsFlag) : 4;
+  const rubricMinItems = rubricMinFlag != null ? _posInt('--rubric-min-items', rubricMinFlag) : 4;
+  const rubricMaxItems = rubricMaxFlag != null ? _posInt('--rubric-max-items', rubricMaxFlag) : 12;
+  if (rubricMinItems != null && rubricMaxItems != null && rubricMinItems > rubricMaxItems) {
+    console.error(`error: --rubric-min-items (${rubricMinItems}) must be <= --rubric-max-items (${rubricMaxItems})`);
+    process.exit(EXIT.BAD_ARGS);
+  }
+  let seeds;
+  try {
+    seeds = fs.readFileSync(seedsFile, 'utf8').split(/\r?\n/).filter(Boolean).map((l) => JSON.parse(l));
+  } catch (e) {
+    console.error('could not parse --seeds JSONL: ' + (e && e.message ? e.message : e));
+    process.exit(EXIT.EXECUTION);
+  }
+  // Build the ROPD prompts JSONL (each seed → {prompt, teacher_refs:[...]} using
+  // black-box teacher TEXT). Anchored next to --out (or a temp ropd run dir).
+  const runRoot = outDir || path.join(KOLM_DIR, 'ropd-runs', `ropd_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
+  fs.mkdirSync(runRoot, { recursive: true });
+  const promptsPath = path.join(runRoot, 'prompts.jsonl');
+  const built = buildRopdPromptsJsonl(seeds, promptsPath);
+  if (!built.ok) {
+    console.error('prompts build failed: ' + (built.error || 'unknown'));
+    process.exit(EXIT.EXECUTION);
+  }
+  const out = trainRopd({
+    promptsPath,
+    studentPath: student,
+    studentBase,
+    numRollouts,
+    numTeacherRefs,
+    rubricMinItems,
+    rubricMaxItems,
+    learningRate: lrFlag != null ? Number(lrFlag) : 1e-6,
+    temperature: tempFlag != null ? Number(tempFlag) : 1.0,
+    maxCompletionLength: maxCompFlag != null ? Number(maxCompFlag) : 1024,
+    difficultyAnchor: !noDifficultyAnchor,
+    outDir: runRoot,
+    namespace: ns,
+  });
+  if (wantJson) {
+    console.log(JSON.stringify({ ...out, prompts: built }, null, 2));
+    process.exit(out.ok ? 0 : EXIT.EXECUTION);
+  }
+  if (!out.ok) {
+    console.error('ropd failed: ' + (out.error || 'unknown') + (out.detail ? ' — ' + out.detail : ''));
+    if (out.install_hint) console.error(out.install_hint);
+    process.exit(EXIT.EXECUTION);
+  }
+  console.log(`ok  ropd run prepared (${built.count} prompts, ${built.with_refs} with teacher refs, rollouts=${numRollouts}, teacher_refs=${numTeacherRefs})`);
+  console.log('  objective: ' + (out.objective || ROPD_OBJECTIVE) + ' (black-box; teacher TEXT only)');
+  console.log('  rubric:    ' + rubricMinItems + '-' + rubricMaxItems + ' items');
   console.log('  run_dir:   ' + out.run_dir);
   if (out.trainer_kicked === false || out.deferred) {
     console.log('  status:    prompts + run dir written (trainer not installed)');

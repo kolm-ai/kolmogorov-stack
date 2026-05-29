@@ -457,6 +457,8 @@ import { registerRegRoutes as __registerRegRoutes_w834 } from './reg-routes.js';
 import { registerAccountUiRoutes as __registerAccountUiRoutes_w921 } from './account-ui-routes.js';
 import { registerWebsiteStatusRoutes as __registerWebsiteStatusRoutes_w921 } from './website-status-routes.js';
 import { register as __registerGovernRoutes_w921 } from './govern-routes.js';
+import { register as __registerIntotoReceiptRoutes_w921 } from './intoto-receipt-routes.js';
+import { register as __registerMcpGatewayRoutes_w921 } from './mcp-gateway-routes.js';
 
 // W709-5 — runtime-router decision summary for /account/routing dashboard.
 import {
@@ -25477,6 +25479,10 @@ res.json({
   __registerAccountUiRoutes_w921(r, { authMiddleware });
   __registerWebsiteStatusRoutes_w921(r, { authMiddleware });
   __registerGovernRoutes_w921(r, { authMiddleware });
+  // W921 BET-3/BET-4 — in-toto/SLSA receipt attestation + governed MCP signed
+  // tool-call receipts. Additive; degrade gracefully without optional deps.
+  __registerIntotoReceiptRoutes_w921(r, { authMiddleware });
+  __registerMcpGatewayRoutes_w921(r, { authMiddleware });
 
   // W829 — multimodal capture pipeline (multimodal/multi-turn captures +
   // VLM-distill enqueue + jobs list). One-line modular mount keeps the
