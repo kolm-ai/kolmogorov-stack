@@ -538,6 +538,10 @@ class KDObjective(str, enum.Enum):
     FORWARD_KL = "forward_kl"
     REVERSE_KL = "reverse_kl"
     JSD = "jsd"
+    # W921 — DistiLLM-2 contrastive asymmetric SKL+SRKL objective (Ko et al.,
+    # ICML 2025 Oral, arXiv:2503.07067). See skewed_kl/skewed_reverse_kl/
+    # distillm2_loss below. Local-teacher only (needs logits).
+    DISTILLM2 = "distillm2"
 
     @classmethod
     def from_str(cls, s: str) -> "KDObjective":
@@ -644,6 +648,134 @@ _KD_FNS = {
     KDObjective.REVERSE_KL: _reverse_kl,
     KDObjective.JSD: _jensen_shannon,
 }
+
+
+# =============================================================================
+# W921 — DistiLLM-2 contrastive asymmetric SKL/SRKL objective.
+#
+# DistiLLM-2 (Ko et al., ICML 2025 Oral, arXiv:2503.07067) uses a CONTRASTIVE
+# asymmetric loss that simultaneously RAISES the likelihood of teacher
+# (chosen) responses via skewed-KL and LOWERS the likelihood of student
+# (rejected) responses via skewed-reverse-KL.
+#
+# Skew with skew alpha mixes the distributions in LOG-space so log-ratios never
+# blow up (DistiLLM v1, arXiv:2402.03898). All functions take per-token LOG-
+# probabilities (already log_softmax'd) of shape [..., V] and return a per-
+# token scalar (sum over V). NOTE: with the DistiLLM convention base_alpha is
+# SMALL (default 0.1); skewed_kl -> forward KL(p_t || p_s) as alpha -> 0, and
+# -> 0 as alpha -> 1. The unit tests assert the alpha->0 reduction, not alpha=1.
+# =============================================================================
+
+def skewed_kl(student_logps, teacher_logps, alpha):
+    """Per-token Skewed-KL on TEACHER (chosen) tokens.
+
+      SKL^alpha = sum_v exp(t_v) * ( t_v - logsumexp(log(alpha)+t_v, log(1-alpha)+s_v) )
+
+    i.e. KL(p_t || alpha*p_t + (1-alpha)*p_s). The mixture lives in the SECOND
+    slot so the ratio is bounded. Returns a tensor with the last (vocab) dim
+    summed out."""
+    import math
+    a = float(alpha)
+    log_a = math.log(max(a, 1e-12))
+    log_1ma = math.log(max(1.0 - a, 1e-12))
+    # mix_v = log( alpha*p_t + (1-alpha)*p_s )  in log-space, numerically stable
+    stacked = torch.stack([log_a + teacher_logps, log_1ma + student_logps], dim=0)
+    mix = torch.logsumexp(stacked, dim=0)
+    per_tok = (teacher_logps.exp() * (teacher_logps - mix)).sum(dim=-1)
+    return per_tok
+
+
+def skewed_reverse_kl(student_logps, teacher_logps, alpha):
+    """Per-token Skewed-Reverse-KL on STUDENT (rejected) tokens.
+
+      SRKL^alpha = sum_v exp(s_v) * ( s_v - logsumexp(log(1-alpha)+t_v, log(alpha)+s_v) )
+
+    i.e. KL(p_s || (1-alpha)*p_t + alpha*p_s). The teacher-anchor term is
+    DETACHED on the gradient path (we lower the student likelihood toward the
+    teacher mixture without pushing the teacher)."""
+    import math
+    a = float(alpha)
+    log_a = math.log(max(a, 1e-12))
+    log_1ma = math.log(max(1.0 - a, 1e-12))
+    teacher_anchor = teacher_logps.detach() if hasattr(teacher_logps, "detach") else teacher_logps
+    stacked = torch.stack([log_1ma + teacher_anchor, log_a + student_logps], dim=0)
+    mix = torch.logsumexp(stacked, dim=0)
+    per_tok = (student_logps.exp() * (student_logps - mix)).sum(dim=-1)
+    return per_tok
+
+
+def distillm2_loss(skl_chosen, srkl_rejected, beta):
+    """Contrastive combination: L = (2 - beta) * SKL(chosen) + beta * SRKL(rejected).
+    beta in [1, 1.5] per the gradual schedule; at beta=1 this is SKL + SRKL."""
+    b = float(beta)
+    return (2.0 - b) * skl_chosen + b * srkl_rejected
+
+
+def adaptive_alpha(tea_logp_sum, stu_logp_sum, base_alpha=0.1, eps=1e-5):
+    """Per-sample adaptive skew from the sentence-level teacher-student gap.
+    Larger gap (harder sample) -> larger alpha (more skew), clipped to
+    [1e-2, base_alpha]. tea_logp_sum/stu_logp_sum are per-sample sums of the
+    per-token gold log-probabilities (the reference impl's anchor)."""
+    # gap >= 0 when the teacher is more confident than the student.
+    anchor = (tea_logp_sum - stu_logp_sum)
+    # alpha = clip(1 - (1-base_alpha) * anchor / (|stu_logp_sum| + eps), 1e-2, base_alpha)
+    denom = stu_logp_sum.abs() + eps if hasattr(stu_logp_sum, "abs") else abs(stu_logp_sum) + eps
+    raw = 1.0 - (1.0 - base_alpha) * (anchor / denom)
+    if hasattr(raw, "clamp"):
+        return raw.clamp(1e-2, base_alpha)
+    return max(1e-2, min(base_alpha, raw))
+
+
+def gradual_beta(global_step, max_steps, beta_0=1.0):
+    """beta ramp: 1.0 + 0.5 * min(1, 2*step/max_steps). Starts emphasizing the
+    teacher SKL term and ramps the student-correction SRKL term as the student
+    improves. Returns a float in [beta_0, beta_0 + 0.5]."""
+    if max_steps <= 0:
+        return float(beta_0)
+    frac = min(1.0, 2.0 * float(global_step) / float(max_steps))
+    return float(beta_0) + 0.5 * frac
+
+
+def build_contrastive_rows(prompts, teacher_outputs, student_outputs):
+    """Reshape into the DistiLLM-2 DPO data shape: each row =
+    {prompt, chosen=teacher_generated, rejected=student_generated}."""
+    rows = []
+    n = min(len(prompts), len(teacher_outputs), len(student_outputs))
+    for i in range(n):
+        rows.append({
+            "prompt": prompts[i],
+            "chosen": teacher_outputs[i],
+            "rejected": student_outputs[i],
+        })
+    return rows
+
+
+def generate_student_responses(student, tokenizer, prompts, temperature=0.8,
+                               max_new_tokens=512, batch_size=8):
+    """On-policy pre-pass: sample y_s from the CURRENT student (HF .generate,
+    batched). Returns a list of decoded completions for the rejected branch.
+    Deterministic when temperature<=0 (greedy). Imported lazily; GPU path."""
+    import torch as _torch
+    outs = []
+    student.eval()
+    do_sample = temperature is not None and temperature > 0
+    with _torch.no_grad():
+        for i in range(0, len(prompts), batch_size):
+            batch = prompts[i:i + batch_size]
+            enc = tokenizer(batch, return_tensors="pt", padding=True, truncation=True)
+            device = next(student.parameters()).device
+            enc = {k: v.to(device) for k, v in enc.items()}
+            gen = student.generate(
+                **enc,
+                do_sample=do_sample,
+                temperature=temperature if do_sample else None,
+                max_new_tokens=max_new_tokens,
+                pad_token_id=getattr(tokenizer, "pad_token_id", None) or getattr(tokenizer, "eos_token_id", None),
+            )
+            for j in range(gen.size(0)):
+                new_tokens = gen[j][enc["input_ids"].size(1):]
+                outs.append(tokenizer.decode(new_tokens, skip_special_tokens=True))
+    return outs
 
 
 def _topk_prune(student_logits, teacher_logits, k: int):

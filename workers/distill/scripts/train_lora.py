@@ -18,6 +18,14 @@ import json
 import sys
 import os
 
+# W921 — import the vendored LoRA-variant builder (same dir). Kept import-safe:
+# lora_variants does NOT import torch/peft at module load.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    import lora_variants as _lv  # noqa: E402
+except Exception:  # pragma: no cover - worker stays usable if the file is absent
+    _lv = None
+
 
 def _require(mod_name, install_hint):
     try:
@@ -39,7 +47,48 @@ def main():
     p.add_argument("--batch-size", type=int, default=4)
     p.add_argument("--lr", type=float, default=2e-4)
     p.add_argument("--max-length", type=int, default=512)
+    # W921 — dry-run / preflight: construct the variant config + probe deps and
+    # exit WITHOUT loading models or training. GPU-free; used by --self-test and
+    # the orchestrator preflight gate.
+    p.add_argument("--preflight-only", action="store_true",
+                   help="construct config + probe variant deps, then exit 0 (no training)")
     args = p.parse_args()
+
+    # ── W921 LoRA-variant / GaLore / packing knobs (env-threaded, default-off) ──
+    lora_variant = os.environ.get("KOLM_LORA_VARIANT", "lora").lower()
+    lora_init = os.environ.get("KOLM_LORA_INIT", "default").lower()
+    neftune_alpha = os.environ.get("KOLM_NEFTUNE_ALPHA")
+    neftune_alpha = float(neftune_alpha) if neftune_alpha else None
+    loraplus_ratio = float(os.environ.get("KOLM_LORAPLUS_RATIO", "16"))
+    trainer_optim = os.environ.get("KOLM_OPTIM", "adamw_torch").lower()
+    galore_args = os.environ.get("KOLM_GALORE_ARGS", "")
+    galore_targets = os.environ.get("KOLM_GALORE_TARGETS", "attn,mlp")
+    packing_enabled = os.environ.get("KOLM_PACKING", "0") == "1"
+    variants_active = (lora_variant != "lora" or lora_init != "default" or neftune_alpha
+                       or trainer_optim != "adamw_torch" or packing_enabled)
+
+    # ── W921 preflight: probe variant deps; FAIL LOUD on missing support. ──
+    if variants_active and _lv is not None:
+        pf = _lv.preflight_variant_support(lora_init, trainer_optim)
+        if not pf["ok"]:
+            sys.stderr.write("[train_lora] variant preflight FAILED:\n")
+            for h in pf["hints"]:
+                sys.stderr.write(f"             - {h}\n")
+            if args.preflight_only:
+                print(json.dumps({"preflight": pf, "ok": False}))
+            sys.exit(7)
+    if args.preflight_only:
+        # Construct the variant config WITHOUT loading models. Proves the path.
+        cfg_preview = {
+            "lora_variant": lora_variant,
+            "lora_init": lora_init,
+            "neftune_alpha": neftune_alpha,
+            "optim": trainer_optim,
+            "packing": packing_enabled,
+            "galore_args": galore_args if trainer_optim.startswith("galore") else None,
+        }
+        print(json.dumps({"preflight": "ok", "config": cfg_preview, "ok": True}))
+        sys.exit(0)
 
     # Hard dependency check — give the operator a single-line install hint
     # instead of a Python traceback.
@@ -102,14 +151,37 @@ def main():
         device_map="auto",
     )
 
-    lora_cfg = LoraConfig(
-        r=args.lora_rank,
-        lora_alpha=args.lora_alpha,
-        task_type=TaskType.CAUSAL_LM,
-        bias="none",
-        lora_dropout=0.05,
-    )
-    model = get_peft_model(base, lora_cfg)
+    # W921 — variant-aware LoRA config. When no variant knobs are set this
+    # produces the IDENTICAL plain LoRA config as before (backward-compat).
+    pissa_init_path = None
+    if variants_active and _lv is not None:
+        lvcfg = _lv.LoraVariantConfig(
+            r=args.lora_rank,
+            lora_alpha=args.lora_alpha,
+            lora_dropout=0.05,
+            bias="none",
+            task_type="CAUSAL_LM",
+            init_lora_weights=lora_init,
+        ).variant_from_name(lora_variant)
+        lora_cfg = _lv.build_peft_lora_config(lvcfg)
+        model = get_peft_model(base, lora_cfg)
+        # PiSSA: snapshot the untrained decomposition BEFORE training so the
+        # adapter can be converted back to base-relative form at save.
+        if lora_init in _lv.PISSA_INITS:
+            try:
+                pissa_init_path = _lv.snapshot_pissa_init(model, args.out)
+            except Exception as e:
+                sys.stderr.write(f"[train_lora] PiSSA snapshot failed: {e}\n")
+    else:
+        lvcfg = None
+        lora_cfg = LoraConfig(
+            r=args.lora_rank,
+            lora_alpha=args.lora_alpha,
+            task_type=TaskType.CAUSAL_LM,
+            bias="none",
+            lora_dropout=0.05,
+        )
+        model = get_peft_model(base, lora_cfg)
     model.print_trainable_parameters()
 
     # W787 — read compute-efficiency knobs from env so the Node-side
@@ -149,7 +221,34 @@ def main():
         ta_kwargs["load_best_model_at_end"] = True
         ta_kwargs["metric_for_best_model"] = "eval_loss"
         ta_kwargs["greater_is_better"] = False
-    training = TrainingArguments(**ta_kwargs)
+    # W921 — NEFTune is a TrainingArguments field. GaLore is wired via the
+    # optim/optim_target_modules/optim_args TrainingArguments fields (the
+    # builder also enforces the incompatible-combo refusals).
+    if neftune_alpha:
+        ta_kwargs["neftune_noise_alpha"] = float(neftune_alpha)
+    custom_optimizer = None
+    if variants_active and _lv is not None and trainer_optim.startswith("galore"):
+        try:
+            training = _lv.build_galore_training_args(
+                ta_kwargs,
+                optim=trainer_optim,
+                target_modules=[m.strip() for m in galore_targets.split(",") if m.strip()],
+                optim_args=galore_args,
+            )
+        except Exception as e:
+            sys.stderr.write(f"[train_lora] GaLore setup refused: {e}\n")
+            sys.exit(8)
+    else:
+        training = TrainingArguments(**ta_kwargs)
+        # LoRA+ / LoRA-FA need a hand-built optimizer (param-group split / freeze).
+        if variants_active and _lv is not None and lvcfg is not None and (lvcfg.use_lora_plus or lvcfg.freeze_a):
+            try:
+                custom_optimizer = _lv.build_optimizer(
+                    model, lvcfg, base_lr=args.lr,
+                    paged_8bit=trainer_optim in ("adamw_8bit", "paged_adamw_8bit"),
+                )
+            except Exception as e:
+                sys.stderr.write(f"[train_lora] custom optimizer build failed: {e}\n")
 
     callbacks = []
     if early_stop_enabled:
@@ -168,16 +267,28 @@ def main():
         except Exception as e:
             sys.stderr.write(f"[train_lora] KOLM_EARLY_STOP=1 but EarlyStoppingCallback unavailable: {e}\n")
 
-    trainer = Trainer(
+    trainer_kwargs = dict(
         model=model,
         args=training,
         train_dataset=ds,
         data_collator=DataCollatorForLanguageModeling(tok, mlm=False),
         callbacks=callbacks,
     )
+    # W921 — inject the hand-built optimizer for LoRA+/LoRA-FA (scheduler left
+    # to the Trainer default by passing (optim, None)).
+    if custom_optimizer is not None:
+        trainer_kwargs["optimizers"] = (custom_optimizer, None)
+    trainer = Trainer(**trainer_kwargs)
 
     trainer.train()
-    model.save_pretrained(args.out)
+    # W921 — PiSSA conversion at save: rewrite the residual-relative adapter to
+    # standard-base form so it loads on the ORIGINAL published base.
+    pissa_converted = False
+    if pissa_init_path and _lv is not None:
+        conv = _lv.convert_pissa_save(model, args.out, pissa_init_path)
+        pissa_converted = bool(conv.get("pissa_converted"))
+    else:
+        model.save_pretrained(args.out)
     tok.save_pretrained(args.out)
 
     with open(os.path.join(args.out, "training-summary.json"), "w", encoding="utf-8") as f:
@@ -201,6 +312,20 @@ def main():
                 "early_stop_enabled": early_stop_enabled,
                 "early_stop_patience": int(os.environ.get("KOLM_EARLY_STOP_PATIENCE", "3")) if early_stop_enabled else None,
                 "early_stop_delta": float(os.environ.get("KOLM_EARLY_STOP_DELTA", "0.005")) if early_stop_enabled else None,
+            },
+            # W921 — LoRA-variant / optimizer / packing provenance so the .kolm
+            # receipt chain documents the REAL training objective. Defaults
+            # record the vanilla path; pissa_converted proves a PiSSA adapter is
+            # base-relative (loads on the published base).
+            "variants": {
+                "lora_variant": lora_variant,
+                "lora_init": lora_init,
+                "neftune_alpha": neftune_alpha,
+                "loraplus_ratio": loraplus_ratio if lora_variant == "loraplus" else None,
+                "optim": trainer_optim,
+                "galore_args": galore_args if trainer_optim.startswith("galore") else None,
+                "packing": packing_enabled,
+                "pissa_converted": pissa_converted,
             },
         }, f, indent=2)
 

@@ -287,8 +287,15 @@ def receipt_block(
     *,
     adapter_ids: Iterable[str],
     weights: Optional[Mapping[str, float]] = None,
+    merge_space: str = "factor",
+    out_rank: Optional[int] = None,
+    svd_rank: Optional[int] = None,
 ) -> dict[str, Any]:
-    """Stable receipt sub-block recording how a merged adapter was composed."""
+    """Stable receipt sub-block recording how a merged adapter was composed.
+
+    W921: merge_space records whether the merge ran in delta-W space ('delta_w',
+    the correct LoRA path) or by merging A/B factors separately ('factor', the
+    rank-locked footgun path) or as a record-only stub ('record_only')."""
     return {
         "algo": f"merge.{cfg.method}",
         "adapter_ids": list(adapter_ids),
@@ -296,13 +303,210 @@ def receipt_block(
         "density": float(cfg.density),
         "slerp_t": float(cfg.slerp_t),
         "seed": int(cfg.seed),
+        "merge_space": merge_space,
+        "out_rank": int(out_rank) if out_rank is not None else None,
+        "svd_rank": int(svd_rank) if svd_rank is not None else None,
         "papers": [
             "arXiv:2306.01708",  # TIES
             "arXiv:2311.03099",  # DARE
+            "arXiv:2406.11617",  # DELLA
+            "arXiv:2410.19735",  # KnOTS (SVD-align LoRA before merge)
             "arXiv:2403.13257",  # mergekit
             "arXiv:2212.04089",  # task arithmetic
         ],
-        "schema_version": "merge.v1",
+        "schema_version": "merge.v2",
+    }
+
+
+# =============================================================================
+# W921 — delta-W-space LoRA merge (the CORRECT path) + DELLA + dare_ties.
+#
+# Merging LoRA A and B FACTORS separately (merge_state_dicts above) is NOT equal
+# to merging the products B@A and is only valid at identical rank — a documented
+# PEFT footgun. The functions below reconstruct delta_W_i = scale_i * B_i @ A_i,
+# run the merge method IN DELTA-W SPACE, then SVD-refactorize back to (A,B) at a
+# chosen output rank so the merged adapter loads on the original frozen base.
+# =============================================================================
+
+def _flat_delta(dw, density: float, torch):
+    """Magnitude-prune (TRIM) a delta tensor to the top-`density` fraction."""
+    if density >= 1.0:
+        return dw
+    flat = dw.abs().flatten()
+    if flat.numel() == 0:
+        return dw
+    k = max(1, int(flat.numel() * density))
+    threshold = torch.topk(flat, k).values.min()
+    return torch.where(dw.abs() >= threshold, dw, torch.zeros_like(dw))
+
+
+def _ties_elect_and_merge(deltas, weights, torch):
+    """TIES on a list of (name, delta) pairs already trimmed: elect a per-coord
+    sign, then average only the sign-agreeing entries."""
+    sign_sum = None
+    for name, dw in deltas:
+        s = torch.sign(dw) * weights[name]
+        sign_sum = s if sign_sum is None else sign_sum + s
+    elected = torch.sign(sign_sum)
+    acc = None
+    agree_count = None
+    for name, dw in deltas:
+        agree = (torch.sign(dw) == elected) & (dw != 0)
+        contrib = torch.where(agree, weights[name] * dw, torch.zeros_like(dw))
+        acc = contrib if acc is None else acc + contrib
+        agree_count = agree.float() if agree_count is None else agree_count + agree.float()
+    denom = torch.where(agree_count > 0, agree_count, torch.ones_like(agree_count))
+    return acc / denom * sum(weights.values())
+
+
+def _merge_della(deltas, weights, cfg: MergeConfig, torch):
+    """DELLA (arXiv:2406.11617): rank coordinates by magnitude WITHIN each row
+    and assign drop probability INVERSELY proportional to magnitude (keep big
+    changes), rescale survivors by 1/keep_prob, then TIES-merge."""
+    g = torch.Generator()
+    g.manual_seed(cfg.seed)
+    p_keep_max = cfg.density  # the largest-magnitude coord keeps with this prob
+    processed = []
+    for name, dw in deltas:
+        flat = dw.flatten()
+        n = flat.numel()
+        if n == 0:
+            processed.append((name, dw))
+            continue
+        # Rank by magnitude -> normalized rank in [0,1]; keep_prob scales with rank.
+        order = torch.argsort(flat.abs())  # ascending magnitude
+        ranks = torch.empty_like(order, dtype=torch.float)
+        ranks[order] = torch.arange(n, dtype=torch.float, device=flat.device)
+        norm_rank = ranks / max(n - 1, 1)  # 0 = smallest, 1 = largest
+        keep_prob = (0.1 + (p_keep_max - 0.1) * norm_rank).clamp(0.0, 1.0)
+        mask = torch.bernoulli(keep_prob, generator=g)
+        survivors = torch.where(mask > 0, flat / keep_prob.clamp_min(1e-6), torch.zeros_like(flat))
+        processed.append((name, survivors.reshape(dw.shape)))
+    return _ties_elect_and_merge(processed, weights, torch)
+
+
+def _merge_dare_ties(deltas, weights, cfg: MergeConfig, torch):
+    """DARE drop+rescale, then TIES sign-election (dare_ties)."""
+    g = torch.Generator()
+    g.manual_seed(cfg.seed)
+    p = cfg.density
+    processed = []
+    for name, dw in deltas:
+        mask = torch.bernoulli(torch.full_like(dw, p), generator=g)
+        processed.append((name, mask * dw / p))
+    return _ties_elect_and_merge(processed, weights, torch)
+
+
+def _svd_refactor(merged_dw, scale: float, out_rank: int, torch):
+    """SVD-refactorize a merged delta-W back to (A, B) at out_rank such that
+    (alpha/r) * B @ A == merged_dw approximately. We fold the LoRA scale into B
+    so the saved adapter reconstructs the merged delta when applied with the
+    same alpha/r. Returns (A [r x in], B [out x r])."""
+    U, S, Vh = torch.linalg.svd(merged_dw.float(), full_matrices=False)
+    r = min(out_rank, S.numel())
+    U_r = U[:, :r]
+    S_r = S[:r]
+    Vh_r = Vh[:r, :]
+    sqrt_s = torch.sqrt(S_r)
+    # B = U_r * sqrt(S) / scale ; A = sqrt(S) * Vh_r  -> scale * B @ A == U S Vh
+    B = (U_r * sqrt_s.unsqueeze(0)) / max(scale, 1e-8)
+    A = sqrt_s.unsqueeze(1) * Vh_r
+    return A, B
+
+
+def merge_lora_deltas(
+    *,
+    adapters: Mapping[str, Mapping[str, Any]],
+    lora_scales: Mapping[str, float],
+    config: Optional[MergeConfig] = None,
+    out_rank: Optional[int] = None,
+) -> dict[str, Any]:
+    """Reconstruct dW_i = scale_i * B_i @ A_i per adapter and per LoRA module,
+    merge in dW-space, then SVD back to (A, B) at out_rank. Returns
+    {state_dict, merge_space:'delta_w', out_rank}.
+
+    adapters[name] is a state-dict mapping with PEFT lora_A/lora_B keys. We pair
+    lora_A.<m>.weight with lora_B.<m>.weight by module path.
+    """
+    cfg = config or MergeConfig()
+    torch = _import_torch()
+    names = list(adapters.keys())
+    if len(names) < 2:
+        raise ValueError(f"merge_lora_deltas needs >= 2 adapters, got {len(names)}")
+    # normalize weights
+    if cfg.weights is None:
+        weights = {k: 1.0 / len(names) for k in names}
+    else:
+        total = sum(float(cfg.weights[k]) for k in names)
+        weights = {k: float(cfg.weights[k]) / total for k in names}
+
+    # Discover LoRA module roots from the first adapter (keys like
+    # "...lora_A.weight" / "...lora_A.default.weight").
+    first = adapters[names[0]]
+
+    def _module_roots(sd):
+        roots = set()
+        for k in sd.keys():
+            if "lora_A" in k:
+                roots.add(k.replace("lora_A", "<X>"))
+        return roots
+
+    roots = _module_roots(first)
+    out_state: dict[str, Any] = {}
+    max_in_rank = 0
+    for a_key_tmpl in sorted(roots):
+        b_key_tmpl = a_key_tmpl  # same template, swap marker
+        a_key = a_key_tmpl.replace("<X>", "lora_A")
+        b_key = a_key_tmpl.replace("<X>", "lora_B")
+        # Reconstruct each adapter's dW for this module.
+        deltas = []
+        ref_scale = None
+        for name in names:
+            sd = adapters[name]
+            if a_key not in sd or b_key not in sd:
+                continue
+            A = sd[a_key].float()  # [r, in]
+            B = sd[b_key].float()  # [out, r]
+            r = A.shape[0]
+            max_in_rank = max(max_in_rank, r)
+            scale = float(lora_scales.get(name, 1.0))
+            ref_scale = scale if ref_scale is None else ref_scale
+            dw = scale * (B @ A)  # [out, in]
+            deltas.append((name, dw))
+        if len(deltas) < 1:
+            continue
+        # Trim then merge per method.
+        method = cfg.method
+        if method in ("ties",):
+            trimmed = [(n, _flat_delta(dw, cfg.density, torch)) for n, dw in deltas]
+            merged = _ties_elect_and_merge(trimmed, weights, torch)
+        elif method == "dare_ties":
+            merged = _merge_dare_ties(deltas, weights, cfg, torch)
+        elif method == "della":
+            merged = _merge_della(deltas, weights, cfg, torch)
+        elif method in ("dare", "dare_linear"):
+            g = torch.Generator(); g.manual_seed(cfg.seed)
+            acc = None
+            for n, dw in deltas:
+                mask = torch.bernoulli(torch.full_like(dw, cfg.density), generator=g)
+                contrib = weights[n] * mask * dw / cfg.density
+                acc = contrib if acc is None else acc + contrib
+            merged = acc
+        else:  # linear / svd / task-arithmetic
+            acc = None
+            for n, dw in deltas:
+                contrib = weights[n] * dw
+                acc = contrib if acc is None else acc + contrib
+            merged = acc
+        # SVD refactor back to (A, B).
+        chosen_rank = out_rank or max_in_rank or 16
+        A_m, B_m = _svd_refactor(merged, ref_scale or 1.0, chosen_rank, torch)
+        out_state[a_key] = A_m.to(first[a_key].dtype if a_key in first else torch.float32)
+        out_state[b_key] = B_m.to(first[b_key].dtype if b_key in first else torch.float32)
+    return {
+        "state_dict": out_state,
+        "merge_space": "delta_w",
+        "out_rank": out_rank or max_in_rank,
     }
 
 
@@ -381,4 +585,6 @@ __all__ = [
     "merge_state_dicts",
     "merge_lora_to_base",
     "receipt_block",
+    # W921 delta-W path
+    "merge_lora_deltas",
 ]

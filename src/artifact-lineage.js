@@ -159,10 +159,23 @@ const LINEAGE_FIELDS = new Set([
   'source', 'parent_artifact_hash', 'source_trace_ids', 'workflow_ir_hash',
   'team_event_head_hash', 'federated_round_id', 'teacher', 'student_base',
   'distillation_method', 'training_corpus_hash', 'compile_seed', 'notes',
+  // W921 — model-merge (multi-parent) lineage. All additive + omitted when
+  // empty so pre-W921 artifacts stay byte-identical under the W460 law.
+  'parent_artifact_hashes', 'merge_method', 'merge_weights', 'merge_density',
+  'source_adapter_hashes',
 ]);
 const VALID_SOURCES = new Set([
   'rule_synthesis', 'workflow_compile', 'distillation',
   'federated_aggregation', 'rebuild',
+  // W921 — a merged artifact is a first-class multi-parent node.
+  'model_merge',
+]);
+// W921 — frozen catalog of supported LoRA-adapter merge methods. Kept in sync
+// with workers/distill/scripts/merge_adapters.py + src/model-merge.js so the
+// recorded merge_method can never drift from what the trainer actually ran.
+export const VALID_MERGE_METHODS = new Set([
+  'linear', 'svd', 'ties', 'ties_svd', 'dare_linear', 'dare_ties',
+  'dare_linear_svd', 'dare_ties_svd', 'magnitude_prune', 'della', 'slerp',
 ]);
 const VALID_DISTILL_METHODS = new Set([
   'lora', 'full-ft', 'qlora', 'prompt-distill',
@@ -240,6 +253,62 @@ export function buildLineage(input = {}) {
     out.notes = input.notes;
   }
 
+  // W921 — multi-parent merge fields. parent_artifact_hashes is the array
+  // analogue of parent_artifact_hash (the single-parent slot is KEPT for
+  // back-compat). Each entry is a hex64 artifact cid. Omitted when empty so
+  // the W460 byte-stability law holds for non-merge artifacts.
+  if (input.parent_artifact_hashes !== undefined) {
+    if (!Array.isArray(input.parent_artifact_hashes)) {
+      throw new Error('parent_artifact_hashes must be array');
+    }
+    for (const h of input.parent_artifact_hashes) {
+      if (!HEX64_RE.test(h)) throw new Error(`parent_artifact_hashes entry must be hex64: ${h}`);
+    }
+    if (input.parent_artifact_hashes.length > 0) {
+      // Sort for canonical, content-addressed stability — order of inputs on
+      // the CLI must not change the lineage hash.
+      out.parent_artifact_hashes = [...input.parent_artifact_hashes].sort();
+    }
+  }
+  if (input.source_adapter_hashes !== undefined) {
+    if (!Array.isArray(input.source_adapter_hashes)) {
+      throw new Error('source_adapter_hashes must be array');
+    }
+    for (const h of input.source_adapter_hashes) {
+      if (!HEX16_RE.test(h)) throw new Error(`source_adapter_hashes entry must be hex16: ${h}`);
+    }
+    if (input.source_adapter_hashes.length > 0) {
+      out.source_adapter_hashes = [...input.source_adapter_hashes].sort();
+    }
+  }
+  if (input.merge_method !== undefined) {
+    if (!VALID_MERGE_METHODS.has(input.merge_method)) {
+      throw new Error(`unknown merge_method: ${input.merge_method}`);
+    }
+    out.merge_method = input.merge_method;
+  }
+  if (input.merge_weights !== undefined) {
+    if (input.merge_weights !== null && typeof input.merge_weights !== 'object') {
+      throw new Error('merge_weights must be an object<string,number> or null');
+    }
+    if (input.merge_weights && typeof input.merge_weights === 'object') {
+      const mw = {};
+      for (const [k, v] of Object.entries(input.merge_weights)) {
+        if (typeof v !== 'number' || !Number.isFinite(v)) {
+          throw new Error(`merge_weights.${k} must be a finite number`);
+        }
+        mw[k] = v;
+      }
+      if (Object.keys(mw).length > 0) out.merge_weights = mw;
+    }
+  }
+  if (input.merge_density !== undefined && input.merge_density !== null) {
+    if (typeof input.merge_density !== 'number' || input.merge_density < 0 || input.merge_density > 1) {
+      throw new Error('merge_density must be a number in [0,1]');
+    }
+    out.merge_density = input.merge_density;
+  }
+
   // Source-specific required fields. distillation and workflow_compile both
   // make claims that must be backed by something concrete.
   if (out.source === 'distillation' && !out.teacher) {
@@ -256,6 +325,17 @@ export function buildLineage(input = {}) {
   }
   if (out.source === 'federated_aggregation' && !out.federated_round_id) {
     throw new Error("source='federated_aggregation' requires federated_round_id");
+  }
+  // W921 — a model_merge node MUST name >= 2 source parents and the method
+  // used, else the receipt cannot prove which adapters produced the weights
+  // (the X04 'every number traces to a measurement' contract for merges).
+  if (out.source === 'model_merge') {
+    if (!out.parent_artifact_hashes || out.parent_artifact_hashes.length < 2) {
+      throw new Error("source='model_merge' requires parent_artifact_hashes with >= 2 entries");
+    }
+    if (!out.merge_method) {
+      throw new Error("source='model_merge' requires merge_method");
+    }
   }
 
   out.hash = _shortHash(_canon(out));
@@ -285,6 +365,7 @@ export function buildManifestBlocks({ capability, lineage } = {}) {
 export default {
   CAPABILITY_SPEC_VERSION,
   LINEAGE_SPEC_VERSION,
+  VALID_MERGE_METHODS,
   buildCapability,
   validateCapability,
   buildLineage,
@@ -355,6 +436,121 @@ export function getParentCid(manifest) {
   if (v === null || v === undefined) return null;
   if (typeof v !== 'string' || !PARENT_CID_RE.test(v)) return null;
   return v;
+}
+
+// W921 — set the multi-parent cid list on a manifest for a merged artifact.
+// Mirrors setParentCid byte-stability: an empty/absent array OMITS the slot so
+// non-merge artifacts stay byte-identical (W460). Each cid must be sha256-hex
+// (64 lowercase hex) or the call throws at build time, not at first walk.
+export function setMergeParents(manifest, parentCids) {
+  if (!manifest || typeof manifest !== 'object') {
+    throw new Error('setMergeParents: manifest must be an object');
+  }
+  if (parentCids === null || parentCids === undefined ||
+      (Array.isArray(parentCids) && parentCids.length === 0)) {
+    const out = { ...manifest };
+    delete out.parent_cids;
+    return out;
+  }
+  if (!Array.isArray(parentCids)) {
+    throw new Error('setMergeParents: parentCids must be an array of sha256-hex cids or null');
+  }
+  for (const cid of parentCids) {
+    if (typeof cid !== 'string' || !PARENT_CID_RE.test(cid)) {
+      throw new Error(
+        'setMergeParents: each parent cid must be sha256-hex (64 lowercase hex chars); got ' +
+        JSON.stringify(cid),
+      );
+    }
+  }
+  // Canonical sorted order so input ordering cannot perturb the manifest bytes.
+  return { ...manifest, parent_cids: [...parentCids].sort() };
+}
+
+// W921 — read the multi-parent cid list off a manifest. Returns [] when absent.
+// Falls back to the single parent_cid (W739) so a merged-or-not manifest can be
+// walked uniformly.
+export function getMergeParents(manifest) {
+  if (!manifest || typeof manifest !== 'object') return [];
+  const v = manifest.parent_cids;
+  if (Array.isArray(v)) {
+    const out = v.filter((c) => typeof c === 'string' && PARENT_CID_RE.test(c));
+    if (out.length > 0) return out;
+  }
+  const single = getParentCid(manifest);
+  return single ? [single] : [];
+}
+
+// W921 — fan-out lineage walk. Unlike walkLineage (single linear chain), this
+// follows BOTH parent_cids[] (merge parents) AND parent_cid (single-parent) so
+// a merged artifact resolves to ALL its source adapters. Returns a DAG view:
+// nodes keyed by cid + edges. Cycle-safe via a visited Set; bounded by
+// max_nodes so a corrupted/adversarial graph terminates with truncated:true.
+//
+// loadArtifact(cid) -> { manifest?, k_score, created_at, parent_cid?, parent_cids? }
+//   (manifest is optional; parent_cid / parent_cids may be top-level or nested
+//    under manifest — both shapes are accepted)
+export async function walkLineageDag(loadArtifact, leafCid, opts = {}) {
+  if (typeof loadArtifact !== 'function') {
+    throw new Error('walkLineageDag: loadArtifact must be a function');
+  }
+  if (typeof leafCid !== 'string' || leafCid.length === 0) {
+    return { ok: false, error: 'leaf_cid_required', version: LINEAGE_VERSION };
+  }
+  const max_nodes = (opts && Number.isFinite(opts.max_nodes) && opts.max_nodes > 0)
+    ? Math.min(5000, Math.floor(opts.max_nodes))
+    : 500;
+  const nodes = {};
+  const edges = [];
+  const visited = new Set();
+  const queue = [leafCid];
+  let truncated = false;
+  let leafFound = false;
+  while (queue.length > 0) {
+    if (Object.keys(nodes).length >= max_nodes) { truncated = true; break; }
+    const cid = queue.shift();
+    if (visited.has(cid)) continue;
+    visited.add(cid);
+    let row;
+    try {
+      row = await loadArtifact(cid);
+    } catch (e) {
+      if (cid === leafCid) {
+        return { ok: false, error: 'load_failure', detail: (e && e.message) || String(e), cid, version: LINEAGE_VERSION };
+      }
+      truncated = true;
+      continue;
+    }
+    if (!row || typeof row !== 'object') {
+      if (cid === leafCid) {
+        return { ok: false, error: 'leaf_not_found', cid, version: LINEAGE_VERSION };
+      }
+      truncated = true;
+      continue;
+    }
+    if (cid === leafCid) leafFound = true;
+    const parents = getMergeParents(row.manifest && typeof row.manifest === 'object' ? row.manifest : row);
+    nodes[cid] = {
+      cid,
+      parents,
+      k_score: (row.k_score === null || row.k_score === undefined) ? null : row.k_score,
+      created_at: row.created_at || null,
+    };
+    for (const p of parents) {
+      edges.push({ from: cid, to: p });
+      if (!visited.has(p)) queue.push(p);
+    }
+  }
+  return {
+    ok: true,
+    leaf: leafCid,
+    leaf_found: leafFound,
+    nodes,
+    edges,
+    node_count: Object.keys(nodes).length,
+    truncated,
+    version: LINEAGE_VERSION,
+  };
 }
 
 // W739-1 / W739-4 — walk a lineage chain starting at `leafCid` by following

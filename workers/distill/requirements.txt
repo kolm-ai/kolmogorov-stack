@@ -1,0 +1,36 @@
+# workers/distill — Python dependencies for the distillation worker.
+#
+# W921: this file closes the studio.audit.json missing-requirements.txt fail
+# (distill.mjs referenced a pip hint pointing at a file that did not exist).
+#
+# The worker invokes these scripts:
+#   train_lora.py          SFT/LoRA + LoRA-variants (rsLoRA/DoRA/LoRA+/PiSSA) + GaLore + packing
+#   train_lora_unsloth.py  Unsloth fast path (optional)
+#   train_grpo.py          GRPO / RLVR verifiable-reward fine-tune (optional)
+#   train_preference.py    SimPO / ORPO / KTO / DPO preference optimization (optional)
+#   train_gkd.py           On-policy distillation (GKD) (optional)
+#   eval_adapter.py        K-score eval + standard-bench (arena-hard/alpaca-lc/ifeval)
+#   merge_adapters.py      TIES/DARE/DELLA/SLERP LoRA-adapter merge (CPU-friendly)
+#   dedup_pairs.py         SemDeDup / ngram dedup
+#
+# Core (required for any training):
+torch>=2.4
+transformers>=4.44
+peft>=0.11
+accelerate>=0.30
+datasets>=2.18
+safetensors>=0.4
+
+# QLoRA / 8-bit optimizers (required for method=qlora + adamw_8bit/paged):
+bitsandbytes>=0.43
+
+# Preference + GRPO (optional; only when those stages run):
+trl>=0.12.0
+jsonschema>=4.0
+
+# GaLore full-parameter low-rank-gradient optimizer (optional; only when
+# KOLM_OPTIM starts with 'galore'):
+# galore-torch>=1.0   # uncomment to enable; the trainer fails-loud with this hint when absent
+
+# Sample-packing with boundary-safe attention (optional; FlashAttention-2):
+# flash-attn>=2.5     # uncomment on a CUDA box; packing refuses on plain-eager attn

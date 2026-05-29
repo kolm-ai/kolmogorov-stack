@@ -67,8 +67,44 @@ const ORCHESTRATOR_MAP = {
 
 const VALID_TRAIN_METHODS = new Set(['qlora', 'lora', 'full']);
 
+// W921 — additive recipe vocabulary.
+// Distillation OBJECTIVE (loss). seqkd is the SFT-on-strings default; the
+// logit-level objectives (forward_kl/reverse_kl/jsd/distillm2/gkd) require a
+// LOCAL teacher (logits), enforced by _validateDistill.
+const VALID_OBJECTIVES = new Set(['seqkd', 'forward_kl', 'reverse_kl', 'jsd', 'distillm2', 'gkd']);
+// Objectives that need teacher LOGITS (API teachers are text-only).
+const LOGIT_OBJECTIVES = new Set(['forward_kl', 'reverse_kl', 'jsd', 'distillm2', 'gkd']);
+// LoRA-variant vocabulary (kept in sync with src/distill-efficiency.js).
+const VALID_LORA_VARIANTS = new Set(['lora', 'rslora', 'dora', 'loraplus', 'lora-fa']);
+const VALID_LORA_INITS = new Set(['default', 'gaussian', 'pissa', 'pissa_niter_16', 'olora']);
+const VALID_OPTIMS = new Set([
+  'adamw_torch', 'adamw_8bit', 'paged_adamw_8bit',
+  'galore_adamw', 'galore_adamw_8bit', 'galore_adamw_layerwise', 'galore_adafactor',
+]);
+// GRPO loss variants (trl).
+const VALID_GRPO_LOSS_TYPES = new Set(['grpo', 'bnpo', 'dr_grpo']);
+const VALID_GRPO_IS_LEVELS = new Set(['token', 'sequence']);
+const VALID_GRPO_REWARDS = new Set(['code_exec', 'math_checker', 'schema_validator', 'format', 'kolm_verifier']);
+// Preference objectives (kept in sync with src/distill-preference.js).
+const VALID_PREFERENCE_OBJECTIVES = new Set(['dpo', 'simpo', 'orpo', 'kto', 'sppo']);
+// Synthetic-data cold-start generators.
+const VALID_SYNTH_GENERATORS = new Set(['magpie', 'evol', 'persona-hub', 'glan', 'self-instruct']);
+
 function _isPlainObject(x) {
   return x !== null && typeof x === 'object' && !Array.isArray(x);
+}
+
+function _teacherIsLocal(recipe) {
+  // A recipe's teacher is "local" (has logits) when ANY teacher slug names a
+  // local vendor OR the recipe explicitly flags a local teacher endpoint.
+  if (recipe && recipe.distill && recipe.distill.teacher_local === true) return true;
+  if (recipe && typeof recipe.teacher_local === 'string' && recipe.teacher_local.length > 0) return true;
+  const teachers = (recipe && Array.isArray(recipe.teachers)) ? recipe.teachers : [];
+  return teachers.some((t) => {
+    const slug = (t && typeof t.slug === 'string') ? t.slug.toLowerCase() : '';
+    const vendor = slug.split(':')[0];
+    return vendor === 'local' || vendor === 'hf' || vendor === 'vllm' || vendor === 'ollama';
+  });
 }
 
 function _sha256OfFile(absPath) {
@@ -200,6 +236,161 @@ function _validateTrain(train) {
       }
     }
   }
+
+  // W921 — optional LoRA-variant / optimizer / packing knobs. Closed-enum,
+  // fail-before-spend. All optional; absence keeps the legacy default path.
+  if (train.lora_variant !== undefined && !VALID_LORA_VARIANTS.has(train.lora_variant)) {
+    issues.push(`train.lora_variant must be one of: ${Array.from(VALID_LORA_VARIANTS).join(', ')} (got ${JSON.stringify(train.lora_variant)})`);
+  }
+  if (train.lora_init !== undefined && !VALID_LORA_INITS.has(train.lora_init)) {
+    issues.push(`train.lora_init must be one of: ${Array.from(VALID_LORA_INITS).join(', ')} (got ${JSON.stringify(train.lora_init)})`);
+  }
+  if (train.optim !== undefined && !VALID_OPTIMS.has(train.optim)) {
+    issues.push(`train.optim must be one of: ${Array.from(VALID_OPTIMS).join(', ')} (got ${JSON.stringify(train.optim)})`);
+  }
+  // GaLore is incompatible with 4-bit (qlora) — refuse before spend.
+  if (typeof train.optim === 'string' && train.optim.startsWith('galore') && train.method === 'qlora') {
+    issues.push('train.optim galore_* is incompatible with method=qlora (4-bit params); use method=full');
+  }
+  if (train.neftune_alpha !== undefined) {
+    if (typeof train.neftune_alpha !== 'number' || train.neftune_alpha < 0) {
+      issues.push('train.neftune_alpha must be a non-negative number');
+    }
+  }
+  if (train.packing !== undefined && typeof train.packing !== 'boolean') {
+    issues.push('train.packing must be a boolean');
+  }
+  if (train.galore !== undefined) {
+    if (!_isPlainObject(train.galore)) {
+      issues.push('train.galore must be an object');
+    } else {
+      for (const k of ['rank', 'update_proj_gap']) {
+        if (train.galore[k] !== undefined && (typeof train.galore[k] !== 'number' || train.galore[k] <= 0)) {
+          issues.push(`train.galore.${k} must be a positive number`);
+        }
+      }
+    }
+  }
+  return issues;
+}
+
+// W921 — optional `distill` section: selects the distillation OBJECTIVE (loss).
+// distillm2 / gkd / *_kl require a LOCAL teacher (logits); we refuse them on an
+// API-only recipe (fail-before-spend) so the receipt never claims a logit-level
+// objective it could not have computed.
+function _validateDistill(distill, recipe) {
+  const issues = [];
+  if (distill === undefined) return issues; // optional
+  if (!_isPlainObject(distill)) {
+    issues.push('distill must be an object if present');
+    return issues;
+  }
+  const objective = distill.objective;
+  if (objective !== undefined && !VALID_OBJECTIVES.has(objective)) {
+    issues.push(`distill.objective must be one of: ${Array.from(VALID_OBJECTIVES).join(', ')} (got ${JSON.stringify(objective)})`);
+  }
+  if (typeof objective === 'string' && LOGIT_OBJECTIVES.has(objective) && !_teacherIsLocal(recipe)) {
+    issues.push(`distill.objective='${objective}' requires a LOCAL teacher (logits); the recipe's teacher is API-only (no logits). Set distill.teacher_local=true or use a local: teacher slug, or pick objective=seqkd.`);
+  }
+  if (distill.base_alpha !== undefined && (typeof distill.base_alpha !== 'number' || distill.base_alpha <= 0 || distill.base_alpha > 1)) {
+    issues.push('distill.base_alpha must be a number in (0,1]');
+  }
+  if (distill.gradual_beta !== undefined && typeof distill.gradual_beta !== 'boolean') {
+    issues.push('distill.gradual_beta must be a boolean');
+  }
+  if (distill.on_policy !== undefined && typeof distill.on_policy !== 'boolean') {
+    issues.push('distill.on_policy must be a boolean');
+  }
+  if (distill.beta !== undefined && (typeof distill.beta !== 'number' || distill.beta < 0)) {
+    issues.push('distill.beta must be a non-negative number (GKD JSD interpolation)');
+  }
+  if (distill.temperature !== undefined && (typeof distill.temperature !== 'number' || distill.temperature <= 0)) {
+    issues.push('distill.temperature must be a positive number');
+  }
+  return issues;
+}
+
+// W921 — optional `grpo` section: verifiable-reward RL fine-tuning stage.
+function _validateGrpo(grpo) {
+  const issues = [];
+  if (grpo === undefined) return issues; // optional
+  if (!_isPlainObject(grpo)) {
+    issues.push('grpo must be an object if present');
+    return issues;
+  }
+  // reward (string) or rewards (array). At least one required for a grpo stage.
+  let rewards = [];
+  if (typeof grpo.reward === 'string') rewards = [grpo.reward];
+  else if (Array.isArray(grpo.rewards)) rewards = grpo.rewards;
+  else issues.push('grpo requires reward (string) or rewards (array)');
+  for (const r of rewards) {
+    if (!VALID_GRPO_REWARDS.has(r)) {
+      issues.push(`grpo reward must be one of: ${Array.from(VALID_GRPO_REWARDS).join(', ')} (got ${JSON.stringify(r)})`);
+    }
+  }
+  if (grpo.loss_type !== undefined && !VALID_GRPO_LOSS_TYPES.has(grpo.loss_type)) {
+    issues.push(`grpo.loss_type must be one of: ${Array.from(VALID_GRPO_LOSS_TYPES).join(', ')}`);
+  }
+  if (grpo.importance_sampling_level !== undefined && !VALID_GRPO_IS_LEVELS.has(grpo.importance_sampling_level)) {
+    issues.push(`grpo.importance_sampling_level must be one of: ${Array.from(VALID_GRPO_IS_LEVELS).join(', ')}`);
+  }
+  if (grpo.num_generations !== undefined && (typeof grpo.num_generations !== 'number' || grpo.num_generations < 2)) {
+    issues.push('grpo.num_generations must be a number >= 2 (group size)');
+  }
+  if (grpo.max_completion_length !== undefined && (typeof grpo.max_completion_length !== 'number' || grpo.max_completion_length <= 0)) {
+    issues.push('grpo.max_completion_length must be a positive number');
+  }
+  if (grpo.scale_rewards !== undefined && typeof grpo.scale_rewards !== 'boolean') {
+    issues.push('grpo.scale_rewards must be a boolean');
+  }
+  return issues;
+}
+
+// W921 — optional `preference` section: SimPO/ORPO/KTO/DPO/SPPO stage.
+function _validatePreference(pref) {
+  const issues = [];
+  if (pref === undefined) return issues;
+  if (!_isPlainObject(pref)) {
+    issues.push('preference must be an object if present');
+    return issues;
+  }
+  if (pref.objective !== undefined && !VALID_PREFERENCE_OBJECTIVES.has(pref.objective)) {
+    issues.push(`preference.objective must be one of: ${Array.from(VALID_PREFERENCE_OBJECTIVES).join(', ')}`);
+  }
+  if (pref.beta !== undefined && (typeof pref.beta !== 'number' || pref.beta < 0)) {
+    issues.push('preference.beta must be a non-negative number');
+  }
+  if (pref.min_pairs !== undefined && (typeof pref.min_pairs !== 'number' || pref.min_pairs < 0)) {
+    issues.push('preference.min_pairs must be a non-negative number');
+  }
+  return issues;
+}
+
+// W921 — optional `synth` section: synthetic-data cold-start AUGMENT stage.
+function _validateSynth(synth) {
+  const issues = [];
+  if (synth === undefined) return issues;
+  if (!_isPlainObject(synth)) {
+    issues.push('synth must be an object if present');
+    return issues;
+  }
+  let gens = [];
+  if (typeof synth.generator === 'string') gens = [synth.generator];
+  else if (Array.isArray(synth.generators)) gens = synth.generators;
+  else if (synth.generator !== undefined || synth.generators !== undefined) {
+    issues.push('synth.generator must be a string or synth.generators an array');
+  }
+  for (const g of gens) {
+    if (!VALID_SYNTH_GENERATORS.has(g)) {
+      issues.push(`synth generator must be one of: ${Array.from(VALID_SYNTH_GENERATORS).join(', ')} (got ${JSON.stringify(g)})`);
+    }
+  }
+  if (synth.target !== undefined && (typeof synth.target !== 'number' || synth.target <= 0)) {
+    issues.push('synth.target must be a positive number');
+  }
+  if (synth.max_share !== undefined && (typeof synth.max_share !== 'number' || synth.max_share < 0 || synth.max_share > 1)) {
+    issues.push('synth.max_share must be a number in [0,1]');
+  }
   return issues;
 }
 
@@ -273,6 +464,12 @@ export function loadRecipe(nameOrPath, opts = {}) {
   issues.push(..._validateTeachers(recipe.teachers));
   issues.push(..._validateScrub(recipe.scrub));
   issues.push(..._validateTrain(recipe.train));
+  // W921 — additive opt-in sections. All optional; a recipe without them is
+  // validated exactly as before (backward-compat).
+  issues.push(..._validateDistill(recipe.distill, recipe));
+  issues.push(..._validateGrpo(recipe.grpo));
+  issues.push(..._validatePreference(recipe.preference));
+  issues.push(..._validateSynth(recipe.synth));
 
   if (issues.length > 0) {
     return {

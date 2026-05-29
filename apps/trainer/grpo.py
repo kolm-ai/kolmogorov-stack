@@ -85,8 +85,48 @@ class GRPOTrainConfig:
     seed: int = 42
     bf16: bool = True
 
+    # W921 — modern GRPO knobs (trl >= 0.14). loss_type: grpo (token-mean),
+    # bnpo, or dr_grpo (Dr.GRPO, removes length bias). scale_rewards normalizes
+    # the advantage by group std (False = Dr.GRPO style). epsilon_high enables
+    # asymmetric clipping (DAPO). importance_sampling_level: token | sequence
+    # (GSPO). use_vllm speeds up generation. These are FILTERED in as_trl_kwargs
+    # so an older trl that lacks a kwarg never errors.
+    loss_type: str = "grpo"
+    scale_rewards: bool = True
+    epsilon_high: float = 0.0  # 0.0 => symmetric clipping (use epsilon)
+    importance_sampling_level: str = "token"
+    use_vllm: bool = False
+
+    # Knobs that are NOT trl.GRPOConfig fields (kolm-internal) — excluded from
+    # as_trl_kwargs so they don't get forwarded to trl.
+    _NON_TRL = frozenset({"loss_type", "importance_sampling_level"})
+
     def as_trl_kwargs(self) -> dict[str, Any]:
-        return dataclasses.asdict(self)
+        """Return the trl.GRPOConfig kwargs, filtered to the fields the INSTALLED
+        trl.GRPOConfig actually accepts (so a version mismatch never raises).
+        loss_type + importance_sampling_level are forwarded ONLY when trl
+        supports them."""
+        raw = dataclasses.asdict(self)
+        # Always-forwarded core fields + the optional ones, then filter by the
+        # installed GRPOConfig signature.
+        try:
+            import inspect
+            import trl
+            sig = inspect.signature(trl.GRPOConfig.__init__)
+            accepted = set(sig.parameters.keys())
+        except Exception:
+            accepted = None
+        out = {}
+        for k, v in raw.items():
+            if k.startswith("_"):
+                continue
+            # epsilon_high default 0.0 means "use symmetric epsilon" — only pass
+            # it through when explicitly set.
+            if k == "epsilon_high" and (v is None or v == 0.0):
+                continue
+            if accepted is None or k in accepted:
+                out[k] = v
+        return out
 
 
 def _import_trl():
@@ -417,6 +457,11 @@ def receipt_block(
         "epsilon": cfg.epsilon,
         "num_train_epochs": cfg.num_train_epochs,
         "seed": cfg.seed,
+        # W921 — modern GRPO provenance.
+        "loss_type": getattr(cfg, "loss_type", "grpo"),
+        "scale_rewards": getattr(cfg, "scale_rewards", True),
+        "importance_sampling_level": getattr(cfg, "importance_sampling_level", "token"),
+        "use_vllm": getattr(cfg, "use_vllm", False),
         "reward_funcs": sorted(set(reward_names)),
         "train_examples": int(train_examples),
         "final_loss": float(final_loss) if final_loss is not None else None,

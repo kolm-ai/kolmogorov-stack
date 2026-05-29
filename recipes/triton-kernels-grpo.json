@@ -1,0 +1,50 @@
+{
+  "$schema": "https://kolm.ai/schemas/distill-recipe/v1.json",
+  "name": "triton-kernels-grpo",
+  "description": "W921 reference recipe: SFT-warmup then GRPO/RLVR for code generation, with a code_exec verifiable reward (each completion is executed against unit tests in a sandboxed subprocess; reward = passed/total). This is the DeepSeek-R1 RLVR pattern: the reward is a deterministic verifier, not a learned reward model.",
+  "version": "1.0.0",
+
+  "seeds": {
+    "target": 300,
+    "generator": "scripts/trinity-2000-v2-seed-gen.mjs",
+    "buckets": {
+      "technical_issues": 300
+    }
+  },
+
+  "teachers": [
+    { "slug": "anthropic:claude-sonnet-4-6", "weight": 1.0, "rows": 300, "source": "kolm-proxy" }
+  ],
+
+  "train": {
+    "method": "qlora",
+    "student_base": "Qwen/Qwen2.5-Coder-7B-Instruct",
+    "lora": { "r": 32, "alpha": 64, "dropout": 0.05 },
+    "max_seq_len": 2048,
+    "epochs": 1,
+    "batch_size": 2,
+    "lr": 1.0e-4,
+    "warmup_ratio": 0.05
+  },
+
+  "grpo": {
+    "reward": "code_exec",
+    "rewards": ["code_exec", "format"],
+    "loss_type": "dr_grpo",
+    "scale_rewards": false,
+    "importance_sampling_level": "sequence",
+    "num_generations": 8,
+    "max_completion_length": 1024,
+    "sft_warmup": true,
+    "note": "code_exec reward runs unit tests in a sandboxed subprocess; dr_grpo removes the GRPO length bias."
+  },
+
+  "eval": {
+    "strict_cot": false,
+    "holdout_n": 30,
+    "bench": "none",
+    "out_path": "student/eval-code-30.jsonl"
+  },
+
+  "system_prompt": "You are a Python code generator. Return a single ```python code block that defines the requested function. The code will be executed against hidden unit tests; write correct, complete, self-contained code."
+}

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://kolm.ai/schemas/distill-recipe/v1.json",
+  "name": "trinity-onpolicy",
+  "description": "W921 reference recipe: on-policy distillation (GKD / DistiLLM-2). The student generates its own responses, a LOCAL teacher (DeepSeek-R1-Distill-Qwen-32B served on :8765) supplies logits, and the loss is the contrastive asymmetric SKL+SRKL objective (distillm2) on a lambda-mixture of teacher- and student-generated data. Requires a LOCAL teacher (logits) — the loader refuses logit objectives on API-only teachers.",
+  "version": "1.0.0",
+
+  "seeds": {
+    "target": 600,
+    "generator": "scripts/trinity-2000-v2-seed-gen.mjs",
+    "buckets": {
+      "refunds_returns": 150,
+      "shipping_delivery": 150,
+      "technical_issues": 150,
+      "escalation_complex": 150
+    }
+  },
+
+  "teachers": [
+    { "slug": "local:deepseek-r1-distill-qwen-32b", "weight": 1.0, "rows": 600, "source": "local:8765" }
+  ],
+
+  "scrub": {
+    "cot": {
+      "markers_path": "workers/distill/scripts/cot_markers.json",
+      "strategy": "rsplit_close_tag",
+      "drop_if_no_close_tag": true
+    }
+  },
+
+  "train": {
+    "method": "qlora",
+    "student_base": "Qwen/Qwen2.5-7B-Instruct",
+    "lora": { "r": 32, "alpha": 64, "dropout": 0.05 },
+    "max_seq_len": 1024,
+    "epochs": 2,
+    "batch_size": 2,
+    "lr": 1.0e-4,
+    "warmup_ratio": 0.05
+  },
+
+  "distill": {
+    "objective": "distillm2",
+    "teacher_local": true,
+    "base_alpha": 0.1,
+    "gradual_beta": true,
+    "on_policy": true,
+    "temperature": 0.8,
+    "note": "distillm2 = contrastive SKL(teacher-chosen)+SRKL(student-rejected); on_policy regenerates student responses per epoch."
+  },
+
+  "eval": {
+    "strict_cot": true,
+    "holdout_n": 20,
+    "bench": "none",
+    "out_path": "student/eval-onpolicy-20.jsonl"
+  },
+
+  "system_prompt": "You are a careful customer-support agent. Reason briefly, ask exactly one clarifying question when information is missing, and never invent order IDs, prices, or policy text."
+}

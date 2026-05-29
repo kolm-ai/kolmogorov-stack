@@ -277,13 +277,171 @@ export function buildEfficiencyEnv(normalized) {
   return out;
 }
 
+// =============================================================================
+// W921 — LoRA-variant / GaLore / sample-packing trainer knobs.
+//
+// Additive, opt-in, default-OFF. The SHIPPING worker (workers/distill/scripts/
+// train_lora.py) reads these via KOLM_* env vars (same threading pattern as the
+// W787 precision/grad-checkpoint block). When no variant opts are supplied,
+// buildTrainerVariantEnv returns {} so the default training path is byte-
+// identical to today.
+//
+// Levers (each independently provable):
+//   - LoRA variant init/structure: rsLoRA / DoRA / LoRA+ / LoRA-FA + PiSSA/OLoRA
+//     init (init_lora_weights). PiSSA is the genuine quality gap; QPiSSA reduces
+//     quantization error vs plain QLoRA.
+//   - GaLore: full-parameter low-rank-gradient optimizer (optim=galore_*).
+//   - sample-packing: concatenate short pairs into max_seq_len blocks with
+//     boundary-safe position_ids (1.1-2x throughput on short support pairs).
+//
+// References: PiSSA arXiv:2404.02948; DoRA arXiv:2402.09353; rsLoRA
+// arXiv:2312.03732; LoRA+ arXiv:2402.12354; NEFTune arXiv:2310.05914; GaLore
+// arXiv:2403.03507; packing arXiv:2407.09105.
+// =============================================================================
+
+export const LORA_VARIANTS = Object.freeze(['lora', 'rslora', 'dora', 'loraplus', 'lora-fa']);
+export const LORA_INITS = Object.freeze(['default', 'gaussian', 'pissa', 'pissa_niter_16', 'olora']);
+export const TRAINER_OPTIMS = Object.freeze([
+  'adamw_torch', 'adamw_8bit', 'paged_adamw_8bit',
+  'galore_adamw', 'galore_adamw_8bit', 'galore_adamw_layerwise', 'galore_adafactor',
+]);
+
+// W921 — normalizeTrainerVariantOptions: validate the raw trainer-variant opts
+// against the frozen enums, clamp numerics, and surface refusals as thrown
+// errors (fail-before-spend). Returns a normalized block consumed by
+// buildTrainerVariantEnv + the recipe loader.
+export function normalizeTrainerVariantOptions(opts = {}) {
+  const raw = (opts && typeof opts === 'object') ? opts : {};
+
+  const lora_variant = raw.lora_variant == null ? 'lora' : String(raw.lora_variant).toLowerCase();
+  if (!LORA_VARIANTS.includes(lora_variant)) {
+    const err = new Error(`lora_variant must be one of [${LORA_VARIANTS.join(', ')}]; got ${JSON.stringify(raw.lora_variant)}`);
+    err.code = 'invalid_lora_variant';
+    throw err;
+  }
+  const lora_init = raw.lora_init == null ? 'default' : String(raw.lora_init).toLowerCase();
+  if (!LORA_INITS.includes(lora_init)) {
+    const err = new Error(`lora_init must be one of [${LORA_INITS.join(', ')}]; got ${JSON.stringify(raw.lora_init)}`);
+    err.code = 'invalid_lora_init';
+    throw err;
+  }
+  const optim = raw.optim == null ? 'adamw_torch' : String(raw.optim).toLowerCase();
+  if (!TRAINER_OPTIMS.includes(optim)) {
+    const err = new Error(`optim must be one of [${TRAINER_OPTIMS.join(', ')}]; got ${JSON.stringify(raw.optim)}`);
+    err.code = 'invalid_optim';
+    throw err;
+  }
+
+  let neftune_alpha = null;
+  if (raw.neftune_alpha != null && raw.neftune_alpha !== '') {
+    const v = Number(raw.neftune_alpha);
+    if (!Number.isFinite(v) || v < 0) {
+      const err = new Error(`neftune_alpha must be a non-negative number; got ${JSON.stringify(raw.neftune_alpha)}`);
+      err.code = 'invalid_neftune_alpha';
+      throw err;
+    }
+    neftune_alpha = v > 0 ? v : null;
+  }
+
+  let loraplus_ratio = null;
+  if (lora_variant === 'loraplus') {
+    const v = raw.loraplus_ratio != null ? Number(raw.loraplus_ratio) : 16.0;
+    if (!Number.isFinite(v) || v <= 0) {
+      const err = new Error('loraplus_ratio must be a positive number');
+      err.code = 'invalid_loraplus_ratio';
+      throw err;
+    }
+    loraplus_ratio = v;
+  }
+
+  // GaLore sub-block.
+  const galoreRaw = (raw.galore && typeof raw.galore === 'object') ? raw.galore : {};
+  const isGalore = optim.startsWith('galore');
+  let galore = null;
+  if (isGalore) {
+    const rank = Number.isFinite(Number(galoreRaw.rank)) && Number(galoreRaw.rank) > 0 ? Math.floor(Number(galoreRaw.rank)) : 128;
+    const update_proj_gap = Number.isFinite(Number(galoreRaw.update_proj_gap)) && Number(galoreRaw.update_proj_gap) > 0 ? Math.floor(Number(galoreRaw.update_proj_gap)) : 200;
+    const scale = Number.isFinite(Number(galoreRaw.scale)) && Number(galoreRaw.scale) > 0 ? Number(galoreRaw.scale) : 0.25;
+    const target_modules = Array.isArray(galoreRaw.target_modules) && galoreRaw.target_modules.length > 0
+      ? galoreRaw.target_modules.map(String)
+      : ['attn', 'mlp'];
+    galore = { rank, update_proj_gap, scale, target_modules };
+  }
+
+  const packing = raw.packing === true || raw.packing === 'true' || raw.packing === 1 || raw.packing === '1';
+  const grad_accum = Number.isFinite(Number(raw.grad_accum)) ? Math.floor(Number(raw.grad_accum)) : 1;
+  const method = raw.method ? String(raw.method).toLowerCase() : null;
+
+  // Refusals (fail-before-spend) — never silently misconfigure.
+  // 1. GaLore is incompatible with 4-bit params (needs full-precision weights).
+  if (isGalore && method === 'qlora') {
+    const err = new Error('galore optimizer is incompatible with method=qlora (4-bit params); use method=full or a non-galore optim');
+    err.code = 'galore_qlora_conflict';
+    throw err;
+  }
+  // 2. galore_*_layerwise breaks grad-accum>1 (and DDP/DeepSpeed).
+  if (optim === 'galore_adamw_layerwise' && grad_accum > 1) {
+    const err = new Error('galore_adamw_layerwise requires gradient_accumulation_steps == 1 (single-GPU, no DDP)');
+    err.code = 'galore_layerwise_grad_accum_conflict';
+    throw err;
+  }
+
+  return {
+    lora_variant,
+    lora_init,
+    neftune_alpha,
+    loraplus_ratio,
+    optim,
+    galore,
+    packing,
+    version: EFFICIENCY_VERSION,
+  };
+}
+
+// W921 — buildTrainerVariantEnv: emit the KOLM_* env slice the worker reads.
+// Default (all opts at their no-op values) emits {} so the trainer's existing
+// behavior is unchanged (backward-compat guarantee). Pure helper, exported so
+// tests can assert the exact wire format.
+export function buildTrainerVariantEnv(normalized) {
+  if (!normalized || typeof normalized !== 'object') return {};
+  const out = {};
+  if (normalized.lora_variant && normalized.lora_variant !== 'lora') {
+    out.KOLM_LORA_VARIANT = normalized.lora_variant;
+  }
+  if (normalized.lora_init && normalized.lora_init !== 'default') {
+    out.KOLM_LORA_INIT = normalized.lora_init;
+  }
+  if (Number.isFinite(normalized.neftune_alpha) && normalized.neftune_alpha > 0) {
+    out.KOLM_NEFTUNE_ALPHA = String(normalized.neftune_alpha);
+  }
+  if (Number.isFinite(normalized.loraplus_ratio) && normalized.loraplus_ratio > 0) {
+    out.KOLM_LORAPLUS_RATIO = String(normalized.loraplus_ratio);
+  }
+  if (normalized.optim && normalized.optim !== 'adamw_torch') {
+    out.KOLM_OPTIM = normalized.optim;
+  }
+  if (normalized.galore && typeof normalized.galore === 'object') {
+    out.KOLM_GALORE_ARGS = `rank=${normalized.galore.rank},update_proj_gap=${normalized.galore.update_proj_gap},scale=${normalized.galore.scale}`;
+    out.KOLM_GALORE_TARGETS = normalized.galore.target_modules.join(',');
+  }
+  if (normalized.packing) {
+    out.KOLM_PACKING = '1';
+  }
+  return out;
+}
+
 export default {
   EFFICIENCY_VERSION,
   EARLY_STOP_DEFAULTS,
   PRECISION_MODES,
   PRECISION_HINTS,
+  LORA_VARIANTS,
+  LORA_INITS,
+  TRAINER_OPTIMS,
   shouldStopEarly,
   normalizeEfficiencyOptions,
   efficiencyDoctor,
   buildEfficiencyEnv,
+  normalizeTrainerVariantOptions,
+  buildTrainerVariantEnv,
 };

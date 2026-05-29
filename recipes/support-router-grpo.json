@@ -1,0 +1,60 @@
+{
+  "$schema": "https://kolm.ai/schemas/distill-recipe/v1.json",
+  "name": "support-router-grpo",
+  "description": "W921 reference recipe: SFT-warmup then GRPO/RLVR for a support-intent router. The verifiable reward is schema_validator (the router must emit JSON that validates against the intent schema) + exact-match against the gold intent. SFT teaches the format, GRPO sharpens correctness with a reward that IS the K-score verifier.",
+  "version": "1.0.0",
+
+  "seeds": {
+    "target": 400,
+    "generator": "scripts/trinity-2000-v2-seed-gen.mjs",
+    "buckets": {
+      "refunds_returns": 100,
+      "shipping_delivery": 100,
+      "billing_payment": 100,
+      "escalation_complex": 100
+    }
+  },
+
+  "teachers": [
+    { "slug": "anthropic:claude-sonnet-4-6", "weight": 1.0, "rows": 400, "source": "kolm-proxy" }
+  ],
+
+  "scrub": {
+    "cot": {
+      "markers_path": "workers/distill/scripts/cot_markers.json",
+      "strategy": "rsplit_close_tag",
+      "drop_if_no_close_tag": true
+    }
+  },
+
+  "train": {
+    "method": "qlora",
+    "student_base": "Qwen/Qwen2.5-3B-Instruct",
+    "lora": { "r": 16, "alpha": 32, "dropout": 0.05 },
+    "max_seq_len": 768,
+    "epochs": 1,
+    "batch_size": 4,
+    "lr": 1.5e-4,
+    "warmup_ratio": 0.05
+  },
+
+  "grpo": {
+    "reward": "schema_validator",
+    "rewards": ["schema_validator", "format"],
+    "loss_type": "grpo",
+    "scale_rewards": true,
+    "num_generations": 8,
+    "max_completion_length": 256,
+    "sft_warmup": true,
+    "note": "schema_validator reward = the K-score verifier; train-eval mismatch is a hard error."
+  },
+
+  "eval": {
+    "strict_cot": false,
+    "holdout_n": 40,
+    "bench": "none",
+    "out_path": "student/eval-router-40.jsonl"
+  },
+
+  "system_prompt": "You are a support-intent router. Read the user message and return ONLY a JSON object {\"intent\": <one of the allowed intents>, \"confidence\": <0..1>, \"needs_human\": <bool>}. Do not add prose. If the message is ambiguous, set needs_human=true."
+}

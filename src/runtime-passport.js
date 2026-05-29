@@ -87,6 +87,12 @@ export const RUNTIME_PASSPORT_FIELDS_V2 = Object.freeze([
   // W916-I4 — measured continuous-batching width and the throughput
   // delta vs single-stream — empty when not measured.
   'continuous_batching',
+  // W921 — quantized-GEMM serving kernel sub-object built by
+  // src/serve-config.js servingKernelPassportEntry({resolved, measured}).
+  // Records the resolved Marlin/Machete/MoE-Marlin/FP8/NVFP4 kernel + the
+  // est-or-measured speedup so the receipt can quote "served via awq_marlin
+  // (est 10.9x vs naive AWQ on sm_89)".
+  'serving_kernel',
   'unsupported_features',
   'notes',
 ]);
@@ -616,4 +622,75 @@ export function recordTestedPassport(measurements) {
   const v = validatePassport(passport);
   if (!v.ok) throw new Error(`recordTestedPassport: ${v.reason}`);
   return passport;
+}
+
+// ---------------------------------------------------------------------------
+// W921 additive v2 attach helpers (serving kernel + generalized KV policy +
+// probe merge). All return a shallow copy; existing v1 callers see no change
+// because these touch only v2-only fields the v1 validator never inspects.
+// ---------------------------------------------------------------------------
+
+/**
+ * addServingKernelToPassport(passport, measured) -> passport (copy)
+ *
+ * Attach a quantized-GEMM serving_kernel sub-object (the object returned by
+ * src/serve-config.js servingKernelPassportEntry()). `measured` carries the
+ * resolved kernel + vllm_quantization + compute_capability + est/measured
+ * speedup + gate.
+ */
+export function addServingKernelToPassport(passport, measured) {
+  if (!passport || typeof passport !== 'object') {
+    throw new Error('addServingKernelToPassport: passport must be an object');
+  }
+  if (!measured || typeof measured !== 'object') {
+    throw new Error('addServingKernelToPassport: measured serving_kernel object required');
+  }
+  return {
+    ...passport,
+    schema_version: RUNTIME_PASSPORT_SCHEMA_V2,
+    serving_kernel: measured,
+  };
+}
+
+/**
+ * addKvPolicyToPassport(passport, kvCacheSubObject) -> passport (copy)
+ *
+ * Generalizes addShardKvCacheToPassport to ANY KV policy (StreamingLLM / H2O /
+ * SnapKV / PyramidKV / KIVI / Shard). `kvCacheSubObject` is the object returned
+ * by src/serve-config.js kvPolicyPassportEntry(). Writes the kv_cache field.
+ */
+export function addKvPolicyToPassport(passport, kvCacheSubObject) {
+  if (!passport || typeof passport !== 'object') {
+    throw new Error('addKvPolicyToPassport: passport must be an object');
+  }
+  if (!kvCacheSubObject || typeof kvCacheSubObject !== 'object') {
+    throw new Error('addKvPolicyToPassport: kv_cache sub-object required');
+  }
+  return {
+    ...passport,
+    schema_version: RUNTIME_PASSPORT_SCHEMA_V2,
+    kv_cache: kvCacheSubObject,
+  };
+}
+
+/**
+ * mergeProbeIntoPassports(estimated, tested) -> passport[] (new array)
+ *
+ * Replace the matching status='estimated' row (matched by target_id) in an
+ * existing runtime_passports[] with a freshly-probed status='tested' row,
+ * leaving unrelated rows untouched. Appends the tested row when no estimated
+ * row matches. Pure: never mutates the input array.
+ */
+export function mergeProbeIntoPassports(estimated, tested) {
+  const arr = Array.isArray(estimated) ? estimated.slice() : [];
+  if (!tested || typeof tested !== 'object' || !_isString(tested.target_id)) {
+    return arr;
+  }
+  const idx = arr.findIndex((p) => p && p.target_id === tested.target_id);
+  if (idx >= 0) {
+    arr[idx] = tested;
+  } else {
+    arr.push(tested);
+  }
+  return arr;
 }
