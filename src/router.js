@@ -22161,6 +22161,11 @@ res.json({
         redact_mode: ['detect_only','redact_captures','redact_all','block'].includes(body.redact_mode) ? body.redact_mode : 'detect_only',
         route_chain: Array.isArray(body.route_chain) ? body.route_chain.slice(0, 16) : null,
         confidence_threshold: (typeof body.confidence_threshold === 'number' && Number.isFinite(body.confidence_threshold)) ? Math.max(0, Math.min(1, body.confidence_threshold)) : 0.7,
+        // W921 gateway opt-ins (default = today's behavior): semantic cost<->quality
+        // routing, semantic/exact prompt cache, prompt-injection guardrail.
+        route_mode: ['static', 'cost_quality', 'semantic'].includes(body.route_mode) ? body.route_mode : 'static',
+        cache_mode: ['off', 'exact', 'semantic', 'verified'].includes(body.cache_mode) ? body.cache_mode : 'off',
+        guardrail_mode: ['off', 'detect_only', 'flag', 'block'].includes(body.guardrail_mode) ? body.guardrail_mode : 'detect_only',
         artifact_id: null,
         artifact_history: [],
         status: 'active',
@@ -22199,10 +22204,23 @@ res.json({
       const { store, ns } = await _findNamespace(tenant, slug);
       if (!ns) return res.status(404).json({ ok: false, error: 'namespace_not_found', slug });
       const patch = req.body || {};
-      const allowed = ['display_name', 'description', 'capture_mode', 'redact_mode', 'route_chain', 'confidence_threshold', 'status'];
+      const allowed = ['display_name', 'description', 'capture_mode', 'redact_mode', 'route_chain', 'confidence_threshold', 'status', 'route_mode', 'cache_mode', 'guardrail_mode'];
+      // Enum-validated fields — reject an out-of-range value instead of silently
+      // persisting garbage (previously capture_mode/redact_mode had no patch-time
+      // validation). The gateway opt-ins join the same guard.
+      const ENUMS = {
+        capture_mode: ['off', 'metadata_only', 'detect_only', 'redact_captures', 'redact_all', 'block'],
+        redact_mode: ['detect_only', 'redact_captures', 'redact_all', 'block'],
+        route_mode: ['static', 'cost_quality', 'semantic'],
+        cache_mode: ['off', 'exact', 'semantic', 'verified'],
+        guardrail_mode: ['off', 'detect_only', 'flag', 'block'],
+      };
       const applied = {};
       for (const k of allowed) {
         if (Object.prototype.hasOwnProperty.call(patch, k)) {
+          if (ENUMS[k] && !ENUMS[k].includes(patch[k])) {
+            return res.status(400).json({ ok: false, error: 'invalid_value', field: k, allowed: ENUMS[k] });
+          }
           ns[k] = patch[k];
           applied[k] = patch[k];
         }
