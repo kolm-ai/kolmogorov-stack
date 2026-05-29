@@ -1,0 +1,57 @@
+{
+  "$schema": "https://kolm.ai/schemas/distill-recipe/v1.json",
+  "name": "minicpm5-1b-support-edge",
+  "description": "W921 NOW-1 edge-student recipe: distill a black-box API teacher council into openbmb/MiniCPM5-1B (Apache-2.0, dense sub-2B, native tool-calling/MCP, ~0.5 GB at INT4) for a runs-on-a-phone signed .kolm. Uses sequence-level KD on teacher TEXT (no logits) so it works with API teachers today; upgrade distill.objective to 'ropd' (rubric-based on-policy) once available. MiniCPM5-1B carries custom modeling code, so load + quantize with --trust-remote-code. Target INT4 NF4+double (the bitsandbytes path applies — dense architecture).",
+  "version": "1.0.0",
+
+  "seeds": {
+    "target": 600,
+    "generator": "scripts/trinity-2000-v2-seed-gen.mjs",
+    "buckets": {
+      "refunds_returns": 150,
+      "shipping_delivery": 150,
+      "technical_issues": 150,
+      "escalation_complex": 150
+    }
+  },
+
+  "teachers": [
+    { "slug": "anthropic:claude-sonnet-4-6", "weight": 0.6, "rows": 360, "source": "api" },
+    { "slug": "openai:gpt-4o", "weight": 0.4, "rows": 240, "source": "api" }
+  ],
+
+  "scrub": {
+    "cot": {
+      "markers_path": "workers/distill/scripts/cot_markers.json",
+      "strategy": "rsplit_close_tag",
+      "drop_if_no_close_tag": true
+    }
+  },
+
+  "train": {
+    "method": "qlora",
+    "student_base": "openbmb/MiniCPM5-1B",
+    "lora": { "r": 16, "alpha": 32, "dropout": 0.05 },
+    "max_seq_len": 1024,
+    "epochs": 2,
+    "batch_size": 4,
+    "lr": 1.0e-4,
+    "warmup_ratio": 0.05
+  },
+
+  "distill": {
+    "objective": "seqkd",
+    "teacher_local": false,
+    "temperature": 0.7,
+    "note": "seqKD = sequence-level KD on teacher text (no logits) — works with black-box API teachers. Upgrade to objective:'ropd' (rubric-based on-policy) when the trainer ships it."
+  },
+
+  "eval": {
+    "strict_cot": true,
+    "holdout_n": 20,
+    "bench": "mixeval-hard",
+    "out_path": "student/eval-minicpm5-edge-20.jsonl"
+  },
+
+  "system_prompt": "You are a concise on-device customer-support agent. Ask exactly one clarifying question when information is missing; never invent order IDs, prices, or policy text."
+}
