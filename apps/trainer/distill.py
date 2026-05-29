@@ -188,6 +188,216 @@ CURRICULUM_VERSION = "w717-v1"
 REASONING_TRACE_LOSS_VERSION = "w828-v1"
 
 
+# W921-NEXT4 — MoE-AWARE DISTILLATION (load-balanced expert training).
+#
+# The dense KD path above is proven (QAD on a 5090, DistiLLM-2 works). These
+# additions are STRICTLY ADDITIVE and GATED on the STUDENT being a sparse-MoE
+# model. When the student config carries no expert fields, every branch below
+# is skipped and the dense loss is byte-for-byte unchanged.
+#
+# Why a MoE student needs a load-balancing term: a sparse mixture routes each
+# token to top-k of N experts via a learned router. With only the KD/CE signal
+# the router collapses — it learns to send (almost) every token to a handful of
+# experts, leaving the rest dead. That wastes capacity and destabilizes
+# training. The standard fix (Shazeer 2017 "Outrageously Large Neural
+# Networks", Fedus 2021 Switch Transformer, and the Mixtral/Qwen-MoE HF
+# implementations) is an auxiliary load-balancing loss added to the main loss:
+#
+#     aux = num_experts * mean_layers( sum_e  f_e * P_e )
+#
+# where, per layer, over the T routed tokens:
+#     f_e = fraction of tokens whose top-k routing INCLUDES expert e
+#     P_e = mean router probability assigned to expert e
+# A perfectly balanced router (every expert gets 1/N of the tokens and 1/N of
+# the probability mass) drives this product toward its minimum; a collapsed
+# router (all tokens to one expert) drives it UP toward num_experts. The term
+# is scaled by router_aux_loss_coef (HF default 0.001) and ADDED to KD+CE.
+#
+# Detection mirrors src/moe-support.js detectMoE() field names so the JS and
+# Python sides agree on what "MoE" means: num_local_experts / num_experts /
+# n_routed_experts / moe_num_experts on the config, plus the model exposing an
+# output_router_logits-capable forward (Mixtral, Qwen2/3-MoE, DeepSeek-V2/V3,
+# Phi-MoE, OLMoE, Granite-MoE, DBRX, Jamba, MiniMax, Llama4).
+#
+# Honesty contracts:
+#   * Dense students: NO behavioral change. _student_is_moe() returns False,
+#     output_router_logits is never set, and the aux term is never added.
+#   * The aux loss is always >= 0 and is scaled by a configurable coefficient
+#     (default 0.001). It is ADDED to the existing KD loss, never replaces it.
+#   * moe:{num_experts, router_aux_loss_coef, aux_loss_last} is surfaced in the
+#     training summary ONLY when the student is MoE.
+
+MOE_VERSION = "w921-next4-v1"
+
+MOE_DEFAULT_ROUTER_AUX_LOSS_COEF = 0.001
+
+# Config keys that name the (total) routed-expert count. Mirrors the lookup
+# order in src/moe-support.js _detectFromConfig so the two sides agree.
+_MOE_NUM_EXPERTS_KEYS = (
+    "num_local_experts",   # Mixtral, Phi-MoE
+    "num_experts",         # Qwen2/3-MoE, OLMoE, Granite-MoE, generic
+    "n_routed_experts",    # DeepSeek-V2/V3
+    "moe_num_experts",     # DBRX-style / generic
+    "num_experts_per_layer",
+)
+# Config keys that name the per-token top-k.
+_MOE_TOP_K_KEYS = (
+    "num_experts_per_tok",
+    "n_activated_experts",
+    "moe_top_k",
+    "top_k_experts",
+    "num_experts_per_token",
+)
+
+
+def _config_get(config, *names):
+    """Read the first present attribute from an HF config (or a plain dict).
+
+    HF PretrainedConfig is attribute-accessed; synthetic test configs may be
+    plain dicts. Returns None when no key is present."""
+    for n in names:
+        if isinstance(config, dict):
+            if n in config and config[n] is not None:
+                return config[n]
+        else:
+            v = getattr(config, n, None)
+            if v is not None:
+                return v
+    return None
+
+
+def _moe_num_experts(config):
+    """Total routed-expert count from a config, or 0 when dense/unknown."""
+    v = _config_get(config, *_MOE_NUM_EXPERTS_KEYS)
+    try:
+        n = int(v) if v is not None else 0
+    except (TypeError, ValueError):
+        return 0
+    return n if n > 1 else 0
+
+
+def _moe_top_k(config):
+    """Per-token top-k from a config, or 0 when absent."""
+    v = _config_get(config, *_MOE_TOP_K_KEYS)
+    try:
+        return int(v) if v is not None else 0
+    except (TypeError, ValueError):
+        return 0
+
+
+def _student_is_moe(model_or_config) -> bool:
+    """True iff the student is a sparse-MoE model.
+
+    Accepts either an HF model (reads .config) or a config object/dict. The
+    verdict is positive ONLY when a routed-expert count > 1 is present — this
+    is the single gate that keeps the dense path untouched. A model that is
+    capable of output_router_logits but reports <= 1 experts is treated as
+    dense (no aux term, nothing to balance)."""
+    config = getattr(model_or_config, "config", model_or_config)
+    return _moe_num_experts(config) > 0
+
+
+def moe_load_balance_loss(router_logits, num_experts: int, top_k: int = 2,
+                          attention_mask=None):
+    """Standard MoE load-balancing auxiliary loss (Switch Transformer / Mixtral).
+
+    aux = num_experts * mean_layers( sum_e  f_e * P_e )
+
+    where, per routing layer, over the routed tokens:
+      f_e = fraction of tokens whose top-k selection INCLUDES expert e
+      P_e = mean router softmax probability assigned to expert e
+
+    Args:
+      router_logits: the per-layer router logits. Accepts either
+          * a tuple/list of tensors, one per MoE layer, each shape
+            (num_tokens, num_experts)  (HF outputs.router_logits convention), OR
+          * a single tensor of shape (num_tokens, num_experts) (one layer).
+        Layers whose last dim != num_experts (e.g. a None / dense layer) are
+        skipped.
+      num_experts: total routed-expert count N.
+      top_k: experts selected per token. Clamped to [1, num_experts].
+      attention_mask: optional (num_tokens,) 0/1 tensor to exclude pad tokens
+        from the routed-token statistics. When None, every row counts.
+
+    Returns:
+      Scalar tensor >= 0. A perfectly balanced router yields ~1.0 (the minimum
+      for this normalization); a collapsed router approaches num_experts.
+
+    Honesty contract: returns a 0 scalar when there are no usable router-logit
+    layers (e.g. dense forward) rather than raising; the caller gates on
+    _student_is_moe() anyway, so this is defense-in-depth."""
+    if not _HAS_TORCH:
+        raise RuntimeError(
+            "moe_load_balance_loss requires torch. Install with: pip install 'torch>=2.4'"
+        )
+    if isinstance(router_logits, (tuple, list)):
+        layers = list(router_logits)
+    else:
+        layers = [router_logits]
+    n_experts = int(num_experts)
+    if n_experts < 2:
+        # Not enough experts to balance — return a 0 scalar in the dtype of the
+        # first available tensor (or a bare CPU zero).
+        for rl in layers:
+            if rl is not None and hasattr(rl, "new_zeros"):
+                return rl.new_zeros(())
+        return torch.zeros(())
+    k = max(1, min(int(top_k) if top_k else 1, n_experts))
+
+    per_layer = []
+    ref = None
+    for rl in layers:
+        if rl is None or not hasattr(rl, "dim"):
+            continue
+        if rl.dim() != 2 or rl.size(-1) != n_experts:
+            # Skip layers that don't look like (tokens, num_experts) router
+            # logits (dense layers in a hybrid stack, or shape mismatches).
+            continue
+        ref = rl
+        # routing_weights[t, e] = softmax over experts for token t.
+        routing_weights = F.softmax(rl, dim=-1)
+        # top-k selection mask: which experts each token routes to.
+        _, selected = torch.topk(routing_weights, k=k, dim=-1)
+        expert_mask = F.one_hot(selected, num_classes=n_experts)  # (T, k, N)
+        # f_e: fraction of tokens that selected expert e (any of its k slots).
+        tokens_per_expert = expert_mask.float().sum(dim=1).clamp(max=1.0)  # (T, N) 0/1 per (token,expert)
+        # P_e: mean router probability mass on expert e.
+        if attention_mask is not None and attention_mask.numel() == routing_weights.size(0):
+            m = attention_mask.to(routing_weights.dtype).unsqueeze(-1)  # (T,1)
+            denom = m.sum().clamp(min=1.0)
+            f_e = (tokens_per_expert * m).sum(dim=0) / denom
+            p_e = (routing_weights * m).sum(dim=0) / denom
+        else:
+            f_e = tokens_per_expert.mean(dim=0)
+            p_e = routing_weights.mean(dim=0)
+        per_layer.append((f_e * p_e).sum())
+
+    if not per_layer:
+        if ref is not None and hasattr(ref, "new_zeros"):
+            return ref.new_zeros(())
+        for rl in layers:
+            if rl is not None and hasattr(rl, "new_zeros"):
+                return rl.new_zeros(())
+        return torch.zeros(())
+
+    stacked = torch.stack(per_layer)
+    return float(n_experts) * stacked.mean()
+
+
+def _extract_router_logits(outputs):
+    """Pull router_logits out of an HF MoE model output, or None when absent.
+
+    HF MoE causal-LM outputs expose `.router_logits` (a tuple per layer) when
+    the forward was called with output_router_logits=True. Some models also
+    expose a precomputed `.aux_loss`/`.z_loss`; we prefer router_logits so the
+    coefficient and normalization are under our control. Returns None for dense
+    outputs so the caller can skip the aux term."""
+    rl = getattr(outputs, "router_logits", None)
+    if rl is None and isinstance(outputs, dict):
+        rl = outputs.get("router_logits")
+    return rl
+
+
 def trace_aware_loss(logits, target_ids, trace_mask, attention_mask, w=0.5):
     """Weighted distillation loss that separates reasoning-trace tokens from
     final-answer tokens.
@@ -899,6 +1109,15 @@ class DistillSession:
     _importance_weights: dict = field(default_factory=dict)
     _train_rows: Any = None
     _out_dir: Optional[str] = None
+    # W921-NEXT4: MoE-student metadata. When the student is dense these stay at
+    # their defaults and train() omits the moe:{...} block entirely (dense path
+    # surface is unchanged). _moe_aux_ref is the mutable container compute_loss
+    # writes the last pre-coefficient aux value through.
+    _moe_is_moe: bool = False
+    _moe_num_experts: int = 0
+    _moe_top_k: int = 0
+    _moe_router_aux_loss_coef: float = MOE_DEFAULT_ROUTER_AUX_LOSS_COEF
+    _moe_aux_ref: Any = None
 
     def train(self) -> dict[str, Any]:
         if self._trainer is None:
@@ -932,6 +1151,18 @@ class DistillSession:
         if feedback is not None:
             summary["importance_feedback"] = feedback
             self._persist_importance_feedback(feedback)
+        # W921-NEXT4 — surface the MoE training-summary block ONLY when the
+        # student is a sparse-MoE model. Dense runs omit this key entirely so
+        # the dense summary shape is unchanged.
+        if self._moe_is_moe:
+            aux_last = self._moe_aux_ref.get("value") if isinstance(self._moe_aux_ref, dict) else None
+            summary["moe"] = {
+                "num_experts": int(self._moe_num_experts),
+                "experts_per_token": int(self._moe_top_k),
+                "router_aux_loss_coef": float(self._moe_router_aux_loss_coef),
+                "aux_loss_last": aux_last,
+                "moe_version": MOE_VERSION,
+            }
         return summary
 
     def _compute_importance_feedback(self, summary: dict) -> Optional[dict]:
@@ -1152,6 +1383,33 @@ def distill_trainer(
     student = get_peft_model(student_base, lora_cfg)
     student.config.pad_token_id = tokenizer.pad_token_id
 
+    # W921-NEXT4 — MoE student detection. Gated: dense students take NO change.
+    # We read the BASE config (PEFT wraps it, but .config delegates through).
+    # When the student is a sparse-MoE model we set output_router_logits=True
+    # on the forward config so compute_loss can read outputs.router_logits and
+    # add the load-balancing aux term. _moe_top_k falls back to 2 (the Mixtral
+    # / Switch default) when the config doesn't name a top-k.
+    student_is_moe = _student_is_moe(student)
+    moe_num_experts = 0
+    moe_top_k = 0
+    if student_is_moe:
+        moe_num_experts = _moe_num_experts(student.config)
+        moe_top_k = _moe_top_k(student.config) or 2
+        # Turn on router-logit output for both the wrapped model config and the
+        # underlying base config (PEFT delegates getattr but the forward reads
+        # the base model's config object directly).
+        try:
+            student.config.output_router_logits = True
+        except Exception:
+            pass
+        try:
+            base = getattr(student, "base_model", None)
+            base_cfg = getattr(getattr(base, "model", base), "config", None)
+            if base_cfg is not None:
+                base_cfg.output_router_logits = True
+        except Exception:
+            pass
+
     rows = _load_jsonl(train_jsonl)
     # W712: progressive-distillation pass filter. Applied BEFORE eval-split
     # so the held-out slice reflects the same capability stage as the
@@ -1239,6 +1497,16 @@ def distill_trainer(
     # byte-identical to the W713 baseline (honesty contract).
     rt_loss_w = float(max(0.0, min(1.0, reasoning_trace_loss_weight or 0.0)))
 
+    # W921-NEXT4 — MoE closure state for compute_loss. _moe_aux_last holds the
+    # most recent (pre-coefficient) load-balance value so train() can surface
+    # moe.aux_loss_last in the summary. Mutable container so the nested
+    # compute_loss can write through it (closures can't rebind names).
+    _moe_on = bool(student_is_moe)
+    _moe_n = int(moe_num_experts)
+    _moe_k = int(moe_top_k)
+    _moe_coef = float(MOE_DEFAULT_ROUTER_AUX_LOSS_COEF)
+    _moe_aux_last = {"value": None}
+
     class _DistillTrainer(Trainer):
         def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
             labels = inputs.pop("labels")
@@ -1252,7 +1520,18 @@ def distill_trainer(
 
             with torch.no_grad():
                 t_out = teacher(input_ids=input_ids, attention_mask=attention_mask).logits
-            s_out = model(input_ids=input_ids, attention_mask=attention_mask).logits
+            # W921-NEXT4 — when the student is MoE, request router logits so we
+            # can add the load-balancing aux loss. Dense students take the
+            # original single-tensor `.logits` path with zero behavioral change.
+            if _moe_on:
+                s_full = model(
+                    input_ids=input_ids,
+                    attention_mask=attention_mask,
+                    output_router_logits=True,
+                )
+                s_out = s_full.logits
+            else:
+                s_out = model(input_ids=input_ids, attention_mask=attention_mask).logits
 
             # Shift for next-token prediction.
             s_shift = s_out[..., :-1, :].contiguous()
@@ -1291,6 +1570,22 @@ def distill_trainer(
                     s_shift, l_shift.clamp(min=0), tm_shift, am, w=rt_loss_w,
                 )
                 loss = loss + loss_trace
+            # W921-NEXT4 — MoE load-balancing aux loss. ADDITIVE and gated on
+            # the student being MoE; dense students never enter this branch so
+            # the loss is byte-for-byte the KD+CE(+trace) value above.
+            loss_moe_aux = s_shift.new_zeros(())
+            if _moe_on:
+                router_logits = _extract_router_logits(s_full)
+                if router_logits is not None:
+                    loss_moe_aux = moe_load_balance_loss(
+                        router_logits, num_experts=_moe_n, top_k=_moe_k,
+                    )
+                    # Stash the pre-coefficient value for the run summary.
+                    try:
+                        _moe_aux_last["value"] = float(loss_moe_aux.detach())
+                    except Exception:
+                        _moe_aux_last["value"] = None
+                    loss = loss + _moe_coef * loss_moe_aux
             if return_outputs:
                 outputs = {
                     "loss_kd": loss_kd.detach(),
@@ -1298,6 +1593,8 @@ def distill_trainer(
                 }
                 if rt_loss_w > 0:
                     outputs["loss_trace"] = loss_trace.detach()
+                if _moe_on:
+                    outputs["loss_moe_aux"] = loss_moe_aux.detach()
                 return loss, outputs
             return loss
 
@@ -1417,6 +1714,13 @@ def distill_trainer(
         _importance_weights=importance_weights,
         _train_rows=rows,
         _out_dir=out_dir,
+        # W921-NEXT4: thread MoE-student metadata + the mutable aux container
+        # so train() can surface moe:{...} (dense students leave these default).
+        _moe_is_moe=_moe_on,
+        _moe_num_experts=_moe_n,
+        _moe_top_k=_moe_k,
+        _moe_router_aux_loss_coef=_moe_coef,
+        _moe_aux_ref=_moe_aux_last,
     )
     return session
 
@@ -1458,7 +1762,7 @@ def receipt_block(session: DistillSession, train_summary: dict) -> dict:
     cfg["objective"] = session.config.objective.value
     student_acc = train_summary.get("student_token_accuracy")
     teacher_acc = train_summary.get("teacher_token_accuracy")
-    return {
+    block = {
         "method": "kd_response_distillation",
         "teacher_model": session.teacher_model,
         "student_model": session.student_model,
@@ -1480,6 +1784,16 @@ def receipt_block(session: DistillSession, train_summary: dict) -> dict:
             "arXiv:2306.13649",  # On-policy distillation
         ],
     }
+    # W921-NEXT4 — surface the MoE block + its references in the receipt ONLY
+    # when the student was a sparse-MoE model (dense receipts are unchanged).
+    moe_summary = train_summary.get("moe")
+    if moe_summary:
+        block["moe"] = moe_summary
+        block["papers"] = block["papers"] + [
+            "arXiv:1701.06538",  # Shazeer 2017 — sparsely-gated MoE + load balance
+            "arXiv:2101.03961",  # Fedus 2021 — Switch Transformer aux loss
+        ]
+    return block
 
 
 __all__ = [
@@ -1493,7 +1807,147 @@ __all__ = [
     # bench_trace_aware.py uses this path).
     "trace_aware_loss",
     "REASONING_TRACE_LOSS_VERSION",
+    # W921-NEXT4 — MoE-aware distillation primitives exposed for the worker
+    # harness + the --self-test-moe path.
+    "moe_load_balance_loss",
+    "MOE_VERSION",
+    "MOE_DEFAULT_ROUTER_AUX_LOSS_COEF",
 ]
+
+
+def _self_test_moe() -> dict[str, Any]:
+    """W921-NEXT4 — pure self-test of the MoE-aware additions on SYNTHETIC data.
+
+    No model download: we build fake router_logits over 8 experts and a
+    synthetic config, then assert the load-balancing invariants and the dense
+    no-op contract. Deterministic (seeded torch); returns
+    {ok, checks:[...]} and raises AssertionError on a logic regression."""
+    if not _HAS_TORCH:
+        return {
+            "ok": False,
+            "error": "torch_absent",
+            "detail": "moe self-test requires torch (it asserts on real tensors)",
+            "moe_version": MOE_VERSION,
+        }
+    torch.manual_seed(0)
+    checks: list[dict[str, Any]] = []
+
+    def _check(name: str, cond: bool, detail: str = "") -> None:
+        checks.append({"name": name, "pass": bool(cond), "detail": detail})
+        assert cond, f"moe self-test FAILED: {name} ({detail})"
+
+    N = 8           # experts
+    T = 64          # routed tokens
+    K = 2           # top-k
+
+    # --- (detect) synthetic MoE config lights up; dense config does not. ----
+    moe_cfg = {"num_local_experts": N, "num_experts_per_tok": K, "hidden_size": 16}
+    dense_cfg = {"hidden_size": 16, "intermediate_size": 64}
+    _check("detect_moe_config", _student_is_moe(moe_cfg) is True,
+           f"num_experts={_moe_num_experts(moe_cfg)}")
+    _check("detect_dense_config", _student_is_moe(dense_cfg) is False,
+           "dense config must not be flagged MoE")
+    _check("detect_top_k", _moe_top_k(moe_cfg) == K, f"got {_moe_top_k(moe_cfg)}")
+    # A config reporting <=1 experts is dense (nothing to balance).
+    _check("detect_single_expert_is_dense",
+           _student_is_moe({"num_experts": 1}) is False)
+
+    # --- (a) aux loss computed + >= 0 on a balanced router. -----------------
+    # Perfectly balanced: every expert gets equal logits -> uniform softmax,
+    # and a deterministic round-robin top-k selection that hits each expert
+    # equally. Build logits so softmax is uniform (all zeros) for P_e, and the
+    # f_e term is uniform by construction of the topk on a tie-broken arange.
+    balanced = torch.zeros(T, N)
+    # Make each token prefer a rotating pair of experts so top-2 selection is
+    # perfectly even across all 8 experts (T divisible by N).
+    for t in range(T):
+        e0 = t % N
+        e1 = (t + 1) % N
+        balanced[t, e0] = 1e-6 * 0  # keep uniform-ish; selection driven below
+    # To get an exactly-even top-k WITHOUT disturbing the (near) uniform P_e,
+    # we nudge two rotating experts by a tiny epsilon so topk picks them.
+    eps = 1e-3
+    for t in range(T):
+        balanced[t, t % N] += eps
+        balanced[t, (t + 1) % N] += eps
+    aux_balanced = moe_load_balance_loss(balanced, num_experts=N, top_k=K)
+    _check("aux_is_scalar", aux_balanced.dim() == 0, f"shape={tuple(aux_balanced.shape)}")
+    _check("aux_nonneg", float(aux_balanced) >= 0.0, f"got {float(aux_balanced)}")
+
+    # --- (b) balanced ~= minimal baseline; collapsed router is HIGHER. ------
+    # Minimal value for the Switch/Mixtral normalization is top_k: a perfectly
+    # balanced router gives every expert f_e = k/N (each of the N experts wins
+    # k/N of the token-slots) and P_e = 1/N, so
+    #   sum_e f_e*P_e = N * (k/N)(1/N) = k/N,  times num_experts N = k.
+    # The balanced router should sit very close to that top_k floor.
+    _check("aux_balanced_near_baseline",
+           abs(float(aux_balanced) - float(K)) < 0.05,
+           f"balanced aux={float(aux_balanced)} (expected ~top_k={K})")
+    # Collapsed: every token routes (overwhelmingly) to expert 0.
+    collapsed = torch.full((T, N), -10.0)
+    collapsed[:, 0] = 10.0
+    collapsed[:, 1] = 5.0   # second-best so top-2 is well-defined
+    aux_collapsed = moe_load_balance_loss(collapsed, num_experts=N, top_k=K)
+    _check("aux_collapsed_higher_than_balanced",
+           float(aux_collapsed) > float(aux_balanced) + 0.5,
+           f"collapsed={float(aux_collapsed)} balanced={float(aux_balanced)}")
+    # Collapsed term penalizes imbalance: must exceed the balanced floor clearly
+    # and stay within the theoretical ceiling (num_experts).
+    _check("aux_collapsed_bounded",
+           float(aux_balanced) <= float(aux_collapsed) <= float(N) + 1e-3,
+           f"collapsed={float(aux_collapsed)} ceiling={N}")
+
+    # --- multi-layer tuple averages per layer (HF router_logits convention). -
+    aux_tuple = moe_load_balance_loss((balanced, collapsed), num_experts=N, top_k=K)
+    mean_of_two = 0.5 * (float(aux_balanced) + float(aux_collapsed))
+    _check("aux_tuple_is_layer_mean",
+           abs(float(aux_tuple) - mean_of_two) < 1e-4,
+           f"tuple={float(aux_tuple)} mean={mean_of_two}")
+
+    # --- (c) dense path adds ZERO aux. --------------------------------------
+    # _extract_router_logits returns None for a dense output (no router_logits
+    # attribute) so the aux term is never added. We model a dense forward
+    # output as a plain object without router_logits.
+    class _DenseOut:
+        router_logits = None
+    _check("dense_extract_none",
+           _extract_router_logits(_DenseOut()) is None,
+           "dense output must expose no router_logits")
+    _check("dense_extract_dict_none",
+           _extract_router_logits({"logits": "x"}) is None,
+           "dict output without router_logits must yield None")
+    # And the aux helper itself returns a 0 scalar when handed an empty/dense
+    # layer list (defense-in-depth; the caller gates on _student_is_moe).
+    aux_empty = moe_load_balance_loss([None], num_experts=N, top_k=K)
+    _check("aux_dense_layer_zero", float(aux_empty) == 0.0,
+           f"got {float(aux_empty)}")
+    # num_experts < 2 -> 0 scalar (a dense student that somehow reached here).
+    aux_one = moe_load_balance_loss(balanced, num_experts=1, top_k=1)
+    _check("aux_single_expert_zero", float(aux_one) == 0.0, f"got {float(aux_one)}")
+
+    # --- attention-mask path: padded tokens excluded from the statistics. ----
+    am = torch.ones(T)
+    am[T // 2:] = 0.0  # mask the back half
+    aux_masked = moe_load_balance_loss(balanced, num_experts=N, top_k=K,
+                                       attention_mask=am)
+    _check("aux_masked_nonneg", float(aux_masked) >= 0.0, f"got {float(aux_masked)}")
+    _check("aux_masked_scalar", aux_masked.dim() == 0)
+
+    # --- determinism: same inputs -> same output. ---------------------------
+    aux_again = moe_load_balance_loss(balanced, num_experts=N, top_k=K)
+    _check("aux_deterministic",
+           abs(float(aux_balanced) - float(aux_again)) < 1e-9,
+           f"{float(aux_balanced)} vs {float(aux_again)}")
+
+    return {
+        "ok": True,
+        "checks": checks,
+        "n_checks": len(checks),
+        "moe_version": MOE_VERSION,
+        "router_aux_loss_coef_default": MOE_DEFAULT_ROUTER_AUX_LOSS_COEF,
+        "aux_balanced": float(aux_balanced),
+        "aux_collapsed": float(aux_collapsed),
+    }
 
 
 def _build_argparser() -> argparse.ArgumentParser:
@@ -1533,6 +1987,12 @@ def _build_argparser() -> argparse.ArgumentParser:
     p.add_argument("--max-length", type=int, default=DistillConfig.max_length)
     p.add_argument("--print-config", action="store_true",
                    help="Print the resolved DistillConfig as JSON and exit; do not load any models.")
+    # W921-NEXT4 — pure self-test of the MoE-aware load-balancing additions on
+    # SYNTHETIC router logits (no model download, no network). Exits 0 on pass,
+    # 5 on a logic regression — mirrors the ropd.py --self-test contract.
+    p.add_argument("--self-test-moe", dest="self_test_moe", action="store_true",
+                   help="Run the synthetic MoE load-balancing self-test (no torch model "
+                        "download, no network) and exit. Exit 0 pass / 5 fail.")
     # W711-2: importance-weighted sampling. JSONL produced by
     # src/capture-importance.js (one row per capture: {capture_id, importance}).
     # When omitted, sampling is uniform (existing behavior preserved verbatim).
@@ -1603,6 +2063,19 @@ def _config_from_args(args: argparse.Namespace) -> DistillConfig:
 
 def main(argv: Optional[list[str]] = None) -> int:
     args = _build_argparser().parse_args(argv)
+    # W921-NEXT4 — synthetic MoE self-test runs first (no models, no network).
+    if getattr(args, "self_test_moe", False):
+        try:
+            env = _self_test_moe()
+        except AssertionError as e:
+            print(json.dumps(
+                {"ok": False, "error": "self_test_moe_failed", "detail": str(e),
+                 "moe_version": MOE_VERSION},
+                indent=2,
+            ))
+            return 5
+        print(json.dumps(env, indent=2))
+        return 0 if env.get("ok") else 5
     cfg = _config_from_args(args)
     if args.print_config:
         cfg_dict = asdict(cfg)

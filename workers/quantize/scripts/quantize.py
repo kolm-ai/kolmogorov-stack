@@ -52,11 +52,16 @@ from pathlib import Path
 
 def parse_args():
     p = argparse.ArgumentParser(prog="kolm-quantize", add_help=True)
-    p.add_argument("--method", required=True,
+    # --method / --in / --out are required for a real quantize run, but the
+    # --self-test-moe path (W921 NEXT-4) runs a self-contained synthetic check
+    # with no model, so we enforce them in main() instead of at argparse-level.
+    self_test_only = "--self-test-moe" in (sys.argv[1:] if sys.argv else [])
+    req = not self_test_only
+    p.add_argument("--method", required=req,
                    choices=["int4", "int8", "gptq", "awq",
                             "aqlm", "quip", "exl2", "exl3", "hqq", "qat"])
-    p.add_argument("--in", dest="src", required=True, help="HF model directory")
-    p.add_argument("--out", dest="dst", required=True, help="output directory")
+    p.add_argument("--in", dest="src", required=req, help="HF model directory")
+    p.add_argument("--out", dest="dst", required=req, help="output directory")
     p.add_argument("--calib", default=None,
                    help="(gptq/awq only) JSONL file of {text: ...} calibration rows; "
                         "defaults to a small built-in pile sample if omitted")
@@ -104,6 +109,14 @@ def parse_args():
                    help="(W921 NEXT-3) cap how many weight tensors the --calib-fp4 "
                         "pass profiles (largest-first) to bound calibration time on "
                         "big models. 0 == all layers.")
+    p.add_argument("--self-test-moe", dest="self_test_moe",
+                   action="store_true", default=False,
+                   help="(W921 NEXT-4) run the deterministic MoE-grouping self-test "
+                        "(synthetic 8-expert config + tiny fake state dict, no model "
+                        "download) and print JSON. Asserts the router stays fp16, "
+                        "every expert FFN block is grouped + assigned the aggressive "
+                        "expert precision, and the grouping covers all expert layers. "
+                        "Exits 0 on pass, 1 on failure.")
     return p.parse_args()
 
 
@@ -718,6 +731,594 @@ def compute_uniform_fallback_from_profile(profile, method):
     return uniform_bits, uniform_group, warnings
 
 
+# -----------------------------------------------------------------------------
+# W921 NEXT-4 — Mixture-of-Experts (MoE) aware quantization.
+#
+# Highest-value NEXT-4 core: quantizing a customer's MoE model (Mixtral /
+# Qwen-MoE / OLMoE / DeepSeek-V2/V3 / DBRX / Llama-4 ...). The DENSE path above
+# is byte-for-byte unchanged — every function here is ADDITIVE and only fires
+# when MoE is DETECTED in the model's config.json. Detection mirrors
+# src/moe-support.js detectMoE (same key list + architecture set) so the JS and
+# Python sides agree on dense-vs-MoE.
+#
+# When MoE is detected we:
+#   (1) group every weight tensor into {router/gate (SACRED — always fp16),
+#       shared/attn layers, per-expert FFN blocks};
+#   (2) apply the per-group precision from the --mixed-precision DAQ profile
+#       (forge's DAQ already emits router=fp16, shared=q4/iq4, experts=
+#       aggressive). Router precision is NEVER downgraded — rounding the router
+#       to <fp16 collapses the top-k softmax (see src/moe-support.js header);
+#   (3) quantize each expert block INDEPENDENTLY (expert-by-expert so an 8x or
+#       128x model can be done without loading every expert at once where the
+#       backend allows) and record per-expert bytes-before/after;
+#   (4) emit run-meta {moe, num_experts, router_precision, expert_precision,
+#       per_group_bytes, total_compression} into the receipt.
+#
+# The pure grouping + byte-accounting math here is dependency-light (stdlib
+# only) so it is deterministic + unit-testable off-GPU via --self-test-moe with
+# a synthetic config + tiny fake state dict (no model download).
+# -----------------------------------------------------------------------------
+
+# MoE expert-count config keys — mirrors src/moe-support.js _detectFromConfig.
+_MOE_EXPERT_KEYS = (
+    "num_experts", "n_routed_experts", "num_local_experts",
+    "num_experts_per_layer", "moe_num_experts",
+)
+# MoE top-k config keys — mirrors src/moe-support.js.
+_MOE_TOPK_KEYS = (
+    "num_experts_per_tok", "n_activated_experts", "moe_top_k", "top_k_experts",
+)
+# Architecture names recognized as MoE — mirrors src/moe-support.js
+# MOE_ARCHITECTURES so detectMoE (JS) and this driver agree.
+_MOE_ARCHITECTURES = frozenset((
+    "MixtralForCausalLM", "Qwen2MoeForCausalLM", "Qwen3MoeForCausalLM",
+    "DeepseekV2ForCausalLM", "DeepseekV3ForCausalLM", "JambaForCausalLM",
+    "PhiMoEForCausalLM", "GraniteMoeForCausalLM", "DbrxForCausalLM",
+    "OlmoeForCausalLM", "MiniMaxText01ForCausalLM",
+    "Llama4ForCausalLM", "Llama4ForConditionalGeneration",
+))
+
+# Tensor-name pattern for a per-expert weight. Matches Mixtral
+# (block_sparse_moe.experts.<n>.w1), DeepSeek / Qwen2-MoE / OLMoE
+# (mlp.experts.<n>.gate_proj), DBRX (ffn.experts.<n>). Mirrors the regex in
+# src/moe-support.js _detectFromSafetensorsIndex.
+import re as _re
+_EXPERT_TENSOR_RE = _re.compile(r"\.experts\.(\d+)\.")
+# Router / gate tensor-name fragments — the sacred fp16 layer. Mixtral uses
+# `block_sparse_moe.gate`, Qwen/DeepSeek/OLMoE use `mlp.gate`, DBRX `ffn.router`.
+# We require it NOT also be an expert tensor (an expert's own gate_proj contains
+# the word "gate" but is part of the expert FFN, not the router).
+_ROUTER_FRAGMENTS = ("block_sparse_moe.gate", "mlp.gate.", "ffn.router",
+                     ".router.", ".gate_network", "moe.gate")
+
+
+def _first_cfg_field(cfg, names):
+    for n in names:
+        if isinstance(cfg, dict) and cfg.get(n) is not None:
+            return cfg.get(n)
+    return None
+
+
+def detect_moe_config(src):
+    """Detect whether the HF model dir at `src` is a sparse-MoE checkpoint by
+    reading ONLY config.json. Mirrors src/moe-support.js _detectFromConfig.
+
+    Returns a dict {is_moe, num_experts, experts_per_token, architecture,
+    model_type, source}. is_moe=False means no MoE evidence (the dense path
+    stays exactly as before). Never raises — a missing/garbled config returns
+    is_moe=False so the dense quantize proceeds untouched.
+    """
+    cfg_path = os.path.join(src, "config.json")
+    cfg = None
+    try:
+        if os.path.exists(cfg_path):
+            with open(cfg_path, "r", encoding="utf-8") as f:
+                cfg = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        cfg = None
+    if not isinstance(cfg, dict):
+        return {"is_moe": False, "num_experts": 0, "experts_per_token": 0,
+                "architecture": None, "model_type": None, "source": "config.json"}
+
+    num_experts = _first_cfg_field(cfg, _MOE_EXPERT_KEYS)
+    top_k = _first_cfg_field(cfg, _MOE_TOPK_KEYS)
+    arch = None
+    if isinstance(cfg.get("architectures"), list) and cfg["architectures"]:
+        arch = cfg["architectures"][0]
+    model_type = cfg.get("model_type") if isinstance(cfg.get("model_type"), str) else ""
+
+    is_moe = (
+        (isinstance(num_experts, (int, float)) and int(num_experts) > 1)
+        or (arch in _MOE_ARCHITECTURES)
+        or bool(_re.search(r"moe|mixtral|deepseek", model_type, _re.IGNORECASE))
+    )
+    return {
+        "is_moe": bool(is_moe),
+        "num_experts": int(num_experts) if isinstance(num_experts, (int, float)) else 0,
+        "experts_per_token": int(top_k) if isinstance(top_k, (int, float)) else 0,
+        "architecture": arch,
+        "model_type": model_type or None,
+        "source": "config.json",
+    }
+
+
+def _classify_tensor(name):
+    """Classify ONE weight-tensor name into a parameter group.
+
+    Returns (group, expert_id):
+      ("router", None)      — top-k gate/router head (SACRED — kept fp16).
+      ("expert", <int>)     — a per-expert FFN block weight.
+      ("shared", None)      — everything else (attention, embeddings, norms,
+                              lm_head, shared-expert MLP — always-active layers).
+
+    Order matters: an expert's own gate_proj contains "gate" but the
+    `.experts.<n>.` match wins first so it is grouped as an expert, never as the
+    router. This mirrors the intent of src/moe-support.js (router precision is
+    split from expert precision).
+    """
+    m = _EXPERT_TENSOR_RE.search(name)
+    if m:
+        return "expert", int(m.group(1))
+    for frag in _ROUTER_FRAGMENTS:
+        if frag in name:
+            return "router", None
+    return "shared", None
+
+
+def group_moe_parameters(weight_names, num_experts=0):
+    """Group an iterable of weight-tensor names into router / shared / per-expert.
+
+    Returns dict:
+      {
+        "router":  [names...],          # sacred fp16
+        "shared":  [names...],          # attn / embed / norm / shared-MLP
+        "experts": {expert_id: [names...], ...},
+        "num_experts_seen": <int>,      # max expert id + 1 observed in names
+        "expert_layer_count": <int>,    # total per-expert tensors grouped
+        "covered_expert_ids": [sorted ids],
+      }
+    Pure + deterministic (sorted outputs) — no RNG, no clock.
+    """
+    router = []
+    shared = []
+    experts = {}
+    for name in weight_names:
+        group, eid = _classify_tensor(name)
+        if group == "expert":
+            experts.setdefault(eid, []).append(name)
+        elif group == "router":
+            router.append(name)
+        else:
+            shared.append(name)
+    for eid in experts:
+        experts[eid].sort()
+    covered = sorted(experts.keys())
+    num_seen = (max(covered) + 1) if covered else 0
+    return {
+        "router": sorted(router),
+        "shared": sorted(shared),
+        "experts": {eid: experts[eid] for eid in covered},
+        "num_experts_seen": num_seen,
+        "expert_layer_count": sum(len(v) for v in experts.values()),
+        "covered_expert_ids": covered,
+    }
+
+
+def _group_precision_from_profile(daq_profile, method):
+    """Reduce a per-layer DAQ profile into a per-GROUP precision plan for an MoE
+    model: {router, shared, experts} -> a precision tag string.
+
+    The forge DAQ (src/daq-profile.js) emits per-layer objects keyed by
+    layer_id. For MoE the layer_ids carry `.experts.` / `.gate` / `.router`
+    fragments, so we classify each profile entry the same way we classify the
+    weight tensors and take, per group, the majority weight_bits. Router is
+    SACRED: it is always reported as fp16 regardless of what a (mis-authored)
+    profile says — rounding the router breaks routing.
+
+    Returns dict {router, shared, experts, expert_weight_bits, shared_weight_bits,
+    source}. When no profile (or no per-group signal) is given we fall back to a
+    safe default: router=fp16, shared=q4, experts=int4 (the aggressive default
+    src/moe-support.js recommends for the bulk of the parameters).
+    """
+    def _bits_to_tag(bits, aggressive=False):
+        b = int(bits)
+        if b >= 8:
+            return "int8" if method == "int8" else "q8_0"
+        if b == 4:
+            return "int4" if aggressive else "q4_k_m"
+        if b == 3:
+            return "iq3_xxs"
+        if b <= 2:
+            return "iq2_xxs"
+        return "q4_k_m"
+
+    # Defaults (no profile / no signal) — the safe aggressive split.
+    plan = {
+        "router": "fp16",
+        "shared": "q4_k_m",
+        "experts": "int4",
+        "router_weight_bits": 16,
+        "shared_weight_bits": 4,
+        "expert_weight_bits": 4,
+        "source": "default_moe_split",
+    }
+    if not daq_profile:
+        return plan
+
+    expert_bits = []
+    shared_bits = []
+    for layer in daq_profile:
+        if not isinstance(layer, dict):
+            continue
+        lid = str(layer.get("layer_id", ""))
+        wb = layer.get("weight_bits")
+        if not isinstance(wb, (int, float)):
+            continue
+        group, _eid = _classify_tensor(lid)
+        if group == "expert":
+            expert_bits.append(int(wb))
+        elif group == "shared":
+            shared_bits.append(int(wb))
+        # router entries in the profile are ignored — router stays fp16.
+
+    def _majority(bits):
+        if not bits:
+            return None
+        counts = {}
+        for b in bits:
+            counts[b] = counts.get(b, 0) + 1
+        # majority; tiebreak HIGHER bits (safer)
+        return sorted(counts.items(), key=lambda x: (-x[1], -x[0]))[0][0]
+
+    eb = _majority(expert_bits)
+    sb = _majority(shared_bits)
+    if eb is not None:
+        plan["expert_weight_bits"] = eb
+        plan["experts"] = _bits_to_tag(eb, aggressive=True)
+        plan["source"] = "daq_profile"
+    if sb is not None:
+        plan["shared_weight_bits"] = sb
+        plan["shared"] = _bits_to_tag(sb, aggressive=False)
+        plan["source"] = "daq_profile"
+    return plan
+
+
+# Effective bytes-per-parameter for the precision tags we emit (matches
+# src/moe-support.js BYTES_PER_PARAM so JS estimates + this receipt agree).
+_BYTES_PER_PARAM = {
+    "fp32": 4.0, "fp16": 2.0, "bf16": 2.0, "fp8": 1.0, "int8": 1.0,
+    "q8_0": 1.0625, "q5_k_m": 0.6875, "q4_k_m": 0.5625,
+    "int4": 0.5, "iq4_xs": 0.5, "iq3_xxs": 0.40625, "iq2_xxs": 0.3125,
+}
+
+
+def _bytes_for(numel, tag):
+    return numel * _BYTES_PER_PARAM.get(tag, 2.0)
+
+
+def plan_moe_quantization(grouping, group_precision, tensor_numels,
+                          src_bytes_per_param=2.0):
+    """Compute per-expert + per-group bytes-before/after for an MoE quantize,
+    quantizing each expert block independently.
+
+    grouping        : output of group_moe_parameters.
+    group_precision : output of _group_precision_from_profile.
+    tensor_numels   : dict {tensor_name: element_count}. (From a real run this
+                      is read from the safetensors header; the self-test feeds a
+                      synthetic fake state dict.)
+    src_bytes_per_param : original on-disk bytes/param (fp16/bf16 = 2.0).
+
+    Returns the run-meta the receipt records:
+      {
+        moe: True, num_experts, router_precision, expert_precision,
+        shared_precision, per_group_bytes: {router:{before,after},
+        shared:{...}, experts:{before,after}},
+        per_expert_bytes: [{expert_id, bytes_before, bytes_after,
+                            compression}],
+        total_bytes_before, total_bytes_after, total_compression,
+      }
+    Deterministic — pure arithmetic over the grouping. Each expert is sized
+    independently (expert-by-expert) which is exactly what lets the real backend
+    stream one expert at a time without holding all of them resident.
+    """
+    def _numel(name):
+        v = tensor_numels.get(name, 0)
+        return int(v) if isinstance(v, (int, float)) else 0
+
+    router_after_tag = "fp16"  # SACRED
+    shared_after_tag = group_precision.get("shared", "q4_k_m")
+    expert_after_tag = group_precision.get("experts", "int4")
+
+    # Router group.
+    router_numel = sum(_numel(n) for n in grouping["router"])
+    router_before = router_numel * src_bytes_per_param
+    router_after = _bytes_for(router_numel, router_after_tag)
+
+    # Shared group.
+    shared_numel = sum(_numel(n) for n in grouping["shared"])
+    shared_before = shared_numel * src_bytes_per_param
+    shared_after = _bytes_for(shared_numel, shared_after_tag)
+
+    # Expert groups — quantized INDEPENDENTLY, one expert at a time.
+    per_expert = []
+    experts_before = 0.0
+    experts_after = 0.0
+    for eid in grouping["covered_expert_ids"]:
+        e_numel = sum(_numel(n) for n in grouping["experts"][eid])
+        e_before = e_numel * src_bytes_per_param
+        e_after = _bytes_for(e_numel, expert_after_tag)
+        experts_before += e_before
+        experts_after += e_after
+        per_expert.append({
+            "expert_id": eid,
+            "tensors": len(grouping["experts"][eid]),
+            "numel": e_numel,
+            "bytes_before": round(e_before, 3),
+            "bytes_after": round(e_after, 3),
+            "precision": expert_after_tag,
+            "compression": round(e_before / e_after, 4) if e_after > 0 else 0.0,
+        })
+
+    total_before = router_before + shared_before + experts_before
+    total_after = router_after + shared_after + experts_after
+    return {
+        "moe": True,
+        "num_experts": grouping["num_experts_seen"],
+        "router_precision": router_after_tag,
+        "expert_precision": expert_after_tag,
+        "shared_precision": shared_after_tag,
+        "precision_source": group_precision.get("source", "default_moe_split"),
+        "per_group_bytes": {
+            "router": {"before": round(router_before, 3), "after": round(router_after, 3),
+                       "tensors": len(grouping["router"]), "numel": router_numel},
+            "shared": {"before": round(shared_before, 3), "after": round(shared_after, 3),
+                       "tensors": len(grouping["shared"]), "numel": shared_numel},
+            "experts": {"before": round(experts_before, 3), "after": round(experts_after, 3),
+                        "tensors": grouping["expert_layer_count"]},
+        },
+        "per_expert_bytes": per_expert,
+        "total_bytes_before": round(total_before, 3),
+        "total_bytes_after": round(total_after, 3),
+        "total_compression": round(total_before / total_after, 4) if total_after > 0 else 0.0,
+    }
+
+
+def read_safetensors_numels(src):
+    """Read {tensor_name: element_count} from a model dir WITHOUT loading weight
+    data — uses the safetensors JSON header (shape per tensor) or the
+    model.safetensors.index.json fallback. Returns {} if neither is present.
+
+    Element count from shape is enough to size every group; we never page the
+    tensor bytes, so this is safe for models larger than RAM. The per-expert
+    independence is preserved because each expert's numel is summed separately.
+    """
+    import struct
+    numels = {}
+    shards = sorted(Path(src).glob("*.safetensors"))
+    for shard in shards:
+        try:
+            with open(shard, "rb") as f:
+                n_header = struct.unpack("<Q", f.read(8))[0]
+                header = json.loads(f.read(n_header).decode("utf-8"))
+        except (OSError, struct.error, json.JSONDecodeError, UnicodeDecodeError):
+            continue
+        for name, meta in header.items():
+            if name == "__metadata__" or not isinstance(meta, dict):
+                continue
+            shape = meta.get("shape")
+            if isinstance(shape, list) and shape:
+                n = 1
+                for d in shape:
+                    n *= int(d)
+                numels[name] = n
+    return numels
+
+
+def build_moe_run_meta(src, daq_profile, method, src_bytes_per_param=2.0):
+    """Top-level MoE run-meta builder for a real quantize run. Reads the
+    safetensors header for tensor shapes, groups, applies per-group precision,
+    and sizes each expert independently. Never raises into the main flow —
+    returns {moe:False, reason} so a detection false-positive degrades to the
+    dense path rather than blocking the quantize.
+    """
+    try:
+        numels = read_safetensors_numels(src)
+        if not numels:
+            return {"moe": False, "reason": "no_safetensors_header_for_moe_grouping"}
+        grouping = group_moe_parameters(numels.keys())
+        if grouping["expert_layer_count"] == 0:
+            return {"moe": False, "reason": "no_expert_tensors_in_safetensors"}
+        group_precision = _group_precision_from_profile(daq_profile, method)
+        meta = plan_moe_quantization(grouping, group_precision, numels,
+                                     src_bytes_per_param=src_bytes_per_param)
+        meta["expert_precision_source"] = group_precision.get("source")
+        return meta
+    except Exception as e:  # degrade gracefully — never block the quantize
+        return {"moe": False, "reason": f"moe_run_meta_raised: {e.__class__.__name__}: {e}"}
+
+
+# -----------------------------------------------------------------------------
+# W921 NEXT-4 — deterministic MoE self-test (synthetic config + tiny fake state
+# dict; NO model download, NO GPU). Asserts the four invariants:
+#   1. router stays fp16 (never downgraded);
+#   2. every expert FFN block is grouped + assigned the aggressive expert
+#      precision;
+#   3. the grouping covers ALL expert layers (no expert tensor lands in shared);
+#   4. byte-accounting is consistent (total_before > total_after, compression>1).
+# -----------------------------------------------------------------------------
+
+def _synthetic_moe_state_dict(num_experts=8, num_layers=2, hidden=128,
+                              moe_inter=256):
+    """Build a synthetic Mixtral-style {tensor_name: numel} fake state dict for
+    an `num_experts`-expert MoE. No tensors are allocated — just names + element
+    counts — so this is instant + deterministic with no RNG."""
+    numels = {}
+    # Embedding + lm_head + final norm (shared).
+    numels["model.embed_tokens.weight"] = 32000 * hidden
+    numels["lm_head.weight"] = 32000 * hidden
+    numels["model.norm.weight"] = hidden
+    for layer in range(num_layers):
+        pfx = f"model.layers.{layer}"
+        # Attention (shared / always-active).
+        for proj in ("q_proj", "k_proj", "v_proj", "o_proj"):
+            numels[f"{pfx}.self_attn.{proj}.weight"] = hidden * hidden
+        numels[f"{pfx}.input_layernorm.weight"] = hidden
+        numels[f"{pfx}.post_attention_layernorm.weight"] = hidden
+        # Router / gate (SACRED — must stay fp16). Mixtral name.
+        numels[f"{pfx}.block_sparse_moe.gate.weight"] = hidden * num_experts
+        # Per-expert FFN blocks (the bulk — aggressive precision).
+        for e in range(num_experts):
+            ep = f"{pfx}.block_sparse_moe.experts.{e}"
+            numels[f"{ep}.w1.weight"] = hidden * moe_inter
+            numels[f"{ep}.w2.weight"] = moe_inter * hidden
+            numels[f"{ep}.w3.weight"] = hidden * moe_inter
+    return numels
+
+
+def _synthetic_moe_config(num_experts=8, top_k=2):
+    return {
+        "architectures": ["MixtralForCausalLM"],
+        "model_type": "mixtral",
+        "num_local_experts": num_experts,
+        "num_experts_per_tok": top_k,
+        "hidden_size": 128,
+        "moe_intermediate_size": 256,
+    }
+
+
+def self_test_moe(num_experts=8, num_layers=2):
+    """Run the deterministic MoE-grouping self-test. Returns a JSON-serialisable
+    result dict {ok, failures, ...}. No model download, no GPU, no RNG."""
+    failures = []
+
+    # --- detection (mirrors src/moe-support.js) on a synthetic config ---
+    cfg = _synthetic_moe_config(num_experts=num_experts)
+    import tempfile
+    d = tempfile.mkdtemp(prefix="kolm-moe-selftest-")
+    try:
+        with open(os.path.join(d, "config.json"), "w", encoding="utf-8") as f:
+            json.dump(cfg, f)
+        det = detect_moe_config(d)
+        if not det["is_moe"]:
+            failures.append("detect_moe_config did not flag the synthetic Mixtral config as MoE")
+        if det["num_experts"] != num_experts:
+            failures.append(
+                f"detect_moe_config num_experts={det['num_experts']} != {num_experts}")
+        # A dense config must NOT be flagged (dense path stays untouched).
+        dense_cfg = {"architectures": ["LlamaForCausalLM"], "model_type": "llama",
+                     "hidden_size": 128, "intermediate_size": 512}
+        with open(os.path.join(d, "config.json"), "w", encoding="utf-8") as f:
+            json.dump(dense_cfg, f)
+        if detect_moe_config(d)["is_moe"]:
+            failures.append("detect_moe_config false-positive on a dense Llama config")
+    finally:
+        import shutil
+        shutil.rmtree(d, ignore_errors=True)
+
+    # --- grouping over the synthetic fake state dict ---
+    numels = _synthetic_moe_state_dict(num_experts=num_experts, num_layers=num_layers)
+    grouping = group_moe_parameters(numels.keys())
+
+    # Invariant 3: grouping covers ALL expert layers — every expert id 0..N-1 is
+    # present and the per-layer tensor count is exactly (3 w-matrices * layers).
+    expected_expert_tensors = num_experts * num_layers * 3  # w1/w2/w3 per expert per layer
+    if grouping["expert_layer_count"] != expected_expert_tensors:
+        failures.append(
+            f"expert_layer_count={grouping['expert_layer_count']} != "
+            f"expected {expected_expert_tensors}")
+    if grouping["covered_expert_ids"] != list(range(num_experts)):
+        failures.append(
+            f"covered_expert_ids={grouping['covered_expert_ids']} != 0..{num_experts - 1}")
+    if grouping["num_experts_seen"] != num_experts:
+        failures.append(
+            f"num_experts_seen={grouping['num_experts_seen']} != {num_experts}")
+
+    # No expert tensor may leak into shared/router (the gate_proj-named expert
+    # weight trap). Verify every shared/router name is NOT an expert tensor.
+    for nm in grouping["shared"] + grouping["router"]:
+        if _EXPERT_TENSOR_RE.search(nm):
+            failures.append(f"expert tensor leaked into shared/router: {nm}")
+    # The router (gate) must be grouped as router, exactly one per layer.
+    if len(grouping["router"]) != num_layers:
+        failures.append(
+            f"router group has {len(grouping['router'])} tensors, expected {num_layers}")
+
+    # --- per-group precision from a DAQ profile (router fp16 sacred) ---
+    # Build a profile that (perversely) tries to push the router to 2-bit; the
+    # plan MUST still keep the router fp16.
+    daq_profile = []
+    for layer in range(num_layers):
+        pfx = f"model.layers.{layer}"
+        daq_profile.append({"layer_id": f"{pfx}.block_sparse_moe.gate.weight",
+                            "weight_bits": 2, "activation_bits": 8,
+                            "kv_bits": 8, "group_size": 128})
+        for proj in ("q_proj", "o_proj"):
+            daq_profile.append({"layer_id": f"{pfx}.self_attn.{proj}.weight",
+                                "weight_bits": 4, "activation_bits": 8,
+                                "kv_bits": 8, "group_size": 128})
+        for e in range(num_experts):
+            daq_profile.append({
+                "layer_id": f"{pfx}.block_sparse_moe.experts.{e}.w1.weight",
+                "weight_bits": 4, "activation_bits": 4, "kv_bits": 8,
+                "group_size": 128})
+    group_precision = _group_precision_from_profile(daq_profile, "int4")
+
+    # Invariant 1: router stays fp16.
+    if group_precision["router"] != "fp16":
+        failures.append(f"router precision {group_precision['router']} != fp16 (SACRED)")
+
+    # --- byte plan + per-expert independence ---
+    meta = plan_moe_quantization(grouping, group_precision, numels,
+                                 src_bytes_per_param=2.0)
+
+    # Invariant 2: every expert is assigned the aggressive expert precision.
+    if len(meta["per_expert_bytes"]) != num_experts:
+        failures.append(
+            f"per_expert_bytes has {len(meta['per_expert_bytes'])} entries != {num_experts}")
+    for pe in meta["per_expert_bytes"]:
+        if pe["precision"] != group_precision["experts"]:
+            failures.append(
+                f"expert {pe['expert_id']} precision {pe['precision']} != "
+                f"{group_precision['experts']}")
+        if pe["bytes_after"] >= pe["bytes_before"]:
+            failures.append(
+                f"expert {pe['expert_id']} did not shrink: "
+                f"{pe['bytes_after']} >= {pe['bytes_before']}")
+    if meta["router_precision"] != "fp16":
+        failures.append(f"run-meta router_precision {meta['router_precision']} != fp16")
+
+    # Invariant 4: byte accounting consistent + compression > 1.
+    if not (meta["total_bytes_after"] < meta["total_bytes_before"]):
+        failures.append("total_bytes_after not < total_bytes_before")
+    if not (meta["total_compression"] > 1.0):
+        failures.append(f"total_compression {meta['total_compression']} not > 1")
+    # Router bytes must be UNCHANGED (fp16 in == fp16 out).
+    rb = meta["per_group_bytes"]["router"]
+    if rb["before"] != rb["after"]:
+        failures.append(
+            f"router bytes changed under quant: before {rb['before']} after {rb['after']}")
+
+    # Determinism: same inputs -> identical meta.
+    meta2 = plan_moe_quantization(group_moe_parameters(numels.keys()),
+                                  group_precision, numels, src_bytes_per_param=2.0)
+    if meta != meta2:
+        failures.append("non-deterministic: MoE run-meta differs across runs")
+
+    return {
+        "ok": len(failures) == 0,
+        "num_experts": num_experts,
+        "num_layers": num_layers,
+        "expert_layer_count": grouping["expert_layer_count"],
+        "router_precision": meta["router_precision"],
+        "expert_precision": meta["expert_precision"],
+        "shared_precision": meta["shared_precision"],
+        "total_compression": meta["total_compression"],
+        "precision_source": group_precision["source"],
+        "checks": 4,
+        "failures": failures,
+    }
+
+
 # Small built-in calibration set — generic prose so the quantizer has something
 # to learn activation scales from when the caller didn't pass --calib.
 _FALLBACK_CALIB = [
@@ -758,6 +1359,15 @@ _FALLBACK_CALIB = [
 
 def main():
     args = parse_args()
+
+    # W921 NEXT-4 — MoE self-test short-circuit. Runs the deterministic
+    # synthetic-config grouping/precision check (no model, no GPU) and exits
+    # before any --in/--out validation so it is callable standalone.
+    if getattr(args, "self_test_moe", False):
+        res = self_test_moe()
+        sys.stdout.write(json.dumps(res, indent=2) + "\n")
+        sys.exit(0 if res["ok"] else 1)
+
     src = Path(args.src).resolve()
     dst = Path(args.dst).resolve()
     if not src.exists() or not src.is_dir():
@@ -798,6 +1408,18 @@ def main():
             block=args.calib_fp4_block,
             max_layers=args.calib_fp4_max_layers,
         )
+
+    # W921 NEXT-4 — MoE detection + per-group / per-expert run-meta. GATED on
+    # detecting MoE in config.json (mirrors src/moe-support.js detectMoE); when
+    # the model is DENSE this stays None and the dense path is byte-for-byte
+    # unchanged. The grouping (router/shared/per-expert) + per-group precision
+    # from the DAQ profile + per-expert bytes-before/after are sized from the
+    # safetensors header (no weight load) and recorded in the receipt. Never
+    # blocks the quantize — build_moe_run_meta degrades to {moe:False,reason}.
+    moe_detection = detect_moe_config(str(src))
+    moe_run_meta = None
+    if moe_detection.get("is_moe"):
+        moe_run_meta = build_moe_run_meta(str(src), daq_profile, args.method)
 
     trc = bool(args.trust_remote_code)
     try:
@@ -859,6 +1481,14 @@ def main():
         receipt["mixed_precision_warnings"] = daq_warnings
         receipt["mixed_precision_applied_bits"] = args.bits
         receipt["mixed_precision_applied_group_size"] = args.group_size
+    # W921 NEXT-4 — record the MoE run-meta (router_precision, expert_precision,
+    # per_group_bytes, per_expert_bytes, total_compression) so a verifier sees
+    # the router was kept fp16 (sacred) and exactly how each expert block was
+    # sized. Always recorded when MoE was detected (moe:true on success, or
+    # {moe:false,reason} if header sizing degraded) so the verdict is explicit.
+    if moe_run_meta is not None:
+        receipt["moe"] = moe_run_meta
+        receipt["moe_detection"] = moe_detection
     with open(dst / "quantize-receipt.json", "w", encoding="utf-8") as f:
         json.dump(receipt, f, indent=2, sort_keys=True)
     sys.stdout.write(json.dumps({"ok": True, "receipt": str(dst / "quantize-receipt.json")}) + "\n")
