@@ -22,7 +22,7 @@ const DRIVER = path.join(REPO, 'scripts', 'release-verify.cjs');
 const SRC = fs.readFileSync(DRIVER, 'utf8');
 
 const ALL_GATES = [
-  'lint:refs', 'control-files', 'openapi-sync', 'claim-verify',
+  'lint:refs', 'control-files', 'openapi-sync', 'claim-verify', 'demo-claims',
   'sdk-manifest', 'test', 'sdk-smoke', 'local-surfaces',
   // ship-gate (W888-I) is opt-in via --include-ship-gate but always lands in
   // gates[] (as skipped when not opted in) so the summary lists it as a known

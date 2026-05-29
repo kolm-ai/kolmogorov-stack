@@ -61,7 +61,9 @@ test('W505 #4 - release-verify runs sdk-manifest before the full test and SDK sm
 });
 
 test('W505 #5 - release-verify top-level gate list documents sdk-manifest', () => {
-  const head = RELEASE_VERIFY.slice(0, 1700);
+  // Head slice covers the documented gate list. Widened 1700 -> 2400 when the
+  // W921 demo-claims gate (4b) was inserted ahead of the sdk-manifest doc.
+  const head = RELEASE_VERIFY.slice(0, 2400);
   assert.match(head, /sdk-manifest/);
   assert.match(head, /current \+ versioned browser SDK assets/);
 });

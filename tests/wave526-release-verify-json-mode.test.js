@@ -90,7 +90,7 @@ test('W526 #8 — running with --skip on every gate yields one parseable JSON li
   // under a second and exercises the actual stdout serialization path. If
   // ANY gate leaks a console.log through, the JSON.parse below throws.
   const allGates = [
-    'lint:refs', 'control-files', 'openapi-sync', 'claim-verify',
+    'lint:refs', 'control-files', 'openapi-sync', 'claim-verify', 'demo-claims',
     'sdk-manifest', 'test', 'sdk-smoke', 'local-surfaces',
     'ship-gate', 'doctor', 'whoami', 'verify-claims', 'billing-tiers',
   ];
