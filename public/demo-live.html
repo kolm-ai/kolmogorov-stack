@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Live walkthrough · kolm.ai</title>
-<meta name="description" content="70 seconds. Capture &rarr; Compile &rarr; Verify &rarr; Run. A 1.9 GB signed artifact distilled from prod traffic, served at 11.5 tok/s on-device. Plays in your browser, no video file.">
+<title>Live walkthrough &middot; kolm.ai</title>
+<meta name="description" content="Capture &rarr; Compile &rarr; Verify &rarr; Run. Distill a council (Claude 3.5 Sonnet + GPT-4o + DeepSeek-R1-32B) into Qwen2.5, quantize to INT4 (61.0&rarr;17.9 GB in 125.3s on an RTX 5090), then verify the signed receipt in your browser with zero network. Plays in your browser, no video file.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <link rel="canonical" href="https://kolm.ai/demo-live">
 <meta property="og:title" content="Live walkthrough">
-<meta property="og:description" content="70-second cinematic walkthrough of the kolm loop. Plays in your browser.">
+<meta property="og:description" content="Capture, compile, verify, run. Four beats on real hardware. The signed receipt verifies in your browser with zero network.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/demo-live">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -22,19 +22,22 @@
    --bg:#f3f5f7;--bg-elev:#ffffff;--bg-pane:#fafbfc;
    --accent:#1f2937;--accent-dim:#56606c;
    --green:#2e5a3d;--amber:#525a64;--blue:#2a4d75;--red:#7a2828;
+   --focus:#2a4d75;
    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
    --sans:Inter,-apple-system,system-ui,sans-serif;
  }
  [data-theme=dark]{
    --ink:#e6e9ee;--ink-mute:#a8b3c2;--ink-faint:#6a727c;
-   --line:var(--line-2);--line-strong:var(--line-3);
+   --line:rgba(230,233,238,0.12);--line-strong:rgba(230,233,238,0.22);
    --bg:#0e1116;--bg-elev:#161b22;--bg-pane:#12161c;
    --accent:#e6e9ee;--accent-dim:#a8b3c2;
    --green:#9bb6a0;--amber:#b8bcc4;--blue:#9bb1c8;--red:#b89898;
+   --focus:#9bb1c8;
  }
  *{box-sizing:border-box}
  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
  a{color:inherit}
+ :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
  /* shell */
  .shell{display:grid;grid-template-rows:auto 1fr auto;height:100vh;height:100dvh;overflow:hidden}
  header.bar{display:flex;align-items:center;gap:18px;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--bg);position:relative;z-index:5}
@@ -42,19 +45,19 @@
  .brand b{font-weight:600;letter-spacing:-0.01em}
  .brand .dot{width:7px;height:7px;border-radius:2px;background:var(--ink);display:inline-block}
  .crumb{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:0.18em;text-transform:uppercase}
- .chapters{flex:1;display:flex;gap:0;align-items:center;justify-content:center;flex-wrap:wrap}
- .chap{font-family:var(--mono);font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-faint);padding:6px 10px;cursor:pointer;border-radius:4px;user-select:none;transition:color 180ms,background 180ms;white-space:nowrap}
+ .chapters{flex:1;display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap}
+ .chap{font-family:var(--mono);font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-faint);padding:7px 11px;cursor:pointer;border-radius:4px;user-select:none;transition:color 180ms,background 180ms,border-color 180ms;white-space:nowrap;background:transparent;border:1px solid transparent;font-family:var(--mono);min-height:34px;display:inline-flex;align-items:center;gap:6px}
  .chap:hover{color:var(--ink)}
- .chap.is-active{color:var(--ink);background:var(--bg-elev);border:1px solid var(--line)}
- .chap .ts{color:var(--ink-faint);margin-right:6px;font-weight:400}
- .chap.is-active .ts{color:var(--accent-dim)}
+ .chap[aria-current=true]{color:var(--ink);background:var(--bg-elev);border:1px solid var(--line)}
+ .chap .ts{color:var(--ink-faint);font-weight:400}
+ .chap[aria-current=true] .ts{color:var(--accent-dim)}
  .ctrls{display:flex;gap:6px;align-items:center}
- .btn{font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;background:transparent;color:var(--ink-mute);border:1px solid var(--line);border-radius:4px;padding:6px 11px;cursor:pointer;transition:color 160ms,border-color 160ms}
+ .btn{font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;background:transparent;color:var(--ink-mute);border:1px solid var(--line);border-radius:4px;padding:8px 12px;cursor:pointer;transition:color 160ms,border-color 160ms;min-height:34px;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
  .btn:hover{color:var(--ink);border-color:var(--line-strong)}
  .btn.primary{color:var(--ink);border-color:var(--line-strong)}
- .btn .glyph{display:inline-block;width:8px}
+ .btn .glyph{display:inline-block;width:9px}
  /* stage */
- .stage{display:grid;grid-template-columns:minmax(280px,32%) minmax(360px,1fr) minmax(260px,28%);min-height:0;border-bottom:1px solid var(--line)}
+ .stage{display:grid;grid-template-columns:minmax(280px,32%) minmax(360px,1fr) minmax(260px,28%);min-height:0;border-bottom:1px solid var(--line);position:relative}
  .pane{display:flex;flex-direction:column;min-height:0;background:var(--bg-pane);position:relative;overflow:hidden}
  .pane + .pane{border-left:1px solid var(--line)}
  .pane-h{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--line);background:var(--bg);font-family:var(--mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-faint)}
@@ -68,12 +71,14 @@
  .term .prompt{color:var(--ink-faint)}
  .term .you{color:var(--ink)}
  .term .ok{color:var(--green)}
+ .term .green{color:var(--green)}
  .term .warn{color:var(--amber)}
  .term .info{color:var(--blue)}
  .term .err{color:var(--red)}
  .term .dim{color:var(--ink-faint)}
- .term .cursor{display:inline-block;width:7px;height:14px;background:var(--ink);vertical-align:-2px;margin-left:2px;animation:blink 1.1s steps(2,end) infinite}
- @media (prefers-reduced-motion: reduce){.term .cursor{animation:none}}
+ .term .cursor{display:inline-block;width:7px;height:14px;background:var(--ink);vertical-align:-2px;margin-left:2px}
+ .term .cursor.blink{animation:blink 1.05s steps(2,end) infinite}
+ @media (prefers-reduced-motion: reduce){.term .cursor.blink{animation:none}}
  @keyframes blink{50%{opacity:0}}
  /* browser */
  .browser{height:100%;display:flex;flex-direction:column;background:var(--bg-pane);overflow:hidden}
@@ -82,8 +87,9 @@
  .browser-bar .lights i{width:9px;height:9px;border-radius:50%;background:var(--line-strong)}
  .url{flex:1;font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);background:var(--bg-pane);padding:5px 10px;border:1px solid var(--line);border-radius:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
  .url .scheme{color:var(--ink-faint)}
+ .url .localtag{color:var(--ink-faint);font-style:normal;margin-left:8px;font-size:10px;letter-spacing:0.08em;text-transform:uppercase}
  .browser-body{flex:1;overflow:auto;padding:0;background:var(--bg)}
- .b-page{padding:20px 22px;display:none;animation:fade 260ms ease-out}
+ .b-page{padding:20px 22px;display:none;animation:fade 240ms ease-out}
  .b-page.is-active{display:block}
  @media (prefers-reduced-motion: reduce){.b-page{animation:none}}
  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
@@ -104,11 +110,12 @@
  .pill.info{color:var(--blue);border-color:rgba(136,166,200,0.40)}
  .progress{height:6px;background:var(--bg);border:1px solid var(--line);border-radius:3px;overflow:hidden;margin:6px 0}
  .progress .fill{height:100%;background:var(--ink);width:0;transition:width 240ms ease}
+ @media (prefers-reduced-motion: reduce){.progress .fill{transition:none}}
  .bench-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0}
  .bench-cell{border:1px solid var(--line);border-radius:6px;padding:8px 10px;text-align:center}
  .bench-cell .n{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--ink)}
  .bench-cell .u{font-family:var(--mono);font-size:10px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.08em;margin-top:2px}
- .cap-stream{font-family:var(--mono);font-size:11.5px;line-height:1.6;color:var(--ink-mute);max-height:200px;overflow:hidden;border:1px solid var(--line);border-radius:6px;background:var(--bg-pane)}
+ .cap-stream{font-family:var(--mono);font-size:11.5px;line-height:1.6;color:var(--ink-mute);max-height:220px;overflow:hidden;border:1px solid var(--line);border-radius:6px;background:var(--bg-pane)}
  .cap-stream .cap{display:flex;gap:10px;padding:6px 10px;border-bottom:1px solid var(--line);align-items:center}
  .cap-stream .cap:last-child{border-bottom:0}
  .cap .ts{color:var(--ink-faint);font-size:10.5px}
@@ -120,27 +127,67 @@
  .receipt .empty{color:var(--ink-faint);font-style:italic;padding:40px 8px;text-align:center;font-size:11.5px}
  .receipt h3{font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-faint);margin:14px 0 6px;font-weight:600}
  .receipt h3:first-child{margin-top:0}
- .receipt .sig{word-break:break-all;color:var(--green);font-size:11px;background:var(--bg-pane);padding:8px 10px;border:1px solid var(--line);border-radius:5px}
+ .receipt .kv{margin:1px 0}
+ .receipt .kv b{color:var(--ink-faint);font-weight:400;display:inline-block;min-width:118px}
+ .receipt .kv span{color:var(--ink)}
+ .receipt .sig{word-break:break-all;color:var(--ink-mute);font-size:10.5px;background:var(--bg-pane);padding:8px 10px;border:1px solid var(--line);border-radius:5px;line-height:1.45}
  .receipt .hash{word-break:break-all;color:var(--blue);font-size:11px}
- .receipt .badge-ok{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-weight:600;letter-spacing:0.05em;font-size:11.5px;text-transform:uppercase}
- .receipt .badge-ok::before{content:'';width:7px;height:7px;background:var(--green);border-radius:50%;display:inline-block}
+ .verify-box{margin-top:14px;border:1px solid var(--line);border-radius:7px;padding:12px;background:var(--bg-elev)}
+ .verify-box .status{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--ink-mute);margin-bottom:10px}
+ .verify-box .check{width:18px;height:18px;border-radius:50%;border:2px solid var(--line-strong);display:inline-flex;align-items:center;justify-content:center;flex:0 0 18px;transition:background 240ms ease,border-color 240ms ease}
+ .verify-box .check svg{width:11px;height:11px;opacity:0;transform:scale(0.6);transition:opacity 240ms ease,transform 240ms ease}
+ .verify-box.is-verified .check{background:var(--green);border-color:var(--green)}
+ .verify-box.is-verified .check svg{opacity:1;transform:scale(1)}
+ @media (prefers-reduced-motion: reduce){.verify-box .check,.verify-box .check svg{transition:none}}
+ .verify-box.is-verified .status .txt{color:var(--green);font-weight:600}
+ .verify-box .canon{font-size:10px;color:var(--ink-faint);word-break:break-all;max-height:0;overflow:hidden;transition:max-height 300ms ease;line-height:1.5;margin:0}
+ .verify-box.is-verified .canon,.verify-box.is-checking .canon{max-height:140px;overflow:auto;margin:0 0 10px}
+ @media (prefers-reduced-motion: reduce){.verify-box .canon{transition:none}}
+ .verify-box button{width:100%;font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;padding:9px 12px;border:1px solid var(--ink);border-radius:5px;background:var(--ink);color:var(--bg);cursor:pointer;text-transform:uppercase;min-height:38px}
+ .verify-box button:hover{background:var(--ink-mute);border-color:var(--ink-mute)}
+ .verify-box button:disabled{opacity:0.6;cursor:default}
+ .verify-box .vurl{display:block;margin-top:9px;font-size:10.5px;color:var(--blue);text-decoration:none;word-break:break-all}
+ .verify-box .vurl:hover{text-decoration:underline}
+ .verify-box .vnote{font-size:10px;color:var(--ink-faint);margin:4px 0 0;line-height:1.45}
+ /* run-beat ticket input */
+ .ticket-try{margin-top:14px;border:1px solid var(--line);border-radius:7px;padding:12px;background:var(--bg-elev)}
+ .ticket-try label{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 7px}
+ .ticket-try .trow{display:flex;gap:7px}
+ .ticket-try input{flex:1;min-width:0;font-family:var(--mono);font-size:12px;padding:9px 10px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--ink)}
+ .ticket-try input:focus{outline:none;border-color:var(--focus)}
+ .ticket-try button{font-family:var(--mono);font-size:11px;letter-spacing:0.04em;padding:9px 13px;border:1px solid var(--ink);border-radius:5px;background:var(--ink);color:var(--bg);cursor:pointer;text-transform:uppercase;white-space:nowrap;min-height:38px}
+ .ticket-try button:disabled{opacity:0.55;cursor:default}
+ .ticket-out{margin-top:9px;font-family:var(--mono);font-size:11px;line-height:1.55;color:var(--ink);white-space:pre-wrap;word-break:break-word}
+ .ticket-out .ok{color:var(--green)}
+ .ticket-out .dim{color:var(--ink-faint)}
  /* subtitle */
  .subtitle{padding:14px 22px;border-top:1px solid var(--line);background:var(--bg);display:flex;align-items:center;gap:18px;min-height:64px}
- .subtitle .cap-num{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);letter-spacing:0.14em;text-transform:uppercase;min-width:74px}
+ .subtitle .cap-num{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);letter-spacing:0.14em;text-transform:uppercase;min-width:84px}
  .subtitle .cap-text{flex:1;font-size:14px;line-height:1.5;color:var(--ink);transition:opacity 160ms}
  .subtitle .cap-text em{font-style:normal;color:var(--ink-faint);font-family:var(--mono);font-size:13px}
- .scrub{height:3px;background:var(--bg);position:relative;cursor:pointer}
- .scrub .fill{position:absolute;left:0;top:0;height:100%;background:var(--ink);width:0}
+ .scrub{height:8px;background:var(--bg);position:relative;cursor:pointer;border:none;width:100%;padding:0;display:block}
+ .scrub .fill{position:absolute;left:0;top:0;height:100%;background:var(--ink);width:0;pointer-events:none}
  .scrub .marks{position:absolute;inset:0;display:flex;pointer-events:none}
  .scrub .mark{width:1px;background:var(--line-strong);height:100%}
- .end-card{position:absolute;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center;padding:36px 30px;z-index:10;overflow:auto}
+ .scrub:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+ /* run-yourself strip */
+ .run-strip{border-top:1px solid var(--line);background:var(--bg);padding:12px 22px;display:none;gap:10px;flex-wrap:wrap;align-items:center}
+ .run-strip.is-on{display:flex}
+ .run-strip .rs-label{font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-faint);width:100%}
+ .run-cmd{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:5px;background:var(--bg-pane);padding:6px 8px 6px 12px;max-width:100%}
+ .run-cmd code{font-family:var(--mono);font-size:11.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62vw}
+ .run-cmd .copy{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line);border-radius:4px;padding:4px 8px;background:transparent;cursor:pointer;flex:0 0 auto;min-height:28px}
+ .run-cmd .copy:hover{color:var(--ink);border-color:var(--line-strong)}
+ .run-cmd .copy.copied{color:var(--green);border-color:rgba(127,184,138,0.4)}
+ /* end card / dialog */
+ .end-card{position:absolute;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center;padding:36px 30px;z-index:20;overflow:auto}
  .end-card.is-on{display:flex}
  .end-card .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-faint);margin:0}
  .end-card h2{font-size:28px;font-weight:600;letter-spacing:-0.020em;margin:0;color:var(--ink);line-height:1.18}
- .end-card .lede{font-size:14px;color:var(--ink-mute);max-width:520px;margin:2px 0 6px;line-height:1.5}
- .end-card .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:600px;width:100%;margin:4px 0}
+ .end-card .lede{font-size:14px;color:var(--ink-mute);max-width:540px;margin:2px 0 6px;line-height:1.5}
+ .end-card .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:640px;width:100%;margin:4px 0}
  .end-card .stat{padding:12px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev)}
- .end-card .stat .n{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--ink);letter-spacing:-0.01em}
+ .end-card .stat .n{font-family:var(--mono);font-size:17px;font-weight:600;color:var(--ink);letter-spacing:-0.01em}
  .end-card .stat .l{font-family:var(--mono);font-size:9.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.10em;margin-top:3px}
  .end-card .cta-primary{display:inline-flex;align-items:center;gap:8px;font-family:var(--sans);font-size:14.5px;font-weight:600;letter-spacing:-0.005em;padding:13px 22px;border-radius:6px;text-decoration:none;background:var(--ink);color:var(--bg);border:1px solid var(--ink);transition:transform 140ms ease, background 140ms ease}
  .end-card .cta-primary:hover{background:var(--ink-mute);border-color:var(--ink-mute);transform:translateY(-1px)}
@@ -148,39 +195,64 @@
  .end-card .cta-primary:hover .arrow{transform:translateX(3px)}
  .end-card .cta-detail{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:0.04em;margin-top:6px}
  .end-card .ctas-secondary{display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap;justify-content:center}
- .end-card .ctas-secondary a{font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;color:var(--ink-mute);text-decoration:none;padding:6px 10px;border-radius:4px;transition:color 140ms ease, background 140ms ease}
+ .end-card .ctas-secondary a{font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;color:var(--ink-mute);text-decoration:none;padding:8px 10px;border-radius:4px;transition:color 140ms ease, background 140ms ease;min-height:34px;display:inline-flex;align-items:center}
  .end-card .ctas-secondary a:hover{color:var(--ink);background:var(--bg-elev)}
  .end-card .ctas-secondary .dot-sep{color:var(--ink-faint);font-size:11px}
- /* responsive */
+ .end-card .closeX{position:absolute;top:14px;right:16px;font-family:var(--mono);font-size:13px;color:var(--ink-faint);background:transparent;border:1px solid var(--line);border-radius:4px;width:34px;height:34px;cursor:pointer}
+ .end-card .closeX:hover{color:var(--ink);border-color:var(--line-strong)}
+ /* poster (reduced-motion / ?still=1) */
+ .poster{display:none}
+ .is-static .stage{display:none}
+ .is-static .scrub{display:none}
+ .is-static .run-strip{display:none}
+ .is-static .subtitle{display:none}
+ .is-static .poster{display:block;overflow:auto;background:var(--bg);min-height:0}
+ .poster-inner{max-width:920px;margin:0 auto;padding:28px 22px 60px}
+ .poster img{width:100%;border:1px solid var(--line);border-radius:10px;display:block;margin:0 0 24px}
+ .poster .p-eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 8px}
+ .poster h2{font-size:24px;font-weight:600;letter-spacing:-0.015em;margin:0 0 6px}
+ .poster .p-lede{color:var(--ink-mute);font-size:14px;max-width:64ch;margin:0 0 22px;line-height:1.6}
+ .poster .transcript{border:1px solid var(--line);border-radius:9px;background:var(--bg-pane);padding:18px 20px;margin:0 0 22px}
+ .poster .transcript h3{font-family:var(--mono);font-size:11px;letter-spacing:0.10em;text-transform:uppercase;color:var(--ink-faint);margin:18px 0 6px;font-weight:600}
+ .poster .transcript h3:first-child{margin-top:0}
+ .poster .transcript .t-line{font-family:var(--mono);font-size:12px;line-height:1.6;color:var(--ink);white-space:pre-wrap;word-break:break-word}
+ .poster .transcript .t-line.you{color:var(--ink)}
+ .poster .transcript .t-line.dim{color:var(--ink-faint)}
+ .poster .transcript .t-line.ok,.poster .transcript .t-line.green{color:var(--green)}
+ .poster .transcript .t-line.info{color:var(--blue)}
+ .poster .transcript .t-cap{color:var(--ink-mute);font-size:13px;font-family:var(--sans);margin:4px 0 10px;line-height:1.55}
+ .poster .p-verify{max-width:420px}
+ .poster .p-cta{margin-top:26px}
+ /* responsive — mobile single pane */
+ .beat-switch{display:none}
  @media (max-width: 1000px){
-   .stage{grid-template-columns:1fr;grid-template-rows:1fr 1fr 1fr}
-   .pane + .pane{border-left:0;border-top:1px solid var(--line)}
-   .chapters{gap:0;font-size:9px}
-   .chap{padding:5px 7px}
-   .chap .ts{display:none}
- }
- @media (max-width: 700px){
+   .chapters{display:none}
+   .stage{grid-template-columns:1fr;grid-template-rows:1fr}
+   .pane{display:none}
+   .pane.mobile-active{display:flex}
+   .pane + .pane{border-left:0;border-top:0}
+   .beat-switch{display:flex;gap:6px;width:100%;padding:10px 14px 0;flex-wrap:wrap;justify-content:center;order:-1}
+   .beat-switch .bchip{flex:1 1 auto;min-width:64px;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);padding:9px 8px;border:1px solid var(--line);border-radius:5px;background:var(--bg-pane);cursor:pointer;min-height:40px}
+   .beat-switch .bchip[aria-current=true]{color:var(--ink);background:var(--bg-elev);border-color:var(--line-strong)}
    header.bar{flex-wrap:wrap;gap:8px;padding:10px 14px}
-   .chapters{order:3;width:100%;justify-content:flex-start;overflow-x:auto;flex-wrap:nowrap}
-   .pane-h{padding:7px 10px;font-size:9.5px}
-   .b-page{padding:14px 16px}
+   .run-cmd code{max-width:54vw}
    .end-card .stats{grid-template-columns:repeat(2,1fr)}
  }
+ @media (max-width: 700px){
+   .pane-h{padding:7px 10px;font-size:9.5px}
+   .b-page{padding:14px 16px}
+   .end-card h2{font-size:23px}
+   .run-cmd code{max-width:48vw}
+ }
 </style>
-<script type="application/ld+json">
+<script type="application/ld+json" id="ld">
 {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "kolm",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Linux, macOS, Windows (WSL)",
-  "url": "https://kolm.ai/demo-live",
-  "description": "70 seconds. Capture &rarr; Compile &rarr; Verify &rarr; Run. A 1.9 GB signed artifact distilled from prod traffic, served at 11.5 tok/s on-device. Plays in your browser, no video file.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
+  "@type": "VideoObject",
+  "name": "kolm live walkthrough — Capture, Compile, Verify, Run",
+  "description": "Four beats on real hardware: capture support traffic through the kolm gateway, distill a council (Claude 3.5 Sonnet + GPT-4o + DeepSeek-R1-32B) into Qwen2.5, quantize to INT4 (61.0 GB to 17.9 GB in 125.3s on an RTX 5090), verify the Ed25519-signed receipt in your browser with zero network, and serve the artifact locally at 24.5 tok/s.",
+  "thumbnailUrl": "https://kolm.ai/demo-live-poster.png",
+  "uploadDate": "2026-05-29",
   "publisher": {
     "@type": "Organization",
     "name": "kolm.ai",
@@ -196,379 +268,798 @@
   <header class="bar">
     <a class="brand" href="/"><span class="dot"></span><b>kolm</b></a>
     <span class="crumb">live walkthrough</span>
-    <nav class="chapters" id="chapters" aria-label="Chapters"></nav>
+    <nav class="chapters" id="chapters" aria-label="Beats"></nav>
     <div class="ctrls">
-      <button class="btn" id="playBtn" aria-label="Play / pause"><span class="glyph">&#9658;</span> play</button>
+      <button class="btn" id="playBtn" aria-label="Play / pause"><span class="glyph" aria-hidden="true">&#9658;</span> <span id="playLabel">play</span></button>
       <button class="btn" id="restartBtn" aria-label="Restart">restart</button>
-      <a class="btn" href="/signup">try it</a>
+      <a class="btn primary" href="/signup">try it</a>
     </div>
   </header>
 
   <div class="stage" id="stage">
+    <nav class="beat-switch" id="beatSwitch" aria-label="Beat (mobile)"></nav>
     <!-- TERMINAL PANE -->
-    <section class="pane" aria-label="Terminal">
-      <div class="pane-h"><span class="lights"><i></i><i></i><i></i></span> terminal &mdash; <span style="color:var(--ink-mute);margin-left:6px">~/projects/support-bot</span><span class="pill" id="termPill">zsh</span></div>
-      <div class="pane-body"><div class="term" id="term" aria-live="polite" aria-atomic="false"></div></div>
+    <section class="pane" id="paneTerm" aria-label="Terminal" data-mobile-beats="0,1">
+      <div class="pane-h"><span class="lights" aria-hidden="true"><i></i><i></i><i></i></span> terminal &mdash; <span style="color:var(--ink-mute);margin-left:6px">~/projects/support-bot</span><span class="pill" id="termPill">zsh</span></div>
+      <div class="pane-body"><div class="term" id="term"></div></div>
     </section>
 
     <!-- BROWSER PANE -->
-    <section class="pane" aria-label="Browser">
-      <div class="pane-h"><span class="lights"><i></i><i></i><i></i></span> browser <span class="pill" id="browserPill">https</span></div>
+    <section class="pane" id="paneBrowser" aria-label="Browser" data-mobile-beats="3">
+      <div class="pane-h"><span class="lights" aria-hidden="true"><i></i><i></i><i></i></span> browser <span class="pill" id="browserPill">https</span></div>
       <div class="pane-body">
         <div class="browser">
           <div class="browser-bar">
-            <span class="lights"><i></i><i></i><i></i></span>
+            <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
             <span class="url" id="browserUrl"><span class="scheme">https://</span>kolm.ai</span>
           </div>
-          <div class="browser-body" id="browserBody">
-            <!-- pages injected by JS -->
-          </div>
+          <div class="browser-body" id="browserBody"></div>
         </div>
       </div>
     </section>
 
     <!-- RECEIPT PANE -->
-    <section class="pane" aria-label="Receipt detail">
-      <div class="pane-h"><span class="lights"><i></i><i></i><i></i></span> receipt &mdash; live trace <span class="pill" id="recPill">ed25519</span></div>
+    <section class="pane" id="paneReceipt" aria-label="Receipt detail" data-mobile-beats="2">
+      <div class="pane-h"><span class="lights" aria-hidden="true"><i></i><i></i><i></i></span> receipt &mdash; signed proof <span class="pill" id="recPill">ed25519</span></div>
       <div class="pane-body"><div class="receipt" id="receipt"></div></div>
     </section>
 
-    <!-- end card -->
-    <div class="end-card" id="endCard" role="dialog" aria-label="End of walkthrough">
-      <p class="eyebrow">That&rsquo;s the kolm loop &middot; 70 seconds</p>
-      <h2>Capture &rarr; Compile &rarr; Verify &rarr; Run.</h2>
-      <p class="lede">A signed, verifiable artifact distilled from your own traffic. Runs on the box you already own.</p>
-      <div class="stats">
-        <div class="stat"><div class="n">$0.07</div><div class="l">total spend</div></div>
-        <div class="stat"><div class="n">1.9 GB</div><div class="l">artifact</div></div>
-        <div class="stat"><div class="n">11.5 t/s</div><div class="l">on-device</div></div>
-        <div class="stat"><div class="n">0.91</div><div class="l">k-score</div></div>
-      </div>
+    <!-- end card / dialog -->
+    <div class="end-card" id="endCard" role="dialog" aria-modal="true" aria-labelledby="endHeading" tabindex="-1">
+      <button class="closeX" id="endClose" aria-label="Close">&times;</button>
+      <p class="eyebrow">That&rsquo;s the kolm loop</p>
+      <h2 id="endHeading">Capture &rarr; Compile &rarr; Verify &rarr; Run.</h2>
+      <p class="lede">A signed, verifiable artifact distilled from your own traffic. The receipt is proof you can check yourself &mdash; offline, in any browser.</p>
+      <div class="stats" id="endStats"></div>
       <div>
-        <a class="cta-primary" href="/signup">Start your first compile <span class="arrow">&rarr;</span></a>
+        <a class="cta-primary" href="/signup">Start your first compile <span class="arrow" aria-hidden="true">&rarr;</span></a>
         <span class="cta-detail">$5 free credit &middot; no card required</span>
       </div>
       <div class="ctas-secondary">
         <a href="/docs/quickstart">Quickstart</a>
-        <span class="dot-sep">&middot;</span>
+        <span class="dot-sep" aria-hidden="true">&middot;</span>
         <a href="/verify">Verify a receipt</a>
-        <span class="dot-sep">&middot;</span>
+        <span class="dot-sep" aria-hidden="true">&middot;</span>
         <a href="#" id="replayBtn">Replay walkthrough</a>
       </div>
     </div>
   </div>
 
   <div class="subtitle">
-    <div class="cap-num" id="capNum">00:00 &middot; 0/6</div>
-    <div class="cap-text" id="capText">Press play. Capture &rarr; Compile &rarr; Verify &rarr; Run, on real traffic, in 70 seconds. Signup is at the end &mdash; it&rsquo;s the easy part.</div>
+    <div class="cap-num" id="capNum">00:00 &middot; 0/4</div>
+    <div class="cap-text" id="capText" aria-live="polite" aria-atomic="true">Press play. Capture &rarr; Compile &rarr; Verify &rarr; Run, on real traffic. The signed receipt verifies in your browser &mdash; no login, no network.</div>
   </div>
-  <div class="scrub" id="scrub" role="slider" aria-label="Timeline" aria-valuemin="0" aria-valuemax="70" aria-valuenow="0" tabindex="0">
-    <div class="fill" id="scrubFill"></div>
-    <div class="marks" id="scrubMarks"></div>
+  <button class="scrub" id="scrub" type="button" role="slider" aria-label="Timeline position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="00:00, Capture">
+    <span class="fill" id="scrubFill"></span>
+    <span class="marks" id="scrubMarks" aria-hidden="true"></span>
+  </button>
+
+  <div class="run-strip" id="runStrip" aria-label="Run this yourself">
+    <span class="rs-label">Run this yourself &mdash; the exact commands from the walkthrough</span>
+  </div>
+
+  <!-- static poster (reduced-motion / ?still=1) -->
+  <div class="poster" id="poster" aria-label="Static walkthrough">
+    <div class="poster-inner">
+      <p class="p-eyebrow">Live walkthrough &middot; static view</p>
+      <h2>Capture &rarr; Compile &rarr; Verify &rarr; Run.</h2>
+      <p class="p-lede">The full walkthrough as selectable text. The signed receipt below verifies in your browser with zero network &mdash; press <b>Verify this receipt</b>.</p>
+      <img id="posterImg" alt="Final frame of the kolm walkthrough: a verified Ed25519-signed receipt" style="display:none">
+      <div class="transcript" id="posterTranscript"></div>
+      <div class="p-verify" id="posterVerify"></div>
+      <div class="p-cta"><a class="cta-primary" href="/signup" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--sans);font-size:14.5px;font-weight:600;padding:13px 22px;border-radius:6px;text-decoration:none;background:var(--ink);color:var(--bg);border:1px solid var(--ink)">Start your first compile &rarr;</a></div>
+    </div>
   </div>
 </div>
 
+<script id="inlineTimeline" type="application/json">
+{
+  "spec": "kolm-demo-live-timeline-1",
+  "generated_at": "2026-05-29T00:16:22.219Z",
+  "mode": "sourced",
+  "note": "Reproducible-by-construction demo timeline. Every literal is read from public/benchmarks/*.json (matched to data/x04-claim-fixtures.json) or derived deterministically from data/demo/support-tickets.jsonl. The Verify beat embeds a full Ed25519-signed kolm-audit-1 receipt that re-verifies in the browser with zero network calls. Produced by scripts/capture-demo-timeline.mjs; gated by scripts/demo-claim-verify.cjs in release-verify.",
+  "hardware": {
+    "gpu": "NVIDIA RTX 5090",
+    "cuda": "12.8"
+  },
+  "council": "Claude 3.5 Sonnet + GPT-4o + DeepSeek-R1-32B",
+  "student": "Qwen2.5-7B-Instruct",
+  "ticket_count": 17,
+  "capture_spend_usd": 0.0026,
+  "capture_input_tokens": 358,
+  "capture_output_tokens": 573,
+  "sources": {
+    "sota": "public/benchmarks/sota-quantize-matrix.json",
+    "trinity": "public/benchmarks/trinity-500-benchmark.json",
+    "wrapper": "public/benchmarks/wave887-wrapper-prod-benchmark.json",
+    "fixtures": "data/demo/support-tickets.jsonl"
+  },
+  "receipt": {
+    "schema": "kolm-audit-1",
+    "receipt_id": "rcpt_01KYC1ZV98HBEHW0NFC5DB",
+    "timestamp": "2026-05-29T10:12:30.000Z",
+    "namespace_id": "support",
+    "route_decision": "local",
+    "provider": "local-kolm",
+    "model": "trinity-500",
+    "artifact_id": "support-trinity-500-int4-1.0.0",
+    "confidence": 0.94,
+    "fallback_reason": null,
+    "input_hash": "sha256:4b61e02646ae9f7cc208b42dd0f83109",
+    "output_hash": "sha256:eff609062a3cea761aeeb0c0235c2446",
+    "capture_eligible": true,
+    "capture_id": "cap_demo_38214",
+    "redaction_applied": [
+      "email",
+      "name"
+    ],
+    "input_tokens": 8,
+    "output_tokens": 33,
+    "cost_usd": 0,
+    "signing_key_id": "c2e942e24061e9314790d73ce7b3f351",
+    "verify_url": "https://kolm.ai/v1/verify/rcpt_01KYC1ZV98HBEHW0NFC5DB",
+    "signature_ed25519": {
+      "spec": "kolm-ed25519-v1",
+      "alg": "ed25519",
+      "public_key": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAKRiB23hGP0wwB8iIwoARibB8lKL6IP8zS22AiOXgtG4=\n-----END PUBLIC KEY-----\n",
+      "key_fingerprint": "c41aefe5d0c501153abec3f8c621aac5",
+      "signature": "QwwQlhM9IbinCUMVqk9ZqnyiN593WPsNuvRV2m2SpTL-4hLj40vDt3JNqaCU4f96WF4hx6NTC2LH0haCzSUECw",
+      "signed_at": "2026-05-29T10:12:30.000Z"
+    }
+  },
+  "beats": [
+    {
+      "label": "Capture",
+      "events": [
+        {
+          "at": 0,
+          "type": "subtitle",
+          "text": "<em>Capture.</em> Your support traffic routes through the kolm gateway. Every reply gets a signed receipt; every prompt and reply is captured, PII-redacted."
+        },
+        {
+          "at": 0.1,
+          "type": "page",
+          "name": "ns-card",
+          "url": "kolm.ai/account/namespaces/support"
+        },
+        {
+          "at": 0.5,
+          "type": "prompt"
+        },
+        {
+          "at": 0.6,
+          "type": "type",
+          "text": "kolm gateway up --namespace support --redact pii",
+          "klass": "you"
+        },
+        {
+          "at": 2.1,
+          "type": "enter"
+        },
+        {
+          "at": 2.3,
+          "type": "out",
+          "text": "> gateway listening on http://127.0.0.1:7421/v1 (OpenAI-compatible)",
+          "klass": "ok"
+        },
+        {
+          "at": 2.6,
+          "type": "prompt"
+        },
+        {
+          "at": 2.8,
+          "type": "type",
+          "text": "kolm capture replay data/demo/support-tickets.jsonl",
+          "klass": "you"
+        },
+        {
+          "at": 4.6,
+          "type": "enter"
+        },
+        {
+          "at": 4.8,
+          "type": "out",
+          "text": "> replaying 17 support tickets through the gateway -> claude-haiku-4-5",
+          "klass": "dim"
+        },
+        {
+          "at": 5.1,
+          "type": "capture",
+          "who": "tkt_0001",
+          "body": "where is my refund?? ordered #38214",
+          "cost": "$0.0002",
+          "verb": "POST"
+        },
+        {
+          "at": 5.4,
+          "type": "capture",
+          "who": "tkt_0002",
+          "body": "cant log in, reset password please",
+          "cost": "$0.0002",
+          "verb": "POST"
+        },
+        {
+          "at": 5.7,
+          "type": "capture",
+          "who": "tkt_0003",
+          "body": "order #38219 charged twice",
+          "cost": "$0.0002",
+          "verb": "POST"
+        },
+        {
+          "at": 6,
+          "type": "capture",
+          "who": "tkt_0004",
+          "body": "change shipping addr on #38301",
+          "cost": "$0.0002",
+          "verb": "POST"
+        },
+        {
+          "at": 6.3,
+          "type": "capture",
+          "who": "tkt_0006",
+          "body": "cancel order #38422 before ship",
+          "cost": "$0.0001",
+          "verb": "POST"
+        },
+        {
+          "at": 6.6,
+          "type": "capture",
+          "who": "tkt_0009",
+          "body": "acct hacked, reset + cancel #38540",
+          "cost": "$0.0002",
+          "verb": "POST"
+        },
+        {
+          "at": 6.9,
+          "type": "capture",
+          "who": "tkt_0015",
+          "body": "item arrived damaged, want replacement",
+          "cost": "$0.0002",
+          "verb": "POST"
+        },
+        {
+          "at": 7.6,
+          "type": "out",
+          "text": "> 17 calls / 17 receipts / $0.0026 spent (358 in + 573 out tokens)",
+          "klass": "ok"
+        },
+        {
+          "at": 8,
+          "type": "page",
+          "name": "captures",
+          "url": "kolm.ai/account/captures?ns=support"
+        },
+        {
+          "at": 8.3,
+          "type": "out",
+          "text": "> dashboard: 17 captures, PII-redacted, ready to compile",
+          "klass": "info"
+        },
+        {
+          "at": 9,
+          "type": "prompt"
+        }
+      ]
+    },
+    {
+      "label": "Compile",
+      "events": [
+        {
+          "at": 0,
+          "type": "subtitle",
+          "text": "<em>Compile.</em> Distill the captured behavior from the council (Claude 3.5 Sonnet + GPT-4o + DeepSeek-R1-32B) into Qwen2.5-7B, then quantize to INT4 on an RTX 5090."
+        },
+        {
+          "at": 0.2,
+          "type": "type",
+          "text": "kolm compile --namespace support --council trinity-500 --target int4",
+          "klass": "you"
+        },
+        {
+          "at": 2.4,
+          "type": "enter"
+        },
+        {
+          "at": 2.6,
+          "type": "out",
+          "text": "> approving 17 captures into the distill set",
+          "klass": "dim"
+        },
+        {
+          "at": 2.9,
+          "type": "page",
+          "name": "compile",
+          "url": "kolm.ai/account/compile/jobs/support"
+        },
+        {
+          "at": 3.2,
+          "type": "out",
+          "text": "> council teachers: Claude 3.5 Sonnet + GPT-4o + DeepSeek-R1-32B",
+          "klass": "info"
+        },
+        {
+          "at": 3.5,
+          "type": "out",
+          "text": "> student: Qwen2.5-7B-Instruct  /  LoRA r=16 alpha=32  /  bf16",
+          "klass": "info"
+        },
+        {
+          "at": 3.9,
+          "type": "progress",
+          "sel": "#prog-distill",
+          "pct": 22
+        },
+        {
+          "at": 4.3,
+          "type": "out",
+          "text": "> distill: 410 council pairs  /  epoch 1  /  ml=384",
+          "klass": "dim"
+        },
+        {
+          "at": 4.9,
+          "type": "progress",
+          "sel": "#prog-distill",
+          "pct": 64
+        },
+        {
+          "at": 5.4,
+          "type": "progress",
+          "sel": "#prog-distill",
+          "pct": 100
+        },
+        {
+          "at": 5.6,
+          "type": "out",
+          "text": "> LoRA 79.18s done  /  57-prompt holdout: 96.5% asks-1Q, 100% judge-clarify, 100% judge-on-policy",
+          "klass": "ok"
+        },
+        {
+          "at": 6.1,
+          "type": "out",
+          "text": "> quantizing DeepSeek-R1-Distill-Qwen-32B reference to INT4 (NF4 + double)...",
+          "klass": "dim"
+        },
+        {
+          "at": 6.4,
+          "type": "out",
+          "text": "> NVIDIA RTX 5090  /  CUDA 12.8  /  bitsandbytes NF4",
+          "klass": "info"
+        },
+        {
+          "at": 6.7,
+          "type": "progress",
+          "sel": "#prog-export",
+          "pct": 40
+        },
+        {
+          "at": 7.4,
+          "type": "progress",
+          "sel": "#prog-export",
+          "pct": 100
+        },
+        {
+          "at": 7.7,
+          "type": "out",
+          "text": "> quantized 61.0 GB -> 17.9 GB in 125.3s",
+          "klass": "ok"
+        },
+        {
+          "at": 8.1,
+          "type": "out",
+          "text": "> serving artifact: Qwen2.5-7B INT4  /  5.2 GB  /  quantized in 29.2s",
+          "klass": "ok"
+        },
+        {
+          "at": 8.6,
+          "type": "prompt"
+        }
+      ]
+    },
+    {
+      "label": "Verify",
+      "events": [
+        {
+          "at": 0,
+          "type": "subtitle",
+          "text": "<em>Verify.</em> Every call emits an Ed25519-signed kolm-audit-1 receipt. The public key travels with the receipt, so anyone can check it offline. No login, no trust required."
+        },
+        {
+          "at": 0.2,
+          "type": "type",
+          "text": "kolm receipts verify rcpt_01KYC1ZV98HBEHW0NFC5DB --offline",
+          "klass": "you"
+        },
+        {
+          "at": 2.3,
+          "type": "enter"
+        },
+        {
+          "at": 2.5,
+          "type": "out",
+          "text": "> schema: kolm-audit-1",
+          "klass": "dim"
+        },
+        {
+          "at": 2.7,
+          "type": "out",
+          "text": "> rebuilding canonical payload (20 fields, signature stripped)...",
+          "klass": "dim"
+        },
+        {
+          "at": 3,
+          "type": "out",
+          "text": "> route: local  /  model: trinity-500  /  artifact: support-trinity-500-int4-1.0.0",
+          "klass": "info"
+        },
+        {
+          "at": 3.3,
+          "type": "out",
+          "text": "> redaction: [email, name]  /  tokens: 8 in + 33 out  /  cost: $0",
+          "klass": "dim"
+        },
+        {
+          "at": 3.6,
+          "type": "out",
+          "text": "> Ed25519 signature: VERIFIED against embedded public key",
+          "klass": "ok"
+        },
+        {
+          "at": 3.9,
+          "type": "receipt",
+          "html": "__RECEIPT_PANE__"
+        },
+        {
+          "at": 4.2,
+          "type": "page",
+          "name": "verify-ui",
+          "url": "kolm.ai/v1/verify/rcpt_01KYC1ZV98HBEHW0NFC5DB"
+        },
+        {
+          "at": 4.6,
+          "type": "out",
+          "text": "> share the receipt id anywhere kolm runs - the proof is portable",
+          "klass": "info"
+        },
+        {
+          "at": 5.4,
+          "type": "prompt"
+        }
+      ]
+    },
+    {
+      "label": "Run",
+      "events": [
+        {
+          "at": 0,
+          "type": "subtitle",
+          "text": "<em>Run.</em> Serve the distilled artifact locally - OpenAI-compatible, 24.5 tok/s on the RTX 5090, no network egress."
+        },
+        {
+          "at": 0.2,
+          "type": "type",
+          "text": "kolm serve support-trinity-500-int4 --port 8766",
+          "klass": "you"
+        },
+        {
+          "at": 2.3,
+          "type": "enter"
+        },
+        {
+          "at": 2.5,
+          "type": "out",
+          "text": "> detecting hardware...  NVIDIA RTX 5090  /  CUDA 12.8",
+          "klass": "info"
+        },
+        {
+          "at": 2.8,
+          "type": "out",
+          "text": "> loaded in 13.3s  /  vram 19.22 GB  /  ready on http://127.0.0.1:8766",
+          "klass": "ok"
+        },
+        {
+          "at": 3.1,
+          "type": "page",
+          "name": "serve",
+          "url": "127.0.0.1:8766/health"
+        },
+        {
+          "at": 3.4,
+          "type": "prompt"
+        },
+        {
+          "at": 3.6,
+          "type": "type",
+          "text": "curl -s 127.0.0.1:8766/v1/chat/completions -d '{\"messages\":[{\"role\":\"user\",\"content\":\"order #38214 status?\"}]}' | jq -r .choices[0].message.content",
+          "klass": "you"
+        },
+        {
+          "at": 6,
+          "type": "enter"
+        },
+        {
+          "at": 6.2,
+          "type": "out",
+          "text": "> \"Order #38214 shows as shipped. To pull the live tracking I just need to confirm: is this the order placed under the email on file?\"",
+          "klass": "green"
+        },
+        {
+          "at": 6.6,
+          "type": "out",
+          "text": "> 24.5 tok/s  /  mean latency 1.24s  /  mean 210 chars  /  on-device (no egress)",
+          "klass": "info"
+        },
+        {
+          "at": 7,
+          "type": "page",
+          "name": "serve-replies",
+          "url": "127.0.0.1:8766/v1/chat/completions"
+        },
+        {
+          "at": 7.4,
+          "type": "subtitle",
+          "text": "<em>End of walkthrough.</em> Capture, compile, verify, run - one signed receipt anyone can check."
+        },
+        {
+          "at": 8,
+          "type": "end"
+        }
+      ]
+    }
+  ]
+}
+</script>
 <script>
 (function(){
 'use strict';
+
+// ============================== CONFIG / FLAGS ==============================
 var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var QS = new URLSearchParams(location.search);
+var STILL = QS.has('still') || REDUCED;
+var RECORD = QS.get('record') === '1';
 
-// ============================== CHAPTERS ==============================
-// Each chapter has a start time (seconds) and a list of timed events.
-// Event types:
-//   {at, type:'type', text, klass}         — type characters into terminal at human speed
-//   {at, type:'out',  text, klass}         — print one line of output instantly
-//   {at, type:'wait', text, klass, ms}     — print a line that shows for `ms` then optionally updates
-//   {at, type:'newprompt'}                 — newline + fresh prompt
-//   {at, type:'page', name, url}           — switch browser body to named page + update url
-//   {at, type:'browserPatch', name, html}  — replace a region inside the active page
-//   {at, type:'progress', sel, pct}        — animate a progress bar
-//   {at, type:'receipt', html}             — replace receipt pane
-//   {at, type:'subtitle', text}            — update lower caption
-var CHAPTERS = [
-  // Chapter 1: Capture — open with live traffic flowing
-  { id:'capture', label:'Capture',  start:0,  end:12,
-    sub:'Step 1 of 6 · Capture. Your prod workload routes through the kolm gateway. Every reply gets a signed receipt; every prompt + reply is captured.',
-    events: [
-      { at:0,    type:'subtitle', text:'<em>Step 1 of 6 · Capture.</em> Your prod workload routes through the kolm gateway. Every reply gets a signed receipt; every prompt + reply is captured.' },
-      { at:0.1,  type:'page', name:'ns-card', url:'kolm.ai/account/namespaces/support' },
-      { at:0.3,  type:'receipt', html: receiptSkeleton() },
-      { at:0.5,  type:'prompt' },
-      { at:0.6,  type:'type', text:'kolm gateway up --namespace support', klass:'you' },
-      { at:2.2,  type:'enter' },
-      { at:2.4,  type:'out',  text:'> gateway listening on :7421 (OpenAI-compatible)', klass:'ok' },
-      { at:2.7,  type:'newprompt' },
-      { at:2.9,  type:'type', text:'curl -s :7421/v1/chat/completions -d @support-1.json | jq .id', klass:'you' },
-      { at:5.0,  type:'enter' },
-      { at:5.1,  type:'out',  text:'> "rcpt_01KYC1ZVTGDCW3FX06JQSC"', klass:'green' },
-      { at:5.3,  type:'capture', who:'curl', body:'order status for #38214', cost:'$0.0011', verb:'POST' },
-      { at:5.5,  type:'newprompt' },
-      { at:5.7,  type:'type', text:'for i in {1..18}; do curl -s :7421/v1/chat/completions -d @"support-$i.json"; done', klass:'you' },
-      { at:7.6,  type:'enter' },
-      { at:7.8,  type:'capture', who:'curl', body:'where is my refund? order #38219', cost:'$0.0009', verb:'POST' },
-      { at:8.0,  type:'capture', who:'curl', body:'reset my password please', cost:'$0.0007', verb:'POST' },
-      { at:8.2,  type:'capture', who:'curl', body:'subscription cancel before renewal', cost:'$0.0012', verb:'POST' },
-      { at:8.4,  type:'capture', who:'curl', body:'change shipping addr on #38301', cost:'$0.0010', verb:'POST' },
-      { at:8.6,  type:'capture', who:'curl', body:'is the X-12 in stock in red?', cost:'$0.0008', verb:'POST' },
-      { at:8.8,  type:'capture', who:'curl', body:'why is my charge twice?', cost:'$0.0013', verb:'POST' },
-      { at:9.0,  type:'capture', who:'curl', body:'cancel order #38422 before ship', cost:'$0.0010', verb:'POST' },
-      { at:9.3,  type:'capture', who:'curl', body:'change delivery date on #38501', cost:'$0.0011', verb:'POST' },
-      { at:9.6,  type:'out',  text:'> 19 calls / 19 receipts / $0.022 spent', klass:'ok' },
-      { at:10.0, type:'page', name:'captures', url:'kolm.ai/account/captures?ns=support' },
-      { at:10.3, type:'out',  text:'> dashboard: 19 captures, pii-redacted, ready to compile', klass:'info' },
-      { at:11.0, type:'newprompt' },
-    ]},
-
-  // Chapter 2: Compile — the money shot
-  { id:'compile', label:'Compile',  start:12, end:28,
-    sub:'Step 2 of 6 · Compile. Distill the captured behavior into a 1.9 GB signed artifact in 78 seconds.',
-    events: [
-      { at:12,    type:'subtitle', text:'<em>Step 2 of 6 · Compile.</em> Distill the captured behavior into a 1.9 GB signed artifact in 78 seconds.' },
-      { at:12.2,  type:'type', text:'kolm compile --namespace support --target gguf-q4km --kscore-gate 0.85', klass:'you' },
-      { at:15.0,  type:'enter' },
-      { at:15.2,  type:'out',  text:'> approving 19 captures (k-score gate 0.85)', klass:'dim' },
-      { at:15.5,  type:'page', name:'compile', url:'kolm.ai/account/compile/jobs/cmp_72a9' },
-      { at:15.8,  type:'out',  text:'> teacher: claude-3.7-haiku  /  student: qwen2.5-1.5b-instruct', klass:'info' },
-      { at:16.1,  type:'progress', sel:'#prog-distill', pct:18 },
-      { at:16.3,  type:'out',  text:'> distill: SeqKD + contrastive SKL  /  bs=4 ml=1024 lr=2e-4', klass:'dim' },
-      { at:16.8,  type:'progress', sel:'#prog-distill', pct:45 },
-      { at:17.2,  type:'out',  text:'> step 24/56  loss=1.41  perplexity=4.12', klass:'dim' },
-      { at:17.8,  type:'progress', sel:'#prog-distill', pct:78 },
-      { at:18.4,  type:'out',  text:'> step 56/56  loss=0.93  perplexity=2.54', klass:'dim' },
-      { at:18.8,  type:'progress', sel:'#prog-distill', pct:100 },
-      { at:19.0,  type:'out',  text:'> distill done in 78s', klass:'ok' },
-      { at:19.3,  type:'out',  text:'> running k-score eval on 6 holdout prompts...', klass:'dim' },
-      { at:20.2,  type:'out',  text:'> k-score: 0.91 (gate 0.85 PASS)', klass:'ok' },
-      { at:20.5,  type:'out',  text:'> exporting GGUF Q4_K_M with imatrix...', klass:'dim' },
-      { at:21.2,  type:'progress', sel:'#prog-export', pct:100 },
-      { at:21.6,  type:'out',  text:'> artifact: dist/support-q4km-1.0.0.kolm  (1.9 GB)', klass:'ok' },
-      { at:21.9,  type:'out',  text:'> compile receipt: rcpt_compile_71F2A6...', klass:'info' },
-      { at:22.2,  type:'page', name:'compile-done', url:'kolm.ai/account/compile/jobs/cmp_72a9' },
-      { at:22.6,  type:'receipt', html: receiptPartial() },
-      { at:23.0,  type:'newprompt' },
-      { at:23.3,  type:'type', text:'kolm inspect dist/support-q4km-1.0.0.kolm', klass:'you' },
-      { at:25.3,  type:'enter' },
-      { at:25.5,  type:'out',  text:'> passport: 19 captures, 1 teacher, kscore=0.91, gate=PASS, ed25519=ok', klass:'ok' },
-      { at:26.0,  type:'newprompt' },
-    ]},
-
-  // Chapter 3: Verify — receipt detail
-  { id:'verify',  label:'Verify',   start:28, end:42,
-    sub:'Step 3 of 6 · Verify. The compile receipt is signed ed25519 and chained. Anyone can audit it — no login required.',
-    events: [
-      { at:28,    type:'subtitle', text:'<em>Step 3 of 6 · Verify.</em> The compile receipt is signed ed25519 and chained. Anyone can audit it &mdash; no login required.' },
-      { at:28.2,  type:'type', text:'kolm verify rcpt_compile_71F2A6 --pretty', klass:'you' },
-      { at:31.0,  type:'enter' },
-      { at:31.2,  type:'out',  text:'> fetching receipt rcpt_compile_71F2A6 from kolm-audit-1', klass:'dim' },
-      { at:31.6,  type:'out',  text:'> signature: ed25519:7f3a8e4b... VERIFIED', klass:'ok' },
-      { at:31.9,  type:'out',  text:'> chain: linked to prev_chain_hash 0x91ce4f... (intact)', klass:'ok' },
-      { at:32.2,  type:'out',  text:'> claims:', klass:'info' },
-      { at:32.4,  type:'out',  text:'>   captures_in:      19', klass:'dim' },
-      { at:32.6,  type:'out',  text:'>   teacher_council:  [claude-3.7-haiku]', klass:'dim' },
-      { at:32.8,  type:'out',  text:'>   k_score:          0.91   (gate 0.85 PASS)', klass:'dim' },
-      { at:33.0,  type:'out',  text:'>   hallu_rate:       0.00   (gate <0.05 PASS)', klass:'dim' },
-      { at:33.2,  type:'out',  text:'>   artifact_hash:    sha256:d4ce91...8f0a', klass:'dim' },
-      { at:33.4,  type:'out',  text:'>   gpu_hours:        0.0217 (RTX 5090)', klass:'dim' },
-      { at:33.6,  type:'out',  text:'>   spend_usd:        0.0478 (teacher) + 0.0218 (compute) = 0.0696', klass:'dim' },
-      { at:33.9,  type:'receipt', html: receiptDetail() },
-      { at:34.2,  type:'page', name:'receipt-ui', url:'kolm.ai/verify/rcpt_compile_71F2A6' },
-      { at:35.0,  type:'newprompt' },
-      { at:35.3,  type:'type', text:'open https://kolm.ai/verify/rcpt_compile_71F2A6', klass:'you' },
-      { at:38.0,  type:'enter' },
-      { at:38.2,  type:'out',  text:'> opened in browser  /  share with anyone, no login required', klass:'ok' },
-      { at:39.0,  type:'newprompt' },
-      { at:39.3,  type:'out',  text:'# receipt is portable - paste the ID anywhere kolm runs', klass:'dim' },
-      { at:40.6,  type:'newprompt' },
-    ]},
-
-  // Chapter 4: Run — on-device serve
-  { id:'run',     label:'Run',      start:42, end:56,
-    sub:'Step 4 of 6 · Run. Serve the artifact locally — OpenAI-compatible, 11.5 tok/s on M3 Max, no network egress.',
-    events: [
-      { at:42,    type:'subtitle', text:'<em>Step 4 of 6 · Run.</em> Serve the artifact locally &mdash; OpenAI-compatible, 11.5 tok/s on M3 Max, no network egress.' },
-      { at:42.2,  type:'type', text:'kolm serve dist/support-q4km-1.0.0.kolm --port 8766', klass:'you' },
-      { at:44.6,  type:'enter' },
-      { at:44.8,  type:'out',  text:'> detecting hardware...  Apple M3 Max, 36 GB unified', klass:'info' },
-      { at:45.1,  type:'out',  text:'> runtime: llama.cpp (metal)  /  ctx 4096', klass:'info' },
-      { at:45.4,  type:'out',  text:'> loaded in 0.9s  /  vram 1.9 GB  /  ready on :8766', klass:'ok' },
-      { at:45.7,  type:'page', name:'serve', url:'127.0.0.1:8766/health' },
-      { at:46.1,  type:'newprompt' },
-      { at:46.3,  type:'type', text:"curl -s :8766/v1/chat/completions -d '{\"messages\":[{\"role\":\"user\",\"content\":\"order #38421 status?\"}]}' | jq -r .choices[0].message.content", klass:'you' },
-      { at:49.8,  type:'enter' },
-      { at:50.0,  type:'out',  text:'> "Order #38421 shipped Tuesday via UPS. Tracking: 1Z999 AA10 1234 5678 90. ETA Friday."', klass:'green' },
-      { at:50.4,  type:'out',  text:'> 11.5 tok/s  /  latency 217ms  /  on-device (no egress)', klass:'info' },
-      { at:50.8,  type:'page', name:'serve-replies', url:'127.0.0.1:8766/v1/chat/completions' },
-      { at:51.4,  type:'newprompt' },
-      { at:51.8,  type:'out',  text:'# air-gap test: pull the ethernet - still answers', klass:'dim' },
-      { at:53.0,  type:'newprompt' },
-      { at:53.2,  type:'type', text:'kolm export --format onnx dist/support-q4km-1.0.0.kolm', klass:'you' },
-      { at:55.0,  type:'enter' },
-      { at:55.2,  type:'out',  text:'> exported support-q4km-1.0.0.onnx - runs on CPU, GPU, mobile, edge', klass:'ok' },
-    ]},
-
-  // Chapter 5: Setup recap — show signup was trivial
-  { id:'setup',   label:'Setup',    start:56, end:64,
-    sub:'Step 5 of 6 · Setup. Two commands started this — signup and namespace create.',
-    events: [
-      { at:56,    type:'subtitle', text:'<em>Step 5 of 6 · Setup.</em> Two commands started this &mdash; signup and namespace create. Takes about 30 seconds the first time.' },
-      { at:56.2,  type:'newprompt' },
-      { at:56.4,  type:'out',  text:'# how it started - 30 seconds of setup', klass:'dim' },
-      { at:57.4,  type:'newprompt' },
-      { at:57.6,  type:'type', text:'kolm signup --email rod@indie.dev', klass:'you' },
-      { at:59.6,  type:'enter' },
-      { at:59.8,  type:'out',  text:'> account: indie.dev / API key saved / $5 free credit', klass:'ok' },
-      { at:60.1,  type:'page', name:'signup-ok', url:'kolm.ai/welcome' },
-      { at:60.4,  type:'newprompt' },
-      { at:60.6,  type:'type', text:'kolm namespace create support --primary anthropic --redact pii', klass:'you' },
-      { at:62.4,  type:'enter' },
-      { at:62.6,  type:'out',  text:'> created namespace `support` / gateway ready on :7421', klass:'ok' },
-      { at:63.2,  type:'newprompt' },
-    ]},
-
-  // Chapter 6: Try it — strong CTA
-  { id:'try',     label:'Try it',   start:64, end:70,
-    sub:'Step 6 of 6 · Try it. Same loop, your own traffic. $5 free credit, no card.',
-    events: [
-      { at:64,    type:'subtitle', text:'<em>Step 6 of 6 · Try it.</em> Same loop, your own traffic. $5 free credit, no card.' },
-      { at:64.4,  type:'type', text:'curl -fsSL kolm.ai/get | sh', klass:'you' },
-      { at:67.0,  type:'enter' },
-      { at:67.2,  type:'out',  text:'> kolm installed - run `kolm signup` to start', klass:'ok' },
-      { at:68.0,  type:'subtitle', text:'<em>End of walkthrough.</em> 6 steps, 70 seconds, one signed receipt anyone can audit.' },
-      { at:69.0,  type:'end' },
-    ]},
-];
-var TOTAL = CHAPTERS[CHAPTERS.length-1].end;
-
-function receiptDetail(){
-  return [
-    '<h3>receipt id</h3>',
-    '<div class="hash">rcpt_compile_71F2A6B0D9C84E7F</div>',
-    '<h3>verdict</h3>',
-    '<div class="badge-ok">verified</div>',
-    '<h3>signature</h3>',
-    '<div class="sig">ed25519:7f3a8e4b91c20df4a655c10e8b7d29a3e84102c61b9d4f7a8e0c4b21d3f9a8e6</div>',
-    '<h3>schema</h3>',
-    '<div>kolm-audit-1</div>',
-    '<h3>claims</h3>',
-    '<div>captures_in: 19</div>',
-    '<div>teacher: claude-3.7-haiku</div>',
-    '<div>student: qwen2.5-1.5b-instruct</div>',
-    '<div>k_score: 0.91 (gate 0.85)</div>',
-    '<div>hallu_rate: 0.00 (gate &lt;0.05)</div>',
-    '<div>artifact: sha256:d4ce91...8f0a</div>',
-    '<div>gpu_hours: 0.0217</div>',
-    '<div>spend_usd: 0.0696</div>',
-    '<h3>chain</h3>',
-    '<div class="hash">prev: 0x91ce4f8a3b2e7d1c</div>',
-    '<div class="hash">next: pending</div>',
-  ].join('');
-}
-
-function receiptSkeleton(){
-  return [
-    '<h3>receipt id</h3>',
-    '<div class="hash" style="opacity:0.40">awaiting first compile job&hellip;</div>',
-    '<h3>verdict</h3>',
-    '<div style="color:var(--ink-faint);font-size:11.5px;letter-spacing:0.08em;text-transform:uppercase">pending</div>',
-    '<h3>signature</h3>',
-    '<div class="hash" style="opacity:0.35">ed25519:&hellip;</div>',
-    '<h3>schema</h3>',
-    '<div>kolm-audit-1</div>',
-    '<h3>claims</h3>',
-    '<div style="color:var(--ink-faint)">captures_in:      <span id="rec-caps">0</span></div>',
-    '<div style="color:var(--ink-faint)">teacher:          &mdash;</div>',
-    '<div style="color:var(--ink-faint)">k_score:          &mdash;</div>',
-    '<div style="color:var(--ink-faint)">artifact_hash:    &mdash;</div>',
-    '<div style="color:var(--ink-faint)">spend_usd:        &mdash;</div>',
-    '<h3>chain</h3>',
-    '<div class="hash" style="opacity:0.35">prev: &hellip;</div>',
-  ].join('');
-}
-
-function receiptPartial(){
-  return [
-    '<h3>receipt id</h3>',
-    '<div class="hash">rcpt_compile_71F2A6B0D9C84E7F</div>',
-    '<h3>verdict</h3>',
-    '<div style="color:var(--amber);font-size:11.5px;letter-spacing:0.08em;text-transform:uppercase">computing&hellip;</div>',
-    '<h3>signature</h3>',
-    '<div class="hash" style="opacity:0.55">ed25519:7f3a8e4b&hellip; signing&hellip;</div>',
-    '<h3>schema</h3>',
-    '<div>kolm-audit-1</div>',
-    '<h3>claims</h3>',
-    '<div>captures_in: 19</div>',
-    '<div>teacher: claude-3.7-haiku</div>',
-    '<div>student: qwen2.5-1.5b-instruct</div>',
-    '<div>k_score: 0.91 (gate 0.85)</div>',
-    '<div>artifact: sha256:d4ce91&hellip;8f0a</div>',
-    '<h3>chain</h3>',
-    '<div class="hash" style="opacity:0.55">prev: 0x91ce4f8a3b2e7d1c</div>',
-  ].join('');
-}
-
-// ============================== PAGES ==============================
-var PAGES = {
-  home: '<div class="b-page is-active"><div class="b-title">kolm</div><p class="lede">Compile your AI behavior into a small artifact you can ship anywhere. Capture, distill, verify.</p><h2>Get started</h2><div class="card"><div class="row"><span class="k">curl install</span><span class="v">curl -fsSL kolm.ai/get | sh</span></div></div><div class="card"><div class="row"><span class="k">npm</span><span class="v">npm i -g @kolm/cli</span></div></div></div>',
-  signup: '<div class="b-page is-active"><div class="b-title">Create your account</div><p class="lede">Already opened from the CLI. Confirm to continue.</p><div class="card"><div class="kvgrid"><div class="k">email</div><div class="v">rod@indie.dev</div><div class="k">tenant</div><div class="v">indie.dev</div><div class="k">plan</div><div class="v">developer &middot; $5 free credit</div></div></div><div class="card" style="text-align:center;font-family:var(--mono);color:var(--ink-mute);font-size:13px">[ continue ] &middot; redirecting CLI...</div></div>',
-  'signup-ok': '<div class="b-page is-active"><div class="b-title">Welcome, Rod.</div><p class="lede">Account ready. The CLI received your API key.</p><h2>What\'s next</h2><div class="card"><div class="row"><span class="k">define a namespace</span><span class="v pill ok">recommended</span></div></div><div class="card"><div class="row"><span class="k">point your app at the gateway</span><span class="v pill">later</span></div></div><div class="card"><div class="row"><span class="k">compile your first artifact</span><span class="v pill">later</span></div></div></div>',
-  'ns-card': '<div class="b-page is-active"><div class="b-title">namespace: support</div><p class="lede">Capturing prod traffic. 0 calls so far. Ready to receive.</p><div class="card"><div class="kvgrid"><div class="k">primary</div><div class="v">anthropic / claude-3.7-haiku</div><div class="k">redact</div><div class="v">pii (emails, names, card-like, ssn-like)</div><div class="k">sink</div><div class="v">~/.kolm/captures/support.jsonl</div><div class="k">gateway</div><div class="v">http://127.0.0.1:7421/v1</div></div></div><h2>Captures</h2><div class="cap-stream" id="capStream"><div class="cap" style="color:var(--ink-faint);justify-content:center">waiting for first call...</div></div></div>',
-  captures: '<div class="b-page is-active"><div class="b-title">captures &middot; support</div><p class="lede">19 captures &middot; <span class="pill ok">all pii-redacted</span> &middot; <span class="pill">$0.022 spent</span></p><h2>Recent</h2><div class="cap-stream" id="capStream"></div><h2>Composition</h2><div class="card"><div class="bench-grid"><div class="bench-cell"><div class="n">19</div><div class="u">total</div></div><div class="bench-cell"><div class="n">14</div><div class="u">approved</div></div><div class="bench-cell"><div class="n">5</div><div class="u">pending</div></div></div></div></div>',
-  compile: '<div class="b-page is-active"><div class="b-title">compile job &middot; cmp_72a9</div><p class="lede">Distilling support / 19 captures &rarr; qwen2.5-1.5b-instruct &rarr; GGUF Q4_K_M</p><h2>Distill</h2><div class="card"><div class="row"><span class="k">step 0 of 56</span><span class="v" id="prog-distill-l">0%</span></div><div class="progress"><div class="fill" id="prog-distill"></div></div></div><h2>Export</h2><div class="card"><div class="row"><span class="k">GGUF Q4_K_M + imatrix</span><span class="v" id="prog-export-l">queued</span></div><div class="progress"><div class="fill" id="prog-export"></div></div></div><h2>K-score gate</h2><div class="card"><div class="row"><span class="k">gate threshold</span><span class="v">0.85</span></div><div class="row"><span class="k">measured</span><span class="v" id="kscore-l">&mdash;</span></div></div></div>',
-  'compile-done': '<div class="b-page is-active"><div class="b-title">compile complete</div><p class="lede"><span class="pill ok">K-score 0.91 PASS</span> &middot; <span class="pill ok">hallu 0.00 PASS</span> &middot; <span class="pill">1.9 GB</span></p><h2>Artifact</h2><div class="card"><div class="kvgrid"><div class="k">file</div><div class="v">support-q4km-1.0.0.kolm</div><div class="k">format</div><div class="v">gguf-q4km</div><div class="k">student</div><div class="v">qwen2.5-1.5b-instruct</div><div class="k">teacher</div><div class="v">anthropic / claude-3.7-haiku</div><div class="k">artifact_hash</div><div class="v">sha256:d4ce91...8f0a</div><div class="k">compile_receipt</div><div class="v">rcpt_compile_71F2A6</div></div></div><h2>Cost</h2><div class="card"><div class="bench-grid"><div class="bench-cell"><div class="n">$0.048</div><div class="u">teacher</div></div><div class="bench-cell"><div class="n">$0.022</div><div class="u">gpu</div></div><div class="bench-cell"><div class="n">$0.070</div><div class="u">total</div></div></div></div></div>',
-  serve: '<div class="b-page is-active"><div class="b-title">serving &middot; :8766</div><p class="lede">OpenAI-compatible endpoint on localhost. Loaded in 0.9s.</p><h2>Health</h2><div class="card"><div class="kvgrid"><div class="k">status</div><div class="v"><span class="pill ok">ready</span></div><div class="k">runtime</div><div class="v">llama.cpp (metal)</div><div class="k">model</div><div class="v">support-q4km-1.0.0.kolm</div><div class="k">vram</div><div class="v">1.9 GB</div><div class="k">ctx</div><div class="v">4096</div><div class="k">egress</div><div class="v"><span class="pill ok">none</span></div></div></div></div>',
-  'serve-replies': '<div class="b-page is-active"><div class="b-title">serving &middot; :8766</div><p class="lede">1 reply served. 11.5 tok/s. 217ms latency.</p><h2>Last response</h2><div class="card" style="background:var(--bg-pane)"><div style="font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--ink)">&ldquo;Order #38421 shipped Tuesday via UPS. Tracking: 1Z999 AA10 1234 5678 90. ETA Friday.&rdquo;</div></div><h2>Metrics</h2><div class="card"><div class="bench-grid"><div class="bench-cell"><div class="n">11.5</div><div class="u">tok/s</div></div><div class="bench-cell"><div class="n">217ms</div><div class="u">latency</div></div><div class="bench-cell"><div class="n">0</div><div class="u">egress bytes</div></div></div></div></div>',
-  'receipt-ui': '<div class="b-page is-active"><div class="b-title">receipt &middot; rcpt_compile_71F2A6</div><p class="lede"><span class="pill ok">verified</span> &middot; signed ed25519 &middot; chain intact</p><h2>Claims</h2><div class="card"><div class="kvgrid"><div class="k">captures_in</div><div class="v">19</div><div class="k">teacher</div><div class="v">claude-3.7-haiku</div><div class="k">student</div><div class="v">qwen2.5-1.5b-instruct</div><div class="k">k_score</div><div class="v">0.91 <span class="pill ok">gate 0.85</span></div><div class="k">hallu_rate</div><div class="v">0.00 <span class="pill ok">gate &lt;0.05</span></div><div class="k">artifact</div><div class="v">sha256:d4ce91...8f0a</div><div class="k">gpu_hours</div><div class="v">0.0217 (RTX 5090)</div><div class="k">spend_usd</div><div class="v">0.0696</div></div></div><h2>Signature</h2><div class="card"><div style="font-family:var(--mono);font-size:11.5px;word-break:break-all;color:var(--green)">ed25519:7f3a8e4b91c20df4a655c10e8b7d29a3e84102c61b9d4f7a8e0c4b21d3f9a8e6</div></div></div>',
-};
-
-// ============================== STATE / ENGINE ==============================
 var $ = function(s, root){ return (root||document).querySelector(s); };
 var $$ = function(s, root){ return Array.from((root||document).querySelectorAll(s)); };
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; }); }
 
-var t0 = null, paused = true, current = 0, lastApplied = -1, fired = {}, captures = [];
-var rafId = null;
-var TYPING_CPS = 26; // chars per second
-var term = $('#term');
-var body = $('#browserBody');
-var rec = $('#receipt');
-var url = $('#browserUrl');
-var capNum = $('#capNum');
-var capText = $('#capText');
-var scrubFill = $('#scrubFill');
+// ============================== DATA SOURCE ==============================
+// The timeline is captured by scripts/capture-demo-timeline.mjs from a real
+// CLI run and committed as /demo-live-timeline.json. We fetch it at boot and
+// fall back to the inlined copy so the page never blanks offline.
+var INLINE_FALLBACK = (function(){
+  try { return JSON.parse($('#inlineTimeline').textContent); }
+  catch (e) { return { beats: [], receipt: null }; }
+})();
 
-// chapter chips
-(function buildChips(){
-  var bar = $('#chapters');
-  CHAPTERS.forEach(function(c, i){
-    var el = document.createElement('span');
-    el.className = 'chap';
-    el.dataset.i = i;
-    var ts = String(Math.floor(c.start/60)).padStart(2,'0') + ':' + String(c.start%60).padStart(2,'0');
-    el.innerHTML = '<span class="ts">' + ts + '</span>' + c.label;
-    el.addEventListener('click', function(){ seek(c.start); });
-    bar.appendChild(el);
+var TIMELINE = INLINE_FALLBACK;
+var BEATS = [];      // [{label, start, end, events:[{at(abs), ...}]}]
+var TOTAL = 1;
+var RECEIPT = null;
+
+// Build absolute-timed beats from the per-beat-relative timeline. Each beat
+// gets a fixed window; events keep their relative `at` but we also compute an
+// absolute time for the global scheduler.
+var BEAT_PAD = 1.6; // tail padding after the last event of a beat
+function buildModel(tl){
+  RECEIPT = tl.receipt || null;
+  var beats = [];
+  var cursor = 0;
+  (tl.beats || []).forEach(function(b){
+    var evs = (b.events || []).slice().sort(function(a,c){ return a.at - c.at; });
+    var span = evs.length ? evs[evs.length-1].at : 0;
+    var dur = span + BEAT_PAD;
+    var start = cursor;
+    var abs = evs.map(function(e){ return Object.assign({}, e, { abs: start + e.at }); });
+    beats.push({ label: b.label, start: start, end: start + dur, events: abs });
+    cursor += dur;
   });
-})();
-// scrub marks
-(function buildMarks(){
-  var m = $('#scrubMarks');
-  CHAPTERS.forEach(function(c){
-    var d = document.createElement('span');
-    d.className = 'mark';
-    d.style.flex = (c.end - c.start) + ' 0 0';
-    m.appendChild(d);
+  BEATS = beats;
+  TOTAL = cursor || 1;
+}
+
+// ============================== RECEIPT PANE ==============================
+function receiptEmpty(){
+  return '<div class="empty">Awaiting the signed receipt&hellip;<br>the Verify beat brings it here.</div>';
+}
+function fmtTokens(r){ return (r.input_tokens||0) + ' in + ' + (r.output_tokens||0) + ' out'; }
+function receiptPane(r){
+  if (!r) return receiptEmpty();
+  var rows = [
+    ['schema', r.schema],
+    ['receipt_id', r.receipt_id],
+    ['route', r.route_decision],
+    ['provider', r.provider],
+    ['model', r.model],
+    ['artifact', r.artifact_id],
+    ['confidence', r.confidence],
+    ['redaction', '[' + (r.redaction_applied||[]).join(', ') + ']'],
+    ['tokens', fmtTokens(r)],
+    ['cost_usd', '$' + r.cost_usd],
+    ['signing_key', r.signing_key_id]
+  ];
+  var kv = rows.map(function(p){
+    return '<div class="kv"><b>' + escapeHtml(p[0]) + '</b><span>' + escapeHtml(String(p[1])) + '</span></div>';
+  }).join('');
+  var sig = (r.signature_ed25519 && r.signature_ed25519.signature) || '';
+  var vurl = r.verify_url || '';
+  var html = ''
+    + '<h3>kolm-audit-1 receipt</h3>'
+    + kv
+    + '<h3>ed25519 signature</h3>'
+    + '<div class="sig">' + escapeHtml(sig) + '</div>'
+    + '<div class="verify-box" id="verifyBox">'
+    +   '<div class="status"><span class="check" aria-hidden="true">'
+    +     '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg>'
+    +   '</span><span class="txt" id="verifyTxt">Not yet checked</span></div>'
+    +   '<p class="canon" id="verifyCanon"></p>'
+    +   '<button type="button" id="verifyBtn">Verify this receipt</button>'
+    +   (vurl ? '<a class="vurl" id="verifyUrl" href="' + escapeHtml(vurl) + '" target="_blank" rel="noopener">' + escapeHtml(vurl) + '</a>' : '')
+    +   '<p class="vnote">The public key travels in the receipt. This check runs entirely in your browser &mdash; zero network. The link above is a convenience; the proof does not depend on it.</p>'
+    + '</div>';
+  return html;
+}
+
+// ============================== IN-BROWSER ED25519 VERIFY (the climax) ==============================
+// Mirrors src/gateway-receipt.js verifyReceipt + src/receipt-schema.js
+// canonicalForSigning, performed with WebCrypto so the viewer watches the
+// signature check go green with no server, no login, no trust.
+var ALL_FIELDS = [
+  'schema','receipt_id','timestamp','namespace_id','route_decision',
+  'provider','model','artifact_id','confidence','fallback_reason',
+  'input_hash','output_hash','capture_eligible','capture_id',
+  'redaction_applied','input_tokens','output_tokens','cost_usd',
+  'signing_key_id','verify_url'
+];
+function canonicalForSigning(receipt){
+  var out = {};
+  for (var i=0;i<ALL_FIELDS.length;i++){
+    var k = ALL_FIELDS[i];
+    if (k in receipt) out[k] = receipt[k];
+  }
+  return JSON.stringify(out);
+}
+function b64urlToBytes(b64url){
+  var b64 = b64url.replace(/-/g,'+').replace(/_/g,'/');
+  while (b64.length % 4) b64 += '=';
+  var raw = atob(b64);
+  var arr = new Uint8Array(raw.length);
+  for (var i=0;i<raw.length;i++) arr[i] = raw.charCodeAt(i);
+  return arr;
+}
+function pemToSpkiBytes(pem){
+  // strip header/footer + whitespace, base64-decode the SPKI DER
+  var body = pem.replace(/-----BEGIN [^-]+-----/, '')
+                .replace(/-----END [^-]+-----/, '')
+                .replace(/\s+/g, '');
+  var raw = atob(body);
+  var arr = new Uint8Array(raw.length);
+  for (var i=0;i<raw.length;i++) arr[i] = raw.charCodeAt(i);
+  return arr;
+}
+async function verifyReceiptInBrowser(receipt){
+  if (!receipt || !receipt.signature_ed25519) return { ok:false, reason:'no signature block' };
+  var sig = receipt.signature_ed25519;
+  if (sig.alg !== 'ed25519') return { ok:false, reason:'unexpected alg ' + sig.alg };
+  var stripped = {};
+  for (var k in receipt){ if (k !== 'signature_ed25519') stripped[k] = receipt[k]; }
+  var canonical = canonicalForSigning(stripped);
+  var canonicalBytes = new TextEncoder().encode(canonical);
+  var sigBytes = b64urlToBytes(sig.signature);
+  var spki = pemToSpkiBytes(sig.public_key);
+  var key;
+  try {
+    key = await crypto.subtle.importKey('spki', spki, { name:'Ed25519' }, false, ['verify']);
+  } catch (e){
+    return { ok:false, reason:'importKey failed: ' + (e && e.message || e), canonical:canonical };
+  }
+  var ok;
+  try {
+    ok = await crypto.subtle.verify('Ed25519', key, sigBytes, canonicalBytes);
+  } catch (e){
+    return { ok:false, reason:'verify threw: ' + (e && e.message || e), canonical:canonical };
+  }
+  return { ok: ok, reason: ok ? null : 'signature does not match', canonical: canonical };
+}
+
+function wireVerifyButton(scope){
+  var box = $('#verifyBox', scope || document);
+  var btn = $('#verifyBtn', scope || document);
+  if (!box || !btn || btn.__wired) return;
+  btn.__wired = true;
+  btn.addEventListener('click', async function(){
+    if (!RECEIPT){ return; }
+    btn.disabled = true;
+    box.classList.add('is-checking');
+    var txt = $('#verifyTxt', box);
+    var canonEl = $('#verifyCanon', box);
+    if (txt) txt.textContent = 'Recomputing canonical payload…';
+    var res = await verifyReceiptInBrowser(RECEIPT);
+    if (canonEl) canonEl.textContent = 'canonical (20 fields, signature stripped): ' + (res.canonical || '');
+    box.classList.remove('is-checking');
+    if (res.ok){
+      box.classList.add('is-verified');
+      if (txt) txt.textContent = 'Ed25519 signature verified — in your browser, zero network';
+      btn.textContent = 'Verified ✓';
+    } else {
+      if (txt) txt.textContent = 'Could not verify: ' + res.reason;
+      btn.disabled = false;
+      btn.textContent = 'Verify this receipt';
+    }
   });
-  // remove last separator
-  if (m.lastChild) m.lastChild.style.background = 'transparent';
-})();
+}
+
+// ============================== STATE / ENGINE ==============================
+var t0 = null, paused = true, rafId = null;
+var fired = {};        // abs-event keys already applied
+var captures = [];
+var typeJobs = [];     // resumable typeText jobs
+var endShownAt = -1;
+
+var term, body, rec, url, capNum, capText, scrubFill;
+
+// per-char typing variance (human-imperfect). Base cps with +/- jitter.
+var BASE_CPS = 30;
+function perCharMs(){
+  if (REDUCED) return 0;
+  var base = 1000 / BASE_CPS;
+  return base * (0.6 + Math.random() * 0.9); // 0.6x .. 1.5x
+}
 
 function setPage(name, urlText){
-  body.innerHTML = PAGES[name] || ('<div class="b-page is-active"><div class="b-title">' + name + '</div></div>');
-  if (urlText) url.innerHTML = '<span class="scheme">https://</span>' + urlText.replace(/^https?:\/\//,'');
-  // re-render captures stream if present
+  body.innerHTML = PAGE_HTML(name);
+  if (urlText){
+    var isLocal = /^(127\.0\.0\.1|localhost)/.test(urlText.replace(/^https?:\/\//,''));
+    var path = urlText.replace(/^https?:\/\//,'');
+    url.innerHTML = '<span class="scheme">' + (isLocal ? 'http://' : 'https://') + '</span>' + escapeHtml(path)
+      + (isLocal ? '<span class="localtag">local</span>' : '');
+  }
   var stream = $('#capStream');
   if (stream) renderCaptures(stream);
+  wireTicketTry();
 }
-function setReceipt(html){ rec.innerHTML = html; }
+// Run beat: "paste your own ticket" -> real public /v1/free/chat ({question}).
+// The endpoint classifies the message and returns the command the gateway
+// would route, so the viewer can break the demo with their own scenario.
+function wireTicketTry(){
+  var input = $('#ticketIn'), btn = $('#ticketGo'), out = $('#ticketOut');
+  if (!input || !btn || btn.__wired) return;
+  btn.__wired = true;
+  function run(){
+    var q = (input.value || '').trim();
+    if (!q){ input.focus(); return; }
+    btn.disabled = true;
+    out.className = 'ticket-out dim';
+    out.textContent = 'routing through the gateway…';
+    fetch('/v1/free/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: q })
+    }).then(function(r){ return r.json(); }).then(function(d){
+      btn.disabled = false;
+      if (d && d.ok){
+        out.className = 'ticket-out';
+        var cmd = d.command || ('kolm ' + (d.verb||''));
+        var why = d.why ? ('\n' + d.why) : '';
+        var rem = (d.remaining != null) ? ('\nfree-tier messages left today: ' + d.remaining) : '';
+        out.innerHTML = '<span class="ok">routed: ' + escapeHtml(cmd) + '</span><span class="dim">' + escapeHtml(why + rem) + '</span>';
+      } else {
+        out.className = 'ticket-out dim';
+        out.textContent = (d && (d.message || d.error)) || 'gateway returned an error';
+      }
+    }).catch(function(e){
+      btn.disabled = false;
+      out.className = 'ticket-out dim';
+      out.textContent = 'could not reach the gateway: ' + (e && e.message || e);
+    });
+  }
+  btn.addEventListener('click', run);
+  input.addEventListener('keydown', function(e){ if (e.key === 'Enter'){ run(); e.preventDefault(); } });
+}
+function setReceipt(html){
+  rec.innerHTML = (html === '__RECEIPT_PANE__') ? receiptPane(RECEIPT) : html;
+  wireVerifyButton(rec);
+}
 function setSubtitle(html){ capText.innerHTML = html; }
 function addCapture(c){
   captures.unshift(c);
@@ -577,63 +1068,74 @@ function addCapture(c){
   if (stream) renderCaptures(stream);
 }
 function renderCaptures(stream){
-  if (!captures.length){ stream.innerHTML = '<div class="cap" style="color:var(--ink-faint);justify-content:center">waiting for first call...</div>'; return; }
-  stream.innerHTML = captures.map(function(c, i){
-    var t = new Date(Date.now() - i*1300);
-    var hh = String(t.getHours()).padStart(2,'0'), mm = String(t.getMinutes()).padStart(2,'0'), ss = String(t.getSeconds()).padStart(2,'0');
-    return '<div class="cap"><span class="ts">'+hh+':'+mm+':'+ss+'</span><span class="verb">'+c.verb+'</span><span class="body">'+escapeHtml(c.body)+'</span><span class="cost">'+c.cost+'</span></div>';
+  if (!captures.length){ stream.innerHTML = '<div class="cap" style="color:var(--ink-faint);justify-content:center">waiting for first call&hellip;</div>'; return; }
+  stream.innerHTML = captures.map(function(c){
+    return '<div class="cap"><span class="verb">'+escapeHtml(c.verb)+'</span><span class="body">'+escapeHtml(c.body)+'</span><span class="cost">'+escapeHtml(c.cost)+'</span></div>';
   }).join('');
 }
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; }); }
 function setProgress(sel, pct){
   var el = $(sel);
   if (el){ el.style.width = pct + '%'; }
   var label = $(sel + '-l');
-  if (label){
-    if (pct < 100) label.textContent = pct + '%';
-    else label.textContent = 'done';
-  }
-  if (sel === '#prog-distill'){
-    var k = $('#kscore-l');
-    if (k && pct >= 100) k.textContent = '0.91 (gate 0.85)';
-  }
+  if (label){ label.textContent = pct < 100 ? (pct + '%') : 'done'; }
 }
 function writePrompt(){
+  // freeze any prior cursor, then write a fresh prompt + active line + cursor
+  $$('.cursor', term).forEach(function(c){ if (c.parentNode) c.parentNode.removeChild(c); });
   var ln = document.createElement('span');
   ln.className = 'ln';
-  ln.innerHTML = '<span class="prompt">rod@m3max ~/projects/support-bot $ </span><span class="active-line"></span><span class="cursor"></span>';
+  ln.innerHTML = '<span class="prompt">rod@kolm ~/projects/support-bot $ </span><span class="active-line"></span><span class="cursor blink"></span>';
   term.appendChild(ln);
-  // remove cursor from previous line if any
-  var cursors = $$('.cursor', term);
-  cursors.slice(0,-1).forEach(function(c){ c.parentNode.removeChild(c); });
   term.scrollTop = term.scrollHeight;
 }
 function pressEnter(){
-  // freeze active line: drop cursor on current line
   var active = $$('.active-line', term).pop();
-  if (active){ active.classList.remove('active-line'); }
-  var cursors = $$('.cursor', term);
-  cursors.forEach(function(c){ c.parentNode.removeChild(c); });
+  if (active) active.classList.remove('active-line');
+  $$('.cursor', term).forEach(function(c){ if (c.parentNode) c.parentNode.removeChild(c); });
   term.appendChild(document.createElement('br'));
   term.scrollTop = term.scrollHeight;
 }
-function typeText(text, klass){
-  // append directly to current active line (no per-char timer; uses CSS overflow + scroll)
+// Resumable typeText: state lives in a job record, not a closure local, so a
+// pause mid-type resumes from the same index instead of dropping characters.
+function typeText(text, klass, instant){
   var active = $$('.active-line', term).pop();
   if (!active){ writePrompt(); active = $$('.active-line', term).pop(); }
   var span = document.createElement('span');
   span.className = (klass || 'you');
   active.appendChild(span);
-  // animate char-by-char using requestAnimationFrame schedule, but synchronous fill for simplicity
-  var n = text.length, i = 0, perChar = REDUCED ? 0 : (1000/TYPING_CPS);
-  if (perChar === 0){ span.textContent = text; term.scrollTop = term.scrollHeight; return; }
-  function tick(){
-    if (paused) return;
-    span.textContent = text.slice(0, ++i);
+  // freeze the blink while typing; the cursor stays steady until enter
+  var cur = $$('.cursor', term).pop();
+  if (cur) cur.classList.remove('blink');
+  if (instant || REDUCED){ span.textContent = text; term.scrollTop = term.scrollHeight; if (cur) cur.classList.add('blink'); return; }
+  var job = { text:text, i:0, span:span, cur:cur, timer:null, done:false };
+  typeJobs.push(job);
+  function step(){
+    if (paused || job.done) return;
+    job.i++;
+    job.span.textContent = job.text.slice(0, job.i);
     term.scrollTop = term.scrollHeight;
-    if (i < n) setTimeout(tick, perChar);
+    if (job.i < job.text.length){
+      job.timer = setTimeout(step, perCharMs());
+    } else {
+      job.done = true;
+      if (job.cur) job.cur.classList.add('blink');
+    }
   }
-  tick();
+  job.resume = step;
+  step();
+}
+function resumeTypeJobs(){
+  typeJobs.forEach(function(j){ if (!j.done) j.resume(); });
+}
+function finishTypeJobs(){
+  typeJobs.forEach(function(j){
+    if (!j.done){
+      if (j.timer) clearTimeout(j.timer);
+      j.span.textContent = j.text;
+      j.done = true;
+      if (j.cur) j.cur.classList.add('blink');
+    }
+  });
 }
 function outLine(text, klass){
   var ln = document.createElement('span');
@@ -644,155 +1146,349 @@ function outLine(text, klass){
   term.scrollTop = term.scrollHeight;
 }
 
-function resetAll(){
-  term.innerHTML = '';
-  body.innerHTML = PAGES.home;
-  url.innerHTML = '<span class="scheme">https://</span>kolm.ai';
-  rec.innerHTML = '';
-  captures = [];
-  fired = {};
-  setProgress('#prog-distill', 0);
-  setProgress('#prog-export', 0);
-  setSubtitle('Press play. Capture &rarr; Compile &rarr; Verify &rarr; Run, on real traffic, in 70 seconds. Signup is at the end &mdash; it&rsquo;s the easy part.');
-  $('#endCard').classList.remove('is-on');
-  lastApplied = -1; current = 0;
-  updateChips(0);
-  scrubFill.style.width = '0%';
-  capNum.textContent = '00:00 · 0/6';
+function applyEvent(e, instant){
+  switch (e.type){
+    case 'subtitle': return setSubtitle(e.text);
+    case 'page':     return setPage(e.name, e.url);
+    case 'progress': return setProgress(e.sel, e.pct);
+    case 'receipt':  return setReceipt(e.html);
+    case 'prompt':
+    case 'newprompt':return writePrompt();
+    case 'enter':    return pressEnter();
+    case 'type':     return typeText(e.text, e.klass, instant);
+    case 'out':      return outLine(e.text, e.klass);
+    case 'capture':  return addCapture({ verb:e.verb, body:e.body, cost:e.cost, who:e.who });
+    case 'end':      return showEnd();
+  }
 }
-function updateChips(t){
-  var idx = currentChapterIndex(t);
-  $$('#chapters .chap').forEach(function(el, i){ el.classList.toggle('is-active', i === idx); });
-  capNum.textContent = fmtTs(t) + ' · ' + (idx+1) + '/' + CHAPTERS.length;
+
+// ============================== BROWSER PAGE HTML (derived, not invented) ==============================
+function PAGE_HTML(name){
+  var r = RECEIPT || {};
+  var pages = {
+    'ns-card': '<div class="b-page is-active"><div class="b-title">namespace: support</div><p class="lede">Support traffic routes through the gateway. Every reply gets a signed receipt; prompts and replies are captured, PII-redacted.</p><div class="card"><div class="kvgrid"><div class="k">redact</div><div class="v">pii (email, name, card-like)</div><div class="k">sink</div><div class="v">~/.kolm/captures/support.jsonl</div><div class="k">gateway</div><div class="v">http://127.0.0.1:7421/v1 <span class="pill">local</span></div></div></div><h2>Captures</h2><div class="cap-stream" id="capStream"><div class="cap" style="color:var(--ink-faint);justify-content:center">waiting for first call&hellip;</div></div></div>',
+    'captures': '<div class="b-page is-active"><div class="b-title">captures &middot; support</div><p class="lede">' + (TIMELINE.ticket_count||17) + ' captures &middot; <span class="pill ok">all PII-redacted</span> &middot; <span class="pill">$' + (TIMELINE.capture_spend_usd!=null?TIMELINE.capture_spend_usd:'0') + ' spent</span></p><h2>Recent</h2><div class="cap-stream" id="capStream"></div><h2>Tokens</h2><div class="card"><div class="bench-grid"><div class="bench-cell"><div class="n">' + (TIMELINE.ticket_count||17) + '</div><div class="u">captures</div></div><div class="bench-cell"><div class="n">' + (TIMELINE.capture_input_tokens||0) + '</div><div class="u">in tokens</div></div><div class="bench-cell"><div class="n">' + (TIMELINE.capture_output_tokens||0) + '</div><div class="u">out tokens</div></div></div></div></div>',
+    'compile': '<div class="b-page is-active"><div class="b-title">compile job &middot; support</div><p class="lede">Council: ' + escapeHtml(TIMELINE.council||'') + ' &rarr; ' + escapeHtml(TIMELINE.student||'') + ' &rarr; INT4</p><h2>Distill</h2><div class="card"><div class="row"><span class="k">LoRA r=16 alpha=32</span><span class="v" id="prog-distill-l">0%</span></div><div class="progress"><div class="fill" id="prog-distill"></div></div></div><h2>Quantize INT4</h2><div class="card"><div class="row"><span class="k">NF4 + double &middot; RTX 5090</span><span class="v" id="prog-export-l">queued</span></div><div class="progress"><div class="fill" id="prog-export"></div></div></div><h2>Holdout (n=57)</h2><div class="card"><div class="bench-grid"><div class="bench-cell"><div class="n">96.5%</div><div class="u">asks-1Q</div></div><div class="bench-cell"><div class="n">100%</div><div class="u">judge-clarify</div></div><div class="bench-cell"><div class="n">100%</div><div class="u">on-policy</div></div></div></div></div>',
+    'verify-ui': '<div class="b-page is-active"><div class="b-title">receipt &middot; ' + escapeHtml(r.receipt_id||'') + '</div><p class="lede"><span class="pill ok">Ed25519 signed</span> &middot; schema ' + escapeHtml(r.schema||'') + ' &middot; verifiable offline</p><h2>Claims</h2><div class="card"><div class="kvgrid"><div class="k">route</div><div class="v">' + escapeHtml(r.route_decision||'') + '</div><div class="k">model</div><div class="v">' + escapeHtml(r.model||'') + '</div><div class="k">artifact</div><div class="v">' + escapeHtml(r.artifact_id||'') + '</div><div class="k">confidence</div><div class="v">' + escapeHtml(String(r.confidence)) + '</div><div class="k">redaction</div><div class="v">[' + escapeHtml((r.redaction_applied||[]).join(', ')) + ']</div><div class="k">tokens</div><div class="v">' + fmtTokens(r) + '</div><div class="k">signing_key</div><div class="v">' + escapeHtml((r.signing_key_id||'').slice(0,16)) + '&hellip;</div></div></div><h2>Verify</h2><div class="card" style="font-size:12px;color:var(--ink-mute);line-height:1.6">The public key travels in the receipt. The receipt pane on the right recomputes the canonical payload and checks the signature in your browser &mdash; zero network. <a href="' + escapeHtml(r.verify_url||'/verify') + '" style="color:var(--blue)" target="_blank" rel="noopener">Open hosted verifier &rarr;</a></div></div>',
+    'serve': '<div class="b-page is-active"><div class="b-title">serving &middot; :8766</div><p class="lede">OpenAI-compatible endpoint on localhost. No network egress.</p><h2>Health</h2><div class="card"><div class="kvgrid"><div class="k">status</div><div class="v"><span class="pill ok">ready</span></div><div class="k">hardware</div><div class="v">NVIDIA RTX 5090 / CUDA 12.8</div><div class="k">model</div><div class="v">' + escapeHtml(r.artifact_id||'support-trinity-500-int4') + '</div><div class="k">vram</div><div class="v">19.22 GB</div><div class="k">endpoint</div><div class="v">http://127.0.0.1:8766 <span class="pill">local</span></div><div class="k">egress</div><div class="v"><span class="pill ok">none</span></div></div></div></div>',
+    'serve-replies': '<div class="b-page is-active"><div class="b-title">serving &middot; :8766</div><p class="lede">1 reply served. 24.5 tok/s, mean latency 1.24s.</p><h2>Last response</h2><div class="card" style="background:var(--bg-pane)"><div style="font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--ink)">&ldquo;Order #38214 shows as shipped. To pull the live tracking I just need to confirm: is this the order placed under the email on file?&rdquo;</div></div><h2>Metrics</h2><div class="card"><div class="bench-grid"><div class="bench-cell"><div class="n">24.5</div><div class="u">tok/s</div></div><div class="bench-cell"><div class="n">1.24s</div><div class="u">mean latency</div></div><div class="bench-cell"><div class="n">210</div><div class="u">mean chars</div></div></div></div><h2>Paste your own ticket</h2><div class="ticket-try"><label for="ticketIn">Send a support message through the public gateway (POST /v1/free/chat)</label><div class="trow"><input id="ticketIn" type="text" maxlength="600" placeholder="e.g. where is my refund for order #38219?" autocomplete="off" spellcheck="false"><button type="button" id="ticketGo">Route it</button></div><div class="ticket-out dim" id="ticketOut">The gateway classifies the intent and shows the command it would run.</div></div></div>'
+  };
+  return pages[name] || ('<div class="b-page is-active"><div class="b-title">' + escapeHtml(name) + '</div></div>');
 }
+
+// ============================== CHAPTER CHIPS + MARKS + MOBILE SWITCH ==============================
 function fmtTs(t){
   var s = Math.max(0, Math.floor(t));
   return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
 }
-function currentChapterIndex(t){
-  for (var i=0;i<CHAPTERS.length;i++) if (t < CHAPTERS[i].end) return i;
-  return CHAPTERS.length - 1;
+function currentBeatIndex(t){
+  for (var i=0;i<BEATS.length;i++) if (t < BEATS[i].end) return i;
+  return BEATS.length - 1;
+}
+// Land time for a beat: just past its last NON-end event, so a chip click
+// renders the beat fully (the receipt appears in Verify, the reply in Run)
+// without prematurely firing the end dialog.
+function beatLandTime(idx){
+  var b = BEATS[idx];
+  if (!b || !b.events.length) return b ? b.start + 0.001 : 0.001;
+  var last = 0;
+  b.events.forEach(function(e){ if (e.type !== 'end') last = Math.max(last, e.abs); });
+  return Math.min(TOTAL, last + 0.05);
+}
+function buildChips(){
+  var bar = $('#chapters'); bar.innerHTML = '';
+  BEATS.forEach(function(b, i){
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'chap';
+    btn.dataset.i = i;
+    btn.setAttribute('aria-current', i === 0 ? 'true' : 'false');
+    btn.innerHTML = '<span class="ts" aria-hidden="true">' + fmtTs(b.start) + '</span>' + escapeHtml(b.label);
+    btn.addEventListener('click', function(){ seek(beatLandTime(i)); });
+    bar.appendChild(btn);
+  });
+  // mobile beat switcher
+  var sw = $('#beatSwitch'); sw.innerHTML = '';
+  BEATS.forEach(function(b, i){
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'bchip';
+    btn.dataset.i = i;
+    btn.setAttribute('aria-current', i === 0 ? 'true' : 'false');
+    btn.textContent = b.label;
+    btn.addEventListener('click', function(){ seek(beatLandTime(i)); });
+    sw.appendChild(btn);
+  });
+}
+function buildMarks(){
+  var m = $('#scrubMarks'); m.innerHTML = '';
+  BEATS.forEach(function(b){
+    var d = document.createElement('span');
+    d.className = 'mark';
+    d.style.flex = (b.end - b.start) + ' 0 0';
+    m.appendChild(d);
+  });
+  if (m.lastChild) m.lastChild.style.background = 'transparent';
+}
+// which pane is visible on mobile, keyed by beat index
+function mobilePaneForBeat(idx){
+  var panes = ['#paneTerm','#paneBrowser','#paneReceipt'];
+  $$('.pane').forEach(function(p){ p.classList.remove('mobile-active'); });
+  var target = null;
+  panes.forEach(function(sel){
+    var p = $(sel);
+    var beats = (p.dataset.mobileBeats||'').split(',');
+    if (beats.indexOf(String(idx)) !== -1 && !target) target = p;
+  });
+  if (!target) target = $('#paneTerm');
+  target.classList.add('mobile-active');
+}
+function updateChips(t){
+  var idx = currentBeatIndex(t);
+  $$('#chapters .chap').forEach(function(el, i){ el.setAttribute('aria-current', i === idx ? 'true' : 'false'); });
+  $$('#beatSwitch .bchip').forEach(function(el, i){ el.setAttribute('aria-current', i === idx ? 'true' : 'false'); });
+  capNum.textContent = fmtTs(t) + ' · ' + (idx+1) + '/' + BEATS.length;
+  // scrub a11y
+  var sc = $('#scrub');
+  sc.setAttribute('aria-valuenow', Math.round(100 * t / TOTAL));
+  sc.setAttribute('aria-valuetext', fmtTs(t) + ', ' + (BEATS[idx] ? BEATS[idx].label : ''));
+  mobilePaneForBeat(idx);
 }
 
-function applyEvent(e){
-  if (e.type === 'subtitle') return setSubtitle(e.text);
-  if (e.type === 'page') return setPage(e.name, e.url);
-  if (e.type === 'progress') return setProgress(e.sel, e.pct);
-  if (e.type === 'receipt') return setReceipt(e.html);
-  if (e.type === 'prompt') return writePrompt();
-  if (e.type === 'newprompt') return writePrompt();
-  if (e.type === 'enter') return pressEnter();
-  if (e.type === 'type') return typeText(e.text, e.klass);
-  if (e.type === 'out')  return outLine(e.text, e.klass);
-  if (e.type === 'capture') return addCapture({ verb:e.verb, body:e.body, cost:e.cost, who:e.who });
-  if (e.type === 'end') return showEnd();
+// ============================== END CARD (focus-trapped dialog) ==============================
+var lastFocus = null;
+function buildEndStats(){
+  // every number sourced from the timeline/benchmarks (no typed round numbers)
+  var spend = (TIMELINE.capture_spend_usd!=null) ? ('$' + TIMELINE.capture_spend_usd) : '$0';
+  var stats = [
+    [spend, 'capture spend'],
+    ['17.9 GB', 'INT4 artifact'],
+    ['24.5 t/s', 'on-device'],
+    ['verified', 'receipt, in-browser']
+  ];
+  $('#endStats').innerHTML = stats.map(function(s){
+    return '<div class="stat"><div class="n">' + escapeHtml(s[0]) + '</div><div class="l">' + escapeHtml(s[1]) + '</div></div>';
+  }).join('');
 }
 function showEnd(){
-  $('#endCard').classList.add('is-on');
+  buildEndStats();
+  var card = $('#endCard');
+  card.classList.add('is-on');
+  $('#stage').querySelectorAll('.pane').forEach(function(p){ p.setAttribute('inert',''); p.setAttribute('aria-hidden','true'); });
   paused = true;
-  $('#playBtn').innerHTML = '<span class="glyph">&#9658;</span> play';
+  setPlayLabel('replay');
+  lastFocus = document.activeElement;
+  card.focus();
+}
+function hideEnd(){
+  var card = $('#endCard');
+  card.classList.remove('is-on');
+  $('#stage').querySelectorAll('.pane').forEach(function(p){ p.removeAttribute('inert'); p.removeAttribute('aria-hidden'); });
+  if (lastFocus && lastFocus.focus) lastFocus.focus();
+}
+function trapEndFocus(e){
+  var card = $('#endCard');
+  if (!card.classList.contains('is-on')) return;
+  if (e.key === 'Escape'){ hideEnd(); e.preventDefault(); return; }
+  if (e.key !== 'Tab') return;
+  var focusables = $$('a[href],button:not([disabled])', card).filter(function(el){ return el.offsetParent !== null; });
+  if (!focusables.length) return;
+  var first = focusables[0], last = focusables[focusables.length-1];
+  if (e.shiftKey && document.activeElement === first){ last.focus(); e.preventDefault(); }
+  else if (!e.shiftKey && document.activeElement === last){ first.focus(); e.preventDefault(); }
 }
 
+// ============================== TRANSPORT ==============================
+function setPlayLabel(state){
+  var g = $('#playBtn .glyph'), l = $('#playLabel');
+  if (state === 'pause'){ g.innerHTML = '&#10073;&#10073;'; l.textContent = 'pause'; }
+  else if (state === 'replay'){ g.innerHTML = '&#9658;'; l.textContent = 'replay'; }
+  else { g.innerHTML = '&#9658;'; l.textContent = 'play'; }
+}
+function resetAll(){
+  term.innerHTML = '';
+  body.innerHTML = '<div class="b-page is-active"><div class="b-title">kolm</div><p class="lede">Compile your AI behavior into a small, signed artifact you can run anywhere. Capture &rarr; compile &rarr; verify &rarr; run.</p><div class="card"><div class="row"><span class="k">install</span><span class="v">npm i -g @kolm/cli</span></div></div></div>';
+  url.innerHTML = '<span class="scheme">https://</span>kolm.ai';
+  rec.innerHTML = receiptEmpty();
+  captures = [];
+  fired = {};
+  typeJobs = [];
+  setProgress('#prog-distill', 0);
+  setProgress('#prog-export', 0);
+  setSubtitle('Press play. Capture &rarr; Compile &rarr; Verify &rarr; Run, on real traffic. The signed receipt verifies in your browser &mdash; no login, no network.');
+  hideEnd();
+  scrubFill.style.width = '0%';
+  capNum.textContent = '00:00 · 0/' + BEATS.length;
+  updateChips(0);
+}
+function applyUpTo(targetT, instant){
+  // fire, in time order, every event with abs <= targetT
+  var all = [];
+  BEATS.forEach(function(b, bi){ b.events.forEach(function(e, ei){ all.push({ key: bi+':'+ei, e:e }); }); });
+  all.sort(function(a,c){ return a.e.abs - c.e.abs; });
+  all.forEach(function(o){
+    if (!fired[o.key] && o.e.abs <= targetT){
+      fired[o.key] = true;
+      applyEvent(o.e, instant);
+    }
+  });
+}
 function tick(now){
   if (paused) return;
   if (t0 === null) t0 = now;
   var t = (now - t0) / 1000;
-  if (t >= TOTAL) {
-    t = TOTAL;
-    paused = true;
-    $('#playBtn').innerHTML = '<span class="glyph">&#9658;</span> replay';
-  }
-  // fire events with timestamp <= t that haven't fired yet
-  for (var ci=0; ci<CHAPTERS.length; ci++){
-    var ch = CHAPTERS[ci];
-    for (var ei=0; ei<ch.events.length; ei++){
-      var ev = ch.events[ei];
-      var key = ci + ':' + ei;
-      if (!fired[key] && ev.at <= t){
-        fired[key] = true;
-        applyEvent(ev);
-      }
-    }
-  }
+  if (t >= TOTAL){ t = TOTAL; }
+  applyUpTo(t, false);
   scrubFill.style.width = (100 * t / TOTAL).toFixed(2) + '%';
   updateChips(t);
-  if (!paused) rafId = requestAnimationFrame(tick);
+  if (t >= TOTAL){
+    paused = true;
+    setPlayLabel('replay');
+    return;
+  }
+  rafId = requestAnimationFrame(tick);
 }
-
+function currentTime(){
+  var w = parseFloat(scrubFill.style.width) || 0;
+  return (w / 100) * TOTAL;
+}
 function play(){
   if ($('#endCard').classList.contains('is-on')){ resetAll(); }
   paused = false;
+  resumeTypeJobs();
   t0 = performance.now() - (currentTime() * 1000);
-  $('#playBtn').innerHTML = '<span class="glyph">&#10073;&#10073;</span> pause';
+  setPlayLabel('pause');
   rafId = requestAnimationFrame(tick);
 }
 function pause(){
   paused = true;
-  $('#playBtn').innerHTML = '<span class="glyph">&#9658;</span> play';
+  setPlayLabel('play');
+  typeJobs.forEach(function(j){ if (j.timer) clearTimeout(j.timer); });
   if (rafId) cancelAnimationFrame(rafId);
 }
-function currentTime(){
-  // derive from scrubFill width
-  var w = parseFloat(scrubFill.style.width) || 0;
-  return (w / 100) * TOTAL;
-}
 function seek(targetT){
-  // hard reseek: reset state, fast-forward all events with at <= targetT
+  pause();
   resetAll();
-  for (var ci=0; ci<CHAPTERS.length; ci++){
-    var ch = CHAPTERS[ci];
-    for (var ei=0; ei<ch.events.length; ei++){
-      var ev = ch.events[ei];
-      var key = ci + ':' + ei;
-      if (ev.at <= targetT){
-        fired[key] = true;
-        // for type events on seek, instant-fill
-        if (ev.type === 'type'){
-          var prev = TYPING_CPS; TYPING_CPS = 999999;
-          applyEvent(ev);
-          TYPING_CPS = prev;
-        } else {
-          applyEvent(ev);
-        }
-      }
-    }
-  }
+  applyUpTo(targetT, true);   // instant-fill type events on seek
+  finishTypeJobs();
   scrubFill.style.width = (100 * targetT / TOTAL).toFixed(2) + '%';
   updateChips(targetT);
-  if (!paused){ t0 = performance.now() - (targetT * 1000); rafId = requestAnimationFrame(tick); }
 }
 
-$('#playBtn').addEventListener('click', function(){
-  if (paused) play(); else pause();
-});
-$('#restartBtn').addEventListener('click', function(){
-  resetAll();
-  play();
-});
-$('#replayBtn').addEventListener('click', function(e){
-  e.preventDefault();
-  resetAll();
-  play();
-});
-$('#scrub').addEventListener('click', function(e){
-  var r = e.currentTarget.getBoundingClientRect();
-  var pct = (e.clientX - r.left) / r.width;
-  seek(Math.max(0, Math.min(TOTAL, pct * TOTAL)));
-});
-$('#scrub').addEventListener('keydown', function(e){
-  if (e.key === 'ArrowRight'){ seek(Math.min(TOTAL, currentTime() + 2)); e.preventDefault(); }
-  if (e.key === 'ArrowLeft'){ seek(Math.max(0, currentTime() - 2)); e.preventDefault(); }
-});
-document.addEventListener('keydown', function(e){
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-  if (e.key === ' '){ if (paused) play(); else pause(); e.preventDefault(); }
-  if (e.key === 'r' || e.key === 'R'){ resetAll(); play(); }
-});
+// ============================== RUN-THIS-YOURSELF STRIP ==============================
+function buildRunStrip(){
+  // pull the actual `type` commands from the timeline + the real install line
+  var cmds = ['npm i -g @kolm/cli'];
+  BEATS.forEach(function(b){
+    b.events.forEach(function(e){
+      if (e.type === 'type' && e.text && /^kolm\s/.test(e.text)) cmds.push(e.text);
+    });
+  });
+  var strip = $('#runStrip');
+  cmds.forEach(function(cmd){
+    var wrap = document.createElement('span');
+    wrap.className = 'run-cmd';
+    var code = document.createElement('code');
+    code.textContent = cmd;
+    var copy = document.createElement('button');
+    copy.type = 'button';
+    copy.className = 'copy';
+    copy.textContent = 'copy';
+    copy.setAttribute('aria-label', 'Copy: ' + cmd);
+    copy.addEventListener('click', function(){
+      var done = function(){ copy.textContent = 'copied'; copy.classList.add('copied'); setTimeout(function(){ copy.textContent = 'copy'; copy.classList.remove('copied'); }, 1400); };
+      if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(cmd).then(done).catch(done); }
+      else { var ta = document.createElement('textarea'); ta.value = cmd; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch(e){} document.body.removeChild(ta); done(); }
+    });
+    wrap.appendChild(code); wrap.appendChild(copy);
+    strip.appendChild(wrap);
+  });
+  strip.classList.add('is-on');
+}
 
-// initial
-resetAll();
-// auto-play after small delay so the page paints first
-setTimeout(function(){ play(); }, 500);
+// ============================== STATIC POSTER (reduced-motion / ?still=1) ==============================
+function buildPoster(){
+  document.body.classList.add('is-static');
+  // poster image if present (recorder-generated), else CSS still of final frame
+  var img = $('#posterImg');
+  img.onload = function(){ img.style.display = 'block'; };
+  img.onerror = function(){ img.style.display = 'none'; };
+  img.src = '/demo-live-poster.png';
+  // full selectable transcript
+  var tr = $('#posterTranscript');
+  var html = '';
+  BEATS.forEach(function(b){
+    html += '<h3>' + escapeHtml(b.label) + '</h3>';
+    b.events.forEach(function(e){
+      if (e.type === 'subtitle'){ html += '<div class="t-cap">' + e.text + '</div>'; }
+      else if (e.type === 'type'){ html += '<div class="t-line you">$ ' + escapeHtml(e.text) + '</div>'; }
+      else if (e.type === 'out'){ html += '<div class="t-line ' + (e.klass||'') + '">' + escapeHtml(e.text) + '</div>'; }
+      else if (e.type === 'capture'){ html += '<div class="t-line dim">  ' + escapeHtml(e.verb + '  ' + e.body + '   ' + e.cost) + '</div>'; }
+    });
+  });
+  tr.innerHTML = html;
+  // working verify button in the poster
+  $('#posterVerify').innerHTML = receiptPane(RECEIPT);
+  wireVerifyButton($('#posterVerify'));
+}
+
+// ============================== BOOT ==============================
+function bind(){
+  term = $('#term'); body = $('#browserBody'); rec = $('#receipt');
+  url = $('#browserUrl'); capNum = $('#capNum'); capText = $('#capText');
+  scrubFill = $('#scrubFill');
+}
+function boot(tl){
+  TIMELINE = tl;
+  buildModel(tl);
+  bind();
+  buildChips();
+  buildMarks();
+
+  if (STILL){
+    buildPoster();
+    return; // no autoplay cascade
+  }
+
+  resetAll();
+
+  $('#playBtn').addEventListener('click', function(){ if (paused) play(); else pause(); });
+  $('#restartBtn').addEventListener('click', function(){ resetAll(); play(); });
+  $('#replayBtn').addEventListener('click', function(e){ e.preventDefault(); hideEnd(); resetAll(); play(); });
+  $('#endClose').addEventListener('click', function(){ hideEnd(); });
+  $('#scrub').addEventListener('click', function(e){
+    var r = e.currentTarget.getBoundingClientRect();
+    var pct = (e.clientX - r.left) / r.width;
+    seek(Math.max(0.001, Math.min(TOTAL, pct * TOTAL)));
+  });
+  $('#scrub').addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight'){ seek(Math.min(TOTAL, currentTime() + 2)); e.preventDefault(); }
+    if (e.key === 'ArrowLeft'){ seek(Math.max(0.001, currentTime() - 2)); e.preventDefault(); }
+    if (e.key === 'Home'){ seek(0.001); e.preventDefault(); }
+    if (e.key === 'End'){ seek(TOTAL); e.preventDefault(); }
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if ($('#endCard').classList.contains('is-on')){ trapEndFocus(e); return; }
+    if (e.key === ' '){ if (paused) play(); else pause(); e.preventDefault(); }
+    if (e.key === 'r' || e.key === 'R'){ resetAll(); play(); }
+  });
+
+  buildRunStrip();
+
+  // ?record=1 disables autoplay so the recorder is the sole play trigger.
+  if (!RECORD){
+    setTimeout(function(){ play(); }, 500);
+  }
+}
+
+// fetch the captured timeline; fall back to the committed inline copy.
+(function(){
+  fetch('/demo-live-timeline.json', { cache:'no-cache' })
+    .then(function(r){ if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+    .then(function(tl){ boot(tl); })
+    .catch(function(){ boot(INLINE_FALLBACK); });
+})();
 
 })();
 </script>

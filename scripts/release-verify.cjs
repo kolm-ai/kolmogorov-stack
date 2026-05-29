@@ -20,6 +20,10 @@
 //   4.  claim-verify (X04)               (W869 T7: every numeric claim in public/**/*.html
 //                                         declared in data/x04-claim-fixtures.json must
 //                                         match its checked-in evidence file)
+//   4b. demo-claims (W921)               (every numeric/metric literal in
+//                                         public/demo-live-timeline.json traces to an x04
+//                                         row/benchmark field or a fixture-derived value,
+//                                         AND the embedded Ed25519 receipt re-verifies)
 //   5.  sdk-manifest                     (current + versioned browser SDK assets
 //                                         exist, match hashes/SRI, and are not ignored)
 //   6.  npm test                         (full test suite, --test-concurrency=1)
@@ -532,6 +536,35 @@ async function gateClaimVerify() {
   return ok;
 }
 
+// W921 — demo-claims gate. The /demo-live page replays public/demo-live-timeline.json
+// as a terminal recording (the single most fakeable dev-tool artifact). This
+// gate runs scripts/demo-claim-verify.cjs, which (a) asserts every numeric/metric
+// literal the timeline emits traces to an x04-claim-fixtures.json row / benchmark
+// field or a fixture-derived value, and (b) re-verifies the embedded Ed25519
+// receipt via the canonical ALL_FIELDS path the browser uses. A drifting or
+// out-claiming demo blocks release.
+async function gateDemoClaims() {
+  if (!shouldRun('demo-claims')) return recordResult('demo-claims', true, { skipped: true });
+  progress('demo-claims (W921) checking');
+  const t = Date.now();
+  const r = runSync(nodeBin, [path.join('scripts', 'demo-claim-verify.cjs'), '--json'], { silent: true, timeoutMs: 60_000 });
+  let parsed = null;
+  try { parsed = JSON.parse((r.stdout || '').trim()); } catch (_) {} // deliberate: cleanup
+  if (!parsed) {
+    recordResult('demo-claims', false, {
+      detail: 'non-JSON output from demo-claim-verify (first 300): ' + (r.stdout || '').slice(0, 300) + ' | stderr: ' + (r.stderr || '').slice(0, 200),
+      duration_ms: Date.now() - t,
+    });
+    return false;
+  }
+  const ok = parsed.ok === true && r.status === 0;
+  const detail = ok
+    ? `receipt ${parsed.receipt_id} verifies=${parsed.receipt_verifies}, ${parsed.numbers_checked} numeric literals checked, ${parsed.unexplained_count} unexplained`
+    : (parsed.error ? parsed.error : `ok=${parsed.ok} unexplained=${parsed.unexplained_count} receipt_verifies=${parsed.receipt_verifies}; ` + (parsed.failures || []).slice(0, 4).join(' | '));
+  recordResult('demo-claims', ok, { detail, duration_ms: Date.now() - t });
+  return ok;
+}
+
 async function gateSdkManifest() {
   if (!shouldRun('sdk-manifest')) return recordResult('sdk-manifest', true, { skipped: true });
   progress('sdk-manifest checking');
@@ -755,6 +788,7 @@ function gateCli(name, argv, validator) {
   await gateControlFiles();
   await gateOpenapiSync();
   await gateClaimVerify();
+  await gateDemoClaims();
   await gateSdkManifest();
   await gateTests();
   await gateSdkSmoke();

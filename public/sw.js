@@ -54,8 +54,8 @@
 //   vercel.json gains 17 rewrites (16 /docs/gateway-* + /gateway) and removes
 //   the stale /gateway -> /capture 308 redirect; /account/gateway[/providers]
 //   rewrites land in the same file. CACHE_VERSION 101 -> 102 for invalidation.
-const CACHE = 'kolm-v157-2026-05-29-wave921-w920-remediation-nav-fix-org-cli-redirects';
-const CACHE_VERSION = 157;
+const CACHE = 'kolm-v158-2026-05-29-wave921-demo';
+const CACHE_VERSION = 158;
 // 24 loading-state hints (#loading-status injected at top of <main>), 4
 // favicons + 4 empty-state blocks (pipelines/_template, pipelines/index,
 // quantize/index, receipts/index), 4 breadcrumbs to /account/overview

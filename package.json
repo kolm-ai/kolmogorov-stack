@@ -84,6 +84,8 @@
     "test": "node --test --test-concurrency=1 tests/*.test.js",
     "test:parallel": "node --test tests/*.test.js",
     "release:verify": "node scripts/release-verify.cjs",
+    "capture:demo-timeline": "node scripts/capture-demo-timeline.mjs",
+    "verify:demo-claims": "node scripts/demo-claim-verify.cjs",
     "lint": "eslint src cli scripts tests workers",
     "lint:fix": "eslint --fix src cli scripts tests workers"
   },
