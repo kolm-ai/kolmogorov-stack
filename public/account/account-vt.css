@@ -1,0 +1,57 @@
+/*
+ * account-vt.css — cross-document View Transitions for the kolm /account MPA.
+ * (W921 Account UI / No-Code, spec 46.)
+ *
+ * Opt-in cross-document view transitions: top nav + sidebar morph in place
+ * (persistent shell) while only .acct-content slides/fades, so account
+ * navigation reads as a product console, not a static-site white-flash reload.
+ *
+ * Scoped to a dedicated stylesheet linked ONLY on account pages (kept out of
+ * global ks.css so the marketing homepage never gets page-slide). The inline
+ * parser-blocking #kolm-vt script tags forward/back direction as a view-
+ * transition type. Unsupported browsers (Firefox <= 143) ignore @view-
+ * transition and navigate normally — zero-fallback graceful degradation.
+ *
+ * Keyframes animate ONLY transform/opacity (compositor-only, INP-safe). All
+ * motion is gated behind prefers-reduced-motion: no-preference. Cool-slate
+ * only — no color is set here at all (transitions are color-agnostic).
+ */
+
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+}
+
+/* Persistent shell: morph in place rather than cross-fade through root. */
+.ks-nav-wrap { view-transition-name: kolm-topnav; contain: layout; }
+#account-sidebar { view-transition-name: kolm-acct-sidebar; contain: layout; }
+.acct-content { view-transition-name: kolm-acct-content; contain: layout; }
+
+/* The shell groups settle fast; only the content panel does the slide. */
+::view-transition-group(kolm-topnav),
+::view-transition-group(kolm-acct-sidebar) { animation-duration: .18s; }
+
+/* Direction-aware content slide (forward = deeper in sidebar order). */
+html:active-view-transition-type(forward)::view-transition-old(kolm-acct-content) {
+  animation: vt-out-left .22s both;
+}
+html:active-view-transition-type(forward)::view-transition-new(kolm-acct-content) {
+  animation: vt-in-right .22s both;
+}
+html:active-view-transition-type(back)::view-transition-old(kolm-acct-content) {
+  animation: vt-out-right .22s both;
+}
+html:active-view-transition-type(back)::view-transition-new(kolm-acct-content) {
+  animation: vt-in-left .22s both;
+}
+
+@keyframes vt-in-right { from { opacity: 0; transform: translateX(14px); } }
+@keyframes vt-out-left { to { opacity: 0; transform: translateX(-14px); } }
+@keyframes vt-in-left { from { opacity: 0; transform: translateX(-14px); } }
+@keyframes vt-out-right { to { opacity: 0; transform: translateX(14px); } }
+
+/* Safety: under reduced-motion, suppress any UA crossfade entirely. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) { animation: none !important; }
+}

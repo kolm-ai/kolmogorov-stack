@@ -1,0 +1,168 @@
+{
+  "spec": "kolm-seo-catalog-competitors-1",
+  "note": "Single source of truth for programmatically generated /compare/* pages. Slugs here MUST NOT collide with hand-authored pages already in public/compare/ (openpipe, predibase, together, bedrock-distill, proxis, ollama, openai, openai-fine-tune, rag). Every proof_href must resolve on disk under public/ — the generator + scripts/audit-seo-pages.cjs hard-fail on a dangling proof. Numeric claims rendered on a page MUST reuse an X04-fixtured claim substring (data/x04-claim-fixtures.json) so they cannot drift from the measured artifact.",
+  "competitors": [
+    {
+      "slug": "modal",
+      "name": "Modal",
+      "positioning": "Modal is a serverless GPU platform: you rent ephemeral GPU containers per second for training and inference jobs.",
+      "category": "serverless-gpu",
+      "bluf": "Modal rents you serverless GPUs by the second; kolm compiles your captured traffic into a signed model you own and run on any hardware. Pick Modal when you want pure on-demand compute with no model ownership. Pick kolm when you want a portable, verifiable artifact and a per-token bill that drops to zero after compile.",
+      "matrix": [
+        { "axis": "Primary unit", "kolm": "A signed .kolm artifact you own", "them": "A serverless GPU container you rent", "why": "kolm's output outlives the session; Modal's does not." },
+        { "axis": "Ongoing cost", "kolm": "Zero per-token after compile (you run the weights)", "them": "Per-second GPU billing for every run", "why": "Compiled weights have no metered inference bill." },
+        { "axis": "Portability", "kolm": "GGUF / EXL2 / vLLM — runs on laptop, VPC, or air-gap", "them": "Runs inside Modal's cloud", "why": "kolm exports a standard artifact with no runtime dependency on us." },
+        { "axis": "Provenance", "kolm": "Ed25519-signed receipt per compile, replayable at /verify-prod", "them": "Job logs, no cryptographic artifact receipt", "why": "kolm's receipt is the proof of what was built." },
+        { "axis": "Data capture", "kolm": "OpenAI-compatible gateway captures (input,output) pairs into your lake", "them": "You wire your own capture", "why": "kolm makes the training set a by-product of normal traffic." },
+        { "axis": "PII handling", "kolm": "Inline redaction on the capture path before storage", "them": "Bring-your-own redaction", "why": "kolm scrubs PII on the way in by default." },
+        { "axis": "Quantization", "kolm": "Built-in: DeepSeek-R1 32B to 17.9 GB INT4 in 125.3 s on one RTX 5090", "them": "You script your own quantize step", "why": "kolm ships the measured quantize path; see the verified matrix." },
+        { "axis": "Lock-in", "kolm": "Apache-2.0, self-hostable, no vendor runtime", "them": "Platform-coupled SDK + runtime", "why": "kolm is open source end to end." }
+      ],
+      "when_them_wins": "Choose Modal when your workload is pure ephemeral batch compute (rendering, ETL, one-off training) and you do not want to own or serve a model afterward. Modal's per-second autoscaling is excellent for spiky, stateless GPU jobs.",
+      "when_kolm_wins": "Choose kolm when you make repeated LLM calls you already pay per token for, and you want to turn that traffic into a model you own, quantize to your own hardware, and stop paying per token — with a signed receipt for every build.",
+      "proof_href": "/benchmarks/sota-quantize-matrix.json",
+      "proof_stat": "17.9 GB",
+      "proof_stat_context": "DeepSeek-R1-Distill-Qwen-32B compresses to 17.9 GB INT4 in 125.3 s on a single RTX 5090 in the verified quantize matrix.",
+      "faqs": [
+        { "q": "Can I move off Modal to kolm without rewriting my app?", "a": "Yes. kolm exposes an OpenAI-compatible gateway, so you change the base URL and keep your existing client. The gateway captures (input, output) pairs as you go, which become the training set for a compiled specialist model." },
+        { "q": "Does kolm replace my GPU provider?", "a": "No. kolm is the compiler, not the cloud. You can compile on a rented Modal GPU, on a local RTX 5090, or in your own VPC. The output is a portable artifact you run anywhere." },
+        { "q": "Do I keep the weights?", "a": "Yes. kolm's output is a single signed .kolm file containing your quantized weights plus a receipt. There is no runtime dependency on kolm and no per-token bill behind it." }
+      ]
+    },
+    {
+      "slug": "fireworks-ai",
+      "name": "Fireworks AI",
+      "positioning": "Fireworks AI is a hosted inference platform offering fast serving of open and fine-tuned models behind an API.",
+      "category": "hosted-inference",
+      "bluf": "Fireworks serves models fast behind its own API and bills per token; kolm compiles a model you own and run with no per-token bill. Pick Fireworks for managed, low-latency hosted inference. Pick kolm when you want to own the weights, run them on your own hardware, and verify every build with a signed receipt.",
+      "matrix": [
+        { "axis": "Where it runs", "kolm": "Your hardware (laptop / VPC / air-gap)", "them": "Fireworks' cloud", "why": "kolm produces a portable artifact; Fireworks hosts." },
+        { "axis": "Billing", "kolm": "Zero per-token after compile", "them": "Per-token serving fees", "why": "Owned weights have no metered inference." },
+        { "axis": "Artifact", "kolm": "Signed .kolm with weight hashes + receipt", "them": "A served endpoint", "why": "kolm hands you the model file, not a URL." },
+        { "axis": "Verification", "kolm": "Replay the receipt at /verify-prod", "them": "Trust the dashboard", "why": "kolm's receipt is cryptographically checkable." },
+        { "axis": "Distillation", "kolm": "Council-distill from captured traffic to a 7B specialist", "them": "Upload-a-dataset fine-tune", "why": "kolm turns live traffic into the training set." },
+        { "axis": "Quantization control", "kolm": "INT4 / GGUF / EXL2 with a measured matrix", "them": "Platform-chosen", "why": "kolm exposes the quantize ladder and the numbers." },
+        { "axis": "Quality gate", "kolm": "K-score with calibrated release gate", "them": "Eval is your responsibility", "why": "kolm ships a quality contract into the pipeline." },
+        { "axis": "License", "kolm": "Apache-2.0, self-hostable", "them": "Proprietary platform", "why": "kolm is open source." }
+      ],
+      "when_them_wins": "Choose Fireworks when you want the lowest-friction managed inference for popular open models and are happy to keep paying per token for the operational simplicity of a hosted endpoint.",
+      "when_kolm_wins": "Choose kolm when your token bill is the cost you want to eliminate: compile your repeated workload into an owned model, quantize to your hardware, and serve it yourself with a verifiable build receipt.",
+      "proof_href": "/benchmarks/trinity-500-benchmark.json",
+      "proof_stat": "96.5%",
+      "proof_stat_context": "The trinity-500 distilled 7B specialist asks the right clarifying question 96.5% of the time at 1.24 s mean latency in the published benchmark.",
+      "faqs": [
+        { "q": "Is kolm slower than a hosted endpoint?", "a": "kolm produces a quantized model you serve yourself, so throughput depends on your hardware. The published matrix records 11.5 tok/s for a 32B INT4 model on one RTX 5090; smaller specialists are faster. The trade is metered cloud latency for owned, fixed-cost local serving." },
+        { "q": "Can I compile a model trained on my Fireworks traffic?", "a": "Point your existing client at the kolm gateway instead. It captures (input, output) pairs and PII-redacts on the way in. Those pairs become the distillation set for an owned specialist." },
+        { "q": "What do I get at the end?", "a": "A single .kolm artifact with quantized weights, the original bf16 SHA-256 hashes, and an Ed25519-signed receipt you can replay at /verify-prod." }
+      ]
+    },
+    {
+      "slug": "baseten",
+      "name": "Baseten",
+      "positioning": "Baseten is a model deployment platform built around Truss packaging and managed autoscaling inference.",
+      "category": "model-deployment",
+      "bluf": "Baseten packages and autoscales your model deployments in its cloud; kolm compiles a signed, portable model you own and run anywhere. Pick Baseten for managed deployment ergonomics. Pick kolm when ownership, portability, and a verifiable build receipt matter more than a hosted control plane.",
+      "matrix": [
+        { "axis": "Output", "kolm": "Owned .kolm artifact", "them": "Managed deployment in Baseten", "why": "kolm's artifact is yours to move." },
+        { "axis": "Runtime dependency", "kolm": "None at inference time", "them": "Baseten control plane", "why": "Compiled weights run standalone." },
+        { "axis": "Cost after build", "kolm": "Zero per-token", "them": "Per-deployment compute billing", "why": "You own the weights." },
+        { "axis": "Receipt", "kolm": "Signed, replayable at /verify-prod", "them": "Deployment metadata", "why": "kolm proves the build cryptographically." },
+        { "axis": "Capture-to-train", "kolm": "Gateway captures traffic into a lake", "them": "You supply the dataset", "why": "kolm makes the dataset a by-product." },
+        { "axis": "Quantize matrix", "kolm": "Measured INT4 ladder (61.0 GB to 17.9 GB)", "them": "Bring-your-own", "why": "kolm ships the numbers." },
+        { "axis": "Air-gap", "kolm": "Runs with no network at inference", "them": "Cloud-coupled", "why": "Owned artifact needs no callback." },
+        { "axis": "License", "kolm": "Apache-2.0", "them": "Proprietary", "why": "kolm is open source." }
+      ],
+      "when_them_wins": "Choose Baseten when you want a polished managed-deployment experience with Truss packaging and autoscaling, and you do not need to physically own and relocate the model artifact.",
+      "when_kolm_wins": "Choose kolm when you need a model you can carry into a VPC or an air-gapped environment, with a signed receipt proving exactly what was compiled.",
+      "proof_href": "/benchmarks/sota-quantize-matrix.json",
+      "proof_stat": "61.0 GB",
+      "proof_stat_context": "The verified matrix records a 61.0 GB bf16 DeepSeek-R1 32B compressing to 17.9 GB INT4 on one consumer GPU.",
+      "faqs": [
+        { "q": "Does kolm package models like Truss?", "a": "kolm's package is the .kolm artifact: quantized weights plus a signed receipt and the original weight hashes. It loads in standard runtimes (llama.cpp, vLLM, ExLlamaV2) without a kolm dependency." },
+        { "q": "Can I deploy a kolm artifact to my own cloud?", "a": "Yes. kolm deploy pushes an artifact to a device or VPC you control. There is no kolm control plane in the inference path." },
+        { "q": "How do I verify a build?", "a": "Run kolm verify on the artifact, or replay the receipt CID at /verify-prod. It checks the SHA-256 weight chain, the Ed25519 signature, and the K-score." }
+      ]
+    },
+    {
+      "slug": "replicate",
+      "name": "Replicate",
+      "positioning": "Replicate runs open-source models behind a hosted API where you pay per prediction.",
+      "category": "hosted-inference",
+      "bluf": "Replicate runs community models behind a pay-per-prediction API; kolm compiles your traffic into a model you own with no per-prediction bill. Pick Replicate for instant access to a catalog of hosted models. Pick kolm when you want to own and quantize a specialist trained on your own workload.",
+      "matrix": [
+        { "axis": "Model ownership", "kolm": "You own the compiled weights", "them": "You call hosted weights", "why": "kolm's output is a file you keep." },
+        { "axis": "Cost model", "kolm": "Zero per-token after compile", "them": "Per-prediction billing", "why": "Owned weights are not metered." },
+        { "axis": "Specialization", "kolm": "Distilled to your captured traffic", "them": "Generic catalog models", "why": "kolm trains on your pairs." },
+        { "axis": "Provenance", "kolm": "Signed receipt per build", "them": "Prediction logs", "why": "kolm's receipt is verifiable." },
+        { "axis": "Offline", "kolm": "Runs air-gapped", "them": "Requires the API", "why": "Owned artifact runs locally." },
+        { "axis": "Quantization", "kolm": "INT4 in 125.3 s for a 32B model", "them": "Platform-managed", "why": "kolm exposes the measured path." },
+        { "axis": "PII", "kolm": "Redacted on capture", "them": "Sent to the API", "why": "kolm scrubs before storage." },
+        { "axis": "License", "kolm": "Apache-2.0", "them": "Proprietary platform", "why": "kolm is open source." }
+      ],
+      "when_them_wins": "Choose Replicate when you want one-line access to a huge catalog of community models for prototyping or low-volume use, with zero infrastructure to manage.",
+      "when_kolm_wins": "Choose kolm when a specific high-volume workload dominates your bill and you want to compile it into an owned, quantized specialist with a verifiable receipt.",
+      "proof_href": "/benchmarks/sota-quantize-matrix.json",
+      "proof_stat": "125.3 s",
+      "proof_stat_context": "kolm quantized a 32B reasoning model to INT4 in 125.3 s on a single RTX 5090 in the verified matrix.",
+      "faqs": [
+        { "q": "Can kolm import a Replicate model?", "a": "kolm compiles open-weight base models and distills specialists from your captured traffic. It does not re-host closed catalog endpoints; instead you point your client at the kolm gateway and build from your own pairs." },
+        { "q": "Is there a free tier?", "a": "Yes, kolm has a free self-serve tier. Sign up to obtain an API key and compile your first artifact." },
+        { "q": "What about reproducibility?", "a": "Compiling the same inputs on the same hardware yields identical output hashes, and the receipt makes that auditable." }
+      ]
+    },
+    {
+      "slug": "lamini",
+      "name": "Lamini",
+      "positioning": "Lamini is an enterprise LLM platform focused on fine-tuning and memory-tuning hosted models.",
+      "category": "fine-tune-platform",
+      "bluf": "Lamini fine-tunes hosted enterprise models; kolm compiles captured traffic into an owned, quantized specialist with a signed receipt. Pick Lamini for a managed enterprise fine-tuning workflow. Pick kolm when you want the trained model as a portable artifact you run yourself with verifiable provenance.",
+      "matrix": [
+        { "axis": "Deliverable", "kolm": "Owned .kolm artifact", "them": "Hosted tuned endpoint", "why": "kolm gives you the file." },
+        { "axis": "Training source", "kolm": "Captured (input,output) pairs from live traffic", "them": "Uploaded datasets", "why": "kolm makes data a by-product of usage." },
+        { "axis": "Method", "kolm": "Council distillation + LoRA + quantize", "them": "Fine-tune / memory-tune", "why": "kolm targets owned, small specialists." },
+        { "axis": "Quality gate", "kolm": "K-score calibrated release gate", "them": "Platform metrics", "why": "kolm ships a quality contract." },
+        { "axis": "Cost after build", "kolm": "Zero per-token", "them": "Hosted inference fees", "why": "Owned weights are free to run." },
+        { "axis": "Receipt", "kolm": "Signed + replayable", "them": "Run metadata", "why": "kolm proves the build." },
+        { "axis": "Air-gap", "kolm": "Yes", "them": "Cloud-coupled", "why": "Owned artifact runs offline." },
+        { "axis": "License", "kolm": "Apache-2.0", "them": "Proprietary", "why": "kolm is open source." }
+      ],
+      "when_them_wins": "Choose Lamini when you want a fully managed enterprise fine-tuning service and prefer to consume the result as a hosted endpoint rather than own the weights.",
+      "when_kolm_wins": "Choose kolm when ownership and portability of the tuned model are requirements — for example to deploy into a customer VPC or an air-gapped network with a signed build receipt.",
+      "proof_href": "/benchmarks/trinity-500-benchmark.json",
+      "proof_stat": "1.24 s",
+      "proof_stat_context": "The distilled 7B trinity-500 specialist answers at 1.24 s mean latency in the published benchmark.",
+      "faqs": [
+        { "q": "Does kolm do memory tuning?", "a": "kolm's primary path is council distillation from captured traffic into a small specialist, then quantization. The result is an owned model rather than a tuned hosted endpoint." },
+        { "q": "Can I keep the data in my VPC?", "a": "Yes. kolm is self-hostable end to end (Apache-2.0). Capture, distill, and compile can all run inside your own environment." },
+        { "q": "What proves the model is what I expect?", "a": "Every compile emits a signed receipt with the K-score and weight hashes, replayable at /verify-prod." }
+      ]
+    },
+    {
+      "slug": "lm-studio",
+      "name": "LM Studio",
+      "positioning": "LM Studio is a desktop app for downloading and running GGUF models locally.",
+      "category": "local-runner",
+      "bluf": "LM Studio downloads and runs existing GGUF models on your desktop; kolm compiles a specialist trained on your own traffic and signs the build. Pick LM Studio to run off-the-shelf models locally. Pick kolm when you want to produce the GGUF — distilled to your workload and quantized with a verifiable receipt.",
+      "matrix": [
+        { "axis": "Role", "kolm": "Compiler that produces the model", "them": "Runner that loads existing models", "why": "kolm builds; LM Studio runs." },
+        { "axis": "Specialization", "kolm": "Distilled to your captured pairs", "them": "Whatever you download", "why": "kolm trains on your traffic." },
+        { "axis": "Output format", "kolm": "GGUF / EXL2 / vLLM + receipt", "them": "Loads GGUF", "why": "kolm emits the artifact LM Studio can then run." },
+        { "axis": "Provenance", "kolm": "Signed, replayable receipt", "them": "None", "why": "kolm proves the build." },
+        { "axis": "Quantize control", "kolm": "Measured INT4 matrix", "them": "Uses pre-quantized files", "why": "kolm runs the quantize step itself." },
+        { "axis": "Pipeline", "kolm": "Capture to distill to compile to serve", "them": "Download to chat", "why": "kolm is the full build chain." },
+        { "axis": "Interoperable", "kolm": "Output runs in LM Studio too", "them": "n/a", "why": "GGUF is a shared format." },
+        { "axis": "License", "kolm": "Apache-2.0", "them": "Free desktop app", "why": "Both are accessible; kolm is open source." }
+      ],
+      "when_them_wins": "Choose LM Studio when you just want to chat with an existing open model locally with a friendly desktop UI and no build step.",
+      "when_kolm_wins": "Choose kolm when you want to produce the model in the first place — a specialist distilled from your traffic and quantized to a GGUF you can then open in LM Studio, with a signed receipt of how it was built.",
+      "proof_href": "/benchmarks/sota-quantize-matrix.json",
+      "proof_stat": "17.9 GB",
+      "proof_stat_context": "kolm compiles a 32B reasoning model to a 17.9 GB INT4 GGUF — small enough for a single consumer GPU — in 125.3 s.",
+      "faqs": [
+        { "q": "Can I run a kolm artifact in LM Studio?", "a": "Yes. kolm exports standard GGUF, which LM Studio loads directly. kolm is the compiler; LM Studio is one of several runtimes for the output." },
+        { "q": "Why compile instead of downloading a model?", "a": "A downloaded model is generic. A kolm-compiled specialist is distilled from your own captured traffic, so it is smaller and tuned to your task, with a receipt that proves how it was built." },
+        { "q": "Do I need a GPU?", "a": "Quantization benefits from a GPU, but the resulting GGUF runs on CPU offload in LM Studio. The verified matrix figures were measured on a single RTX 5090." }
+      ]
+    }
+  ]
+}

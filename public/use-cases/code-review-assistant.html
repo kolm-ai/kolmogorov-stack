@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Internal code review assistant with kolm | kolm.ai</title>
+<meta name="description" content="Internal code review assistant: A frontier-model code reviewer is costly per pull request and sends proprietary source to an external API. The reviews are gener">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta name="author" content="kolm.ai">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:title" content="Internal code review assistant with kolm | kolm.ai">
+<meta property="og:description" content="Internal code review assistant: A frontier-model code reviewer is costly per pull request and sends proprietary source to an external API. The reviews are gener">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/use-cases/code-review-assistant">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Internal code review assistant with kolm | kolm.ai">
+<meta name="twitter:description" content="Internal code review assistant: A frontier-model code reviewer is costly per pull request and sends proprietary source to an external API. The reviews are gener">
+<link rel="canonical" href="https://kolm.ai/use-cases/code-review-assistant">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/seo-pages.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://kolm.ai/use-cases/code-review-assistant#software","name":"kolm","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows","description":"Internal code review assistant: A frontier-model code reviewer is costly per pull request and sends proprietary source to an external API. The reviews are gener","url":"https://kolm.ai/use-cases/code-review-assistant","offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"},"license":"https://www.apache.org/licenses/LICENSE-2.0"},{"@type":"BreadcrumbList","@id":"https://kolm.ai/use-cases/code-review-assistant#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Use cases","item":"https://kolm.ai/use-cases"},{"@type":"ListItem","position":3,"name":"Internal code review assistant","item":"https://kolm.ai/use-cases/code-review-assistant"}]},{"@id":"https://kolm.ai/use-cases/code-review-assistant#faq","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can it run in CI?","acceptedAnswer":{"@type":"Answer","text":"Yes. The compiled artifact serves an OpenAI-compatible endpoint via kolm serve, which a CI job can call locally."}},{"@type":"Question","name":"Does my source go to a third party?","acceptedAnswer":{"@type":"Answer","text":"With a self-hosted gateway and a compiled local model, inference happens inside your boundary. PII and secrets are redacted on capture."}},{"@type":"Question","name":"How big is the model?","acceptedAnswer":{"@type":"Answer","text":"You choose the base and quantization. The verified matrix records sizes from 0.44 GB (a 0.5B model INT4) up to 17.9 GB (a 32B model INT4)."}}]}]}
+</script>
+</head>
+<body class="seo-page">
+<a class="seo-skip" href="#main">Skip to content</a>
+<header class="seo-head"><div class="seo-head__wrap"><a class="seo-head__logo" href="/">kolm.ai</a><nav class="seo-head__nav"><a href="/compare">Compare</a><a href="/forge">Forge</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/signup">Sign up</a></nav></div></header>
+<main id="main" class="seo-main">
+<p class="seo-crumb"><a href="/use-cases">&larr; All use cases</a></p>
+<h1 class="seo-h1">Internal code review assistant</h1>
+<div class="seo-bluf" data-bluf="1"><p class="seo-bluf__q">How does kolm handle internal code review assistant?</p><p class="seo-bluf__a">kolm captures your review interactions, distills a specialist that learns your conventions, and quantizes it for local serving — so PR review runs on your own hardware at fixed cost with a signed receipt, and your source never has to leave on every call. The result is a model you own and run on your own hardware, trained on your real workload, with a signed build receipt instead of a recurring per-call API bill.</p></div>
+<h2>The problem</h2>
+<div class="seo-bluf" data-bluf="1"><p class="seo-bluf__q">What makes internal code review assistant expensive today?</p><p class="seo-bluf__a">A frontier-model code reviewer is costly per pull request and sends proprietary source to an external API. The reviews are generic rather than tuned to your codebase conventions. That cost compounds with volume and ties a sensitive workload to an external API, which is exactly the situation an owned, compiled specialist is designed to replace once the traffic pattern is well understood.</p></div>
+<h2>The kolm flow</h2>
+<div class="seo-bluf" data-bluf="1"><p class="seo-bluf__q">How does the kolm pipeline solve it?</p><p class="seo-bluf__a">Point your review tool's LLM at the kolm gateway. Captured (diff, review) pairs feed a distillation run; kolm compiles a quantized specialist you serve in CI or on a workstation. Each stage runs inside your own environment, so capture, distillation, and compilation happen without handing the workload to a third party, and the final artifact is a portable, signed model.</p></div>
+<h2>The verified proof point</h2>
+<div class="seo-bluf" data-bluf="1"><p class="seo-bluf__q">What evidence backs this?</p><p class="seo-bluf__a">kolm grounds its claims in checked-in measurements rather than estimates. The statistic below links to a verified benchmark artifact, and every model compile emits a signed receipt you can replay at /verify-prod, so the outcome of this use case is auditable end to end rather than asserted.</p></div>
+<p class="seo-proof"><span class="seo-proof__badge">verified</span> <strong>17.9 GB</strong> A capable 32B reasoning base compresses to 17.9 GB INT4 in the verified matrix, small enough to serve a code reviewer on a single workstation GPU. <a class="seo-proof__src" href="/benchmarks/sota-quantize-matrix.json" rel="nofollow">Source &rarr;</a></p>
+<h2>The outcome</h2>
+<div class="seo-bluf" data-bluf="1"><p class="seo-bluf__q">What do you end up with?</p><p class="seo-bluf__a">You get a review assistant you own, tuned to your conventions, served locally at fixed cost, with a signed receipt proving exactly which weights were compiled. Because the artifact is portable and signed, you can move it between a laptop, a VPC, or an air-gapped network, and prove at any point exactly which weights and method produced it.</p></div>
+<h2>FAQ</h2>
+<div class="seo-faq"><details class="seo-faq__item"><summary>Can it run in CI?</summary><div class="seo-faq__a">Yes. The compiled artifact serves an OpenAI-compatible endpoint via kolm serve, which a CI job can call locally.</div></details><details class="seo-faq__item"><summary>Does my source go to a third party?</summary><div class="seo-faq__a">With a self-hosted gateway and a compiled local model, inference happens inside your boundary. PII and secrets are redacted on capture.</div></details><details class="seo-faq__item"><summary>How big is the model?</summary><div class="seo-faq__a">You choose the base and quantization. The verified matrix records sizes from 0.44 GB (a 0.5B model INT4) up to 17.9 GB (a 32B model INT4).</div></details></div>
+<p class="seo-cta"><a class="seo-cta__primary" href="/signup">Start free &rarr;</a> <a class="seo-cta__secondary" href="/use-cases">All use cases</a></p>
+<nav class="seo-links" aria-label="Related pages"><ul><li><a href="/use-cases/support-deflection">Customer support deflection</a></li><li><a href="/use-cases/document-extraction">Structured document extraction</a></li><li><a href="/use-cases/on-prem-chat">On-prem internal chat assistant</a></li><li><a href="/compare">How kolm compares</a></li><li><a href="/forge">The Forge: compile + distill</a></li><li><a href="/pricing">Pricing</a></li></ul></nav>
+</main>
+<footer class="seo-foot">kolm.ai &middot; the AI compiler &middot; <a href="/compare">Compare</a> &middot; <a href="/verify-prod">Verify a receipt</a> &middot; <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></footer>
+</body>
+</html>

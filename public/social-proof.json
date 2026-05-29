@@ -1,0 +1,93 @@
+{
+  "spec": "kolm-social-proof-1",
+  "generated_at": "2026-05-29T06:58:51.867Z",
+  "stale": true,
+  "repo": "kolm-ai/kolm",
+  "oss": {
+    "available": false,
+    "stale": true,
+    "reason": "offline",
+    "stargazers_count": null,
+    "forks_count": null,
+    "contributors": null,
+    "pushed_at": null,
+    "etag": null,
+    "fetched_at": "2026-05-29T06:48:01.393Z"
+  },
+  "policy": {
+    "show_star_count": false,
+    "show_forks": false,
+    "show_contributors": false,
+    "lead_with": "chips"
+  },
+  "chips": [
+    {
+      "label": "Apache-2.0",
+      "href": "/license"
+    },
+    {
+      "label": "Self-hostable",
+      "href": "/docs"
+    },
+    {
+      "label": "6 SDKs",
+      "href": "/docs/sdk"
+    },
+    {
+      "label": "Air-gapped",
+      "href": "/docs"
+    }
+  ],
+  "proof": [
+    {
+      "label": "Asks the right question",
+      "value": "96.5%",
+      "claim_substring": "96.5%",
+      "evidence_file": "public/benchmarks/trinity-500-benchmark.json",
+      "href": "/benchmarks/trinity-500-benchmark.json",
+      "verify_href": "/verify-prod",
+      "note": "trinity-500 distilled specialist, 57 held-out cases"
+    },
+    {
+      "label": "PII redaction",
+      "value": "F1 1.0",
+      "claim_substring": "F1 1.0",
+      "evidence_file": "public/benchmarks/redaction-public-benchmark.json",
+      "href": "/benchmarks/redaction-public-benchmark.json",
+      "verify_href": "/verify-prod",
+      "note": "public redaction benchmark, zero false positives"
+    },
+    {
+      "label": "32B model, one GPU",
+      "value": "17.9 GB",
+      "claim_substring": "17.9 GB",
+      "evidence_file": "public/benchmarks/sota-quantize-matrix.json",
+      "href": "/benchmarks/sota-quantize-matrix.json",
+      "verify_href": "/verify-prod",
+      "note": "DeepSeek-R1 32B compressed to INT4 in 125.3 s on an RTX 5090"
+    }
+  ],
+  "case_studies": [
+    {
+      "href": "/case-studies/healthcare-phi-redactor.html",
+      "title": "Healthcare PHI redaction",
+      "who": "Director, Privacy & Compliance (anonymized)"
+    },
+    {
+      "href": "/case-studies/finance-sr11-7.html",
+      "title": "Model-risk governance (SR 11-7)",
+      "who": "SVP Model Risk Management (anonymized)"
+    },
+    {
+      "href": "/case-studies/legal-contract-extraction.html",
+      "title": "Contract extraction",
+      "who": "Firm General Counsel (anonymized)"
+    }
+  ],
+  "testimonial": {
+    "quote": "Privilege means client text cannot leave. An owned model with a signed build receipt let us say yes to AI without that risk.",
+    "who": "Firm General Counsel (anonymized)",
+    "source_href": "/case-studies/legal-contract-extraction.html"
+  },
+  "compare_href": "/compare"
+}

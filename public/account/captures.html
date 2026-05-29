@@ -119,6 +119,13 @@
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/warm-paper.css">
+<link rel="stylesheet" href="/account/account-ui.css">
+<link rel="stylesheet" href="/account/account-vt.css">
+<!-- W921 cross-document view transitions (parser-blocking, before first paint) -->
+<script id="kolm-vt">(function kolmAccountVT(){var ORDER=['overview','gateway','captures','connectors','captured','privacy-events','repeated-workflows','opportunities','labeling','datasets','simulations','bakeoffs','builds','artifacts','devices','storage','billing','routing','active-learning'];function idx(u){try{var p=new URL(u,location.href).pathname.replace(/\/+$/,'').split('/').pop();var i=ORDER.indexOf(p);return i<0?999:i;}catch(e){return 999;}}function dir(f,t){var a=idx(f),b=idx(t);return a===b?'none':(b>a?'forward':'back');}function anim(){return ('startViewTransition' in document)&&!matchMedia('(prefers-reduced-motion: reduce)').matches;}function tag(e){if(!e.viewTransition)return;if(!anim()){e.viewTransition.skipTransition();return;}try{var nav=window.navigation&&navigation.activation;var f=(e.activation&&e.activation.from&&e.activation.from.url)||(nav&&nav.from&&nav.from.url)||location.href;var t=(e.activation&&e.activation.entry&&e.activation.entry.url)||(nav&&nav.entry&&nav.entry.url)||location.href;e.viewTransition.types.add(dir(f,t));}catch(_){}}window.addEventListener('pageswap',tag);window.addEventListener('pagereveal',tag);})();</script>
+<script src="/account/account-net.js" defer></script>
+<script src="/account/account-mutate.js" defer></script>
+<script src="/account/account-keylist.js" defer></script>
 <script src="/nav.js" defer></script>
 </head>
 <body class="kolm-account-surface ks">
@@ -222,6 +229,8 @@
   <button type="button" class="btn" id="bulk-quarantine" disabled>Quarantine selected</button>
   <button type="button" class="btn" id="bulk-export" disabled>Export selected</button>
 </div>
+
+<div class="keylist-hint" aria-hidden="true"><kbd>j</kbd>/<kbd>k</kbd> move &middot; <kbd>x</kbd> select &middot; <kbd>shift</kbd>+arrow range &middot; <kbd>enter</kbd> inspect &middot; <kbd>ctrl</kbd>/<kbd>cmd</kbd>+<kbd>z</kbd> undo</div>
 
 <div class="kpanel">
   <table class="ktable" aria-describedby="captures-empty-desc">
@@ -358,6 +367,7 @@ function rowHtml(r){
     +"</tr>";
 }
 
+var keylistCtl=null;
 function renderRows(rows){
   var tbody=document.getElementById("cap-rows");
   var empty=document.getElementById("cap-empty");
@@ -375,6 +385,22 @@ function renderRows(rows){
   tbody.querySelectorAll(".inspect-btn").forEach(function(b){
     b.addEventListener("click",function(){openInspect(b.getAttribute("data-id"));});
   });
+  // W921: keyboard-operable list (roving tabindex, j/k/arrow, x select, Enter
+  // open). Feature-detected; falls back to the mouse-only path if the shared
+  // module did not load. The controller delegates selection STATE to state.sel
+  // and open EFFECTS to openInspect, so the existing bulk pipeline is reused.
+  if(typeof window.mountKeyList==="function"){
+    if(keylistCtl){keylistCtl.destroy();keylistCtl=null;}
+    keylistCtl=window.mountKeyList(tbody,{
+      rowSelector:"tr[data-cap-id]",
+      getRowId:function(tr){return tr.getAttribute("data-cap-id");},
+      multiselect:true,
+      selectionSet:state.sel,
+      onSelect:function(id,sel,tr){var cb=tr.querySelector(".row-check");if(cb)cb.checked=sel;updateSelCount();},
+      onOpen:function(tr,id){openInspect(id);},
+      liveRegionEl:document.getElementById("loading-status")
+    });
+  }
 }
 
 function renderPager(){
@@ -441,6 +467,23 @@ function openInspect(id){
 function bulkAction(action){
   if(state.sel.size===0)return;
   var ids=Array.from(state.sel);
+  // W921: route through the optimistic deferred-commit bus when present so the
+  // user gets a 5.5s Undo window before an irreversible bulk status change
+  // actually fires. The selection is captured up-front; rollback re-renders.
+  if(typeof window.kMutate==="function"){
+    var labels={approve:"Approved",reject:"Rejected",quarantine:"Quarantined"};
+    window.kMutate({
+      entity:"captures:bulk",
+      label:(labels[action]||"Updated")+" "+ids.length+" capture"+(ids.length===1?"":"s"),
+      strategy:"defer",
+      severity:action==="reject"||action==="quarantine"?"warn":"good",
+      applyOptimistic:function(){state.sel=new Set();updateSelCount();},
+      rollback:function(){load();},
+      commit:function(){return window.kFetchJSON("/v1/capture/bulk",{method:"POST",body:JSON.stringify({action:action,capture_ids:ids})});},
+      onSettled:function(){load();}
+    });
+    return;
+  }
   try{
     window.kfetch("/v1/capture/bulk",{method:"POST",body:JSON.stringify({action:action,capture_ids:ids})})
       .then(function(){load();}).catch(function(){load();});

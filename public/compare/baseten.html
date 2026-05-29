@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>kolm vs Baseten: compile vs rent | kolm.ai</title>
+<meta name="description" content="kolm vs Baseten — an axis-by-axis comparison. Baseten is a model deployment platform built around Truss packaging and managed autoscaling inference. kolm compil">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta name="author" content="kolm.ai">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:title" content="kolm vs Baseten: compile vs rent | kolm.ai">
+<meta property="og:description" content="kolm vs Baseten — an axis-by-axis comparison. Baseten is a model deployment platform built around Truss packaging and managed autoscaling inference. kolm compil">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/compare/baseten">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kolm vs Baseten: compile vs rent | kolm.ai">
+<meta name="twitter:description" content="kolm vs Baseten — an axis-by-axis comparison. Baseten is a model deployment platform built around Truss packaging and managed autoscaling inference. kolm compil">
+<link rel="canonical" href="https://kolm.ai/compare/baseten">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/seo-pages.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://kolm.ai/compare/baseten#software","name":"kolm","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows","description":"kolm vs Baseten — an axis-by-axis comparison. Baseten is a model deployment platform built around Truss packaging and managed autoscaling inference. kolm compil","url":"https://kolm.ai/compare/baseten","offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"},"license":"https://www.apache.org/licenses/LICENSE-2.0"},{"@type":"BreadcrumbList","@id":"https://kolm.ai/compare/baseten#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Compare","item":"https://kolm.ai/compare"},{"@type":"ListItem","position":3,"name":"Baseten","item":"https://kolm.ai/compare/baseten"}]},{"@id":"https://kolm.ai/compare/baseten#faq","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does kolm package models like Truss?","acceptedAnswer":{"@type":"Answer","text":"kolm's package is the .kolm artifact: quantized weights plus a signed receipt and the original weight hashes. It loads in standard runtimes (llama.cpp, vLLM, ExLlamaV2) without a kolm dependency."}},{"@type":"Question","name":"Can I deploy a kolm artifact to my own cloud?","acceptedAnswer":{"@type":"Answer","text":"Yes. kolm deploy pushes an artifact to a device or VPC you control. There is no kolm control plane in the inference path."}},{"@type":"Question","name":"How do I verify a build?","acceptedAnswer":{"@type":"Answer","text":"Run kolm verify on the artifact, or replay the receipt CID at /verify-prod. It checks the SHA-256 weight chain, the Ed25519 signature, and the K-score."}}]}]}
+</script>
+</head>
+<body class="seo-page">
+<a class="seo-skip" href="#main">Skip to content</a>
+<header class="seo-head"><div class="seo-head__wrap"><a class="seo-head__logo" href="/">kolm.ai</a><nav class="seo-head__nav"><a href="/compare">Compare</a><a href="/forge">Forge</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/signup">Sign up</a></nav></div></header>
+<main id="main" class="seo-main">
+<p class="seo-crumb"><a href="/compare">&larr; All comparisons</a></p>
+<h1 class="seo-h1">kolm vs Baseten</h1>
+<div class="seo-bluf" data-bluf="1"><p class="seo-bluf__q">kolm vs Baseten: which should you pick?</p><p class="seo-bluf__a">Baseten packages and autoscales your model deployments in its cloud; kolm compiles a signed, portable model you own and run anywhere. Pick Baseten for managed deployment ergonomics. Pick kolm when ownership, portability, and a verifiable build receipt matter more than a hosted control plane.</p></div>
+<h2>How they differ, axis by axis</h2>
+<div class="seo-bluf" data-bluf="1"><p class="seo-bluf__q">What is the core difference between kolm and Baseten?</p><p class="seo-bluf__a">Baseten is a model deployment platform built around Truss packaging and managed autoscaling inference. The table below contrasts each on the axes that matter for ownership, cost, provenance, and portability, so you can see where kolm's compile-and-own model diverges from a hosted or rented offering and decide which fits your workload.</p></div>
+<table class="seo-matrix"><thead><tr><th>Axis</th><th>kolm</th><th>Baseten</th><th>Why it matters</th></tr></thead><tbody>
+<tr><td class="seo-matrix__axis">Output</td><td class="seo-matrix__kolm">Owned .kolm artifact</td><td class="seo-matrix__them">Managed deployment in Baseten</td><td class="seo-matrix__why">kolm's artifact is yours to move.</td></tr>
+<tr><td class="seo-matrix__axis">Runtime dependency</td><td class="seo-matrix__kolm">None at inference time</td><td class="seo-matrix__them">Baseten control plane</td><td class="seo-matrix__why">Compiled weights run standalone.</td></tr>
+<tr><td class="seo-matrix__axis">Cost after build</td><td class="seo-matrix__kolm">Zero per-token</td><td class="seo-matrix__them">Per-deployment compute billing</td><td class="seo-matrix__why">You own the weights.</td></tr>
+<tr><td class="seo-matrix__axis">Receipt</td><td class="seo-matrix__kolm">Signed, replayable at /verify-prod</td><td class="seo-matrix__them">Deployment metadata</td><td class="seo-matrix__why">kolm proves the build cryptographically.</td></tr>
+<tr><td class="seo-matrix__axis">Capture-to-train</td><td class="seo-matrix__kolm">Gateway captures traffic into a lake</td><td class="seo-matrix__them">You supply the dataset</td><td class="seo-matrix__why">kolm makes the dataset a by-product.</td></tr>
+<tr><td class="seo-matrix__axis">Quantize matrix</td><td class="seo-matrix__kolm">Measured INT4 ladder (61.0 GB to 17.9 GB)</td><td class="seo-matrix__them">Bring-your-own</td><td class="seo-matrix__why">kolm ships the numbers.</td></tr>
+<tr><td class="seo-matrix__axis">Air-gap</td><td class="seo-matrix__kolm">Runs with no network at inference</td><td class="seo-matrix__them">Cloud-coupled</td><td class="seo-matrix__why">Owned artifact needs no callback.</td></tr>
+<tr><td class="seo-matrix__axis">License</td><td class="seo-matrix__kolm">Apache-2.0</td><td class="seo-matrix__them">Proprietary</td><td class="seo-matrix__why">kolm is open source.</td></tr>
+</tbody></table>
+<h2>The verified proof point</h2>
+<div class="seo-bluf" data-bluf="1"><p class="seo-bluf__q">What can kolm actually demonstrate?</p><p class="seo-bluf__a">kolm's differentiator is that its claims are backed by checked-in measurements, not marketing copy. The statistic below links to a verified benchmark artifact, and every model compile emits a signed receipt you can replay at /verify-prod, so the proof travels with the build rather than living only on a slide.</p></div>
+<p class="seo-proof"><span class="seo-proof__badge">verified</span> <strong>61.0 GB</strong> The verified matrix records a 61.0 GB bf16 DeepSeek-R1 32B compressing to 17.9 GB INT4 on one consumer GPU. <a class="seo-proof__src" href="/benchmarks/sota-quantize-matrix.json" rel="nofollow">Source &rarr;</a></p>
+<h2>When to pick each</h2>
+<div class="seo-bluf" data-bluf="1"><p class="seo-bluf__q">When is Baseten the right answer, and when is kolm?</p><p class="seo-bluf__a">Neither tool is strictly better; they solve different problems. Choose Baseten when you want a polished managed-deployment experience with Truss packaging and autoscaling, and you do not need to physically own and relocate the model artifact. The opposite case is summarized below, so you can match the choice to whether you want a hosted, rented capability or an owned, portable model with a verifiable build receipt.</p></div>
+<p class="seo-when"><strong>When kolm wins.</strong> Choose kolm when you need a model you can carry into a VPC or an air-gapped environment, with a signed receipt proving exactly what was compiled.</p>
+<h2>FAQ</h2>
+<div class="seo-faq"><details class="seo-faq__item"><summary>Does kolm package models like Truss?</summary><div class="seo-faq__a">kolm's package is the .kolm artifact: quantized weights plus a signed receipt and the original weight hashes. It loads in standard runtimes (llama.cpp, vLLM, ExLlamaV2) without a kolm dependency.</div></details><details class="seo-faq__item"><summary>Can I deploy a kolm artifact to my own cloud?</summary><div class="seo-faq__a">Yes. kolm deploy pushes an artifact to a device or VPC you control. There is no kolm control plane in the inference path.</div></details><details class="seo-faq__item"><summary>How do I verify a build?</summary><div class="seo-faq__a">Run kolm verify on the artifact, or replay the receipt CID at /verify-prod. It checks the SHA-256 weight chain, the Ed25519 signature, and the K-score.</div></details></div>
+<h2>Try it</h2>
+<div class="seo-bluf" data-bluf="1"><p class="seo-bluf__q">How do I start with kolm?</p><p class="seo-bluf__a">Sign up for a free kolm key, point your existing OpenAI-compatible client at the gateway base URL, and let it capture traffic. When the lake is full, run kolm distill then kolm compile to produce a signed, quantized model you own. Every build is replayable at /verify-prod, so you can verify before you ship.</p></div>
+<p class="seo-cta"><a class="seo-cta__primary" href="/signup">Start free &rarr;</a> <a class="seo-cta__secondary" href="/compare">See all comparisons</a></p>
+<nav class="seo-links" aria-label="Related pages"><ul><li><a href="/compare/modal">kolm vs Modal</a></li><li><a href="/compare/fireworks-ai">kolm vs Fireworks AI</a></li><li><a href="/compare/replicate">kolm vs Replicate</a></li><li><a href="/compare">How kolm compares</a></li><li><a href="/forge">The Forge: compile + distill</a></li><li><a href="/pricing">Pricing</a></li></ul></nav>
+</main>
+<footer class="seo-foot">kolm.ai &middot; the AI compiler &middot; <a href="/compare">Compare</a> &middot; <a href="/verify-prod">Verify a receipt</a> &middot; <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></footer>
+</body>
+</html>

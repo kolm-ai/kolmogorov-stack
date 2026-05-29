@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>kolm vs Fireworks AI: compile vs rent | kolm.ai</title>
+<meta name="description" content="kolm vs Fireworks AI — an axis-by-axis comparison. Fireworks AI is a hosted inference platform offering fast serving of open and fine-tuned models behind an API">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta name="author" content="kolm.ai">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:title" content="kolm vs Fireworks AI: compile vs rent | kolm.ai">
+<meta property="og:description" content="kolm vs Fireworks AI — an axis-by-axis comparison. Fireworks AI is a hosted inference platform offering fast serving of open and fine-tuned models behind an API">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/compare/fireworks-ai">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kolm vs Fireworks AI: compile vs rent | kolm.ai">
+<meta name="twitter:description" content="kolm vs Fireworks AI — an axis-by-axis comparison. Fireworks AI is a hosted inference platform offering fast serving of open and fine-tuned models behind an API">
+<link rel="canonical" href="https://kolm.ai/compare/fireworks-ai">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/seo-pages.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://kolm.ai/compare/fireworks-ai#software","name":"kolm","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows","description":"kolm vs Fireworks AI — an axis-by-axis comparison. Fireworks AI is a hosted inference platform offering fast serving of open and fine-tuned models behind an API","url":"https://kolm.ai/compare/fireworks-ai","offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"},"license":"https://www.apache.org/licenses/LICENSE-2.0"},{"@type":"BreadcrumbList","@id":"https://kolm.ai/compare/fireworks-ai#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Compare","item":"https://kolm.ai/compare"},{"@type":"ListItem","position":3,"name":"Fireworks AI","item":"https://kolm.ai/compare/fireworks-ai"}]},{"@id":"https://kolm.ai/compare/fireworks-ai#faq","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is kolm slower than a hosted endpoint?","acceptedAnswer":{"@type":"Answer","text":"kolm produces a quantized model you serve yourself, so throughput depends on your hardware. The published matrix records 11.5 tok/s for a 32B INT4 model on one RTX 5090; smaller specialists are faster. The trade is metered cloud latency for owned, fixed-cost local serving."}},{"@type":"Question","name":"Can I compile a model trained on my Fireworks traffic?","acceptedAnswer":{"@type":"Answer","text":"Point your existing client at the kolm gateway instead. It captures (input, output) pairs and PII-redacts on the way in. Those pairs become the distillation set for an owned specialist."}},{"@type":"Question","name":"What do I get at the end?","acceptedAnswer":{"@type":"Answer","text":"A single .kolm artifact with quantized weights, the original bf16 SHA-256 hashes, and an Ed25519-signed receipt you can replay at /verify-prod."}}]}]}
+</script>
+</head>
+<body class="seo-page">
+<a class="seo-skip" href="#main">Skip to content</a>
+<header class="seo-head"><div class="seo-head__wrap"><a class="seo-head__logo" href="/">kolm.ai</a><nav class="seo-head__nav"><a href="/compare">Compare</a><a href="/forge">Forge</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/signup">Sign up</a></nav></div></header>
+<main id="main" class="seo-main">
+<p class="seo-crumb"><a href="/compare">&larr; All comparisons</a></p>
+<h1 class="seo-h1">kolm vs Fireworks AI</h1>
+<div class="seo-bluf" data-bluf="1"><p class="seo-bluf__q">kolm vs Fireworks AI: which should you pick?</p><p class="seo-bluf__a">Fireworks serves models fast behind its own API and bills per token; kolm compiles a model you own and run with no per-token bill. Pick Fireworks for managed, low-latency hosted inference. Pick kolm when you want to own the weights, run them on your own hardware, and verify every build with a signed receipt.</p></div>
+<h2>How they differ, axis by axis</h2>
+<div class="seo-bluf" data-bluf="1"><p class="seo-bluf__q">What is the core difference between kolm and Fireworks AI?</p><p class="seo-bluf__a">Fireworks AI is a hosted inference platform offering fast serving of open and fine-tuned models behind an API. The table below contrasts each on the axes that matter for ownership, cost, provenance, and portability, so you can see where kolm's compile-and-own model diverges from a hosted or rented offering and decide which fits your workload.</p></div>
+<table class="seo-matrix"><thead><tr><th>Axis</th><th>kolm</th><th>Fireworks AI</th><th>Why it matters</th></tr></thead><tbody>
+<tr><td class="seo-matrix__axis">Where it runs</td><td class="seo-matrix__kolm">Your hardware (laptop / VPC / air-gap)</td><td class="seo-matrix__them">Fireworks' cloud</td><td class="seo-matrix__why">kolm produces a portable artifact; Fireworks hosts.</td></tr>
+<tr><td class="seo-matrix__axis">Billing</td><td class="seo-matrix__kolm">Zero per-token after compile</td><td class="seo-matrix__them">Per-token serving fees</td><td class="seo-matrix__why">Owned weights have no metered inference.</td></tr>
+<tr><td class="seo-matrix__axis">Artifact</td><td class="seo-matrix__kolm">Signed .kolm with weight hashes + receipt</td><td class="seo-matrix__them">A served endpoint</td><td class="seo-matrix__why">kolm hands you the model file, not a URL.</td></tr>
+<tr><td class="seo-matrix__axis">Verification</td><td class="seo-matrix__kolm">Replay the receipt at /verify-prod</td><td class="seo-matrix__them">Trust the dashboard</td><td class="seo-matrix__why">kolm's receipt is cryptographically checkable.</td></tr>
+<tr><td class="seo-matrix__axis">Distillation</td><td class="seo-matrix__kolm">Council-distill from captured traffic to a 7B specialist</td><td class="seo-matrix__them">Upload-a-dataset fine-tune</td><td class="seo-matrix__why">kolm turns live traffic into the training set.</td></tr>
+<tr><td class="seo-matrix__axis">Quantization control</td><td class="seo-matrix__kolm">INT4 / GGUF / EXL2 with a measured matrix</td><td class="seo-matrix__them">Platform-chosen</td><td class="seo-matrix__why">kolm exposes the quantize ladder and the numbers.</td></tr>
+<tr><td class="seo-matrix__axis">Quality gate</td><td class="seo-matrix__kolm">K-score with calibrated release gate</td><td class="seo-matrix__them">Eval is your responsibility</td><td class="seo-matrix__why">kolm ships a quality contract into the pipeline.</td></tr>
+<tr><td class="seo-matrix__axis">License</td><td class="seo-matrix__kolm">Apache-2.0, self-hostable</td><td class="seo-matrix__them">Proprietary platform</td><td class="seo-matrix__why">kolm is open source.</td></tr>
+</tbody></table>
+<h2>The verified proof point</h2>
+<div class="seo-bluf" data-bluf="1"><p class="seo-bluf__q">What can kolm actually demonstrate?</p><p class="seo-bluf__a">kolm's differentiator is that its claims are backed by checked-in measurements, not marketing copy. The statistic below links to a verified benchmark artifact, and every model compile emits a signed receipt you can replay at /verify-prod, so the proof travels with the build rather than living only on a slide.</p></div>
+<p class="seo-proof"><span class="seo-proof__badge">verified</span> <strong>96.5%</strong> The trinity-500 distilled 7B specialist asks the right clarifying question 96.5% of the time at 1.24 s mean latency in the published benchmark. <a class="seo-proof__src" href="/benchmarks/trinity-500-benchmark.json" rel="nofollow">Source &rarr;</a></p>
+<h2>When to pick each</h2>
+<div class="seo-bluf" data-bluf="1"><p class="seo-bluf__q">When is Fireworks AI the right answer, and when is kolm?</p><p class="seo-bluf__a">Neither tool is strictly better; they solve different problems. Choose Fireworks when you want the lowest-friction managed inference for popular open models and are happy to keep paying per token for the operational simplicity of a hosted endpoint. The opposite case is summarized below, so you can match the choice to whether you want a hosted, rented capability or an owned, portable model with a verifiable build receipt.</p></div>
+<p class="seo-when"><strong>When kolm wins.</strong> Choose kolm when your token bill is the cost you want to eliminate: compile your repeated workload into an owned model, quantize to your hardware, and serve it yourself with a verifiable build receipt.</p>
+<h2>FAQ</h2>
+<div class="seo-faq"><details class="seo-faq__item"><summary>Is kolm slower than a hosted endpoint?</summary><div class="seo-faq__a">kolm produces a quantized model you serve yourself, so throughput depends on your hardware. The published matrix records 11.5 tok/s for a 32B INT4 model on one RTX 5090; smaller specialists are faster. The trade is metered cloud latency for owned, fixed-cost local serving.</div></details><details class="seo-faq__item"><summary>Can I compile a model trained on my Fireworks traffic?</summary><div class="seo-faq__a">Point your existing client at the kolm gateway instead. It captures (input, output) pairs and PII-redacts on the way in. Those pairs become the distillation set for an owned specialist.</div></details><details class="seo-faq__item"><summary>What do I get at the end?</summary><div class="seo-faq__a">A single .kolm artifact with quantized weights, the original bf16 SHA-256 hashes, and an Ed25519-signed receipt you can replay at /verify-prod.</div></details></div>
+<h2>Try it</h2>
+<div class="seo-bluf" data-bluf="1"><p class="seo-bluf__q">How do I start with kolm?</p><p class="seo-bluf__a">Sign up for a free kolm key, point your existing OpenAI-compatible client at the gateway base URL, and let it capture traffic. When the lake is full, run kolm distill then kolm compile to produce a signed, quantized model you own. Every build is replayable at /verify-prod, so you can verify before you ship.</p></div>
+<p class="seo-cta"><a class="seo-cta__primary" href="/signup">Start free &rarr;</a> <a class="seo-cta__secondary" href="/compare">See all comparisons</a></p>
+<nav class="seo-links" aria-label="Related pages"><ul><li><a href="/compare/modal">kolm vs Modal</a></li><li><a href="/compare/baseten">kolm vs Baseten</a></li><li><a href="/compare/replicate">kolm vs Replicate</a></li><li><a href="/compare">How kolm compares</a></li><li><a href="/forge">The Forge: compile + distill</a></li><li><a href="/pricing">Pricing</a></li></ul></nav>
+</main>
+<footer class="seo-foot">kolm.ai &middot; the AI compiler &middot; <a href="/compare">Compare</a> &middot; <a href="/verify-prod">Verify a receipt</a> &middot; <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></footer>
+</body>
+</html>

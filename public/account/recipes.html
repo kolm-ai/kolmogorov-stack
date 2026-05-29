@@ -63,6 +63,12 @@
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/warm-paper.css">
+<link rel="stylesheet" href="/account/account-ui.css">
+<link rel="stylesheet" href="/account/account-vt.css">
+<script id="kolm-vt">(function kolmAccountVT(){var ORDER=['overview','gateway','captures','connectors','captured','privacy-events','repeated-workflows','opportunities','labeling','datasets','recipes','simulations','bakeoffs','builds','artifacts','devices','storage','billing','routing','active-learning','continuous-monitoring'];function idx(u){try{var p=new URL(u,location.href).pathname.replace(/\/+$/,'').split('/').pop();var i=ORDER.indexOf(p);return i<0?999:i;}catch(e){return 999;}}function dir(f,t){var a=idx(f),b=idx(t);return a===b?'none':(b>a?'forward':'back');}function anim(){return ('startViewTransition' in document)&&!matchMedia('(prefers-reduced-motion: reduce)').matches;}function tag(e){if(!e.viewTransition)return;if(!anim()){e.viewTransition.skipTransition();return;}try{var nav=window.navigation&&navigation.activation;var f=(e.activation&&e.activation.from&&e.activation.from.url)||(nav&&nav.from&&nav.from.url)||location.href;var t=(e.activation&&e.activation.entry&&e.activation.entry.url)||(nav&&nav.entry&&nav.entry.url)||location.href;e.viewTransition.types.add(dir(f,t));}catch(_){}}window.addEventListener('pageswap',tag);window.addEventListener('pagereveal',tag);})();</script>
+<script src="/account/account-net.js" defer></script>
+<script src="/account/account-mutate.js" defer></script>
+<script src="/account/account-automations.js" defer></script>
 </head>
 <body class="kolm-account-surface ks">
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
@@ -148,6 +154,12 @@
  </div>
 </div>
 
+<div class="kpanel">
+ <h2>Automations</h2>
+ <p class="pdesc">Bind a trigger (schedule on a cron cadence, or an event such as drift crossing its threshold) to a recipe so it re-runs without a manual step. Auto-recompile is opt-in and proposes by default. Backed by <code>/v1/automations</code>.</p>
+ <div id="automations-mount" aria-live="polite"><div class="empty">Loading automations&hellip;</div></div>
+</div>
+
 <h2 style="margin-top:30px">CLI mirror</h2>
 <p class="help">Every action on this page has a CLI equivalent. Useful for scripting + CI.</p>
 <div class="code-snippet"><span class="c"># list available templates</span>
@@ -215,12 +227,15 @@ kolm recipe label-corpus my-support-bot --since 7d</div>
      empty.hidden=true;
      tbody.innerHTML=items.map(function(rcp){
        var id=esc(rcp.id||rcp.name||'');
+       var runAgain=(window.KolmAutomations&&typeof window.KolmAutomations.renderRunAgainButton==='function')
+         ? window.KolmAutomations.renderRunAgainButton(rcp.id||rcp.name||'')
+         : '<button type="button" class="btn kauto-runagain" data-recipe-id="'+id+'">Run again</button>';
        return '<tr>'+
         '<td>'+esc(rcp.name||rcp.id||'-')+'</td>'+
         '<td><code>'+esc(rcp.template||rcp.recipe_template||'-')+'</code></td>'+
         '<td><code>'+esc(rcp.namespace||'-')+'</code></td>'+
         '<td>'+esc(fmtTs(rcp.last_run_at||rcp.updated_at||rcp.created_at))+'</td>'+
-        '<td><a class="btn" href="/account/artifacts?recipe='+encodeURIComponent(id)+'">Results</a></td>'+
+        '<td>'+runAgain+' <a class="btn" href="/account/artifacts?recipe='+encodeURIComponent(id)+'">Results</a></td>'+
        '</tr>';
      }).join('');
    }).catch(function(){
@@ -228,9 +243,29 @@ kolm recipe label-corpus my-support-bot --since 7d</div>
    });
  }
 
+ // W921: a shared JSON fetch that reuses this page's auth headers + throws the
+ // {status} shape the modules expect.
+ function recipeFetchJSON(url,o){
+   o=o||{};var h=headers(o.body!=null?{'Content-Type':'application/json'}:{});
+   if(o.headers)for(var k in o.headers)h[k]=o.headers[k];
+   return fetch(url,{method:o.method||'GET',headers:h,body:o.body,credentials:'include'}).then(function(r){
+     var ct=r.headers.get('content-type')||'';var p=ct.indexOf('application/json')>=0?r.json():r.text();
+     return p.then(function(b){if(!r.ok){var e=new Error('HTTP '+r.status);e.status=r.status;e.body=b;throw e;}return b;});
+   });
+ }
+
  document.addEventListener('DOMContentLoaded',function(){
    loadTemplates();
    loadRecipes();
+   // W921: "Run again" delegation + automations card (feature-detected).
+   if(window.KolmAutomations){
+     window.KolmAutomations.wireRunAgain(document.getElementById('recipe-rows'),{
+       fetchJSON:recipeFetchJSON,
+       toast:(typeof window.kToast==='function'?window.kToast:null)
+     });
+     var mount=document.getElementById('automations-mount');
+     if(mount)window.KolmAutomations.mountAutomationsCard(mount,{fetchJSON:recipeFetchJSON});
+   }
  });
 })();
 </script>

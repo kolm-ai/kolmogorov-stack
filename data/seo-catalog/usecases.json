@@ -1,0 +1,70 @@
+{
+  "spec": "kolm-seo-catalog-usecases-1",
+  "note": "Generated /use-cases/* pages. Slugs MUST NOT collide with hand-authored use-case pages (agentic-coding, ai-saas, capture-and-distill, embedded, enterprise-search, mobile, web3-verifiable, index).",
+  "usecases": [
+    {
+      "slug": "support-deflection",
+      "title": "Customer support deflection",
+      "problem": "High-volume support teams pay per token to a frontier model for answers that follow a narrow, repetitive playbook. The bill scales with ticket volume and the model is generic, not tuned to your product or tone.",
+      "bluf": "kolm captures your real support conversations, distills them into a small specialist that asks the right clarifying question first, and quantizes it to your own hardware — so support answers run at fixed cost with a signed build receipt instead of a per-ticket token bill.",
+      "kolm_flow": "Point your support assistant at the kolm gateway. It captures (question, resolution) pairs with PII redacted on the way in. Once the lake is full, kolm distills a 7B specialist, gates it on the K-score, and compiles a quantized artifact you serve yourself.",
+      "proof_href": "/benchmarks/trinity-500-benchmark.json",
+      "proof_stat": "96.5%",
+      "proof_stat_context": "The trinity-500 support specialist asks the right clarifying question 96.5% of the time and never invents an order it was not given, at 1.24 s mean latency.",
+      "outcome_bluf": "The result is a support model you own: it follows your playbook, runs on hardware you control, and every build is signed and replayable — eliminating the per-token bill that scaled with ticket volume.",
+      "faqs": [
+        { "q": "Will the specialist hallucinate fewer details?", "a": "In the published benchmark the distilled specialist invented no fabricated details (100% no-inventions) and asked for missing information rather than guessing." },
+        { "q": "How much support traffic do I need?", "a": "Distillation works from a few hundred high-quality captured pairs; the trinity-500 benchmark used a council-distilled set evaluated on 57 held-out cases." },
+        { "q": "Can it run on-prem?", "a": "Yes. The compiled specialist is a portable .kolm artifact that runs in your VPC or air-gapped, with no per-token bill." }
+      ]
+    },
+    {
+      "slug": "document-extraction",
+      "title": "Structured document extraction",
+      "problem": "Extracting fields from contracts, claims, or filings with a frontier model is expensive at scale and exposes sensitive document text to a third-party API on every call.",
+      "bluf": "kolm captures your extraction calls, redacts PII inline, distills a specialist tuned to your schema, and quantizes it for on-prem use — so document extraction runs privately at fixed cost with a verifiable build receipt.",
+      "kolm_flow": "Route extraction prompts through the kolm gateway so each (document, extracted-fields) pair is captured and redacted. kolm distills a specialist, gates it on a calibrated K-score, and compiles a quantized model you run inside your own boundary.",
+      "proof_href": "/benchmarks/redaction-public-benchmark.json",
+      "proof_stat": "F1 1.0",
+      "proof_stat_context": "On the public redaction benchmark, inline PII detection scored F1 1.0 with zero false positives across the fixture, so sensitive document text is scrubbed before storage.",
+      "outcome_bluf": "You end up with an extraction model you own and run privately, with PII redacted on capture and a signed receipt for every compile — replacing a per-document API bill with fixed-cost local inference.",
+      "faqs": [
+        { "q": "Does document text leave my environment?", "a": "The gateway and lake are self-hostable, and PII is redacted on the capture path. You can run the whole pipeline inside your own boundary." },
+        { "q": "What about extraction accuracy?", "a": "kolm gates releases on a calibrated K-score and lets you hold out an eval set, so a specialist only ships if it clears your quality bar." },
+        { "q": "Which output formats are supported?", "a": "The compiled model exports as GGUF, EXL2, or a vLLM-servable artifact, and runs with no kolm dependency at inference time." }
+      ]
+    },
+    {
+      "slug": "code-review-assistant",
+      "title": "Internal code review assistant",
+      "problem": "A frontier-model code reviewer is costly per pull request and sends proprietary source to an external API. The reviews are generic rather than tuned to your codebase conventions.",
+      "bluf": "kolm captures your review interactions, distills a specialist that learns your conventions, and quantizes it for local serving — so PR review runs on your own hardware at fixed cost with a signed receipt, and your source never has to leave on every call.",
+      "kolm_flow": "Point your review tool's LLM at the kolm gateway. Captured (diff, review) pairs feed a distillation run; kolm compiles a quantized specialist you serve in CI or on a workstation.",
+      "proof_href": "/benchmarks/sota-quantize-matrix.json",
+      "proof_stat": "17.9 GB",
+      "proof_stat_context": "A capable 32B reasoning base compresses to 17.9 GB INT4 in the verified matrix, small enough to serve a code reviewer on a single workstation GPU.",
+      "outcome_bluf": "You get a review assistant you own, tuned to your conventions, served locally at fixed cost, with a signed receipt proving exactly which weights were compiled.",
+      "faqs": [
+        { "q": "Can it run in CI?", "a": "Yes. The compiled artifact serves an OpenAI-compatible endpoint via kolm serve, which a CI job can call locally." },
+        { "q": "Does my source go to a third party?", "a": "With a self-hosted gateway and a compiled local model, inference happens inside your boundary. PII and secrets are redacted on capture." },
+        { "q": "How big is the model?", "a": "You choose the base and quantization. The verified matrix records sizes from 0.44 GB (a 0.5B model INT4) up to 17.9 GB (a 32B model INT4)." }
+      ]
+    },
+    {
+      "slug": "on-prem-chat",
+      "title": "On-prem internal chat assistant",
+      "problem": "Regulated teams cannot send internal questions to a public LLM API, yet hosting a generic open model gives weak, untuned answers and still carries operational cost.",
+      "bluf": "kolm distills an internal-chat specialist from your captured Q&A and quantizes it to run fully on-prem — so a regulated team gets a tuned assistant inside its own boundary, with PII redacted on capture and a signed receipt for every build.",
+      "kolm_flow": "Run the kolm gateway inside your network. Capture internal (question, answer) pairs with redaction, distill a specialist, gate it on the K-score, and compile a quantized artifact that serves with no outbound network.",
+      "proof_href": "/benchmarks/trinity-500-benchmark.json",
+      "proof_stat": "1.24 s",
+      "proof_stat_context": "The distilled specialist answers at 1.24 s mean latency, fast enough for interactive internal chat without any external API.",
+      "outcome_bluf": "The outcome is an internal assistant that runs air-gapped on your own hardware, tuned to your knowledge, with a verifiable receipt and no per-token bill.",
+      "faqs": [
+        { "q": "Can this run with no internet?", "a": "Yes. Once compiled, the artifact serves locally with no network dependency at inference time." },
+        { "q": "Is it tuned to our content?", "a": "Distillation trains on your captured pairs, so the specialist reflects your internal knowledge and tone rather than a generic base model." },
+        { "q": "How do we audit a build?", "a": "Every compile emits an Ed25519-signed receipt with weight hashes and the K-score, replayable at /verify-prod." }
+      ]
+    }
+  ]
+}

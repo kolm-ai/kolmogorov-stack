@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>kolm vs LM Studio: compile vs rent | kolm.ai</title>
+<meta name="description" content="kolm vs LM Studio — an axis-by-axis comparison. LM Studio is a desktop app for downloading and running GGUF models locally. kolm compiles an owned, signed model">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta name="author" content="kolm.ai">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:title" content="kolm vs LM Studio: compile vs rent | kolm.ai">
+<meta property="og:description" content="kolm vs LM Studio — an axis-by-axis comparison. LM Studio is a desktop app for downloading and running GGUF models locally. kolm compiles an owned, signed model">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/compare/lm-studio">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kolm vs LM Studio: compile vs rent | kolm.ai">
+<meta name="twitter:description" content="kolm vs LM Studio — an axis-by-axis comparison. LM Studio is a desktop app for downloading and running GGUF models locally. kolm compiles an owned, signed model">
+<link rel="canonical" href="https://kolm.ai/compare/lm-studio">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/seo-pages.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://kolm.ai/compare/lm-studio#software","name":"kolm","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows","description":"kolm vs LM Studio — an axis-by-axis comparison. LM Studio is a desktop app for downloading and running GGUF models locally. kolm compiles an owned, signed model","url":"https://kolm.ai/compare/lm-studio","offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"},"license":"https://www.apache.org/licenses/LICENSE-2.0"},{"@type":"BreadcrumbList","@id":"https://kolm.ai/compare/lm-studio#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Compare","item":"https://kolm.ai/compare"},{"@type":"ListItem","position":3,"name":"LM Studio","item":"https://kolm.ai/compare/lm-studio"}]},{"@id":"https://kolm.ai/compare/lm-studio#faq","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can I run a kolm artifact in LM Studio?","acceptedAnswer":{"@type":"Answer","text":"Yes. kolm exports standard GGUF, which LM Studio loads directly. kolm is the compiler; LM Studio is one of several runtimes for the output."}},{"@type":"Question","name":"Why compile instead of downloading a model?","acceptedAnswer":{"@type":"Answer","text":"A downloaded model is generic. A kolm-compiled specialist is distilled from your own captured traffic, so it is smaller and tuned to your task, with a receipt that proves how it was built."}},{"@type":"Question","name":"Do I need a GPU?","acceptedAnswer":{"@type":"Answer","text":"Quantization benefits from a GPU, but the resulting GGUF runs on CPU offload in LM Studio. The verified matrix figures were measured on a single RTX 5090."}}]}]}
+</script>
+</head>
+<body class="seo-page">
+<a class="seo-skip" href="#main">Skip to content</a>
+<header class="seo-head"><div class="seo-head__wrap"><a class="seo-head__logo" href="/">kolm.ai</a><nav class="seo-head__nav"><a href="/compare">Compare</a><a href="/forge">Forge</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/signup">Sign up</a></nav></div></header>
+<main id="main" class="seo-main">
+<p class="seo-crumb"><a href="/compare">&larr; All comparisons</a></p>
+<h1 class="seo-h1">kolm vs LM Studio</h1>
+<div class="seo-bluf" data-bluf="1"><p class="seo-bluf__q">kolm vs LM Studio: which should you pick?</p><p class="seo-bluf__a">LM Studio downloads and runs existing GGUF models on your desktop; kolm compiles a specialist trained on your own traffic and signs the build. Pick LM Studio to run off-the-shelf models locally. Pick kolm when you want to produce the GGUF — distilled to your workload and quantized with a verifiable receipt.</p></div>
+<h2>How they differ, axis by axis</h2>
+<div class="seo-bluf" data-bluf="1"><p class="seo-bluf__q">What is the core difference between kolm and LM Studio?</p><p class="seo-bluf__a">LM Studio is a desktop app for downloading and running GGUF models locally. The table below contrasts each on the axes that matter for ownership, cost, provenance, and portability, so you can see where kolm's compile-and-own model diverges from a hosted or rented offering and decide which fits your workload.</p></div>
+<table class="seo-matrix"><thead><tr><th>Axis</th><th>kolm</th><th>LM Studio</th><th>Why it matters</th></tr></thead><tbody>
+<tr><td class="seo-matrix__axis">Role</td><td class="seo-matrix__kolm">Compiler that produces the model</td><td class="seo-matrix__them">Runner that loads existing models</td><td class="seo-matrix__why">kolm builds; LM Studio runs.</td></tr>
+<tr><td class="seo-matrix__axis">Specialization</td><td class="seo-matrix__kolm">Distilled to your captured pairs</td><td class="seo-matrix__them">Whatever you download</td><td class="seo-matrix__why">kolm trains on your traffic.</td></tr>
+<tr><td class="seo-matrix__axis">Output format</td><td class="seo-matrix__kolm">GGUF / EXL2 / vLLM + receipt</td><td class="seo-matrix__them">Loads GGUF</td><td class="seo-matrix__why">kolm emits the artifact LM Studio can then run.</td></tr>
+<tr><td class="seo-matrix__axis">Provenance</td><td class="seo-matrix__kolm">Signed, replayable receipt</td><td class="seo-matrix__them">None</td><td class="seo-matrix__why">kolm proves the build.</td></tr>
+<tr><td class="seo-matrix__axis">Quantize control</td><td class="seo-matrix__kolm">Measured INT4 matrix</td><td class="seo-matrix__them">Uses pre-quantized files</td><td class="seo-matrix__why">kolm runs the quantize step itself.</td></tr>
+<tr><td class="seo-matrix__axis">Pipeline</td><td class="seo-matrix__kolm">Capture to distill to compile to serve</td><td class="seo-matrix__them">Download to chat</td><td class="seo-matrix__why">kolm is the full build chain.</td></tr>
+<tr><td class="seo-matrix__axis">Interoperable</td><td class="seo-matrix__kolm">Output runs in LM Studio too</td><td class="seo-matrix__them">n/a</td><td class="seo-matrix__why">GGUF is a shared format.</td></tr>
+<tr><td class="seo-matrix__axis">License</td><td class="seo-matrix__kolm">Apache-2.0</td><td class="seo-matrix__them">Free desktop app</td><td class="seo-matrix__why">Both are accessible; kolm is open source.</td></tr>
+</tbody></table>
+<h2>The verified proof point</h2>
+<div class="seo-bluf" data-bluf="1"><p class="seo-bluf__q">What can kolm actually demonstrate?</p><p class="seo-bluf__a">kolm's differentiator is that its claims are backed by checked-in measurements, not marketing copy. The statistic below links to a verified benchmark artifact, and every model compile emits a signed receipt you can replay at /verify-prod, so the proof travels with the build rather than living only on a slide.</p></div>
+<p class="seo-proof"><span class="seo-proof__badge">verified</span> <strong>17.9 GB</strong> kolm compiles a 32B reasoning model to a 17.9 GB INT4 GGUF — small enough for a single consumer GPU — in 125.3 s. <a class="seo-proof__src" href="/benchmarks/sota-quantize-matrix.json" rel="nofollow">Source &rarr;</a></p>
+<h2>When to pick each</h2>
+<div class="seo-bluf" data-bluf="1"><p class="seo-bluf__q">When is LM Studio the right answer, and when is kolm?</p><p class="seo-bluf__a">Neither tool is strictly better; they solve different problems. Choose LM Studio when you just want to chat with an existing open model locally with a friendly desktop UI and no build step. The opposite case is summarized below, so you can match the choice to whether you want a hosted, rented capability or an owned, portable model with a verifiable build receipt.</p></div>
+<p class="seo-when"><strong>When kolm wins.</strong> Choose kolm when you want to produce the model in the first place — a specialist distilled from your traffic and quantized to a GGUF you can then open in LM Studio, with a signed receipt of how it was built.</p>
+<h2>FAQ</h2>
+<div class="seo-faq"><details class="seo-faq__item"><summary>Can I run a kolm artifact in LM Studio?</summary><div class="seo-faq__a">Yes. kolm exports standard GGUF, which LM Studio loads directly. kolm is the compiler; LM Studio is one of several runtimes for the output.</div></details><details class="seo-faq__item"><summary>Why compile instead of downloading a model?</summary><div class="seo-faq__a">A downloaded model is generic. A kolm-compiled specialist is distilled from your own captured traffic, so it is smaller and tuned to your task, with a receipt that proves how it was built.</div></details><details class="seo-faq__item"><summary>Do I need a GPU?</summary><div class="seo-faq__a">Quantization benefits from a GPU, but the resulting GGUF runs on CPU offload in LM Studio. The verified matrix figures were measured on a single RTX 5090.</div></details></div>
+<h2>Try it</h2>
+<div class="seo-bluf" data-bluf="1"><p class="seo-bluf__q">How do I start with kolm?</p><p class="seo-bluf__a">Sign up for a free kolm key, point your existing OpenAI-compatible client at the gateway base URL, and let it capture traffic. When the lake is full, run kolm distill then kolm compile to produce a signed, quantized model you own. Every build is replayable at /verify-prod, so you can verify before you ship.</p></div>
+<p class="seo-cta"><a class="seo-cta__primary" href="/signup">Start free &rarr;</a> <a class="seo-cta__secondary" href="/compare">See all comparisons</a></p>
+<nav class="seo-links" aria-label="Related pages"><ul><li><a href="/compare/modal">kolm vs Modal</a></li><li><a href="/compare/fireworks-ai">kolm vs Fireworks AI</a></li><li><a href="/compare/baseten">kolm vs Baseten</a></li><li><a href="/compare">How kolm compares</a></li><li><a href="/forge">The Forge: compile + distill</a></li><li><a href="/pricing">Pricing</a></li></ul></nav>
+</main>
+<footer class="seo-foot">kolm.ai &middot; the AI compiler &middot; <a href="/compare">Compare</a> &middot; <a href="/verify-prod">Verify a receipt</a> &middot; <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></footer>
+</body>
+</html>

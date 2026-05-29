@@ -454,6 +454,9 @@ import { registerFederatedConsortiumRoutes as __registerFederatedConsortiumRoute
 // Modular mount keeps router.js diff to one import + one call line per the
 // W83x concurrent-edit standing directive.
 import { registerRegRoutes as __registerRegRoutes_w834 } from './reg-routes.js';
+import { registerAccountUiRoutes as __registerAccountUiRoutes_w921 } from './account-ui-routes.js';
+import { registerWebsiteStatusRoutes as __registerWebsiteStatusRoutes_w921 } from './website-status-routes.js';
+import { register as __registerGovernRoutes_w921 } from './govern-routes.js';
 
 // W709-5 — runtime-router decision summary for /account/routing dashboard.
 import {
@@ -25435,6 +25438,14 @@ res.json({
   // GRC export). Modular mount keeps router.js diff to a single call site
   // per the W83x concurrent-edit standing directive.
   __registerRegRoutes_w834(r);
+
+  // W921 — Account-UI no-code routes (client-error sink + automations CRUD/run/tick),
+  // Website status/trust strip (/v1/status/summary + /receipts), and Govern
+  // (receipt Merkle anchoring / SLSA provenance / transparency log / compliance export).
+  // One-line modular mounts; each handler fences on req.tenant_record internally.
+  __registerAccountUiRoutes_w921(r, { authMiddleware });
+  __registerWebsiteStatusRoutes_w921(r, { authMiddleware });
+  __registerGovernRoutes_w921(r, { authMiddleware });
 
   // W829 — multimodal capture pipeline (multimodal/multi-turn captures +
   // VLM-distill enqueue + jobs list). One-line modular mount keeps the

@@ -61,6 +61,13 @@
 </style>
 <link rel="stylesheet" href="/ks.css">
     <link rel="stylesheet" href="/warm-paper.css">
+<link rel="stylesheet" href="/account/account-ui.css">
+<link rel="stylesheet" href="/account/account-vt.css">
+<script id="kolm-vt">(function kolmAccountVT(){var ORDER=['overview','gateway','captures','connectors','captured','privacy-events','repeated-workflows','opportunities','labeling','datasets','simulations','bakeoffs','builds','artifacts','devices','storage','billing','routing','active-learning'];function idx(u){try{var p=new URL(u,location.href).pathname.replace(/\/+$/,'').split('/').pop();var i=ORDER.indexOf(p);return i<0?999:i;}catch(e){return 999;}}function dir(f,t){var a=idx(f),b=idx(t);return a===b?'none':(b>a?'forward':'back');}function anim(){return ('startViewTransition' in document)&&!matchMedia('(prefers-reduced-motion: reduce)').matches;}function tag(e){if(!e.viewTransition)return;if(!anim()){e.viewTransition.skipTransition();return;}try{var nav=window.navigation&&navigation.activation;var f=(e.activation&&e.activation.from&&e.activation.from.url)||(nav&&nav.from&&nav.from.url)||location.href;var t=(e.activation&&e.activation.entry&&e.activation.entry.url)||(nav&&nav.entry&&nav.entry.url)||location.href;e.viewTransition.types.add(dir(f,t));}catch(_){}}window.addEventListener('pageswap',tag);window.addEventListener('pagereveal',tag);})();</script>
+<script src="/account/account-net.js" defer></script>
+<script src="/account/account-mutate.js" defer></script>
+<script src="/account/account-keylist.js" defer></script>
+<script src="/account/account-grid.js" defer></script>
 </head>
 <body class="kolm-account-surface ks">
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
@@ -271,7 +278,8 @@ window.kfetch("/v1/artifacts").catch(function(){return [];}).then(function(j){
   if(!list.length){rows.innerHTML="";document.getElementById("empty-state").hidden=false;if(rpEmpty)rpEmpty.hidden=false;return;}
   rows.innerHTML=list.map(function(a){
     var devs=(a.devices_installed||a.devices||[]).join(", ")||"-";
-    return "<tr>"+
+    var aid=a.artifact_id||a.id||"";
+    return "<tr data-id=\""+window.kesc(aid)+"\">"+
       "<td><b>"+window.kesc(a.artifact_id||a.id||"-")+"</b><div style=\"color:var(--ink-faint);font-size:11px\">"+window.kesc(a.runtime||a.tier||"")+"</div></td>"+
       "<td>"+window.kbytes(a.size_bytes||a.bytes)+"</td>"+
       "<td><code>"+window.kesc(a.runtime||a.format||"-")+"</code></td>"+
@@ -280,6 +288,17 @@ window.kfetch("/v1/artifacts").catch(function(){return [];}).then(function(j){
       "<td><button class=\"btn bad\" data-act=\"uninstall\" data-id=\""+window.kesc(a.artifact_id||a.id||"")+"\">uninstall</button></td>"+
     "</tr>";
   }).join("");
+  // W921: read-only keyboard nav over the artifacts table (j/k/arrow move,
+  // Enter opens the artifact's receipts/results). Feature-detected; no-op if
+  // the shared module did not load. The rows already carry data-id.
+  if(typeof window.mountKeyList==="function"){
+    window.mountKeyList(rows,{
+      rowSelector:"tr[data-id]",
+      getRowId:function(tr){return tr.getAttribute("data-id");},
+      multiselect:false,
+      onOpen:function(tr,id){if(id)location.href="/account/artifacts?artifact="+encodeURIComponent(id);}
+    });
+  }
   // R-1 - render the passport matrix per artifact that carries one.
   if(rpMount){
     var blocks=list.map(rpRenderArtifact).filter(Boolean).join("");
@@ -375,9 +394,26 @@ document.addEventListener("click",function(e){
 });
 rows.addEventListener("click",function(e){
   var b=e.target.closest("button[data-act=uninstall]"); if(!b)return;
-  if(!confirm("Uninstall "+b.getAttribute("data-id")+"?"))return;
   var id=b.getAttribute("data-id");
-  window.kfetch("/v1/artifacts/"+encodeURIComponent(id),{method:"DELETE"}).then(function(){b.closest("tr").style.opacity=0.4;b.disabled=true;}).catch(function(){b.textContent="error";});
+  var tr=b.closest("tr");
+  // W921: route the irreversible uninstall through the deferred-commit bus so
+  // the user gets a 5.5s Undo window with 0 network calls if undone.
+  if(typeof window.kMutate==="function"){
+    var prevOpacity=tr?tr.style.opacity:"";
+    window.kMutate({
+      entity:"artifact:"+id,
+      label:"Uninstalled "+id,
+      strategy:"defer",
+      severity:"warn",
+      applyOptimistic:function(){if(tr)tr.style.opacity=0.4;b.disabled=true;},
+      rollback:function(){if(tr)tr.style.opacity=prevOpacity;b.disabled=false;},
+      commit:function(){return window.kFetchJSON("/v1/artifacts/"+encodeURIComponent(id),{method:"DELETE"});},
+      onSettled:function(res){if(res&&!res.ok&&!res.undone){b.textContent="error";}}
+    });
+    return;
+  }
+  if(!confirm("Uninstall "+b.getAttribute("data-id")+"?"))return;
+  window.kfetch("/v1/artifacts/"+encodeURIComponent(id),{method:"DELETE"}).then(function(){if(tr)tr.style.opacity=0.4;b.disabled=true;}).catch(function(){b.textContent="error";});
 });
 </script>
 

@@ -1,0 +1,110 @@
+{
+  "spec": "kolm-seo-catalog-integrations-1",
+  "note": "Generated /integrations/* pages. Slugs MUST NOT collide with hand-authored integration pages (cursor, claude-code, langchain, litellm, openai-sdk, anthropic-sdk, vercel-ai-sdk, openrouter, continue, zed, vscode, jetbrains, github-actions, gitlab-ci, docker-compose, cloudflare, env-vars, cursor-claude-code). HowTo steps drive the HowTo JSON-LD.",
+  "integrations": [
+    {
+      "slug": "llamaindex",
+      "tool": "LlamaIndex",
+      "category": "RAG framework",
+      "bluf": "Point LlamaIndex's LLM at the kolm gateway base URL and every retrieval-augmented call is captured as an (input,output) pair, PII-redacted on the way in, and signed on the way out — so your RAG traffic becomes the training set for an owned specialist.",
+      "summary": "LlamaIndex orchestrates retrieval and prompting; kolm sits underneath as the OpenAI-compatible gateway. Swap the base URL, keep your indexes and query engine, and start capturing the pairs that compile into a model you own.",
+      "env": [
+        { "key": "OPENAI_API_BASE", "value": "https://your-kolm-gateway/v1" },
+        { "key": "OPENAI_API_KEY", "value": "ks_your_kolm_key" }
+      ],
+      "setup_steps": [
+        { "name": "Install kolm and sign up", "text": "Sign up at /signup for an API key. Install the kolm gateway with npm i -g github:kolm-ai/kolm." },
+        { "name": "Point LlamaIndex at the gateway", "text": "Set the OpenAI base URL in your LlamaIndex Settings.llm to the kolm gateway /v1 endpoint and use your kolm API key." },
+        { "name": "Run your queries", "text": "Run your normal LlamaIndex query engine. Each LLM call is captured into your tenant lake with PII redacted on the capture path." },
+        { "name": "Distill and compile", "text": "Once you have enough pairs, run kolm distill then kolm compile to produce a signed specialist model quantized to your hardware." },
+        { "name": "Verify the build", "text": "Run kolm verify on the artifact or replay the receipt at /verify-prod to confirm the signature chain and K-score." }
+      ],
+      "proof_href": "/benchmarks/trinity-500-benchmark.json",
+      "proof_stat": "96.5%",
+      "proof_stat_context": "A specialist distilled from captured traffic asks the right clarifying question 96.5% of the time in the trinity-500 benchmark.",
+      "faqs": [
+        { "q": "Does kolm change my LlamaIndex indexes?", "a": "No. kolm only intercepts the LLM completion calls via the gateway base URL. Your vector store, retrievers, and query engine are unchanged." },
+        { "q": "Is my retrieved context redacted?", "a": "PII is redacted on the capture path before anything is stored in your lake. The redaction runs inline in the gateway." },
+        { "q": "Can I keep using OpenAI underneath?", "a": "Yes. The gateway can route to OpenAI, Anthropic, or a local model while it captures pairs for distillation." }
+      ]
+    },
+    {
+      "slug": "haystack",
+      "tool": "Haystack",
+      "category": "RAG framework",
+      "bluf": "Configure Haystack's OpenAIGenerator with the kolm gateway base URL and your pipeline runs unchanged while kolm captures, redacts, and signs every generation — turning production RAG traffic into a compilable training set.",
+      "summary": "Haystack pipelines stay exactly as they are; kolm is the OpenAI-compatible endpoint behind the generator node. Capture flows automatically into your lake and becomes the basis for an owned specialist.",
+      "env": [
+        { "key": "OPENAI_API_BASE_URL", "value": "https://your-kolm-gateway/v1" },
+        { "key": "OPENAI_API_KEY", "value": "ks_your_kolm_key" }
+      ],
+      "setup_steps": [
+        { "name": "Get a kolm key", "text": "Sign up at /signup and copy your API key." },
+        { "name": "Set the generator endpoint", "text": "In your Haystack OpenAIGenerator, set api_base_url to the kolm gateway /v1 endpoint and api_key to your kolm key." },
+        { "name": "Run the pipeline", "text": "Run your Haystack pipeline normally. Completions are captured into your tenant lake with inline PII redaction." },
+        { "name": "Compile a specialist", "text": "Run kolm distill and kolm compile to build a quantized model trained on the captured pairs." },
+        { "name": "Verify", "text": "Replay the signed receipt at /verify-prod or run kolm verify locally." }
+      ],
+      "proof_href": "/benchmarks/sota-quantize-matrix.json",
+      "proof_stat": "17.9 GB",
+      "proof_stat_context": "The resulting specialist can be quantized aggressively — a 32B model compresses to 17.9 GB INT4 in the verified matrix.",
+      "faqs": [
+        { "q": "Which Haystack version is supported?", "a": "Any version whose OpenAIGenerator accepts a custom api_base_url works, since kolm speaks the OpenAI wire protocol." },
+        { "q": "Does this add latency?", "a": "The gateway adds a thin capture + redaction + receipt step. The published wrapper benchmark records the end-to-end overhead; the receipt is signed asynchronously." },
+        { "q": "Can I self-host the gateway?", "a": "Yes, the gateway is Apache-2.0 and self-hostable, so traffic and captures stay in your environment." }
+      ]
+    },
+    {
+      "slug": "n8n",
+      "tool": "n8n",
+      "category": "workflow automation",
+      "bluf": "Point any n8n OpenAI or HTTP node at the kolm gateway and your automation's LLM steps are captured, redacted, and signed automatically — so a no-code workflow quietly builds the dataset for an owned model.",
+      "summary": "n8n drives the workflow; kolm is the model endpoint behind your AI nodes. No custom code: change the credential base URL and capture begins.",
+      "env": [
+        { "key": "OPENAI_BASE_URL", "value": "https://your-kolm-gateway/v1" },
+        { "key": "OPENAI_API_KEY", "value": "ks_your_kolm_key" }
+      ],
+      "setup_steps": [
+        { "name": "Create a kolm key", "text": "Sign up at /signup and copy your API key." },
+        { "name": "Add an OpenAI credential in n8n", "text": "Create an OpenAI credential whose base URL points at the kolm gateway /v1 endpoint, using your kolm key." },
+        { "name": "Use it in your nodes", "text": "Reference that credential from your OpenAI / AI Agent nodes. Each call is captured into your lake with PII redaction." },
+        { "name": "Build a specialist", "text": "Run kolm distill then kolm compile on the captured pairs to produce a signed, quantized model." },
+        { "name": "Verify the receipt", "text": "Confirm the build at /verify-prod or with kolm verify." }
+      ],
+      "proof_href": "/benchmarks/trinity-500-benchmark.json",
+      "proof_stat": "1.24 s",
+      "proof_stat_context": "An owned specialist serves automation steps at 1.24 s mean latency per the trinity-500 benchmark, with no per-token bill.",
+      "faqs": [
+        { "q": "Do I need to write code?", "a": "No. You only change the base URL on an n8n OpenAI credential. The capture, redaction, and signing happen in the gateway." },
+        { "q": "Can I route to multiple providers?", "a": "Yes. The gateway speaks OpenAI, Anthropic, Gemini, vLLM, SGLang, TGI, and TRT-LLM protocols and can route between them." },
+        { "q": "Where do captures live?", "a": "In your tenant lake, which is self-hostable. PII is redacted before storage." }
+      ]
+    },
+    {
+      "slug": "dspy",
+      "tool": "DSPy",
+      "category": "LLM programming",
+      "bluf": "Configure DSPy's LM with the kolm gateway base URL and every optimized program call is captured and signed — so your compiled DSPy prompts feed straight into a distilled, owned specialist model.",
+      "summary": "DSPy compiles prompt programs; kolm compiles the model. Wire DSPy's LM to the kolm gateway and the traces DSPy already produces become the training pairs for an owned model.",
+      "env": [
+        { "key": "OPENAI_API_BASE", "value": "https://your-kolm-gateway/v1" },
+        { "key": "OPENAI_API_KEY", "value": "ks_your_kolm_key" }
+      ],
+      "setup_steps": [
+        { "name": "Sign up for kolm", "text": "Create an account at /signup and copy your API key." },
+        { "name": "Configure dspy.LM", "text": "Set dspy.LM to an OpenAI-compatible model with api_base pointed at the kolm gateway /v1 endpoint." },
+        { "name": "Run your DSPy program", "text": "Compile and run your DSPy module. Each LM call is captured with inline PII redaction." },
+        { "name": "Distill to a specialist", "text": "Run kolm distill and kolm compile to turn the captured pairs into a signed, quantized model." },
+        { "name": "Verify", "text": "Replay the receipt at /verify-prod." }
+      ],
+      "proof_href": "/benchmarks/sota-quantize-matrix.json",
+      "proof_stat": "125.3 s",
+      "proof_stat_context": "Quantizing the distilled model is fast — 125.3 s for a 32B model on a single RTX 5090 in the verified matrix.",
+      "faqs": [
+        { "q": "Does kolm replace DSPy's optimizer?", "a": "No. DSPy optimizes the prompt program; kolm compiles the underlying model. They compose: DSPy traces become kolm training pairs." },
+        { "q": "Which DSPy LM backends work?", "a": "Any OpenAI-compatible backend, since the kolm gateway speaks the OpenAI protocol." },
+        { "q": "Is the build verifiable?", "a": "Yes. Every compile emits an Ed25519-signed receipt replayable at /verify-prod." }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "spec": "kolm-seo-catalog-verticals-1",
+  "note": "Generated /for/* vertical pages. Slugs MUST NOT collide with hand-authored /for pages (agents, edge-ai, fintech, government-defense, healthcare, support-automation). Regulatory references are framed as the customer's own obligations the architecture supports, not a kolm certification claim — keep clear of FORBIDDEN_PUBLIC_PATTERNS (no 'HIPAA-ready', 'EU AI Act compliant', etc.).",
+  "verticals": [
+    {
+      "slug": "insurance",
+      "name": "Insurance",
+      "bluf": "Insurers process claims and policy documents that cannot be sent to a public LLM API on every call. kolm lets an insurer compile a claims specialist that runs inside its own boundary, with PII redacted on capture and a signed receipt for every model build.",
+      "regs": ["NAIC model governance expectations", "state privacy statutes", "internal model-risk review"],
+      "regs_intro": "Insurance carriers operate under model-governance and privacy obligations that favor inspectable, owned models over opaque external APIs. kolm's architecture supports those obligations:",
+      "kolm_flow": "Run the kolm gateway in your environment, capture (claim, decision) and (policy, answer) pairs with inline redaction, distill a specialist, gate it on a calibrated K-score, and compile a quantized artifact you serve on-prem.",
+      "proof_href": "/case-studies/finance-sr11-7.html",
+      "proof_stat": "F1 1.0",
+      "proof_stat_context": "Inline PII detection scored F1 1.0 with zero false positives on the public redaction benchmark, so claimant data is scrubbed before any storage.",
+      "proof_quote": "We needed a model-risk story our examiners could follow end to end. A signed receipt for every build is exactly that.",
+      "proof_quote_who": "SVP Model Risk Management (anonymized)",
+      "faqs": [
+        { "q": "Does claimant data leave our network?", "a": "With a self-hosted gateway and a compiled local model, the pipeline runs inside your boundary, and PII is redacted on the capture path before storage." },
+        { "q": "How do we evidence a model build for examiners?", "a": "Each compile emits an Ed25519-signed receipt recording the input weight hashes, method, and K-score, replayable at /verify-prod." },
+        { "q": "Can we keep human review in the loop?", "a": "Yes. kolm produces a model artifact; how you route its outputs through adjuster review is your workflow decision." }
+      ]
+    },
+    {
+      "slug": "legal-services",
+      "name": "Legal services",
+      "bluf": "Law firms handle privileged documents that must not be sent to a third-party API. kolm lets a firm compile a contract or research specialist that runs inside its own boundary, with PII redacted on capture and a verifiable build receipt for every model.",
+      "regs": ["attorney-client privilege", "client confidentiality duties", "data-residency commitments"],
+      "regs_intro": "Legal practice carries strict confidentiality and privilege duties that make an owned, inspectable model preferable to an external API. kolm's architecture supports those duties:",
+      "kolm_flow": "Capture (document, extraction) and (question, memo) pairs through a self-hosted gateway with redaction, distill a specialist tuned to your matter types, and compile a quantized artifact served on firm hardware.",
+      "proof_href": "/case-studies/legal-contract-extraction.html",
+      "proof_stat": "F1 1.0",
+      "proof_stat_context": "On the public redaction benchmark, PII detection scored F1 1.0 with zero false positives, so privileged text is scrubbed before storage.",
+      "proof_quote": "Privilege means client text cannot leave. An owned model with a signed build receipt let us say yes to AI without that risk.",
+      "proof_quote_who": "Firm General Counsel (anonymized)",
+      "faqs": [
+        { "q": "Does privileged content reach a third party?", "a": "With a self-hosted gateway and a compiled local model, inference stays inside the firm, and PII is redacted on capture." },
+        { "q": "Is the model tuned to our matters?", "a": "Distillation trains on your captured pairs, so the specialist reflects your matter types and drafting conventions." },
+        { "q": "Can we prove what was built?", "a": "Yes. Every compile is signed and replayable at /verify-prod, giving a clean provenance trail for the build." }
+      ]
+    },
+    {
+      "slug": "manufacturing",
+      "name": "Manufacturing",
+      "bluf": "Manufacturers want AI on the plant floor and in field service without a metered cloud round-trip. kolm lets a manufacturer compile a maintenance or quality specialist that runs at the edge, with a signed build receipt and no per-token bill.",
+      "regs": ["operational-technology isolation", "supplier IP confidentiality", "edge / offline reliability requirements"],
+      "regs_intro": "Manufacturing environments often isolate operational technology and demand offline reliability, which favors an owned model over a cloud API. kolm's architecture supports those constraints:",
+      "kolm_flow": "Capture (symptom, fix) and (spec, answer) pairs through the gateway, distill a maintenance specialist, and compile a heavily quantized artifact that runs on edge hardware with no network.",
+      "proof_href": "/benchmarks/sota-quantize-matrix.json",
+      "proof_stat": "0.44 GB",
+      "proof_stat_context": "kolm can compress a small base model to 0.44 GB INT4 in the verified matrix — small enough for constrained edge devices on the plant floor.",
+      "proof_quote": "Our line cannot depend on a cloud call. An owned model that runs offline with a verifiable build is the only thing that fit.",
+      "proof_quote_who": "Director of Plant Systems (anonymized)",
+      "faqs": [
+        { "q": "Can a kolm model run with no network?", "a": "Yes. The compiled artifact serves locally with no inference-time network dependency, suitable for isolated OT networks." },
+        { "q": "How small can the model get?", "a": "The verified matrix records sizes from 0.44 GB up. You choose the base and quantization to fit your edge hardware." },
+        { "q": "What proves the deployed model is correct?", "a": "The signed receipt records the exact weights and method; verify it at /verify-prod or with kolm verify before deploying to the line." }
+      ]
+    }
+  ]
+}

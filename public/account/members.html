@@ -129,6 +129,12 @@ body[data-org=none] .no-org-section{display:block}
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/warm-paper.css">
+<link rel="stylesheet" href="/account/account-ui.css">
+<link rel="stylesheet" href="/account/account-vt.css">
+<script id="kolm-vt">(function kolmAccountVT(){var ORDER=['overview','members','org','groups','team','api-keys','billing','settings'];function idx(u){try{var p=new URL(u,location.href).pathname.replace(/\/+$/,'').split('/').pop();var i=ORDER.indexOf(p);return i<0?999:i;}catch(e){return 999;}}function dir(f,t){var a=idx(f),b=idx(t);return a===b?'none':(b>a?'forward':'back');}function anim(){return ('startViewTransition' in document)&&!matchMedia('(prefers-reduced-motion: reduce)').matches;}function tag(e){if(!e.viewTransition)return;if(!anim()){e.viewTransition.skipTransition();return;}try{var nav=window.navigation&&navigation.activation;var f=(e.activation&&e.activation.from&&e.activation.from.url)||(nav&&nav.from&&nav.from.url)||location.href;var t=(e.activation&&e.activation.entry&&e.activation.entry.url)||(nav&&nav.entry&&nav.entry.url)||location.href;e.viewTransition.types.add(dir(f,t));}catch(_){}}window.addEventListener('pageswap',tag);window.addEventListener('pagereveal',tag);})();</script>
+<script src="/account/account-net.js" defer></script>
+<script src="/account/account-mutate.js" defer></script>
+<script src="/account/account-keylist.js" defer></script>
 <script defer src="/nav.js"></script>
 </head>
 <body class="kolm-account-surface ks" data-role="member" data-auth="unknown" data-org="unknown">
@@ -450,6 +456,18 @@ function renderMembers() {
       '<td>' + actionsCell + '</td>' +
     '</tr>';
   }).join("");
+  // W921: read-only keyboard row navigation (j/k/arrow). The bespoke sortable
+  // headers + row-action menus are unchanged; this only adds roving-tabindex
+  // movement. Feature-detected; no-op if the shared module did not load.
+  if (typeof window.mountKeyList === "function") {
+    if (window.__membersKeylist) window.__membersKeylist.destroy();
+    window.__membersKeylist = window.mountKeyList(tbody, {
+      rowSelector: "tr[data-member-row]",
+      getRowId: function (tr) { return tr.getAttribute("data-member-row"); },
+      multiselect: false,
+      onOpen: function (tr) { var s = tr.querySelector("details > summary"); if (s && s.click) s.click(); }
+    });
+  }
 }
 
 function renderInvites() {

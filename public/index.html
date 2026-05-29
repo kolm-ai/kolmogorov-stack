@@ -455,13 +455,16 @@
         </div>
       </div>
       <p class="ks-lede hero-quant" data-w260="thesis" style="max-width:58ch;">Point your OpenAI client at one URL. Capture what's worth keeping. Compile a signed model that runs on your own hardware. After compile, the per-token bill goes to zero.</p>
-      <div class="ks-hero__ctas" data-w260="v02-strip" data-above-fold="hero-ctas">
-        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/signup">Start free <span class="ks-btn-arrow">&rarr;</span></a>
-        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/book-demo" data-above-fold="book-demo">Book demo</a>
-        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="#chat">Try it without signing up</a>
-        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/demo-live" data-above-fold="demo-live">Watch the 70s demo</a>
-        <span class="test-anchor" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;"><a href="/verify-prod">Verify a receipt</a><a href="#how">See how it works</a></span>
+      <div class="ks-hero__ctas" data-w260="v02-strip" data-above-fold="hero-ctas" data-w921="cta-hierarchy">
+        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/signup" data-cta="primary">Start free <span class="ks-btn-arrow">&rarr;</span></a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/book-demo" data-above-fold="book-demo" data-cta="secondary">Book demo</a>
       </div>
+      <p class="ks-hero__cta-aux" data-w921="cta-aux">
+        <a class="ks-btn ks-btn--link" href="#chat" data-cta="aux">Try it without signing up</a>
+        <span class="ks-hero__cta-aux-dot" aria-hidden="true">&middot;</span>
+        <a class="ks-btn ks-btn--link" href="/demo-live" data-above-fold="demo-live" data-cta="aux">Watch the 70s demo</a>
+        <span class="test-anchor" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;"><a href="/verify-prod">Verify a receipt</a><a href="#how">See how it works</a></span>
+      </p>
       
       <span class="test-anchor" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
         <ul class="ks-hero__proof"><li><b>$8K/mo</b></li><li><b>~$140/mo</b></li><li><b>125s</b></li><li><b>17.9 GB</b></li></ul>
@@ -506,6 +509,143 @@
     </div>
   </div>
 </section>
+
+<!-- ================== W921 verifiable social-proof + trust strip ================== -->
+<section class="ks-proof-rail" data-w921="proof-rail" aria-label="Proof and live system status">
+  <div class="ks-proof-rail__inner">
+    <!-- Live trust strip: status dot + receipt counter + verify-this-one.
+         Progressively enhanced by the inline widget below; degrades to the
+         static text already in the DOM if JS is off or routes are unreachable. -->
+    <div class="ks-trust-strip" data-w921="trust-strip" role="status" aria-live="polite">
+      <span class="ks-trust-strip__dot ks-trust-strip__dot--unknown" data-trust="dot" aria-hidden="true"></span>
+      <span class="ks-trust-strip__label" data-trust="status-label">System status</span>
+      <span class="ks-trust-strip__sep" aria-hidden="true">&middot;</span>
+      <span class="ks-trust-strip__count" data-trust="receipts"><span data-trust="receipt-total">&middot;</span> signed receipts</span>
+      <a class="ks-trust-strip__verify" data-trust="verify-link" href="/verify-prod">Verify a receipt &rarr;</a>
+    </div>
+
+    <!-- Always-true credibility chips (lead when star traction is below the
+         1,000-star display floor). Promotes the previously hidden proof line. -->
+    <ul class="ks-proof-chips" data-w921="chips" aria-label="What kolm is">
+      <li><a href="/license">Apache-2.0</a></li>
+      <li>Self-hostable</li>
+      <li>6 SDKs</li>
+      <li>Air-gapped</li>
+    </ul>
+
+    <!-- Receipt-backed, X04-bound metric cards. Every number traces to a
+         checked-in benchmark artifact (data/x04-claim-fixtures.json). -->
+    <ul class="ks-proof-cards" data-w921="proof-cards" aria-label="Verified proof points">
+      <li class="ks-proof-card">
+        <span class="ks-proof-card__badge">verified</span>
+        <span class="ks-proof-card__value">96.5%</span>
+        <span class="ks-proof-card__label">asks the right question</span>
+        <a class="ks-proof-card__src" href="/benchmarks/trinity-500-benchmark.json">trinity-500 benchmark &rarr;</a>
+      </li>
+      <li class="ks-proof-card">
+        <span class="ks-proof-card__badge">verified</span>
+        <span class="ks-proof-card__value">F1 1.0</span>
+        <span class="ks-proof-card__label">PII redaction, zero false positives</span>
+        <a class="ks-proof-card__src" href="/benchmarks/redaction-public-benchmark.json">redaction benchmark &rarr;</a>
+      </li>
+      <li class="ks-proof-card">
+        <span class="ks-proof-card__badge">verified</span>
+        <span class="ks-proof-card__value">17.9 GB</span>
+        <span class="ks-proof-card__label">32B reasoning model, one GPU</span>
+        <a class="ks-proof-card__src" href="/benchmarks/sota-quantize-matrix.json">quantize matrix &rarr;</a>
+      </li>
+    </ul>
+
+    <!-- One curated anonymized-role testimonial (no named customer, per the
+         case-studies "we do not publish customer names" policy). -->
+    <figure class="ks-proof-quote" data-w921="testimonial">
+      <blockquote>Privilege means client text cannot leave. An owned model with a signed build receipt let us say yes to AI without that risk.</blockquote>
+      <figcaption>Firm General Counsel (anonymized) &middot; <a href="/case-studies/legal-contract-extraction.html">read the case study</a></figcaption>
+    </figure>
+
+    <p class="ks-proof-rail__more">
+      <a href="/compare">How kolm compares &rarr;</a>
+      <span aria-hidden="true">&middot;</span>
+      <a href="/case-studies/healthcare-phi-redactor.html">Healthcare case study</a>
+      <span aria-hidden="true">&middot;</span>
+      <a href="/case-studies/finance-sr11-7.html">Model-risk case study</a>
+    </p>
+  </div>
+</section>
+<script>
+/* W921 trust strip progressive enhancement. Vanilla, no deps, motion-gated.
+   Reads /v1/status/receipts + /v1/status/summary; falls back to the existing
+   public /v1/status + /health. Never fabricates green or a count. */
+(function(){
+  var strip = document.querySelector('[data-w921="trust-strip"]');
+  if (!strip) return;
+  var dot = strip.querySelector('[data-trust="dot"]');
+  var label = strip.querySelector('[data-trust="status-label"]');
+  var totalEl = strip.querySelector('[data-trust="receipt-total"]');
+  var verify = strip.querySelector('[data-trust="verify-link"]');
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function setDot(indicator){
+    dot.className = 'ks-trust-strip__dot ks-trust-strip__dot--' + (indicator || 'unknown');
+  }
+  function fetchJson(url){
+    return fetch(url, { headers: { 'Accept': 'application/json' } })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .catch(function(){ return null; });
+  }
+  function animateCount(to){
+    if (typeof to !== 'number' || to < 0) return;
+    if (reduceMotion){ totalEl.textContent = to.toLocaleString(); return; }
+    var from = 0, start = null, dur = 600;
+    function step(ts){
+      if (start === null) start = ts;
+      var t = Math.min(1, (ts - start) / dur);
+      var v = Math.round(from + (to - from) * (1 - Math.pow(1 - t, 3)));
+      totalEl.textContent = v.toLocaleString();
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function applyStatus(summary){
+    if (summary && summary.status && summary.status.indicator){
+      setDot(summary.status.indicator);
+      label.textContent = summary.status.description || 'System status';
+    } else {
+      // fallback to /health liveness only (operational-or-unknown).
+      fetchJson('/health').then(function(h){
+        if (h){ setDot('none'); label.textContent = 'All systems operational'; }
+      });
+    }
+  }
+  function applyReceipts(stats){
+    if (stats && typeof stats.total === 'number'){
+      animateCount(stats.total);
+      if (stats.last_receipt_id){
+        verify.textContent = 'Verify this receipt →';
+        verify.setAttribute('href', '/verify?cid=' + encodeURIComponent(stats.last_receipt_id));
+      }
+    }
+  }
+
+  function poll(){
+    if (document.hidden) return;
+    Promise.allSettled([
+      fetchJson('/v1/status/receipts'),
+      fetchJson('/v1/status/summary')
+    ]).then(function(res){
+      var receipts = res[0].value;
+      var summary = res[1].value;
+      applyReceipts(receipts);
+      if (summary) applyStatus(summary);
+      else fetchJson('/v1/status').then(applyStatus);
+    });
+  }
+  poll();
+  var iv = setInterval(poll, 30000);
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) poll(); });
+})();
+</script>
 
 <section class="kolm-start" data-w910="start-rail" aria-label="Start a model in four ways" style="padding: clamp(48px, 6vw, 88px) 24px; border-bottom: 1px solid var(--rule, var(--surface-3,#dde1e7));">
   <div style="max-width: 1200px; margin: 0 auto;">

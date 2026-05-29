@@ -120,7 +120,7 @@
   <span class="status-dot" id="overallDot" data-state="ok" aria-hidden="true"></span>
   <div class="status-hero__text">
     <p class="status-hero__h" id="overallH">All systems operational</p>
-    <p class="status-hero__sub" id="overallSub">Last 7 of 7 components healthy &middot; <span id="overallUptime">99.97%</span> rolling 90-day uptime</p>
+    <p class="status-hero__sub" id="overallSub">Live component status below &middot; <span id="overallUptime">&mdash;</span> rolling 90-day uptime (history begins when sampling starts)</p>
   </div>
   <span class="status-hero__updated">Updated <time id="overallUpdated" datetime="">&mdash;</time></span>
 </div>
@@ -320,14 +320,48 @@
   }
 
   function okBars(){ const arr = []; for(let i=0;i<90;i++) arr.push('ok'); return arr; }
+  function unknownBars(){ const arr = []; for(let i=0;i<90;i++) arr.push('unknown'); return arr; }
 
+  // W921: when no real 90-day history exists yet, render grey 'unknown' bars
+  // and an em-dash uptime instead of fabricating 99.97% all-green.
   function paintFallback(){
-    COMPONENTS.forEach(c => renderRow(c, 'ok', okBars(), '99.97%'));
+    COMPONENTS.forEach(c => renderRow(c, 'ok', unknownBars(), '—'));
+    overallUp.textContent = '—';
     const now = new Date(); overallUpd.dateTime = now.toISOString(); overallUpd.textContent = now.toUTCString().slice(0,22);
   }
 
+  // W921: prefer the real Atlassian-shape /v1/status/summary contract. It maps
+  // operational/degraded_performance/partial_outage/major_outage component
+  // states and a {none,minor,major,critical} indicator from in-process
+  // liveness — no fabricated green. History bars stay 'unknown' until a
+  // 90-day sample buffer accrues.
+  function paintFromSummary(s){
+    if (!s || !s.status || !Array.isArray(s.components)) return false;
+    grid.innerHTML = '';
+    var stateMap = { operational:'ok', degraded_performance:'degraded', partial_outage:'degraded', major_outage:'down' };
+    var degraded = 0, down = 0;
+    s.components.forEach(function(c){
+      var state = stateMap[c.status] || 'unknown';
+      if (state === 'degraded') degraded++;
+      if (state === 'down') down++;
+      var meta = COMPONENTS.find(function(x){ return x.id === c.id; }) || { name: c.name || c.id, sub: '' };
+      renderRow(meta, state, unknownBars(), '—');
+    });
+    overallUp.textContent = '—';
+    var ind = s.status.indicator;
+    if (ind === 'critical' || ind === 'major') { overall.dataset.overall = 'down'; overallDot.dataset.state = 'down'; overallH.textContent = s.status.description || 'Outage'; overallSub.textContent = (down||'1')+' component(s) affected'; }
+    else if (ind === 'minor') { overall.dataset.overall = 'degraded'; overallDot.dataset.state = 'degraded'; overallH.textContent = s.status.description || 'Degraded performance'; overallSub.textContent = degraded+' component(s) degraded'; }
+    var now = new Date((s.page && s.page.updated_at) || Date.now());
+    overallUpd.dateTime = now.toISOString(); overallUpd.textContent = now.toUTCString().slice(0,22);
+    return true;
+  }
+
+  fetch('/v1/status/summary').then(function(r){ return r.ok ? r.json() : null; }).then(function(s){
+    if (paintFromSummary(s)) return Promise.reject({ handled: true });
+    return null;
+  }).then(function(){
   // try to fetch /v1/status/board
-  fetch('/v1/status/board').then(r => {
+  return fetch('/v1/status/board').then(r => {
     if (!r.ok) throw new Error('no_board');
     return r.json();
   }).then(data => {
@@ -361,7 +395,9 @@
         list.appendChild(node);
       });
     }
-  }).catch(_ => {
+  });
+  }).catch(err => {
+    if (err && err.handled) return; // summary already painted the page
     paintFallback();
   });
 })();

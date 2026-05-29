@@ -1,0 +1,272 @@
+/*
+ * account-ui.css — shared styling for the W921 Account UI / No-Code client
+ * modules: data-grid (account-grid.js), optimistic toast/undo bus
+ * (account-mutate.js), connectivity/error banner (account-net.js), and
+ * keyboard-operable lists (account-keylist.js).
+ *
+ * Lives under public/account/ (linked only by account pages that adopt the
+ * modules) so it never leaks to the marketing site. Cool-slate ONLY — every
+ * color resolves through design tokens with slate fallbacks; NO warm/brown/
+ * orange/amber hex anywhere. All motion is gated behind prefers-reduced-motion.
+ */
+
+/* status-token fallbacks so toast/banner severities resolve even on the
+   account pages that do not load design-tokens.css (cool-slate-safe). */
+:root {
+  --kui-good: var(--good, #16a34a);
+  --kui-bad: var(--bad, #dc2626);
+  --kui-warn: var(--warn, #ca8a04);
+  --kui-text-1: var(--ink, #1f2937);
+  --kui-text-2: var(--ink-mute, #56606c);
+  --kui-surface-0: var(--bg-card, #ffffff);
+  --kui-surface-1: var(--bg-elev, #f3f5f7);
+  --kui-border-1: var(--line, #dde1e7);
+  --kui-border-2: var(--line-strong, #c3c9d2);
+  --kui-focus: var(--accent, #2563eb);
+}
+
+/* =====================================================================
+   DATA GRID (account-grid.js)
+   ===================================================================== */
+.kgrid-scroll {
+  max-height: 560px;
+  overflow-y: auto;
+  position: relative;
+  border: 1px solid var(--kui-border-1);
+  border-radius: 8px;
+}
+.kgrid-scroll table.ktable { width: 100%; }
+.kgrid-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--kui-surface-1);
+}
+.kgrid-row[aria-selected="true"] td {
+  background: var(--accent-soft, rgba(37, 99, 235, 0.10));
+}
+.kgrid-row:focus-visible {
+  outline: 2px solid var(--kui-focus);
+  outline-offset: -2px;
+}
+.kgrid-spacer td { background: transparent; }
+.kgrid-skel {
+  display: inline-block;
+  width: 180px; height: 10px;
+  background: var(--kui-surface-1);
+  border-radius: 3px;
+}
+.kgrid-check { width: 28px; }
+
+.kgrid-chrome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+.kgrid-views { display: flex; flex-wrap: wrap; gap: 6px; }
+.kgrid-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--kui-border-1);
+  background: var(--kui-surface-1);
+  border-radius: 999px;
+  font-family: var(--mono, ui-monospace, Menlo, monospace);
+  font-size: 11px;
+  color: var(--kui-text-2);
+  cursor: pointer;
+}
+.kgrid-chip:hover { border-color: var(--kui-focus); color: var(--kui-text-1); }
+.kgrid-chip:focus-visible { outline: 2px solid var(--kui-focus); outline-offset: 2px; }
+.kgrid-chip.active {
+  background: var(--accent-soft, rgba(37, 99, 235, 0.10));
+  border-color: var(--kui-focus);
+  color: var(--kui-text-1);
+}
+.kgrid-chip-x {
+  font-size: 13px; line-height: 1;
+  color: var(--kui-text-2);
+  cursor: pointer;
+}
+.kgrid-chip-x:hover { color: var(--kui-bad); }
+
+.kgrid-bulkbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-left: auto;
+  padding: 4px 8px;
+  border: 1px solid var(--kui-border-1);
+  border-radius: 8px;
+  background: var(--kui-surface-0);
+}
+.kgrid-bulkbar--in { animation: kgrid-slidein .16s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .kgrid-bulkbar--in { animation: none; } }
+@keyframes kgrid-slidein { from { opacity: 0; transform: translateY(6px); } }
+.kgrid-selcount { font-family: var(--mono, monospace); font-size: 11.5px; color: var(--kui-text-2); }
+.kgrid-bulk-act, .kgrid-bulk-clear, .kgrid-bulk-all {
+  padding: 4px 10px;
+  border: 1px solid var(--kui-border-2);
+  background: transparent;
+  color: var(--kui-text-1);
+  border-radius: 5px;
+  font-family: var(--mono, monospace);
+  font-size: 12px;
+  cursor: pointer;
+}
+.kgrid-bulk-act:hover, .kgrid-bulk-clear:hover, .kgrid-bulk-all:hover {
+  border-color: var(--kui-focus); color: var(--kui-focus);
+}
+.kgrid-bulk-bad { color: var(--kui-bad); border-color: var(--kui-bad); }
+
+/* =====================================================================
+   TOAST / UNDO BUS (account-mutate.js)
+   ===================================================================== */
+.k-sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+.k-toast-region {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9000;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  max-width: min(420px, calc(100vw - 40px));
+  pointer-events: none;
+}
+.k-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--kui-border-1);
+  background: var(--kui-surface-0);
+  color: var(--kui-text-1);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.18);
+  font-size: 13px;
+  border-left: 3px solid var(--kui-text-2);
+}
+.k-toast--anim { animation: k-toast-in .18s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .k-toast--anim { animation: k-toast-fade .18s both; }
+}
+@keyframes k-toast-in { from { opacity: 0; transform: translateY(10px); } }
+@keyframes k-toast-fade { from { opacity: 0; } }
+.k-toast--good { border-left-color: var(--kui-good); }
+.k-toast--bad { border-left-color: var(--kui-bad); }
+.k-toast--warn { border-left-color: var(--kui-warn); }
+.k-toast__msg { flex: 1 1 auto; }
+.k-toast__undo {
+  flex: 0 0 auto;
+  border: 1px solid var(--kui-focus);
+  background: transparent;
+  color: var(--kui-focus);
+  border-radius: 5px;
+  padding: 3px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.k-toast__undo:hover { background: var(--accent-soft, rgba(37, 99, 235, 0.10)); }
+.k-toast__undo:focus-visible, .k-toast__close:focus-visible {
+  outline: 2px solid var(--kui-focus); outline-offset: 2px;
+}
+.k-toast__close {
+  flex: 0 0 auto;
+  border: 0; background: transparent;
+  color: var(--kui-text-2);
+  font-size: 16px; line-height: 1;
+  cursor: pointer; padding: 0 2px;
+}
+
+/* =====================================================================
+   CONNECTIVITY / ERROR BANNER (account-net.js)
+   ===================================================================== */
+.ks-netbanner {
+  position: sticky;
+  top: 0;
+  z-index: 8000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  font-family: var(--mono, monospace);
+  font-size: 12.5px;
+  color: var(--kui-text-1);
+  background: var(--kui-surface-1);
+  border-bottom: 1px solid var(--kui-border-1);
+}
+.ks-netbanner[hidden] { display: none; }
+.ks-netbanner__dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--kui-text-2); flex: 0 0 auto;
+}
+.ks-netbanner--offline { border-bottom-color: var(--kui-bad); }
+.ks-netbanner--offline .ks-netbanner__dot { background: var(--kui-bad); }
+.ks-netbanner--degraded { border-bottom-color: var(--kui-warn); }
+.ks-netbanner--degraded .ks-netbanner__dot { background: var(--kui-warn); }
+.ks-netbanner--ok { border-bottom-color: var(--kui-good); }
+.ks-netbanner--ok .ks-netbanner__dot { background: var(--kui-good); }
+.ks-netbanner__retry {
+  margin-left: auto;
+  border: 1px solid var(--kui-border-2);
+  background: transparent; color: var(--kui-text-1);
+  border-radius: 5px; padding: 2px 10px;
+  font-size: 12px; cursor: pointer;
+}
+.ks-netbanner__retry:hover { border-color: var(--kui-focus); color: var(--kui-focus); }
+
+.kolm-retry-card {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border: 1px dashed var(--kui-border-2);
+  border-radius: 8px;
+  color: var(--kui-text-2);
+  font-size: 13px;
+}
+.kolm-retry-btn {
+  margin-left: 8px;
+  border: 1px solid var(--kui-focus);
+  background: transparent; color: var(--kui-focus);
+  border-radius: 5px; padding: 3px 12px;
+  font-size: 12px; cursor: pointer;
+}
+
+/* =====================================================================
+   KEYBOARD-OPERABLE LISTS (account-keylist.js)
+   ===================================================================== */
+.ktable tr[tabindex]:focus-visible {
+  outline: 2px solid var(--kui-focus);
+  outline-offset: -2px;
+}
+.ktable tr[aria-selected="true"] td {
+  background: var(--accent-soft, rgba(37, 99, 235, 0.10));
+}
+.keylist-hint {
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+  color: var(--kui-text-2);
+  margin: 4px 0 10px;
+}
+.keylist-hint kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  border: 1px solid var(--kui-border-2);
+  border-radius: 3px;
+  background: var(--kui-surface-1);
+  font-size: 10.5px;
+}
+
+/* =====================================================================
+   AUTOMATIONS (account-automations.js)
+   ===================================================================== */
+.kauto-runagain { white-space: nowrap; }

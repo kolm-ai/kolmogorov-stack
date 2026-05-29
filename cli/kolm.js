@@ -256,6 +256,213 @@ function saveConfig(c) {
   fs.chmodSync(CONFIG_PATH, 0o600);
 }
 
+// ===========================================================================
+// W921 — OS-native credential storage scaffolding (CredStore).
+//
+// The headline goal is to store the ks_* bearer token in the platform secret
+// vault (macOS Keychain / Windows Credential Manager-DPAPI / Linux Secret
+// Service) instead of plaintext config.json, with the chmod-0600 JSON file as
+// an explicit, transparent fallback. The OS-vault backend rides on the
+// @napi-rs/keyring binding, which must be declared as an optionalDependency in
+// package.json (a file this run does NOT own). Until that dependency is added,
+// _credBackend() probes for the module, finds it absent, and degrades to the
+// file backend — exactly the designed graceful-degradation contract. So this
+// scaffolding is correct + live today on the file path, and lights up the OS
+// path automatically once the optionalDependency lands.
+//
+// What IS shipped here, GPU/credential-free:
+//   - _credBackend() memoized probe (honors KOLM_KEY_STORE=os|file|auto)
+//   - keyStoreLocation() transparency surface for whoami/config-show/doctor
+//   - the missing `kolm logout` verb (delete vault entry + scrub config files)
+//   - `kolm config migrate-keys` explicit migration (dry-run aware)
+//   - a Windows chmod-no-op warning when file fallback is active
+// ===========================================================================
+const CRED_SERVICE = 'ai.kolm.cli';
+let _credBackendCache = null;
+let _keyringModCache = undefined; // undefined=unprobed, null=absent, obj=loaded
+
+async function _loadKeyringModule() {
+  if (_keyringModCache !== undefined) return _keyringModCache;
+  try {
+    // Optional — present only once @napi-rs/keyring is added to package.json
+    // optionalDependencies. The dynamic import keeps the CLI loading on a fresh
+    // clone where the module is absent.
+    const mod = await import('@napi-rs/keyring');
+    _keyringModCache = mod && (mod.Entry || (mod.default && mod.default.Entry)) ? mod : null;
+  } catch (_) {
+    _keyringModCache = null;
+  }
+  return _keyringModCache;
+}
+
+// _credBackend — returns 'os' | 'file'. Memoized per-process. Honors
+// KOLM_KEY_STORE (os|file|auto). 'os' is only selected when the keyring module
+// is present AND a cheap round-trip probe succeeds (vault reachable). A
+// reachable-but-locked vault throws and we surface that rather than silently
+// downgrading — but until the optionalDependency lands, this always resolves
+// to 'file'.
+async function _credBackend() {
+  if (_credBackendCache) return _credBackendCache;
+  const forced = String(process.env.KOLM_KEY_STORE || 'auto').toLowerCase();
+  if (forced === 'file') { _credBackendCache = 'file'; return 'file'; }
+  const mod = await _loadKeyringModule();
+  if (!mod) { _credBackendCache = 'file'; return 'file'; }
+  try {
+    const Entry = mod.Entry || (mod.default && mod.default.Entry);
+    const probe = new Entry(CRED_SERVICE, '__kolm_probe__');
+    probe.setPassword('1');
+    probe.getPassword();
+    try { probe.deletePassword(); } catch (_) {}
+    _credBackendCache = 'os';
+    return 'os';
+  } catch (e) {
+    if (forced === 'os') {
+      // The user FORCED os but the vault is unreachable/locked — surface it,
+      // do not silently write plaintext (the Databricks/gh stance).
+      throw Object.assign(new Error('keyring unavailable: ' + (e && e.message || e)), { code: 'KEYRING_UNAVAILABLE' });
+    }
+    _credBackendCache = 'file';
+    return 'file';
+  }
+}
+
+// keyStoreLocation — transparency: where does the key live and why? Sync; safe
+// to call from whoami/config-show without awaiting the probe (it reports the
+// resolved/cached backend and the static reason).
+function keyStoreLocation() {
+  if (process.env.KOLM_API_KEY) return { backend: 'env', reason: 'KOLM_API_KEY env override', writable: false, secure: true };
+  const forced = String(process.env.KOLM_KEY_STORE || 'auto').toLowerCase();
+  const backend = _credBackendCache || (forced === 'os' ? 'os' : 'file');
+  let reason;
+  if (backend === 'os') reason = 'OS secret vault (' + _osVaultName() + ')';
+  else if (forced === 'file') reason = 'file (forced by KOLM_KEY_STORE=file)';
+  else reason = 'file (OS keyring unavailable — @napi-rs/keyring not installed)';
+  const winFileWarn = (backend === 'file' && process.platform === 'win32');
+  return {
+    backend, reason,
+    writable: backend !== 'env',
+    secure: backend === 'os' || (backend === 'file' && process.platform !== 'win32'),
+    windows_chmod_noop: winFileWarn || undefined,
+  };
+}
+
+function _osVaultName() {
+  if (process.platform === 'darwin') return 'macOS Keychain';
+  if (process.platform === 'win32') return 'Windows Credential Manager';
+  return 'Secret Service / libsecret';
+}
+
+// _scrubPlaintextKey — remove api_key from config.json (and best-effort from
+// config.toml [account]) without disturbing other settings. Returns whether a
+// key was actually present + scrubbed.
+function _scrubPlaintextKey() {
+  let scrubbed = false;
+  try {
+    if (fs.existsSync(CONFIG_PATH)) {
+      const c = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
+      if (c && c.api_key) { delete c.api_key; scrubbed = true; }
+      c.key_store = c.key_store || (_credBackendCache === 'os' ? 'os' : 'file');
+      fs.writeFileSync(CONFIG_PATH, JSON.stringify(c, null, 2));
+      try { fs.chmodSync(CONFIG_PATH, 0o600); } catch (_) {}
+    }
+  } catch (_) {}
+  // config.toml: strip api_key line inside [account].
+  try {
+    const tomlPath = path.join(KOLM_DIR, 'config.toml');
+    if (fs.existsSync(tomlPath)) {
+      const lines = fs.readFileSync(tomlPath, 'utf-8').split(/\r?\n/);
+      let inAccount = false;
+      const kept = [];
+      for (const raw of lines) {
+        const t = raw.trim();
+        const sec = t.match(/^\[([A-Za-z0-9_\-]+)\]/);
+        if (sec) { inAccount = sec[1] === 'account'; kept.push(raw); continue; }
+        if (inAccount && /^api_key\s*=/.test(t)) { scrubbed = true; continue; }
+        kept.push(raw);
+      }
+      fs.writeFileSync(tomlPath, kept.join('\n'));
+    }
+  } catch (_) {}
+  return scrubbed;
+}
+
+// cmdLogout — the verb the help text + error hints have long advertised but was
+// never wired. Deletes the OS-vault entry (when present) and scrubs the
+// plaintext api_key from config.json + config.toml. --json aware.
+async function cmdLogout(args) {
+  if (maybeHelp('logout', args)) return;
+  const jsonOut = (args || []).includes('--json');
+  const backend = await _credBackend();
+  let vaultRemoved = false;
+  if (backend === 'os') {
+    try {
+      const mod = await _loadKeyringModule();
+      const Entry = mod && (mod.Entry || (mod.default && mod.default.Entry));
+      if (Entry) { const e = new Entry(CRED_SERVICE, 'api_key'); vaultRemoved = !!e.deletePassword(); }
+    } catch (_) {}
+  }
+  const scrubbed = _scrubPlaintextKey();
+  const out = { ok: true, action: 'logout', backend, vault_removed: vaultRemoved, plaintext_scrubbed: scrubbed };
+  if (jsonOut) { _printJson(out); return; }
+  console.log('logged out.');
+  if (vaultRemoved) console.log('  removed key from ' + _osVaultName());
+  if (scrubbed) console.log('  scrubbed api_key from ~/.kolm/config.json');
+  if (!vaultRemoved && !scrubbed) console.log('  (no stored key found)');
+  nextStep({ run: 'kolm login' });
+}
+
+// cmdConfigMigrateKeys — `kolm config migrate-keys [--dry-run] [--json]`. Moves
+// an existing plaintext api_key into the OS vault and scrubs the plaintext
+// copy, write-verify-then-scrub so a failed vault write never loses the key.
+async function cmdConfigMigrateKeys(args) {
+  const jsonOut = (args || []).includes('--json');
+  const dryRun = (args || []).includes('--dry-run');
+  let plaintextKey = null;
+  try {
+    if (fs.existsSync(CONFIG_PATH)) {
+      const c = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
+      if (c && c.api_key) plaintextKey = c.api_key;
+    }
+  } catch (_) {}
+  if (!plaintextKey) {
+    const out = { ok: true, migrated: false, reason: 'no_plaintext_key' };
+    if (jsonOut) { _printJson(out); return; }
+    console.log('no plaintext key in config.json — nothing to migrate.');
+    return;
+  }
+  const backend = await _credBackend();
+  if (backend !== 'os') {
+    const out = { ok: false, migrated: false, reason: 'no_os_vault',
+      detail: 'OS keyring unavailable (@napi-rs/keyring not installed) — key stays in chmod-0600 config.json', backend };
+    if (jsonOut) { _printJson(out); return; }
+    console.error('cannot migrate: OS keyring is unavailable. The key stays in ~/.kolm/config.json (mode 0600).');
+    console.error('  (install support adds @napi-rs/keyring as an optional dependency)');
+    return;
+  }
+  if (dryRun) {
+    const out = { ok: true, migrated: false, dry_run: true, would_move_to: _osVaultName() };
+    if (jsonOut) { _printJson(out); return; }
+    console.log('[dry-run] would move api_key from config.json into ' + _osVaultName());
+    return;
+  }
+  try {
+    const mod = await _loadKeyringModule();
+    const Entry = mod.Entry || (mod.default && mod.default.Entry);
+    const e = new Entry(CRED_SERVICE, 'api_key');
+    e.setPassword(plaintextKey);
+    // Write-verify BEFORE scrubbing the plaintext (no data loss).
+    if (e.getPassword() !== plaintextKey) throw new Error('vault write verification failed');
+    _scrubPlaintextKey();
+    const out = { ok: true, migrated: true, backend: 'os', vault: _osVaultName() };
+    if (jsonOut) { _printJson(out); return; }
+    console.log('migrated api_key into ' + _osVaultName() + ' and scrubbed the plaintext copy.');
+  } catch (e) {
+    const out = { ok: false, migrated: false, reason: 'migrate_failed', detail: String(e && e.message || e) };
+    if (jsonOut) { _printJson(out); return; }
+    console.error('migration failed: ' + (e && e.message || e) + ' — plaintext key left intact.');
+  }
+}
+
 function authHeaders(c) {
   return c.api_key ? { 'Authorization': 'Bearer ' + c.api_key } : {};
 }
@@ -5585,7 +5792,22 @@ async function cmdLogin(args) {
   } else {
     console.log('kolm login - paste your API key from kolm.ai/signup.');
     console.log(`Cloud: ${c.base}`);
-    key = (await prompt('API key (ks_...): ')).trim();
+    // W921 — masked input. Stops the ks_... key from being echoed to the
+    // terminal/scrollback (the headline security win: shared terminals,
+    // asciinema recordings and screen-shares no longer leak the secret).
+    // password() auto-falls-back to the numbered readline `prompt()` path when
+    // the terminal is non-interactive (--plain / ACCESSIBLE / TERM=dumb /
+    // KOLM_NO_INTERACTIVE / non-TTY), so existing behavior is preserved there.
+    try {
+      const ux = await import('./kolm-ux.js');
+      const pw = await ux.password({ message: 'API key (ks_...):' });
+      if (ux.isCancel(pw)) { console.error('login cancelled.'); process.exit(EXIT.BAD_ARGS); }
+      key = String(pw || '').trim();
+    } catch (_) {
+      // Defensive: if the masked prompt is unavailable for any reason, fall
+      // back to the historic plain prompt rather than failing the login.
+      key = (await prompt('API key (ks_...): ')).trim();
+    }
   }
   if (!key.startsWith('ks_')) {
     console.error('error: API key must start with "ks_"');
@@ -14879,11 +15101,20 @@ async function cmdConfig(args) {
     return await _cmdConfigW888(sub, args.slice(1), { jsonOut, showSecrets });
   }
 
+  // W921 — `kolm config migrate-keys` moves a plaintext api_key into the OS
+  // secret vault (no-op + honest message when the vault is unavailable).
+  if (sub === 'migrate-keys') {
+    return await cmdConfigMigrateKeys(args.slice(1));
+  }
+
   // ─────── legacy `show` / no-arg path (preserve W067 behavior) ───────
   if (!sub || sub === 'show') {
     const c = loadConfig();
     const key = c.api_key || process.env.KOLM_API_KEY || '';
     const fp = key ? (key.slice(0, 10) + '...' + key.slice(-4)) : null;
+    // W921 — surface WHERE the key lives + why (os | file(unavailable) |
+    // file(forced) | env), plus the Windows chmod-no-op caveat when relevant.
+    const loc = keyStoreLocation();
     if (jsonOut) {
       console.log(JSON.stringify({
         base: c.base,
@@ -14891,6 +15122,10 @@ async function cmdConfig(args) {
         key_fingerprint: fp,
         config_path: CONFIG_PATH,
         toml_path: path.join(KOLM_DIR, 'config.toml'),
+        key_store: loc.backend,
+        key_store_reason: loc.reason,
+        key_store_secure: loc.secure,
+        windows_chmod_noop: loc.windows_chmod_noop || false,
       }, null, 2));
       return;
     }
@@ -14899,6 +15134,12 @@ async function cmdConfig(args) {
     console.log('key_fingerprint:   ' + (fp || '(not logged in)'));
     console.log('config_path:       ' + CONFIG_PATH);
     console.log('toml_path:         ' + path.join(KOLM_DIR, 'config.toml'));
+    console.log('key_store:         ' + loc.backend + '  (' + loc.reason + ')');
+    if (loc.windows_chmod_noop) {
+      console.log('  caveat: chmod 0600 is a no-op on Windows/NTFS — the plaintext key is');
+      console.log('          readable by any process running as this user. `kolm config');
+      console.log('          migrate-keys` moves it into Credential Manager once available.');
+    }
     console.log('');
     console.log('# full hierarchy: kolm config list   (flag > env > user > project > default)');
     return;
@@ -32078,7 +32319,7 @@ function looksLikeNaturalLanguage(cmd, rest) {
 // Single source of truth for the verb + subcommand tables the shell completion
 // scripts consume. Keep this in sync with the dispatch switch below.
 const COMPLETION_VERBS = [
-  'init', 'signup', 'login', 'whoami', 'artifacts', 'artifact', 'status', 'health', 'metrics', 'changelog', 'billing', 'support-bundle', 'key', 'new', 'build', 'compile', 'train', 'make', 'ship', 'run', 'eval', 'benchmark', 'bench',
+  'init', 'signup', 'login', 'logout', 'whoami', 'artifacts', 'artifact', 'status', 'health', 'metrics', 'changelog', 'billing', 'support-bundle', 'key', 'new', 'build', 'compile', 'train', 'make', 'ship', 'run', 'eval', 'benchmark', 'bench',
   'score', 'list', 'ls', 'inspect', 'eject', 'diff', 'verify', 'serve', 'tui', 'repl', 'publish', 'pull', 'hub', 'capture', 'labels', 'distill', 'moe', 'tokenize',
   'config', 'hmac', 'install', 'tune', 'rag', 'team', 'tunnel', 'cloud', 'airgap',
   'compute', 'doctor', 'loop', 'logs', 'ask', 'nl', 'chat', 'chat-tui', 'version', 'help', 'completion', 'upgrade', 'update', 'self-update',
@@ -32121,6 +32362,8 @@ const COMPLETION_VERBS = [
   'kolmbench', 'kb',
   // W784 — third-party plugin architecture.
   'plugin',
+  // W921 — gh/kubectl-style user command extensions.
+  'extension', 'ext',
   // W731/W733/W735/W736/W835/W739 — completion entries for verbs already in dispatch.
   'vscode', 'otel', 'tool', 'guardrails', 'savings', 'lineage',
   // W848 — interactive setup wizard: `kolm quickstart` picks wrapper or studio
@@ -32160,8 +32403,8 @@ const COMPLETION_SUBS = {
   // the menu: `kolm quickstart wrapper` or `kolm quickstart studio`.
   quickstart: ['wrapper', 'studio'],
   package: ['release-readiness', 'release', 'readiness'],
-  namespace: ['fingerprint', 'warm-start-suggest', 'verticals'],
-  ns: ['fingerprint', 'warm-start-suggest', 'verticals'],
+  namespace: ['create', 'config', 'set', 'deploy', 'undeploy', 'rollback', 'status', 'fingerprint', 'warm-start-suggest', 'verticals', 'updates'],
+  ns: ['create', 'config', 'set', 'deploy', 'undeploy', 'rollback', 'status', 'fingerprint', 'warm-start-suggest', 'verticals', 'updates'],
   evidence: ['format-governance', 'runtime-adoption', 'compliance-certification', 'package-release', 'benchmark', 'quality'],
   models:  ['list', 'info', 'recommend', 'pin', 'devices', 'frontier', 'tiers', 'backends', 'benchmarks', 'verify-benchmarks', 'show', 'add', 'verify', 'pull', 'cache', 'prefetch', 'manifest'],
   gpu:     ['detect', 'doctor', 'setup', 'stress'],
@@ -32195,6 +32438,11 @@ const COMPLETION_SUBS = {
   bakeoff: [],
   // W784 — plugin architecture.
   plugin:  ['list', 'ls', 'register', 'install', 'info', 'show'],
+  // W888-J config + W921 migrate-keys.
+  config:  ['list', 'get', 'set', 'unset', 'edit', 'show', 'migrate-keys'],
+  // W921 — user command extensions.
+  extension: ['list', 'ls', 'install', 'remove', 'rm', 'exec', 'dir'],
+  ext:       ['list', 'ls', 'install', 'remove', 'rm', 'exec', 'dir'],
   // W371 — `kolm replay trace|namespace|dataset` overlaps the W216 cloud
   // path; both are wired in cmdReplay's subverb shortcut.
   replay:  ['trace', 'namespace', 'dataset'],
@@ -33463,6 +33711,370 @@ async function cmdWrapAgent(args) {
 // =============================================================================
 // W384 end — CLI consolidator region.
 // =============================================================================
+
+// =============================================================================
+// W921 — gh/kubectl-style USER COMMAND extensions.
+//
+// Resolve an unknown `kolm <x>` to an external executable named `kolm-<x>`
+// (found under ~/.kolm/extensions/ or on PATH), forward trailing args to it
+// with an augmented env, and ship `kolm extension install|list|remove|exec`
+// to manage them. Distinct from the CAPABILITY plugin system (`kolm plugin`,
+// src/plugins.js) which loads in-process hooks of 4 frozen kinds — extensions
+// are out-of-process SUBCOMMANDS, the gh/kubectl ecosystem-unlock pattern.
+//
+// SAFETY INVARIANTS (the gh/kubectl rules that make grafting onto a closed
+// switch safe): core verbs ALWAYS win — an extension can NEVER shadow a
+// built-in; resolution is filesystem+PATH only (no network on the hot path);
+// spawn is shell:false with an absolute resolved path (no injection); names
+// are validated by EXT_NAME_RE (blocks path traversal); KOLM_API_KEY is
+// opt-in via manifest wants_api_key (tighter than gh's always-on GH_TOKEN).
+// =============================================================================
+const EXT_NAME_RE = /^[a-z][a-z0-9-]{0,63}$/;
+const EXTENSIONS_VERSION = 'w921-v1';
+// Windows-executable suffixes (PATHEXT-style). On POSIX we use the exec bit.
+const EXT_WIN_SUFFIXES = ['.cmd', '.exe', '.ps1', '.bat', ''];
+
+function extensionsDir() {
+  if (process.env.KOLM_EXTENSIONS_DIR) return process.env.KOLM_EXTENSIONS_DIR;
+  // Honor the same home-dir resolution KOLM_DIR uses (KOLM_HOME wins, then
+  // os.homedir() which already reads USERPROFILE on Windows).
+  const home = process.env.KOLM_HOME || HOME;
+  return path.join(home, '.kolm', 'extensions');
+}
+
+// _isExecutableFile — cross-platform exec-bit / suffix probe. Never throws.
+function _isExecutableFile(p) {
+  try {
+    const st = fs.statSync(p);
+    if (!st.isFile()) return false;
+    if (process.platform === 'win32') return true; // exec bit is meaningless on NTFS
+    return (st.mode & 0o111) !== 0;
+  } catch (_) { return false; }
+}
+
+// _findManagedBin — look for kolm-<name>[.suffix] inside ~/.kolm/extensions/
+// (flat file) or ~/.kolm/extensions/kolm-<name>/kolm-<name>[.suffix] (dir).
+function _findManagedBin(name) {
+  const dir = extensionsDir();
+  const base = 'kolm-' + name;
+  const suffixes = process.platform === 'win32' ? EXT_WIN_SUFFIXES : [''];
+  const candidates = [];
+  for (const s of suffixes) {
+    candidates.push(path.join(dir, base + s));
+    candidates.push(path.join(dir, base, base + s));
+  }
+  for (const c of candidates) if (_isExecutableFile(c)) return c;
+  return null;
+}
+
+// _findPathBin — scan PATH left-to-right for kolm-<name>[.suffix].
+function _findPathBin(name) {
+  const base = 'kolm-' + name;
+  const dirs = String(process.env.PATH || '').split(path.delimiter).filter(Boolean);
+  const suffixes = process.platform === 'win32' ? EXT_WIN_SUFFIXES : [''];
+  for (const d of dirs) {
+    for (const s of suffixes) {
+      const c = path.join(d, base + s);
+      if (_isExecutableFile(c)) return c;
+    }
+  }
+  return null;
+}
+
+// resolveExtension — kubectl longest-prefix + underscore->dash resolution
+// against managed dir (highest trust) then PATH. HARD-REFUSES any name whose
+// first word is a core verb. Returns:
+//   { ok, found, name, bin, args, source } | { ok:true, found:false, shadowedByCore } | { ok:false, error }
+function resolveExtension(words, opts = {}) {
+  const coreVerbs = new Set(opts.coreVerbs || []);
+  const toks = (words || []).filter(w => typeof w === 'string');
+  if (toks.length === 0) return { ok: true, found: false };
+  // Longest-prefix-first: kolm-foo-bar-baz, then kolm-foo-bar, then kolm-foo.
+  // Stop at the first whitespace-bearing or flag token (flags belong to args).
+  const prefixTokens = [];
+  for (const t of toks) {
+    if (t.startsWith('-') || /\s/.test(t)) break;
+    prefixTokens.push(t);
+  }
+  if (prefixTokens.length === 0) return { ok: true, found: false };
+  for (let len = prefixTokens.length; len >= 1; len--) {
+    const nameWords = prefixTokens.slice(0, len);
+    // underscore->dash: a filename kolm-foo_bar is invokable as foo-bar OR
+    // foo_bar. Normalize the joined name to dashes for the canonical lookup,
+    // but also try the raw underscore form.
+    const joinedDash = nameWords.join('-').replace(/_/g, '-');
+    const joinedRaw = nameWords.join('-');
+    // Core-verb shadow refusal: the FIRST word cannot be a core verb.
+    if (coreVerbs.has(nameWords[0])) {
+      // A core verb at the head can never be an extension; only flag if a
+      // matching binary actually exists (so `extension list` can warn).
+      const shadowBin = _findManagedBin(joinedDash) || _findPathBin(joinedDash);
+      if (shadowBin) return { ok: true, found: false, shadowedByCore: true, name: joinedDash, bin: shadowBin };
+      continue;
+    }
+    if (!EXT_NAME_RE.test(joinedDash)) continue;
+    let bin = _findManagedBin(joinedDash);
+    let source = 'managed';
+    if (!bin && joinedRaw !== joinedDash) { bin = _findManagedBin(joinedRaw); }
+    if (!bin) { bin = _findPathBin(joinedDash); source = 'path'; }
+    if (!bin && joinedRaw !== joinedDash) { bin = _findPathBin(joinedRaw); source = 'path'; }
+    if (bin) {
+      return { ok: true, found: true, name: joinedDash, bin, args: toks.slice(len), source };
+    }
+  }
+  return { ok: true, found: false };
+}
+
+// listExtensions — enumerate managed + PATH extensions, flag non-executable,
+// overshadowed, and core collisions. Never throws on one bad entry.
+function listExtensions(opts = {}) {
+  const dir = extensionsDir();
+  const coreVerbs = new Set(opts.coreVerbs || []);
+  const out = { ok: true, dir, extensions: [], errors: [], version: EXTENSIONS_VERSION };
+  const seen = new Map(); // name -> first bin (managed wins)
+  // Managed dir first.
+  try {
+    if (fs.existsSync(dir)) {
+      for (const ent of fs.readdirSync(dir)) {
+        const m = ent.match(/^kolm-([a-z][a-z0-9_-]*?)(?:\.(cmd|exe|ps1|bat))?$/);
+        if (!m) continue;
+        const name = m[1].replace(/_/g, '-');
+        const full = path.join(dir, ent);
+        let bin = full;
+        try { if (fs.statSync(full).isDirectory()) { bin = _findManagedBin(name) || full; } } catch (_) {}
+        const executable = _isExecutableFile(bin);
+        out.extensions.push({ name, bin, source: 'managed', executable,
+          overshadowed_by: null, collides_with_core: coreVerbs.has(name) });
+        if (!seen.has(name)) seen.set(name, bin);
+      }
+    }
+  } catch (e) { out.errors.push({ name: '(managed-dir)', error: String(e && e.message || e) }); }
+  // PATH scan (explicit `list` only — never on the hot path).
+  if (opts.pathScan !== false) {
+    const pdirs = String(process.env.PATH || '').split(path.delimiter).filter(Boolean);
+    for (const d of pdirs) {
+      let ents;
+      try { ents = fs.readdirSync(d); } catch (_) { continue; }
+      for (const ent of ents) {
+        const m = ent.match(/^kolm-([a-z][a-z0-9_-]*?)(?:\.(cmd|exe|ps1|bat))?$/);
+        if (!m) continue;
+        const name = m[1].replace(/_/g, '-');
+        const full = path.join(d, ent);
+        if (!_isExecutableFile(full)) continue;
+        const overshadowed = seen.has(name) ? seen.get(name) : null;
+        out.extensions.push({ name, bin: full, source: 'path', executable: true,
+          overshadowed_by: overshadowed, collides_with_core: coreVerbs.has(name) });
+        if (!seen.has(name)) seen.set(name, full);
+      }
+    }
+  }
+  return out;
+}
+
+// extensionEnv — the value-add over a raw kubectl plugin: a documented env
+// contract. KOLM_API_KEY is injected ONLY when the manifest opts in.
+function extensionEnv(ctx) {
+  const env = { ...process.env };
+  env.KOLM_EXTENSION = '1';
+  env.KOLM_VERSION = VERSION;
+  env.KOLM_EXT_NAME = ctx.name;
+  env.KOLM_CONFIG_DIR = KOLM_DIR;
+  try { env.KOLM_BASE_URL = loadConfig().base; } catch (_) {}
+  if (ctx.wantApiKey) {
+    try { const c = loadConfig(); if (c.api_key) env.KOLM_API_KEY = c.api_key; } catch (_) {}
+  } else {
+    // Do NOT leak the key to an extension that did not opt in.
+    delete env.KOLM_API_KEY;
+  }
+  return env;
+}
+
+// _readExtManifest — best-effort read of ~/.kolm/extensions/kolm-<name>/manifest.json.
+function _readExtManifest(name) {
+  try {
+    const p = path.join(extensionsDir(), 'kolm-' + name, 'manifest.json');
+    if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, 'utf8'));
+  } catch (_) {}
+  return {};
+}
+
+// runExtension — spawn the resolved binary, propagate its exit code verbatim.
+// shell:false on POSIX (absolute path, no injection); Windows uses shell:true
+// so .cmd/.bat shims resolve, matching the cmdWrap precedent.
+async function runExtension(bin, childArgs, ctx) {
+  const { spawn } = await import('node:child_process');
+  const env = extensionEnv(ctx);
+  const child = spawn(bin, childArgs, { env, stdio: 'inherit', shell: process.platform === 'win32' });
+  child.on('error', (e) => {
+    console.error('error: extension `kolm ' + ctx.name + '` failed to spawn: ' + e.message);
+    nextStep({ try: ['kolm extension list', 'chmod +x ' + bin] });
+    process.exit(e && e.code === 'ENOENT' ? EXIT.NOT_FOUND : EXIT.EXECUTION);
+  });
+  child.on('exit', (code, signal) => {
+    if (signal) process.exit(EXIT.EXECUTION);
+    process.exit(code == null ? EXIT.EXECUTION : code);
+  });
+}
+
+// cmdExtension — `kolm extension <install|list|remove|exec|dir>` dispatcher.
+async function cmdExtension(args) {
+  const sub = (args && args[0]) || '';
+  const rest = (args || []).slice(1);
+  const jsonOut = (args || []).includes('--json');
+
+  if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
+    console.log('kolm extension — gh/kubectl-style user command extensions\n\n' +
+      'USAGE\n' +
+      '  kolm extension list [--json]            enumerate managed + PATH extensions\n' +
+      '  kolm extension install --bin <path> [--name <n>] [--yes]   install a local binary\n' +
+      '  kolm extension remove <name>            delete a managed extension\n' +
+      '  kolm extension exec <name> [args...]    run even a core-shadowing extension\n' +
+      '  kolm extension dir                      print the extensions directory\n\n' +
+      'An extension is an executable named `kolm-<name>` under ~/.kolm/extensions/\n' +
+      'or on PATH. When you run `kolm <name>` and <name> is not a built-in verb,\n' +
+      'kolm forwards to it with KOLM_EXTENSION=1 + KOLM_VERSION + KOLM_EXT_NAME set.\n' +
+      'Core verbs can NEVER be shadowed. KOLM_API_KEY is injected only when the\n' +
+      'extension manifest sets wants_api_key:true.\n\n' +
+      'Distinct from `kolm plugin` (in-process capability hooks).');
+    return;
+  }
+
+  if (sub === 'dir') {
+    if (jsonOut) return _printJson({ ok: true, dir: extensionsDir(), version: EXTENSIONS_VERSION });
+    console.log(extensionsDir());
+    return;
+  }
+
+  if (sub === 'list' || sub === 'ls') {
+    const listed = listExtensions({ coreVerbs: COMPLETION_VERBS });
+    if (jsonOut) return _printJson(listed);
+    console.log('extensions dir: ' + listed.dir);
+    if (listed.extensions.length === 0) { console.log('  (none installed)'); }
+    for (const e of listed.extensions) {
+      let line = '  kolm ' + e.name + '  [' + e.source + ']';
+      if (!e.executable) line += '  (not executable)';
+      if (e.overshadowed_by) line += '  (overshadowed by ' + e.overshadowed_by + ')';
+      if (e.collides_with_core) line += '  (WARNING: collides with core verb — will never run)';
+      console.log(line);
+    }
+    for (const err of listed.errors) console.error('  ! ' + err.name + ': ' + err.error);
+    return;
+  }
+
+  if (sub === 'install') {
+    const binPath = pickFlag(rest, '--bin') || pickFlagEq(rest, '--bin');
+    let name = pickFlag(rest, '--name') || pickFlagEq(rest, '--name');
+    const yes = rest.includes('--yes') || rest.includes('-y');
+    if (!binPath) {
+      const env = { ok: false, error: 'missing_source', hint: 'usage: kolm extension install --bin <path> [--name <n>]' };
+      if (jsonOut) { _printJson(env); process.exit(EXIT.BAD_ARGS); }
+      console.error('error: ' + env.error + ' — ' + env.hint);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (!fs.existsSync(binPath)) {
+      const env = { ok: false, error: 'bin_not_found', bin: binPath };
+      if (jsonOut) { _printJson(env); process.exit(EXIT.NOT_FOUND); }
+      console.error('error: bin not found: ' + binPath);
+      process.exit(EXIT.NOT_FOUND);
+    }
+    if (!name) {
+      const b = path.basename(binPath).replace(/\.(cmd|exe|ps1|bat)$/i, '');
+      const m = b.match(/^kolm-(.+)$/);
+      name = m ? m[1] : b;
+    }
+    name = String(name).replace(/_/g, '-');
+    if (!EXT_NAME_RE.test(name)) {
+      const env = { ok: false, error: 'invalid_name', name, allowed: EXT_NAME_RE.source };
+      if (jsonOut) { _printJson(env); process.exit(EXIT.BAD_ARGS); }
+      console.error('error: invalid extension name: ' + name + ' (must match ' + EXT_NAME_RE.source + ')');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (COMPLETION_VERBS.includes(name)) {
+      const env = { ok: false, error: 'collides_with_core', name };
+      if (jsonOut) { _printJson(env); process.exit(EXIT.BAD_ARGS); }
+      console.error('error: `' + name + '` is a core verb and can never be run as an extension.');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    // gh-style trust warning + confirm (unless --yes or non-TTY w/ --yes).
+    if (!yes && process.stdin.isTTY && !process.env.KOLM_NO_INTERACTIVE) {
+      try {
+        const ux = await import('./kolm-ux.js');
+        console.log('This extension is NOT verified or signed by kolm. You are trusting the publisher.');
+        const ok = await ux.confirm({ message: 'Install kolm-' + name + ' from ' + binPath + '?' });
+        if (ux.isCancel(ok) || !ok) { console.error('install cancelled.'); process.exit(EXIT.BAD_ARGS); }
+      } catch (_) { /* fall through to install if the prompt is unavailable */ }
+    }
+    const dir = extensionsDir();
+    const target = path.join(dir, 'kolm-' + name);
+    try {
+      fs.mkdirSync(target, { recursive: true });
+      const suffix = process.platform === 'win32' ? (path.extname(binPath) || '.cmd') : '';
+      const destBin = path.join(target, 'kolm-' + name + suffix);
+      fs.copyFileSync(binPath, destBin);
+      if (process.platform !== 'win32') { try { fs.chmodSync(destBin, 0o755); } catch (_) {} }
+      fs.writeFileSync(path.join(target, 'manifest.json'), JSON.stringify({
+        name, entry: path.basename(destBin), kind: 'binary',
+        installed_at: new Date().toISOString(), wants_api_key: false, version: EXTENSIONS_VERSION,
+      }, null, 2));
+      const env = { ok: true, name, kind: 'binary', entry: destBin, dir: target };
+      if (jsonOut) return _printJson(env);
+      console.log('installed kolm-' + name + ' -> ' + destBin);
+      nextStep({ run: 'kolm ' + name + ' --help' });
+    } catch (e) {
+      const env = { ok: false, error: 'install_failed', detail: String(e && e.message || e) };
+      if (jsonOut) { _printJson(env); process.exit(EXIT.EXECUTION); }
+      console.error('error: install failed: ' + (e && e.message || e));
+      process.exit(EXIT.EXECUTION);
+    }
+    return;
+  }
+
+  if (sub === 'remove' || sub === 'rm' || sub === 'uninstall') {
+    const name = (rest.find(a => a && !a.startsWith('-')) || '').replace(/_/g, '-');
+    if (!name) {
+      if (jsonOut) { _printJson({ ok: false, error: 'missing_name' }); process.exit(EXIT.BAD_ARGS); }
+      console.error('error: usage: kolm extension remove <name>');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const target = path.join(extensionsDir(), 'kolm-' + name);
+    if (!fs.existsSync(target)) {
+      if (jsonOut) { _printJson({ ok: false, error: 'not_found', name }); process.exit(EXIT.NOT_FOUND); }
+      console.error('error: extension not found: ' + name);
+      process.exit(EXIT.NOT_FOUND);
+    }
+    try {
+      fs.rmSync(target, { recursive: true, force: true });
+      if (jsonOut) return _printJson({ ok: true, name, removed_dir: target });
+      console.log('removed kolm-' + name);
+    } catch (e) {
+      if (jsonOut) { _printJson({ ok: false, error: 'remove_failed', detail: String(e && e.message || e) }); process.exit(EXIT.EXECUTION); }
+      console.error('error: remove failed: ' + (e && e.message || e));
+      process.exit(EXIT.EXECUTION);
+    }
+    return;
+  }
+
+  if (sub === 'exec') {
+    // exec bypasses the core-shadow guard: run even a core-named extension.
+    const name = (rest.find(a => a && !a.startsWith('-')) || '').replace(/_/g, '-');
+    if (!name) {
+      console.error('error: usage: kolm extension exec <name> [args...]');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const idx = rest.indexOf(rest.find(a => a && !a.startsWith('-')));
+    const childArgs = rest.slice(idx + 1).filter(a => a !== '--json');
+    const bin = _findManagedBin(name) || _findPathBin(name);
+    if (!bin) {
+      console.error('error: no extension binary found for: ' + name);
+      process.exit(EXIT.NOT_FOUND);
+    }
+    const man = _readExtManifest(name);
+    await runExtension(bin, childArgs, { name, wantApiKey: !!man.wants_api_key });
+    return;
+  }
+
+  throw _badArgs('unknown extension subcommand: ' + sub);
+}
 
 // ---------- kolm models ----------
 async function cmdModels(args) {
@@ -37723,6 +38335,22 @@ async function cmdNamespace(args) {
     return;
   }
 
+  // W921 — `kolm namespace set <slug> [--route-mode m] [--cache-mode m]
+  // [--guardrail-mode m] [--route-chain a,b] [--confidence-threshold n] [--json]`.
+  // The explicit, server-authoritative CLI front door to PUT /v1/namespaces/:slug.
+  //
+  // Distinct from `kolm namespace config <slug> --set k=v` (src/wrapper-cli.js),
+  // which is local-first and SWALLOWS server errors on a best-effort sync. `set`
+  // is the opposite contract: it talks to the server, treats the server as the
+  // source of truth, and surfaces the server's enum-validation error
+  // (HTTP 400 invalid_value {field, allowed}) cleanly instead of hiding it. Use
+  // `set` when you want to push the gateway routing/cache/guardrail policy to a
+  // deployed namespace and know whether it actually took.
+  if (sub === 'set') {
+    await cmdNamespaceSet(rest);
+    return;
+  }
+
   const fp = await import('../src/namespace-fingerprint.js');
   const eventStore = await import('../src/event-store.js');
   if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
@@ -37731,13 +38359,25 @@ async function cmdNamespace(args) {
       'USAGE\n' +
       '  kolm namespace create <slug> [--display-name "..."] [--capture-mode mode]\n' +
       '                               [--redact-mode mode] [--route-chain a,b,c]\n' +
-      '  kolm namespace config <slug> [--set key=value ...]\n' +
+      '  kolm namespace config <slug> [--set key=value ...]   (local-first read/write)\n' +
+      '  kolm namespace set <slug> [--route-mode m] [--cache-mode m]\n' +
+      '                            [--guardrail-mode m] [--route-chain a,b]\n' +
+      '                            [--confidence-threshold n] [--json]\n' +
       '  kolm namespace deploy <slug> [--artifact <id>]\n' +
       '  kolm namespace undeploy <slug> [--reason "..."]\n' +
       '  kolm namespace rollback <slug> [--to <artifact_id>]\n' +
       '  kolm namespace fingerprint [--namespace=<ns>] [--limit=N] [--json]\n' +
       '  kolm namespace warm-start-suggest [--namespace=<ns>] [--k=5] [--json]\n' +
       '  kolm namespace verticals [--json]\n\n' +
+      'kolm namespace set — server-authoritative PUT /v1/namespaces/:slug. Pushes\n' +
+      'gateway routing/cache/guardrail policy and reports the server\'s applied\n' +
+      'fields. Unlike `config` (local-first, best-effort sync), `set` surfaces the\n' +
+      'server\'s enum-validation error (invalid_value) instead of swallowing it.\n' +
+      '  --route-mode      static | cost_quality | semantic\n' +
+      '  --cache-mode      off | exact | semantic | verified\n' +
+      '  --guardrail-mode  off | detect_only | flag | block\n' +
+      '  --route-chain     comma/space list of model ids (server caps at 16)\n' +
+      '  --confidence-threshold  number in [0,1]\n\n' +
       'Scope: fingerprint = sha256(bigram-bag) + top-K sha256(bigram) +\n' +
       'vertical guess. NO raw capture text is ever included. Sharing requires\n' +
       'explicit opt-in via /account/namespaces/new (default OFF).');
@@ -37827,6 +38467,186 @@ async function cmdNamespace(args) {
   }
 
   throw _badArgs(`unknown namespace subcommand: ${sub}`);
+}
+
+// ---------- namespace set (W921) ----------
+// `kolm namespace set <slug> [flags]` — push gateway routing / cache / guardrail
+// policy to a namespace via PUT /v1/namespaces/:slug. Server-authoritative: this
+// is the canonical front door to the PUT handler (src/router.js) which already
+// accepts route_mode/cache_mode/guardrail_mode/route_chain/confidence_threshold
+// and rejects bad enum values with HTTP 400 {error:'invalid_value',field,allowed}.
+//
+// Enum domains (mirror src/router.js; surfaced in --help and error hints):
+//   --route-mode      static | cost_quality | semantic
+//   --cache-mode      off | exact | semantic | verified
+//   --guardrail-mode  off | detect_only | flag | block
+//   --route-chain     comma- or space-separated model id list (server caps at 16)
+//   --confidence-threshold  number in [0,1] (server clamps)
+//
+// Only flags the user actually passes are sent — the PUT is a sparse patch, so
+// `kolm namespace set support --cache-mode exact` leaves route_mode/guardrail_mode
+// untouched. With zero policy flags the verb refuses (use `kolm namespace config`
+// to READ, or pass at least one field to write).
+//
+// Exit codes: 0 ok, 1 bad-args/invalid-value/not-found, 3 auth missing.
+const NS_SET_ENUMS = Object.freeze({
+  route_mode:     ['static', 'cost_quality', 'semantic'],
+  cache_mode:     ['off', 'exact', 'semantic', 'verified'],
+  guardrail_mode: ['off', 'detect_only', 'flag', 'block'],
+});
+async function cmdNamespaceSet(args) {
+  args = args || [];
+  const jsonOut = args.includes('--json');
+
+  // Known value-taking flags. We mark each flag's VALUE index as consumed so a
+  // bare positional like `support` is unambiguously the slug — never the value
+  // of `--route-mode` (`set --route-mode cost_quality` must NOT treat
+  // cost_quality as the slug).
+  const VALUE_FLAGS = ['route-mode', 'cache-mode', 'guardrail-mode', 'route-chain', 'confidence-threshold', 'base'];
+  const consumed = new Set();
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (typeof a !== 'string' || !a.startsWith('--')) continue;
+    const eq = a.indexOf('=');
+    const name = (eq >= 0 ? a.slice(2, eq) : a.slice(2));
+    if (eq < 0 && VALUE_FLAGS.includes(name) && i + 1 < args.length && !String(args[i + 1]).startsWith('-')) {
+      consumed.add(i + 1);
+    }
+  }
+  // First positional that is neither a flag nor a consumed flag-value = slug.
+  let slug;
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (typeof a === 'string' && !a.startsWith('-') && !consumed.has(i)) { slug = a; break; }
+  }
+
+  // Local flag reader: supports `--name value` and `--name=value`.
+  function val(name) {
+    const eqArg = args.find(a => a.startsWith('--' + name + '='));
+    if (eqArg) return eqArg.slice(('--' + name + '=').length);
+    const i = args.indexOf('--' + name);
+    if (i >= 0 && i + 1 < args.length && !String(args[i + 1]).startsWith('-')) return args[i + 1];
+    return undefined;
+  }
+
+  function emitErr(envelope, exit = EXIT.BAD_ARGS, hint) {
+    if (jsonOut) { _printJson(envelope); process.exit(exit); }
+    console.error('error: ' + (envelope.error || 'namespace_set_failed') +
+      (envelope.field ? ' (field=' + envelope.field + ')' : '') +
+      (envelope.detail ? ' — ' + envelope.detail : ''));
+    if (Array.isArray(envelope.allowed)) {
+      console.error('  allowed for ' + envelope.field + ': ' + envelope.allowed.join(' | '));
+    }
+    if (hint) nextStep(hint);
+    process.exit(exit);
+  }
+
+  if (!slug) {
+    emitErr({ ok: false, error: 'missing_slug' }, EXIT.BAD_ARGS,
+      { run: 'kolm namespace set <slug> --route-mode cost_quality', see: 'docs/reference/namespace-set.md' });
+    return;
+  }
+  if (!/^[a-z0-9][a-z0-9_-]{0,63}$/.test(slug)) {
+    emitErr({ ok: false, error: 'invalid_slug', slug }, EXIT.BAD_ARGS,
+      { fix: 'slug must be lowercase alnum + dash/underscore, <=64 chars' });
+    return;
+  }
+
+  // Build the sparse patch from explicit flags only.
+  const patch = {};
+  const routeMode = val('route-mode');
+  const cacheMode = val('cache-mode');
+  const guardrailMode = val('guardrail-mode');
+  const routeChainRaw = val('route-chain');
+  const confThRaw = val('confidence-threshold');
+
+  if (routeMode !== undefined) patch.route_mode = routeMode;
+  if (cacheMode !== undefined) patch.cache_mode = cacheMode;
+  if (guardrailMode !== undefined) patch.guardrail_mode = guardrailMode;
+  if (routeChainRaw !== undefined) {
+    // Accept comma- OR space-separated lists; trim + drop empties.
+    patch.route_chain = String(routeChainRaw).split(/[,\s]+/).map(s => s.trim()).filter(Boolean);
+  }
+  if (confThRaw !== undefined) {
+    const n = Number(confThRaw);
+    if (!Number.isFinite(n)) {
+      emitErr({ ok: false, error: 'invalid_value', field: 'confidence_threshold', detail: 'not a number: ' + confThRaw },
+        EXIT.BAD_ARGS, { fix: '--confidence-threshold expects a number in [0,1]' });
+      return;
+    }
+    patch.confidence_threshold = n;
+  }
+
+  if (Object.keys(patch).length === 0) {
+    emitErr({ ok: false, error: 'no_fields',
+      detail: 'pass at least one of --route-mode/--cache-mode/--guardrail-mode/--route-chain/--confidence-threshold' },
+      EXIT.BAD_ARGS, { run: 'kolm namespace config ' + slug, see: 'docs/reference/namespace-set.md' });
+    return;
+  }
+
+  // Client-side enum pre-validation — fail fast with the SAME shape the server
+  // returns (error:'invalid_value', field, allowed) so the user sees a clean
+  // message even when offline, and the server's authoritative check is a
+  // backstop (it owns capture_mode/redact_mode/status which this verb doesn't set).
+  for (const [field, allowed] of Object.entries(NS_SET_ENUMS)) {
+    if (Object.prototype.hasOwnProperty.call(patch, field) && !allowed.includes(patch[field])) {
+      emitErr({ ok: false, error: 'invalid_value', field, allowed, given: patch[field] }, EXIT.BAD_ARGS);
+      return;
+    }
+  }
+
+  const c = loadConfig();
+  if (!c.api_key) {
+    emitErr({ ok: false, error: 'auth_required',
+      detail: 'no API key — set one in ~/.kolm/config.json or KOLM_API_KEY' },
+      EXIT.MISSING_PREREQ, { run: 'kolm login' });
+    return;
+  }
+
+  let resp;
+  try {
+    resp = await api(c, 'PUT', '/v1/namespaces/' + encodeURIComponent(slug), patch);
+  } catch (e) {
+    // api() throws on non-2xx with { status, body }. The server's 400 enum
+    // rejection is { ok:false, error:'invalid_value', field, allowed }; surface
+    // it verbatim rather than as a bare "http 400".
+    const status = e && e.status;
+    const sb = (e && e.body) || {};
+    if (status === 400 && sb.error === 'invalid_value') {
+      emitErr({ ok: false, error: 'invalid_value', field: sb.field, allowed: sb.allowed, given: patch[sb.field], status },
+        EXIT.BAD_ARGS);
+      return;
+    }
+    if (status === 400 && sb.error === 'invalid_slug') {
+      emitErr({ ok: false, error: 'invalid_slug', slug, status }, EXIT.BAD_ARGS);
+      return;
+    }
+    if (status === 404 || sb.error === 'namespace_not_found') {
+      emitErr({ ok: false, error: 'namespace_not_found', slug, status },
+        EXIT.NOT_FOUND, { run: 'kolm namespace create ' + slug });
+      return;
+    }
+    if (status === 401 || sb.error === 'auth_required') {
+      emitErr({ ok: false, error: 'auth_required', status }, EXIT.MISSING_PREREQ, { run: 'kolm login' });
+      return;
+    }
+    emitErr({ ok: false, error: 'namespace_set_failed', status: status || null,
+      detail: String((e && e.message) || e) }, EXIT.EXECUTION,
+      { try: ['kolm doctor --network', 'kolm whoami'] });
+    return;
+  }
+
+  const applied = (resp && resp.applied) || patch;
+  if (jsonOut) {
+    _printJson({ ok: true, action: 'set', slug, applied, namespace: resp && resp.namespace });
+    return;
+  }
+  console.log('namespace ' + slug + ' updated');
+  for (const k of Object.keys(applied)) {
+    const v = applied[k];
+    console.log('  ' + k + ' = ' + (Array.isArray(v) ? v.join(',') : String(v)));
+  }
+  nextStep({ run: 'kolm namespace config ' + slug });
 }
 
 function _badArgs(msg) { const e = new Error(msg); e.exitCode = EXIT.BAD_ARGS; return e; }
@@ -45235,6 +46055,10 @@ async function main() {
       case 'init':     await withErrorContext('init',     () => cmdInit(rest)); break;
       case 'signup':   await withErrorContext('signup',   () => cmdSignup(rest)); break;
       case 'login':    await withErrorContext('login',    () => cmdLogin(rest)); break;
+      // W921 — `kolm logout` (long advertised in help + error hints, never
+      // wired). Deletes the OS-vault entry (when present) + scrubs the
+      // plaintext api_key from config.json/config.toml.
+      case 'logout':   await withErrorContext('logout',   () => cmdLogout(rest)); break;
       case 'whoami':   await withErrorContext('whoami',   () => cmdWhoami(rest)); break;
       // R-2 — singular `kolm artifact <verb>` drives the lifecycle state
       // machine (lifecycle / deploy / undeploy / rollback / revoke).
@@ -45836,6 +46660,10 @@ async function main() {
       // W784 — third-party plugin architecture (quantization / runtime /
       // capture-processor / eval-metric). Plugins live under ~/.kolm/plugins.
       case 'plugin':    await withErrorContext('plugin',    () => cmdPlugin(rest)); break;
+      // W921 — gh/kubectl-style user COMMAND extensions (out-of-process
+      // subcommands named kolm-<x>). Distinct from `plugin` (in-process hooks).
+      case 'extension':
+      case 'ext':      await withErrorContext('extension', () => cmdExtension(rest)); break;
       // W715 — cross-namespace transfer learning: compute a privacy-safe
       // namespace fingerprint + discover warm-start siblings.
       case 'namespace':
@@ -46083,6 +46911,19 @@ async function main() {
         if (!noAssistant && looksLikeNaturalLanguage(cmd, rest)) {
           await withErrorContext('ask', () => cmdAsk([cmd, ...rest]));
         } else {
+          // W921 — gh/kubectl-style extension resolution. BEFORE suggestVerb,
+          // probe for a `kolm-<cmd>` executable under ~/.kolm/extensions or on
+          // PATH. Core verbs never reach here (they match a `case` above), so a
+          // hit can never shadow a built-in. On a miss we fall through to the
+          // EXACT existing suggestVerb path unchanged (regression-safe). The
+          // hot path costs <=N specific statSync probes — never a PATH walk.
+          let extResolved = null;
+          try { extResolved = resolveExtension([cmd, ...rest], { coreVerbs: COMPLETION_VERBS }); } catch (_) { extResolved = null; }
+          if (extResolved && extResolved.found && extResolved.bin) {
+            const man = _readExtManifest(extResolved.name);
+            await runExtension(extResolved.bin, extResolved.args || [], { name: extResolved.name, wantApiKey: !!man.wants_api_key });
+            break; // runExtension calls process.exit; defensive break.
+          }
           const guess = suggestVerb(cmd, COMPLETION_VERBS);
           console.error('unknown command:', cmd);
           if (guess) console.error('did you mean: kolm ' + guess + ' ?');

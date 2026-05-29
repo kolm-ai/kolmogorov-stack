@@ -71,6 +71,11 @@
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="stylesheet" href="/ks.css">
     <link rel="stylesheet" href="/warm-paper.css">
+<link rel="stylesheet" href="/account/account-ui.css">
+<link rel="stylesheet" href="/account/account-vt.css">
+<script id="kolm-vt">(function kolmAccountVT(){var ORDER=['overview','audit-log','members','billing','settings'];function idx(u){try{var p=new URL(u,location.href).pathname.replace(/\/+$/,'').split('/').pop();var i=ORDER.indexOf(p);return i<0?999:i;}catch(e){return 999;}}function dir(f,t){var a=idx(f),b=idx(t);return a===b?'none':(b>a?'forward':'back');}function anim(){return ('startViewTransition' in document)&&!matchMedia('(prefers-reduced-motion: reduce)').matches;}function tag(e){if(!e.viewTransition)return;if(!anim()){e.viewTransition.skipTransition();return;}try{var nav=window.navigation&&navigation.activation;var f=(e.activation&&e.activation.from&&e.activation.from.url)||(nav&&nav.from&&nav.from.url)||location.href;var t=(e.activation&&e.activation.entry&&e.activation.entry.url)||(nav&&nav.entry&&nav.entry.url)||location.href;e.viewTransition.types.add(dir(f,t));}catch(_){}}window.addEventListener('pageswap',tag);window.addEventListener('pagereveal',tag);})();</script>
+<script src="/account/account-net.js" defer></script>
+<script src="/account/account-keylist.js" defer></script>
 </head>
 <body class="kolm-account-surface ks">
 <a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
@@ -309,8 +314,9 @@ kolm audit --verify
  }
  empty.hidden=true;
  if (emptyOrg) emptyOrg.hidden=true;
- rows.innerHTML=items.map(function(e){
- return "<tr>"+
+ rows.innerHTML=items.map(function(e,i){
+ var rid=e.id||((e.ts||e.timestamp||"")+":"+(e.action||"")+":"+i);
+ return "<tr data-id=\""+esc(String(rid))+"\">"+
  "<td>"+fmtTs(e.ts||e.timestamp)+"</td>"+
  "<td>"+actorCell(e)+"</td>"+
  "<td><span class=\"pill "+pillFor(e.action||"")+"\">"+esc(e.action||"&ndash;")+"</span></td>"+
@@ -320,6 +326,12 @@ kolm audit --verify
  "</tr>";
  }).join("");
  hydrateStats(items);
+ // W921: read-only keyboard row navigation over the audit log. j/k/arrow move
+ // the active row; feature-detected, no-op if the shared module is absent.
+ if(typeof window.mountKeyList==="function"){
+   if(window.__auditKeylist)window.__auditKeylist.destroy();
+   window.__auditKeylist=window.mountKeyList(rows,{rowSelector:"tr[data-id]",getRowId:function(tr){return tr.getAttribute("data-id");},multiselect:false});
+ }
  }
 
  function fetchOrgEvents(){

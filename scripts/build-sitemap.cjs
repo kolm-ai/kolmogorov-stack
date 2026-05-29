@@ -100,12 +100,21 @@ function lastmodFor(full) {
 
 function isIncluded(urlPath) {
   if (CUT_PATHS.has(urlPath)) return false;
+  // A cut path also cuts its whole subtree (e.g. /playground cuts
+  // /playground/_slug). Without this, a dynamic route template under a cut
+  // surface leaks a robots-disallowed URL into the sitemap.
+  for (const cut of CUT_PATHS) {
+    if (urlPath.startsWith(cut + '/')) return false;
+  }
   for (const px of EXCLUDE_PREFIXES) {
     if (urlPath === px || urlPath.startsWith(px + '/')) return false;
   }
   if (urlPath.startsWith('/compare/legacy')) return false;
   if (urlPath.startsWith('/preview')) return false;
   if (urlPath.includes('.well-known')) return false;
+  // Underscore-prefixed segments are dynamic route templates (e.g. _slug),
+  // never indexable destinations.
+  if (urlPath.split('/').some((seg) => seg.startsWith('_'))) return false;
   return true;
 }
 
