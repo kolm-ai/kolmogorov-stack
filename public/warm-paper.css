@@ -1445,12 +1445,17 @@ pre code {
   transition: opacity 480ms cubic-bezier(0.2, 0.7, 0.2, 1),
               transform 480ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
-.fr-reveal.fr-reveal--prep:not(.is-visible):not([data-visible="true"]) {
+/* frontier.js reveals via the .fr-in class (see frontier.css:350); this overlay
+   previously only recognized .is-visible / [data-visible], so .fr-in sections
+   stayed pinned at opacity:0 by this higher-specificity rule -> the homepage
+   "bleed" (most sections invisible after scroll). Honor .fr-in in both rules. */
+.fr-reveal.fr-reveal--prep:not(.is-visible):not([data-visible="true"]):not(.fr-in) {
   opacity: 0;
   transform: translateY(6px);
 }
 .fr-reveal.is-visible,
-.fr-reveal[data-visible="true"] {
+.fr-reveal[data-visible="true"],
+.fr-reveal.fr-in {
   opacity: 1;
   transform: none;
 }
