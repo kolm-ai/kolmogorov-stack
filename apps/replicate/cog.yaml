@@ -3,15 +3,15 @@ build:
   cuda: "12.1"
   python_version: "3.11"
   python_packages:
-    - "torch==2.4.1"
-    - "transformers==4.45.2"
+    - "torch==2.6.0"
+    - "transformers==4.48.0"
     - "peft==0.13.2"
     - "datasets==3.0.1"
     - "accelerate==0.34.2"
     - "bitsandbytes==0.44.1"
     - "httpx==0.27.2"
     - "safetensors==0.4.5"
-    - "sentencepiece==0.2.0"
+    - "sentencepiece==0.2.1"
   system_packages:
     - "git"
 predict: "predict.py:Predictor"
