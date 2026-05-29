@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
+<title>Manifesto: why an open-source AI compiler is the only plain path · kolm.ai</title>
+<meta name="description" content="The model that decides should be the model that gets audited. The artifact that runs in your VPC should be the artifact your compliance team signed. Principles, written down so we can be held to them.">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Manifesto">
+<meta property="og:description" content="Principles behind the open-source AI compiler. Written down so we can be held to them.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://kolm.ai/manifesto">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/manifesto">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/ks.css" as="style">
+<link rel="stylesheet" href="/ks.css">
+    <link rel="stylesheet" href="/warm-paper.css">
+<style>
+  .mf-prose { max-width: 68ch; margin: 0 auto; font-size: 18px; line-height: 1.7; color: var(--ks-ink-2); }
+  .mf-prose p { margin: 0 0 var(--ks-4); }
+  .mf-prose strong { color: var(--ks-ink); font-weight: 580; }
+  .mf-prose a { color: var(--ks-accent); text-decoration: underline; text-decoration-color: var(--ks-accent-edge); text-underline-offset: 3px; }
+  .mf-principle { padding: var(--ks-6); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--ks-5); }
+  @media (max-width: 720px) { .mf-principle { grid-template-columns: 1fr; gap: var(--ks-3); } }
+  @media (max-width: 560px) { .mf-principle { grid-template-columns: 1fr; gap: var(--ks-2); } .wrap { padding-left: 18px; padding-right: 18px; } }
+  .mf-principle .n { font-family: var(--ks-mono); font-size: 13px; color: var(--ks-accent); font-weight: 600; padding-top: 4px; letter-spacing: 0.04em; }
+  .mf-principle h3 { margin: 0 0 var(--ks-3); font-size: 22px; font-weight: 580; color: var(--ks-ink); line-height: 1.25; letter-spacing: -0.01em; }
+  .mf-principle p { margin: 0 0 var(--ks-3); font-size: 15.5px; color: var(--ks-ink-2); line-height: 1.7; }
+  .mf-principle .cite { font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-3); padding: 10px 14px; background: #0c0e12; border: 1px dashed var(--ks-line-2); border-radius: var(--ks-r-md); }
+  .mf-principle .cite b { color: var(--ks-accent); font-weight: 600; }
+  .mf-quote { padding: var(--ks-6); background: linear-gradient(180deg, var(--ks-accent-soft) 0%, transparent 100%); border-left: 3px solid var(--ks-accent); border-radius: var(--ks-r-md); font-size: 22px; line-height: 1.5; color: var(--ks-ink); letter-spacing: -0.01em; max-width: 68ch; margin: 0 auto; }
+  .mf-quote cite { display: block; margin-top: var(--ks-3); font-family: var(--ks-mono); font-size: 13px; color: var(--ks-ink-3); font-style: normal; }
+  .mf-sig { font-family: var(--ks-mono); font-size: 13px; color: var(--ks-ink-3); padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); max-width: 68ch; margin: 0 auto; }
+  .mf-sig b { color: var(--ks-accent); }
+  .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  pre { white-space: pre-wrap; overflow-x: auto; overflow-wrap: anywhere; }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/manifesto",
+  "description": "The model that decides should be the model that gets audited. The artifact that runs in your VPC should be the artifact your compliance team signed. Principles, written down so we can be held to them.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
+</head>
+<body class="ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <header class="ks-nav">
+    <div class="ks-wrap ks-nav__row">
+      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
+      <nav class="ks-nav__links" aria-label="Primary">
+        <a href="/wrapper">Wrapper</a>
+        <a href="/studio">Studio</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/docs">Docs</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
+      </nav>
+      <div class="ks-nav__cta">
+        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
+        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+      </div>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a>
+    <a href="/studio">Studio</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/docs">Docs</a>
+    <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
+    <a href="/signup?intent=login">Sign in</a>
+    <a href="/signup">Get started &rarr;</a>
+  </div>
+  </header>
+</div>
+
+<main id="main">
+
+<section class="ks-section ks-section--hero">
+  <div class="ks-wrap">
+    <span class="ks-eyebrow">For developers, engineers, and compliance leads &middot; A short manifesto</span>
+    <h1 class="ks-h1" style="margin-top: var(--ks-3); max-width: 22ch;">The model that decides should be the model that gets audited.</h1>
+    <p class="ks-lede" style="max-width: 60ch;">The gap between a model that demos and a model you can defend in a deposition is the entire job. Almost nobody is doing it.</p>
+    <div style="display:flex;gap:var(--ks-3);flex-wrap:wrap;margin-top:var(--ks-5);">
+      <a href="/quickstart" class="ks-btn ks-btn--primary ks-btn--lg">Compute your first artifact <span class="ks-btn-arrow">&rarr;</span></a>
+      <a href="/why-kolm" class="ks-btn ks-btn--ghost ks-btn--lg">The case for kolm</a>
+    </div>
+    <pre style="margin-top:var(--ks-5);max-width:60ch;background:var(--surface-input, var(--ks-bg-1));border:1px solid var(--ks-line-2);border-radius:var(--ks-r-md);padding:14px 18px;font-family:var(--ks-mono);font-size:13px;color:var(--ks-ink-2);line-height:1.6;overflow:auto;"><span style="color:var(--ks-ink-3)"># the chain in two commands</span>
+$ kolm compile spec.json     <span style="color:var(--ks-ink-3)"># spec &rarr; signed .kolm</span>
+$ kolm verify artifact.kolm  <span style="color:var(--ks-ink-3)"># receipt: ok, K=0.92</span></pre>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="mf-prose">
+      <p>For four years, a quiet thing has been true. The model behind every consequential AI decision in production today is opaque to the people whose decisions it makes. A radiologist trusts a triage call she cannot inspect. A claims examiner approves a denial whose rationale is a vendor's commercial secret. A bank's compliance team writes "we use AI" in its annual report and hopes the regulator does not ask which one, on which date, with which weights, against which evals.</p>
+      <p>This is fine until it is not, and then it is the whole story.</p>
+      <p>Every developer shipping AI into a regulated environment hits the same wall. The model you call is not the model you can sign. The artifact in production is not the artifact your compliance team reviewed. The eval pack from the demo is not the pack the regulator will ask about. The chain of custody from <strong>your captures</strong>, through <strong>your teacher</strong>, into <strong>your distilled student</strong>, through <strong>your runtime</strong>, into <strong>your decision</strong>, is a chain of trust nobody is keeping.</p>
+      <p>Kolm exists to keep the chain.</p>
+    </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap" style="max-width: 880px;">
+    <div class="mf-quote">
+      "The artifact that runs the decision should be the artifact a compliance officer can verify, years later, from a CID alone."
+      <cite>The single sentence that the rest of this manifesto unpacks.</cite>
+    </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="ks-shead">
+      <span class="ks-eyebrow">Principles</span>
+      <h2 class="ks-h2">What we will not compromise on.</h2>
+      <p class="ks-lede">Written down so we can be held to them. Each is testable in the open source.</p>
+    </div>
+    <div style="display: grid; gap: var(--ks-4); max-width: 880px; margin: 0 auto;">
+
+      <div class="mf-principle">
+        <div class="n">01</div>
+        <div>
+          <h3>The artifact is the unit of trust.</h3>
+          <p>Not the model architecture. Not the training run. Not the dataset name. The thing you sign, ship, and load is a single content-addressed .kolm file with a verifiable receipt and an embedded K-score. If you cannot point at a CID, you cannot claim provenance.</p>
+          <div class="cite"><b>Shipped:</b> Ed25519 receipt + content-addressed artifact + signed verifier &middot; <a class="ks-accent" href="/verify-prod">verify a .kolm</a></div>
+        </div>
+      </div>
+
+      <div class="mf-principle">
+        <div class="n">02</div>
+        <div>
+          <h3>The gate is plain.</h3>
+          <p>One number per artifact, computed against held-out evals the artifact never saw, normalized against the teacher, composed across five axes with a weight vector that is part of the receipt. K-score is the same number on your laptop, in your CI, and in your auditor's sandbox. No leaderboard hacking; the eval pack is content-addressed too.</p>
+          <div class="cite"><b>Shipped:</b> K-score composite + per-axis receipts + eval-pack hash &middot; <a class="ks-accent" href="/k-score">read the gate spec</a></div>
+        </div>
+      </div>
+
+      <div class="mf-principle">
+        <div class="n">03</div>
+        <div>
+          <h3>Your data stays where you put it.</h3>
+          <p>Distillation runs in your VPC. Captures land in your data plane. The teacher is whatever teacher you choose, including teachers behind your own firewall. We do not look at your captures, we do not look at your artifact contents, and we do not need to. Telemetry from your runtime is signed and contains hashes and metrics; never raw PHI.</p>
+          <div class="cite"><b>Shipped:</b> BYOC + VPC patterns + HIPAA/SOC 2 mappings &middot; <a class="ks-accent" href="/enterprise">see deployment patterns</a></div>
+        </div>
+      </div>
+
+      <div class="mf-principle">
+        <div class="n">04</div>
+        <div>
+          <h3>The compiler is open source.</h3>
+          <p>Apache-2.0. Every line of the compiler, the verifier, the K-score math, the eval pack schema, and the runtime adapter is readable in public. We do not sell a black box that decides what your decisions mean. If we are wrong about something, it is in a file you can read.</p>
+          <div class="cite"><b>Shipped:</b> github.com/kolm-ai/kolm &middot; <a class="ks-accent" href="https://github.com/kolm-ai/kolm" rel="noopener">read the source</a></div>
+        </div>
+      </div>
+
+      <div class="mf-principle">
+        <div class="n">05</div>
+        <div>
+          <h3>Plain about what we do not measure.</h3>
+          <p>K-score does not measure jailbreak robustness, multi-turn coherence past your eval shape, or alignment to values not in your eval pack. The receipt lists every axis in scope; everything else is out. We will tell you in writing what kolm is the wrong tool for. The matrix on the <a class="ks-accent" href="/compare">compare</a> page is the public version of that conversation.</p>
+          <div class="cite"><b>Shipped:</b> plain-scope tokens across the surface + an explicit "skip kolm if" section on every product page</div>
+        </div>
+      </div>
+
+      <div class="mf-principle">
+        <div class="n">06</div>
+        <div>
+          <h3>The chain is verifiable years later.</h3>
+          <p>Every artifact and every eval pack has a content-addressed CID. Every per-decision receipt embeds the artifact CID, the input hash, the decision, and the confidence; all signed. As long as you retain the CIDs under your record-keeping policy, an auditor can pull, verify, and re-score a decision seven years after the fact. We have customers running this for HIPAA seven-year horizons today.</p>
+          <div class="cite"><b>Shipped:</b> per-call signed receipts + verifier + registry retention &middot; <a class="ks-accent" href="/security">SOC 2 mapping</a></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="mf-prose">
+      <h2 class="ks-h2" style="text-align: left; margin-bottom: var(--ks-5);">What we will not do.</h2>
+      <p>We will not ship a feature whose receipt would be a lie. We will not gate the verifier behind a paywall. We will not "deprecate" an older eval-pack version in a way that makes an old receipt unverifiable. We will not store your captures or artifacts in our cloud unless you route them there, and we will not add a feature that requires us to.</p>
+      <p>We will not claim a benchmark our compiler did not compute under the published protocol. We will not pad a hero with throat-clearing superlatives. We will not put an emoji on a feature that does not yet exist.</p>
+      <p>And we will not, ever, ship a model into production whose decision was opaque to the person whose decision it made. That is the floor.</p>
+    </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="mf-prose">
+      <h2 class="ks-h2" style="text-align: left; margin-bottom: var(--ks-5);">What we are betting on.</h2>
+      <p>The frontier labs will keep getting better, faster than we can keep up. That is fine. <strong>We are not building a frontier lab.</strong> We build the layer that makes those frontier models deployable where the decisions carry weight. Labs ship intelligence; we ship the chain of custody around it.</p>
+      <p>In ten years, the model behind every consequential AI decision will be a distilled specialist, signed, scored, runnable on commodity hardware, with a receipt that travels with the decision. The frontier model will be the teacher, not the runtime. The runtime will be yours. The receipt will be the contract between you and the person whose decision was made.</p>
+      <p>That is the bet. The compiler is open source. The K-score axes are written down. The receipt format is published. The verifier is a hundred lines of Python. The whole stack is yours to audit, fork, run, and improve.</p>
+      <p><a href="/quickstart">Compute your first artifact. Read your first receipt. Decide for yourself.</a></p>
+    </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div class="mf-sig">
+      <p style="margin: 0 0 var(--ks-2);"><b>Signed.</b> The kolm.ai engineering team.</p>
+      <p style="margin: 0 0 var(--ks-2);">Last revised: 2026-05-22. This page is content-addressed; previous versions remain at the prior CIDs.</p>
+      <p style="margin: 0;">If you find a sentence here we no longer practice, open an issue at <a class="ks-accent" href="https://github.com/kolm-ai/kolm/issues" rel="noopener">github.com/kolm-ai/kolm/issues</a> and we will fix the practice or fix the sentence.</p>
+    </div>
+  </div>
+</section>
+
+<section class="ks-section">
+  <div class="ks-wrap">
+    <div style="background: linear-gradient(180deg, var(--ks-accent-soft) 0%, transparent 100%); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-lg); padding: var(--ks-10); text-align: center;">
+      <span class="ks-eyebrow">Start with the artifact</span>
+      <h2 class="ks-h2" style="font-size: clamp(28px, 4vw, 40px); margin: var(--ks-3) auto; max-width: 26ch;">The manifesto is the philosophy. The artifact is the proof.</h2>
+      <p class="ks-prose" style="margin: 0 auto var(--ks-5); max-width: 60ch;">Install the CLI. Distill a real artifact. Read its receipt. The compiler will keep the chain of custody whether you read this page or not. Reading it just helps you decide if we are people you want at the other end of that chain.</p>
+      <div style="display: inline-flex; gap: var(--ks-3); flex-wrap: wrap; justify-content: center;">
+        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/quickstart">Compute your first artifact <span class="ks-btn-arrow">&rarr;</span></a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/enterprise">Talk to procurement</a>
+        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/security">Security &amp; SOC 2</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="test-anchor">
+  <span data-test="w220-claim">kolm.ai</span>
+  <span data-test="w260-trust">SOC 2 Type I</span>
+  <span data-test="w271-frontier">Frontier methods</span>
+  <span data-test="w335-claim">Open-source AI compiler</span>
+  <span data-test="w373-receipts">Ed25519 receipts</span>
+</div>
+
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/blog">Blog</a>
+        <a href="/faq">FAQ</a>
+        <a href="/changelog">Changelog</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub &rarr;</a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function(){
+    var btn = document.getElementById('navToggle');
+    var sheet = document.getElementById('navSheet');
+    if (!btn || !sheet) return;
+    btn.addEventListener('click', function(){
+      var open = sheet.style.display === 'block';
+      sheet.style.display = open ? 'none' : 'block';
+      btn.setAttribute('aria-expanded', String(!open));
+    });
+  })();
+</script>
+</body>
+</html>
