@@ -38,6 +38,12 @@
 import { embed, cosine, DIMENSIONS } from './embedding.js';
 import { estimateCost } from './cost-estimator.js';
 import { buildChainFromNamespace, selectRoute, parseChainEntry } from './gateway-router.js';
+// READ-ONLY import: ewmaLatencyMs is a pure getter on the process-wide health
+// registry (no mutation). scoreRoute only ever READS the EWMA p50 latency for a
+// provider; it never records outcomes or opens circuits here. Callers/tests can
+// inject opts.latencyFn to stay fully deterministic without touching the
+// singleton. Importing the function (not calling a mutator) keeps this additive.
+import { ewmaLatencyMs as _ewmaLatencyMs } from './provider-health.js';
 
 export const SEMANTIC_ROUTER_VERSION = 'w921-v1';
 export const EMBEDDER_ID = 'hashed-ngram-256';
@@ -48,6 +54,55 @@ const DEFAULT_ALPHA = 0.5;
 const DEFAULT_BETA = 0.0;
 const DEFAULT_MIN_QUALITY = 0.8;
 const DEFAULT_MIN_SAMPLES = 20;
+
+// --------------------------------------------------------------------------
+// MULTI-SIGNAL ROUTING (NEXT-5) — opt-in, additive.
+//
+// Frontier routers blend MORE than the legacy alpha cost<->quality term.
+// Web-confirmed (2026): RouteLLM (ICLR'25, similarity-weighted Elo + cost
+// threshold), Avengers-Pro (DAI'25, arXiv 2508.12631 — embed -> cluster ->
+// performance-efficiency score), and RouterWise (arXiv 2604.10907, 2026-04 —
+// proves per-model latency is NOT fixed but a function of request LOAD on the
+// shared GPU pool, making load a first-class routing determinant). NEXT-5 in
+// KOLM_W921_FRONTIER_REVIEW.md asks to fuse multiple signals into one weighted
+// score while keeping the auditable-receipt edge.
+//
+// The five canonical signals, each min-max normalized within the candidate set
+// into [0,1] and ORIENTED so higher == more preferred:
+//   quality    cluster accuracy (already [0,1]); higher better. As-is.
+//   cost       lower USD better -> normalized then INVERTED (1 - cost~).
+//   latency    lower ms better  -> normalized then INVERTED (1 - lat~).
+//   load       lower in-flight/util better -> normalized then INVERTED.
+//   similarity cosine(prompt, assigned-cluster centroid); higher better.
+//
+// Final per-candidate score = sum_s w_s * signal_s~  /  sum_s w_s  (weights
+// renormalized over the signals actually present so an absent signal neither
+// rewards nor penalizes). Weights come from namespaceConfig.route_weights (or
+// opts.route_weights). A signal whose weight is 0/absent is dropped entirely.
+//
+// HARD INVARIANT: when route_weights is absent (null/undefined/empty/all-zero)
+// scoreRoute's behavior is BYTE-IDENTICAL to the legacy alpha/beta path — the
+// multi-signal branch is never entered. This preserves the cold-start/static
+// fallback and every existing test.
+// --------------------------------------------------------------------------
+
+// The canonical signal identifiers, in a STABLE order (used for deterministic
+// receipt/serialization ordering). 'similarity' is the only one that needs the
+// raw prompt vector + centroid; the rest derive from aggregates/load/health.
+export const ROUTE_SIGNALS = Object.freeze(['quality', 'cost', 'latency', 'load', 'similarity']);
+
+// Signals where a LOWER raw value is better (so we invert after min-max norm).
+const _LOWER_IS_BETTER = Object.freeze(new Set(['cost', 'latency', 'load']));
+
+// A neutral default weight set used ONLY for documentation / introspection.
+// Never applied implicitly — multi-signal mode requires explicit route_weights.
+export const DEFAULT_ROUTE_WEIGHTS = Object.freeze({
+  quality: 1.0,
+  cost: 1.0,
+  latency: 0.0,
+  load: 0.0,
+  similarity: 0.0,
+});
 
 // Rough length-based token estimate used BEFORE dispatch (we have no usage
 // yet). ~4 chars/token is the standard OpenAI heuristic. Floor at 1 so an
@@ -77,6 +132,63 @@ function _minMaxNorm(values) {
   const span = hi - lo;
   if (!(span > 0)) return values.map(() => 0.5);
   return values.map((v) => (v - lo) / span);
+}
+
+// --------------------------------------------------------------------------
+// normalizeRouteWeights — parse a caller route_weights object into a clean
+// map of {signal -> non-negative finite weight} restricted to ROUTE_SIGNALS,
+// dropping zero/negative/NaN/unknown keys. Returns null when nothing usable
+// remains (so the caller falls back to the legacy alpha/beta path — the whole
+// back-compat contract). Pure + deterministic (no clock / no global state).
+// --------------------------------------------------------------------------
+export function normalizeRouteWeights(weights) {
+  if (!weights || typeof weights !== 'object') return null;
+  const out = {};
+  let any = false;
+  for (const sig of ROUTE_SIGNALS) {
+    if (!Object.prototype.hasOwnProperty.call(weights, sig)) continue;
+    const w = Number(weights[sig]);
+    if (!Number.isFinite(w) || w <= 0) continue; // 0/neg/NaN => signal dropped
+    out[sig] = w;
+    any = true;
+  }
+  return any ? out : null;
+}
+
+// --------------------------------------------------------------------------
+// blendSignals — the pure multi-signal weighted-blend core. Given per-candidate
+// ORIENTED-and-normalized signal values (each already in [0,1], higher better)
+// and a normalized weight map, returns the weighted score per candidate with
+// weights renormalized over ONLY the signals present for that candidate (so a
+// candidate missing a signal is scored on the signals it has, not penalized).
+//
+//   normedSignalsByKey: Map<modelKey, {signal -> value in [0,1] | null}>
+//   weights:            {signal -> weight>0}  (from normalizeRouteWeights)
+// Returns Map<modelKey, { score, contributions: {signal -> w*value} }>.
+// Deterministic; no clock, no RNG.
+// --------------------------------------------------------------------------
+export function blendSignals(normedSignalsByKey, weights) {
+  const out = new Map();
+  const w = weights || {};
+  const wSignals = Object.keys(w).filter((s) => Number(w[s]) > 0);
+  for (const [key, sigVals] of normedSignalsByKey.entries()) {
+    let num = 0;
+    let den = 0;
+    const contributions = {};
+    for (const sig of wSignals) {
+      const v = sigVals ? sigVals[sig] : null;
+      if (v == null || !Number.isFinite(Number(v))) continue; // signal absent for this candidate
+      const ww = Number(w[sig]);
+      const term = ww * _clamp01(v);
+      num += term;
+      den += ww;
+      contributions[sig] = Number(term.toFixed(6));
+    }
+    // No present signal at all => neutral 0.5 (never fabricate a preference).
+    const score = den > 0 ? num / den : 0.5;
+    out.set(key, { score, contributions });
+  }
+  return out;
 }
 
 // --------------------------------------------------------------------------
@@ -336,6 +448,23 @@ export function scoreRoute({
   const topP = Number.isFinite(Number(opts.top_p)) ? Number(opts.top_p)
     : (Number.isFinite(Number(cfg.top_p)) ? Number(cfg.top_p) : DEFAULT_TOP_P);
 
+  // (NEXT-5) Multi-signal weighted blend — OPT-IN. Resolved from opts first,
+  // then namespaceConfig.route_weights. normalizeRouteWeights returns null when
+  // no usable (positive, finite) weight exists, in which case scoreRoute stays
+  // BYTE-IDENTICAL to the legacy alpha/beta path below. This is the entire
+  // back-compat contract: absent weights == old behavior.
+  const routeWeights = normalizeRouteWeights(
+    (opts && opts.route_weights != null) ? opts.route_weights : cfg.route_weights,
+  );
+  // load: a per-candidate request-load signal the caller passes in (RouterWise
+  // shows load drives real latency). Keyed by modelKey OR by bare provider.
+  // Read-only param; lower == less loaded == better. Defaults to {} (no load
+  // data => the load signal contributes nothing, weights renormalize around it).
+  const loadByKey = (opts && opts.load && typeof opts.load === 'object') ? opts.load : {};
+  // latencyFn: injectable for determinism. Defaults to the read-only EWMA getter
+  // on the provider-health singleton. Called as latencyFn(provider) -> ms|null.
+  const latencyFn = (opts && typeof opts.latencyFn === 'function') ? opts.latencyFn : _ewmaLatencyMs;
+
   // The static chain is the ground truth we fall back to. candidates override
   // when the caller already resolved the chain (dispatch passes it through).
   const staticChain = Array.isArray(candidates) && candidates.length
@@ -426,6 +555,15 @@ export function scoreRoute({
   const estOut = Math.max(1, Math.round(estIn * 0.5)); // rough completion estimate
   const priceFn = typeof costFn === 'function' ? costFn : estimateModelCost;
 
+  // similarity (NEXT-5): cosine of the prompt vector to the assigned cluster
+  // centroid — the Avengers-Pro/RouteLLM "embedding-similarity-to-cluster"
+  // signal. Per-candidate similarity is identical here (all candidates share
+  // the same top cluster), so it acts as a confidence weight on this cluster's
+  // learned stats rather than a per-model discriminator; it still varies the
+  // ABSOLUTE route_score (low similarity => low confidence). Computed once.
+  const headCentroid = (Array.isArray(stats.centroids) && stats.centroids[clusterId]) || null;
+  const clusterSimilarity = headCentroid ? _clamp01((cosine(vec, headCentroid) + 1) / 2) : null;
+
   const rows = [];
   let totalSamples = 0;
   for (const cand of staticChain) {
@@ -440,13 +578,31 @@ export function scoreRoute({
       const est = priceFn({ provider: cand.provider, model: cand.model, est_input_tokens: estIn, est_output_tokens: estOut });
       cost = Number.isFinite(est) && est > 0 ? est : null;
     }
+    // latency (NEXT-5): prefer the live provider-health EWMA p50 (read-only),
+    // else the cluster's measured avg_latency, else unknown. Lower is better.
+    let latency = agg.avg_latency;
+    if (routeWeights && routeWeights.latency) {
+      let live = null;
+      try { live = latencyFn(cand.provider); } catch { live = null; }
+      if (Number.isFinite(Number(live)) && Number(live) >= 0) latency = Number(live);
+    }
+    // load (NEXT-5): caller-supplied in-flight/utilization for this candidate,
+    // keyed by full modelKey first then bare provider. Lower is better.
+    let load = null;
+    if (routeWeights && routeWeights.load) {
+      const raw = Object.prototype.hasOwnProperty.call(loadByKey, key) ? loadByKey[key]
+        : (Object.prototype.hasOwnProperty.call(loadByKey, cand.provider) ? loadByKey[cand.provider] : null);
+      const ln = Number(raw);
+      if (Number.isFinite(ln) && ln >= 0) load = ln;
+    }
     rows.push({
       key,
       cand,
       n: agg.n,
       accuracy: agg.accuracy,
       cost,
-      latency: agg.avg_latency,
+      latency,
+      load,
       hasQuality: agg.n > 0,
     });
   }
@@ -456,6 +612,21 @@ export function scoreRoute({
   const maxN = rows.reduce((m, r) => Math.max(m, r.n), 0);
   if (maxN < minSamples) {
     return buildStatic('cold_start_below_min_samples', { cluster_id: clusterId, n_samples: totalSamples });
+  }
+
+  // ------------------------------------------------------------------------
+  // (NEXT-5) MULTI-SIGNAL BRANCH — only when route_weights is present. Builds
+  // a per-candidate weighted blend over the requested signals; the quality
+  // floor + reorder/trim safety + rejected[] machinery below the legacy path
+  // are mirrored here so the safety contract is identical. When route_weights
+  // is absent this whole block is skipped and execution falls through to the
+  // byte-identical legacy alpha/beta scorer.
+  // ------------------------------------------------------------------------
+  if (routeWeights) {
+    return _scoreRouteMultiSignal({
+      rows, routeWeights, clusterSimilarity, minQuality, alpha, beta,
+      staticChain, clusterId, totalSamples,
+    });
   }
 
   // Min-max normalize cost across candidates that HAVE a known cost. Unknown
@@ -558,14 +729,170 @@ export function scoreRoute({
 }
 
 // --------------------------------------------------------------------------
+// _scoreRouteMultiSignal — the NEXT-5 weighted-blend scorer. Pure given its
+// inputs (rows already carry every raw signal; no clock / RNG / global read).
+// Mirrors the legacy path's quality-floor + reorder/trim + rejected[] safety
+// EXACTLY so the multi-signal mode never violates a contract the legacy mode
+// upholds. Returns the same decision shape plus an additive `route_signals`
+// block (weights + per-candidate normalized signals) for the auditable receipt.
+//
+// Normalization is cross-candidate min-max within this request's candidate set,
+// then orientation so higher == better:
+//   quality:    accuracy as-is (already [0,1], higher better).
+//   cost:       min-max(cost) then INVERT -> cheaper scores higher.
+//   latency:    min-max(latency) then INVERT -> faster scores higher.
+//   load:       min-max(load) then INVERT -> less-loaded scores higher.
+//   similarity: shared clusterSimilarity for every candidate (cluster-fit
+//               confidence; constant within the set => normalizes to itself).
+// A candidate missing a signal gets null for it (blendSignals renormalizes the
+// weights over only the present signals — never penalized into oblivion).
+// --------------------------------------------------------------------------
+function _scoreRouteMultiSignal({
+  rows, routeWeights, clusterSimilarity, minQuality, alpha, beta,
+  staticChain, clusterId, totalSamples,
+}) {
+  // Helper: min-max normalize ONE raw dimension across rows that have a value,
+  // optionally inverting (lower-is-better). Rows with null value -> null. When
+  // all present values are equal, _minMaxNorm yields 0.5 (neutral) for each.
+  const normDim = (pick, invert) => {
+    const present = rows.filter((r) => pick(r) != null && Number.isFinite(Number(pick(r))));
+    const map = new Map();
+    if (!present.length) {
+      for (const r of rows) map.set(r.key, null);
+      return map;
+    }
+    const vals = present.map((r) => Number(pick(r)));
+    const normed = _minMaxNorm(vals);
+    let i = 0;
+    for (const r of rows) {
+      const v = pick(r);
+      if (v != null && Number.isFinite(Number(v))) {
+        const nv = normed[i++];
+        map.set(r.key, invert ? 1 - nv : nv);
+      } else {
+        map.set(r.key, null);
+      }
+    }
+    return map;
+  };
+
+  // Per-signal normalized maps (only build the ones with positive weight).
+  const qualityMap = new Map();
+  for (const r of rows) qualityMap.set(r.key, r.hasQuality ? _clamp01(r.accuracy) : null);
+  const costMap = routeWeights.cost ? normDim((r) => r.cost, true) : null;
+  const latMap = routeWeights.latency ? normDim((r) => r.latency, true) : null;
+  const loadMap = routeWeights.load ? normDim((r) => r.load, true) : null;
+
+  // Assemble the oriented-normalized signal vector per candidate.
+  const normedSignalsByKey = new Map();
+  for (const r of rows) {
+    const sig = {};
+    if (routeWeights.quality) sig.quality = qualityMap.get(r.key);
+    if (routeWeights.cost) sig.cost = costMap.get(r.key);
+    if (routeWeights.latency) sig.latency = latMap.get(r.key);
+    if (routeWeights.load) sig.load = loadMap.get(r.key);
+    if (routeWeights.similarity) sig.similarity = clusterSimilarity; // shared; null-safe in blend
+    normedSignalsByKey.set(r.key, sig);
+  }
+
+  const blended = blendSignals(normedSignalsByKey, routeWeights);
+
+  // Build the score map + quality floor (identical sink semantics to legacy).
+  const scoresByModel = {};
+  const scored = [];
+  const signalsOut = [];
+  for (const r of rows) {
+    const b = blended.get(r.key) || { score: 0.5, contributions: {} };
+    let x = b.score;
+    let belowFloor = false;
+    if (r.hasQuality && r.accuracy < minQuality) {
+      belowFloor = true;
+      x -= 1000; // sink to the back, never dropped (matches legacy floor)
+    }
+    scoresByModel[r.key] = x;
+    const sigVals = normedSignalsByKey.get(r.key) || {};
+    scored.push({
+      provider: r.cand.provider,
+      model: r.cand.model,
+      score: Number(x.toFixed(6)),
+      blended_score: Number(b.score.toFixed(6)),
+      quality: r.hasQuality ? Number(r.accuracy.toFixed(6)) : null,
+      n: r.n,
+      below_quality_floor: belowFloor,
+    });
+    // Receipt-friendly per-candidate signal detail (additive audit surface).
+    const detail = { provider: r.cand.provider, model: r.cand.model };
+    for (const s of ROUTE_SIGNALS) {
+      if (Object.prototype.hasOwnProperty.call(sigVals, s)) {
+        const v = sigVals[s];
+        detail[s] = v == null ? null : Number(Number(v).toFixed(6));
+      }
+    }
+    signalsOut.push(detail);
+  }
+
+  const ordered_chain = reorderChainByScore(staticChain, scoresByModel, { min_quality: minQuality });
+  const head = ordered_chain[0] || {};
+  const headKey = modelKey(head.provider, head.model);
+
+  const rejected = [];
+  for (const s of scored) {
+    const key = modelKey(s.provider, s.model);
+    if (key === headKey) continue;
+    rejected.push({
+      provider: s.provider,
+      model: s.model,
+      score: s.score,
+      reason: s.below_quality_floor ? 'below_quality_floor' : 'lower_route_score',
+    });
+  }
+
+  const headScored = scored.find((s) => modelKey(s.provider, s.model) === headKey);
+  // The reported route_score is the BLENDED score (0..1) of the head — a
+  // floored head would be negative, so clamp to the blended value for display.
+  const route_score = headScored
+    ? _clamp01(headScored.below_quality_floor ? headScored.blended_score : headScored.score)
+    : 0;
+  const headIsLocal = String(head.route_decision || '') === 'local'
+    || String(head.provider || '').startsWith('local');
+
+  return {
+    route_decision: headIsLocal ? 'local' : 'frontier',
+    ordered_chain,
+    route_score: Number(route_score.toFixed(6)),
+    alpha,
+    beta,
+    chosen: { provider: head.provider || null, model: head.model || '' },
+    rejected,
+    cluster_id: clusterId,
+    n_samples: totalSamples,
+    embedder: EMBEDDER_ID,
+    cold_start: false,
+    reason: 'multi_signal_reorder',
+    // Additive audit block — the kolm moat: a SIGNED, inspectable record of
+    // exactly which signals + weights produced the order.
+    route_weights: { ...routeWeights },
+    route_signals: signalsOut,
+    cluster_similarity: clusterSimilarity == null ? null : Number(clusterSimilarity.toFixed(6)),
+  };
+}
+
+// --------------------------------------------------------------------------
 // buildRouterDecisionBlock — the non-signed receipt.router_decision block
 // (mirrors latency_breakdown). canonicalForSigning walks ALL_FIELDS only, so
 // attaching this is signature-neutral.
 // --------------------------------------------------------------------------
 export function buildRouterDecisionBlock({ scored, alpha, beta = DEFAULT_BETA, cluster_id, n_samples, embedder, cold_start } = {}) {
   const s = scored || {};
-  return {
-    route_mode: cold_start ? 'static' : 'cost_quality',
+  const isCold = cold_start == null ? !!s.cold_start : !!cold_start;
+  // route_mode reflects HOW the order was decided: 'static' on cold-start,
+  // 'semantic' when the multi-signal blend ran (reason === 'multi_signal_*'),
+  // else 'cost_quality' (the legacy alpha/beta path — unchanged for back-compat).
+  let routeMode = 'cost_quality';
+  if (isCold) routeMode = 'static';
+  else if (typeof s.reason === 'string' && s.reason.startsWith('multi_signal')) routeMode = 'semantic';
+  const block = {
+    route_mode: routeMode,
     version: SEMANTIC_ROUTER_VERSION,
     route_score: Number.isFinite(Number(s.route_score)) ? Number(s.route_score) : 0,
     alpha: Number.isFinite(Number(alpha)) ? Number(alpha) : (Number.isFinite(Number(s.alpha)) ? Number(s.alpha) : DEFAULT_ALPHA),
@@ -575,9 +902,19 @@ export function buildRouterDecisionBlock({ scored, alpha, beta = DEFAULT_BETA, c
     cluster_id: cluster_id == null ? (s.cluster_id == null ? null : s.cluster_id) : cluster_id,
     n_samples: Number.isFinite(Number(n_samples)) ? Number(n_samples) : (Number(s.n_samples) || 0),
     embedder: embedder || s.embedder || EMBEDDER_ID,
-    cold_start: cold_start == null ? !!s.cold_start : !!cold_start,
+    cold_start: isCold,
     reason: s.reason || null,
   };
+  // ADDITIVE multi-signal audit fields — present ONLY when scoreRoute ran the
+  // multi-signal branch (route_weights/route_signals set). Absent => the block
+  // shape is byte-identical to the legacy block. This is the auditable edge:
+  // the receipt records exactly which signals + weights produced the order.
+  if (s.route_weights && typeof s.route_weights === 'object') block.route_weights = { ...s.route_weights };
+  if (Array.isArray(s.route_signals)) block.route_signals = s.route_signals;
+  if (s.cluster_similarity != null && Number.isFinite(Number(s.cluster_similarity))) {
+    block.cluster_similarity = Number(s.cluster_similarity);
+  }
+  return block;
 }
 
 // --------------------------------------------------------------------------

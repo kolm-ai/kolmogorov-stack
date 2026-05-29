@@ -1,0 +1,68 @@
+{
+  "$schema": "https://kolm.ai/schemas/distill-recipe/v1.json",
+  "name": "support-ropd",
+  "description": "W921 NEXT-1 reference recipe: BLACK-BOX on-policy distillation (ROPD, arXiv:2605.07396). The teacher is an API model (Claude via kolm-proxy) that returns TEXT ONLY -- no logits. ROPD induces a prompt-specific scoring rubric by contrasting the teacher's reference answer against the student's own rollouts, scores each rollout with teacher TEXT only (weighted rubric pass-rate = the K-Score verifier), and GRPO-optimizes the student toward its own best rollouts. Works for the regime most kolm customers are in (started from a Claude/GPT capture). Unlike trinity-onpolicy (distillm2, needs LOCAL teacher logits), this recipe needs NO logits.",
+  "version": "1.0.0",
+
+  "seeds": {
+    "target": 400,
+    "generator": "scripts/trinity-2000-v2-seed-gen.mjs",
+    "buckets": {
+      "refunds_returns": 100,
+      "shipping_delivery": 100,
+      "technical_issues": 100,
+      "escalation_complex": 100
+    }
+  },
+
+  "teachers": [
+    { "slug": "anthropic:claude-sonnet-4-6", "weight": 1.0, "rows": 400, "source": "kolm-proxy" }
+  ],
+
+  "scrub": {
+    "cot": {
+      "markers_path": "workers/distill/scripts/cot_markers.json",
+      "strategy": "rsplit_close_tag",
+      "drop_if_no_close_tag": true
+    }
+  },
+
+  "train": {
+    "method": "qlora",
+    "student_base": "Qwen/Qwen2.5-7B-Instruct",
+    "lora": { "r": 32, "alpha": 64, "dropout": 0.05 },
+    "max_seq_len": 1024,
+    "epochs": 1,
+    "batch_size": 1,
+    "lr": 1.0e-6,
+    "warmup_ratio": 0.05
+  },
+
+  "ropd": {
+    "objective": "ropd",
+    "trainer": "apps/trainer/ropd.py",
+    "teacher_regime": "black_box_text",
+    "teacher_local": false,
+    "num_rollouts": 8,
+    "num_teacher_refs": 4,
+    "rubric_min_items": 4,
+    "rubric_max_items": 12,
+    "learning_rate": 1.0e-6,
+    "temperature": 1.0,
+    "scale_rewards": true,
+    "blind_difficulty_anchor": true,
+    "max_completion_length": 1024,
+    "reward_formula": "s_i = (sum_k w_k * v_{i,k}) / (sum_k w_k + eps)",
+    "papers": ["arXiv:2605.07396", "arXiv:2402.03300", "arXiv:2306.13649"],
+    "note": "ROPD = rubric induction (teacher-vs-student text contrast) -> teacher-text-only verification (binary per-criterion) -> GRPO group-relative update. Needs ONLY teacher TEXT, so it works for API teachers where distillm2/gkd cannot. The rubric pass-rate reward shares the K-Score weighted-axis aggregation, so train-eval scoring is one path."
+  },
+
+  "eval": {
+    "strict_cot": true,
+    "holdout_n": 40,
+    "bench": "none",
+    "out_path": "student/eval-ropd-40.jsonl"
+  },
+
+  "system_prompt": "You are a careful customer-support agent. Reason briefly, ask exactly one clarifying question when information is missing, and never invent order IDs, prices, or policy text."
+}

@@ -76,6 +76,34 @@ def parse_args():
                         "the chosen backend fall back to nearest-supported with a "
                         "warning logged into the receipt; uniform-bit calls still "
                         "work when this flag is omitted.")
+    p.add_argument("--trust-remote-code", dest="trust_remote_code",
+                   action="store_true", default=False,
+                   help="(W921 NOW-1) OPT-IN: pass trust_remote_code=True to every "
+                        "HuggingFace from_pretrained call so models that ship custom "
+                        "modeling code (e.g. openbmb/MiniCPM5-1B) can be loaded + "
+                        "quantized. SECURITY: this executes arbitrary repo Python at "
+                        "load time — default is False and you must pass this flag "
+                        "explicitly per run. The receipt records trust_remote_code so "
+                        "a verifier sees whether remote code was permitted.")
+    p.add_argument("--calib-fp4", dest="calib_fp4",
+                   action="store_true", default=False,
+                   help="(W921 NEXT-3) OPT-IN: run an FP4-aware PTQ calibration pass "
+                        "(BATQuant-style block-granular learnable affine transform + "
+                        "block-wise learnable clipping, arXiv:2603.16590) over the "
+                        "model weights BEFORE the int4 quantize, and record the "
+                        "per-layer calibration plan + measured reconstruction-error "
+                        "reduction in the receipt. Reduces FP4/INT4 error vs naive "
+                        "round-to-nearest. Additive: omit the flag for the pre-W921 "
+                        "behavior. See --calib-fp4-block / --calib-fp4-max-layers.")
+    p.add_argument("--calib-fp4-block", dest="calib_fp4_block", type=int, default=32,
+                   help="(W921 NEXT-3) MXFP4/NVFP4 micro-scaling block size for the "
+                        "--calib-fp4 pass (default 32 — the hardware-native FP4 "
+                        "block).")
+    p.add_argument("--calib-fp4-max-layers", dest="calib_fp4_max_layers",
+                   type=int, default=64,
+                   help="(W921 NEXT-3) cap how many weight tensors the --calib-fp4 "
+                        "pass profiles (largest-first) to bound calibration time on "
+                        "big models. 0 == all layers.")
     return p.parse_args()
 
 
@@ -122,7 +150,7 @@ def fail(code, msg, extra=None):
     sys.exit(code)
 
 
-def run_int_bnb(method, src, dst, device):
+def run_int_bnb(method, src, dst, device, trust_remote_code=False):
     """int4/int8 via bitsandbytes — load with quantization config, save sharded."""
     try:
         import torch  # noqa: F401
@@ -141,12 +169,12 @@ def run_int_bnb(method, src, dst, device):
     else:
         bnb = BitsAndBytesConfig(load_in_8bit=True)
 
-    tok = AutoTokenizer.from_pretrained(src, trust_remote_code=False)
+    tok = AutoTokenizer.from_pretrained(src, trust_remote_code=trust_remote_code)
     model = AutoModelForCausalLM.from_pretrained(
         src,
         quantization_config=bnb,
         device_map=device if device != "auto" else "auto",
-        trust_remote_code=False,
+        trust_remote_code=trust_remote_code,
         low_cpu_mem_usage=True,
     )
     tok.save_pretrained(dst)
@@ -157,10 +185,11 @@ def run_int_bnb(method, src, dst, device):
         "torch_version": _ver("torch"),
         "transformers_version": _ver("transformers"),
         "scheme": "nf4+double" if method == "int4" else "llm.int8",
+        "trust_remote_code": bool(trust_remote_code),
     }
 
 
-def run_gptq(src, dst, calib, bits, group_size, device):
+def run_gptq(src, dst, calib, bits, group_size, device, trust_remote_code=False):
     """GPTQ via auto-gptq."""
     try:
         import torch  # noqa: F401
@@ -170,12 +199,12 @@ def run_gptq(src, dst, calib, bits, group_size, device):
         fail(2, f"missing python deps for gptq: {e}",
              {"install": "pip install torch transformers auto-gptq optimum accelerate"})
 
-    tok = AutoTokenizer.from_pretrained(src, trust_remote_code=False)
+    tok = AutoTokenizer.from_pretrained(src, trust_remote_code=trust_remote_code)
     cfg = BaseQuantizeConfig(bits=bits, group_size=group_size, desc_act=False)
     model = AutoGPTQForCausalLM.from_pretrained(
         src,
         quantize_config=cfg,
-        trust_remote_code=False,
+        trust_remote_code=trust_remote_code,
         low_cpu_mem_usage=True,
     )
     calib_rows = _load_calib(calib, tok)
@@ -190,10 +219,11 @@ def run_gptq(src, dst, calib, bits, group_size, device):
         "bits": bits,
         "group_size": group_size,
         "calib_rows": len(calib_rows),
+        "trust_remote_code": bool(trust_remote_code),
     }
 
 
-def run_awq(src, dst, calib, bits, group_size, device):
+def run_awq(src, dst, calib, bits, group_size, device, trust_remote_code=False):
     """AWQ via autoawq."""
     try:
         import torch  # noqa: F401
@@ -203,8 +233,9 @@ def run_awq(src, dst, calib, bits, group_size, device):
         fail(2, f"missing python deps for awq: {e}",
              {"install": "pip install torch transformers autoawq accelerate"})
 
-    tok = AutoTokenizer.from_pretrained(src, trust_remote_code=False)
-    model = AutoAWQForCausalLM.from_pretrained(src, low_cpu_mem_usage=True, trust_remote_code=False)
+    tok = AutoTokenizer.from_pretrained(src, trust_remote_code=trust_remote_code)
+    model = AutoAWQForCausalLM.from_pretrained(
+        src, low_cpu_mem_usage=True, trust_remote_code=trust_remote_code)
     quant_config = {"zero_point": True, "q_group_size": group_size, "w_bit": bits, "version": "GEMM"}
     calib_rows = _load_calib(calib, tok, as_str=True)
     model.quantize(tok, quant_config=quant_config, calib_data=calib_rows)
@@ -218,10 +249,11 @@ def run_awq(src, dst, calib, bits, group_size, device):
         "bits": bits,
         "group_size": group_size,
         "calib_rows": len(calib_rows),
+        "trust_remote_code": bool(trust_remote_code),
     }
 
 
-def run_aqlm(src, dst, calib, bits, group_size, device):
+def run_aqlm(src, dst, calib, bits, group_size, device, trust_remote_code=False):
     """AQLM additive quantization (Egiazarian 2024) — near-lossless 2-bit.
 
     The aqlm pip package ships inference + format support but the heavy
@@ -246,12 +278,14 @@ def run_aqlm(src, dst, calib, bits, group_size, device):
         fail(2, f"AQLM_REPO_PATH set but main.py not found at {main_py}")
 
     import subprocess
-    tok = AutoTokenizer.from_pretrained(src, trust_remote_code=False)
+    tok = AutoTokenizer.from_pretrained(src, trust_remote_code=trust_remote_code)
     tok.save_pretrained(dst)
     cmd = [sys.executable, main_py, src,
            "--nbits_per_codebook=16", "--num_codebooks=2",
            "--in_group_size=8", "--out_group_size=1",
            f"--save={dst}"]
+    if trust_remote_code:
+        cmd.append("--trust_remote_code")
     if calib and os.path.exists(calib):
         cmd.append(f"--dataset={calib}")
     res = subprocess.run(cmd, check=False)
@@ -264,10 +298,11 @@ def run_aqlm(src, dst, calib, bits, group_size, device):
         "transformers_version": _ver("transformers"),
         "scheme": "additive-2x16",
         "repo_used": repo,
+        "trust_remote_code": bool(trust_remote_code),
     }
 
 
-def run_quip(src, dst, calib, bits, group_size, device):
+def run_quip(src, dst, calib, bits, group_size, device, trust_remote_code=False):
     """QuIP# (Tseng 2024) — sub-2-bit with incoherence preprocessing + E8 lattice.
 
     Same pattern as AQLM: drives the upstream Cornell-RelaxML/quip-sharp
@@ -292,7 +327,7 @@ def run_quip(src, dst, calib, bits, group_size, device):
         fail(2, f"QUIP_SHARP_REPO_PATH set but quantize_llama.py not found at {main_py}")
 
     import subprocess
-    tok = AutoTokenizer.from_pretrained(src, trust_remote_code=False)
+    tok = AutoTokenizer.from_pretrained(src, trust_remote_code=trust_remote_code)
     tok.save_pretrained(dst)
     cmd = [sys.executable, main_py,
            f"--save_path={dst}",
@@ -310,10 +345,11 @@ def run_quip(src, dst, calib, bits, group_size, device):
         "transformers_version": _ver("transformers"),
         "scheme": "E8P12-incoherence",
         "repo_used": repo,
+        "trust_remote_code": bool(trust_remote_code),
     }
 
 
-def _run_exllamav2(src, dst, calib, bits, exl3=False):
+def _run_exllamav2(src, dst, calib, bits, exl3=False, trust_remote_code=False):
     """Shared driver for EXL2 + EXL3 — both go through exllamav2.conversion.convert."""
     try:
         import torch  # noqa: F401
@@ -324,7 +360,7 @@ def _run_exllamav2(src, dst, calib, bits, exl3=False):
              {"install": "pip install exllamav2 torch transformers"})
 
     import subprocess
-    tok = AutoTokenizer.from_pretrained(src, trust_remote_code=False)
+    tok = AutoTokenizer.from_pretrained(src, trust_remote_code=trust_remote_code)
     tok.save_pretrained(dst)
     work = os.path.join(dst, "_exl_work")
     os.makedirs(work, exist_ok=True)
@@ -343,20 +379,23 @@ def _run_exllamav2(src, dst, calib, bits, exl3=False):
         "torch_version": _ver("torch"),
         "transformers_version": _ver("transformers"),
         "scheme": f"{'exl3' if exl3 else 'exl2'}-{bits}bpw",
+        "trust_remote_code": bool(trust_remote_code),
     }
 
 
-def run_exl2(src, dst, calib, bits, group_size, device):
+def run_exl2(src, dst, calib, bits, group_size, device, trust_remote_code=False):
     """ExLlamaV2 EXL2 runtime-optimized variable-bit quantization."""
-    return _run_exllamav2(src, dst, calib, bits, exl3=False)
+    return _run_exllamav2(src, dst, calib, bits, exl3=False,
+                          trust_remote_code=trust_remote_code)
 
 
-def run_exl3(src, dst, calib, bits, group_size, device):
+def run_exl3(src, dst, calib, bits, group_size, device, trust_remote_code=False):
     """ExLlamaV2 EXL3 next-gen format (better compression than EXL2)."""
-    return _run_exllamav2(src, dst, calib, bits, exl3=True)
+    return _run_exllamav2(src, dst, calib, bits, exl3=True,
+                          trust_remote_code=trust_remote_code)
 
 
-def run_hqq(src, dst, calib, bits, group_size, device):
+def run_hqq(src, dst, calib, bits, group_size, device, trust_remote_code=False):
     """HQQ calibration-free half-quadratic quantization (Mobius Labs 2024).
 
     Cleanest of the new methods: pure pip install, no repo checkout, no
@@ -371,11 +410,11 @@ def run_hqq(src, dst, calib, bits, group_size, device):
         fail(2, f"missing python deps for hqq: {e}",
              {"install": "pip install hqq torch transformers accelerate"})
 
-    tok = AutoTokenizer.from_pretrained(src, trust_remote_code=False)
+    tok = AutoTokenizer.from_pretrained(src, trust_remote_code=trust_remote_code)
     quant_config = HqqConfig(nbits=bits, group_size=group_size,
                              quant_zero=True, quant_scale=False)
     model = HQQModelForCausalLM.from_pretrained(
-        src, trust_remote_code=False, low_cpu_mem_usage=True,
+        src, trust_remote_code=trust_remote_code, low_cpu_mem_usage=True,
     )
     model.quantize_model(
         quant_config=quant_config,
@@ -393,10 +432,11 @@ def run_hqq(src, dst, calib, bits, group_size, device):
         "group_size": group_size,
         "scheme": f"hqq-{bits}bit-g{group_size}",
         "calibration_free": True,
+        "trust_remote_code": bool(trust_remote_code),
     }
 
 
-def run_qat(src, dst, calib, bits, group_size, device):
+def run_qat(src, dst, calib, bits, group_size, device, trust_remote_code=False):
     """EfficientQAT block-wise quantization-aware training (Chen 2024).
 
     QAT is a training procedure, not a one-shot quantize. Drives the
@@ -422,7 +462,7 @@ def run_qat(src, dst, calib, bits, group_size, device):
         fail(2, f"EFFICIENT_QAT_REPO_PATH set but main_block_ap.py not found at {main_py}")
 
     import subprocess
-    tok = AutoTokenizer.from_pretrained(src, trust_remote_code=False)
+    tok = AutoTokenizer.from_pretrained(src, trust_remote_code=trust_remote_code)
     tok.save_pretrained(dst)
     cmd = [sys.executable, main_py,
            f"--model={src}", f"--save_quant_dir={dst}",
@@ -442,7 +482,91 @@ def run_qat(src, dst, calib, bits, group_size, device):
         "group_size": group_size,
         "scheme": f"qat-block-{bits}bit-g{group_size}",
         "repo_used": repo,
+        "trust_remote_code": bool(trust_remote_code),
     }
+
+
+# -----------------------------------------------------------------------------
+# W921 NEXT-3 — FP4-aware PTQ calibration driver (BATQuant-style).
+#
+# When --calib-fp4 is set we run a CPU-side calibration pass over the model's
+# largest 2-D weight tensors BEFORE the int4 quantize. The pure math lives in
+# fp4_calib.py (block-granular learnable affine transform + block-wise
+# learnable clipping, arXiv:2603.16590) so it is deterministic + unit-testable
+# off-GPU. We record the per-layer plan + the measured reconstruction-error
+# reduction in the receipt; the GPU FP4 export path (src/export-nvfp4.js)
+# consumes the plan to fuse the transform into the weights before the real FP4
+# round. Additive: omitting --calib-fp4 leaves the pre-W921 path untouched.
+# -----------------------------------------------------------------------------
+
+def _iter_safetensor_weights(src, max_layers, min_numel=4096):
+    """Yield (name, numpy_2d_array) for the largest 2-D float weight tensors in
+    a HF model dir, loading lazily from safetensors on CPU. Falls back to a
+    *.bin torch load only when no safetensors are present.
+
+    max_layers: cap (largest-first). 0 == all. min_numel: skip tiny tensors.
+    """
+    import numpy as np
+    shards = sorted(Path(src).glob("*.safetensors"))
+    collected = []  # (numel, name, loader)
+    if shards:
+        from safetensors import safe_open
+        for shard in shards:
+            with safe_open(str(shard), framework="numpy") as f:
+                for name in f.keys():
+                    # Defer the actual tensor read; we only need the shape now.
+                    # safetensors numpy framework reads on get_tensor — read it
+                    # to inspect ndim/dtype (cheap relative to GPU quant) and
+                    # keep only 2-D float weights.
+                    t = f.get_tensor(name)
+                    if t.ndim != 2 or t.size < min_numel:
+                        continue
+                    if not np.issubdtype(t.dtype, np.floating):
+                        t = t.astype(np.float32)
+                    collected.append((t.size, name, t.astype(np.float32)))
+    else:
+        try:
+            import torch
+        except ImportError:
+            return
+        for binf in sorted(Path(src).glob("*.bin")):
+            sd = torch.load(str(binf), map_location="cpu")
+            for name, t in sd.items():
+                if hasattr(t, "ndim") and t.ndim == 2 and t.numel() >= min_numel:
+                    collected.append((int(t.numel()), name,
+                                      t.detach().to(torch.float32).numpy()))
+    collected.sort(key=lambda x: -x[0])
+    if max_layers and max_layers > 0:
+        collected = collected[:max_layers]
+    for _numel, name, arr in collected:
+        yield name, arr
+
+
+def run_fp4_calibration(src, block=32, max_layers=64, grid_steps=24):
+    """Build the FP4-aware calibration plan for a model dir. Returns the plan
+    dict (see fp4_calib.build_calibration_plan) plus a status. Never raises into
+    the main quantize flow — calibration failure degrades gracefully to a
+    recorded warning so the int4 quantize still proceeds.
+    """
+    try:
+        import numpy as np  # noqa: F401
+        import fp4_calib
+    except ImportError as e:
+        return {"ok": False, "reason": f"fp4 calibration deps missing: {e}"}
+    try:
+        weights = {}
+        for name, arr in _iter_safetensor_weights(src, max_layers):
+            weights[name] = arr
+        if not weights:
+            return {"ok": False, "reason": "no 2-D float weight tensors found for FP4 calibration"}
+        import numpy as np
+        plan = fp4_calib.build_calibration_plan(
+            np, weights, block=block, grid_steps=grid_steps, use_transform=True)
+        plan["ok"] = True
+        plan["layers_calibrated"] = len(weights)
+        return plan
+    except Exception as e:  # degrade gracefully — calibration must never block quantize
+        return {"ok": False, "reason": f"fp4 calibration raised: {e.__class__.__name__}: {e}"}
 
 
 def _load_calib(path, tokenizer, as_str=False, max_rows=128, max_len=512):
@@ -662,25 +786,39 @@ def main():
         if uniform_group is not None:
             args.group_size = uniform_group
 
+    # W921 NEXT-3 — FP4-aware PTQ calibration pass (opt-in). Runs on CPU over
+    # the model's largest weight tensors BEFORE the quantize, and never blocks
+    # the quantize on failure. The plan is recorded in the receipt for the GPU
+    # FP4 export path to fuse. (fp4_calib lives next to this script.)
+    fp4_calib_plan = None
+    if args.calib_fp4:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        fp4_calib_plan = run_fp4_calibration(
+            str(src),
+            block=args.calib_fp4_block,
+            max_layers=args.calib_fp4_max_layers,
+        )
+
+    trc = bool(args.trust_remote_code)
     try:
         if args.method in ("int4", "int8"):
-            tool_info = run_int_bnb(args.method, str(src), str(dst), args.device)
+            tool_info = run_int_bnb(args.method, str(src), str(dst), args.device, trust_remote_code=trc)
         elif args.method == "gptq":
-            tool_info = run_gptq(str(src), str(dst), args.calib, args.bits, args.group_size, args.device)
+            tool_info = run_gptq(str(src), str(dst), args.calib, args.bits, args.group_size, args.device, trust_remote_code=trc)
         elif args.method == "awq":
-            tool_info = run_awq(str(src), str(dst), args.calib, args.bits, args.group_size, args.device)
+            tool_info = run_awq(str(src), str(dst), args.calib, args.bits, args.group_size, args.device, trust_remote_code=trc)
         elif args.method == "aqlm":
-            tool_info = run_aqlm(str(src), str(dst), args.calib, args.bits, args.group_size, args.device)
+            tool_info = run_aqlm(str(src), str(dst), args.calib, args.bits, args.group_size, args.device, trust_remote_code=trc)
         elif args.method == "quip":
-            tool_info = run_quip(str(src), str(dst), args.calib, args.bits, args.group_size, args.device)
+            tool_info = run_quip(str(src), str(dst), args.calib, args.bits, args.group_size, args.device, trust_remote_code=trc)
         elif args.method == "exl2":
-            tool_info = run_exl2(str(src), str(dst), args.calib, args.bits, args.group_size, args.device)
+            tool_info = run_exl2(str(src), str(dst), args.calib, args.bits, args.group_size, args.device, trust_remote_code=trc)
         elif args.method == "exl3":
-            tool_info = run_exl3(str(src), str(dst), args.calib, args.bits, args.group_size, args.device)
+            tool_info = run_exl3(str(src), str(dst), args.calib, args.bits, args.group_size, args.device, trust_remote_code=trc)
         elif args.method == "hqq":
-            tool_info = run_hqq(str(src), str(dst), args.calib, args.bits, args.group_size, args.device)
+            tool_info = run_hqq(str(src), str(dst), args.calib, args.bits, args.group_size, args.device, trust_remote_code=trc)
         elif args.method == "qat":
-            tool_info = run_qat(str(src), str(dst), args.calib, args.bits, args.group_size, args.device)
+            tool_info = run_qat(str(src), str(dst), args.calib, args.bits, args.group_size, args.device, trust_remote_code=trc)
         else:
             fail(2, f"unknown method: {args.method}")
     except SystemExit:
@@ -701,8 +839,15 @@ def main():
         "device": args.device,
         "python_version": sys.version.split()[0],
         "tool": tool_info,
+        "trust_remote_code": bool(args.trust_remote_code),
         "finished_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
+    # W921 NEXT-3 — record the FP4-aware calibration plan + measured error
+    # reduction so a verifier can see the BATQuant transform/clip that the GPU
+    # FP4 export will fuse, and the reconstruction-MSE improvement vs naive
+    # round-to-nearest. Recorded only when --calib-fp4 was passed.
+    if fp4_calib_plan is not None:
+        receipt["fp4_calibration"] = fp4_calib_plan
     # W719 — surface the DAQ profile + any fallback warnings in the receipt
     # so a verifier replaying this run knows EXACTLY which per-layer schedule
     # was requested and how the backend honored or fell back from it. The

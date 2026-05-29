@@ -1,0 +1,84 @@
+{
+  "$schema": "https://kolm.ai/schemas/distill-recipe/v1.json",
+  "name": "trinity-qad",
+  "description": "Trinity QAD — Quantization-Aware Distillation. Fuses kolm's two verbs (distill + quantize) into one pass: the student's weights are fake-quantized (NF4 by default; FP4/NVFP4 opt-in) in the forward pass during distillation, with a straight-through-estimator backward, so the student learns 4-bit-robust weights that beat post-hoc PTQ at the same bit-width. Teacher is a LOCAL high-precision model (logits required for the forward-KL objective, matching NVIDIA Nemotron QAD arXiv:2601.20088). Student: Qwen2.5-1.5B QLoRA. Runs via apps/trainer/qad.py; preflight with `python -m apps.trainer.qad --preflight ...` (GPU-free).",
+  "version": "1.0.0",
+
+  "seeds": {
+    "target": 1000,
+    "generator": "scripts/trinity-2000-v2-seed-gen.mjs",
+    "buckets": {
+      "refunds_returns": 150,
+      "shipping_delivery": 150,
+      "warranty_repair": 100,
+      "billing_payment": 150,
+      "technical_issues": 150,
+      "account_access": 100,
+      "loyalty_discount": 100,
+      "escalation_complex": 100
+    },
+    "dedupe": { "method": "3gram", "threshold": 0.85 }
+  },
+
+  "teachers": [
+    { "slug": "kolm:deepseek-r1-distill-qwen-32b", "weight": 1.0, "rows": 1000, "source": "local:8765" }
+  ],
+
+  "scrub": {
+    "cot": {
+      "markers_path": "workers/distill/scripts/cot_markers.json",
+      "strategy": "rsplit_close_tag",
+      "drop_if_no_close_tag": true
+    }
+  },
+
+  "distill": {
+    "objective": "forward_kl",
+    "teacher_local": true,
+    "temperature": 2.0,
+    "base_alpha": 0.9
+  },
+
+  "quant_aware": true,
+  "qad": {
+    "quant_format": "nf4",
+    "quant_block": 16,
+    "clip_ste": true,
+    "warmup_steps": 50,
+    "quantize_target_modules": [
+      "q_proj", "k_proj", "v_proj", "o_proj",
+      "gate_proj", "up_proj", "down_proj"
+    ],
+    "trainer": "apps/trainer/qad.py",
+    "fp4_variant_note": "Set quant_format=fp4 for the NVFP4 element grid (E2M1, 16-element blocks, per-block E4M3 scale at export). FP4/NVFP4 needs the Blackwell export path (export-nvfp4.js) post-train; NF4 is proven end-to-end on the RTX 5090 via the bitsandbytes worker."
+  },
+
+  "train": {
+    "method": "qlora",
+    "student_base": "Qwen/Qwen2.5-1.5B-Instruct",
+    "lora": { "r": 16, "alpha": 32, "dropout": 0.0 },
+    "max_seq_len": 1024,
+    "epochs": 2,
+    "batch_size": 2,
+    "gradient_accumulation_steps": 8,
+    "effective_batch_size": 16,
+    "val_fraction": 0.05,
+    "eval_steps": 50,
+    "save_steps": 50,
+    "save_total_limit": 4,
+    "lr": 1.0e-4,
+    "warmup_ratio": 0.03,
+    "max_grad_norm": 1.0
+  },
+
+  "eval": {
+    "strict_cot": true,
+    "holdout_n": 20,
+    "bench": "none",
+    "out_path": "student/eval-qad-20.jsonl",
+    "compare_against": "post_hoc_ptq",
+    "compare_note": "The QAD claim is that the quant-aware student beats a post-hoc PTQ of the same distilled student at the same bit-width. The eval harness should quantize a plain-distill student to the same format and compare holdout token accuracy / K-Score."
+  },
+
+  "system_prompt": "You are a careful customer-support agent. When a user asks for help, think through the steps, explain your reasoning briefly, and call the right tool with structured arguments. If information is missing, ask exactly one clarifying question. Never invent order IDs, prices, or policy text — say you don't know and route to a human."
+}
