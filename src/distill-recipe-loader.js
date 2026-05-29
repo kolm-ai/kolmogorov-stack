@@ -71,7 +71,10 @@ const VALID_TRAIN_METHODS = new Set(['qlora', 'lora', 'full']);
 // Distillation OBJECTIVE (loss). seqkd is the SFT-on-strings default; the
 // logit-level objectives (forward_kl/reverse_kl/jsd/distillm2/gkd) require a
 // LOCAL teacher (logits), enforced by _validateDistill.
-const VALID_OBJECTIVES = new Set(['seqkd', 'forward_kl', 'reverse_kl', 'jsd', 'distillm2', 'gkd']);
+// W921 — 'ropd' (rubric-based on-policy distillation) is black-box: it scores
+// rollouts with teacher TEXT only (no logits), so it is valid with API teachers
+// and is intentionally NOT in LOGIT_OBJECTIVES.
+const VALID_OBJECTIVES = new Set(['seqkd', 'forward_kl', 'reverse_kl', 'jsd', 'distillm2', 'gkd', 'ropd']);
 // Objectives that need teacher LOGITS (API teachers are text-only).
 const LOGIT_OBJECTIVES = new Set(['forward_kl', 'reverse_kl', 'jsd', 'distillm2', 'gkd']);
 // LoRA-variant vocabulary (kept in sync with src/distill-efficiency.js).

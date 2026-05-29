@@ -182,6 +182,15 @@ if (args['mixed-precision']) {
   const mp = path.resolve(process.cwd(), args['mixed-precision']);
   passthrough.push(`--mixed-precision=${mp}`);
 }
+// W921 — expose the new quantize.py flags through the Node worker: opt-in
+// custom-modeling-code load (edge models like MiniCPM5-1B) and FP4-aware PTQ
+// calibration (BATQuant-style block transform, ~70% MSE reduction vs naive).
+if (args['trust-remote-code']) passthrough.push('--trust-remote-code');
+if (args['calib-fp4']) {
+  passthrough.push('--calib-fp4');
+  if (args['calib-fp4-block']) passthrough.push(`--calib-fp4-block=${args['calib-fp4-block']}`);
+  if (args['calib-fp4-max-layers'] !== undefined) passthrough.push(`--calib-fp4-max-layers=${args['calib-fp4-max-layers']}`);
+}
 const res = spawnSync('python3', passthrough, { stdio: 'inherit' });
 process.exit(res.status ?? 1);
 
