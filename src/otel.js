@@ -243,7 +243,10 @@ function tracesPayload(spans) {
           spanId: s.spanId,
           parentSpanId: s.parentSpanId,
           name: s.name,
-          kind: 1,
+          // SpanKind: 1=INTERNAL (default, back-compat with the kolm.* path),
+          // 3=CLIENT (GenAI inference spans — the gateway is a client of the
+          // upstream provider per OTel SemConv gen-ai-spans).
+          kind: Number.isInteger(s.kind) ? s.kind : 1,
           startTimeUnixNano: s.startTimeUnixNano,
           endTimeUnixNano: s.endTimeUnixNano || nowNs(),
           attributes: s.attributes,
@@ -584,6 +587,429 @@ function listW733SpanNames() {
   return Object.assign({}, KOLM_OTEL_SPAN_NAMES);
 }
 
+// =============================================================================
+// W921 — OpenTelemetry GenAI semantic conventions (gen_ai.*)
+//
+// Standard OTel GenAI inference span + the three GenAI client metrics emitted
+// from the /v1/gateway/dispatch path so a buyer's existing Datadog / Grafana
+// Tempo / Honeycomb / Phoenix / OpenLLMetry pipeline lights up kolm gateway
+// traffic with ZERO custom mapping. kolm.* (W733/W823) stays additive
+// enrichment on the SAME span via setRoutingAttributes — one span carries
+// both dialects.
+//
+// Spec verified against OTel SemConv v1.37 (2026-05-29):
+//   gen-ai-spans   : https://opentelemetry.io/docs/specs/semconv/gen-ai/gen-ai-spans/
+//   gen-ai-metrics : https://opentelemetry.io/docs/specs/semconv/gen-ai/gen-ai-metrics/
+//   attribute reg  : https://opentelemetry.io/docs/specs/semconv/registry/attributes/gen-ai/
+//
+// Migration: gen_ai.system is DEPRECATED, replaced by gen_ai.provider.name.
+// We dual-emit gen_ai.system ONLY under KOLM_OTEL_SEMCONV_COMPAT=1.
+//
+// Privacy: CONTENT attributes (gen_ai.input.messages / gen_ai.output.messages /
+// gen_ai.system_instructions) are OPT-IN ONLY and SHOULD NOT be captured by
+// default. Under KOLM_OTEL_CAPTURE_CONTENT=1 we emit ONLY post-redaction text,
+// so no un-redacted PII reaches a trace backend.
+//
+// Gating: every GenAI emitter is a hard no-op unless isEnabled() (native
+// exporter wired via KOLM_OTEL=1) OR a host @opentelemetry/api tracer is
+// registered — identical to the existing kolm.inference wrapper. Never throws
+// on the request hot-path.
+// =============================================================================
+
+const OTEL_GENAI_VERSION = 'w921-genai-v1';
+
+// One source of truth for every gen_ai.* key string so a semconv key rename
+// is a one-line change here, not a grep-and-replace across the codebase.
+const GEN_AI_ATTRS = Object.freeze({
+  OPERATION_NAME: 'gen_ai.operation.name',
+  PROVIDER_NAME: 'gen_ai.provider.name',
+  // DEPRECATED — emitted only under KOLM_OTEL_SEMCONV_COMPAT=1.
+  SYSTEM: 'gen_ai.system',
+  REQUEST_MODEL: 'gen_ai.request.model',
+  RESPONSE_MODEL: 'gen_ai.response.model',
+  RESPONSE_ID: 'gen_ai.response.id',
+  FINISH_REASONS: 'gen_ai.response.finish_reasons',
+  USAGE_INPUT_TOKENS: 'gen_ai.usage.input_tokens',
+  USAGE_OUTPUT_TOKENS: 'gen_ai.usage.output_tokens',
+  REQUEST_MAX_TOKENS: 'gen_ai.request.max_tokens',
+  REQUEST_TEMPERATURE: 'gen_ai.request.temperature',
+  TIME_TO_FIRST_CHUNK: 'gen_ai.response.time_to_first_chunk',
+  CONVERSATION_ID: 'gen_ai.conversation.id',
+  TOKEN_TYPE: 'gen_ai.token.type',
+  // Opt-in content (KOLM_OTEL_CAPTURE_CONTENT=1, post-redaction only).
+  INPUT_MESSAGES: 'gen_ai.input.messages',
+  OUTPUT_MESSAGES: 'gen_ai.output.messages',
+  SYSTEM_INSTRUCTIONS: 'gen_ai.system_instructions',
+  // Shared (non gen_ai.* namespace per SemConv).
+  SERVER_ADDRESS: 'server.address',
+  SERVER_PORT: 'server.port',
+  ERROR_TYPE: 'error.type',
+  // kolm extension namespace — raw provider when no clean enum member exists.
+  PROVIDER_RAW: 'kolm.provider.raw',
+});
+
+const GEN_AI_METRICS = Object.freeze({
+  TOKEN_USAGE: 'gen_ai.client.token.usage',
+  OPERATION_DURATION: 'gen_ai.client.operation.duration',
+  TIME_TO_FIRST_TOKEN: 'gen_ai.server.time_to_first_token',
+});
+
+// Exact bucket boundaries from OTel SemConv v1.37 — byte-match required so a
+// buyer's pre-aggregated GenAI dashboards line up without a custom view.
+const GENAI_TOKEN_BUCKETS = Object.freeze([1, 4, 16, 64, 256, 1024, 4096, 16384, 65536, 262144, 1048576, 4194304, 16777216, 67108864]);
+const GENAI_DURATION_BUCKETS = Object.freeze([0.01, 0.02, 0.04, 0.08, 0.16, 0.32, 0.64, 1.28, 2.56, 5.12, 10.24, 20.48, 40.96, 81.92]);
+const GENAI_TTFT_BUCKETS = Object.freeze([0.001, 0.005, 0.01, 0.02, 0.04, 0.06, 0.08, 0.1, 0.25, 0.5, 0.75, 1.0, 2.5, 5.0, 7.5, 10.0]);
+
+// Well-known gen_ai.provider.name enum members (OTel SemConv attribute
+// registry). kolm provider slugs that don't map cleanly fall through to a
+// lowercased passthrough and stamp the raw slug under kolm.provider.raw.
+const _PROVIDER_ENUM = Object.freeze({
+  anthropic: 'anthropic',
+  openai: 'openai',
+  azure_openai: 'azure.ai.openai',
+  'azure-openai': 'azure.ai.openai',
+  azure: 'azure.ai.openai',
+  bedrock: 'aws.bedrock',
+  aws: 'aws.bedrock',
+  'aws-bedrock': 'aws.bedrock',
+  cohere: 'cohere',
+  deepseek: 'deepseek',
+  google: 'gcp.gemini',
+  gemini: 'gcp.gemini',
+  'google-gemini': 'gcp.gemini',
+  vertex: 'gcp.vertex_ai',
+  'vertex-ai': 'gcp.vertex_ai',
+  vertexai: 'gcp.vertex_ai',
+  groq: 'groq',
+  watsonx: 'ibm.watsonx.ai',
+  mistral: 'mistral_ai',
+  mistralai: 'mistral_ai',
+  'mistral-ai': 'mistral_ai',
+  perplexity: 'perplexity',
+  xai: 'x_ai',
+  'x-ai': 'x_ai',
+  grok: 'x_ai',
+});
+
+// Map a kolm provider slug to the OTel gen_ai.provider.name well-known enum.
+// openrouter is a passthrough aggregator with no enum member: when the
+// underlying vendor is derivable (e.g. "openrouter/anthropic") use it, else
+// fall back to a lowercased passthrough. Returns a lowercased string always.
+function mapProviderToGenAi(kolmProvider) {
+  if (!kolmProvider) return 'unknown';
+  const raw = String(kolmProvider).trim().toLowerCase();
+  if (!raw) return 'unknown';
+  // Aggregator passthrough: "openrouter/anthropic", "openrouter:openai".
+  if (raw.startsWith('openrouter')) {
+    const sub = raw.replace(/^openrouter[\/:]?/, '');
+    if (sub && _PROVIDER_ENUM[sub]) return _PROVIDER_ENUM[sub];
+    if (sub && !sub.includes('openrouter')) return sub.replace(/[^a-z0-9._-]+/g, '_');
+    return 'openrouter';
+  }
+  if (_PROVIDER_ENUM[raw]) return _PROVIDER_ENUM[raw];
+  // Substring vendor sniff for compound slugs.
+  for (const key of Object.keys(_PROVIDER_ENUM)) {
+    if (raw.includes(key)) return _PROVIDER_ENUM[key];
+  }
+  // Lowercased fallback — keep it OTel-attribute-safe.
+  return raw.replace(/[^a-z0-9._-]+/g, '_');
+}
+
+// Normalize a provider-native finish/stop reason to the OpenAI vocabulary
+// (stop | length | tool_calls | content_filter). Anthropic stop_reason is
+// mapped; OpenAI passes through. null/undefined -> undefined (so the caller
+// simply omits the attribute).
+function mapFinishReason(provider, raw) {
+  if (raw === null || raw === undefined || raw === '') return undefined;
+  const r = String(raw).trim();
+  if (!r) return undefined;
+  const p = provider ? String(provider).toLowerCase() : '';
+  const isAnthropic = p.includes('anthropic') || p.includes('claude');
+  const ANTHROPIC_MAP = {
+    end_turn: 'stop',
+    stop_sequence: 'stop',
+    max_tokens: 'length',
+    tool_use: 'tool_calls',
+    pause_turn: 'stop',
+    refusal: 'content_filter',
+    model_context_window_exceeded: 'length',
+  };
+  if (isAnthropic && ANTHROPIC_MAP[r]) return ANTHROPIC_MAP[r];
+  // Even for non-anthropic-tagged providers, defensively normalize the
+  // anthropic-only tokens (some chains relabel the provider mid-flight).
+  if (ANTHROPIC_MAP[r] && !['stop', 'length', 'tool_calls', 'content_filter'].includes(r)) {
+    return ANTHROPIC_MAP[r];
+  }
+  // OpenAI vocabulary passthrough + lowercased fallback for anything else.
+  return r.toLowerCase();
+}
+
+// Extract an array of normalized finish reasons from a raw upstream response
+// body (OpenAI-shape choices[].finish_reason OR Anthropic stop_reason). Always
+// returns string[] (possibly empty), never null — safe for the array attr.
+function extractFinishReasons(provider, responseJson) {
+  if (!responseJson || typeof responseJson !== 'object') return [];
+  const out = [];
+  if (Array.isArray(responseJson.choices)) {
+    for (const c of responseJson.choices) {
+      const fr = c && (c.finish_reason !== undefined ? c.finish_reason : c.finishReason);
+      const mapped = mapFinishReason(provider, fr);
+      if (mapped) out.push(mapped);
+    }
+  }
+  const stopReason = responseJson.stop_reason !== undefined ? responseJson.stop_reason : responseJson.stopReason;
+  if (out.length === 0 && stopReason !== undefined) {
+    const mapped = mapFinishReason(provider, stopReason);
+    if (mapped) out.push(mapped);
+  }
+  return out;
+}
+
+// True when ANY emit path is live: native exporter (KOLM_OTEL=1) or a host
+// @opentelemetry/api tracer registered. Mirrors the kolm.inference gate.
+function _genAiActive() {
+  return STATE.enabled || !!_getRegisteredTracer();
+}
+
+function _scalarAnyValue(value) {
+  if (typeof value === 'number' && Number.isInteger(value)) return { intValue: String(value) };
+  if (typeof value === 'number') return { doubleValue: value };
+  if (typeof value === 'boolean') return { boolValue: value };
+  return { stringValue: String(value) };
+}
+
+// Append a gen_ai.* attribute to a kolm-native span (kv-array) OR an
+// @opentelemetry/api Span (setAttribute). Drops null/undefined values so we
+// never emit an empty attribute. Arrays become an OTLP arrayValue (native) or
+// pass straight to setAttribute (which accepts string[]).
+function _setSpanAttr(span, key, value) {
+  if (!span || value === null || value === undefined) return;
+  if (Array.isArray(span.attributes)) {
+    if (Array.isArray(value)) {
+      span.attributes.push({ key, value: { arrayValue: { values: value.map((v) => _scalarAnyValue(v)) } } });
+    } else {
+      span.attributes.push(kv(key, value));
+    }
+    return;
+  }
+  if (typeof span.setAttribute === 'function') {
+    try { span.setAttribute(key, value); } catch (_e) { /* ignore one bad attr */ }
+  }
+}
+
+// Start a GenAI inference CLIENT span. Returns a kolm-native span object (or
+// an @opentelemetry/api span when a host tracer is registered) or null when
+// telemetry is inactive (honest no-op). span name = `{operation} {model}`.
+function startGenAiSpan({ operation = 'chat', provider, requestModel, maxTokens, temperature, namespace, tenant_id, parent } = {}) {
+  if (!_genAiActive()) return null;
+  let span;
+  try {
+    const providerName = mapProviderToGenAi(provider);
+    const name = requestModel ? `${operation} ${requestModel}` : String(operation);
+    // Prefer a registered host tracer (so the span joins the buyer's trace
+    // context); otherwise use the kolm-native span shape that rides our OTLP
+    // flush loop. Both honor setAttribute / the kv-array contract.
+    const tracer = _getRegisteredTracer();
+    if (tracer && typeof tracer.startSpan === 'function') {
+      // SpanKind.CLIENT === 3 in @opentelemetry/api.
+      span = tracer.startSpan(name, { kind: 3 });
+    } else {
+      span = startSpan(name, {}, parent);
+      span.kind = 3; // CLIENT — honored by tracesPayload.
+    }
+    _setSpanAttr(span, GEN_AI_ATTRS.OPERATION_NAME, operation);
+    _setSpanAttr(span, GEN_AI_ATTRS.PROVIDER_NAME, providerName);
+    // Stamp the raw kolm provider slug when the enum mapping was lossy.
+    if (provider && providerName !== String(provider).trim().toLowerCase()) {
+      _setSpanAttr(span, GEN_AI_ATTRS.PROVIDER_RAW, String(provider));
+    }
+    if (process.env.KOLM_OTEL_SEMCONV_COMPAT === '1') {
+      // Deprecated dual-emit — same value as provider.name.
+      _setSpanAttr(span, GEN_AI_ATTRS.SYSTEM, providerName);
+    }
+    if (requestModel) _setSpanAttr(span, GEN_AI_ATTRS.REQUEST_MODEL, String(requestModel));
+    if (Number.isFinite(Number(maxTokens))) _setSpanAttr(span, GEN_AI_ATTRS.REQUEST_MAX_TOKENS, Math.trunc(Number(maxTokens)));
+    if (Number.isFinite(Number(temperature))) _setSpanAttr(span, GEN_AI_ATTRS.REQUEST_TEMPERATURE, Number(temperature));
+    // kolm enrichment — namespace is public-safe; tenant goes through the
+    // W733 hash path so the raw id never crosses the OTel boundary.
+    if (typeof namespace === 'string' && namespace) _setSpanAttr(span, KOLM_OTEL_ATTRS.NAMESPACE, namespace);
+    if (tenant_id) {
+      const hashed = _hashTenant(tenant_id);
+      if (hashed) _setSpanAttr(span, KOLM_OTEL_ATTRS.TENANT_ID_HASH, hashed);
+    }
+    // Stash provider for finish-time finish-reason mapping + metric attrs.
+    if (span && typeof span === 'object') {
+      span.__genai = { provider, providerName, requestModel, operation, startMs: Date.now() };
+    }
+  } catch (_e) {
+    return span || null;
+  }
+  return span || null;
+}
+
+// Finish a GenAI span: set response attrs, set status + error.type on
+// failure, emit opt-in post-redaction content, end the span, and emit the
+// three GenAI client metrics in one place. Honest no-op when span is null.
+function finishGenAiSpan(span, {
+  responseModel, responseId, finishReasons,
+  inputTokens, outputTokens, durationMs, ttftMs,
+  status = 'ok', errorType, serverAddress, serverPort,
+  outputContent, inputContent,
+} = {}) {
+  // Even with a null span (telemetry inactive at start) we keep the metric
+  // emit gated below — metrics are also a hard no-op when inactive.
+  const meta = (span && span.__genai) || {};
+  const provider = meta.provider;
+  const providerName = meta.providerName || mapProviderToGenAi(provider);
+  const requestModel = meta.requestModel;
+  const operation = meta.operation || 'chat';
+  const isError = status === 'error' || (errorType !== undefined && errorType !== null);
+
+  if (span) {
+    try {
+      if (responseModel) _setSpanAttr(span, GEN_AI_ATTRS.RESPONSE_MODEL, String(responseModel));
+      if (responseId) _setSpanAttr(span, GEN_AI_ATTRS.RESPONSE_ID, String(responseId));
+      let reasons = finishReasons;
+      if (!Array.isArray(reasons)) reasons = (reasons === undefined || reasons === null) ? [] : [reasons];
+      reasons = reasons.map((r) => mapFinishReason(provider, r)).filter((r) => r !== undefined);
+      if (reasons.length) _setSpanAttr(span, GEN_AI_ATTRS.FINISH_REASONS, reasons);
+      if (Number.isFinite(Number(inputTokens))) _setSpanAttr(span, GEN_AI_ATTRS.USAGE_INPUT_TOKENS, Math.trunc(Number(inputTokens)));
+      if (Number.isFinite(Number(outputTokens))) _setSpanAttr(span, GEN_AI_ATTRS.USAGE_OUTPUT_TOKENS, Math.trunc(Number(outputTokens)));
+      if (Number.isFinite(Number(ttftMs))) _setSpanAttr(span, GEN_AI_ATTRS.TIME_TO_FIRST_CHUNK, Number(ttftMs) / 1000);
+      if (serverAddress) _setSpanAttr(span, GEN_AI_ATTRS.SERVER_ADDRESS, String(serverAddress));
+      if (Number.isFinite(Number(serverPort))) _setSpanAttr(span, GEN_AI_ATTRS.SERVER_PORT, Math.trunc(Number(serverPort)));
+      if (isError && errorType !== undefined && errorType !== null) {
+        _setSpanAttr(span, GEN_AI_ATTRS.ERROR_TYPE, String(errorType));
+      }
+      // Opt-in content (post-redaction text ONLY). Caller is responsible for
+      // passing already-redacted strings — this is the privacy chokepoint.
+      if (process.env.KOLM_OTEL_CAPTURE_CONTENT === '1') {
+        if (typeof inputContent === 'string' && inputContent) _setSpanAttr(span, GEN_AI_ATTRS.INPUT_MESSAGES, inputContent);
+        if (typeof outputContent === 'string' && outputContent) _setSpanAttr(span, GEN_AI_ATTRS.OUTPUT_MESSAGES, outputContent);
+      }
+      // End the span via the right path.
+      if (Array.isArray(span.attributes)) {
+        endSpan(span, { status: isError ? 'error' : 'ok', message: isError ? String(errorType || 'error') : undefined });
+      } else if (typeof span.end === 'function') {
+        if (typeof span.setStatus === 'function') {
+          // OTel api StatusCode: 1=OK, 2=ERROR.
+          try { span.setStatus({ code: isError ? 2 : 1 }); } catch (_e) { /* ignore */ }
+        }
+        span.end();
+      }
+    } catch (_e) { /* never throw on the hot path */ }
+  }
+
+  // Emit the three GenAI client metrics (each is a hard no-op when inactive).
+  try {
+    genAiTokenUsage({ provider, requestModel, responseModel, operation, inputTokens, outputTokens, serverAddress, serverPort });
+    genAiOperationDuration({ provider, requestModel, responseModel, operation, durationMs, errorType: isError ? errorType : undefined, serverAddress, serverPort });
+    if (Number.isFinite(Number(ttftMs))) {
+      genAiTimeToFirstToken({ provider, requestModel, responseModel, operation, ttftMs, serverAddress, serverPort });
+    }
+  } catch (_e) { /* metrics are best-effort */ }
+}
+
+// Generic explicit-bucket histogram instrument. The hand-rolled exporter only
+// had gauge (metric()) + monotonic sum (counter()); GenAI metrics are
+// explicit-bucket histograms. Queues an OTLP histogram dataPoint with
+// explicitBounds + bucketCounts + count + sum. Hard no-op when inactive.
+function histogram(name, value, { unit = '', bounds = [], attrs = {}, description = '' } = {}) {
+  if (!STATE.enabled) return;
+  const v = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(v)) return;
+  const explicitBounds = Array.isArray(bounds) ? bounds.map((b) => Number(b)) : [];
+  // bucketCounts length MUST be explicitBounds.length + 1 (OTLP histogram
+  // contract: N boundaries => N+1 buckets including the +Inf overflow bucket).
+  const bucketCounts = new Array(explicitBounds.length + 1).fill(0);
+  let placed = false;
+  for (let i = 0; i < explicitBounds.length; i++) {
+    if (v <= explicitBounds[i]) { bucketCounts[i] = 1; placed = true; break; }
+  }
+  if (!placed) bucketCounts[bucketCounts.length - 1] = 1; // +Inf overflow bucket
+  STATE.metricQueue.push({
+    name,
+    description: description || '',
+    unit: unit || '',
+    histogram: {
+      aggregationTemporality: 2, // CUMULATIVE
+      dataPoints: [{
+        startTimeUnixNano: nowNs(),
+        timeUnixNano: nowNs(),
+        count: '1',
+        sum: v,
+        min: v,
+        max: v,
+        bucketCounts: bucketCounts.map((c) => String(c)),
+        explicitBounds,
+        attributes: attrsToKv(attrs || {}),
+      }],
+    },
+  });
+  trimQueue();
+}
+
+// gen_ai.client.token.usage — Histogram, unit {token}. Emitted TWICE per call
+// (gen_ai.token.type=input value=input_tokens; type=output value=output_tokens).
+function genAiTokenUsage({ provider, requestModel, responseModel, operation = 'chat', inputTokens, outputTokens, serverAddress, serverPort } = {}) {
+  if (!STATE.enabled) return;
+  const base = _genAiMetricAttrs({ provider, requestModel, responseModel, operation, serverAddress, serverPort });
+  if (Number.isFinite(Number(inputTokens))) {
+    const a = Object.assign({}, base); a[GEN_AI_ATTRS.TOKEN_TYPE] = 'input';
+    histogram(GEN_AI_METRICS.TOKEN_USAGE, Math.trunc(Number(inputTokens)), { unit: '{token}', bounds: GENAI_TOKEN_BUCKETS, attrs: a, description: 'Number of input tokens used' });
+  }
+  if (Number.isFinite(Number(outputTokens))) {
+    const a = Object.assign({}, base); a[GEN_AI_ATTRS.TOKEN_TYPE] = 'output';
+    histogram(GEN_AI_METRICS.TOKEN_USAGE, Math.trunc(Number(outputTokens)), { unit: '{token}', bounds: GENAI_TOKEN_BUCKETS, attrs: a, description: 'Number of output tokens used' });
+  }
+}
+
+// gen_ai.client.operation.duration — Histogram, unit s (SECONDS not ms).
+// value = upstream call seconds (durationMs/1000), error.type when failed.
+function genAiOperationDuration({ provider, requestModel, responseModel, operation = 'chat', durationMs, errorType, serverAddress, serverPort } = {}) {
+  if (!STATE.enabled) return;
+  if (!Number.isFinite(Number(durationMs))) return;
+  const a = _genAiMetricAttrs({ provider, requestModel, responseModel, operation, serverAddress, serverPort });
+  if (errorType !== undefined && errorType !== null) a[GEN_AI_ATTRS.ERROR_TYPE] = String(errorType);
+  histogram(GEN_AI_METRICS.OPERATION_DURATION, Number(durationMs) / 1000, { unit: 's', bounds: GENAI_DURATION_BUCKETS, attrs: a, description: 'GenAI operation duration' });
+}
+
+// gen_ai.server.time_to_first_token — Histogram, unit s. SSE first-chunk delta
+// (synthetic until true upstream streaming lands).
+function genAiTimeToFirstToken({ provider, requestModel, responseModel, operation = 'chat', ttftMs, serverAddress, serverPort } = {}) {
+  if (!STATE.enabled) return;
+  if (!Number.isFinite(Number(ttftMs))) return;
+  const a = _genAiMetricAttrs({ provider, requestModel, responseModel, operation, serverAddress, serverPort });
+  histogram(GEN_AI_METRICS.TIME_TO_FIRST_TOKEN, Number(ttftMs) / 1000, { unit: 's', bounds: GENAI_TTFT_BUCKETS, attrs: a, description: 'Time to first token in seconds' });
+}
+
+// Shared metric attr set: REQUIRED {operation.name, provider.name} +
+// RECOMMENDED {request.model, response.model, server.address, server.port}.
+function _genAiMetricAttrs({ provider, requestModel, responseModel, operation = 'chat', serverAddress, serverPort }) {
+  const a = {};
+  a[GEN_AI_ATTRS.OPERATION_NAME] = operation;
+  a[GEN_AI_ATTRS.PROVIDER_NAME] = mapProviderToGenAi(provider);
+  if (requestModel) a[GEN_AI_ATTRS.REQUEST_MODEL] = String(requestModel);
+  if (responseModel) a[GEN_AI_ATTRS.RESPONSE_MODEL] = String(responseModel);
+  if (serverAddress) a[GEN_AI_ATTRS.SERVER_ADDRESS] = String(serverAddress);
+  if (Number.isFinite(Number(serverPort))) a[GEN_AI_ATTRS.SERVER_PORT] = Math.trunc(Number(serverPort));
+  return a;
+}
+
+function listGenAiAttrs() { return Object.assign({}, GEN_AI_ATTRS); }
+function listGenAiMetrics() { return Object.assign({}, GEN_AI_METRICS); }
+function getGenAiStatus() {
+  return {
+    ok: true,
+    version: OTEL_GENAI_VERSION,
+    active: _genAiActive(),
+    native_enabled: STATE.enabled,
+    tracer_registered: !!_getRegisteredTracer(),
+    attrs: Object.keys(GEN_AI_ATTRS).length,
+    metrics: Object.values(GEN_AI_METRICS),
+  };
+}
+
 export {
   init,
   startSpan,
@@ -604,4 +1030,23 @@ export {
   listW733Attrs,
   listW733SpanNames,
   _probeOtelApi,
+  // W921 — OTel GenAI semantic conventions (gen_ai.*) surface.
+  OTEL_GENAI_VERSION,
+  GEN_AI_ATTRS,
+  GEN_AI_METRICS,
+  GENAI_TOKEN_BUCKETS,
+  GENAI_DURATION_BUCKETS,
+  GENAI_TTFT_BUCKETS,
+  mapProviderToGenAi,
+  mapFinishReason,
+  extractFinishReasons,
+  startGenAiSpan,
+  finishGenAiSpan,
+  histogram,
+  genAiTokenUsage,
+  genAiOperationDuration,
+  genAiTimeToFirstToken,
+  listGenAiAttrs,
+  listGenAiMetrics,
+  getGenAiStatus,
 };
