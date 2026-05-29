@@ -26,6 +26,23 @@
 // fields (backend_used, n_clusters, minhash, selection) stay null/'none' unless
 // the corresponding opt is set.
 //
+// W921 frontier upgrades (ALL opt-in; default behavior unchanged):
+//   - opts.qualityClassifier — replace the quality stage's output-only heuristic
+//     with the learned per-pair quality CLASSIFIER (src/data-quality-classifier.js,
+//     FineWeb-Edu/DCLM/AlpaGasus lineage). opts.quality_mode 'percentile' (top
+//     keep_fraction, DCLM-style) | 'absolute'. Surfaces report.quality + stamps
+//     p.quality_score. Pure JS.
+//   - opts.semanticCluster — replace the 3-gram-prefix bucket cluster stage with
+//     embedding k-means + c-TF-IDF topic auto-labeling (src/data-cluster-label.js).
+//     Surfaces report.topics (named, human-readable slugs). Pure JS.
+//   - opts.detectErrors — NEW 'error' sub-stage (after cluster) running Confident-
+//     Learning label-error detection (src/data-label-errors.js). FLAGS by default
+//     (stamps provenance.error_flag; routes to the human review queue); opt-in
+//     errorAction:'filter' drops the flagged set. Surfaces report.label_errors.
+//   - opts.diversitySelect / select_method 'k-center'|'facility-location'|'badge'
+//     — route the SELECT stage through src/data-diversity-select.js instead of the
+//     default data-select reprFilter/coverage path.
+//
 // Caveats:
 //   - dedup quality is only as good as the embedder the python script can
 //     load; with the `ngram` backend it is coarse-but-deterministic, and when
@@ -45,6 +62,14 @@ import * as eventStore from './event-store.js';
 import activeLearning from './active-learning.js';
 import { minhashPredup } from './minhash-dedup.js';
 import { selectInformativeSubset } from './data-select.js';
+// ── opt-in W921 frontier curation modules (additive; default OFF) ─────────────
+import { selectDiverse as _selectDiverse } from './data-diversity-select.js';
+import { clusterAndLabel as _clusterAndLabel } from './data-cluster-label.js';
+import {
+  scoreQuality as _scoreQualityLearned,
+  applyThreshold as _applyQualityThreshold,
+} from './data-quality-classifier.js';
+import { detectLabelErrors as _detectLabelErrors, routeErrorsToReview as _routeErrorsToReview } from './data-label-errors.js';
 
 export const CURATE_VERSION = 'curate-v1';
 
@@ -157,6 +182,22 @@ export function scoreCandidateLocal(output, seed) {
 
   const clamped = Math.max(0, Math.min(1, score));
   return { score: clamped, components };
+}
+
+// The original output-only heuristic quality gate, factored out so the opt-in
+// learned-classifier path and the default path share one definition (and so the
+// learned path can degrade back to it without duplicating the loop).
+function _runHeuristicQuality(work, o, report) {
+  const minQ = Number.isFinite(Number(o.minQuality)) ? Number(o.minQuality) : 0.35;
+  const survivors = [];
+  for (const p of work) {
+    let score = 0;
+    try { score = Number(scoreCandidateLocal(_pairOutput(p)).score) || 0; }
+    catch (_) { score = 0; } // a scoring failure drops the pair conservatively
+    if (score < minQ) report.quality_filtered += 1;
+    else survivors.push(p);
+  }
+  return survivors;
 }
 
 function _bucketKeyFor(pair) {
@@ -349,6 +390,28 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       select_strategy: 'diversity', // 'diversity' (self-coverage) | 'dsir' (target-matched)
       diversity_tau: 0.9,
       target_items: null, // reference distribution for the 'dsir' strategy
+      // ── W921 frontier opt-ins (default OFF → default curate path unchanged) ──
+      // qualityClassifier: use the learned per-pair quality classifier in stage a.
+      qualityClassifier: false,
+      quality_mode: 'percentile', // 'percentile' (DCLM top keep_fraction) | 'absolute'
+      keep_fraction: 0.9,         // percentile retain ratio
+      quality_model: null,        // optional fitted model {w,feature_names,...}
+      // semanticCluster: replace stage c with embedding k-means + c-TF-IDF labels.
+      semanticCluster: false,
+      n_clusters: null,           // override auto-k
+      cluster_labeler: null,      // optional injectable teacher labeler fn
+      // detectErrors: run the Confident-Learning label-error sub-stage after cluster.
+      detectErrors: false,
+      errorMethod: 'cl',          // 'cl' (offline) | 'clear' (teacher; needs errorSample)
+      errorAction: 'review',      // 'review' (flag+enqueue) | 'filter' (drop flagged)
+      errorThreshold: null,       // CLEAR gamma override (null => median)
+      errorSample: null,          // CLEAR teacher sampler (input,n)=>Promise<string[]>
+      errorReflect: null,         // CLEAR self-reflection grader
+      routeErrors: true,          // enqueue flagged pairs to the human review queue
+      // diversitySelect: route the SELECT stage through the embedding-native
+      // diversity algorithms instead of the default data-select path.
+      diversitySelect: false,
+      select_method: 'k-center',  // 'k-center' | 'facility-location' | 'badge'
     }, opts || {});
 
     const inFile = in_path || path.join(_nsDir(ns), 'raw-pairs.jsonl');
@@ -376,20 +439,57 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       minhash: null,
       // selection: the SELECT-stage report block (null if no target_size).
       selection: null,
+      // ── W921 opt-in report blocks (null/absent unless the new stages run) ──
+      // quality: learned-classifier report {backend, mode, threshold_used, kept,
+      //   dropped, score_p50, score_p10} (null when qualityClassifier off).
+      quality: null,
+      // topics: named c-TF-IDF topics from the semantic cluster stage (null off).
+      topics: null,
+      // label_errors: the Confident-Learning label-error report (null when off).
+      label_errors: null,
     };
 
     // a. quality — drop low-scoring teacher outputs.
-    if (o.quality) {
-      const minQ = Number.isFinite(Number(o.minQuality)) ? Number(o.minQuality) : 0.35;
-      const survivors = [];
-      for (const p of work) {
-        let score = 0;
-        try { score = Number(scoreCandidateLocal(_pairOutput(p)).score) || 0; }
-        catch (_) { score = 0; } // a scoring failure drops the pair conservatively
-        if (score < minQ) report.quality_filtered += 1;
-        else survivors.push(p);
+    //    DEFAULT: the output-only scoreCandidateLocal heuristic (back-compat).
+    //    OPT-IN (o.qualityClassifier): the learned per-pair quality CLASSIFIER
+    //    (FineWeb-Edu/DCLM/AlpaGasus lineage) with a percentile-or-absolute
+    //    threshold. Stamps p.quality_score; surfaces report.quality. Never throws
+    //    — any failure degrades to the heuristic path.
+    if (o.quality && o.qualityClassifier) {
+      try {
+        const scored = _scoreQualityLearned({ rows: work, backend: 'auto', model: o.quality_model || null });
+        const scores = (scored && Array.isArray(scored.scores)) ? scored.scores : work.map(() => 0.5);
+        const thr = _applyQualityThreshold(scores, {
+          mode: o.quality_mode === 'absolute' ? 'absolute' : 'percentile',
+          keep_fraction: Number.isFinite(Number(o.keep_fraction)) ? Number(o.keep_fraction) : 0.9,
+          minQuality: Number.isFinite(Number(o.minQuality)) ? Number(o.minQuality) : 0.35,
+        });
+        const keptSet = new Set(thr.kept_indices);
+        const survivors = [];
+        for (let i = 0; i < work.length; i++) {
+          work[i].quality_score = scores[i];
+          if (keptSet.has(i)) survivors.push(work[i]);
+          else report.quality_filtered += 1;
+        }
+        const sorted = scores.slice().sort((a, b) => a - b);
+        const pct = (q) => (sorted.length ? sorted[Math.min(sorted.length - 1, Math.floor(q * sorted.length))] : 0);
+        report.quality = {
+          backend: scored.backend || 'learned-default',
+          mode: thr.mode,
+          threshold_used: thr.threshold_used,
+          kept: survivors.length,
+          dropped: work.length - survivors.length,
+          score_p50: Number(pct(0.5).toFixed(6)),
+          score_p10: Number(pct(0.1).toFixed(6)),
+        };
+        work = survivors;
+      } catch (e) {
+        // degrade to the heuristic path; record why the learned path didn't run.
+        report.quality = { skipped: 'error:' + String((e && e.message) || e) };
+        work = _runHeuristicQuality(work, o, report);
       }
-      work = survivors;
+    } else if (o.quality) {
+      work = _runHeuristicQuality(work, o, report);
     }
 
     // b0. minhash-predup — OPT-IN Node-native MinHash/LSH near-dup pre-pass
@@ -435,7 +535,41 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
     }
 
     // c. cluster — tag each survivor + build coverage histogram.
-    if (o.cluster) {
+    //    DEFAULT: the 3-gram-prefix hash bucket (back-compat).
+    //    OPT-IN (o.semanticCluster): embedding k-means + c-TF-IDF topic auto-
+    //    labeling (named, human-readable cluster_id slugs + report.topics).
+    //    Degrades to the bucket path on any failure — never fails curate.
+    if (o.cluster && o.semanticCluster) {
+      let labeled = null;
+      try {
+        labeled = await _clusterAndLabel({
+          pairs: work,
+          n_clusters: o.n_clusters || null,
+          labeler: typeof o.cluster_labeler === 'function' ? o.cluster_labeler : null,
+        });
+      } catch (e) {
+        labeled = { ok: false, error: String((e && e.message) || e) };
+      }
+      if (labeled && labeled.ok && Array.isArray(labeled.assigned) && labeled.assigned.length === work.length) {
+        for (let i = 0; i < work.length; i++) {
+          work[i].cluster_id = labeled.assigned[i].cluster_id;
+          work[i].cluster_idx = labeled.assigned[i].cluster_idx;
+        }
+        report.coverage = labeled.coverage || {};
+        report.clusters = Object.keys(report.coverage).length;
+        report.topics = labeled.topics || [];
+        report.cluster_method = labeled.method;
+        report.k_selected = labeled.k;
+        report.k_method = labeled.k_method;
+      } else {
+        // degrade to the 3-gram bucket path.
+        const coverage = {};
+        for (const p of work) { const cid = _bucketKeyFor(p); p.cluster_id = cid; coverage[cid] = (coverage[cid] || 0) + 1; }
+        report.coverage = coverage;
+        report.clusters = Object.keys(coverage).length;
+        report.cluster_method = 'fallback:3gram';
+      }
+    } else if (o.cluster) {
       const coverage = {};
       for (const p of work) {
         const cid = _bucketKeyFor(p);
@@ -444,6 +578,68 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       }
       report.coverage = coverage;
       report.clusters = Object.keys(coverage).length;
+    }
+
+    // c2. error — OPT-IN Confident-Learning label-error detection (runs AFTER
+    //     cluster so it has cluster_ids to compute the input->output topic-
+    //     agreement confident-joint). FLAGS by default (stamps
+    //     provenance.error_flag + routes to the human review queue);
+    //     errorAction:'filter' drops the flagged set. Never throws.
+    if (o.detectErrors && work.length > 0) {
+      try {
+        const led = await _detectLabelErrors({
+          pairs: work,
+          clusterField: 'cluster_id',
+          method: o.errorMethod === 'clear' ? 'clear' : 'cl',
+          action: o.errorAction || 'review',
+          threshold: o.errorThreshold,
+          sample: typeof o.errorSample === 'function' ? o.errorSample : null,
+          reflect: typeof o.errorReflect === 'function' ? o.errorReflect : null,
+          tenant: tenantId,
+          namespace: ns,
+        });
+        if (led && led.ok) {
+          report.label_errors = {
+            flagged: led.flagged,
+            by_reason: led.by_reason,
+            backend: led.backend,
+            off_diagonal_rate: led.off_diagonal_rate,
+            median_confidence: led.median_confidence,
+            sample: led.sample,
+            action: o.errorAction || 'review',
+            routed_to_review: 0,
+          };
+          const flaggedEntries = Array.isArray(led.flagged_entries) ? led.flagged_entries : [];
+          // errorAction:'filter' — drop the flagged set (recorded).
+          if ((o.errorAction || 'review') === 'filter' && flaggedEntries.length) {
+            const drop = new Set(flaggedEntries.map((e) => e.index));
+            const survivors = [];
+            for (let i = 0; i < work.length; i++) if (!drop.has(i)) survivors.push(work[i]);
+            report.label_errors.filtered = work.length - survivors.length;
+            work = survivors;
+          } else if (o.routeErrors && flaggedEntries.length) {
+            // 'review' (default) — enqueue flagged pairs to the human review queue.
+            try {
+              const routed = await _routeErrorsToReview({
+                flaggedPairs: flaggedEntries.map((e) => ({
+                  pair: e.pair,
+                  method: e.method,
+                  score: e.score,
+                  reason: e.reason,
+                })),
+                tenant: tenantId,
+                namespace: ns,
+                method: o.errorMethod === 'clear' ? 'clear' : 'cl',
+              });
+              report.label_errors.routed_to_review = routed.enqueued || 0;
+            } catch (_) { /* routing is best-effort */ }
+          }
+        } else {
+          report.label_errors = { skipped: 'detect_failed', backend: led && led.backend };
+        }
+      } catch (e) {
+        report.label_errors = { skipped: 'error:' + String((e && e.message) || e) };
+      }
     }
 
     // d. cot — drop chain-of-thought leakage.
@@ -475,28 +671,51 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
     const targetSize = Number(o.target_size);
     if (Number.isFinite(targetSize) && targetSize > 0 && work.length > 0) {
       try {
-        const strategy = o.select_strategy === 'dsir' ? 'dsir' : 'diversity';
-        const selOpts = {
-          diversity_tau: Number.isFinite(Number(o.diversity_tau)) ? Number(o.diversity_tau) : 0.9,
-        };
-        if (strategy === 'dsir' && Array.isArray(o.target_items) && o.target_items.length) {
-          selOpts.target_items = o.target_items;
-        }
-        const sel = selectInformativeSubset(work, targetSize, selOpts);
-        if (sel && Array.isArray(sel.kept)) {
-          const beforeSel = work.length;
-          work = sel.kept;
-          report.selection = {
-            strategy,
-            target_size: targetSize,
-            diversity_tau: selOpts.diversity_tau,
-            n_in: beforeSel,
-            n_selected: work.length,
-            dropped: Math.max(0, beforeSel - work.length),
-            coverage_radius: sel.coverage_radius,
-            basis: sel.basis,
-            version: sel.version,
+        if (o.diversitySelect) {
+          // OPT-IN: embedding-native diversity algorithm (k-center / facility-
+          // location / badge) from src/data-diversity-select.js.
+          const method = ['k-center', 'facility-location', 'badge'].includes(o.select_method)
+            ? o.select_method : 'k-center';
+          const sel = _selectDiverse({ items: work, target_size: targetSize, method });
+          if (sel && sel.ok && Array.isArray(sel.kept)) {
+            const beforeSel = work.length;
+            work = sel.kept;
+            report.selection = {
+              strategy: 'diversity-' + method,
+              target_size: targetSize,
+              n_in: beforeSel,
+              n_selected: work.length,
+              dropped: Math.max(0, beforeSel - work.length),
+              coverage_radius: sel.coverage_radius,
+              objective: sel.objective,
+              basis: method,
+              version: sel.version,
+            };
+          }
+        } else {
+          const strategy = o.select_strategy === 'dsir' ? 'dsir' : 'diversity';
+          const selOpts = {
+            diversity_tau: Number.isFinite(Number(o.diversity_tau)) ? Number(o.diversity_tau) : 0.9,
           };
+          if (strategy === 'dsir' && Array.isArray(o.target_items) && o.target_items.length) {
+            selOpts.target_items = o.target_items;
+          }
+          const sel = selectInformativeSubset(work, targetSize, selOpts);
+          if (sel && Array.isArray(sel.kept)) {
+            const beforeSel = work.length;
+            work = sel.kept;
+            report.selection = {
+              strategy,
+              target_size: targetSize,
+              diversity_tau: selOpts.diversity_tau,
+              n_in: beforeSel,
+              n_selected: work.length,
+              dropped: Math.max(0, beforeSel - work.length),
+              coverage_radius: sel.coverage_radius,
+              basis: sel.basis,
+              version: sel.version,
+            };
+          }
         }
       } catch (e) {
         // selection is best-effort — never fails curate; record why it didn't run.

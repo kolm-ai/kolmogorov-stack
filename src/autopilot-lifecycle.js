@@ -70,6 +70,12 @@ const GRACE_MS = 48 * 60 * 60 * 1000; // 48 hours
 // quality-predictor.js). Used by the conformal-lower-bound advisory below.
 const SHIP_GATE = 0.85;
 
+// W921 — strategy-feature priors live in the cost-optimizer (re-exported here as
+// STRATEGIES). The bandit advisory warms each arm's prior mean from the
+// cost-optimizer's per-strategy predicted_delta_k (the exact number the greedy
+// path uses today), so at zero observed outcomes the bandit ranking matches the
+// greedy ranking — no day-0 regression.
+
 function _ns(namespace) {
   return String(namespace || 'default').slice(0, 128);
 }
@@ -202,6 +208,117 @@ function _eventTs(row) {
   } catch (_) { /* fall through to created_at */ }
   const c = Date.parse((row && row.created_at) || '');
   return Number.isFinite(c) ? c : 0;
+}
+
+// ---------------------------------------------------------------------------
+// W921 — bandit strategy-ranking advisory (ADDITIVE, OPT-IN).
+//
+// When opts.use_bandit === true the autopilot consults the budgeted,
+// non-stationary Thompson-sampling bandit (src/bandit-thompson.js) as a SECOND
+// opinion alongside the cost-optimizer's greedy ranking. It is strictly
+// advisory: the default propose-only gate and the simulator input
+// (plan.recommended) are UNCHANGED. The bandit's pick is surfaced as
+// bandit.recommended so an operator (or a future opt-in flag) can act on it;
+// it never overrides the greedy recommended unless opts.bandit_decides === true.
+//
+// Warm-start: each arm's prior mean = the cost-optimizer's predicted_delta_k for
+// that strategy, so n=0 behavior matches greedy (no day-0 regression). The bandit
+// also writes a pending CHOICE row tying the chosen strategy to the base K so the
+// OBSERVE leg (recordStrategyOutcome) can fold the realized ΔK back next tick.
+//
+// Deterministic: opts.rng (a seeded function) flows straight through to the
+// sampler, so a test can pin the draw. Any import/throw falls back to a null
+// advisory — the autopilot never regresses because the bandit is unavailable.
+// ---------------------------------------------------------------------------
+async function _banditAdvisory({ tenant, namespace, opts, plan, baseK, baseFeatures }) {
+  if (!opts || opts.use_bandit !== true) {
+    return { applicable: false, reason: 'not_enabled', recommended: null };
+  }
+  const ranked = (plan && plan.ok === true && Array.isArray(plan.ranked)) ? plan.ranked : null;
+  if (!ranked || ranked.length === 0) {
+    return { applicable: false, reason: 'no_cost_plan', recommended: null };
+  }
+  try {
+    const bandit = await import('./bandit-thompson.js');
+    // Build arms warm-started from the greedy plan's per-strategy ΔK + cost.
+    const arms = ranked.map((r) => ({
+      strategy: r.strategy,
+      prior_mu: Number.isFinite(Number(r.predicted_delta_k)) ? Number(r.predicted_delta_k) : 0,
+      est_cost_usd: Number.isFinite(Number(r.est_cost_usd)) ? Number(r.est_cost_usd) : 0,
+      fits_budget: r.fits_budget === undefined ? true : !!r.fits_budget,
+    }));
+    const gamma = Number.isFinite(Number(opts.bandit_gamma)) ? Number(opts.bandit_gamma) : bandit.DEFAULT_GAMMA;
+    const res = await bandit.rankByThompson({
+      tenant, namespace, arms, gamma, rng: opts.rng,
+    });
+    if (!res || res.ok !== true) {
+      return { applicable: true, error: (res && res.error) || 'bandit_failed', recommended: null };
+    }
+
+    // Write a pending CHOICE row for the bandit's pick so the loop can close.
+    let choice = null;
+    const recommended = res.recommended || null;
+    if (recommended) {
+      const picked = res.ranked.find((x) => x.strategy === recommended) || null;
+      choice = await bandit.recordStrategyChoice({
+        tenant, namespace, strategy: recommended,
+        base_kscore: Number.isFinite(Number(baseK)) ? Number(baseK) : null,
+        base_features: (baseFeatures && typeof baseFeatures === 'object') ? baseFeatures : null,
+        est_cost_usd: picked ? picked.est_cost_usd : null,
+        sampled_ratio: picked ? picked.sampled_ratio : null,
+        run_id: opts.run_id || null,
+      });
+    }
+
+    return {
+      applicable: true,
+      method: 'discounted-thompson',
+      gamma: res.gamma,
+      recommended,
+      ranked: res.ranked,
+      choice_id: choice && choice.choice_id,
+      // Whether the bandit pick agrees with the greedy pick (diagnostic).
+      agrees_with_greedy: !!(recommended && plan.recommended && recommended === plan.recommended),
+      version: bandit.STRATEGY_BANDIT_VERSION,
+    };
+  } catch (e) {
+    return { applicable: true, error: String((e && e.message) || e), recommended: null };
+  }
+}
+
+// W921 — OBSERVE leg of the bandit loop. When the bandit is in use AND a fresh
+// REALIZED candidate K is known, fold ΔK = candidate_K - base_K into the
+// discounted posterior so the next tick learns from this round. Best-effort;
+// idempotent on choice_id. Never throws.
+async function _banditObserve({ tenant, namespace, opts, advisory, baseK, candidateK }) {
+  if (!advisory || advisory.applicable !== true || !advisory.recommended) {
+    return { recorded: false, reason: 'no_bandit_choice' };
+  }
+  if (!Number.isFinite(Number(candidateK)) || !Number.isFinite(Number(baseK))) {
+    return { recorded: false, reason: 'no_realized_reward' };
+  }
+  try {
+    const bandit = await import('./bandit-thompson.js');
+    const gamma = Number.isFinite(Number(opts && opts.bandit_gamma)) ? Number(opts.bandit_gamma) : bandit.DEFAULT_GAMMA;
+    const out = await bandit.recordStrategyOutcome({
+      tenant, namespace,
+      strategy: advisory.recommended,
+      realized_delta_k: Number(candidateK) - Number(baseK),
+      candidate_kscore: Number(candidateK),
+      base_kscore: Number(baseK),
+      choice_id: advisory.choice_id || null,
+      run_id: (opts && opts.run_id) || null,
+      gamma,
+    });
+    return {
+      recorded: !!(out && out.ok),
+      strategy: advisory.recommended,
+      posterior: out && out.posterior,
+      idempotent_hit: !!(out && out.idempotent_hit),
+    };
+  } catch (e) {
+    return { recorded: false, error: String((e && e.message) || e) };
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -463,8 +580,24 @@ export async function tickAutopilotFull({ tenant, namespace, opts = {} } = {}) {
     plan = { ok: false, error: String((e && e.message) || e) };
   }
 
+  // 3b. W921 — bandit strategy-ranking advisory (ADDITIVE, opt-in via
+  // opts.use_bandit). Warm-started from the greedy plan so n=0 == greedy. This
+  // is a SECOND opinion only; plan.recommended (the simulator input below) is
+  // unchanged unless opts.bandit_decides === true.
+  const baseK = (plan && plan.ok === true && Number.isFinite(Number(plan.current_k)))
+    ? Number(plan.current_k) : null;
+  const bandit = await _banditAdvisory({
+    tenant, namespace: ns, opts: o, plan, baseK, baseFeatures: features,
+  });
+
   // 4. ④ Compile Simulator — should we compile the recommended move?
-  const recommended = (plan && plan.ok === true && plan.recommended) ? plan.recommended : null;
+  // Default: the greedy cost-optimizer's recommended strategy. The bandit pick
+  // is consulted ONLY when the operator explicitly opts in (bandit_decides), and
+  // even then we never recommend a move the bandit's advisory could not produce.
+  const greedyRecommended = (plan && plan.ok === true && plan.recommended) ? plan.recommended : null;
+  const recommended = (o.use_bandit === true && o.bandit_decides === true && bandit && bandit.recommended)
+    ? bandit.recommended
+    : greedyRecommended;
   const proposedDelta = (recommended && STRATEGIES[recommended] && STRATEGIES[recommended].delta) || {};
   let simulate;
   try {
@@ -527,6 +660,24 @@ export async function tickAutopilotFull({ tenant, namespace, opts = {} } = {}) {
     }
   }
 
+  // 8b. W921 — bandit OBSERVE leg. When the bandit is in use AND a REALIZED
+  // candidate K is supplied (opts.candidate_kscore — the realized post-distill K,
+  // NOT the simulator's predicted K), fold ΔK = candidate_K - base_K into the
+  // discounted posterior so the next tick learns which strategy actually paid
+  // off. Additive + best-effort; the loop closes only when the caller hands us a
+  // realized reward. Absent that, this is a no-op.
+  let bandit_observe = null;
+  if (o.use_bandit === true && bandit && bandit.applicable === true) {
+    const realizedK = Number.isFinite(Number(o.candidate_kscore)) ? Number(o.candidate_kscore) : null;
+    if (realizedK != null && baseK != null) {
+      bandit_observe = await _banditObserve({
+        tenant, namespace: ns, opts: o, advisory: bandit, baseK, candidateK: realizedK,
+      });
+    } else {
+      bandit_observe = { recorded: false, reason: 'no_realized_candidate_k' };
+    }
+  }
+
   // Optional weekly digest row (email cron consumes provider kolm_autopilot_digest).
   if (o.digest === true) {
     try {
@@ -557,6 +708,9 @@ export async function tickAutopilotFull({ tenant, namespace, opts = {} } = {}) {
     failure,
     deploy_decision,
     kscore_recorded,
+    // W921 — additive bandit advisory + OBSERVE result (null unless opts.use_bandit).
+    bandit,
+    bandit_observe,
   };
 }
 
@@ -572,6 +726,9 @@ export const __internals = Object.freeze({
   _sequentialAdvisory,
   _conformalAdvisory,
   SHIP_GATE,
+  // W921 additive bandit advisory + OBSERVE leg.
+  _banditAdvisory,
+  _banditObserve,
 });
 
 export default {
