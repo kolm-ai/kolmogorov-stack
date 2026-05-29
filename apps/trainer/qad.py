@@ -91,6 +91,13 @@ from typing import Any, Optional
 # succeed because distill.py guards its torch import. The torch-dependent loss
 # *functions* are only CALLED inside the GPU train loop, never at import.
 _DISTILL_IMPORT_ERR: Optional[str] = None
+# When qad.py is run as a script (`python apps/trainer/qad.py`) the repo root is
+# not on sys.path, so `import apps.trainer.distill` fails with ModuleNotFoundError.
+# Add the repo root (parent of apps/) so the absolute import resolves in both the
+# `-m apps.trainer.qad` and bare-script invocations.
+_REPO_ROOT = str(Path(__file__).resolve().parent.parent.parent)
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
 try:
     from apps.trainer.distill import (  # type: ignore
         DistillConfig,
