@@ -1,5 +1,18 @@
 # KOLM W921 — Frontier Review & 10–100x Roadmap
 
+> **EXECUTION STATUS (updated 2026-05-29, same session):**
+> - **NOW-2 (EAGLE serve) + NOW-6 (multi-LoRA serve): ALREADY DONE** — the review analyzed the
+>   pre-fix spec state; the shipped `apps/runtime/serve.py` already uses the modern vLLM
+>   `speculative_config` (`method:'eagle3'`, no fabricated keys, via `eagle3.py`) and wires
+>   `enable_lora`/`max_loras`. Live (the review's "dead wires" are not dead). Needs a vLLM GPU serve to perf-verify.
+> - **NOW-4 (sequential gate → gating): SHIPPED** (`fe155fd1`) — autonomous deploy now requires the
+>   anytime-valid mSPRT/GAVI 'promote' by default when an A/B test is in scope.
+> - **NOW-3 (standards-conformant inference signatures): SHIPPED** (`60435ee5`) — `/.well-known/jwks.json`
+>   (RFC 8037 OKP JWK) + `X-Inference-Signature`/`X-Inference-Key-ID` headers; round-trip-tested.
+> - **Remaining NOW:** NOW-1 (edge students — needs HF model-existence check + a 5090 quantize run);
+>   NOW-5 (WebGPU verified runner — needs browser WebGPU validation). **NEXT/BET are multi-day bets** below.
+
+
 > Chief-architect review, 2026-05-29. Sources are web-verified for the last 2–3 weeks
 > (mid-to-late May 2026); my training cutoff is Jan 2026 so every "newer than Jan 2026"
 > claim below was confirmed by live web search (URLs + dates inline). Where a search
