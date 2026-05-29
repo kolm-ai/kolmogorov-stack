@@ -2382,6 +2382,87 @@ SUBCOMMANDS — RUN TELEMETRY (wave 455)
   Telemetry is recorded automatically by every \`kolm distill --local-worker\` run
   in ~/.kolm/distill-runs/<run_id>/{run-meta.json,progress.jsonl,manifest.json}
   and served via /v1/distill/runs (tenant-scoped).
+
+SUBCOMMANDS — STUDIO ENGINE (wave 921)
+  kolm distill grpo --seeds <jsonl> --student <path> [--reward code_exec,math_checker,...]
+                    [--loss-type grpo|bnpo|dr_grpo] [--num-generations 8]
+                    [--sft-warmup-adapter <dir>] [--max-completion-length 512]
+                    [--namespace ns] [--out <dir>] [--json]
+                                     GRPO / RLVR — verifiable-reward RL on top of
+                                     an SFT student. Reward families: code_exec,
+                                     math_checker, schema_validator, format,
+                                     kolm_verifier.
+  kolm distill grpo doctor           probe the trl GRPO trainer environment.
+  kolm distill preference mine --in <rows.jsonl> --out <pairs.jsonl>
+                    [--format pref|kto] [--min-gap 0.1] [--max-pairs N] [--json]
+                                     mine DPO/KTO preference pairs from council /
+                                     eval disagreement rows.
+  kolm distill preference train --pairs <jsonl> --student <path>
+                    [--objective dpo|simpo|orpo|kto] [--beta 0.1]
+
+LOCAL-WORKER OBJECTIVE + TRAINER VARIANTS (wave 921)
+  --objective seqkd|forward_kl|reverse_kl|jsd|distillm2|gkd
+                       distillation loss. Logit objectives (forward_kl/distillm2/
+                       gkd/...) require teacher logits — pass --teacher-local.
+  --teacher-local      assert the teacher serves logits (local endpoint), which
+                       unlocks the logit-level objectives above.
+  --lora-variant lora|rslora|dora|loraplus|lora-fa
+  --lora-init  default|gaussian|pissa|pissa_niter_16|olora
+  --neftune <alpha>    NEFTune noise alpha (>0 enables).
+  --optim adamw_torch|adamw_8bit|paged_adamw_8bit|galore_adamw|galore_adamw_8bit|galore_adamw_layerwise|galore_adafactor
+  --galore-rank <N> --galore-proj-gap <N>
+                       GaLore low-rank-gradient projection knobs (galore_* optims).
+  --packing            example packing for higher token throughput.
+  Recipe \`train\` blocks carrying these keys are auto-mapped to the same
+  trainer env; explicit flags override the recipe.
+`,
+  gate: `kolm gate - explain the conformal gate decision for an artifact.
+
+USAGE
+  kolm gate explain <artifact.kolm> [--gate 0.85] [--alpha 0.10]
+                                    [--judge-spread <s>] [--n-judges <n>] [--json]
+
+DESCRIPTION
+  Renders the split-conformal gate decision (ship / abstain / reject + the
+  calibrated interval) for an artifact's composite K-score. Reads the artifact
+  manifest only (no network, no auth). When the manifest carries a conformal
+  block the calibrated bounds drive the decision; otherwise it falls back to the
+  legacy scalar gate (composite >= gate => ship).
+
+  abstain and reject are informational. The exit code mirrors the ship gate: a
+  reject decision exits 2 so a CI pipeline can fail closed.
+
+EXAMPLES
+  kolm gate explain ./support.kolm
+  kolm gate explain ./support.kolm --gate 0.90 --json
+  kolm gate explain ./support.kolm --judge-spread 0.18 --n-judges 1
+
+SEE ALSO
+  kolm verify <artifact>.kolm    verify the receipt chain.
+`,
+  data: `kolm data - synthetic-data plan for the AUGMENT stage.
+
+USAGE
+  kolm data synth <magpie|evol|persona-hub|glan|self-instruct>
+                  [--recipe <file>] [--target <N>] [--max-share <0..1>]
+                  [--namespace <ns>] [--json]
+
+DESCRIPTION
+  Plans a synthetic-data cold-start AUGMENT stage. Validates the requested
+  generator against the recipe synth vocabulary and, when --recipe is supplied,
+  validates that recipe's synth section. It then prints a plan envelope.
+
+  This verb does NOT fabricate data: the Python generators run via the distill
+  pipeline (a recipe \`synth\` block), not from this CLI. Synthetic rows are
+  AUGMENT candidates tagged synthesized:true, never labels. Cap the synthetic
+  share with --max-share so real captures dominate. Verify before ship.
+
+EXAMPLES
+  kolm data synth magpie --target 2000 --max-share 0.4
+  kolm data synth evol --recipe ./trinity.json --json
+
+SEE ALSO
+  kolm verify <artifact>.kolm    verify the receipt chain.
 `,
   nl: `kolm nl - natural-language recipe scaffolder. Describe a recipe in
 plain English and get a structured scaffold ready to drop into spec.json +
@@ -9256,6 +9337,18 @@ async function cmdCompile(args) {
           catch (e) { if (process.env.KOLM_DEBUG) console.error('skill emit failed:', e.message); }
         }
         await dispatch('PostCompile', { command: 'compile', cwd: process.cwd(), artifact: r.outPath, sha256: r.sha256, bytes: r.bytes, k_score: r.k_score }, { onResult: printHookResult });
+        // W921 — additive conformal gate_decision in the --json envelope. Only
+        // attached when the compile carries a numeric composite (low-risk: never
+        // mutates an existing field, only adds `gate_decision`). The scalar
+        // fallback decision matches the legacy ships/verdict logic.
+        let _w921GateDecision = null;
+        try {
+          if (r.k_score && typeof r.k_score.composite === 'number') {
+            const { attachGateDecision } = await import('../src/judge-calibration.js');
+            const gateNum = Number.isFinite(Number(gate)) ? Number(gate) : 0.85;
+            _w921GateDecision = attachGateDecision({ composite: r.k_score.composite }, { gate: gateNum }).gate_decision;
+          }
+        } catch { /* additive decoration; never block the envelope */ }
         console.log(JSON.stringify({
           artifact: r.outPath,
           sha256: r.sha256,
@@ -9266,6 +9359,7 @@ async function cmdCompile(args) {
           production_ready: prodVerdict.ok,
           gate_reasons: prodVerdict.reasons,
           gates: prodVerdict.gates,
+          ...(_w921GateDecision ? { gate_decision: _w921GateDecision } : {}),
           mcp_project: mcpProject,
           evals_report: r.evals_report || null,
         }, null, 2));
@@ -18779,11 +18873,53 @@ async function cmdImportChat(args) {
 // W232 — kolm merge <base> <head> [--evaluator <file>] [--output <path>]
 async function cmdMerge(args) {
   if (maybeHelp('merge', args)) return;
-  const positional = args.filter(a => !a.startsWith('--'));
+  // W921 — real N-adapter merge path. Routes through src/model-merge.js
+  // mergeAdapters() (delta-W TIES/DARE/SLERP/SVD in PEFT space) when the
+  // invocation looks like an ADAPTER merge rather than the legacy two-.kolm
+  // recipe merge. Strictly opt-in so existing `kolm merge a.kolm b.kolm` calls
+  // are byte-for-byte unchanged. We compute TRUE positionals first (dropping
+  // both --flags AND each value-taking flag's following token) so a legacy
+  // `kolm merge a.kolm b.kolm --method ties` is NOT mis-detected as a 3-adapter
+  // merge. We take the adapter branch only when NOT --dry-run AND any of:
+  //   - explicit --adapters <d1,d2,...>
+  //   - 3+ TRUE positionals (recipe merge only ever takes 2)
+  //   - a model-merge-only knob is present (--weights / --svd-rank /
+  //     --majority-sign / --density / --eval-holdout)
+  //   - both positionals resolve to directories on disk (adapter dirs, not .kolm)
+  const MERGE_VALUE_FLAGS = new Set([
+    '--method', '--weights', '--density', '--svd-rank', '--majority-sign',
+    '--eval-holdout', '--base', '--base-model', '--out', '--output', '--adapters',
+    '--alpha', '--evaluator', '--project',
+  ]);
+  const positional = [];
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (typeof a === 'string' && a.startsWith('--')) {
+      if (!a.includes('=') && MERGE_VALUE_FLAGS.has(a)) i++;
+      continue;
+    }
+    positional.push(a);
+  }
+  const adaptersFlag = pickFlag(args, '--adapters');
+  const mergeOnlyKnob = adaptersFlag != null
+    || pickFlag(args, '--weights') != null
+    || pickFlag(args, '--svd-rank') != null
+    || pickFlag(args, '--majority-sign') != null
+    || pickFlag(args, '--density') != null
+    || pickFlag(args, '--eval-holdout') != null;
+  const positionalsAreDirs = positional.length >= 2 && positional.every((p) => {
+    try { return fs.existsSync(p) && fs.statSync(p).isDirectory(); } catch { return false; }
+  });
+  const wantAdapterMerge = !args.includes('--dry-run')
+    && (adaptersFlag != null || positional.length >= 3 || mergeOnlyKnob || positionalsAreDirs);
+  if (wantAdapterMerge) {
+    return cmdMergeAdapters(args, { positional, adaptersFlag });
+  }
   const baseArg = positional[0];
   const headArg = positional[1];
   if (!baseArg || !headArg) {
     console.error('usage: kolm merge <base.kolm> <head.kolm> [--method linear|slerp|ties|dare|passthrough] [--alpha 0.5] [--dry-run] [--evaluator <file>] [--output <path>] [--json]');
+    console.error('   or: kolm merge <adapterA> <adapterB> [<adapterC> ...] --method ties|dare_ties|slerp [--weights w1,w2,...] [--density 0.5] [--svd-rank N] [--majority-sign frequency|total] [--out <dir>] [--json]');
     process.exit(EXIT.BAD_ARGS);
   }
   // Resolve both paths against ~/.kolm/artifacts/ so bare basenames work.
@@ -18879,6 +19015,357 @@ async function cmdMerge(args) {
     console.error('merge failed: ' + (e && e.message ? e.message : e));
     process.exit(EXIT.EXECUTION);
   }
+}
+
+// W921 — real N-adapter merge. Delegates the numerical merge to
+// src/model-merge.js mergeAdapters() (delta-W TIES / DARE / SLERP / SVD in PEFT
+// space, via workers/distill/scripts/merge_adapters.py). Durable: writes a plan
+// + lineage record even when torch/peft are absent (trainer_kicked:false). The
+// multi-parent lineage is bound via artifact-lineage setMergeParents when the
+// adapter inputs resolve to .kolm artifact cids.
+async function cmdMergeAdapters(args, { positional, adaptersFlag } = {}) {
+  const wantJson = args.includes('--json');
+  // True positionals: drop both --flags AND the value that follows a
+  // value-taking flag, so `--weights 0.6,0.4` etc. are never mistaken for
+  // adapter paths. (The caller's `positional` is the naive filter; recompute.)
+  const VALUE_FLAGS = new Set([
+    '--method', '--weights', '--density', '--svd-rank', '--majority-sign',
+    '--eval-holdout', '--base', '--base-model', '--out', '--output', '--adapters', '--project',
+  ]);
+  const truePositional = [];
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (typeof a === 'string' && a.startsWith('--')) {
+      // `--flag=value` carries its own value; bare value-flags consume the next token.
+      if (!a.includes('=') && VALUE_FLAGS.has(a)) i++;
+      continue;
+    }
+    truePositional.push(a);
+  }
+  // Adapter list: explicit --adapters d1,d2,... wins; else true positionals.
+  let adapterPaths;
+  if (adaptersFlag != null) {
+    adapterPaths = String(adaptersFlag).split(',').map((s) => s.trim()).filter(Boolean);
+  } else {
+    adapterPaths = truePositional.slice();
+  }
+  if (!adapterPaths || adapterPaths.length < 2) {
+    console.error('usage: kolm merge <adapterA> <adapterB> [<adapterC> ...] [--method ties|dare_ties|slerp|...] [--weights w1,w2,...] [--density 0.5] [--svd-rank N] [--majority-sign frequency|total] [--eval-holdout <file>] [--out <dir>] [--json]');
+    console.error('  need >= 2 adapter directories to merge.');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const mm = await import('../src/model-merge.js');
+  const method = pickFlag(args, '--method') || 'ties';
+  if (!mm.MERGE_METHODS.includes(method)) {
+    console.error(`error: --method must be one of: ${mm.MERGE_METHODS.join(', ')} (got '${method}')`);
+    process.exit(EXIT.BAD_ARGS);
+  }
+  // --weights w1,w2,... (parallel to the adapter list). Omit for uniform.
+  let weights = null;
+  const weightsFlag = pickFlag(args, '--weights');
+  if (weightsFlag != null) {
+    weights = String(weightsFlag).split(',').map((s) => Number(s.trim()));
+    if (weights.some((w) => !Number.isFinite(w))) {
+      console.error(`error: --weights must be comma-separated numbers (got '${weightsFlag}')`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (weights.length !== adapterPaths.length) {
+      console.error(`error: --weights has ${weights.length} entries but ${adapterPaths.length} adapters were given`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+  }
+  const densityFlag = pickFlag(args, '--density');
+  let density = 0.5;
+  if (densityFlag != null) {
+    density = Number(densityFlag);
+    if (!Number.isFinite(density) || density < 0 || density > 1) {
+      console.error(`error: --density must be a fraction in [0, 1] (got '${densityFlag}')`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+  }
+  let svdRank = null;
+  const svdRankFlag = pickFlag(args, '--svd-rank');
+  if (svdRankFlag != null) {
+    svdRank = Number(svdRankFlag);
+    if (!Number.isInteger(svdRank) || svdRank <= 0) {
+      console.error(`error: --svd-rank must be a positive integer (got '${svdRankFlag}')`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+  }
+  const majoritySign = pickFlag(args, '--majority-sign') || 'frequency';
+  if (!['frequency', 'total'].includes(majoritySign)) {
+    console.error(`error: --majority-sign must be one of: frequency, total (got '${majoritySign}')`);
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const evalHoldout = pickFlag(args, '--eval-holdout') || null;
+  const baseModel = pickFlag(args, '--base') || pickFlag(args, '--base-model') || null;
+  const outDir = pickFlag(args, '--out') || pickFlag(args, '--output') || null;
+
+  // Resolve any adapter inputs that are actually .kolm artifacts to their cids
+  // so the lineage record can bind real parent cids (multi-parent DAG). Raw
+  // adapter dirs stay record-only inside mergeAdapters (source_adapter_hashes).
+  let parentCids = null;
+  try {
+    const cids = [];
+    for (const p of adapterPaths) {
+      const resolved = resolveArtifact(p) || p;
+      if (typeof resolved === 'string' && resolved.endsWith('.kolm') && fs.existsSync(resolved)) {
+        try {
+          const { inspectArtifact: forgeInspect } = await import('../src/forge-inspect.js');
+          const man = await forgeInspect(resolved);
+          const cid = man && (man.cid || man.artifact_hash || man.sha256);
+          if (cid && /^[0-9a-f]{64}$/.test(String(cid))) cids.push(String(cid));
+        } catch { /* not a readable .kolm — fall through to record-only */ }
+      }
+    }
+    if (cids.length >= 2) parentCids = cids;
+  } catch { /* lineage cid resolution is best-effort */ }
+
+  let res;
+  try {
+    res = mm.mergeAdapters({
+      adapters: adapterPaths,
+      method,
+      weights,
+      density,
+      svdRank,
+      majoritySign,
+      outDir,
+      baseModel,
+      evalHoldout,
+      json: wantJson,
+      parentCids,
+    });
+  } catch (e) {
+    console.error('merge failed: ' + (e && e.message ? e.message : e));
+    process.exit(EXIT.EXECUTION);
+  }
+
+  // W921 — bind the multi-parent lineage explicitly via artifact-lineage
+  // setMergeParents when we have real .kolm parent cids (additive: the engine
+  // already wrote merge-lineage.json; this stamps the merge-summary manifest so
+  // a downstream `kolm lineage` walk sees the merge parents).
+  if (res && res.ok && Array.isArray(parentCids) && parentCids.length >= 2) {
+    try {
+      const lin = await import('../src/artifact-lineage.js');
+      const stamped = lin.setMergeParents(res.merge_summary || {}, parentCids);
+      const summaryPath = res.merge_summary_path
+        || (res.output_dir ? path.join(res.output_dir, 'merge-summary.json') : null);
+      if (summaryPath) {
+        try { fs.writeFileSync(summaryPath, JSON.stringify(stamped, null, 2)); res.merge_summary = stamped; } catch { /* best-effort stamp */ }
+      } else {
+        res.merge_summary = stamped;
+      }
+      res.merge_parent_cids = parentCids;
+    } catch { /* lineage stamp is additive; never block the merge result */ }
+  }
+
+  if (wantJson) {
+    console.log(JSON.stringify(res, null, 2));
+    if (!res.ok) process.exit(EXIT.EXECUTION);
+    return;
+  }
+  if (!res.ok) {
+    console.error('merge failed: ' + (res.error || 'unknown') + (res.detail ? ' — ' + res.detail : ''));
+    if (res.install_hint) console.error(res.install_hint);
+    process.exit(EXIT.EXECUTION);
+  }
+  console.log(`ok  merged ${res.parents.length} adapters (method=${res.method}) → ${res.output_dir}`);
+  console.log('  weights:   ' + res.parents.map((p) => `${p.name}=${p.weight}`).join(', '));
+  if (res.density != null) console.log('  density:   ' + res.density);
+  if (res.trainer_kicked === false) {
+    console.log('  status:    plan + lineage written (trainer not installed)');
+    if (res.hint) console.log('  hint:      ' + res.hint);
+  } else {
+    console.log('  status:    merged weights computed (merge_space=' + (res.merge_space || '?') + ')');
+  }
+  if (Array.isArray(parentCids) && parentCids.length >= 2) {
+    console.log('  lineage:   bound ' + parentCids.length + ' parent cids (model_merge)');
+  } else if (res.lineage_note) {
+    console.log('  lineage:   ' + res.lineage_note);
+  }
+}
+
+// W921 — `kolm gate explain <artifact>` renders the conformal gate_decision
+// (ship / abstain / reject + the calibrated interval) for an artifact's
+// composite K-score. Routes through src/judge-calibration.js attachGateDecision
+// / decideGate. Reads the artifact manifest with the unsigned forge-inspect path
+// (manifest-only) so a dev can explain a gate even if local signature trust is
+// stale. No network, no auth.
+async function cmdGate(args) {
+  if (maybeHelp('gate', args)) return;
+  const sub = args[0];
+  const wantJson = args.includes('--json');
+  if (sub !== 'explain') {
+    console.error('usage: kolm gate explain <artifact.kolm> [--gate 0.85] [--alpha 0.10] [--judge-spread <s>] [--n-judges <n>] [--json]');
+    console.error('  Explains the ship/abstain/reject gate decision + calibrated interval for an artifact.');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const positional = args.slice(1).filter((a) => !a.startsWith('--'));
+  const artArg = positional[0];
+  if (!artArg) {
+    console.error('usage: kolm gate explain <artifact.kolm> [--gate 0.85] [--alpha 0.10] [--judge-spread <s>] [--n-judges <n>] [--json]');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const art = resolveArtifact(artArg) || artArg;
+  if (!fs.existsSync(art)) {
+    console.error('not found: ' + art + '\nhint: list available artifacts with `kolm list`.');
+    process.exit(EXIT.NOT_FOUND);
+  }
+  let man;
+  try {
+    const { inspectArtifact: forgeInspect } = await import('../src/forge-inspect.js');
+    man = await forgeInspect(art);
+  } catch (e) {
+    console.error('gate explain: cannot inspect artifact: ' + (e && e.message ? e.message : e));
+    process.exit(EXIT.EXECUTION);
+  }
+  const k = (man && man.k_score && typeof man.k_score === 'object') ? man.k_score : null;
+  const composite = k && typeof k.composite === 'number' ? k.composite : null;
+  if (composite == null) {
+    const env = { ok: false, error: 'no_k_score', artifact: art, hint: 'this artifact has no k_score.composite; compile/score it first' };
+    if (wantJson) { console.log(JSON.stringify(env, null, 2)); } else { console.error('gate explain: artifact has no k_score.composite (compile/score it first)'); }
+    process.exit(EXIT.EXECUTION);
+  }
+  const gateFlag = pickFlag(args, '--gate');
+  const alphaFlag = pickFlag(args, '--alpha');
+  const judgeSpreadFlag = pickFlag(args, '--judge-spread');
+  const nJudgesFlag = pickFlag(args, '--n-judges');
+  const gate = gateFlag != null ? Number(gateFlag) : 0.85;
+  if (!Number.isFinite(gate) || gate < 0 || gate > 1) { console.error('error: --gate must be in [0, 1]'); process.exit(EXIT.BAD_ARGS); }
+  const { attachGateDecision } = await import('../src/judge-calibration.js');
+  const input = { gate };
+  if (alphaFlag != null) input.alpha = Number(alphaFlag);
+  if (judgeSpreadFlag != null) input.judge_spread = Number(judgeSpreadFlag);
+  if (nJudgesFlag != null) input.n_completed = Number(nJudgesFlag);
+  // A conformal interval, when the manifest carries one, lets decideGate use the
+  // calibrated bounds instead of the scalar fallback.
+  if (man && man.conformal && typeof man.conformal === 'object') input.conformal = man.conformal;
+  const decorated = attachGateDecision({ composite }, input);
+  const decision = decorated.gate_decision;
+  if (wantJson) {
+    console.log(JSON.stringify({ ok: true, artifact: art, composite, gate_decision: decision }, null, 2));
+    return;
+  }
+  const STATE_LABEL = { ship: 'SHIP', abstain: 'ABSTAIN', reject: 'REJECT' };
+  console.log('Gate decision  (' + (decision.spec || 'kolm-gate-decision-1') + ')');
+  console.log('  artifact:  ' + path.basename(art));
+  console.log('  composite: ' + composite.toFixed(3) + '   gate >= ' + gate);
+  console.log('  decision:  ' + (STATE_LABEL[decision.state] || decision.state));
+  if (decision.lower != null && decision.upper != null) {
+    console.log('  interval:  [' + decision.lower.toFixed(3) + ', ' + decision.upper.toFixed(3) + ']' + (decision.coverage_target != null ? '  (coverage ' + decision.coverage_target + ')' : ''));
+  }
+  console.log('  basis:     ' + decision.basis);
+  if (Array.isArray(decision.reasons) && decision.reasons.length) {
+    console.log('  reasons:');
+    for (const r of decision.reasons) console.log('    - ' + r);
+  }
+  // abstain/reject are informational; exit code mirrors the ship/no-ship gate.
+  if (decision.state === 'reject') process.exit(EXIT.GATE_FAIL);
+}
+
+// W921 — `kolm data synth <generator>` plans a synthetic-data cold-start
+// AUGMENT stage. It validates the requested generator against the recipe-loader
+// synth vocabulary (magpie / evol / persona-hub / glan / self-instruct) and, if
+// a recipe is supplied, validates that recipe's `synth` section. It then emits a
+// plan envelope. The Python generators are OUT OF SCOPE here: this verb does NOT
+// fabricate data — it prints a "planned, run via recipe" envelope so the caller
+// wires the generator through a recipe + the distill pipeline.
+async function cmdData(args) {
+  if (maybeHelp('data', args)) return;
+  const sub = args[0];
+  const wantJson = args.includes('--json');
+  // Canonical synth generators — kept in sync with src/distill-recipe-loader.js
+  // VALID_SYNTH_GENERATORS (which is not exported).
+  const VALID_SYNTH_GENERATORS = ['magpie', 'evol', 'persona-hub', 'glan', 'self-instruct'];
+  if (sub !== 'synth') {
+    console.error('usage: kolm data synth <' + VALID_SYNTH_GENERATORS.join('|') + '> [--recipe <file>] [--target <N>] [--max-share <0..1>] [--namespace <ns>] [--json]');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const rest = args.slice(1);
+  const positional = rest.filter((a) => !a.startsWith('--'));
+  const generator = positional[0];
+  if (!generator) {
+    console.error('usage: kolm data synth <' + VALID_SYNTH_GENERATORS.join('|') + '> [--recipe <file>] [--target <N>] [--max-share <0..1>] [--json]');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  if (!VALID_SYNTH_GENERATORS.includes(generator)) {
+    const env = { ok: false, error: 'invalid_value', field: 'generator', allowed: VALID_SYNTH_GENERATORS, got: generator };
+    if (wantJson) { console.log(JSON.stringify(env, null, 2)); }
+    else { console.error(`error: generator must be one of: ${VALID_SYNTH_GENERATORS.join(', ')} (got '${generator}')`); }
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const targetFlag = pickFlag(rest, '--target');
+  const maxShareFlag = pickFlag(rest, '--max-share');
+  const recipeFlag = pickFlag(rest, '--recipe');
+  const ns = pickFlag(rest, '--namespace') || 'default';
+  let target = null;
+  if (targetFlag != null) {
+    target = Number(targetFlag);
+    if (!Number.isFinite(target) || target <= 0) { console.error('error: --target must be a positive number'); process.exit(EXIT.BAD_ARGS); }
+  }
+  let maxShare = null;
+  if (maxShareFlag != null) {
+    maxShare = Number(maxShareFlag);
+    if (!Number.isFinite(maxShare) || maxShare < 0 || maxShare > 1) { console.error('error: --max-share must be a number in [0, 1]'); process.exit(EXIT.BAD_ARGS); }
+  }
+  // When a recipe is supplied, validate it (its synth section in particular)
+  // through the recipe loader so a bad synth block fails before any plan prints.
+  let recipeInfo = null;
+  if (recipeFlag) {
+    const { loadRecipe } = await import('../src/distill-recipe-loader.js');
+    const loaded = loadRecipe(recipeFlag);
+    if (!loaded.ok) {
+      const env = { ok: false, error: loaded.error, message: loaded.message, issues: loaded.issues || null };
+      if (wantJson) { console.log(JSON.stringify(env, null, 2)); }
+      else {
+        console.error('recipe invalid: ' + (loaded.message || loaded.error));
+        for (const i of (loaded.issues || [])) console.error('  - ' + i);
+      }
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const synth = loaded.recipe && loaded.recipe.synth;
+    recipeInfo = {
+      name: loaded.recipe.name,
+      hash: loaded.hash,
+      synth_section: synth || null,
+      synth_in_recipe: !!synth,
+    };
+  }
+  const plan = {
+    ok: true,
+    status: 'planned',
+    stage: 'augment',
+    generator,
+    target,
+    max_share: maxShare,
+    namespace: ns,
+    recipe: recipeInfo,
+    constraints: [
+      'synthetic rows are AUGMENT-stage candidates, not labels — each must be tagged synthesized:true.',
+      'the Python generator for this method runs via the distill pipeline, not from this CLI verb.',
+      'cap the synthetic share with --max-share (or synth.max_share in the recipe) so real captures dominate.',
+    ],
+    next: [
+      `add a "synth": { "generator": "${generator}"${target ? `, "target": ${target}` : ''}${maxShare != null ? `, "max_share": ${maxShare}` : ''} } block to your recipe`,
+      'run it through the recipe: kolm compile --spec <recipe>.json   (the AUGMENT stage invokes the generator)',
+      'verify before ship: kolm verify <artifact>.kolm',
+    ],
+    synth_plan_version: 'w921-data-synth-1',
+  };
+  if (wantJson) { console.log(JSON.stringify(plan, null, 2)); return; }
+  console.log(`data synth — ${generator} (planned)`);
+  console.log('  stage:     augment (synthetic-data cold-start)');
+  if (target != null) console.log('  target:    ' + target + ' rows');
+  if (maxShare != null) console.log('  max_share: ' + maxShare);
+  console.log('  namespace: ' + ns);
+  if (recipeInfo) console.log('  recipe:    ' + recipeInfo.name + (recipeInfo.synth_in_recipe ? ' (has synth section)' : ' (no synth section yet)'));
+  console.log('');
+  console.log('  Constraints:');
+  for (const cstr of plan.constraints) console.log('    - ' + cstr);
+  console.log('');
+  console.log('  Next:');
+  for (const n of plan.next) console.log('    - ' + n);
 }
 
 // W236 — kolm agent {export-hermes, blueprint, validate}
@@ -21097,6 +21584,8 @@ async function cmdDistill(args) {
   if (args[0] === 'preference' || args[0] === 'dpo' || args[0] === 'simpo') {
     return cmdDistillPreference(args.slice(1), args[0]);
   }
+  // W921 — GRPO / RLVR subverb (verifiable-reward RL on top of an SFT student).
+  if (args[0] === 'grpo') return cmdDistillGrpo(args.slice(1));
   // W718 Teacher Council (--teachers + --weights).
   if (args.includes('--teachers') && args.includes('--weights')) {
     return cmdDistillTeacherCouncil(args);
@@ -21398,6 +21887,64 @@ async function cmdDistillPreference(args, verbName = 'preference') {
     console.log(JSON.stringify(out, null, 2));
     process.exit(out.ready ? 0 : 3);
   }
+  // W921 — `kolm distill preference mine` mines preference PAIRS from council /
+  // eval disagreement rows (src/distill-preference.js mineDisagreementPairs)
+  // and writes them as DPO {prompt,chosen,rejected} or KTO {prompt,completion,
+  // label} JSONL (writePreferencePairs). This is the AUGMENT step that produces
+  // the --pairs file the `train` subverb below consumes.
+  if (sub === 'mine') {
+    const inFile = pickFlag(rest, '--in') || pickFlag(rest, '--rows') || pickFlag(rest, '--from');
+    const outFile = pickFlag(rest, '--out');
+    const format = (pickFlag(rest, '--format') || 'pref').toLowerCase();
+    const minGapFlag = pickFlag(rest, '--min-gap');
+    const maxPairsFlag = pickFlag(rest, '--max-pairs');
+    const wantJson = rest.includes('--json');
+    if (!inFile || !outFile) {
+      console.error('usage: kolm distill preference mine --in <rows.jsonl> --out <pairs.jsonl> [--format pref|kto] [--min-gap 0.1] [--max-pairs N] [--json]');
+      console.error('  --in rows: JSONL of {prompt, candidates:[{model,text,score?}], seed_output?} council/eval rows.');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (!fs.existsSync(inFile)) {
+      console.error('not found: ' + inFile);
+      process.exit(EXIT.NOT_FOUND);
+    }
+    if (!['pref', 'kto'].includes(format)) {
+      console.error("error: --format must be one of: pref, kto (got '" + format + "')");
+      process.exit(EXIT.BAD_ARGS);
+    }
+    let rows;
+    try {
+      rows = fs.readFileSync(inFile, 'utf8').split(/\r?\n/).filter(Boolean).map((l) => JSON.parse(l));
+    } catch (e) {
+      console.error('could not parse --in JSONL: ' + (e && e.message ? e.message : e));
+      process.exit(EXIT.EXECUTION);
+    }
+    const mineOpts = {};
+    if (minGapFlag != null) {
+      const g = Number(minGapFlag);
+      if (!Number.isFinite(g) || g < 0 || g > 1) { console.error("error: --min-gap must be a number in [0, 1]"); process.exit(EXIT.BAD_ARGS); }
+      mineOpts.min_gap = g;
+    }
+    if (maxPairsFlag != null) {
+      const m = Number(maxPairsFlag);
+      if (!Number.isInteger(m) || m <= 0) { console.error("error: --max-pairs must be a positive integer"); process.exit(EXIT.BAD_ARGS); }
+      mineOpts.max_pairs = m;
+    }
+    const { mineDisagreementPairs, writePreferencePairs } = await import('../src/distill-preference.js');
+    const mined = mineDisagreementPairs(rows, mineOpts);
+    if (!mined.ok) {
+      console.error('mine failed: ' + (mined.error || 'unknown'));
+      process.exit(EXIT.EXECUTION);
+    }
+    const written = writePreferencePairs(mined.pairs, outFile, { format });
+    const out = { ok: written.ok, mined: mined.stats, written, format, in: inFile, version: mined.version };
+    if (wantJson) { console.log(JSON.stringify(out, null, 2)); process.exit(written.ok ? 0 : EXIT.EXECUTION); }
+    if (!written.ok) { console.error('write failed: ' + (written.error || 'unknown')); process.exit(EXIT.EXECUTION); }
+    console.log(`ok  mined ${written.count} ${format} pairs from ${mined.stats.rows_in} rows → ${outFile}`);
+    console.log(`  considered: ${mined.stats.considered}  skipped_no_gap: ${mined.stats.skipped_no_gap}  skipped_shape: ${mined.stats.skipped_shape}`);
+    console.log(`  next: kolm distill preference train --pairs ${outFile} --student <path> --objective ${format === 'kto' ? 'kto' : 'dpo'}`);
+    return;
+  }
   // `kolm distill dpo|simpo --pairs ...` is a shortcut for `train --objective dpo|simpo`.
   if (sub === 'train' || sub === undefined || verbName === 'dpo' || verbName === 'simpo') {
     const train_args = (verbName === 'dpo' || verbName === 'simpo') ? args : rest;
@@ -21415,8 +21962,102 @@ async function cmdDistillPreference(args, verbName = 'preference') {
     console.log(JSON.stringify(out, null, 2));
     process.exit(out.ok ? 0 : 3);
   }
-  console.error(`usage: kolm distill preference {doctor|train [--pairs <jsonl> --student <path> --objective dpo|simpo|orpo|kto]}`);
+  console.error(`usage: kolm distill preference {doctor|mine [--in <rows.jsonl> --out <pairs.jsonl>]|train [--pairs <jsonl> --student <path> --objective dpo|simpo|orpo|kto]}`);
   process.exit(EXIT.BAD_ARGS);
+}
+
+// W921 — `kolm distill grpo` (GRPO / RLVR — verifiable-reward RL).
+//
+// Builds the prompts JSONL the trainer needs (buildPromptsJsonl, which carries
+// the per-prompt verifiable column the reward family checks: tests for
+// code_exec, references for math_checker, schemas/regexes for schema_validator)
+// then routes to src/distill-grpo.js trainGrpo(). Durable: trainGrpo writes the
+// run dir + an honest no_trainer_installed envelope when trl is absent.
+async function cmdDistillGrpo(args) {
+  const sub = args[0];
+  const rest = args.slice(1);
+  if (sub === 'doctor') {
+    const { doctor } = await import('../src/distill-grpo.js');
+    const out = doctor();
+    console.log(JSON.stringify(out, null, 2));
+    process.exit(out.ready ? 0 : 3);
+  }
+  // default + `train` are the run path.
+  const train_args = (sub === 'train') ? rest : args;
+  const seedsFile = pickFlag(train_args, '--seeds') || pickFlag(train_args, '--prompts');
+  const student = pickFlag(train_args, '--student');
+  const rewardFlag = pickFlag(train_args, '--reward') || 'code_exec';
+  const lossType = pickFlag(train_args, '--loss-type') || 'grpo';
+  const numGen = pickFlag(train_args, '--num-generations');
+  const sftWarmup = pickFlag(train_args, '--sft-warmup-adapter') || null;
+  const maxComp = pickFlag(train_args, '--max-completion-length');
+  const ns = pickFlag(train_args, '--namespace') || 'default';
+  const outDir = pickFlag(train_args, '--out') || null;
+  const wantJson = train_args.includes('--json');
+  const { REWARD_FAMILIES, LOSS_TYPES, buildPromptsJsonl, trainGrpo } = await import('../src/distill-grpo.js');
+  if (!seedsFile || !student) {
+    console.error('usage: kolm distill grpo --seeds <jsonl> --student <path> [--reward code_exec,math_checker,...] [--loss-type grpo|bnpo|dr_grpo] [--num-generations 8] [--sft-warmup-adapter <dir>] [--max-completion-length 512] [--namespace ns] [--out <dir>] [--json]');
+    console.error('  rewards: ' + REWARD_FAMILIES.join(', '));
+    console.error('  also: kolm distill grpo doctor');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  if (!fs.existsSync(seedsFile)) { console.error('not found: ' + seedsFile); process.exit(EXIT.NOT_FOUND); }
+  const rewards = String(rewardFlag).split(',').map((s) => s.trim()).filter(Boolean);
+  for (const r of rewards) {
+    if (!REWARD_FAMILIES.includes(r)) {
+      console.error(`error: --reward must be one of: ${REWARD_FAMILIES.join(', ')} (got '${r}')`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+  }
+  if (!LOSS_TYPES.includes(lossType)) {
+    console.error(`error: --loss-type must be one of: ${LOSS_TYPES.join(', ')} (got '${lossType}')`);
+    process.exit(EXIT.BAD_ARGS);
+  }
+  let seeds;
+  try {
+    seeds = fs.readFileSync(seedsFile, 'utf8').split(/\r?\n/).filter(Boolean).map((l) => JSON.parse(l));
+  } catch (e) {
+    console.error('could not parse --seeds JSONL: ' + (e && e.message ? e.message : e));
+    process.exit(EXIT.EXECUTION);
+  }
+  // Build the prompts JSONL the reward family consumes (carries tests/references/
+  // schemas alongside each prompt). Anchored next to --out (or a temp run dir).
+  const runRoot = outDir || path.join(KOLM_DIR, 'grpo-runs', `grpo_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
+  fs.mkdirSync(runRoot, { recursive: true });
+  const promptsPath = path.join(runRoot, 'prompts.jsonl');
+  const built = buildPromptsJsonl(seeds, { family: rewards[0] }, promptsPath);
+  if (!built.ok) {
+    console.error('prompts build failed: ' + (built.error || 'unknown'));
+    process.exit(EXIT.EXECUTION);
+  }
+  const out = trainGrpo({
+    promptsPath,
+    studentPath: student,
+    rewardFunctions: rewards,
+    numGenerations: numGen != null ? Number(numGen) : 8,
+    lossType,
+    sftWarmupAdapter: sftWarmup,
+    maxCompletionLength: maxComp != null ? Number(maxComp) : 512,
+    outDir: runRoot,
+    namespace: ns,
+  });
+  if (wantJson) {
+    console.log(JSON.stringify({ ...out, prompts: built }, null, 2));
+    process.exit(out.ok ? 0 : EXIT.EXECUTION);
+  }
+  if (!out.ok) {
+    console.error('grpo failed: ' + (out.error || 'unknown') + (out.detail ? ' — ' + out.detail : ''));
+    if (out.install_hint) console.error(out.install_hint);
+    process.exit(EXIT.EXECUTION);
+  }
+  console.log(`ok  grpo run prepared (${built.count} prompts, reward=${rewards.join(',')}, loss=${lossType})`);
+  console.log('  run_dir:   ' + out.run_dir);
+  if (out.trainer_kicked === false || out.deferred) {
+    console.log('  status:    prompts + run dir written (trainer not installed)');
+    if (out.install_hint) console.log('  hint:      ' + out.install_hint.split('\n')[0]);
+  } else {
+    console.log('  status:    trainer kicked');
+  }
 }
 
 async function cmdSpecDecode(args) {
@@ -24689,6 +25330,26 @@ async function cmdDistillLocalWorker(args) {
   const localApiKey = pick('--local-api-key');
   const maxRows = pick('--max-rows');
   const maxTokens = pick('--max-tokens');
+  // W921 — distillation OBJECTIVE (loss). seqkd is the SFT-on-strings default;
+  // the logit-level objectives (forward_kl / distillm2 / gkd) need teacher
+  // LOGITS, which API teachers cannot supply. We gate those behind
+  // --teacher-local (mirrors src/distill-recipe-loader.js teacher_local) so a
+  // logit objective against an API teacher fails BEFORE the spawn rather than
+  // silently degrading.
+  const objective = pick('--objective');
+  const teacherLocal = args.includes('--teacher-local');
+  const VALID_OBJECTIVES = ['seqkd', 'forward_kl', 'reverse_kl', 'jsd', 'distillm2', 'gkd'];
+  const LOGIT_OBJECTIVES = new Set(['forward_kl', 'reverse_kl', 'jsd', 'distillm2', 'gkd']);
+  if (objective != null) {
+    if (!VALID_OBJECTIVES.includes(objective)) {
+      console.error(`error: --objective must be one of [${VALID_OBJECTIVES.join(', ')}]; got ${objective}`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (LOGIT_OBJECTIVES.has(objective) && !teacherLocal) {
+      console.error(`error: --objective=${objective} requires teacher LOGITS — pass --teacher-local with a local teacher endpoint (API teachers are text-only). Use --objective=seqkd for an API teacher.`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+  }
 
   // Validate redact class on the CLI side so the user gets the hint without
   // round-tripping through worker spawn. The worker re-validates so direct
@@ -24736,7 +25397,16 @@ async function cmdDistillLocalWorker(args) {
     if (localApiKey) passthru.push(`--local-api-key=${localApiKey}`);
     if (maxRows) passthru.push(`--max-rows=${maxRows}`);
     if (maxTokens) passthru.push(`--max-tokens=${maxTokens}`);
+    // W921 — thread the distillation objective + teacher-local flag through to
+    // the worker (which forwards to the Python trainer via KOLM_DISTILL_OBJECTIVE).
+    if (objective) passthru.push(`--objective=${objective}`);
+    if (teacherLocal) passthru.push('--teacher-local');
   }
+  // W921 — objective env slice for the trainer (workers/distill/scripts/*.py
+  // read KOLM_DISTILL_OBJECTIVE; default seqkd behavior is unchanged when unset).
+  const _w921ObjectiveEnv = {};
+  if (objective) _w921ObjectiveEnv.KOLM_DISTILL_OBJECTIVE = objective;
+  if (teacherLocal) _w921ObjectiveEnv.KOLM_TEACHER_LOCAL = '1';
 
   // W787 — accept --precision / --gradient-checkpointing / --early-stop-patience
   // on the local-worker path, normalise once, inject as env vars to the worker
@@ -24761,6 +25431,72 @@ async function cmdDistillLocalWorker(args) {
       }
       const normalised = eff.normalizeEfficiencyOptions(eopts);
       _w787Env = eff.buildEfficiencyEnv(normalised);
+    } catch (e) {
+      console.error(`error: ${e.message}`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+  }
+
+  // W921 — trainer-variant flags. The Python trainer (scripts/train_lora.py)
+  // reads KOLM_LORA_VARIANT / KOLM_LORA_INIT / KOLM_NEFTUNE_ALPHA / KOLM_OPTIM /
+  // KOLM_GALORE_ARGS / KOLM_PACKING. We normalise once via
+  // distill-efficiency.normalizeTrainerVariantOptions (fail-before-spend on a
+  // bad enum or a galore/qlora conflict) and merge buildTrainerVariantEnv(...)
+  // into the worker spawn env. All flags are optional; with none set the env
+  // slice is {} so the trainer's existing behavior is byte-for-byte unchanged.
+  const _w921LoraVariant = pick('--lora-variant');
+  const _w921LoraInit = pick('--lora-init');
+  const _w921Neftune = pick('--neftune');
+  const _w921Optim = pick('--optim');
+  const _w921GaloreRank = pick('--galore-rank');
+  const _w921GaloreProjGap = pick('--galore-proj-gap');
+  const _w921Packing = args.includes('--packing');
+  let _w921VariantEnv = {};
+  const _w921VariantSet = _w921LoraVariant != null || _w921LoraInit != null
+    || _w921Neftune != null || _w921Optim != null
+    || _w921GaloreRank != null || _w921GaloreProjGap != null || _w921Packing;
+  // W921 — auto-map a recipe's train.{lora_variant,...} block to the same env
+  // when the user points --spec at a recipe-shaped JSON carrying a `train`
+  // section. Explicit CLI flags WIN over recipe values. Best-effort: a spec
+  // without a train block (the common case) is a silent no-op.
+  let _w921RecipeTrain = null;
+  if (spec && fs.existsSync(spec)) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(spec, 'utf8'));
+      if (parsed && typeof parsed === 'object' && parsed.train && typeof parsed.train === 'object') {
+        _w921RecipeTrain = parsed.train;
+      }
+    } catch { /* spec is not recipe-shaped JSON — ignore */ }
+  }
+  if (_w921VariantSet || _w921RecipeTrain) {
+    try {
+      const eff = await import('../src/distill-efficiency.js');
+      const t = _w921RecipeTrain || {};
+      const vopts = {};
+      // Recipe defaults first, then override with explicit CLI flags.
+      if (t.lora_variant != null) vopts.lora_variant = t.lora_variant;
+      if (t.lora_init != null) vopts.lora_init = t.lora_init;
+      if (t.neftune_alpha != null) vopts.neftune_alpha = t.neftune_alpha;
+      if (t.optim != null) vopts.optim = t.optim;
+      if (t.loraplus_ratio != null) vopts.loraplus_ratio = t.loraplus_ratio;
+      if (t.packing != null) vopts.packing = t.packing;
+      if (t.galore != null && typeof t.galore === 'object') vopts.galore = { ...t.galore };
+      if (t.method != null) vopts.method = t.method;
+      if (_w921LoraVariant != null) vopts.lora_variant = _w921LoraVariant;
+      if (_w921LoraInit != null) vopts.lora_init = _w921LoraInit;
+      if (_w921Neftune != null) vopts.neftune_alpha = _w921Neftune;
+      if (_w921Optim != null) vopts.optim = _w921Optim;
+      if (_w921Packing) vopts.packing = true;
+      // Thread --distillation-method into the normalizer so the galore/qlora
+      // refusal (4-bit params vs full-precision GaLore) fires before the spawn.
+      if (distillationMethod != null) vopts.method = distillationMethod === 'full-ft' ? 'full' : distillationMethod;
+      if (_w921GaloreRank != null || _w921GaloreProjGap != null) {
+        vopts.galore = { ...(vopts.galore || {}) };
+        if (_w921GaloreRank != null) vopts.galore.rank = Number(_w921GaloreRank);
+        if (_w921GaloreProjGap != null) vopts.galore.update_proj_gap = Number(_w921GaloreProjGap);
+      }
+      const normalisedVariant = eff.normalizeTrainerVariantOptions(vopts);
+      _w921VariantEnv = eff.buildTrainerVariantEnv(normalisedVariant);
     } catch (e) {
       console.error(`error: ${e.message}`);
       process.exit(EXIT.BAD_ARGS);
@@ -24833,7 +25569,7 @@ async function cmdDistillLocalWorker(args) {
   await new Promise((resolve) => {
     const child = spawn(process.execPath, [workerPath, ...passthru], {
       stdio: 'inherit',
-      env: { ...process.env, ..._w870ProxyEnv, ..._w787Env },
+      env: { ...process.env, ..._w870ProxyEnv, ..._w787Env, ..._w921VariantEnv, ..._w921ObjectiveEnv },
     });
     // Wave 253 backend#10: relay SIGINT/SIGTERM to the distill worker so
     // Ctrl+C in the parent terminal stops the python LoRA trainer (or the
@@ -32364,6 +33100,9 @@ const COMPLETION_VERBS = [
   'plugin',
   // W921 — gh/kubectl-style user command extensions.
   'extension', 'ext',
+  // W921 — Studio engine front doors: `kolm gate explain <artifact>` (conformal
+  // gate decision) + `kolm data synth <generator>` (synthetic-data plan).
+  'gate', 'data',
   // W731/W733/W735/W736/W835/W739 — completion entries for verbs already in dispatch.
   'vscode', 'otel', 'tool', 'guardrails', 'savings', 'lineage',
   // W848 — interactive setup wizard: `kolm quickstart` picks wrapper or studio
@@ -32462,7 +33201,11 @@ const COMPLETION_SUBS = {
   // W454 — multimodal redaction worker (OCR / pdf-parse / whisper).
   media:      ['tokenize', 'doctor', 'redact-job'],
   // W455 — per-prompt loss telemetry: `kolm distill runs [<id>]`.
-  distill:    ['runs', 'strategy'],
+  // W921 — grpo (RLVR) + preference (mine pairs) subverbs.
+  distill:    ['runs', 'strategy', 'grpo', 'preference', 'onpolicy', 'efficiency'],
+  // W921 — Studio engine front doors.
+  gate:       ['explain'],
+  data:       ['synth'],
   agents:     ['stats', 'sessions', 'recommend', 'failing'],
   'shell-init': [],
   // W409i — billing surface subverbs.
@@ -46704,6 +47447,10 @@ async function main() {
       case 'synth':    await withErrorContext('synth',    () => cmdSynth(rest)); break;
       case 'sim':      await withErrorContext('sim',      () => cmdSim(rest)); break;
       case 'bakeoff':  await withErrorContext('bakeoff',  () => cmdBakeoff(rest)); break;
+      // W921 — `kolm gate explain <artifact>` (conformal gate_decision) +
+      // `kolm data synth <generator>` (synthetic-data cold-start plan).
+      case 'gate':     await withErrorContext('gate',     () => cmdGate(rest)); break;
+      case 'data':     await withErrorContext('data',     () => cmdData(rest)); break;
       // W372 runtime policy ladder + device fleet.
       case 'devices':        await withErrorContext('devices',        () => cmdDevices(rest)); break;
       case 'install-device': await withErrorContext('install-device', () => cmdInstallDevice(rest)); break;
