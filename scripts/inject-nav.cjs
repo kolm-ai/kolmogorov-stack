@@ -27,7 +27,7 @@ const END = '<!-- KOLM_NAV_END (W221) -->';
 // Five top-level items. Order is the W221 #1 + #3 contract. Slug is used for
 // nav-item--<slug> classnames so CSS can size individual menus.
 const NAV_ITEMS = [
-  { href: '/about',      label: 'Product',    slug: 'product' },
+  { href: '/about',      label: 'About',      slug: 'product' },
   { href: '/models',     label: 'Models',     slug: 'models' },
   { href: '/docs',       label: 'Docs',       slug: 'docs' },
   { href: '/pricing',    label: 'Pricing',    slug: 'pricing' },

@@ -47,7 +47,7 @@ for (const surface of SURFACES) {
     assert.match(html, /<a\b[^>]*href="#main"[^>]*>Skip to content<\/a>/, 'skip-link required by W207 a11y contract');
     assert.match(html, /<main id="main">/, 'main landmark required');
     // 5-anchor consolidated nav (W221)
-    for (const v of ['Product', 'Models', 'Docs', 'Pricing', 'Enterprise']) {
+    for (const v of ['About', 'Models', 'Docs', 'Pricing', 'Enterprise']) {
       assert.match(html, new RegExp(`<a\\b[^>]*href="/${v.toLowerCase()}"[^>]*>${v}</a>`),
         `nav must include ${v} (W221 5-link consolidation)`);
     }

@@ -487,7 +487,7 @@ function fullPage(entries) {
   <div class="wrap">
     <a class="logo" href="/">k o l m</a>
     <nav class="primary">
-      <a class="nav-top" href="/product">Product</a>
+      <a class="nav-top" href="/about">About</a>
       <a class="nav-top" href="/models">Models</a>
       <a class="nav-top" href="/docs">Docs</a>
       <a class="nav-top" href="/pricing">Pricing</a>

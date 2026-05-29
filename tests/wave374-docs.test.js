@@ -93,7 +93,7 @@ test('W374 #4 - every page emits TechArticle JSON-LD with author + publisher', (
 });
 
 test('W374 #5 - every page has a skip-link, main#main, and 5-anchor W221 nav', () => {
-  const ANCHORS = ['/product', '/models', '/docs', '/pricing', '/enterprise'];
+  const ANCHORS = ['/about', '/models', '/docs', '/pricing', '/enterprise'];
   for (const p of PAGES) {
     const html = readPage(p.rel);
     assert.ok(/<a[^>]+class="skip-link"[^>]+href="#main"/.test(html), `${p.rel}: skip-link missing`);

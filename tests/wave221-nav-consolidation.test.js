@@ -18,7 +18,7 @@ const VERCEL = JSON.parse(fs.readFileSync(path.join(ROOT, 'vercel.json'), 'utf8'
 const INJECTOR = fs.readFileSync(path.join(ROOT, 'scripts/inject-nav.cjs'), 'utf8');
 const PRODUCT_HTML = fs.readFileSync(path.join(ROOT, 'public/product.html'), 'utf8');
 
-const NAV_ITEMS = ['Product', 'Models', 'Docs', 'Pricing', 'Enterprise'];
+const NAV_ITEMS = ['About', 'Models', 'Docs', 'Pricing', 'Enterprise'];
 const BEGIN_MARK = '<!-- KOLM_NAV_BEGIN (W221) -->';
 const END_MARK = '<!-- KOLM_NAV_END (W221) -->';
 

@@ -31,7 +31,7 @@ test('W559 #1 - generated CLI pages strip frontmatter and corrupted separators',
     assert.doesNotMatch(html, /繚/, `${name} must not expose corrupted title separators`);
     assert.doesNotMatch(html, /KOLM_NAV_BEGIN \(W221\) --><!-- KOLM_NAV_END \(W221\)/, `${name} must not emit an empty nav marker`);
     assert.match(html, /<title>kolm [^<]+ \| CLI reference \| kolm\.ai<\/title>/, `${name} title must use the canonical CLI title shape`);
-    assert.match(html, /<a class="nav-top" href="\/product"/, `${name} must emit the canonical nav block`);
+    assert.match(html, /<a class="nav-top" href="\/about"/, `${name} must emit the canonical nav block`);
     assert.match(html, /<h1>kolm /, `${name} must keep the command H1`);
   }
 });
