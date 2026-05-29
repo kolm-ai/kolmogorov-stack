@@ -6,7 +6,10 @@
 // panel can show WHY a pair did or did not survive:
 //
 //   a. quality   — drop pairs whose teacher output scores below minQuality
-//                  (reuses scoreCandidateLocal from src/distill-preference.js).
+//                  (uses the local scoreCandidateLocal heuristic below).
+//   b0. minhash  — OPT-IN (opts.minhash) Node-native MinHash/LSH near-dup
+//                  pre-pass (src/minhash-dedup.js) that collapses exact + near-
+//                  exact dups off-GPU BEFORE the python pass. Default OFF.
 //   b. dedup     — shell to workers/distill/scripts/dedup_pairs.py for
 //                  semantic near-dup removal. DEGRADES to a no-op (recorded)
 //                  if python / the script is unavailable — never fails curate.
@@ -14,6 +17,14 @@
 //                  src/active-learning.js) and build a coverage histogram.
 //   d. cot       — drop pairs whose output leaks chain-of-thought.
 //   e. pii       — redact (NOT drop) emails / phones / SSN / card numbers.
+//   f. select    — OPT-IN (opts.target_size>0) informative-subset SELECTION
+//                  (src/data-select.js) that caps survivors to a budget-bounded
+//                  diversity-aware / target-matched subset. Default OFF.
+//
+// The opt-in stages (b0, f) are ADDITIVE: with default opts they do not run and
+// the curate result is identical to the original five-stage pipeline. New report
+// fields (backend_used, n_clusters, minhash, selection) stay null/'none' unless
+// the corresponding opt is set.
 //
 // Caveats:
 //   - dedup quality is only as good as the embedder the python script can
@@ -30,9 +41,10 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
-import { scoreCandidateLocal } from './distill-preference.js';
 import * as eventStore from './event-store.js';
 import activeLearning from './active-learning.js';
+import { minhashPredup } from './minhash-dedup.js';
+import { selectInformativeSubset } from './data-select.js';
 
 export const CURATE_VERSION = 'curate-v1';
 
@@ -89,6 +101,62 @@ export function redactPii(text) {
   s = s.replace(_RE_EMAIL, '[REDACTED]');
   s = s.replace(_RE_PHONE, '[REDACTED]');
   return s;
+}
+
+// ── local quality heuristic (was imported; now a real local fn) ──────────────
+//
+// scoreCandidateLocal — output-only quality score in [0,1]. Previously imported
+// from src/distill-preference.js, but the committed module no longer exports it,
+// which left this whole module UNLOADABLE. We restore it as a real local fn
+// (spec G1 fix) so CURATE can import + run. The heuristic mirrors the survivor
+// scorer in src/minhash-dedup.js (_scoreQuality) and the python score_quality in
+// workers/distill/scripts/dedup_pairs.py so dedup + curate + preference agree on
+// what "good output" means. Penalizes leaked chain-of-thought + refusals + very
+// short text; mildly lifts well-sized, structured answers and seed overlap.
+const _REFUSAL_RE = /\b(i'?m sorry|i cannot|i can'?t help|i am unable|i'?m unable|as an ai)\b/i;
+const _STRUCTURE_RE = /(^|\n)\s*(\d+[.)]|[-*•])\s+/m;
+
+function _wordsLower(text) {
+  return String(text || '').toLowerCase().match(/[a-z0-9]+/g) || [];
+}
+
+function _tokenOverlapScore(candidate, reference) {
+  const ref = new Set(_wordsLower(reference).filter((w) => w.length > 2));
+  if (ref.size === 0) return 0;
+  const cand = new Set(_wordsLower(candidate).filter((w) => w.length > 2));
+  let inter = 0;
+  for (const w of cand) if (ref.has(w)) inter += 1;
+  return inter / ref.size;
+}
+
+export function scoreCandidateLocal(output, seed) {
+  const s = String(output == null ? '' : output);
+  const components = {};
+  let score = 0.5;
+  components.base = 0.5;
+
+  if (flagCot(s)) { score -= 0.5; components.cot_penalty = -0.5; }
+  if (_REFUSAL_RE.test(s)) { score -= 0.2; components.refusal_penalty = -0.2; }
+
+  const n = s.trim().length;
+  let lenAdj = 0;
+  if (n < 20) lenAdj = -0.2;
+  else if (n < 60) lenAdj = -0.1;
+  else if (n <= 1200) lenAdj = 0.1;
+  else if (n > 2000) lenAdj = -0.1;
+  score += lenAdj;
+  components.length_adj = lenAdj;
+
+  if (_STRUCTURE_RE.test(s)) { score += 0.05; components.structure_bonus = 0.05; }
+
+  if (seed) {
+    const ov = 0.3 * _tokenOverlapScore(s, seed);
+    score += ov;
+    components.seed_overlap = ov;
+  }
+
+  const clamped = Math.max(0, Math.min(1, score));
+  return { score: clamped, components };
 }
 
 function _bucketKeyFor(pair) {
@@ -269,6 +337,18 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       cluster: true,
       pii: true,
       cot: true,
+      // ── opt-in W921 additions (default OFF → default curate path unchanged) ──
+      // minhash: run a Node-native MinHash/LSH near-dup PRE-PASS before the
+      //          existing python dedup. Catches exact + near-exact dups off-GPU
+      //          (the python pass stays as the tier-2 paraphrase catcher).
+      minhash: false,
+      minhashThreshold: 0.85, // true-Jaccard floor for the verify pass
+      // target_size: when set (>0), run an informative-subset SELECTION stage
+      //          after the filter stages. >1 = absolute count, 0<x<=1 = fraction.
+      target_size: 0,
+      select_strategy: 'diversity', // 'diversity' (self-coverage) | 'dsir' (target-matched)
+      diversity_tau: 0.9,
+      target_items: null, // reference distribution for the 'dsir' strategy
     }, opts || {});
 
     const inFile = in_path || path.join(_nsDir(ns), 'raw-pairs.jsonl');
@@ -286,6 +366,16 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       clusters: 0,
       coverage: {},
       dedup: 'not_run',
+      // ── opt-in W921 fields (stay null/absent unless the new stages run) ──
+      // backend_used: which dedup path actually executed
+      //   ('none' | 'minhash-js' | 'python:<backend>' | 'minhash-js+python:<backend>').
+      backend_used: 'none',
+      // n_clusters: count of MinHash near-dup clusters collapsed (null if not run).
+      n_clusters: null,
+      // minhash: the MinHash pre-pass report block (null if not run).
+      minhash: null,
+      // selection: the SELECT-stage report block (null if no target_size).
+      selection: null,
     };
 
     // a. quality — drop low-scoring teacher outputs.
@@ -302,12 +392,41 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       work = survivors;
     }
 
+    // b0. minhash-predup — OPT-IN Node-native MinHash/LSH near-dup pre-pass
+    //     (runs BEFORE the python pass; catches exact + near-exact dups off-GPU
+    //     so the O(n^2)-class python embedding pass only sees survivors). Pure
+    //     JS, never throws — degrades to a no-op on its own if it ever errors.
+    if (o.minhash) {
+      try {
+        const pre = minhashPredup(work, {
+          jaccardThreshold: Number(o.minhashThreshold) || 0.85,
+          verify: true,
+        });
+        if (pre && Array.isArray(pre.kept)) {
+          report.deduped += Math.max(0, work.length - pre.kept.length);
+          report.minhash = pre.report;
+          report.n_clusters = (pre.report && typeof pre.report.n_clusters === 'number')
+            ? pre.report.n_clusters
+            : (Array.isArray(pre.clusters) ? pre.clusters.length : null);
+          report.backend_used = 'minhash-js';
+          work = pre.kept;
+        }
+      } catch (e) {
+        // minhash pre-pass is best-effort — never fails curate.
+        report.minhash = { skipped: 'error:' + String((e && e.message) || e) };
+      }
+    }
+
     // b. dedup — semantic near-dup removal via python (degrades to no-op).
     if (o.dedup) {
       const ded = _dedupViaPython(work, ns, o.dedupThreshold);
       if (ded.note === 'ok') {
-        report.deduped = Math.max(0, work.length - ded.kept.length);
+        report.deduped += Math.max(0, work.length - ded.kept.length);
         report.dedup = 'ok';
+        const pyBackend = 'python:' + (ded.backend || 'unknown');
+        report.backend_used = report.backend_used === 'minhash-js'
+          ? 'minhash-js+' + pyBackend
+          : pyBackend;
         work = ded.kept;
       } else {
         report.dedup = ded.note; // 'skipped:<reason>'
@@ -345,6 +464,43 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
           _setPairOutput(p, redactPii(out));
           report.pii_redacted += 1;
         }
+      }
+    }
+
+    // f. select — OPT-IN informative-subset SELECTION (off unless target_size>0).
+    //    CURATE only FILTERS by default; this caps the survivors to a budget-
+    //    bounded, diversity-aware (or target-distribution-matched) subset so
+    //    teacher tokens are spent on the most informative pairs, not near-dups.
+    //    Pure JS via src/data-select.js → never throws / hangs / spawns python.
+    const targetSize = Number(o.target_size);
+    if (Number.isFinite(targetSize) && targetSize > 0 && work.length > 0) {
+      try {
+        const strategy = o.select_strategy === 'dsir' ? 'dsir' : 'diversity';
+        const selOpts = {
+          diversity_tau: Number.isFinite(Number(o.diversity_tau)) ? Number(o.diversity_tau) : 0.9,
+        };
+        if (strategy === 'dsir' && Array.isArray(o.target_items) && o.target_items.length) {
+          selOpts.target_items = o.target_items;
+        }
+        const sel = selectInformativeSubset(work, targetSize, selOpts);
+        if (sel && Array.isArray(sel.kept)) {
+          const beforeSel = work.length;
+          work = sel.kept;
+          report.selection = {
+            strategy,
+            target_size: targetSize,
+            diversity_tau: selOpts.diversity_tau,
+            n_in: beforeSel,
+            n_selected: work.length,
+            dropped: Math.max(0, beforeSel - work.length),
+            coverage_radius: sel.coverage_radius,
+            basis: sel.basis,
+            version: sel.version,
+          };
+        }
+      } catch (e) {
+        // selection is best-effort — never fails curate; record why it didn't run.
+        report.selection = { skipped: 'error:' + String((e && e.message) || e) };
       }
     }
 
@@ -390,6 +546,7 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
 export default {
   CURATE_VERSION,
   curatePairs,
+  scoreCandidateLocal,
   flagCot,
   flagPii,
   redactPii,

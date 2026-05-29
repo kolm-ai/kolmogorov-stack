@@ -33,7 +33,32 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
+// W921 — real depth-D gradient-boosted regressor (src/gbm-regressor.js), wired
+// in BEHIND this module's existing train/predict API as an OPT-IN engine. The
+// default path remains the W832 toy stump GBM, so every existing caller + test
+// behaves identically by default. The GBM engine activates only when explicitly
+// requested (opts.engine==='gbm' / KOLM_META_ENGINE=gbm) AND there are enough
+// rows to fit it; below the row floor it falls back to the stump automatically.
+import * as gbm from './gbm-regressor.js';
+
 export const META_VERSION = 'w832-v1';
+
+// W921 — opt-in engine selection. 'stump' (W832 default, unchanged) or 'gbm'
+// (the real depth-D regressor). Env override lets an operator flip the engine
+// without a code change; an explicit opts.engine wins over the env.
+export const META_ENGINE_STUMP = 'stump';
+export const META_ENGINE_GBM = 'gbm';
+
+// Minimum training rows before the real GBM is worth fitting. Below this the
+// engine falls back to the stump even when 'gbm' is requested, so a thin
+// backfill never trains a deep tree on too little signal (and the determinism /
+// holdout machinery in gbm-regressor stays well-conditioned).
+export const MIN_ROWS_FOR_GBM_ENGINE = Number(process.env.KOLM_META_GBM_MIN_ROWS || 24);
+
+function _resolveEngine(optEngine) {
+  const want = String(optEngine || process.env.KOLM_META_ENGINE || META_ENGINE_STUMP).toLowerCase();
+  return want === META_ENGINE_GBM ? META_ENGINE_GBM : META_ENGINE_STUMP;
+}
 
 // Frozen so a test can pin the exact feature contract — a re-ordering or rename
 // would invalidate any persisted model and the test catches it.
@@ -324,10 +349,128 @@ function _trainFailureClassifier(xs, failureModeRows) {
 }
 
 // =============================================================================
+// W921 — real GBM engine (behind the same API).
+//
+// These helpers wrap src/gbm-regressor.js. The feature matrix + targets are the
+// SAME ones the stump path builds (_coerceFeatures over META_FEATURES), so the
+// GBM is a drop-in replacement for the per-target stump ensemble. Each target
+// (kscore, compile_time, per-failure-class one-vs-rest) gets its own GBM model.
+// The serialized output rides in additive model fields so the on-disk shape is a
+// strict superset of the W832 model; inferKolmMeta routes by inspecting the
+// stored engine tag.
+// =============================================================================
+
+// GBM hyperparameters for the meta-task. Conservative depth-3 with subsampling
+// + L2 + early stopping (the gbm-regressor defaults already encode this, but we
+// pin a seed so retrains are byte-deterministic — the W832 promise).
+const GBM_META_OPTS = Object.freeze({
+  max_depth: 3,
+  n_trees: 200,
+  learning_rate: 0.05,
+  subsample: 0.8,
+  colsample: 0.7,
+  lambda: 1.0,
+  gamma: 0.0,
+  min_child_weight: 3,
+  early_stopping_rounds: 20,
+  seed: 1337,
+  n_features: META_FEATURES.length,
+});
+
+function _trainOneTargetRealGBM(xs, ys) {
+  // gbm.fit returns a serializable model object; keep it as-is in the meta model.
+  return gbm.fit(xs, ys, GBM_META_OPTS);
+}
+
+function _predictRealGBM(model, xRow) {
+  const v = gbm.predict(model, xRow);
+  return Number.isFinite(v) ? v : 0;
+}
+
+// One-vs-rest failure classifier using real GBMs (mirrors _trainFailureClassifier).
+function _trainFailureClassifierGBM(xs, failureModeRows) {
+  const labelSet = new Set();
+  for (const row of failureModeRows) {
+    if (!Array.isArray(row)) continue;
+    for (const lab of row) labelSet.add(String(lab));
+  }
+  const labels = Array.from(labelSet).sort();
+  if (labels.length === 0) return { labels: [], gbms: {} };
+  const gbms = {};
+  for (const lab of labels) {
+    const ys = new Array(xs.length);
+    for (let i = 0; i < xs.length; i++) {
+      ys[i] = (Array.isArray(failureModeRows[i]) && failureModeRows[i].includes(lab)) ? 1 : 0;
+    }
+    gbms[lab] = _trainOneTargetRealGBM(xs, ys);
+  }
+  return { labels, gbms };
+}
+
+// Split-conformal calibration over an absolute-residual holdout.
+//
+// Q = the b-th order statistic of {|y_i - pred_i|}, b = ceil((1-alpha)(n+1)),
+// which yields the distribution-free finite-sample marginal-coverage interval
+// [pred-Q, pred+Q] at level 1-alpha (Angelopoulos & Bates 2021). When the
+// calibration pool is too thin (b>n) Q is undefined and we report undercalibrated
+// so the caller keeps its existing (point) band instead of a false-tight CI.
+function _splitConformalCalibrate(model, xsCal, ysCal, alpha) {
+  const a = Number.isFinite(Number(alpha)) && Number(alpha) > 0 && Number(alpha) < 1 ? Number(alpha) : 0.10;
+  const scores = [];
+  for (let i = 0; i < xsCal.length; i++) {
+    const pred = _predictRealGBM(model, xsCal[i]);
+    const y = Number(ysCal[i]);
+    if (!Number.isFinite(pred) || !Number.isFinite(y)) continue;
+    scores.push(Math.abs(y - pred));
+  }
+  scores.sort((x, y) => x - y);
+  const n = scores.length;
+  const b = Math.ceil((1 - a) * (n + 1));
+  if (n === 0 || b > n) {
+    return { Q: null, n_cal: n, alpha: a, coverage_target: 1 - a, undercalibrated: true };
+  }
+  return { Q: scores[b - 1], n_cal: n, alpha: a, coverage_target: 1 - a, undercalibrated: false };
+}
+
+// Build the GBM-engine meta model. Splits a deterministic calibration holdout
+// (last calib_frac of the rows after a seeded shuffle handled by gbm-regressor's
+// own internal split is for early-stopping; here we carve a SEPARATE conformal
+// holdout so the interval is honest). Returns the model object to persist.
+function _trainKolmMetaGBM({ xs, ysKscore, ysCompile, failureModeRows, nRows, alpha, calib_frac }) {
+  const a = Number.isFinite(Number(alpha)) && Number(alpha) > 0 && Number(alpha) < 1 ? Number(alpha) : 0.10;
+  const cf = Number.isFinite(Number(calib_frac)) && Number(calib_frac) > 0 && Number(calib_frac) < 0.9
+    ? Number(calib_frac) : 0.3;
+
+  // Deterministic conformal split: take the last cf-fraction as calibration.
+  // (gbm-regressor's seeded PRNG handles the train-time early-stopping holdout
+  // separately; this slice is only used to compute Q.)
+  const nCal = Math.max(0, Math.min(nRows - 2, Math.floor(nRows * cf)));
+  const nFit = nRows - nCal;
+
+  const xsFit = xs.slice(0, nFit);
+  const ysKFit = ysKscore.slice(0, nFit);
+  const ysCFit = ysCompile.slice(0, nFit);
+  const failFit = failureModeRows.slice(0, nFit);
+
+  const kscoreGBM = _trainOneTargetRealGBM(xsFit, ysKFit);
+  const compileGBM = _trainOneTargetRealGBM(xsFit, ysCFit);
+  const failureClf = _trainFailureClassifierGBM(xsFit, failFit);
+
+  // Conformal Q on the held-out calibration slice (kscore target only — the
+  // interval the autopilot consumes is the K-Score interval).
+  let conformal = { Q: null, n_cal: nCal, alpha: a, coverage_target: 1 - a, undercalibrated: true };
+  if (nCal >= 2) {
+    conformal = _splitConformalCalibrate(kscoreGBM, xs.slice(nFit), ysKscore.slice(nFit), a);
+  }
+
+  return { kscoreGBM, compileGBM, failureClf, conformal };
+}
+
+// =============================================================================
 // Public train + infer
 // =============================================================================
 
-export function trainKolmMeta({ rows, model_path = null } = {}) {
+export function trainKolmMeta({ rows, model_path = null, engine = null, alpha = 0.10, calib_frac = 0.3 } = {}) {
   if (!Array.isArray(rows)) {
     return { ok: false, error: 'rows_must_be_array', version: META_VERSION };
   }
@@ -353,28 +496,76 @@ export function trainKolmMeta({ rows, model_path = null } = {}) {
     ysCompile[i] = Number.isFinite(Number(obs.compile_time_s)) ? Number(obs.compile_time_s) : 0;
     failureModeRows[i] = Array.isArray(obs.failure_modes) ? obs.failure_modes : [];
   }
-  const kscoreGBM = _trainOneTargetGBM(xs, ysKscore);
-  const compileGBM = _trainOneTargetGBM(xs, ysCompile);
-  const failureClf = _trainFailureClassifier(xs, failureModeRows);
+  // W921 — engine selection. Default 'stump' (W832, unchanged byte-for-byte).
+  // 'gbm' activates the real depth-D regressor BUT silently downgrades back to
+  // the stump when there are too few rows to fit it, so a thin pool never trains
+  // a deep tree (and the default behavior + existing tests are untouched).
+  let resolvedEngine = _resolveEngine(engine);
+  if (resolvedEngine === META_ENGINE_GBM && rows.length < MIN_ROWS_FOR_GBM_ENGINE) {
+    resolvedEngine = META_ENGINE_STUMP;
+  }
 
-  const model = {
-    schema: META_VERSION,
-    trained_at: new Date().toISOString(),
-    n_train_rows: rows.length,
-    feature_order: META_FEATURES.slice(),
-    target_order: META_TARGETS.slice(),
-    hyperparameters: { n_trees: N_TREES, learning_rate: LEARNING_RATE, max_depth: 1 },
-    kscore_gbm: kscoreGBM,
-    compile_time_gbm: compileGBM,
-    failure_classifier: failureClf,
-    // Document the honest bounds INSIDE the model file so anyone inspecting
-    // it knows it is not XGBoost.
-    honesty: {
-      implementation: 'toy_stump_gbm',
-      not_a_substitute_for: 'xgboost_or_lightgbm',
-      production_path: 'apps/trainer/meta_xgb.py worker shell',
-    },
-  };
+  let model;
+  if (resolvedEngine === META_ENGINE_GBM) {
+    const fit = _trainKolmMetaGBM({
+      xs, ysKscore, ysCompile, failureModeRows,
+      nRows: rows.length, alpha, calib_frac,
+    });
+    model = {
+      schema: META_VERSION,
+      engine: META_ENGINE_GBM,
+      trained_at: new Date().toISOString(),
+      n_train_rows: rows.length,
+      feature_order: META_FEATURES.slice(),
+      target_order: META_TARGETS.slice(),
+      hyperparameters: {
+        max_depth: GBM_META_OPTS.max_depth,
+        n_trees: GBM_META_OPTS.n_trees,
+        learning_rate: GBM_META_OPTS.learning_rate,
+        subsample: GBM_META_OPTS.subsample,
+        colsample: GBM_META_OPTS.colsample,
+        lambda: GBM_META_OPTS.lambda,
+        gamma: GBM_META_OPTS.gamma,
+        min_child_weight: GBM_META_OPTS.min_child_weight,
+        early_stopping_rounds: GBM_META_OPTS.early_stopping_rounds,
+        seed: GBM_META_OPTS.seed,
+      },
+      kscore_gbm: fit.kscoreGBM,
+      compile_time_gbm: fit.compileGBM,
+      failure_classifier: fit.failureClf,
+      // Split-conformal calibration of the K-Score interval (the distribution-
+      // free, finite-sample replacement for the n/1000 confidence proxy).
+      conformal: fit.conformal,
+      honesty: {
+        implementation: 'depth_d_gbm',
+        engine: META_ENGINE_GBM,
+        interval: 'split_conformal',
+      },
+    };
+  } else {
+    const kscoreGBM = _trainOneTargetGBM(xs, ysKscore);
+    const compileGBM = _trainOneTargetGBM(xs, ysCompile);
+    const failureClf = _trainFailureClassifier(xs, failureModeRows);
+
+    model = {
+      schema: META_VERSION,
+      trained_at: new Date().toISOString(),
+      n_train_rows: rows.length,
+      feature_order: META_FEATURES.slice(),
+      target_order: META_TARGETS.slice(),
+      hyperparameters: { n_trees: N_TREES, learning_rate: LEARNING_RATE, max_depth: 1 },
+      kscore_gbm: kscoreGBM,
+      compile_time_gbm: compileGBM,
+      failure_classifier: failureClf,
+      // Document the honest bounds INSIDE the model file so anyone inspecting
+      // it knows it is not XGBoost.
+      honesty: {
+        implementation: 'toy_stump_gbm',
+        not_a_substitute_for: 'xgboost_or_lightgbm',
+        production_path: 'apps/trainer/meta_xgb.py worker shell',
+      },
+    };
+  }
   const outPath = model_path || _defaultModelPath();
   try {
     fs.mkdirSync(path.dirname(outPath), { recursive: true });
@@ -387,7 +578,25 @@ export function trainKolmMeta({ rows, model_path = null } = {}) {
       version: META_VERSION,
     };
   }
-  return { ok: true, model, model_path: outPath, version: META_VERSION };
+  return {
+    ok: true,
+    model,
+    model_path: outPath,
+    version: META_VERSION,
+    // Additive: which engine actually trained + the conformal block (gbm only).
+    engine: resolvedEngine,
+    conformal: (resolvedEngine === META_ENGINE_GBM) ? model.conformal : null,
+  };
+}
+
+// Engine-aware single-target inference. A 'gbm'-tagged model predicts through
+// gbm-regressor; otherwise the legacy stump path. Never returns NaN.
+function _predictTargetForModel(metaModel, targetModel, xRow) {
+  if (!targetModel) return 0;
+  if (metaModel && metaModel.engine === META_ENGINE_GBM) {
+    return _predictRealGBM(targetModel, xRow);
+  }
+  return _predictGBM(targetModel, xRow);
 }
 
 export function inferKolmMeta({ features, model_path = null } = {}) {
@@ -423,8 +632,8 @@ export function inferKolmMeta({ features, model_path = null } = {}) {
   }
   _validateFeatures(features);
   const x = _coerceFeatures(features);
-  const kscore_predicted = _predictGBM(model.kscore_gbm, x);
-  const compile_time_s_predicted = _predictGBM(model.compile_time_gbm, x);
+  const kscore_predicted = _predictTargetForModel(model, model.kscore_gbm, x);
+  const compile_time_s_predicted = _predictTargetForModel(model, model.compile_time_gbm, x);
   // Failure mode: pick argmax among label scores. If no labels, return null.
   let failure_mode_predicted = null;
   let failure_mode_scores = {};
@@ -432,8 +641,8 @@ export function inferKolmMeta({ features, model_path = null } = {}) {
     let bestLab = null;
     let bestScore = -Infinity;
     for (const lab of model.failure_classifier.labels) {
-      const gbm = model.failure_classifier.gbms[lab];
-      const score = gbm ? _predictGBM(gbm, x) : 0;
+      const clfModel = model.failure_classifier.gbms[lab];
+      const score = clfModel ? _predictTargetForModel(model, clfModel, x) : 0;
       failure_mode_scores[lab] = score;
       if (score > bestScore) { bestScore = score; bestLab = lab; }
     }
@@ -442,7 +651,8 @@ export function inferKolmMeta({ features, model_path = null } = {}) {
   // Heuristic confidence: shrink toward 0 when training-set support is thin.
   // n=1000 → 1.0; n=100 → 0.1. NOT a calibrated posterior.
   const confidence = Math.max(0, Math.min(1, (model.n_train_rows || 0) / 1000));
-  return {
+
+  const out = {
     ok: true,
     status: 'predicted',
     kscore_predicted,
@@ -453,6 +663,29 @@ export function inferKolmMeta({ features, model_path = null } = {}) {
     n_train_rows: model.n_train_rows || 0,
     version: META_VERSION,
   };
+
+  // W921 additive: for a GBM-engine model, attach the split-conformal K-Score
+  // interval [pred-Q, pred+Q] clamped to [0,1] + coverage target. The legacy
+  // `confidence` field is preserved untouched; this is a strict superset.
+  out.engine = (model.engine === META_ENGINE_GBM) ? META_ENGINE_GBM : META_ENGINE_STUMP;
+  if (model.engine === META_ENGINE_GBM && model.conformal
+      && Number.isFinite(Number(model.conformal.Q)) && !model.conformal.undercalibrated) {
+    const Q = Number(model.conformal.Q);
+    const lo = Math.max(0, Math.min(1, kscore_predicted - Q));
+    const hi = Math.max(0, Math.min(1, kscore_predicted + Q));
+    out.ci = [lo, hi];
+    out.conformal_Q = Q;
+    out.coverage_target = Number(model.conformal.coverage_target);
+    out.conformal_basis = 'split_conformal';
+  } else if (model.engine === META_ENGINE_GBM) {
+    // GBM but calibration pool too thin to certify coverage — honest signal.
+    out.ci = null;
+    out.conformal_Q = null;
+    out.coverage_target = model.conformal ? Number(model.conformal.coverage_target) : null;
+    out.conformal_basis = 'undercalibrated';
+  }
+
+  return out;
 }
 
 export const __internals = Object.freeze({
@@ -463,4 +696,10 @@ export const __internals = Object.freeze({
   _predictGBM,
   _trainingRowsPath,
   _defaultModelPath,
+  // W921 GBM engine internals.
+  _resolveEngine,
+  _trainOneTargetRealGBM,
+  _predictRealGBM,
+  _splitConformalCalibrate,
+  _trainKolmMetaGBM,
 });

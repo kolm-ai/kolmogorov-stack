@@ -303,6 +303,22 @@ export async function ingestDescribe(description, opts = {}) {
   };
 }
 
+// W921 — object-arg wrapper consumed by the autopilot bootstrap. Normalizes the
+// ingestDescribe result into an {ok:true, ...} envelope (the bootstrap gates on
+// seed.ok === true). Errors propagate to the caller's try/catch.
+export async function ingestDescribeEngine({ tenant, namespace, description, n, count, budgetUsd, teacherBaseUrl, teacherKey, onProgress } = {}) {
+  const result = await ingestDescribe(description, {
+    count: n != null ? n : count,
+    namespace,
+    tenant,
+    budgetUsd,
+    teacherBaseUrl,
+    teacherKey,
+    onProgress,
+  });
+  return { ok: true, ...result };
+}
+
 async function synthesizeViaTeacher(description, count, { teacherBase, teacherKey, onProgress }) {
   const out = [];
   const batchSize = 20;

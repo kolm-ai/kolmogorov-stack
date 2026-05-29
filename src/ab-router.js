@@ -416,9 +416,29 @@ export async function getAbStatus({ tenant, ab_test_id } = {}) {
   const kscore_a = mean(samples_a);
   const kscore_b = mean(samples_b);
   let sig_test = null;
+  // W921 — additive anytime-valid (GAVI) interval so the dashboard can render a
+  // peeking-safe confidence sequence alongside the legacy fixed-horizon CI. This
+  // does NOT replace sig_test (welchT); it is a strict additive field.
+  let sequential = null;
   try {
-    const { welchT } = await import('./stat-sig.js');
+    const { welchT, gaviConfidenceSequence } = await import('./stat-sig.js');
     sig_test = welchT({ samples_a, samples_b });
+    try {
+      const gavi = gaviConfidenceSequence({ samples_a, samples_b });
+      if (gavi && gavi.ok) {
+        sequential = {
+          method: 'gavi',
+          mean_diff: gavi.mean_diff,
+          cs_low: gavi.lower,
+          cs_high: gavi.upper,
+          half_width: gavi.half_width,
+          t: gavi.t,
+          version: gavi.version,
+        };
+      } else if (gavi) {
+        sequential = { method: 'gavi', ok: false, error: gavi.error || 'insufficient_samples', version: gavi.version };
+      }
+    } catch (_) { /* advisory only; never fails getAbStatus */ }
   } catch (e) {
     sig_test = {
       ok: false,
@@ -427,7 +447,7 @@ export async function getAbStatus({ tenant, ab_test_id } = {}) {
       p: null,
     };
   }
-  return {
+  const out = {
     ok: true,
     ab_test_id,
     status: rec.status,
@@ -437,6 +457,86 @@ export async function getAbStatus({ tenant, ab_test_id } = {}) {
     kscore_b,
     record: _publicRecord(rec),
     sig_test,
+    version: AB_ROUTER_VERSION,
+  };
+  if (sequential) out.sequential = sequential;
+  return out;
+}
+
+// =============================================================================
+// W921 — sequentialDecision: anytime-valid (mSPRT / GAVI) A/B verdict.
+//
+// Reads the SAME per-arm kscore samples as autoRollback's legacy gate path, then
+// runs the always-valid sequentialGate (src/stat-sig.js) which is valid at every
+// sample size simultaneously — safe for the autopilot's continuous per-tick
+// peeking. This is ADDITIVE: it does not modify recordOutcome / readSamples /
+// autoRollback's default decision; consumers (e.g. the deploy guardrail) opt in
+// by calling this explicitly.
+// =============================================================================
+
+/**
+ * @param {Object} args
+ * @param {string} args.tenant
+ * @param {string} args.ab_test_id
+ * @param {'msprt'|'gavi'} [args.method='msprt']
+ * @param {number} [args.alpha]
+ * @param {number} [args.tau_sq]
+ * @param {number} [args.n_tune]
+ * @param {number} [args.min_effect_size]
+ * @param {number} [args.min_n]
+ * @returns {Promise<{ ok:boolean, decision:'promote'|'rollback'|'continue',
+ *   method:string, avp?:number, cs_low?:number, cs_high?:number,
+ *   effect_size?:number, n_a?:number, n_b?:number, seq_version?:string,
+ *   version:string, error?:string }>}
+ */
+export async function sequentialDecision({ tenant, ab_test_id, method = 'msprt', alpha, tau_sq, n_tune, min_effect_size, min_n } = {}) {
+  if (!tenant || !ab_test_id) {
+    return {
+      ok: false,
+      error: 'missing_args',
+      hint: 'sequentialDecision requires tenant + ab_test_id',
+      version: AB_ROUTER_VERSION,
+    };
+  }
+  const rec = _readTest({ tenant, ab_test_id });
+  if (!rec) {
+    return {
+      ok: false,
+      error: 'not_found',
+      hint: 'no ab_test for (tenant=' + tenant + ', ab_test_id=' + ab_test_id + ')',
+      version: AB_ROUTER_VERSION,
+    };
+  }
+  let res;
+  try {
+    const ss = await import('./stat-sig.js');
+    res = await ss.sequentialGate({
+      tenant, ab_test_id, method,
+      alpha: Number.isFinite(Number(alpha)) ? Number(alpha) : undefined,
+      tau_sq: Number.isFinite(Number(tau_sq)) ? Number(tau_sq) : undefined,
+      n_tune: Number.isFinite(Number(n_tune)) ? Number(n_tune) : undefined,
+      min_effect_size: Number.isFinite(Number(min_effect_size)) ? Number(min_effect_size) : undefined,
+      min_n: Number.isFinite(Number(min_n)) ? Number(min_n) : undefined,
+    });
+  } catch (e) {
+    return {
+      ok: false,
+      error: 'stat_sig_unavailable',
+      detail: String(e && e.message || e),
+      version: AB_ROUTER_VERSION,
+    };
+  }
+  return {
+    ok: !!(res && res.ok),
+    decision: res && res.decision,
+    method: res && res.method,
+    avp: res && res.avp,
+    cs_low: res && res.cs_low,
+    cs_high: res && res.cs_high,
+    effect_size: res && res.effect_size,
+    n_a: res && res.n_a,
+    n_b: res && res.n_b,
+    seq_version: res && res.version,
     version: AB_ROUTER_VERSION,
   };
 }
@@ -985,6 +1085,8 @@ export default {
   promoteArm,
   autoRollback,
   listOutcomeEvents,
+  // W921 anytime-valid sequential A/B decision (additive).
+  sequentialDecision,
   // W822 surface
   W822_AB_VERSION,
   setSplit,

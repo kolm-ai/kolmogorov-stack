@@ -59,6 +59,16 @@ import {
   n_rows as metaNRows,
   MIN_ROWS_FOR_META,
 } from './kolm-meta-trainer.js';
+// W921 — split-conformal calibrated interval, attached as an ADDITIVE field
+// (predicted_interval) alongside the existing point-estimate `ci` band. The
+// legacy `ci` is left untouched; this is a strict superset of the qp-v1
+// envelope and activates only when a calibration pool clears MIN_CONFORMAL_CAL.
+import {
+  conformalInterval,
+  splitConformalQuantile,
+  MIN_CONFORMAL_CAL,
+  CONFORMAL_VERSION,
+} from './conformal.js';
 
 export const QUALITY_PREDICTOR_VERSION = 'qp-v1';
 
@@ -230,6 +240,76 @@ function _heuristicK(sub) {
 }
 
 // ---------------------------------------------------------------------------
+// W921 — split-conformal calibrated interval (additive).
+//
+// Builds calibration residuals e_i = | observed_K_i - f_hat(x_i) | over the
+// accumulated meta-training rows, where f_hat is the SAME heuristic point
+// estimator used for the cold path (over each row's preserved _qp_features).
+// Then conformalInterval gives a distribution-free, finite-sample [lo,hi] around
+// the CURRENT point prediction. Returns null when the pool is below
+// MIN_CONFORMAL_CAL (caller simply omits the additive field — zero regression).
+//
+// This is intentionally a SEPARATE, additive signal: it never replaces the
+// existing `ci` band, so every existing caller of predictKScore is unaffected.
+// ---------------------------------------------------------------------------
+function _conformalIntervalForPoint({ tenant, point }) {
+  try {
+    if (!Number.isFinite(Number(point))) return null;
+    const rows = readTrainingRows({ tenant_id: tenant });
+    if (!Array.isArray(rows) || rows.length < MIN_CONFORMAL_CAL) return null;
+
+    const calRows = [];
+    for (const r of rows) {
+      if (!r || typeof r !== 'object') continue;
+      const obs = r.observed || {};
+      const y = Number(obs.kscore);
+      if (!Number.isFinite(y)) continue;
+      // Reconstruct the heuristic point for this row from its preserved
+      // data-quality features (_qp_features), so the residual is on the same
+      // scale as the prediction we are bracketing.
+      const f = (r.features && typeof r.features === 'object' && r.features._qp_features
+        && typeof r.features._qp_features === 'object')
+        ? r.features._qp_features
+        : null;
+      let yhat;
+      if (f) {
+        yhat = _heuristicK(_subScores(f));
+      } else {
+        // No source vector preserved: fall back to the pool mean as f_hat so the
+        // residual still reflects spread (conservative — widens the interval).
+        yhat = null;
+      }
+      if (Number.isFinite(yhat)) calRows.push({ y, yhat });
+      else calRows.push({ residual: null, y });
+    }
+
+    // Drop rows we could not residualize; require the floor on usable rows.
+    const usable = calRows.filter((c) => Number.isFinite(Number(c.y))
+      && (Number.isFinite(Number(c.yhat)) || Number.isFinite(Number(c.residual))));
+    if (usable.length < MIN_CONFORMAL_CAL) return null;
+
+    const iv = conformalInterval({
+      point: Number(point),
+      calRows: usable,
+      alpha: 0.10,
+      mode: 'split',
+    });
+    if (!iv || iv.ok !== true) return null;
+    return {
+      lo: iv.lo,
+      hi: iv.hi,
+      coverage_target: iv.coverage_target,
+      basis: iv.basis,
+      n_cal: iv.n_cal,
+      qhat: iv.qhat,
+      version: CONFORMAL_VERSION,
+    };
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // predictKScore — the public predictor. Heuristic below MIN_ROWS_FOR_META,
 // learned at or above it.
 // ---------------------------------------------------------------------------
@@ -272,17 +352,26 @@ export async function predictKScore({ tenant, namespace, features } = {}) {
       result = _predictHeuristic({ sub, nTrain });
     }
 
+    // W921 — additive split-conformal interval around the point estimate. When
+    // the learned path already produced a meta conformal interval, prefer it;
+    // otherwise compute one from the accumulated calibration pool. null when the
+    // pool is below the floor (field simply absent — no regression).
+    const predicted_interval = (result.conformal_interval && result.conformal_interval.lo != null)
+      ? result.conformal_interval
+      : _conformalIntervalForPoint({ tenant: t, point: result.kscore_predicted });
+
     // Best-effort log of the prediction for later audit / calibration drift.
     const persist = await _persist({
       tenant: t, namespace: ns, workflow: 'quality:predict',
       payload: {
         features, kscore_predicted: result.kscore_predicted, ci: result.ci,
         confidence: result.confidence, basis: result.basis, n_train_rows: nTrain,
+        predicted_interval,
         predicted_at: new Date().toISOString(),
       },
     });
 
-    return {
+    const out = {
       ok: true,
       version: QUALITY_PREDICTOR_VERSION,
       kscore_predicted: result.kscore_predicted,
@@ -292,6 +381,9 @@ export async function predictKScore({ tenant, namespace, features } = {}) {
       n_train_rows: nTrain,
       persisted: persist.persisted === true,
     };
+    // Strict-superset addition: present only when a calibrated interval exists.
+    if (predicted_interval) out.predicted_interval = predicted_interval;
+    return out;
   } catch (e) {
     return { ok: false, error: String((e && e.message) || e), version: QUALITY_PREDICTOR_VERSION };
   }
@@ -342,7 +434,9 @@ async function _predictLearned({ tenant, features, sub, nTrain }) {
     if (!Array.isArray(rows) || rows.length < 2) return null;
 
     // Retrain to the default model path so inferKolmMeta picks it up. trainKolmMeta
-    // is deterministic given identical rows + feature order.
+    // is deterministic given identical rows + feature order. The engine defaults
+    // to the W832 stump (unchanged); KOLM_META_ENGINE=gbm opts into the real
+    // depth-D regressor BEHIND this same call (resolved inside trainKolmMeta).
     const trained = trainKolmMeta({ rows });
     if (!trained || trained.ok !== true) return null;
 
@@ -361,16 +455,34 @@ async function _predictLearned({ tenant, features, sub, nTrain }) {
     const confidence = _round4(Math.max(0.5, Math.min(0.95, 0.5 + 0.45 * gbmConf)));
 
     // Tighter band than the cold path: ~0.12 at min learned confidence, ~0.05
-    // at high confidence.
+    // at high confidence. (Legacy point-estimate band — UNCHANGED.)
     const half = 0.155 - 0.11 * confidence;
     const lo = _round4(_clampK(k - half));
     const hi = _round4(_clampK(k + half));
+
+    // W921 additive: if the GBM engine attached a split-conformal K-Score
+    // interval, carry it up so predictKScore can surface predicted_interval
+    // straight from the meta model (distribution-free coverage) instead of the
+    // accumulated-pool recompute. Absent on the stump path -> stays null.
+    let conformal_interval = null;
+    if (inf.engine === 'gbm' && Array.isArray(inf.ci)
+        && Number.isFinite(Number(inf.ci[0])) && Number.isFinite(Number(inf.ci[1]))) {
+      conformal_interval = {
+        lo: _round4(_clampK(inf.ci[0])),
+        hi: _round4(_clampK(inf.ci[1])),
+        coverage_target: Number(inf.coverage_target),
+        basis: inf.conformal_basis || 'split_conformal',
+        qhat: Number.isFinite(Number(inf.conformal_Q)) ? Number(inf.conformal_Q) : null,
+        source: 'meta_gbm',
+      };
+    }
 
     return {
       kscore_predicted: _round4(k),
       ci: [lo, hi],
       confidence,
       basis: 'learned',
+      conformal_interval,
     };
   } catch {
     return null;

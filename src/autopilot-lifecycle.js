@@ -66,8 +66,78 @@ export const DEPLOY_WORKFLOW = Object.freeze({
 
 const GRACE_MS = 48 * 60 * 60 * 1000; // 48 hours
 
+// W921 — ship gate on the K-Score composite scale (mirrors src/kscore.js +
+// quality-predictor.js). Used by the conformal-lower-bound advisory below.
+const SHIP_GATE = 0.85;
+
 function _ns(namespace) {
   return String(namespace || 'default').slice(0, 128);
+}
+
+// ---------------------------------------------------------------------------
+// W921 — always-valid (mSPRT / GAVI) sequential A/B advisory.
+//
+// The autopilot peeks the SAME accumulating A/B samples on every cron tick; a
+// fixed-horizon test inflates Type-I error toward 1 under that peeking. The
+// anytime-valid sequentialGate (src/stat-sig.js) is valid at every sample size
+// simultaneously, so consulting it on each tick is safe. This is computed ONLY
+// when an ab_test_id is in scope, and is ADDITIVE: by default it is an advisory
+// signal attached to the decision envelope. It becomes a fail-closed deploy
+// condition ONLY when opts.enforce_sequential === true, so existing deploy
+// behavior (no A/B test wired) is byte-for-byte unchanged.
+// ---------------------------------------------------------------------------
+async function _sequentialAdvisory({ tenant, opts }) {
+  const abTestId = opts && opts.ab_test_id;
+  if (!abTestId) {
+    return { applicable: false, reason: 'no_ab_test', decision: null, version: null };
+  }
+  try {
+    const ss = await import('./stat-sig.js');
+    const method = (opts && opts.seq_method === 'gavi') ? 'gavi' : 'msprt';
+    const res = await ss.sequentialGate({
+      tenant,
+      ab_test_id: abTestId,
+      method,
+      alpha: (opts && Number.isFinite(Number(opts.seq_alpha))) ? Number(opts.seq_alpha) : undefined,
+      min_effect_size: (opts && Number.isFinite(Number(opts.seq_min_effect_size)))
+        ? Number(opts.seq_min_effect_size) : undefined,
+      min_n: (opts && Number.isFinite(Number(opts.seq_min_n))) ? Number(opts.seq_min_n) : undefined,
+    });
+    return {
+      applicable: true,
+      method,
+      decision: res && res.decision,
+      ok: !!(res && res.ok),
+      avp: res && res.avp,
+      cs_low: res && res.cs_low,
+      cs_high: res && res.cs_high,
+      effect_size: res && res.effect_size,
+      n_a: res && res.n_a,
+      n_b: res && res.n_b,
+      version: res && res.version,
+    };
+  } catch (e) {
+    return { applicable: true, error: String((e && e.message) || e), decision: null, version: null };
+  }
+}
+
+// W921 — conformal-lower-bound advisory for the candidate K-Score interval.
+// When the caller supplies the candidate's conformal interval (candidate_ci,
+// e.g. from quality-predictor.predicted_interval / inferKolmMeta), report
+// whether the LOWER bound clears the ship gate. Additive: advisory by default,
+// fail-closed condition only under opts.enforce_conformal === true.
+function _conformalAdvisory({ opts }) {
+  const ci = opts && (opts.candidate_ci || opts.candidate_conformal_interval);
+  const lo = Array.isArray(ci) ? Number(ci[0]) : (ci && Number(ci.lo));
+  if (!Number.isFinite(lo)) {
+    return { applicable: false, reason: 'no_candidate_interval', lower: null, clears_gate: null };
+  }
+  return {
+    applicable: true,
+    lower: lo,
+    ship_gate: SHIP_GATE,
+    clears_gate: lo >= SHIP_GATE,
+  };
 }
 
 function _isoNow() {
@@ -147,6 +217,14 @@ async function _evaluateDeploy({ tenant, namespace, opts, simulate }) {
   const minDelta = (opts && Number.isFinite(Number(opts.min_kscore_delta))) ? Number(opts.min_kscore_delta) : 0.02;
   const maxReg = (opts && Number.isFinite(Number(opts.max_regression_classes))) ? Number(opts.max_regression_classes) : 0;
 
+  // W921 — ADDITIVE guardrail signals the deploy gate can consult. Both are
+  // advisory by default (attached to the envelope, never block) and become
+  // fail-closed conditions only under the explicit opt-in flags
+  // (enforce_sequential / enforce_conformal). With neither an ab_test_id nor a
+  // candidate interval, both are N/A and the deploy path is unchanged.
+  const sequential = await _sequentialAdvisory({ tenant, opts });
+  const conformal = _conformalAdvisory({ opts });
+
   // PROPOSE-ONLY DEFAULT. Never executes a deploy. A compile-worthy candidate
   // writes/refreshes a DEPLOY_PROPOSED row so a later --auto tick can start its
   // 48h grace clock from this timestamp.
@@ -163,12 +241,13 @@ async function _evaluateDeploy({ tenant, namespace, opts, simulate }) {
       });
       return {
         mode: 'propose_only', decision: 'propose', deploy_event: DEPLOY_WORKFLOW.PROPOSED,
-        executed: false, reason: 'propose_only_default', version: LIFECYCLE_VERSION,
+        executed: false, reason: 'propose_only_default',
+        sequential, conformal, version: LIFECYCLE_VERSION,
       };
     }
     return {
       mode: 'propose_only', decision: 'skip', executed: false,
-      reason: 'simulator_skip', version: LIFECYCLE_VERSION,
+      reason: 'simulator_skip', sequential, conformal, version: LIFECYCLE_VERSION,
     };
   }
 
@@ -228,6 +307,30 @@ async function _evaluateDeploy({ tenant, namespace, opts, simulate }) {
   conditions.grace = grace.satisfied;
   if (!conditions.grace) failed.push('grace');
 
+  // (6) W921 OPT-IN — always-valid sequential A/B promote. Off by default
+  // (enforce_sequential!==true) so existing deploy behavior is unchanged. When
+  // enabled AND an ab_test_id is in scope, EXECUTE additionally requires the
+  // anytime-valid gate to say 'promote'; absent an ab_test_id the condition is
+  // N/A (true) so the K-delta path for no-A/B-traffic is preserved.
+  if (opts && opts.enforce_sequential === true) {
+    conditions.sequential_promote = (!sequential.applicable)
+      ? true
+      : sequential.decision === 'promote';
+    if (!conditions.sequential_promote) failed.push('sequential');
+  }
+
+  // (7) W921 OPT-IN — conformal lower bound clears the ship gate. Off by default
+  // (enforce_conformal!==true). When enabled AND a candidate interval is in
+  // scope, EXECUTE additionally requires the conformal LOWER bound >= ship gate
+  // (deploy on the certified floor, not the point estimate); absent a candidate
+  // interval the condition is N/A (true).
+  if (opts && opts.enforce_conformal === true) {
+    conditions.conformal_clears_gate = (!conformal.applicable)
+      ? true
+      : conformal.clears_gate === true;
+    if (!conditions.conformal_clears_gate) failed.push('conformal_below_gate');
+  }
+
   // No proposal yet: the --auto path PROPOSES first (starts the clock), it does
   // not execute on the same tick it first sees a candidate.
   if (!proposedRow) {
@@ -243,12 +346,13 @@ async function _evaluateDeploy({ tenant, namespace, opts, simulate }) {
       });
       return {
         mode: 'auto', decision: 'propose', deploy_event: DEPLOY_WORKFLOW.PROPOSED,
-        executed: false, reason: 'grace_started', conditions, grace, version: LIFECYCLE_VERSION,
+        executed: false, reason: 'grace_started', conditions, grace,
+        sequential, conformal, version: LIFECYCLE_VERSION,
       };
     }
     return {
       mode: 'auto', decision: 'skip', executed: false, reason: 'simulator_skip',
-      conditions, grace, version: LIFECYCLE_VERSION,
+      conditions, grace, sequential, conformal, version: LIFECYCLE_VERSION,
     };
   }
 
@@ -274,7 +378,8 @@ async function _evaluateDeploy({ tenant, namespace, opts, simulate }) {
     });
     return {
       mode: 'auto', decision: 'execute', deploy_event: DEPLOY_WORKFLOW.EXECUTED,
-      executed: true, conditions, grace, promote, version: LIFECYCLE_VERSION,
+      executed: true, conditions, grace, promote,
+      sequential, conformal, version: LIFECYCLE_VERSION,
     };
   }
 
@@ -286,7 +391,8 @@ async function _evaluateDeploy({ tenant, namespace, opts, simulate }) {
   });
   return {
     mode: 'auto', decision: 'hold', deploy_event: DEPLOY_WORKFLOW.GRACE,
-    executed: false, conditions, grace, failed_conditions: failed, version: LIFECYCLE_VERSION,
+    executed: false, conditions, grace, failed_conditions: failed,
+    sequential, conformal, version: LIFECYCLE_VERSION,
   };
 }
 
@@ -462,6 +568,10 @@ export const __internals = Object.freeze({
   DEPLOY_WORKFLOW,
   GRACE_MS,
   STRATEGIES,
+  // W921 additive advisories.
+  _sequentialAdvisory,
+  _conformalAdvisory,
+  SHIP_GATE,
 });
 
 export default {
