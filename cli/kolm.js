@@ -1141,6 +1141,18 @@ USAGE
   kolm compile "<task>" [opts]                  cloud compile from a task description
   kolm compile --spec <file.json> [--out <p>]   offline build from a JSON spec
   kolm compile --spec - [--out <p>]             offline build from JSON on stdin
+  kolm compile --auto [opts]                    run the full data-engine pipeline
+
+OPTIONS (auto / data-engine)
+  --auto                       run the W921 data-engine pipeline end to end
+                               (ingest -> curate -> augment -> evaluate ->
+                               feedback) instead of a hand-authored spec.
+                               Prints a per-stage summary (JSON under --json).
+  --describe <text>            natural-language goal for the auto pipeline
+  --data <dir>                 corpus dir to ingest (auto + cloud)
+  --docs <dir>                 docs dir to ground curation/augmentation on
+  --approve-cost <usd>         auto-approve pipeline spend up to this ceiling
+  --namespace, -n <ns>         namespace to operate on (default: default)
 
 OPTIONS (cloud)
   --data <dir>                 corpus dir to ground the compile in (Recall)
@@ -4600,10 +4612,19 @@ USAGE
   kolm autopilot savings  --namespace <ns>             [--window-days N] [--json]
   kolm autopilot tick     --namespace <ns>             [--json]
   kolm autopilot disable  --namespace <ns>             (alias for stop)
+  kolm autopilot plan     [--budget <usd>] [--target-k <k>] [--namespace <ns>] [--json]
+  kolm autopilot analyze  [--run-dir <p>] [--eval-path <p>] [--namespace <ns>] [--json]
+  kolm autopilot temporal [--window-days N] [--namespace <ns>] [--json]
+  kolm autopilot "<free-text description>" [--namespace <ns>] [--budget <usd>] [--auto]
 
 FLAGS
   --namespace, -n <ns>     namespace to operate on (default: default)
-  --window-days <N>        savings rolling window (default 30, max 365)
+  --window-days <N>        savings/temporal rolling window (default 30, max 365)
+  --budget <usd>           plan/describe budget ceiling in USD
+  --target-k <k>           plan target K-score
+  --run-dir <p>            analyze: directory of a finished run
+  --eval-path <p>          analyze: path to an eval result file
+  --auto                   describe: let the lifecycle act without confirmation
   --json                   deterministic JSON envelope output
 
 VERBS
@@ -4613,6 +4634,12 @@ VERBS
   savings    GET  /v1/autopilot/savings  - conservative dollar savings vs baseline
   tick       GET  /v1/autopilot/tick     - force one tick (cron normally drives)
   disable    alias for stop
+  plan       POST /v1/autopilot/plan     - rank distill strategies under a budget
+  analyze    POST /v1/autopilot/analyze  - cluster eval failures + draft fix pairs
+  temporal   GET  /v1/autopilot/temporal - capture coverage over a time window
+  "<text>"   POST /v1/autopilot/tick     - "describe and done": one full lifecycle
+             tick driven by a natural-language description (any first arg that is
+             not a known verb is treated as the description)
 
 DISCLOSURE
   System-tray integration (taskbar widget, OS-level start-on-boot) is on the
@@ -4635,6 +4662,10 @@ EXAMPLE
   kolm autopilot start --namespace prod
   kolm autopilot status --namespace prod --json
   kolm autopilot savings --namespace prod --window-days 7 --json
+  kolm autopilot plan --budget 25 --target-k 0.9 --namespace prod
+  kolm autopilot analyze --run-dir ./runs/last --namespace prod
+  kolm autopilot temporal --window-days 30 --namespace prod
+  kolm autopilot "improve refund-classifier accuracy" --namespace prod --budget 20 --auto
 `,
 };
 
@@ -8046,6 +8077,69 @@ async function cmdCompile(args) {
       console.log(tp.formatTable());
       console.log('');
       console.log('Use: kolm compile --target-profile <profile> --spec my.spec.json');
+    }
+    return;
+  }
+
+  // W921 — `kolm compile --auto` runs the full data-engine pipeline
+  // (ingest -> curate -> augment -> evaluate -> feedback) instead of the
+  // hand-authored spec/local/rent paths. The orchestrator lives in
+  // src/data-engine.js; the CLI only resolves tenant + namespace, parses the
+  // describe/data/docs/approve-cost flags, and prints a per-stage summary.
+  // This short-circuits BEFORE any other flag resolution so existing compile
+  // behaviour is untouched whenever --auto is absent.
+  if (args.includes('--auto')) {
+    const autoJson = args.includes('--json');
+    const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || 'default';
+    const describe = pickFlag(args, '--describe') || null;
+    const data = pickFlag(args, '--data') || null;
+    const docs = pickFlag(args, '--docs') || null;
+    const approveCostRaw = pickFlag(args, '--approve-cost');
+    const approve_cost_usd = approveCostRaw != null && approveCostRaw !== ''
+      ? Number(approveCostRaw)
+      : null;
+    const c = loadConfig();
+    const tenant = process.env.KOLM_TENANT_ID
+      || (c && c.tenant_id)
+      || (c && c.api_key ? `tenant_${String(c.api_key).slice(3, 19)}` : 'tenant_local');
+    let orchestratePipeline;
+    try {
+      ({ orchestratePipeline } = await import('../src/data-engine.js'));
+    } catch (e) {
+      const env = { ok: false, error: 'data_engine_module_missing', detail: e && e.message ? e.message : String(e), version: 'data-engine-v1' };
+      if (autoJson) console.log(JSON.stringify(env, null, 2));
+      else console.error('error: ' + env.error + ' - ' + env.detail);
+      process.exit(EXIT.MISSING_PREREQ);
+    }
+    let env;
+    try {
+      env = await orchestratePipeline({
+        tenant,
+        namespace,
+        opts: { describe, data, docs, approve_cost_usd },
+      });
+    } catch (e) {
+      env = { ok: false, error: 'orchestrate_failed', detail: e && e.message ? e.message : String(e), version: 'data-engine-v1' };
+    }
+    if (autoJson) {
+      console.log(JSON.stringify(env, null, 2));
+    } else if (env && env.ok) {
+      console.log('compile --auto (data-engine ' + (env.version || 'data-engine-v1') + ')');
+      console.log('  namespace: ' + (env.namespace || namespace));
+      const stages = (env && env.stages) || {};
+      const order = ['ingest', 'curate', 'augment', 'evaluate', 'feedback'];
+      for (const name of order) {
+        if (!(name in stages)) continue;
+        const s = stages[name] || {};
+        const ok = s.ok === false ? 'FAIL' : 'ok';
+        const detail = s.summary || s.detail || s.note
+          || (s.error ? ('error: ' + s.error) : '');
+        console.log('  ' + (name + ':').padEnd(11) + ok + (detail ? '  ' + detail : ''));
+      }
+    } else {
+      console.error('compile --auto: ' + ((env && env.error) || 'failed'));
+      if (env && env.detail) console.error('  detail: ' + env.detail);
+      process.exit(EXIT.EXECUTION);
     }
     return;
   }
@@ -16892,6 +16986,47 @@ async function cmdW832Meta(args) {
     } else {
       features = { capture_count: 100, teacher_class: 'open-weights', task_type: 'kd_softmax' };
     }
+
+    // W921 — `kolm meta predict` PREFERS the quality-predictor route
+    // (GET /v1/quality/predict -> src/quality-predictor.js#predictKScore) when
+    // an API key + base are configured. The local toy meta-model
+    // (inferKolmMeta) remains the fallback so the existing offline behaviour is
+    // untouched. --namespace is forwarded; --features is JSON-encoded into the
+    // query string.
+    let cfg = null;
+    try { cfg = loadConfig(); } catch (_) { cfg = null; }
+    if (cfg && cfg.api_key && cfg.base) {
+      const namespace = pickFlag(rest, '--namespace') || pickFlag(rest, '-n') || 'default';
+      const base = cfg.base.replace(/\/+$/, '');
+      let qpath = '/v1/quality/predict?namespace=' + encodeURIComponent(namespace)
+        + '&features=' + encodeURIComponent(JSON.stringify(features));
+      let httpEnv = null, networkFailed = false;
+      try {
+        const res = await fetch(base + qpath, { headers: { Accept: 'application/json', ...authHeaders(cfg) } });
+        httpEnv = await res.json().catch(() => ({}));
+      } catch (e) {
+        networkFailed = true;
+      }
+      if (!networkFailed && httpEnv) {
+        if (wantJson) {
+          console.log(JSON.stringify(httpEnv, null, 2));
+        } else if (httpEnv.ok) {
+          console.log('quality predict (quality-predictor):');
+          if (httpEnv.kscore_predicted != null) console.log('  kscore_predicted:        ' + httpEnv.kscore_predicted);
+          if (httpEnv.predicted_kscore != null) console.log('  predicted_kscore:        ' + httpEnv.predicted_kscore);
+          if (httpEnv.confidence != null) console.log('  confidence:              ' + httpEnv.confidence);
+          if (httpEnv.namespace) console.log('  namespace:               ' + httpEnv.namespace);
+        } else {
+          console.error('quality predict: ' + (httpEnv.error || httpEnv.status || 'failed'));
+          if (httpEnv.detail) console.error('  detail: ' + httpEnv.detail);
+          if (httpEnv.hint) console.error('  hint: ' + httpEnv.hint);
+        }
+        if (!httpEnv.ok) process.exit(EXIT.EXECUTION);
+        return;
+      }
+      // Network error: fall through to the local meta-model below.
+    }
+
     const env = metaMod.inferKolmMeta({ features });
     if (wantJson) console.log(JSON.stringify(env, null, 2));
     else if (env.ok) {
@@ -16929,7 +17064,11 @@ async function cmdW832Meta(args) {
 // All verbs honour --namespace, --json, and the standard config/auth env.
 async function cmdW775Autopilot(args) {
   if (maybeHelp('autopilot', args)) return;
-  const verb = (args && args[0]) || '';
+  // `verb` is `let` so the free-text "describe and done" path can rebind it to
+  // 'describe' for the human-readable summary AFTER the known-verb dispatch has
+  // already decided this is NOT one of start|stop|status|disable|savings|tick|
+  // plan|analyze|temporal. Dispatch decisions read the original first arg.
+  let verb = (args && args[0]) || '';
   const rest = args.slice(1);
   const wantJson = rest.includes('--json');
   const namespace = pickFlag(rest, '--namespace') || pickFlag(rest, '-n') || 'default';
@@ -16993,6 +17132,58 @@ async function cmdW775Autopilot(args) {
         console.log('  namespace:             ' + (env.namespace || namespace));
         console.log('  persisted:             ' + !!env.persisted);
         if (env.persist_error) console.log('  persist_error:         ' + env.persist_error);
+      } else if (verb === 'plan') {
+        console.log('autopilot plan');
+        console.log('  namespace:             ' + (env.namespace || namespace));
+        if (env.budget_usd != null) console.log('  budget_usd:            $' + Number(env.budget_usd).toFixed(2));
+        if (env.target_kscore != null) console.log('  target_kscore:         ' + env.target_kscore);
+        const ranked = Array.isArray(env.strategies) ? env.strategies
+          : (Array.isArray(env.ranked) ? env.ranked : []);
+        if (ranked.length) {
+          console.log('  strategies (ranked):');
+          ranked.forEach((s, i) => {
+            const label = s.name || s.strategy || s.id || ('strategy-' + (i + 1));
+            const cost = s.cost_usd != null ? '  $' + Number(s.cost_usd).toFixed(2) : '';
+            const k = s.predicted_kscore != null ? '  k=' + s.predicted_kscore
+              : (s.kscore != null ? '  k=' + s.kscore : '');
+            console.log('    ' + (i + 1) + '. ' + label + cost + k);
+          });
+        }
+      } else if (verb === 'analyze') {
+        console.log('autopilot analyze');
+        console.log('  namespace:             ' + (env.namespace || namespace));
+        if (env.n_failures != null) console.log('  n_failures:            ' + env.n_failures);
+        const clusters = Array.isArray(env.weak_clusters) ? env.weak_clusters
+          : (Array.isArray(env.clusters) ? env.clusters : []);
+        if (clusters.length) {
+          console.log('  weak_clusters:');
+          for (const cl of clusters) {
+            const label = cl.label || cl.cluster || cl.name || '(cluster)';
+            const cnt = cl.count != null ? '  (' + cl.count + ')' : '';
+            console.log('    - ' + label + cnt);
+          }
+        }
+        if (env.n_fix_pairs != null) console.log('  fix_pairs_generated:   ' + env.n_fix_pairs);
+      } else if (verb === 'temporal') {
+        console.log('autopilot temporal');
+        console.log('  namespace:             ' + (env.namespace || namespace));
+        if (env.window_days != null) console.log('  window_days:           ' + env.window_days);
+        if (env.coverage != null) console.log('  coverage:              ' + env.coverage);
+        if (env.n_captures != null) console.log('  n_captures:            ' + env.n_captures);
+        const gaps = Array.isArray(env.gaps) ? env.gaps : [];
+        if (gaps.length) {
+          console.log('  gaps:');
+          for (const g of gaps) {
+            console.log('    - ' + (typeof g === 'string' ? g : JSON.stringify(g)));
+          }
+        }
+      } else if (verb === 'describe') {
+        console.log('autopilot (describe-and-done)');
+        console.log('  action:                ' + (env.action || '(unknown)'));
+        if (env.reason) console.log('  reason:                ' + env.reason);
+        if (env.top_gap_score != null) console.log('  top_gap_score:         ' + Number(env.top_gap_score).toFixed(4));
+        if (env.artifact_id) console.log('  artifact_id:           ' + env.artifact_id);
+        console.log('  namespace:             ' + (env.namespace || namespace));
       } else {
         console.log(JSON.stringify(env, null, 2));
       }
@@ -17066,8 +17257,67 @@ async function cmdW775Autopilot(args) {
     _w775PrintEnv(env, httpStatus >= 200 && httpStatus < 300 && env && env.ok);
     return;
   }
+
+  // W921 — `kolm autopilot plan` ranks distill strategies under a budget.
+  // POST /v1/autopilot/plan -> src/cost-optimizer.js#rankStrategies.
+  if (verb === 'plan') {
+    const budgetRaw = pickFlag(rest, '--budget');
+    const targetKRaw = pickFlag(rest, '--target-k');
+    const body = { namespace };
+    if (budgetRaw != null && budgetRaw !== '') body.budget_usd = Number(budgetRaw);
+    if (targetKRaw != null && targetKRaw !== '') body.target_kscore = Number(targetKRaw);
+    const { httpStatus, env } = await _w775Call('POST', '/v1/autopilot/plan', body);
+    _w775PrintEnv(env, httpStatus >= 200 && httpStatus < 300 && env && env.ok);
+    return;
+  }
+
+  // W921 — `kolm autopilot analyze` clusters eval failures + drafts fix pairs.
+  // POST /v1/autopilot/analyze -> src/failure-analyst.js#analyzeFailures.
+  if (verb === 'analyze') {
+    const runDir = pickFlag(rest, '--run-dir');
+    const evalPath = pickFlag(rest, '--eval-path');
+    const body = { namespace };
+    if (runDir != null && runDir !== '') body.run_dir = runDir;
+    if (evalPath != null && evalPath !== '') body.eval_path = evalPath;
+    const { httpStatus, env } = await _w775Call('POST', '/v1/autopilot/analyze', body);
+    _w775PrintEnv(env, httpStatus >= 200 && httpStatus < 300 && env && env.ok);
+    return;
+  }
+
+  // W921 — `kolm autopilot temporal` reports time-window capture coverage.
+  // GET /v1/autopilot/temporal -> src/temporal-analyzer.js#analyzeTemporalCoverage.
+  if (verb === 'temporal') {
+    let path = '/v1/autopilot/temporal?namespace=' + encodeURIComponent(namespace);
+    if (windowDays != null) path += '&window_days=' + windowDays;
+    const { httpStatus, env } = await _w775Call('GET', path, null);
+    _w775PrintEnv(env, httpStatus >= 200 && httpStatus < 300 && env && env.ok);
+    return;
+  }
+
+  // W921 — "describe and done": when the first arg is NOT a known verb but is a
+  // non-empty string, treat it as a natural-language description and run one
+  // full autopilot lifecycle tick. POST /v1/autopilot/tick with
+  // { namespace, describe, budget_usd, auto } -> src/autopilot-lifecycle.js#
+  // tickAutopilotFull. Known-verb dispatch above is unchanged; this only fires
+  // for free text.
+  const KNOWN_VERBS = new Set(['start', 'stop', 'status', 'disable', 'savings', 'tick', 'plan', 'analyze', 'temporal']);
+  if (verb && typeof verb === 'string' && !verb.startsWith('-') && !KNOWN_VERBS.has(verb)) {
+    const describeText = verb;
+    const budgetRaw = pickFlag(rest, '--budget');
+    const body = { namespace, describe: describeText };
+    if (budgetRaw != null && budgetRaw !== '') body.budget_usd = Number(budgetRaw);
+    if (rest.includes('--auto')) body.auto = true;
+    // Rebind `verb` so the human-readable summary uses the describe layout; the
+    // dispatch decision above already used the original (free-text) value.
+    verb = 'describe';
+    const { httpStatus, env } = await _w775Call('POST', '/v1/autopilot/tick', body);
+    _w775PrintEnv(env, httpStatus >= 200 && httpStatus < 300 && env && env.ok);
+    return;
+  }
+
   _w775PrintEnv(_w775ErrEnv('bad_verb', 'unknown autopilot verb: ' + verb
-    + ' (expected start|stop|disable|status|savings|tick)'), false);
+    + ' (expected start|stop|disable|status|savings|tick|plan|analyze|temporal, '
+    + 'or a free-text description)'), false);
   process.exit(EXIT.BAD_ARGS);
 }
 
@@ -33446,7 +33696,7 @@ COMPLETION_SUBS.lingual = ['detect', 'distribution', 'synthesize', 'mixture'];
 // dispatcher cmdW775Autopilot so parallel W773/W774/W807/W813/W814/W815/W816
 // wave agents cannot collide on this symbol.
 COMPLETION_VERBS.push('autopilot');
-COMPLETION_SUBS.autopilot = ['start', 'stop', 'status', 'disable', 'savings', 'tick'];
+COMPLETION_SUBS.autopilot = ['start', 'stop', 'status', 'disable', 'savings', 'tick', 'plan', 'analyze', 'temporal'];
 
 function emitBashCompletion() {
     const verbs = COMPLETION_VERBS.join(' ');

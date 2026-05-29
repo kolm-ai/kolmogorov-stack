@@ -24039,6 +24039,185 @@ res.json({
   });
 
   // =====================================================================
+  // W921 — Autopilot data-engine intelligence routes.
+  //
+  // Wire the six built-but-unrouted autopilot components plus the full
+  // lifecycle tick into HTTP, mirroring the existing autopilot route
+  // pattern above (auth-gate -> dynamic import -> envelope -> status).
+  // =====================================================================
+
+  r.get('/v1/quality/predict', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./quality-predictor.js');
+      const namespace = req.query.namespace || (req.body && req.body.namespace) || 'default';
+      let features = req.body && req.body.features;
+      if (typeof req.query.features === 'string') {
+        try { features = JSON.parse(req.query.features); } catch (_e) { /* fall back to body */ }
+      }
+      const env = await mod.predictKScore({
+        tenant: req.tenant_record.id,
+        namespace,
+        features,
+      });
+      return res.status(env && env.ok === false ? 400 : 200).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'quality_predict_error',
+        detail: String(e && e.message || e),
+        version: 'w921-v1',
+      });
+    }
+  });
+
+  r.post('/v1/autopilot/plan', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./cost-optimizer.js');
+      const namespace = req.query.namespace || (req.body && req.body.namespace) || 'default';
+      const env = await mod.rankStrategies({
+        tenant: req.tenant_record.id,
+        namespace,
+        budget_usd: req.body && req.body.budget_usd,
+        target_kscore: req.body && req.body.target_kscore,
+        current_features: req.body && req.body.current_features,
+        teacher_spec: req.body && req.body.teacher_spec,
+      });
+      return res.status(env && env.ok === false ? 400 : 200).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'autopilot_plan_error',
+        detail: String(e && e.message || e),
+        version: 'w921-v1',
+      });
+    }
+  });
+
+  r.post('/v1/autopilot/analyze', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./failure-analyst.js');
+      const namespace = req.query.namespace || (req.body && req.body.namespace) || 'default';
+      const env = await mod.analyzeFailures({
+        tenant: req.tenant_record.id,
+        namespace,
+        eval_path: req.body && req.body.eval_path,
+        run_dir: req.body && req.body.run_dir,
+        teacher_base: req.body && req.body.teacher_base,
+        max_fix_pairs: req.body && req.body.max_fix_pairs,
+      });
+      return res.status(env && env.ok === false ? 400 : 200).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'autopilot_analyze_error',
+        detail: String(e && e.message || e),
+        version: 'w921-v1',
+      });
+    }
+  });
+
+  r.post('/v1/autopilot/simulate', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./compile-simulator.js');
+      const namespace = req.query.namespace || (req.body && req.body.namespace) || 'default';
+      const env = await mod.simulateCompile({
+        tenant: req.tenant_record.id,
+        namespace,
+        current_features: req.body && req.body.current_features,
+        proposed_delta: req.body && req.body.proposed_delta,
+        min_delta_k: req.body && req.body.min_delta_k,
+      });
+      return res.status(env && env.ok === false ? 400 : 200).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'autopilot_simulate_error',
+        detail: String(e && e.message || e),
+        version: 'w921-v1',
+      });
+    }
+  });
+
+  r.post('/v1/eval/adversarial/generate', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./adversarial-eval.js');
+      const namespace = req.query.namespace || (req.body && req.body.namespace) || 'default';
+      const env = await mod.generateAdversarialSet({
+        tenant: req.tenant_record.id,
+        namespace,
+        weak_clusters: req.body && req.body.weak_clusters,
+        n: req.body && req.body.n,
+      });
+      return res.status(env && env.ok === false ? 400 : 200).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'eval_adversarial_generate_error',
+        detail: String(e && e.message || e),
+        version: 'w921-v1',
+      });
+    }
+  });
+
+  r.get('/v1/autopilot/temporal', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./temporal-analyzer.js');
+      const namespace = req.query.namespace || (req.body && req.body.namespace) || 'default';
+      const windowDays = Number.isFinite(Number(req.query.window_days)) ? Number(req.query.window_days) : undefined;
+      const env = await mod.analyzeTemporalCoverage({
+        tenant: req.tenant_record.id,
+        namespace,
+        window_days: windowDays,
+      });
+      return res.status(env && env.ok === false ? 400 : 200).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'autopilot_temporal_error',
+        detail: String(e && e.message || e),
+        version: 'w921-v1',
+      });
+    }
+  });
+
+  // NEW full-lifecycle tick. The GET /v1/autopilot/tick route above stays
+  // the heartbeat (tests/wave775-autopilot.test.js asserts action:'disabled');
+  // this POST handler runs the full lifecycle via tickAutopilotFull.
+  r.post('/v1/autopilot/tick', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./autopilot-lifecycle.js');
+      const namespace = req.query.namespace || (req.body && req.body.namespace) || 'default';
+      const body = req.body || {};
+      const env = await mod.tickAutopilotFull({
+        tenant: req.tenant_record.id,
+        namespace,
+        opts: {
+          describe: body.describe,
+          budget_usd: body.budget_usd,
+          auto: body.auto,
+          features: body.features,
+          target_kscore: body.target_kscore,
+        },
+      });
+      return res.status(env && env.ok === false ? 400 : 200).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'autopilot_tick_full_error',
+        detail: String(e && e.message || e),
+        version: 'w921-v1',
+      });
+    }
+  });
+
+  // =====================================================================
   // W772b — Audio tokenizer worker (Whisper mel/BPE).
   //
   // Wraps workers/audio-tokenize/tokenize.mjs via src/audio-tokenize.js so
