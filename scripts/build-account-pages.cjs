@@ -127,6 +127,30 @@ function shell(opts) {
     '.toolbar input[type=search],.toolbar select,.toolbar input[type=text]{background:var(--bg-elev);border:1px solid var(--line);color:var(--ink);padding:6px 10px;border-radius:4px;font-family:var(--mono);font-size:12px}',
     '.kbd{font-family:var(--mono);font-size:11px;background:var(--bg-elev);padding:1px 5px;border-radius:3px;color:var(--ink-mute);border:1px solid var(--line)}',
     '@media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.metric-grid{grid-template-columns:repeat(2,1fr)}}',
+    // Mobile-first phone breakpoint (W921). Additive only: leaves the 880px tablet rules + desktop grid intact.
+    '@media (max-width:560px){',
+    // Shell: single column, sidebar above content, comfortable phone padding (no overflow at 360px).
+    '.acct-shell{grid-template-columns:1fr;gap:16px;padding:16px 14px 36px;max-width:100%}',
+    '#account-sidebar{position:static;top:auto;font-size:13.5px}',
+    '#account-sidebar ul{flex-direction:row;flex-wrap:wrap;gap:6px}',
+    '#account-sidebar a{font-size:13px;padding:7px 11px}',
+    // Headings: keep them legible but not oversized on a narrow viewport.
+    '.acct-content h1{font-size:23px}',
+    '.acct-content .lede{font-size:14px;max-width:100%}',
+    // Fields: never wider than the viewport. Override the inline min-widths (160-360px) that overflow phones.
+    '.acct-content input,.acct-content select,.acct-content textarea{max-width:100%;min-width:0 !important;width:100%;box-sizing:border-box}',
+    '.toolbar{flex-direction:column;align-items:stretch}',
+    '.toolbar input[type=search],.toolbar input[type=text],.toolbar select,.toolbar input{max-width:100%;min-width:0 !important;width:100%;box-sizing:border-box}',
+    '.toolbar .btn,.toolbar button{width:100%}',
+    // Tables: horizontal-scroll container + readable >=12.5px type (was 10.5-12px).
+    '.ktable{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;font-size:12.5px;white-space:nowrap}',
+    '.ktable th{font-size:12px;padding:8px 10px}',
+    '.ktable td{font-size:12.5px;padding:10px 10px}',
+    // Metric grid: stack to a single column so figures stay readable.
+    '.metric-grid{grid-template-columns:1fr}',
+    // Panels: tighter inner padding on phones.
+    '.kpanel{padding:14px}',
+    '}',
     (opts.extraStyle || ''),
     '</style>',
     '</head>',

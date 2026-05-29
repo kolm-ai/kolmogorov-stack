@@ -77,6 +77,23 @@
 .modal .field input:focus,.modal .field select:focus{outline:none;border-color:var(--accent)}
 .modal .mactions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
 @media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.fleet-summary{grid-template-columns:repeat(2,1fr)}.device-grid{grid-template-columns:1fr}}
+@media (max-width:560px){
+.acct-shell{grid-template-columns:1fr;gap:16px;padding:16px 14px 36px;max-width:100%}
+#account-sidebar{position:static;top:auto;font-size:13.5px}
+#account-sidebar ul{flex-direction:row;flex-wrap:wrap;gap:6px}
+#account-sidebar a{font-size:13px;padding:7px 11px}
+.acct-content h1{font-size:23px}
+.acct-content .lede{font-size:14px;max-width:100%}
+.acct-content input,.acct-content select,.acct-content textarea{max-width:100%;min-width:0 !important;width:100%;box-sizing:border-box}
+.toolbar{flex-direction:column;align-items:stretch}
+.toolbar input[type=search],.toolbar input[type=text],.toolbar select,.toolbar input{max-width:100%;min-width:0 !important;width:100%;box-sizing:border-box}
+.toolbar .btn,.toolbar button{width:100%}
+.ktable{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;font-size:12.5px;white-space:nowrap}
+.ktable th{font-size:12px;padding:8px 10px}
+.ktable td{font-size:12.5px;padding:10px 10px}
+.metric-grid{grid-template-columns:1fr}
+.kpanel{padding:14px}
+}
 </style>
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/warm-paper.css">

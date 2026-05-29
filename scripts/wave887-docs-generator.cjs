@@ -75,6 +75,31 @@ td code{font-size:12px}
 .related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
 .privacy-note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:14px 18px;margin:18px 0;border-radius:0 8px 8px 0;max-width:780px}
 .privacy-note strong{color:var(--ink)}
+/* W921 mobile-first docs hardening (additive). Long JSON in <pre> was a black brick;
+   cap height + scroll + a touch of contrast so it reads as a code card. */
+pre{max-height:460px;overflow-y:auto;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.02);-webkit-overflow-scrolling:touch}
+pre::-webkit-scrollbar{width:8px;height:8px}
+pre::-webkit-scrollbar-thumb{background:rgba(230,233,238,0.18);border-radius:4px}
+/* Tables overflow on phones: wrap in a horizontal scroller. */
+.ds-table-scroll,table{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{display:block;max-width:100%}
+@media(min-width:561px){table{display:table}}
+/* Content column tightening below 880px / 560px. */
+@media(max-width:880px){
+  .wrap{padding:0 18px}
+  h1{font-size:34px}
+  pre{max-height:380px}
+}
+@media(max-width:560px){
+  .wrap{padding:0 14px}
+  h1{font-size:28px;line-height:1.12}
+  .lede{font-size:16px}
+  h2{font-size:21px;margin:36px 0 10px}
+  p,ul,ol{font-size:14.5px}
+  pre{padding:13px 14px;font-size:12px;max-height:320px;border-radius:8px}
+  th,td{padding:7px 9px;font-size:12.5px}
+  table{font-size:12.5px}
+}
 </style>
 <link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/docs-shell.css">
@@ -1135,6 +1160,11 @@ section p{color:var(--ink-mute);font-size:16px;line-height:1.65;max-width:780px;
 .feature p{font-size:14px;color:var(--ink-mute);line-height:1.6;margin:0;max-width:none}
 .feature code{font-family:var(--mono);font-size:12px;color:var(--accent);background:var(--accent-soft);padding:1px 6px;border-radius:4px}
 pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:18px 22px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:16px 0;max-width:820px}
+/* W921: cap long code blocks so they scroll instead of forming a black brick. */
+pre{max-height:460px;overflow-y:auto;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.02);-webkit-overflow-scrolling:touch}
+pre::-webkit-scrollbar{width:8px;height:8px}
+pre::-webkit-scrollbar-thumb{background:rgba(230,233,238,0.18);border-radius:4px}
+@media(max-width:560px){pre{padding:13px 14px;font-size:12px;max-height:320px;border-radius:8px}}
 .flow{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:30px 0}
 @media(max-width:820px){.flow{grid-template-columns:repeat(2,1fr)}}
 .flow-step{padding:14px 16px;background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;font-size:12.5px}

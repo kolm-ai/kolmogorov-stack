@@ -77,3 +77,57 @@ body.ks { background: var(--ks-bg); color: var(--ks-ink); }
 .v-complements h3 { margin: 0 0 8px; font-size: 19px; font-weight: 540; color: var(--ks-ink); letter-spacing: -0.01em; }
 .v-complements p { margin: 0 0 8px; font-size: 14.5px; color: var(--ks-ink-2); line-height: 1.6; }
 .v-complements p:last-child { margin-bottom: 0; }
+
+/* ── W921 mobile-first additive coverage (phones ≤480px / ≤360px) ──
+   Additive only: collapses multi-col grids to 1 col, lifts sub-12px labels
+   to ≥12.5px, makes the .v-compare table scroll cleanly, trims section padding.
+   No desktop rule above this comment is modified. */
+@media (max-width: 480px) {
+  /* (1) collapse every remaining multi-col grid to a single column */
+  .v-compl { grid-template-columns: 1fr; }
+  .v-flows { grid-template-columns: 1fr; }
+  .v-claims { grid-template-columns: 1fr; }
+  .v-trio { grid-template-columns: 1fr; }
+
+  /* (4) trim section + hero + card padding for narrow viewports */
+  .v-wrap { padding: 0 16px; }
+  .v-hero { padding: 48px 0 32px; }
+  .v-section { padding: 44px 0; }
+  .v-cta-row { padding: 40px 0 56px; }
+  .v-card { padding: 22px 20px; }
+  .v-compl > div { padding: 18px 18px; }
+  .v-flow { padding: 20px 20px; }
+  .v-claim { padding: 18px 18px; }
+  .v-twocol .v-col { padding: 18px 18px; }
+  .v-complements { padding: 20px 20px; }
+  .v-receipts { padding: 18px 18px; }
+
+  /* (2) lift sub-12.5px labels to ≥12.5px for legibility on phones */
+  .v-eyebrow { font-size: 12.5px; }
+  .v-caveat { font-size: 12.5px; }
+  .v-card .ctag { font-size: 12.5px; }
+  .v-compl .label { font-size: 12.5px; }
+  .v-flow .who { font-size: 12.5px; }
+  .v-claim .label { font-size: 12.5px; }
+  .v-receipts .label { font-size: 12.5px; }
+  .v-compare th { font-size: 12.5px; }
+
+  /* (3) make the comparison table scroll cleanly on phones */
+  .v-compare { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .v-compare table { min-width: 560px; font-size: 13px; }
+  .v-compare th, .v-compare td { padding: 11px 12px; white-space: normal; }
+  .v-compare td.dim { white-space: nowrap; }
+
+  /* full-width CTAs so taps land on phones */
+  .v-ctas { flex-direction: column; align-items: stretch; }
+  .v-btn { justify-content: center; }
+}
+
+@media (max-width: 360px) {
+  /* even tighter for the smallest phones — keep single column + scroll */
+  .v-wrap { padding: 0 12px; }
+  .v-card { padding: 18px 16px; }
+  .v-compl > div, .v-flow, .v-claim, .v-twocol .v-col, .v-complements, .v-receipts { padding: 16px 14px; }
+  .v-compare table { min-width: 480px; }
+  .v-compare th, .v-compare td { padding: 10px 10px; }
+}

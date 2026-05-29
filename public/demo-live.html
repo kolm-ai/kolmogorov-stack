@@ -174,8 +174,8 @@
  .run-strip{border-top:1px solid var(--line);background:var(--bg);padding:12px 22px;display:none;gap:10px;flex-wrap:wrap;align-items:center}
  .run-strip.is-on{display:flex}
  .run-strip .rs-label{font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-faint);width:100%}
- .run-cmd{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:5px;background:var(--bg-pane);padding:6px 8px 6px 12px;max-width:100%}
- .run-cmd code{font-family:var(--mono);font-size:11.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62vw}
+ .run-cmd{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:5px;background:var(--bg-pane);padding:6px 8px 6px 12px;max-width:100%;min-width:0}
+ .run-cmd code{font-family:var(--mono);font-size:11.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62vw;min-width:0}
  .run-cmd .copy{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-mute);border:1px solid var(--line);border-radius:4px;padding:4px 8px;background:transparent;cursor:pointer;flex:0 0 auto;min-height:28px}
  .run-cmd .copy:hover{color:var(--ink);border-color:var(--line-strong)}
  .run-cmd .copy.copied{color:var(--green);border-color:rgba(127,184,138,0.4)}
@@ -226,23 +226,67 @@
  /* responsive — mobile single pane */
  .beat-switch{display:none}
  @media (max-width: 1000px){
+   /* Below 1000px the 3-col stage can't fit; collapse to a single stacked
+      column where one pane shows at a time, driven by mobilePaneForBeat().
+      Let the shell flow + scroll vertically instead of locking to 100dvh so a
+      tall header + switcher + subtitle + scrub + run-strip never crush the
+      content pane on small phones. Desktop (>1000px) is untouched. */
+   .shell{display:flex;flex-direction:column;height:auto;min-height:100dvh;overflow:visible}
    .chapters{display:none}
-   .stage{grid-template-columns:1fr;grid-template-rows:1fr}
-   .pane{display:none}
-   .pane.mobile-active{display:flex}
+   .stage{display:flex;flex-direction:column;min-height:0}
+   .pane{display:none;min-height:0}
+   .pane.mobile-active{display:flex;min-height:62vh}
    .pane + .pane{border-left:0;border-top:0}
-   .beat-switch{display:flex;gap:6px;width:100%;padding:10px 14px 0;flex-wrap:wrap;justify-content:center;order:-1}
-   .beat-switch .bchip{flex:1 1 auto;min-width:64px;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);padding:9px 8px;border:1px solid var(--line);border-radius:5px;background:var(--bg-pane);cursor:pointer;min-height:40px}
+   .pane-body{min-height:0}
+   .term{padding:13px 14px 48px;font-size:12.5px}
+   .beat-switch{display:flex;gap:6px;width:100%;padding:10px 12px 0;flex-wrap:nowrap;justify-content:stretch;order:-1}
+   .beat-switch .bchip{flex:1 1 0;min-width:0;font-family:var(--mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint);padding:11px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg-pane);cursor:pointer;min-height:44px;text-align:center}
    .beat-switch .bchip[aria-current=true]{color:var(--ink);background:var(--bg-elev);border-color:var(--line-strong)}
    header.bar{flex-wrap:wrap;gap:8px;padding:10px 14px}
-   .run-cmd code{max-width:54vw}
+   .subtitle{padding:13px 16px;min-height:0}
+   .subtitle .cap-num{min-width:0}
+   /* long commands wrap instead of truncating to a sliver */
+   .run-strip{padding:12px 16px}
+   .run-cmd{flex-wrap:wrap}
+   .run-cmd code{white-space:normal;overflow:visible;text-overflow:clip;word-break:break-word;overflow-wrap:anywhere;max-width:100%;flex:1 1 100%}
+   .run-cmd .copy{align-self:flex-start}
+   .end-card{padding:30px 22px}
    .end-card .stats{grid-template-columns:repeat(2,1fr)}
  }
  @media (max-width: 700px){
-   .pane-h{padding:7px 10px;font-size:9.5px}
+   .pane-h{padding:8px 11px;font-size:9.5px}
    .b-page{padding:14px 16px}
    .end-card h2{font-size:23px}
-   .run-cmd code{max-width:48vw}
+   .pane.mobile-active{min-height:58vh}
+ }
+ @media (max-width: 560px){
+   /* 3-up benchmark/stat grids get cramped on narrow phones -> 2-up */
+   .bench-grid{grid-template-columns:1fr 1fr}
+   .subtitle{flex-wrap:wrap;gap:6px 14px}
+   .subtitle .cap-text{font-size:13.5px;flex:1 1 100%}
+ }
+ @media (max-width: 480px){
+   header.bar{padding:9px 12px;gap:6px}
+   .crumb{display:none}
+   .beat-switch{gap:5px;padding:9px 10px 0}
+   .beat-switch .bchip{font-size:10.5px;padding:11px 4px;letter-spacing:0.02em}
+   .pane.mobile-active{min-height:54vh}
+   .b-page{padding:13px 14px}
+   .b-page .b-title{font-size:18px}
+   .bench-grid{grid-template-columns:1fr}
+   .end-card{padding:26px 18px}
+   .end-card h2{font-size:21px}
+   .end-card .stats{grid-template-columns:1fr}
+   .end-card .ctas-secondary{flex-direction:column;gap:2px}
+   .end-card .ctas-secondary .dot-sep{display:none}
+   .ticket-try .trow{flex-direction:column}
+   .ticket-try button{width:100%}
+ }
+ @media (max-width: 360px){
+   .beat-switch .bchip{font-size:9.5px;letter-spacing:0;padding:11px 2px}
+   .b-page .b-title{font-size:17px}
+   .kvgrid{grid-template-columns:1fr;gap:2px 0}
+   .kvgrid .k{margin-top:6px}
  }
 </style>
 <script type="application/ld+json" id="ld">
