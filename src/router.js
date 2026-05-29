@@ -6214,6 +6214,7 @@ export function buildRouter() {
       const pii = await import('./pii-redactor.js');
       const guardrail = await import('./gateway-guardrail.js');
       const grec = await import('./gateway-receipt.js');
+      const otel = await import('./otel.js');
       const reg = await import('./provider-registry.js');
       // W-N: shared adapter helpers — clampTimeoutMs lives here. We pull
       // the inbound timeout_ms from either the body or the
@@ -6442,6 +6443,14 @@ export function buildRouter() {
       phases.total_ms = Date.now() - t0;
       phases.wrapper_tax_ms = phases.total_ms - phases.chain_dispatch_ms;
       receipt.latency_breakdown = { ...phases };
+      // W921 — emit OpenTelemetry GenAI semantic-convention metrics
+      // (gen_ai.client.token.usage + gen_ai.client.operation.duration). No-op
+      // when OTEL is unconfigured; fire-and-forget so telemetry never affects
+      // the call. operation.duration uses the upstream dispatch time.
+      try {
+        otel.genAiTokenUsage({ provider: receipt.provider, requestModel: receipt.model, responseModel: receipt.model, operation: 'chat', inputTokens: receipt.input_tokens, outputTokens: receipt.output_tokens });
+        otel.genAiOperationDuration({ provider: receipt.provider, requestModel: receipt.model, responseModel: receipt.model, operation: 'chat', durationMs: phases.chain_dispatch_ms });
+      } catch (_) { /* telemetry is best-effort */ }
       try {
         store.insert('observations', {
           id: receipt.receipt_id,
