@@ -65,3 +65,12 @@ env/
 
 # Large simulation outputs (regenerated on demand)
 sim-*.json
+
+# GPU validation scratch + local engine state + screenshot artifacts (never in
+# the prod container; also avoids the railway-up indexer choking on transient
+# sqlite/lock files or odd filenames in these dev-only dirs).
+/tmp-gpu/
+/.kolm-state/
+/audit/
+/.shots-w912/
+.shots-w912*.png
