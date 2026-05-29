@@ -2868,15 +2868,24 @@ a.ks-btn--primary:hover {
 }
 .kolm-receipt-strip pre {
   margin: 0;
+  /* Deliberately a dark "terminal" card. It MUST carry an explicit light text
+     color — var(--ink-1) is DARK in the default light theme, which rendered the
+     whole JSON as dark-on-dark (the "black brick"). */
   padding: 18px 22px;
   background: #0e1116;
-  color: var(--ink-1);
-  border: 1px solid #1c2128;
-  border-radius: 8px;
+  color: #d4d9e0;
+  border: 1px solid #2a313b;
+  border-radius: 10px;
   font-family: var(--ks-font-mono, ui-monospace, "JetBrains Mono", monospace);
   font-size: 12.5px;
-  line-height: 1.55;
+  line-height: 1.6;
+  max-height: 420px;
   overflow: auto;
+  white-space: pre;
+  -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 560px) {
+  .kolm-receipt-strip pre { font-size: 11px; padding: 14px 14px; max-height: 340px; border-radius: 8px; }
 }
 .kolm-receipt-strip .kolm-receipt-strip__copy {
   display: flex;

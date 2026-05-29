@@ -14,12 +14,11 @@ const ROOT = path.resolve(import.meta.dirname, '..');
 const INDEX = fs.readFileSync(path.join(ROOT, 'public/index.html'), 'utf8');
 const SW = fs.readFileSync(path.join(ROOT, 'public/sw.js'), 'utf8');
 
-test('W410 #1 - loop section is present after the W404 numbers strip', () => {
-  const numIdx = INDEX.indexOf('data-w404="numbers-strip"');
+test('W410 #1 - loop section is present', () => {
+  // W922: the W404 "Six numbers that describe the system" strip was removed per
+  // user feedback (jargon-y, low value). The loop strip stands on its own now.
   const loopIdx = INDEX.indexOf('data-w410="loop-strip"');
-  assert.ok(numIdx > 0, 'W404 numbers strip must still be present');
   assert.ok(loopIdx > 0, 'W410 loop strip must be present');
-  assert.ok(loopIdx > numIdx, 'loop strip must land below the numbers strip');
 });
 
 test('W410 #2 - loop section names all 8 canonical steps', () => {

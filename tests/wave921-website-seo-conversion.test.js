@@ -196,9 +196,10 @@ test('W921 SOCIAL #5 - homepage rail is present, visible, and every number trace
   // no fabricated star count is rendered when below floor
   assert.equal(a.policy.show_star_count, false);
   assert.ok(!/\b\d{3,4} stars\b/.test(railBlock), 'must not render a star count below the floor');
-  // a /compare link and case-study links are present
-  assert.match(railBlock, /href="\/compare"/);
-  assert.match(railBlock, /\/case-studies\//);
+  // W922: the testimonial + "How kolm compares / case study" link cluster was
+  // removed from the rail per user feedback ("this part makes no sense"). The
+  // rail is now just the verified proof cards. /compare + /case-studies remain
+  // reachable from nav/footer + their own pages.
 });
 
 // ---------------------------------------------------------------------------

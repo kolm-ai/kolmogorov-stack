@@ -556,20 +556,6 @@
       </li>
     </ul>
 
-    <!-- One curated anonymized-role testimonial (no named customer, per the
-         case-studies "we do not publish customer names" policy). -->
-    <figure class="ks-proof-quote" data-w921="testimonial">
-      <blockquote>Privilege means client text cannot leave. An owned model with a signed build receipt let us say yes to AI without that risk.</blockquote>
-      <figcaption>Firm General Counsel (anonymized) &middot; <a href="/case-studies/legal-contract-extraction.html">read the case study</a></figcaption>
-    </figure>
-
-    <p class="ks-proof-rail__more">
-      <a href="/compare">How kolm compares &rarr;</a>
-      <span aria-hidden="true">&middot;</span>
-      <a href="/case-studies/healthcare-phi-redactor.html">Healthcare case study</a>
-      <span aria-hidden="true">&middot;</span>
-      <a href="/case-studies/finance-sr11-7.html">Model-risk case study</a>
-    </p>
   </div>
 </section>
 <script>
@@ -647,6 +633,26 @@
 })();
 </script>
 
+<style id="w922-home-mobile">
+  /* W922 homepage mobile-first polish: collapse fixed multi-col grids + clean
+     connector chips + readable code/labels on phones. Inline grids set
+     grid-template-columns inline, so override with !important at breakpoints. */
+  .kolm-connectors__chip {
+    display: inline-flex; align-items: center; white-space: nowrap;
+    padding: 9px 16px; background: var(--surface-0, #f3f5f7);
+    border: 1px solid var(--surface-3, #dde1e7); border-radius: 999px;
+    font-size: 14px; font-weight: 500; color: var(--ink-2, #1f2937);
+    letter-spacing: -0.01em;
+  }
+  [data-theme="dark"] .kolm-connectors__chip { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.12); }
+  @media (max-width: 760px) {
+    .kolm-start__grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+  }
+  @media (max-width: 520px) {
+    .kolm-start__grid { grid-template-columns: 1fr !important; }
+    .kolm-connectors__chip { padding: 8px 13px; font-size: 13px; }
+  }
+</style>
 <section class="kolm-start" data-w910="start-rail" aria-label="Start a model in four ways" style="padding: clamp(48px, 6vw, 88px) 24px; border-bottom: 1px solid var(--rule, var(--surface-3,#dde1e7));">
   <div style="max-width: 1200px; margin: 0 auto;">
     <header style="text-align:center; margin-bottom: 32px;">
@@ -694,15 +700,15 @@
       <h2 style="font-family: var(--ks-display, Inter, sans-serif); font-weight: 560; font-size: clamp(24px, 2.8vw, 32px); letter-spacing: -0.015em; color: var(--ink-2,#1f2937); margin: 0 0 10px; line-height: 1.15;">Pull data from where it already lives.</h2>
       <p style="font-size: 14.5px; line-height: 1.55; color: var(--ink-3,#56606c); max-width: 58ch; margin: 0 auto;">Authenticate once; pick a slice; the console redacts PII on the way in and turns it into a labeled corpus you can distill.</p>
     </header>
-    <ul aria-label="Available source connectors" style="list-style:none; padding:0; margin: 28px 0 24px; display:grid; grid-template-columns: repeat(4, 1fr); gap: 12px; font-family: var(--ks-display, Inter, sans-serif); font-size: 13.5px; color: var(--ink-2,#1f2937); text-align: center;">
-      <li style="padding: 14px 10px; background: var(--surface-0,#f3f5f7); border: 1px solid var(--surface-3,#dde1e7); border-radius: 8px;">Zendesk</li>
-      <li style="padding: 14px 10px; background: var(--surface-0,#f3f5f7); border: 1px solid var(--surface-3,#dde1e7); border-radius: 8px;">Intercom</li>
-      <li style="padding: 14px 10px; background: var(--surface-0,#f3f5f7); border: 1px solid var(--surface-3,#dde1e7); border-radius: 8px;">Slack</li>
-      <li style="padding: 14px 10px; background: var(--surface-0,#f3f5f7); border: 1px solid var(--surface-3,#dde1e7); border-radius: 8px;">Notion</li>
-      <li style="padding: 14px 10px; background: var(--surface-0,#f3f5f7); border: 1px solid var(--surface-3,#dde1e7); border-radius: 8px;">Salesforce</li>
-      <li style="padding: 14px 10px; background: var(--surface-0,#f3f5f7); border: 1px solid var(--surface-3,#dde1e7); border-radius: 8px;">GitHub</li>
-      <li style="padding: 14px 10px; background: var(--surface-0,#f3f5f7); border: 1px solid var(--surface-3,#dde1e7); border-radius: 8px;">HubSpot</li>
-      <li style="padding: 14px 10px; background: var(--surface-0,#f3f5f7); border: 1px solid var(--surface-3,#dde1e7); border-radius: 8px;">Google Drive</li>
+    <ul class="kolm-connectors__chips" aria-label="Available source connectors" style="list-style:none; padding:0; margin: 28px auto 24px; max-width: 760px; display:flex; flex-wrap:wrap; justify-content:center; gap: 10px; font-family: var(--ks-display, Inter, sans-serif);">
+      <li class="kolm-connectors__chip">Zendesk</li>
+      <li class="kolm-connectors__chip">Intercom</li>
+      <li class="kolm-connectors__chip">Slack</li>
+      <li class="kolm-connectors__chip">Notion</li>
+      <li class="kolm-connectors__chip">Salesforce</li>
+      <li class="kolm-connectors__chip">GitHub</li>
+      <li class="kolm-connectors__chip">HubSpot</li>
+      <li class="kolm-connectors__chip">Google Drive</li>
     </ul>
     <div style="text-align:center; margin-top: 24px;">
       <a href="mailto:dev@kolm.ai?subject=Notify%20me%20when%20a%20connector%20ships&body=I%20want%20to%20be%20notified%20when%20a%20kolm%20connector%20ships%20for%3A%20" style="display:inline-block; padding: 10px 18px; border: 1px solid var(--ink-2,#1f2937); border-radius: 999px; font-family: var(--ks-display, Inter, sans-serif); font-size: 13.5px; color: var(--ink-2,#1f2937); text-decoration: none; background: transparent; transition: background .18s ease, color .18s ease;">Notify me when a connector ships &rarr;</a>
@@ -857,6 +863,20 @@
   [data-theme="dark"] .ks-race__replay { background: #1c1f24; border-color: #2a2d34; color: #eef1f4; }
   [data-theme="dark"] .ks-race__replay:hover { background: #2a2d34; }
   [data-theme="dark"] .ks-race__note { color: #8a929c; }
+  /* W922 mobile-first: this comparison was tiny + cramped on phones. Let panes
+     grow vertically, bump the body + eyebrow type, full-width replay. */
+  @media (max-width: 640px) {
+    .ks-race { padding: 44px 0 40px; }
+    .ks-race__eye { font-size: 12px; line-height: 1.45; white-space: normal; padding: 7px 12px; }
+    .ks-race__h2 { font-size: 23px; }
+    .ks-race__lede { font-size: 14.5px; }
+    .ks-race__panes { gap: 16px; }
+    .ks-race__pane { height: auto; min-height: 280px; max-height: none; }
+    .ks-race__body { font-size: 14.5px; line-height: 1.6; padding: 16px; }
+    .ks-race__model-name { font-size: 14px; }
+    .ks-race__clock { font-size: 14px; }
+    .ks-race__replay { width: 100%; max-width: 320px; justify-content: center; }
+  }
   @media (prefers-reduced-motion: reduce) { .ks-race__caret { animation: none; } }
 </style>
 <section class="ks-race" id="chat" aria-label="Speed comparison: frontier wrapper vs compiled specialist">
@@ -997,7 +1017,7 @@
   "artifact": "support.kolm",
   "manifest_sha256": "bf8a3d1c4e92...f047",
   "model": {
-    "teacher": "claude-opus-4-7",
+    "teacher": "claude-opus-4-8",
     "student": "qwen-2.5-7b-instruct",
     "quant": "NF4 + double"
   },
@@ -1034,14 +1054,14 @@
   </div>
 </section>
 
-<div class="fr-rule--major" role="separator" aria-hidden="true"><span class="fr-rule--major__mark">01 / Three surfaces, one product</span></div>
+<div class="fr-rule--major" role="separator" aria-hidden="true"><span class="fr-rule--major__mark">01 / What kolm does</span></div>
 
 <section class="fr-section fr-section--tight fr-reveal" aria-labelledby="three-surface-h">
   <div class="fr-container">
     <div class="fr-section__head">
       <span class="fr-eyebrow">What kolm does</span>
-      <h2 class="fr-h2" id="three-surface-h">Three surfaces. One <code>.kolm</code> file at the end.</h2>
-      <p class="fr-lede">Route traffic, capture what works, distill it down, and run it on your own hardware. Each surface stands on its own; together they replace the gateway / fine-tune / inference / receipts stack you would otherwise glue from four vendors.</p>
+      <h2 class="fr-h2" id="three-surface-h">Route, distill, run. One <code>.kolm</code> file at the end.</h2>
+      <p class="fr-lede">Route traffic, capture what works, distill it down, and run it on your own hardware. Each step stands on its own; together they replace the gateway / fine-tune / inference / receipts stack you would otherwise glue from four vendors.</p>
     </div>
 
     <div class="ks-three-surface">
@@ -1199,15 +1219,7 @@
       </figure>
 
       <div class="kolm-diagram__sidebar">
-        <dl class="spec-sheet">
-          <div class="spec-sheet__row"><dt class="spec-sheet__label">spec</dt><dd class="spec-sheet__value">Teacher, student, quant recipe.<em>claude-opus-4-7 &rarr; qwen-2.5-7b-instruct, bnb 0.49.2 NF4 + double</em></dd></div>
-          <div class="spec-sheet__row"><dt class="spec-sheet__label">weights</dt><dd class="spec-sheet__value">Quantized parameters, runtime-neutral.<em>q4_0.safetensors (3.8 GB), q4_0.metadata (12 KB)</em></dd></div>
-          <div class="spec-sheet__row"><dt class="spec-sheet__label">eval</dt><dd class="spec-sheet__value">Frozen evaluation set, immutable after compile.<em>240 rows, hash-pinned to manifest.json</em></dd></div>
-          <div class="spec-sheet__row"><dt class="spec-sheet__label">bakeoff</dt><dd class="spec-sheet__value">K-Score per row vs teacher; the gate that decided shipping.<em>K = 0.91, gate 0.85 &check;, accuracy 0.94, safety 0.96, latency 0.88, cost 0.93</em></dd></div>
-          <div class="spec-sheet__row"><dt class="spec-sheet__label">receipts</dt><dd class="spec-sheet__value">Hash-chained capture transcript from the source namespace.<em>47,392 captures, root <code>bf8a3d1c…</code></em></dd></div>
-          <div class="spec-sheet__row"><dt class="spec-sheet__label">manifest</dt><dd class="spec-sheet__value">SHA-256 of every path, plus the K-Score breakdown.<em>22 KB, hashes match every byte on disk</em></dd></div>
-          <div class="spec-sheet__row"><dt class="spec-sheet__label">sidecar</dt><dd class="spec-sheet__value">Ed25519 signature over <code>manifest.sha256</code>.<em>key kolm-registry-prod-2026, sig <code>7c4a…e1b3</code>, valid offline</em></dd></div>
-        </dl>
+        <p class="kolm-diagram__sidebar-lede">Seven entries, every byte hash-pinned in <code>manifest.json</code> and signed with one Ed25519 key. Unzip it on any machine; the verifier travels inside the file.</p>
         <p class="kolm-diagram__cta">
           Verifies offline in ~2 s. <a href="/verify-prod">Try it on any artifact &rarr;</a> &middot; <a href="/spec/kolm-format-v1">Read the format spec &rarr;</a>
         </p>
@@ -1500,22 +1512,10 @@
 <!-- ============================================================ -->
 
 <!-- ============================================================ -->
-<section class="ks-section" data-w404="numbers-strip" aria-label="kolm by the numbers">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">By the numbers</span>
-      <h2 class="ks-h2">Six numbers that describe the system.</h2>
-    </div>
-    <div class="ks-numbers-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:var(--ks-5,16px);margin-top:var(--ks-6,24px)">
-      <div class="ks-num-card" data-w404-num="distill"><div class="ks-num-card__big" style="font-family:var(--ks-mono);font-size:34px;letter-spacing:-0.01em">79.18s</div><div class="ks-num-card__lbl" style="color:var(--ks-ink-3);font-size:13px;letter-spacing:0.04em;text-transform:uppercase;margin-top:6px">Trinity-500 LoRA on a 5090</div></div>
-      <div class="ks-num-card" data-w404-num="quant"><div class="ks-num-card__big" style="font-family:var(--ks-mono);font-size:34px;letter-spacing:-0.01em">17.9 GB</div><div class="ks-num-card__lbl" style="color:var(--ks-ink-3);font-size:13px;letter-spacing:0.04em;text-transform:uppercase;margin-top:6px">DeepSeek-R1 32B INT4 (NF4)</div></div>
-      <div class="ks-num-card" data-w404-num="bench"><div class="ks-num-card__big" style="font-family:var(--ks-mono);font-size:34px;letter-spacing:-0.01em">96.5%</div><div class="ks-num-card__lbl" style="color:var(--ks-ink-3);font-size:13px;letter-spacing:0.04em;text-transform:uppercase;margin-top:6px">Trinity-500 asks-1Q score</div></div>
-      <div class="ks-num-card" data-w404-num="latency"><div class="ks-num-card__big" style="font-family:var(--ks-mono);font-size:34px;letter-spacing:-0.01em">1.24s</div><div class="ks-num-card__lbl" style="color:var(--ks-ink-3);font-size:13px;letter-spacing:0.04em;text-transform:uppercase;margin-top:6px">Avg reply at 210 chars</div></div>
-      <div class="ks-num-card" data-w404-num="cache"><div class="ks-num-card__big" style="font-family:var(--ks-mono);font-size:34px;letter-spacing:-0.01em">10&times;</div><div class="ks-num-card__lbl" style="color:var(--ks-ink-3);font-size:13px;letter-spacing:0.04em;text-transform:uppercase;margin-top:6px">SHARD KV cache compression</div></div>
-      <div class="ks-num-card" data-w404-num="cost"><div class="ks-num-card__big" style="font-family:var(--ks-mono);font-size:34px;letter-spacing:-0.01em">$0</div><div class="ks-num-card__lbl" style="color:var(--ks-ink-3);font-size:13px;letter-spacing:0.04em;text-transform:uppercase;margin-top:6px">Per-token bill after compile</div></div>
-    </div>
-  </div>
-</section>
+<!-- W922: "Six numbers that describe the system" strip removed per user feedback
+     (jargon-y, nobody cares). The verified proof-rail at the top of the page +
+     the receipt section carry the real, sourced numbers. -->
+
 
 <!-- ============================================================ -->
 
