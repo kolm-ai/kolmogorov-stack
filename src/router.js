@@ -6212,6 +6212,7 @@ export function buildRouter() {
       const store = await import('./store.js');
       const gw = await import('./gateway-router.js');
       const pii = await import('./pii-redactor.js');
+      const guardrail = await import('./gateway-guardrail.js');
       const grec = await import('./gateway-receipt.js');
       const reg = await import('./provider-registry.js');
       // W-N: shared adapter helpers — clampTimeoutMs lives here. We pull
@@ -6264,6 +6265,25 @@ export function buildRouter() {
           redaction_applied: inputScan.redaction_applied,
           block_reason: inputScan.block_reason,
           block_classes: inputScan.block_classes,
+        });
+      }
+
+      // 2b. W921 — inline prompt-injection / jailbreak guardrail (OWASP LLM01).
+      // Default 'detect_only' is non-blocking (zero behavior change for existing
+      // namespaces); a namespace opts into 'block'. The verdict is surfaced on
+      // the response (kolm_guardrail) for audit. Fail-open: applyGuardrail never
+      // throws (a thrown detector degrades to a benign allow verdict).
+      const guard = guardrail.applyGuardrail({
+        text: inputText,
+        mode: nsConfig.guardrail_mode || 'detect_only',
+        threshold: nsConfig.guardrail_threshold,
+      });
+      if (guard.blocked) {
+        return res.status(400).json({
+          ok: false,
+          error: 'prompt_injection_blocked',
+          namespace: nsSlug,
+          guardrail: guardrail.buildGuardrailReceiptField(guard),
         });
       }
 
@@ -6586,6 +6606,7 @@ export function buildRouter() {
         kolm_fallback_reason: receipt.fallback_reason,
         kolm_attempts: attempted,
         kolm_latency_breakdown: receipt.latency_breakdown,
+        kolm_guardrail: guardrail.buildGuardrailReceiptField(guard),
         kolm_rate_limit: _rlHardCap > 0 ? {
           unit: 'gateway_calls',
           tier: _tier,
