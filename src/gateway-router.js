@@ -36,6 +36,7 @@
 //   }
 
 import { PROVIDERS, resolveAdapter } from './provider-registry.js';
+import { isOpen as _circuitOpen, recordOutcome as _recordHealth } from './provider-health.js';
 import {
   forwardAnthropic,
   forwardOpenAI,
@@ -247,6 +248,17 @@ export async function dispatchWithFallback({
   let lastReason = null;
   for (let i = 0; i < chain.length; i++) {
     const entry = chain[i] || {};
+    // W921 — health-aware failover: skip a provider whose circuit breaker is
+    // OPEN (recently hard-down) rather than burning a full upstream timeout on
+    // it. Fail-open panic invariant: NEVER skip the LAST candidate — if every
+    // provider's circuit is open, still attempt one so the gateway never goes
+    // dark. A thrown breaker degrades to "allow" (attempt the provider).
+    const _isLast = i === chain.length - 1;
+    if (!_isLast && entry.provider) {
+      let _open = false;
+      try { _open = _circuitOpen(entry.provider); } catch (_) { _open = false; }
+      if (_open) { lastReason = 'circuit_open'; continue; }
+    }
     const result = await dispatchToProvider({
       provider:       entry.provider,
       body,
@@ -260,6 +272,8 @@ export async function dispatchWithFallback({
       // W-N: per-entry override wins; outer chain timeoutMs is the default.
       timeoutMs:      entry.timeoutMs || timeoutMs || null,
     });
+    // Feed the breaker so a flapping provider trips OPEN and recovers via HALF_OPEN.
+    try { _recordHealth(entry.provider, { ok: !!result.ok, status: result.status }); } catch (_) { /* health is best-effort */ }
     if (typeof onAttempt === 'function') {
       try { onAttempt(result); } catch (_) { /* never break the chain on callback error */ }
     }
