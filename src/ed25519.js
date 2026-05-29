@@ -233,6 +233,24 @@ export function loadOrCreateDefaultSigner(opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
+// W921 NOW-3 — export the Ed25519 public key as an RFC 8037 OKP JWK so a
+// standards-conformant JWKS endpoint (/.well-known/jwks.json) lets any third-
+// party verifier fetch the key and check an X-Inference-Signature header without
+// trusting kolm (IETF draft-sharif-ai-model-lifecycle-attestation).
+// ---------------------------------------------------------------------------
+export function publicKeyJwk(publicKeyPem, kid) {
+  const jwk = crypto.createPublicKey(publicKeyPem).export({ format: 'jwk' });
+  return {
+    kty: jwk.kty,   // 'OKP'
+    crv: jwk.crv,   // 'Ed25519'
+    x: jwk.x,       // base64url-encoded raw 32-byte public key
+    use: 'sig',
+    alg: 'EdDSA',
+    kid: kid || keyFingerprint(publicKeyPem),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Helper: build a signature_ed25519 block for embedding in a receipt or any
 // other manifest-like structure.
 //

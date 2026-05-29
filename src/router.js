@@ -3121,6 +3121,23 @@ export function buildRouter() {
   // otherwise let an attacker invalidate a tenant's receipt verification
   // by deleting their published key.
 
+  // W921 NOW-3 — standards-conformant JWKS endpoint. Exposes the default receipt
+  // signing key as an RFC 8037 OKP JWK so any third-party verifier can fetch the
+  // key (kid == fingerprint) and check the X-Inference-Signature response header
+  // the gateway emits, WITHOUT trusting kolm (IETF inference-signature drafts).
+  r.get('/.well-known/jwks.json', async (_req, res) => {
+    try {
+      const ed = await import('./ed25519.js');
+      const signer = ed.loadOrCreateDefaultSigner();
+      if (!signer) { res.json({ keys: [] }); return; }
+      const jwk = ed.publicKeyJwk(signer.publicKey, signer.key_fingerprint);
+      res.set('cache-control', 'public, max-age=3600');
+      res.json({ keys: [jwk] });
+    } catch (e) {
+      res.status(500).json({ keys: [], error: 'jwks_unavailable', detail: String((e && e.message) || e) });
+    }
+  });
+
   // Public keys list - returns registered Ed25519 verification keys and directory stats.
   // W899 — additionally surface the default receipt signing pubkey under
   // source:'system' so /v1/verify callers can discover it without going
@@ -6555,6 +6572,20 @@ export function buildRouter() {
           res.set('X-RateLimit-Limit', String(_rlHardCap));
           res.set('X-RateLimit-Remaining', String(Math.max(0, _rlHardCap - (_rlCurrent + 1))));
           res.set('X-RateLimit-Reset', String(_resetEpoch));
+        }
+      } catch (_) { /* header set best-effort */ }
+
+      // W921 NOW-3 — standards-conformant inference-signature response headers.
+      // A third-party verifier fetches the key from /.well-known/jwks.json
+      // (kid == X-Inference-Key-ID) and checks this Ed25519 signature over the
+      // signed receipt covering this inference — verifiable WITHOUT trusting kolm
+      // (IETF draft-sharif-ai-model-lifecycle-attestation). Set before the
+      // SSE/JSON branch so both response shapes carry it.
+      try {
+        const _sig = receipt && receipt.signature_ed25519;
+        if (_sig && _sig.signature) {
+          res.set('X-Inference-Signature', _sig.signature);
+          res.set('X-Inference-Key-ID', _sig.key_fingerprint || '');
         }
       } catch (_) { /* header set best-effort */ }
 
