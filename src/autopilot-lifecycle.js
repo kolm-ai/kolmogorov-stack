@@ -429,7 +429,18 @@ async function _evaluateDeploy({ tenant, namespace, opts, simulate }) {
   // enabled AND an ab_test_id is in scope, EXECUTE additionally requires the
   // anytime-valid gate to say 'promote'; absent an ab_test_id the condition is
   // N/A (true) so the K-delta path for no-A/B-traffic is preserved.
-  if (opts && opts.enforce_sequential === true) {
+  // W921 NOW-4: close the peeking hole. When a REAL A/B test is in scope
+  // (sequential.applicable — an ab_test_id with enough samples), the fixed-
+  // horizon K-delta decision is statistically invalid under continuous cron
+  // peeking, so EXECUTE now REQUIRES the anytime-valid (mSPRT/GAVI) gate to say
+  // 'promote' BY DEFAULT. Operators can opt out with enforce_sequential===false.
+  // Absent a real A/B test the condition is N/A (true), preserving the K-delta
+  // path for no-A/B-traffic deploys. This only ever makes autonomous deploy MORE
+  // conservative (it blocks promotions the peeking-naive test would wrongly pass).
+  const _seqGated = (opts && opts.enforce_sequential === false)
+    ? false
+    : (sequential.applicable || (opts && opts.enforce_sequential === true));
+  if (_seqGated) {
     conditions.sequential_promote = (!sequential.applicable)
       ? true
       : sequential.decision === 'promote';
