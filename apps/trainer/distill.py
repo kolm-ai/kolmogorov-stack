@@ -711,6 +711,30 @@ def distillm2_loss(skl_chosen, srkl_rejected, beta):
     return (2.0 - b) * skl_chosen + b * srkl_rejected
 
 
+def _distillm2(student_logits, teacher_logits, T: float, alpha: float = 0.1):
+    """DistiLLM-2 objective for the offline SFT loop — the skewed-KL
+    "raise-the-chosen" component (SKL toward the teacher distribution).
+
+    The full DistiLLM-2 recipe is CONTRASTIVE: SKL on teacher (chosen) responses
+    PLUS skewed-reverse-KL on on-policy student (rejected) generations (see
+    distillm2_loss + the on-policy path). On-policy sampling is not available in
+    this per-batch teacher-forced loop, so here we apply the SKL half, which is
+    the core skewed forward KL toward the teacher and is signature-compatible
+    with the other _KD_FNS objectives. Skew (alpha) mixes the distributions in
+    log-space so the log-ratio stays bounded (DistiLLM v1); the T^2 factor
+    matches the Hinton gradient-scaling used by the other losses."""
+    log_p_s = F.log_softmax(student_logits / T, dim=-1)
+    log_p_t = F.log_softmax(teacher_logits / T, dim=-1)
+    per_tok = skewed_kl(log_p_s, log_p_t, alpha)  # vocab summed -> per-token
+    return per_tok.mean() * (T * T)
+
+
+# Register the offline DistiLLM-2 objective so `--objective distillm2` trains
+# through the standard KD loop (the contrastive on-policy variant rides the
+# dedicated path). Without this the per-batch loop KeyErrors on DISTILLM2.
+_KD_FNS[KDObjective.DISTILLM2] = _distillm2
+
+
 def adaptive_alpha(tea_logp_sum, stu_logp_sum, base_alpha=0.1, eps=1e-5):
     """Per-sample adaptive skew from the sentence-level teacher-student gap.
     Larger gap (harder sample) -> larger alpha (more skew), clipped to
@@ -1080,6 +1104,7 @@ def distill_trainer(
             TrainingArguments,
             Trainer,
             DataCollatorForLanguageModeling,
+            DataCollatorForSeq2Seq,
         )
         from peft import LoraConfig, get_peft_model, TaskType
     except ImportError as e:
@@ -1109,6 +1134,12 @@ def distill_trainer(
     teacher.eval()
     for p in teacher.parameters():
         p.requires_grad = False
+    # The HF Trainer moves the STUDENT to its device but does NOT manage the
+    # teacher (it is only invoked inside compute_loss). Pin the teacher to the
+    # same device as the student/inputs, else the teacher forward hits an
+    # index_select device mismatch (teacher weights on CPU, input_ids on CUDA).
+    _kd_device = "cuda" if torch.cuda.is_available() else "cpu"
+    teacher.to(_kd_device)
 
     student_base = AutoModelForCausalLM.from_pretrained(student_model, torch_dtype=dtype)
     lora_cfg = LoraConfig(
@@ -1174,7 +1205,12 @@ def distill_trainer(
     train_ds = _PromptResponseDataset(rows, tokenizer, cfg.max_length)
     eval_ds = _PromptResponseDataset(eval_rows, tokenizer, cfg.max_length) if eval_rows else None
 
-    collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
+    # DataCollatorForSeq2Seq pads BOTH input_ids and the custom variable-length
+    # `labels` (prompt positions masked to -100) consistently. The LM collator
+    # only handled input_ids, so batches with differing lengths raised a tensor-
+    # stacking ValueError on `labels`. label_pad_token_id=-100 keeps padded
+    # label positions out of the loss.
+    collator = DataCollatorForSeq2Seq(tokenizer=tokenizer, label_pad_token_id=-100, padding=True)
 
     args = TrainingArguments(
         output_dir=out_dir,
