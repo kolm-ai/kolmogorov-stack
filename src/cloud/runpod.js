@@ -136,20 +136,25 @@ function _podMutations() {
 // _callGraphQL — thin wrapper around fetch. Returns parsed `data` or throws
 // a tagged error. Identical contract to cloud-providers/runpod.js so callers
 // can treat error envelopes interchangeably.
-async function _callGraphQL({ apiKey, query, variables, opName, fetchImpl }) {
+async function _callGraphQL({ apiKey, query, variables, opName, fetchImpl, proxy }) {
   const fetchFn = fetchImpl || globalThis.fetch;
   if (typeof fetchFn !== 'function') {
     const err = new Error('global fetch is required (Node 22+). Pass opts.fetch to override.');
     err.code = 'fetch_unavailable';
     throw err;
   }
+  // No direct key? Route through the Vercel proxy (api/runpod.js), which holds
+  // the operator's runpod_api_key. The proxy returns the same { data, errors }
+  // GraphQL shape as api.runpod.io, so all parsing below is unchanged.
+  const px = proxy || (!apiKey ? _resolveProxy() : null);
+  const useProxy = !apiKey && px && px.url;
   let res;
   try {
-    res = await fetchFn(POD_GRAPHQL_URL, {
+    res = await fetchFn(useProxy ? px.url : POD_GRAPHQL_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${useProxy ? px.bearer : apiKey}`,
       },
       body: JSON.stringify({ query, variables }),
     });
@@ -206,7 +211,32 @@ function _resolveApiKey(opts = {}) {
   return (opts && opts.apiKey)
     || process.env.RUNPOD_API_KEY
     || process.env.KOLM_RUNPOD_TOKEN
+    // Operators commonly add the key with Vercel's lowercase casing; read it too
+    // (server.js normalizeEnv() also maps this, but be robust in any process).
+    || process.env.runpod_api_key
     || '';
+}
+
+// When there is NO direct RunPod key in this process (the common case: the
+// operator keeps runpod_api_key in Vercel, which the Railway router + CLI can't
+// see), fall back to the Vercel proxy (api/runpod.js) which DOES hold the key.
+// Requires a kolm bearer + base to authenticate to the proxy.
+function _resolveProxy(opts = {}) {
+  const bearer = (opts && (opts.proxyBearer || opts.kolmKey))
+    || process.env.KOLM_API_KEY || process.env.KOLM_KEY || '';
+  if (!bearer) return null;
+  const base = String((opts && opts.proxyBase) || process.env.KOLM_BASE_URL
+    || process.env.KOLM_BASE || 'https://kolm.ai').replace(/\/+$/, '');
+  return { url: base + '/v1/runpod/graphql', bearer };
+}
+
+// Resolve either a direct key or the Vercel proxy; throw the actionable
+// missing-key error only when NEITHER is available.
+function _resolveAuth(opts = {}) {
+  const apiKey = _resolveApiKey(opts);
+  const proxy = apiKey ? null : _resolveProxy(opts);
+  if (!apiKey && !proxy) throw _missingKeyError();
+  return { apiKey, proxy };
 }
 
 function _missingKeyError() {
@@ -227,7 +257,7 @@ function _missingKeyError() {
 // should poll getPodStatus() until openai_url is set.
 export async function provisionPod(opts = {}) {
   const apiKey = _resolveApiKey(opts);
-  if (!apiKey) throw _missingKeyError();
+  if (!apiKey && !_resolveProxy(opts)) throw _missingKeyError();
   const gpuLabel = opts.gpu_type || opts.gpuType || 'RTX A4000';
   const gpuTypeId = RUNPOD_GPU_CATALOG[gpuLabel] || gpuLabel;
   const containerImage = opts.container_image || opts.containerImage || 'kolm/serve:latest';
@@ -295,7 +325,7 @@ export async function tearDownPod(podId, opts = {}) {
     const err = new Error('tearDownPod requires podId'); err.code = 'bad_args'; throw err;
   }
   const apiKey = _resolveApiKey(opts);
-  if (!apiKey) throw _missingKeyError();
+  if (!apiKey && !_resolveProxy(opts)) throw _missingKeyError();
   const errors = [];
   let stopped = false, terminated = false;
   try {
@@ -338,7 +368,7 @@ export async function getPodStatus(podId, opts = {}) {
     const err = new Error('getPodStatus requires podId'); err.code = 'bad_args'; throw err;
   }
   const apiKey = _resolveApiKey(opts);
-  if (!apiKey) throw _missingKeyError();
+  if (!apiKey && !_resolveProxy(opts)) throw _missingKeyError();
   const data = await _callGraphQL({
     apiKey,
     query: _podMutations().getPod.query,
@@ -382,7 +412,7 @@ export async function getPodLogs(podId, opts = {}) {
     const err = new Error('getPodLogs requires podId'); err.code = 'bad_args'; throw err;
   }
   const apiKey = _resolveApiKey(opts);
-  if (!apiKey) throw _missingKeyError();
+  if (!apiKey && !_resolveProxy(opts)) throw _missingKeyError();
   const tail = Math.max(1, Math.min(2000, Number(opts.tail) || 200));
   const data = await _callGraphQL({
     apiKey,

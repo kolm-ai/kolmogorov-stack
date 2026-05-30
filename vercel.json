@@ -304,6 +304,14 @@
       "destination": "/api/teacher-chat"
     },
     {
+      "source": "/v1/runpod/graphql",
+      "destination": "/api/runpod"
+    },
+    {
+      "source": "/v1/runpod/health",
+      "destination": "/api/runpod"
+    },
+    {
       "source": "/v1/(.*)",
       "destination": "https://kolmogorov-stack-production.up.railway.app/v1/$1"
     },

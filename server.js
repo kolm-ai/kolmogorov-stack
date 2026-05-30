@@ -15,14 +15,14 @@ import { synthesize } from './src/synthesis.js';
 import { createConcept, publishVersion } from './src/registry.js';
 import { all } from './src/store.js';
 
-// W921 — accept the Stripe secret under common env-var casings. The kolm Vercel
-// var was added as `stripe_api_key`, but the billing code (5 call sites) reads
-// process.env.STRIPE_SECRET_KEY. Normalize once at startup so dynamic checkout
-// (src/billing-upgrade.js) + subscription management pick it up in prod.
-if (!process.env.STRIPE_SECRET_KEY) {
-  const _sk = process.env.STRIPE_API_KEY || process.env.stripe_api_key || process.env.STRIPE_KEY;
-  if (_sk) process.env.STRIPE_SECRET_KEY = _sk;
-}
+// W922 — normalize provider-key env-var names at startup. Operators keep keys in
+// Vercel/Railway under varied casings (runpod_api_key, cerebras_api,
+// anthropic_api_key, Cloudflare_api_token, stripe_api_key, ...); the code reads
+// canonical UPPER_SNAKE names. Map them once so every provider (Stripe, RunPod,
+// Cerebras, Anthropic, Google, ...) is picked up regardless of the operator's
+// casing. (Supersedes the Stripe-only normalization.)
+import { normalizeEnv } from './src/env-normalize.js';
+normalizeEnv();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
