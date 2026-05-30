@@ -64,6 +64,11 @@ import { handleMcpRequest } from './mcp-server.js';
 import * as webhooksModule from './webhooks.js';
 import * as modelEntitlements from './model-entitlements.js';
 import { evaluateAndGate as compileEvaluateAndGate } from './compile-eval-gate.js';
+// W-INTEG-3 — wave-3 modules (on-device update, inference bench, billing activation, connectors).
+import * as modelUpdateChannel from './model-update-channel.js';
+import * as inferenceBench from './inference-bench.js';
+import * as billingActivation from './billing-activation.js';
+import * as connectorsModule from './connectors.js';
 // R-2 — artifact lifecycle state machine. Routes below expose the per-artifact
 // `lifecycle.json` (created → signed → deployed → monitored → superseded →
 // revoked → archived). The download handler reads canPull() to block pulls
@@ -5855,6 +5860,32 @@ export function buildRouter() {
   });
 
   r.use(authMiddleware);
+
+  // W-INTEG — spend-cap enforcement (src/spend-caps.js). Runs after auth so the
+  // tenant is resolved, and gates the metered inference POST routes
+  // (/v1/chat/completions, /v1/messages, /v1/gateway*) with HTTP 402 when the
+  // tenant is over its USD budget cap. Tenant-fenced via req.tenant_record.id.
+  // Best-effort: a budget-subsystem error never fails the request closed.
+  const _METERED_BUDGET_PATHS = /^\/v1\/(chat\/completions|messages|gateway(\/|$)|completions)/;
+  r.use(async (req, res, next) => {
+    try {
+      if (req.method !== 'POST') return next();
+      if (!req.tenant_record) return next();
+      if (!_METERED_BUDGET_PATHS.test(req.path || req.url || '')) return next();
+      const budget = await spendCheckBudget(req.tenant_record.id, { plan: req.tenant_record.plan });
+      if (budget && budget.allowed === false) {
+        return res.status(402).json({
+          error: 'budget_exceeded',
+          spent_usd: budget.spent_usd,
+          cap_usd: budget.cap_usd,
+          remaining: budget.remaining,
+          plan: budget.plan,
+          detail: 'tenant USD budget cap reached; see GET /v1/usage/budget',
+        });
+      }
+    } catch { /* budget enforcement is best-effort; never fail-closed on its own error */ }
+    return next();
+  });
 
   // LM-8 (V1 launch 2026-05-26) — usage-cap alert middleware. Fires the 80%
   // and 100% transactional emails the first time each tenant crosses the
