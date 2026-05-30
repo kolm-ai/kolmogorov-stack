@@ -24,6 +24,12 @@ import { all } from './src/store.js';
 import { normalizeEnv } from './src/env-normalize.js';
 normalizeEnv();
 
+// Trust moat: guarantee a persistent Ed25519 signing key on boot so kolm never ships
+// unsigned artifacts/receipts. Persists to the durable data volume (KOLM_DATA_DIR/keys),
+// not ephemeral ~/.kolm, and points the key store there so the signer + /health agree.
+import { ensureSigningKey } from './src/ensure-signing-key.js';
+ensureSigningKey();
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
