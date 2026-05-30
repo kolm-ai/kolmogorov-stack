@@ -9,9 +9,14 @@
 # if anything here fails we still start the server so the app can never be taken
 # down by this wrapper.
 DATA="${KOLM_DATA_DIR:-/app/data}"
-mkdir -p "$DATA/events" 2>/dev/null || true
-chown node:node "$DATA" "$DATA/events" 2>/dev/null || true
-chmod a+rwX "$DATA" "$DATA/events" 2>/dev/null || true
+# Create + chown every subdir the app writes as the node user: events (event-store),
+# keys (Ed25519 signing key — the provenance moat; signing_key:missing if node can't
+# write it). Recursive chown of these SMALL dirs is safe (unlike a recursive pass over
+# the whole multi-GiB volume, which once delayed boot past the healthcheck).
+mkdir -p "$DATA/events" "$DATA/keys" 2>/dev/null || true
+chown -R node:node "$DATA/events" "$DATA/keys" 2>/dev/null || true
+chown node:node "$DATA" 2>/dev/null || true
+chmod a+rwX "$DATA" "$DATA/events" "$DATA/keys" 2>/dev/null || true
 
 # Args are the CMD / Railway start command (e.g. `node server.js`). Fall back to
 # the canonical command if none were passed.
