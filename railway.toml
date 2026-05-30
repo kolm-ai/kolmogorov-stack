@@ -2,7 +2,10 @@
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "node server.js"
+# sh start.sh = two exec-safe tokens (Railway execs the start command without a shell, so inline
+# 'chmod; node' fails). The shell logic lives in start.sh, which makes the data volume writable
+# (best-effort) then `exec node server.js` — node always launches, so this can't crash-loop.
+startCommand = "sh start.sh"
 healthcheckPath = "/health"
 healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"
