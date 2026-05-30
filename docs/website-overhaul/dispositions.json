@@ -1,0 +1,7133 @@
+{
+ "counts": {
+  "ELEVATE": 210,
+  "MERGE": 23,
+  "KEEP": 825,
+  "RETIRE": 129
+ },
+ "generated_by": "rule-engine grounded in phase0 strategy",
+ "dispositions": [
+  {
+   "path": "404.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "about-the-assistant.html",
+   "disposition": "MERGE",
+   "reason": "fold into about",
+   "redirect_to": "/about"
+  },
+  {
+   "path": "about.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "acceptable-use.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/ab-tests.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/active-learning.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/agent-telemetry.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/api-keys.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/approvals.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/artifacts/diff.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/artifacts/_slug.html",
+   "disposition": "RETIRE",
+   "reason": "app surface",
+   "redirect_to": "/account/overview"
+  },
+  {
+   "path": "account/artifacts.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/audit-log.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/bakeoff.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/bakeoffs.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/bench.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/billing.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/builds/new.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/builds.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/captured.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/captures/analytics.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/captures/review.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/captures.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/chargeback.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/confidence.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/connectors.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/continuous-monitoring.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/create-model.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/datasets.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/devices/_slug.html",
+   "disposition": "RETIRE",
+   "reason": "app surface",
+   "redirect_to": "/account/overview"
+  },
+  {
+   "path": "account/devices.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/diagnose.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/distill/new.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/distill-runs.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/drift-alert.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/drift.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/enterprise/sso.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/enterprise.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/experts.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/failure-modes.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/federated/consortium.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/fleet.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/forge.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/gateway/providers.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/gateway.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/governance/assurance.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/governance/cost.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/governance/drift.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/governance/evidence.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/governance/lifecycle.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/governance/passport.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/governance.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/groups.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/hardware.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/keys.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/labeling.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/lake.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/members.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/merge/new.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/models.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/multimodal-bakeoff.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/namespaces/new.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/namespaces.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/onboarding/path-gpu.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/onboarding/path-no-gpu.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/onboarding/path-route.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/onboarding/path-verify.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/onboarding.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/opportunities.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/org.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/overview.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/pipelines/index.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/pipelines/_template.html",
+   "disposition": "RETIRE",
+   "reason": "app surface",
+   "redirect_to": "/account/overview"
+  },
+  {
+   "path": "account/pipelines.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/privacy-events.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/quantize/index.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/quantize/new.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/receipts/index.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/recipes.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/repeated-workflows.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/routing.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/savings.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/seasonal.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/security/2fa.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/serve/index.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/serve/new.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/settings/integrations.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/settings/notifications.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/settings.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/simulations.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/sla.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/staleness.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/storage.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/sustainability.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/synthetic.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/team.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account/webhooks.html",
+   "disposition": "KEEP",
+   "reason": "app surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "account.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "admin.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "agents.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "airgap.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "api.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "articles/ai-compiler-comparison.html",
+   "disposition": "KEEP",
+   "reason": "articles surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "articles/ai-compiler.html",
+   "disposition": "KEEP",
+   "reason": "articles surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "articles/distillation-vs-fine-tuning-vs-rag.html",
+   "disposition": "KEEP",
+   "reason": "articles surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "articles/fine-tune-vs-compile.html",
+   "disposition": "KEEP",
+   "reason": "articles surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "articles/hipaa-ai-from-prompts.html",
+   "disposition": "KEEP",
+   "reason": "articles surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "articles/hipaa-on-device.html",
+   "disposition": "KEEP",
+   "reason": "articles surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "articles/how-we-benchmark.html",
+   "disposition": "KEEP",
+   "reason": "articles surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "articles/index.html",
+   "disposition": "KEEP",
+   "reason": "articles surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "articles/k-sample-verified-inference.html",
+   "disposition": "KEEP",
+   "reason": "articles surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "articles/kolm-ai-vs-kolm-therapeutics.html",
+   "disposition": "KEEP",
+   "reason": "articles surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "articles/kolm-artifact-walkthrough.html",
+   "disposition": "KEEP",
+   "reason": "articles surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "articles/kolm-file-format.html",
+   "disposition": "KEEP",
+   "reason": "articles surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "articles/rent-vs-buy-compute.html",
+   "disposition": "KEEP",
+   "reason": "articles surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "articles/running-our-marketing-on-distilled-models.html",
+   "disposition": "KEEP",
+   "reason": "articles surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "articles/speculative-decoding-recipes.html",
+   "disposition": "KEEP",
+   "reason": "articles surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "articles/why-we-built-kolm.html",
+   "disposition": "KEEP",
+   "reason": "articles surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "artifacts/example/drift.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "ask.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "audit-log.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "baa.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "badge.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "bench/kolmbench-v1.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "benchmarks/edge.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "benchmarks/swe-bench-mini.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "benchmarks.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "blog/2026-05-26-from-frontier-to-local-in-five-minutes.html",
+   "disposition": "KEEP",
+   "reason": "blog",
+   "redirect_to": ""
+  },
+  {
+   "path": "blog/2026-05-26-introducing-kolm-v1.html",
+   "disposition": "KEEP",
+   "reason": "blog",
+   "redirect_to": ""
+  },
+  {
+   "path": "blog/2026-05-26-receipts-as-compliance.html",
+   "disposition": "KEEP",
+   "reason": "blog",
+   "redirect_to": ""
+  },
+  {
+   "path": "blog/2026-05-26-the-wrapper-tax-decomposed.html",
+   "disposition": "KEEP",
+   "reason": "blog",
+   "redirect_to": ""
+  },
+  {
+   "path": "blog/2026-05-26-trinity-500-distill-story.html",
+   "disposition": "KEEP",
+   "reason": "blog",
+   "redirect_to": ""
+  },
+  {
+   "path": "blog/2026-05-28-openai-finetuning-shutdown.html",
+   "disposition": "KEEP",
+   "reason": "blog",
+   "redirect_to": ""
+  },
+  {
+   "path": "blog/2026-06-02-distilling-agents.html",
+   "disposition": "KEEP",
+   "reason": "blog",
+   "redirect_to": ""
+  },
+  {
+   "path": "blog/2026-06-04-distill-from-gateway-logs.html",
+   "disposition": "KEEP",
+   "reason": "blog",
+   "redirect_to": ""
+  },
+  {
+   "path": "blog/index.html",
+   "disposition": "KEEP",
+   "reason": "blog",
+   "redirect_to": ""
+  },
+  {
+   "path": "blog/templates/cost-of-ai.html",
+   "disposition": "RETIRE",
+   "reason": "blog",
+   "redirect_to": "/blog"
+  },
+  {
+   "path": "blog/templates/state-of-distillation.html",
+   "disposition": "RETIRE",
+   "reason": "blog",
+   "redirect_to": "/blog"
+  },
+  {
+   "path": "book-demo.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "brand/company-entity.html",
+   "disposition": "KEEP",
+   "reason": "brand surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "brand/index.html",
+   "disposition": "KEEP",
+   "reason": "brand surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "brand/values.html",
+   "disposition": "KEEP",
+   "reason": "brand surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "build-your-own.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "builder.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "byoc.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "capture.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "captures.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "case-studies/finance-sr11-7.html",
+   "disposition": "KEEP",
+   "reason": "case-studies surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "case-studies/healthcare-phi-redactor.html",
+   "disposition": "KEEP",
+   "reason": "case-studies surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "case-studies/index.html",
+   "disposition": "KEEP",
+   "reason": "case-studies surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "case-studies/legal-contract-extraction.html",
+   "disposition": "KEEP",
+   "reason": "case-studies surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "cerebras-teacher.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "changelog.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "ci.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "cloud.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "code-gen.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "community/devto-article.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "community/discord-bootstrap.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "community/hn-launch.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "community/twitter-thread.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "community.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "compare/baseten.html",
+   "disposition": "ELEVATE",
+   "reason": "competitor proof",
+   "redirect_to": ""
+  },
+  {
+   "path": "compare/fireworks-ai.html",
+   "disposition": "ELEVATE",
+   "reason": "competitor proof",
+   "redirect_to": ""
+  },
+  {
+   "path": "compare/kolm-vs-bedrock-distill.html",
+   "disposition": "ELEVATE",
+   "reason": "competitor proof",
+   "redirect_to": ""
+  },
+  {
+   "path": "compare/kolm-vs-ollama.html",
+   "disposition": "ELEVATE",
+   "reason": "competitor proof",
+   "redirect_to": ""
+  },
+  {
+   "path": "compare/kolm-vs-openai-fine-tune.html",
+   "disposition": "ELEVATE",
+   "reason": "competitor proof",
+   "redirect_to": ""
+  },
+  {
+   "path": "compare/kolm-vs-openai.html",
+   "disposition": "ELEVATE",
+   "reason": "competitor proof",
+   "redirect_to": ""
+  },
+  {
+   "path": "compare/kolm-vs-openpipe-2026.html",
+   "disposition": "ELEVATE",
+   "reason": "competitor proof",
+   "redirect_to": ""
+  },
+  {
+   "path": "compare/kolm-vs-openpipe.html",
+   "disposition": "ELEVATE",
+   "reason": "competitor proof",
+   "redirect_to": ""
+  },
+  {
+   "path": "compare/kolm-vs-predibase-2026.html",
+   "disposition": "ELEVATE",
+   "reason": "competitor proof",
+   "redirect_to": ""
+  },
+  {
+   "path": "compare/kolm-vs-predibase.html",
+   "disposition": "ELEVATE",
+   "reason": "competitor proof",
+   "redirect_to": ""
+  },
+  {
+   "path": "compare/kolm-vs-proxis.html",
+   "disposition": "ELEVATE",
+   "reason": "competitor proof",
+   "redirect_to": ""
+  },
+  {
+   "path": "compare/kolm-vs-rag.html",
+   "disposition": "ELEVATE",
+   "reason": "competitor proof",
+   "redirect_to": ""
+  },
+  {
+   "path": "compare/kolm-vs-together-2026.html",
+   "disposition": "ELEVATE",
+   "reason": "competitor proof",
+   "redirect_to": ""
+  },
+  {
+   "path": "compare/kolm-vs-together.html",
+   "disposition": "ELEVATE",
+   "reason": "competitor proof",
+   "redirect_to": ""
+  },
+  {
+   "path": "compare/lamini.html",
+   "disposition": "ELEVATE",
+   "reason": "competitor proof",
+   "redirect_to": ""
+  },
+  {
+   "path": "compare/legacy.html",
+   "disposition": "ELEVATE",
+   "reason": "competitor proof",
+   "redirect_to": ""
+  },
+  {
+   "path": "compare/lm-studio.html",
+   "disposition": "ELEVATE",
+   "reason": "competitor proof",
+   "redirect_to": ""
+  },
+  {
+   "path": "compare/modal.html",
+   "disposition": "ELEVATE",
+   "reason": "competitor proof",
+   "redirect_to": ""
+  },
+  {
+   "path": "compare/replicate.html",
+   "disposition": "ELEVATE",
+   "reason": "competitor proof",
+   "redirect_to": ""
+  },
+  {
+   "path": "compare.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "compile/all.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/claude-opus-4-to-awq.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/claude-opus-4-to-exl2.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/claude-opus-4-to-gguf-q4_k_m.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/claude-opus-4-to-gguf-q5_k_m.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/claude-opus-4-to-gguf-q8_0.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/claude-opus-4-to-gptq.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/claude-opus-4-to-mlx.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/deepseek-r1-distill-32b-to-awq.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/deepseek-r1-distill-32b-to-exl2.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/deepseek-r1-distill-32b-to-gguf-q4_k_m.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/deepseek-r1-distill-32b-to-gguf-q5_k_m.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/deepseek-r1-distill-32b-to-gguf-q8_0.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/deepseek-r1-distill-32b-to-gptq.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/deepseek-r1-distill-32b-to-mlx.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/deepseek-r1-distill-7b-to-awq.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/deepseek-r1-distill-7b-to-exl2.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/deepseek-r1-distill-7b-to-gguf-q4_k_m.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/deepseek-r1-distill-7b-to-gguf-q5_k_m.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/deepseek-r1-distill-7b-to-gguf-q8_0.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/deepseek-r1-distill-7b-to-gptq.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/deepseek-r1-distill-7b-to-mlx.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/gemma-2-27b-to-awq.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/gemma-2-27b-to-exl2.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/gemma-2-27b-to-gguf-q4_k_m.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/gemma-2-27b-to-gguf-q5_k_m.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/gemma-2-27b-to-gguf-q8_0.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/gemma-2-27b-to-gptq.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/gemma-2-27b-to-mlx.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/gpt-4o-to-awq.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/gpt-4o-to-exl2.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/gpt-4o-to-gguf-q4_k_m.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/gpt-4o-to-gguf-q5_k_m.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/gpt-4o-to-gguf-q8_0.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/gpt-4o-to-gptq.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/gpt-4o-to-mlx.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/llama-3.3-70b-to-awq.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/llama-3.3-70b-to-exl2.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/llama-3.3-70b-to-gguf-q4_k_m.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/llama-3.3-70b-to-gguf-q5_k_m.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/llama-3.3-70b-to-gguf-q8_0.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/llama-3.3-70b-to-gptq.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/llama-3.3-70b-to-mlx.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/mistral-large-to-awq.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/mistral-large-to-exl2.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/mistral-large-to-gguf-q4_k_m.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/mistral-large-to-gguf-q5_k_m.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/mistral-large-to-gguf-q8_0.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/mistral-large-to-gptq.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/mistral-large-to-mlx.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-32b-to-awq.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-32b-to-exl2.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-32b-to-gguf-q4_k_m.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-32b-to-gguf-q5_k_m.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-32b-to-gguf-q8_0.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-32b-to-gptq.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-32b-to-mlx.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-72b-to-awq.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-72b-to-exl2.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-72b-to-gguf-q4_k_m.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-72b-to-gguf-q5_k_m.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-72b-to-gguf-q8_0.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-72b-to-gptq.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-72b-to-mlx.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-7b-to-awq.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-7b-to-exl2.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-7b-to-gguf-q4_k_m.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-7b-to-gguf-q5_k_m.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-7b-to-gguf-q8_0.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-7b-to-gptq.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile/qwen2.5-7b-to-mlx.html",
+   "disposition": "RETIRE",
+   "reason": "internal build pages -> app",
+   "redirect_to": "/account/builds"
+  },
+  {
+   "path": "compile.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "compliance/data-residency.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "compliance/eu-ai-act.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "compliance/index.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "compliance/nist-ai-rmf.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "compliance-packs.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "compute.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "cookbook/bug-spotter.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/calendar-summary.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/churn-predict.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/daily-recap.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/docstring.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/drug-name-redact.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/email-reply.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/embedded-sensor-classifier.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/feature-spec-from-issue.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/finance-disclosure-redact.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/hipaa-summarizer.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/incident-summarizer.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/intake-triage.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/k-score-explainer.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/legal-clause-extract.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/log-grep.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/nps-classifier.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/on-call-page-classifier.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/phi-redactor.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/photo-grouper.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/pr-review.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/pricing-quote.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/recall-namespace-tagger.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/recipe-from-observations.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/refactor.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/runbook-step.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/slack-thread-summarizer.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/soap-redactor.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/support-reply.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/tactical-edge-intel.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/test-gen.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/type-hint.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/verifier-from-examples.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/voice-memo-to-task.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "cookbook/web3-address-screener.html",
+   "disposition": "RETIRE",
+   "reason": "cookbook stub -> docs",
+   "redirect_to": "/docs"
+  },
+  {
+   "path": "customer-support.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "dashboard.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "defense-v2.html",
+   "disposition": "MERGE",
+   "reason": "v2 dupe",
+   "redirect_to": "/defense"
+  },
+  {
+   "path": "defense.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "demo-90s.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "demo-live.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "demo.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "design-system.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "device/webgpu-runner.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "device-transfer/browser-wasm.html",
+   "disposition": "KEEP",
+   "reason": "device-transfer surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "device-transfer/iphone-15-pro.html",
+   "disposition": "KEEP",
+   "reason": "device-transfer surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "device-transfer/jetson-orin-nano.html",
+   "disposition": "KEEP",
+   "reason": "device-transfer surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "device-transfer/m3-mac.html",
+   "disposition": "KEEP",
+   "reason": "device-transfer surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "device-transfer/raspberry-pi-5.html",
+   "disposition": "KEEP",
+   "reason": "device-transfer surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "device-transfer.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "device.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "devtools-v2.html",
+   "disposition": "MERGE",
+   "reason": "v2 dupe",
+   "redirect_to": "/devtools"
+  },
+  {
+   "path": "distill.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/ab-testing.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/agent-guide.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/agents.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/airgap.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/api.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/approvals.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/artifact-lifecycle.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/assurance-case.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/audit-export.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/audit.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/capture/approval.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/capture/export.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/capture/hash-chain.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/capture/overview.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/capture/poisoning.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/capture/redaction.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/capture/retention.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/capture-anomaly.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/chargeback.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/ab.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/accelerate.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/active-learn.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/add.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/agent.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/ai-act.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/airgap.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/anonymize.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/approval.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/artifacts.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/ask.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/attach.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/attest.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/audio.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/audit-export.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/audit.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/auditor.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/autopilot.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/backbones.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/bakeoff.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/bench.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/benchmark.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/billing.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/bootstrap.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/bridges.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/build.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/bundle.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/cache.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/caiq.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/capture-off.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/capture-on.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/capture.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/captures.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/carbon.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/cc.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/cert.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/changelog.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/chargeback.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/chat-tui.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/chat.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/checkpoint.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/cloud.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/compile.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/completion.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/compute.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/config.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/connect.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/connectors.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/copyright-scan.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/dataset.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/datasets.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/decode.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/demo.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/deploy.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/detect.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/device.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/devices.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/diagnose.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/diff.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/distill.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/do.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/doc.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/doctor.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/drift-alert.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/drift.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/eject.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/encode.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/eval.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/evidence.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/evolve.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/experts.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/explain.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/export.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/extract.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/failure-modes.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/failure-to-capture-loop.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/federated.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/fit.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/fix.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/fl.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/forge.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/forget.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/frontier.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/gateway.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/gpu.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/guardrails.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/hardware.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/health.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/help.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/hmac.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/hub.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/import-chat.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/import.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/improve.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/index.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/init-agent.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/init.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/inspect.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/inspection.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/install-device.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/install.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/instant.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/intent.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/ir.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/its.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/jobs.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/key.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/keygen.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/keys.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/kolmbench.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/label.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/labels.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/lake.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/lang.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/lineage.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/lingual.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/list.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/load.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/login.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/logout.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/logs.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/long-context.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/loop.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/make.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/manifest.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/marketplace.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/media.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/menu.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/merge.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/mesh.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/meta.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/metrics.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/migrate.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/model-card.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/models.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/moe.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/multilingual.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/namespace.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/new.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/next.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/nl.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/numeric.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/opportunities.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/optimize.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/otel.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/pack.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/package.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/packages.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/passport.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/pextract.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/pin.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/pipeline.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/plugin.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/poison.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/prefetch.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/privacy.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/procurement.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/profile.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/promote.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/proxy.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/pubkey.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/publish.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/pull-backbone.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/pull.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/quantize.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/query.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/quickstart.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/rag.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/recommend.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/redact.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/redteam.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/reg.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/region.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/registry.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/regulatory.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/reinject.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/remote.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/repeated-workflows.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/repl.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/replay.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/rescue.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/residency.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/resume.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/review.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/route.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/run.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/runtime.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/savings.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/sbom.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/score.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/sdk.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/seasonal.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/seeds.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/serve.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/services.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/sessions.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/settings.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/setup.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/shell-init.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/ship.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/signup.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/sigstore-attest.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/sim.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/sla.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/spec-decode.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/staleness.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/stat-sig.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/status.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/stress.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/studio.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/support-bundle.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/surfaces.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/sync.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/synth.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/synthetic.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/tail.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/team.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/test.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/tokenize.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/tool.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/trace.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/train.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/tui.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/tune.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/tunnel.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/unpack.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/update.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/upgrade.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/usage.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/verify.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/version.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/vertical.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/video.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/vlm.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/vscode.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/watch.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/what.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/whoami.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/wizard.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/wrap.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/xlang.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cli/yaml.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cloud-cerebras.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cloud-compile.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cloud-sync.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/colab-compile.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/compile/formats.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/compile/gguf.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/connect/anthropic.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/connect/gemini.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/connect/openai.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/connect/openrouter.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/connectors.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cookbook/coding-assistant.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cookbook/document-extractor.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cookbook/index.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cookbook/support-bot.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cookbook.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/copyright-scan.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cost-displacement.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cost-optimization.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cross-lingual.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/cve-in-kscore.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/data-network-effects.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/datasets.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/deploy-airgap.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/deploy-docker-compose.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/deploy-kubernetes.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/deploy-vllm.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/dev-agents.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/devices.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/diagnose.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/distill.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/distillation.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/drift-alert.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/drift-detection.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/drift-detector.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/efficiency.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/enterprise.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/eval-harness.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/evals.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/evidence-dag.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/failure-modes.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/federated-consortium.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/forge/spec-toml.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway/configuration.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway/overview.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway/providers.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway/quickstart.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway/routing-rules.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway/self-host.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway/streaming.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway/troubleshooting.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway-api.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway-bench.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway-byoc.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway-captures.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway-cli.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway-compose.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway-confidence-router.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway-deploy.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway-faq.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway-mode.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway-namespaces.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway-pii.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway-providers.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway-receipts.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway-region-lock.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway-sdk.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway-toml.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/gateway.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/github-actions.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/glossary.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/govern/assurance.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/govern/compliance.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/govern/drift.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/govern/evidence.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/govern/lifecycle.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/govern/receipts.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/govern-api-reference.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/govern-cli-reference.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/govern-faq.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/govern-overview.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/guardrails.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/hardware.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/i18n/de.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/i18n/es.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/i18n/fr.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/i18n/ja.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/i18n/ko.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/i18n/zh.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/import.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/indie-loop.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/install/linux.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/install/mac.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/install/windows.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/integrations/azure-ai-studio.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/integrations/index.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/integrations/langchain-js.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/integrations/langchain-py.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/integrations/llamaindex-js.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/integrations/llamaindex-py.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/integrations/make.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/integrations/sagemaker.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/integrations/vertex-ai.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/integrations/zapier.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/k-score-methodology.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/kubernetes.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/lake.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/lineage.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/lm-studio-import.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/marketplace/publish.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/marketplace-import.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/marketplace.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/migrate.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/model-card.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/multi-region.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/multilingual.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/multimodal/audio.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/multimodal/video.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/multimodal/vision.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/multimodal-pipeline.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/namespace-fingerprint.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/numeric-accuracy.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/observability/opentelemetry.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/observability/prometheus.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/observability.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/optimizer.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/passport.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/pipelines.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/plugins.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/privacy.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/procurement.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/progressive-distill.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/quickstart/c.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/quickstart/index.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/quickstart/mcp.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/quickstart/node.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/quickstart/python.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/quickstart/rust.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/quickstart.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/rag.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/rbac.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/reasoning-traces.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/receipts/audit-export.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/receipts/format.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/receipts/index.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/receipts/overview.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/receipts/signing.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/receipts/verification.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/recipes/agent.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/recipes/authoring-a-template.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/recipes/cerebras-council-distill.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/recipes/classify.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/recipes/customer-support.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/recipes/doc-qa.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/recipes/edge-deploy.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/recipes/index.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/recipes/openai-finetune-migration.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/reference/config-toml.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/reference/doctor-checks.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/reference/ship-gate.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/regulatory-toolkit.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/releasing.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/routing/active-learning.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/routing/confidence-routing.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/routing/cost-attribution.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/routing/overview.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/routing/provider-failover.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/rs-1.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/run/deploy.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/run/devices.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/run/fleet.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/run/hardware.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/run/monitoring.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/run/overview.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/run/rollback.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/run/runtimes.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/run/security.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/run/serve.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/run/speed-optimization.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/run/testing.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/run/troubleshooting.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/run/updates.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/runtime/horizontal-scaling.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/runtime/memory-tiers.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/runtime-autodetect.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/runtime-passport.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/runtime-placement.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/runtime.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/sandbox.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/sdk/c.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/sdk/mcp.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/sdk/node.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/sdk/python.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/sdk/rust.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/sdk.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/seasonal.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/self-hosted-deploy-complete.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/spec/dot-kolm-v1.0.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/staleness.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/state.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/storage.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/studio/artifacts.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/studio/overview.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/studio-api-reference.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/studio-bench.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/studio-cli-reference.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/studio-compile.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/studio-distill-recipes.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/studio-distill.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/studio-export-formats.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/studio-export-gguf.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/studio-faq.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/studio-judges.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/studio-moe.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/studio-overview.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/studio-publish-hf.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/studio-quantization.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/studio-teachers.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/synthetic.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/teacher-council.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/team.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/tickets.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/token-dpo.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/training.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/troubleshooting.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/verify.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/verticals.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/vscode.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/webauthn.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs/webhooks.html",
+   "disposition": "KEEP",
+   "reason": "docs (curate in generator)",
+   "redirect_to": ""
+  },
+  {
+   "path": "docs.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "download.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "dpa.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "drift.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "edge.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "education.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "enterprise/console.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "enterprise/inquiry.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "enterprise/self-hosted.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "enterprise.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "eu-sovereign.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "eu.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "faq.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "finance/architecture.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "finance-v2.html",
+   "disposition": "MERGE",
+   "reason": "v2 dupe",
+   "redirect_to": "/finance"
+  },
+  {
+   "path": "finance.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "fintech.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "fleet.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "for/agents.html",
+   "disposition": "KEEP",
+   "reason": "for surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "for/edge-ai.html",
+   "disposition": "KEEP",
+   "reason": "for surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "for/fintech.html",
+   "disposition": "KEEP",
+   "reason": "for surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "for/government-defense.html",
+   "disposition": "KEEP",
+   "reason": "for surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "for/healthcare.html",
+   "disposition": "KEEP",
+   "reason": "for surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "for/insurance.html",
+   "disposition": "KEEP",
+   "reason": "for surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "for/legal-services.html",
+   "disposition": "KEEP",
+   "reason": "for surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "for/manufacturing.html",
+   "disposition": "KEEP",
+   "reason": "for surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "for/support-automation.html",
+   "disposition": "KEEP",
+   "reason": "for surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "forge.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "format/v2.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "foundations/git.html",
+   "disposition": "KEEP",
+   "reason": "foundations surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "foundations/scripts.html",
+   "disposition": "KEEP",
+   "reason": "foundations surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "foundations/tailscale.html",
+   "disposition": "KEEP",
+   "reason": "foundations surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "foundations/termius.html",
+   "disposition": "KEEP",
+   "reason": "foundations surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "foundations/tmux.html",
+   "disposition": "KEEP",
+   "reason": "foundations surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "foundations.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "frontier-stack.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "frozen-eval.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "gateway-migration.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "gateway.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "glossary.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "gov.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "government.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "hall-of-fame.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "hardware.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "health-insurance.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "healthcare/architecture.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "healthcare/assessment.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "healthcare-v2.html",
+   "disposition": "MERGE",
+   "reason": "v2 dupe",
+   "redirect_to": "/healthcare"
+  },
+  {
+   "path": "healthcare.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "hipaa-mapping.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "hobbyist.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "how-vs-anthropic.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "how-vs-diy.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "how-vs-hyperscaler.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "how-vs-lorax.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "how-vs-openai-fine-tune.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "how-vs-openpipe.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "how-vs-predibase.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "hub.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "index.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "install/claude-desktop.html",
+   "disposition": "KEEP",
+   "reason": "install surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "install/continue.html",
+   "disposition": "KEEP",
+   "reason": "install surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "install/cursor.html",
+   "disposition": "KEEP",
+   "reason": "install surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "install/vscode.html",
+   "disposition": "KEEP",
+   "reason": "install surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "install/windsurf.html",
+   "disposition": "KEEP",
+   "reason": "install surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/claims-adjudication.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/cms-star.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/denial-appeal-letter.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/edi-270-271.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/edi-278.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/edi-834.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/edi-835.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/edi-837.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/fhir-uscdi.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/fraud-detector.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/hedis-bcs.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/hedis-cbp.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/hedis-cdc-hba1c.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/icd10-cpt-crosswalk.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/member-support-triage.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/mlr-rebate.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/npi-directory.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/prior-auth-letter.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/prior-auth-review.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/provider-credentialing.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance/templates/risk-adjustment-coder.html",
+   "disposition": "KEEP",
+   "reason": "vertical templates (real)",
+   "redirect_to": ""
+  },
+  {
+   "path": "insurance.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "insure.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/anthropic-sdk.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/claude-code.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/cloudflare.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/continue.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/cursor-claude-code.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/cursor.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/docker-compose.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/dspy.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/env-vars.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/github-actions.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/gitlab-ci.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/haystack.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/jetbrains.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/langchain.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/litellm.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/llamaindex.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/n8n.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/openai-sdk.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/openrouter.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/vercel-ai-sdk.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/vscode.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations/zed.html",
+   "disposition": "KEEP",
+   "reason": "integration credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "integrations.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "k-score-calibration.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "k-score-explained.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "k-score.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "kolm-auto-pilot.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "kscore-bench.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "kscore-leaderboard.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "labs/index.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "lang/de/index.html",
+   "disposition": "KEEP",
+   "reason": "lang surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "lang/fr/index.html",
+   "disposition": "KEEP",
+   "reason": "lang surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "lang/ja/index.html",
+   "disposition": "KEEP",
+   "reason": "lang surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "leaderboard.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "learn/deploy-to-phone.html",
+   "disposition": "KEEP",
+   "reason": "learn surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "learn/distill-openai-usage.html",
+   "disposition": "KEEP",
+   "reason": "learn surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "learn/first-kolm-in-5-minutes.html",
+   "disposition": "KEEP",
+   "reason": "learn surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "learn/from-openpipe.html",
+   "disposition": "KEEP",
+   "reason": "learn surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "learn/from-predibase.html",
+   "disposition": "KEEP",
+   "reason": "learn surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "learn/from-raw-lora.html",
+   "disposition": "KEEP",
+   "reason": "learn surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "learn/index.html",
+   "disposition": "KEEP",
+   "reason": "learn surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "legal/architecture.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "legal/distillation-tos-clarity.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "legal/dpa.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "legal/liability.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "legal/teacher-source-disclosure.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "legal-v2.html",
+   "disposition": "MERGE",
+   "reason": "v2 dupe",
+   "redirect_to": "/legal"
+  },
+  {
+   "path": "legal.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "license.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "manifesto.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "marketplace/aws.html",
+   "disposition": "RETIRE",
+   "reason": "underdeveloped marketplace",
+   "redirect_to": "/hub"
+  },
+  {
+   "path": "marketplace/azure.html",
+   "disposition": "RETIRE",
+   "reason": "underdeveloped marketplace",
+   "redirect_to": "/hub"
+  },
+  {
+   "path": "marketplace/claims-redactor.html",
+   "disposition": "RETIRE",
+   "reason": "underdeveloped marketplace",
+   "redirect_to": "/hub"
+  },
+  {
+   "path": "marketplace/code-issue-classifier.html",
+   "disposition": "RETIRE",
+   "reason": "underdeveloped marketplace",
+   "redirect_to": "/hub"
+  },
+  {
+   "path": "marketplace/cs-intent-classifier.html",
+   "disposition": "RETIRE",
+   "reason": "underdeveloped marketplace",
+   "redirect_to": "/hub"
+  },
+  {
+   "path": "marketplace/gcp.html",
+   "disposition": "RETIRE",
+   "reason": "underdeveloped marketplace",
+   "redirect_to": "/hub"
+  },
+  {
+   "path": "marketplace/index.html",
+   "disposition": "RETIRE",
+   "reason": "underdeveloped marketplace",
+   "redirect_to": "/hub"
+  },
+  {
+   "path": "marketplace/invoice-parser.html",
+   "disposition": "RETIRE",
+   "reason": "underdeveloped marketplace",
+   "redirect_to": "/hub"
+  },
+  {
+   "path": "marketplace/kolm-code-7b.html",
+   "disposition": "RETIRE",
+   "reason": "underdeveloped marketplace",
+   "redirect_to": "/hub"
+  },
+  {
+   "path": "marketplace/kolm-finance-7b.html",
+   "disposition": "RETIRE",
+   "reason": "underdeveloped marketplace",
+   "redirect_to": "/hub"
+  },
+  {
+   "path": "marketplace/kolm-legal-7b.html",
+   "disposition": "RETIRE",
+   "reason": "underdeveloped marketplace",
+   "redirect_to": "/hub"
+  },
+  {
+   "path": "marketplace/kolm-medical-7b.html",
+   "disposition": "RETIRE",
+   "reason": "underdeveloped marketplace",
+   "redirect_to": "/hub"
+  },
+  {
+   "path": "marketplace/kolm-support-7b.html",
+   "disposition": "RETIRE",
+   "reason": "underdeveloped marketplace",
+   "redirect_to": "/hub"
+  },
+  {
+   "path": "marketplace/legal-clause-extractor.html",
+   "disposition": "RETIRE",
+   "reason": "underdeveloped marketplace",
+   "redirect_to": "/hub"
+  },
+  {
+   "path": "marketplace/multilingual-greeter.html",
+   "disposition": "RETIRE",
+   "reason": "underdeveloped marketplace",
+   "redirect_to": "/hub"
+  },
+  {
+   "path": "marketplace/phi-redactor.html",
+   "disposition": "RETIRE",
+   "reason": "underdeveloped marketplace",
+   "redirect_to": "/hub"
+  },
+  {
+   "path": "marketplace/qwen-distill-classifier.html",
+   "disposition": "RETIRE",
+   "reason": "underdeveloped marketplace",
+   "redirect_to": "/hub"
+  },
+  {
+   "path": "marketplace/upload.html",
+   "disposition": "RETIRE",
+   "reason": "underdeveloped marketplace",
+   "redirect_to": "/hub"
+  },
+  {
+   "path": "marketplace.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "merge.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "migrate/diy.html",
+   "disposition": "KEEP",
+   "reason": "migrate surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "migrate/hyperscaler.html",
+   "disposition": "KEEP",
+   "reason": "migrate surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "migrate/lorax.html",
+   "disposition": "KEEP",
+   "reason": "migrate surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "migrate/openpipe.html",
+   "disposition": "KEEP",
+   "reason": "migrate surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "migrate/predibase.html",
+   "disposition": "KEEP",
+   "reason": "migrate surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "migrate.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "models.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "nonprofits.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "onboard/compliance.html",
+   "disposition": "KEEP",
+   "reason": "onboard surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "onboard/cto.html",
+   "disposition": "KEEP",
+   "reason": "onboard surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "onboard/developer.html",
+   "disposition": "KEEP",
+   "reason": "onboard surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "onboard/index.html",
+   "disposition": "KEEP",
+   "reason": "onboard surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "onboard/researcher.html",
+   "disposition": "KEEP",
+   "reason": "onboard surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "openai-migration.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "partners/hardware.html",
+   "disposition": "KEEP",
+   "reason": "partners surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "partners/index.html",
+   "disposition": "KEEP",
+   "reason": "partners surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "password-reset.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "playground/_slug.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "press.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "pricing/currency.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "pricing/nonprofit.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "pricing/purchase-order.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "pricing/regional.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "pricing/savings-based.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "pricing/startup.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "pricing/student.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "pricing.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "privacy.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "product.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "quickstart/api.html",
+   "disposition": "KEEP",
+   "reason": "quickstart surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "quickstart/cli.html",
+   "disposition": "KEEP",
+   "reason": "quickstart surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "quickstart/embed.html",
+   "disposition": "KEEP",
+   "reason": "quickstart surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "quickstart/nl.html",
+   "disposition": "KEEP",
+   "reason": "quickstart surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "quickstart/sdk.html",
+   "disposition": "KEEP",
+   "reason": "quickstart surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "quickstart.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "r.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "receipt.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "recipes.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "registry/submit.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "registry.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/adapter-merging.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/airgap-deployment.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/byoc-deploy-modes.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/capture-loop-fidelity.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/capture-loop-provenance.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/case-for-adapters.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/compute-backend-selection.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/constrained-decoding-and-tools.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/continual-learning-loop.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/cross-lingual.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/document-ingestion.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/dpo.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/eagle3-lookahead.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/edge-artifact-sizing.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/embedding-reranker-training.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/eval-drift.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/eval-set-drift.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/federated-compile.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/function-calling-training.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/grpo-reasoning.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/grpo.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/guarded-prompts.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/holdout.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/judges.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/k-sampling.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/k-score-correlation.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/k-score-whitepaper.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/kolm-meta.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/kto.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/long-context-training.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/methods-2026-q2.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/mixture-of-judges-and-prm.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/moe-lora-routing.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/multi-lora-serving.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/multi-token-prediction.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/online-dpo.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/orpo.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/output-specs.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/preference-optimization-modern.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/prm.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/probes.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/prompt-cache.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/provenance-data-generation.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/rationale-distill.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/receipt-chain.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/receipt-chains.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/registry-economics.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/response-distill.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/response-distillation.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/reward-modeling.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/sbom.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/sft.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/synthesis-then-distillation.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/synthetic-data.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/teacher-trace.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/test-time-compute.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/tool-traces.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/vlm-fine-tuning.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research/voice-adapters.html",
+   "disposition": "KEEP",
+   "reason": "research credibility",
+   "redirect_to": ""
+  },
+  {
+   "path": "research.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "roadmap.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "roi.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "run.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "runtimes.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "saas.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "sbom.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "sdks.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "security/bug-bounty.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "security/halborn-2026-04.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "security/incident-response.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "security/iso-27001.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "security/membership-inference.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "security/model-poisoning.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "security/posture.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "security/prompt-extraction.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "security/questionnaire.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "security/red-team.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "security/sbom.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "security/soc2-type2.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "security/sub-processors.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "security/threat-model.html",
+   "disposition": "KEEP",
+   "reason": "trust",
+   "redirect_to": ""
+  },
+  {
+   "path": "security.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "self-host.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "settings.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "setup-with-ai.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "setup.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "shortcuts.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "signup.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "sla.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "slsa.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "soc2.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "sovereign-ai.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "spec/changelog.html",
+   "disposition": "KEEP",
+   "reason": "spec surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "spec/codebase.html",
+   "disposition": "KEEP",
+   "reason": "spec surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "spec/kolm-format-v1.html",
+   "disposition": "KEEP",
+   "reason": "spec surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "spec/rs-1.html",
+   "disposition": "KEEP",
+   "reason": "spec surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "spec/toml.html",
+   "disposition": "KEEP",
+   "reason": "spec surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "spec-grammar.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "spec.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "start.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "status/index.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "status.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "studio/compile-status.html",
+   "disposition": "KEEP",
+   "reason": "studio surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "studio/compile.html",
+   "disposition": "KEEP",
+   "reason": "studio surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "studio/distill-status.html",
+   "disposition": "KEEP",
+   "reason": "studio surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "studio/distill.html",
+   "disposition": "KEEP",
+   "reason": "studio surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "studio/export-status.html",
+   "disposition": "KEEP",
+   "reason": "studio surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "studio/export.html",
+   "disposition": "KEEP",
+   "reason": "studio surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "studio/index.html",
+   "disposition": "KEEP",
+   "reason": "studio surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "studio/jobs.html",
+   "disposition": "KEEP",
+   "reason": "studio surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "studio/publish.html",
+   "disposition": "KEEP",
+   "reason": "studio surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "studio/recipes.html",
+   "disposition": "KEEP",
+   "reason": "studio surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "studio.html",
+   "disposition": "MERGE",
+   "reason": "jargon->product",
+   "redirect_to": "/product"
+  },
+  {
+   "path": "subprocessors.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "sustainability.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "taxonomy.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "teams-accept.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "teams.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "templates.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "terms.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "threat-model.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "tos.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "train.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "training/data-sources.html",
+   "disposition": "ELEVATE",
+   "reason": "misc",
+   "redirect_to": ""
+  },
+  {
+   "path": "training.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "troubleshooting.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "trust.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "tui.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "tunnels.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "tutorials/ci-verify.html",
+   "disposition": "KEEP",
+   "reason": "tutorials surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "tutorials/code-review.html",
+   "disposition": "KEEP",
+   "reason": "tutorials surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "tutorials/contract-review.html",
+   "disposition": "KEEP",
+   "reason": "tutorials surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "tutorials/index.html",
+   "disposition": "KEEP",
+   "reason": "tutorials surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "tutorials/openai-drop-in.html",
+   "disposition": "KEEP",
+   "reason": "tutorials surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "tutorials/phi-redactor.html",
+   "disposition": "KEEP",
+   "reason": "tutorials surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "tutorials/support-triage.html",
+   "disposition": "KEEP",
+   "reason": "tutorials surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "university/distillation-101.html",
+   "disposition": "KEEP",
+   "reason": "university surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "university/index.html",
+   "disposition": "KEEP",
+   "reason": "university surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "upgrade.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "use-cases/agentic-coding.html",
+   "disposition": "KEEP",
+   "reason": "use-cases surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "use-cases/ai-saas.html",
+   "disposition": "KEEP",
+   "reason": "use-cases surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "use-cases/capture-and-distill.html",
+   "disposition": "KEEP",
+   "reason": "use-cases surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "use-cases/code-review-assistant.html",
+   "disposition": "KEEP",
+   "reason": "use-cases surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "use-cases/document-extraction.html",
+   "disposition": "KEEP",
+   "reason": "use-cases surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "use-cases/embedded.html",
+   "disposition": "KEEP",
+   "reason": "use-cases surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "use-cases/enterprise-search.html",
+   "disposition": "KEEP",
+   "reason": "use-cases surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "use-cases/index.html",
+   "disposition": "KEEP",
+   "reason": "use-cases surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "use-cases/mobile.html",
+   "disposition": "KEEP",
+   "reason": "use-cases surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "use-cases/on-prem-chat.html",
+   "disposition": "KEEP",
+   "reason": "use-cases surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "use-cases/support-deflection.html",
+   "disposition": "KEEP",
+   "reason": "use-cases surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "use-cases/web3-verifiable.html",
+   "disposition": "KEEP",
+   "reason": "use-cases surface",
+   "redirect_to": ""
+  },
+  {
+   "path": "use-cases.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "value-loop.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "verify-cli.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "verify-prod.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "verify.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "verticals/code.html",
+   "disposition": "MERGE",
+   "reason": "verticals->canonical",
+   "redirect_to": "/code"
+  },
+  {
+   "path": "verticals/finance.html",
+   "disposition": "MERGE",
+   "reason": "verticals->canonical",
+   "redirect_to": "/finance"
+  },
+  {
+   "path": "verticals/legal.html",
+   "disposition": "MERGE",
+   "reason": "verticals->canonical",
+   "redirect_to": "/legal"
+  },
+  {
+   "path": "verticals/medical.html",
+   "disposition": "MERGE",
+   "reason": "verticals->canonical",
+   "redirect_to": "/medical"
+  },
+  {
+   "path": "verticals/support.html",
+   "disposition": "MERGE",
+   "reason": "verticals->canonical",
+   "redirect_to": "/support"
+  },
+  {
+   "path": "vs/fireworks.html",
+   "disposition": "MERGE",
+   "reason": "vs->compare",
+   "redirect_to": "/compare/kolm-vs-fireworks"
+  },
+  {
+   "path": "vs/index.html",
+   "disposition": "MERGE",
+   "reason": "vs->compare",
+   "redirect_to": "/compare/kolm-vs-index"
+  },
+  {
+   "path": "vs/lm-studio.html",
+   "disposition": "MERGE",
+   "reason": "vs->compare",
+   "redirect_to": "/compare/kolm-vs-lm-studio"
+  },
+  {
+   "path": "vs/ollama.html",
+   "disposition": "MERGE",
+   "reason": "vs->compare",
+   "redirect_to": "/compare/kolm-vs-ollama"
+  },
+  {
+   "path": "vs/openai-api.html",
+   "disposition": "MERGE",
+   "reason": "vs->compare",
+   "redirect_to": "/compare/kolm-vs-openai-api"
+  },
+  {
+   "path": "vs/openai.html",
+   "disposition": "MERGE",
+   "reason": "vs->compare",
+   "redirect_to": "/compare/kolm-vs-openai"
+  },
+  {
+   "path": "vs/openpipe.html",
+   "disposition": "MERGE",
+   "reason": "vs->compare",
+   "redirect_to": "/compare/kolm-vs-openpipe"
+  },
+  {
+   "path": "vs/openrouter.html",
+   "disposition": "MERGE",
+   "reason": "vs->compare",
+   "redirect_to": "/compare/kolm-vs-openrouter"
+  },
+  {
+   "path": "vs/self-built.html",
+   "disposition": "MERGE",
+   "reason": "vs->compare",
+   "redirect_to": "/compare/kolm-vs-self-built"
+  },
+  {
+   "path": "vs/together.html",
+   "disposition": "MERGE",
+   "reason": "vs->compare",
+   "redirect_to": "/compare/kolm-vs-together"
+  },
+  {
+   "path": "vs-fine-tune.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "vs-hindsight.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "vs-langsmith.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "vs-mem0.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "vs-ollama.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "vs-openai-fine-tune.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "vs-openpipe.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "vs-predibase.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "vs-rag.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "vs-together.html",
+   "disposition": "ELEVATE",
+   "reason": "root page, keep+rework",
+   "redirect_to": ""
+  },
+  {
+   "path": "what-is-an-ai-compiler.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "whitepaper.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "why-kolm.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "why-now.html",
+   "disposition": "ELEVATE",
+   "reason": "marketing-spine",
+   "redirect_to": ""
+  },
+  {
+   "path": "wrapper.html",
+   "disposition": "MERGE",
+   "reason": "jargon->product",
+   "redirect_to": "/product"
+  }
+ ]
+}
