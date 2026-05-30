@@ -2,7 +2,10 @@
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "node server.js"
+# Single non-recursive chmod of the data-volume root (instant — won't delay boot like a
+# recursive chmod did). Makes /app/data writable so the event-store can create an app-owned
+# subdir (events-rw fallback) and persistence works (tenants/events/conversations survive).
+startCommand = "chmod a+rwX /app/data 2>/dev/null; node server.js"
 healthcheckPath = "/health"
 healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"
