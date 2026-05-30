@@ -2,10 +2,7 @@
 builder = "NIXPACKS"
 
 [deploy]
-# Make the mounted data volume writable at boot (it can mount root-owned, leaving the
-# app process unable to persist tenants/events/conversations -> EACCES). chmod runs as
-# the boot user (root on Nixpacks); best-effort so a healthy volume is unaffected.
-startCommand = "mkdir -p ${KOLM_DATA_DIR:-/app/data}/events 2>/dev/null; chmod -R a+rwX ${KOLM_DATA_DIR:-/app/data} 2>/dev/null || true; node server.js"
+startCommand = "node server.js"
 healthcheckPath = "/health"
 healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"
