@@ -53,6 +53,11 @@ function _dirWritable(d) {
   catch { return false; }
 }
 
+// True if the path can be opened for append (creates it app-owned if absent).
+function _appendable(p) {
+  try { const fd = fs.openSync(p, 'a'); fs.closeSync(fd); return true; } catch { return false; }
+}
+
 function _ensureDirs() {
   if (_eventsDir && fs.existsSync(_eventsDir)) return;
   const testMode = _isTestRunner();
@@ -81,6 +86,11 @@ function _ensureDirs() {
     ? path.resolve(process.env.KOLM_EVENT_STORE_PATH)
     : path.join(_eventsDir, 'events.sqlite');
   _jsonlPath = path.join(_eventsDir, 'events.jsonl');
+  // Final guard: a store file left root-owned by a prior root-deploy can't be opened
+  // for append (EACCES) even when its dir is writable. Switch to an app-owned alternate
+  // name in the same (writable) dir — a fresh file is created app-owned, always writable.
+  if (!_appendable(_dbPath)) _dbPath = path.join(_eventsDir, 'events-app.sqlite');
+  if (!_appendable(_jsonlPath)) _jsonlPath = path.join(_eventsDir, 'events-app.jsonl');
 }
 
 function _openSqlite() {
