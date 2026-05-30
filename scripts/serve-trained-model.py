@@ -168,6 +168,22 @@ button:disabled{opacity:.5}
 #gate input{width:100%;max-width:360px;background:#11151d;color:#e7ebf0;border:1px solid #232b3a;border-radius:12px;padding:13px;font:16px monospace}
 #gate .t{font-size:20px;font-weight:700}#gate .s{color:#7a8699;font-size:14px;max-width:380px}#gate .e{color:#f87171;font-size:13px;min-height:16px}
 .hint{color:#7a8699;font-size:13px;padding:0 14px 8px}
+.hbtn{background:#161b25;border:1px solid #232b3a;color:#e7ebf0;border-radius:9px;padding:6px 10px;font-size:13px;font-weight:600;line-height:1;cursor:pointer}
+.hbtn:active{background:#1c2230}
+#scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:3;display:none}
+#drawer{position:fixed;top:0;left:0;bottom:0;width:84%;max-width:320px;background:#0e1218;border-right:1px solid #1c2230;z-index:4;transform:translateX(-100%);transition:transform .2s ease;display:flex;flex-direction:column}
+#drawer.open{transform:none}#scrim.open{display:block}
+.dhead{padding:14px 16px;border-bottom:1px solid #1c2230;font-weight:600;display:flex;align-items:center;gap:8px}
+.dhead .x{margin-left:auto;background:none;border:0;color:#7a8699;font-size:20px;padding:0 4px;cursor:pointer}
+.dnew{margin:10px 12px;background:#2563eb;color:#fff;border:0;border-radius:10px;padding:10px;font-weight:600;font-size:15px;cursor:pointer}
+#convs{flex:1;overflow-y:auto;padding:0 8px 16px}
+.cv{display:flex;align-items:center;gap:8px;padding:10px 10px;border-radius:10px;cursor:pointer}
+.cv:active,.cv.cur{background:#161b25}
+.cv .ct{flex:1;min-width:0}.cv .cn{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cv .cp{font-size:12px;color:#7a8699;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.cv .cd{background:none;border:0;color:#7a8699;font-size:16px;padding:4px 6px;cursor:pointer;flex:none}
+.cv .cd:active{color:#f87171}
+.dempty{color:#7a8699;font-size:13px;text-align:center;padding:24px 12px}
 </style></head><body>
 <div id=gate>
   <div class=t>🔒 kolm · __NAME__</div>
@@ -177,23 +193,84 @@ button:disabled{opacity:.5}
   <div class=e id=err></div>
   <div class=s style="font-size:12px">No key? Get one at kolm.ai → Account → API keys.</div>
 </div>
-<header><span class=dot></span> kolm · __NAME__ <span class=who id=who></span></header>
+<div id=scrim onclick=closeDrawer()></div>
+<div id=drawer>
+  <div class=dhead>Conversations <button class=x onclick=closeDrawer()>×</button></div>
+  <button class=dnew onclick=newChat()>+ New chat</button>
+  <div id=convs></div>
+</div>
+<header><button class=hbtn id=menu onclick=openDrawer() title="Conversations">☰</button><span class=dot></span> kolm · __NAME__ <span class=who id=who></span><button class=hbtn id=newbtn onclick=newChat() title="New chat" style="margin-left:8px">+ New</button></header>
 <div id=log><div class="msg a">Connected. Ask me anything — try “weather in Tokyo?” to see a tool call, or just chat.</div></div>
 <div class=hint>Private to your kolm account · trained on your GPU</div>
 <footer><textarea id=t rows=1 placeholder="Message…"></textarea><button id=s onclick=send()>Send</button></footer>
 <script>
+const AUTHBASE="__AUTHBASE__",MODEL="__NAME__";
 const log=document.getElementById('log'),t=document.getElementById('t'),s=document.getElementById('s'),gate=document.getElementById('gate'),err=document.getElementById('err'),who=document.getElementById('who');
-let KEY=localStorage.getItem('kolm_key')||'',msgs=[];
-function showApp(tenant){gate.style.display='none';who.textContent=tenant?('· '+tenant):'';}
+const drawer=document.getElementById('drawer'),scrim=document.getElementById('scrim'),convsEl=document.getElementById('convs');
+// Pre-auth from a CLI share link (#k=<key>): store it, then strip it from the URL bar.
+try{var _h=location.hash.match(/[#&]k=([^&]+)/);if(_h){localStorage.setItem('kolm_key',decodeURIComponent(_h[1]));history.replaceState(null,document.title,location.pathname);}}catch(e){}
+let KEY=localStorage.getItem('kolm_key')||'',TENANT='',msgs=[];
+let CID='',TITLE='',saveTimer=0;
+function showApp(tenant){gate.style.display='none';TENANT=tenant||'';who.textContent=tenant?('· '+tenant):'';renderConvs();}
 async function check(k){try{const r=await fetch('/whoami',{headers:{authorization:'Bearer '+k}});if(!r.ok)return null;return (await r.json()).tenant;}catch(e){return null;}}
-async function signin(){const k=document.getElementById('key').value.trim();err.textContent='';if(!k){err.textContent='Enter your kolm key';return;}const tn=await check(k);if(!tn){err.textContent='Invalid key (rejected by kolm.ai)';return;}KEY=k;localStorage.setItem('kolm_key',k);showApp(tn);}
-(async()=>{if(KEY){const tn=await check(KEY);if(tn)showApp(tn);}})();
+async function signin(){const k=document.getElementById('key').value.trim();err.textContent='';if(!k){err.textContent='Enter your kolm key';return;}const tn=await check(k);if(!tn){err.textContent='Invalid key (rejected by kolm.ai)';return;}KEY=k;localStorage.setItem('kolm_key',k);showApp(tn);pullCloud();}
+(async()=>{if(KEY){const tn=await check(KEY);if(tn){showApp(tn);pullCloud();}}})();
 function add(role,text){const d=document.createElement('div');const tc=role==='assistant'&&text.includes('<tool_call>');d.className='msg '+(role==='user'?'u':(tc?'tool':'a'));d.textContent=tc?('🔧 '+text.replace(/<\/?tool_call>/g,'').trim()):text;log.appendChild(d);log.scrollTop=1e9;return d;}
 t.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
+
+// ---- conversation history: localStorage store, keyed per tenant; cloud-synced via kolm.ai ----
+function lsKey(){return 'kolm_convs_'+(TENANT||'anon');}
+function store(){try{return JSON.parse(localStorage.getItem(lsKey())||'{}');}catch(e){return {};}}
+function saveStore(o){try{localStorage.setItem(lsKey(),JSON.stringify(o));}catch(e){}}
+function newId(){return 'cv_'+Date.now().toString(36)+Math.random().toString(36).slice(2,10);}
+function newChat(){CID='';TITLE='';msgs=[];log.innerHTML='<div class="msg a">New chat. Ask me anything — try “weather in Tokyo?” to see a tool call, or just chat.</div>';closeDrawer();renderConvs();t.focus();}
+function openDrawer(){renderConvs();drawer.classList.add('open');scrim.classList.add('open');}
+function closeDrawer(){drawer.classList.remove('open');scrim.classList.remove('open');}
+function lastUser(m){for(let i=m.length-1;i>=0;i--){if(m[i].role==='user')return m[i].content;}return '';}
+function renderConvs(){const o=store();const ids=Object.keys(o).filter(k=>!o[k].deleted).sort((a,b)=>(o[b].updated_at||0)-(o[a].updated_at||0));
+  if(!ids.length){convsEl.innerHTML='<div class=dempty>No conversations yet.</div>';return;}
+  convsEl.innerHTML='';
+  for(const id of ids){const c=o[id];const row=document.createElement('div');row.className='cv'+(id===CID?' cur':'');
+    row.innerHTML='<div class=ct><div class=cn></div><div class=cp></div></div><button class=cd title=Delete>🗑</button>';
+    row.querySelector('.cn').textContent=c.title||'Untitled';
+    row.querySelector('.cp').textContent=(c.preview||'').slice(0,120);
+    row.querySelector('.ct').onclick=()=>resume(id);
+    row.querySelector('.cd').onclick=(e)=>{e.stopPropagation();delConv(id);};
+    convsEl.appendChild(row);}}
+function resume(id){const o=store();const c=o[id];if(!c)return;CID=id;TITLE=c.title||'';msgs=(c.messages||[]).map(m=>({role:m.role,content:m.content}));
+  log.innerHTML='';if(!msgs.length){add('assistant','(empty conversation)');}
+  for(const m of msgs){if(m.role==='user'||m.role==='assistant')add(m.role,m.content);}
+  closeDrawer();renderConvs();}
+function persistLocal(){if(!msgs.length)return;if(!CID)CID=newId();
+  if(!TITLE){const fu=msgs.find(m=>m.role==='user');TITLE=(fu?fu.content:'Chat').slice(0,80);}
+  const o=store();o[CID]={conversation_id:CID,title:TITLE,model:MODEL,messages:msgs,message_count:msgs.length,preview:lastUser(msgs).slice(0,120),updated_at:Date.now()};
+  saveStore(o);renderConvs();}
+function delConv(id){const o=store();if(o[id]){o[id]={deleted:true,updated_at:Date.now()};saveStore(o);}
+  if(id===CID)newChat();else renderConvs();
+  if(KEY)fetch(AUTHBASE+'/v1/conversations/'+encodeURIComponent(id),{method:'DELETE',headers:{authorization:'Bearer '+KEY}}).catch(e=>{});}
+function scheduleSync(){clearTimeout(saveTimer);saveTimer=setTimeout(pushCloud,800);}
+// cloud sync: upsert current conversation metadata+messages to kolm.ai (best-effort, non-blocking)
+async function pushCloud(){if(!KEY||!CID||!msgs.length)return;
+  try{await fetch(AUTHBASE+'/v1/conversations',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+KEY},
+    body:JSON.stringify({conversation_id:CID,model:MODEL,title:TITLE,messages:msgs,device:'phone'})});}catch(e){}}
+// pull cloud conversation list into local store on sign-in (metadata; full messages fetched on resume)
+async function pullCloud(){if(!KEY)return;
+  try{const r=await fetch(AUTHBASE+'/v1/conversations?limit=200',{headers:{authorization:'Bearer '+KEY}});if(!r.ok)return;
+    const j=await r.json();const list=(j&&j.conversations)||[];if(!list.length)return;
+    const o=store();for(const c of list){const ex=o[c.conversation_id];if(ex&&ex.deleted)continue;
+      o[c.conversation_id]=Object.assign({},ex,{conversation_id:c.conversation_id,title:c.title,model:c.model,message_count:c.message_count,preview:c.preview,updated_at:Date.parse(c.updated_at)||(ex?ex.updated_at:Date.now()),cloud:true,messages:(ex&&ex.messages)||[]});}
+    saveStore(o);renderConvs();}catch(e){}}
+// fetch full messages for a cloud-only conversation when resumed and local copy is empty
+async function fillCloud(id){if(!KEY)return;
+  try{const r=await fetch(AUTHBASE+'/v1/conversations/'+encodeURIComponent(id),{headers:{authorization:'Bearer '+KEY}});if(!r.ok)return;
+    const j=await r.json();const c=j&&j.conversation;if(!c||!c.messages)return;
+    const o=store();if(o[id]&&!o[id].deleted){o[id].messages=c.messages;saveStore(o);if(id===CID)resume(id);}}catch(e){}}
+const _resume=resume;resume=function(id){const o=store();const c=o[id];_resume(id);if(c&&(!c.messages||!c.messages.length)&&c.cloud)fillCloud(id);};
+
 async function send(){const v=t.value.trim();if(!v)return;t.value='';add('user',v);msgs.push({role:'user',content:v});s.disabled=true;const d=add('assistant','…');
 try{const r=await fetch('/v1/chat/completions',{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+KEY},body:JSON.stringify({messages:msgs})});
 if(r.status===401){d.remove();localStorage.removeItem('kolm_key');KEY='';gate.style.display='flex';err.textContent='Session expired — sign in again';s.disabled=false;return;}
-const j=await r.json();const c=(j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'(no response)';d.remove();add('assistant',c);msgs.push({role:'assistant',content:c});}
+const j=await r.json();const c=(j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'(no response)';d.remove();add('assistant',c);msgs.push({role:'assistant',content:c});persistLocal();scheduleSync();}
 catch(e){d.textContent='error: '+e;}s.disabled=false;t.focus();}
 </script></body></html>"""
 
@@ -222,7 +299,7 @@ class H(BaseHTTPRequestHandler):
             if not tenant:
                 return self._send(401, json.dumps({"ok": False, "error": "auth_required"}))
             return self._send(200, json.dumps({"ok": True, "tenant": tenant}))
-        return self._send(200, PAGE.replace("__NAME__", A.name), "text/html; charset=utf-8")
+        return self._send(200, PAGE.replace("__NAME__", A.name).replace("__AUTHBASE__", A.auth_base.rstrip("/")), "text/html; charset=utf-8")
     def do_POST(self):
         if not self.path.startswith("/v1/chat/completions"):
             return self._send(404, json.dumps({"error": "not_found"}))

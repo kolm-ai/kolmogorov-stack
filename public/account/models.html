@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
+<title>Models &middot; Account &middot; kolm.ai</title>
+<meta name="description" content="Your trained and hosted models on kolm.ai: per-model status (training/ready/serving) with Chat, Export (kolm storage/GitHub/Hugging Face/Ollama), and Share actions. Backed by /v1/artifacts + /v1/serve/pods + /v1/exports.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/account/models">
+<meta property="og:title" content="Models &middot; Account" />
+<meta property="og:description" content="Your trained and hosted models on kolm.ai: status, Chat, Export, and Share for every artifact." />
+<meta property="og:image" content="https://kolm.ai/brand-hero.png" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://kolm.ai/account/models" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Models - Account - kolm.ai","description":"Your trained and hosted models on kolm.ai: status, Chat, Export, and Share for every artifact.","url":"https://kolm.ai/account/models","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Account","item":"https://kolm.ai/account"},{"@type":"ListItem","position":3,"name":"Models","item":"https://kolm.ai/account/models"}]}}</script>
+<style>
+.acct-shell{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:flex-start;max-width:1280px;margin:0 auto;padding:24px}
+#account-sidebar{position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px}
+#account-sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin:0 0 10px}
+#account-sidebar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#account-sidebar a{display:block;padding:6px 10px;border-radius:4px;color:var(--ink-mute);text-decoration:none;font-family:var(--mono);font-size:12.5px}
+#account-sidebar a:hover{background:var(--bg-elev);color:var(--ink)}
+#account-sidebar a[aria-current=page]{background:var(--bg-elev);color:var(--accent);border-left:2px solid var(--accent);padding-left:8px}
+.acct-content h1{margin:0 0 4px;font-size:28px;letter-spacing:0}
+.acct-content h2{font-size:16px;margin:22px 0 10px}
+.acct-content .lede{color:var(--ink-mute);font-size:14.5px;margin:0 0 20px;max-width:64ch}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--ink,#e6e9ee);color:var(--bg,#08090c);padding:8px 12px;font-family:var(--mono);font-size:12px;text-decoration:none;border-radius:0 0 6px 0;z-index:9999}
+.skip-link:focus{left:0}
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.metric-card{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px}
+.metric-card .label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);margin-bottom:6px}
+.metric-card .value{font-size:22px;font-weight:600;font-family:var(--mono);color:var(--ink)}
+.metric-card .delta{font-size:11.5px;color:var(--ink-mute);margin-top:4px}
+.kpanel{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
+.kpanel h2{margin:0 0 12px;font-size:15px}
+.kpanel .pdesc{color:var(--ink-mute);font-size:13px;margin:0 0 12px}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor}
+.pill.ok{color:var(--good)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}.pill.mute{color:var(--ink-faint)}
+.btn{display:inline-block;padding:6px 12px;border-radius:5px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{filter:brightness(1.08);color:#fff}
+.btn[disabled],.btn[aria-disabled=true]{opacity:0.45;cursor:not-allowed;pointer-events:none}
+.empty{background:var(--bg-card);border:1px dashed var(--line);border-radius:8px;padding:18px;color:var(--ink-mute);font-size:13.5px;line-height:1.6}
+.empty code{background:var(--bg-elev);padding:2px 6px;border-radius:3px;font-size:12.5px;color:var(--accent)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px;align-items:center}
+.skel{background:linear-gradient(90deg,var(--bg-elev) 0%,var(--bg-card) 50%,var(--bg-elev) 100%);background-size:200% 100%;animation:skel 1.4s linear infinite;border-radius:4px;height:12px}
+@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* Model card grid - mobile-first single column, expands to a responsive grid. */
+.model-grid{display:grid;grid-template-columns:1fr;gap:14px}
+@media (min-width:640px){.model-grid{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}}
+.model-card{background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.model-card:hover{border-color:var(--line-strong)}
+.model-card__head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.model-card__name{margin:0;font-size:15px;font-weight:600;color:var(--ink);word-break:break-word;line-height:1.3}
+.model-card__sub{margin:2px 0 0;font-family:var(--mono);font-size:11px;color:var(--ink-faint);word-break:break-all}
+.model-card__meta{display:flex;flex-wrap:wrap;gap:6px 14px;font-family:var(--mono);font-size:11.5px;color:var(--ink-mute)}
+.model-card__meta b{color:var(--ink);font-weight:600}
+.model-card__actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:4px}
+.model-card__actions .btn{flex:1 1 auto;text-align:center}
+
+/* Export menu - lightweight inline disclosure, cool-slate surfaces only. */
+.export-wrap{position:relative}
+.export-menu{position:absolute;z-index:30;right:0;top:calc(100% + 4px);min-width:200px;background:var(--bg-card);border:1px solid var(--line-strong);border-radius:8px;padding:6px;box-shadow:0 8px 28px rgba(15,23,42,0.18)}
+.export-menu[hidden]{display:none}
+.export-menu button{display:block;width:100%;text-align:left;background:transparent;border:0;border-radius:5px;padding:8px 10px;font-family:var(--mono);font-size:12px;color:var(--ink);cursor:pointer}
+.export-menu button:hover{background:var(--bg-elev);color:var(--accent)}
+.export-menu .em-h{font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);padding:4px 10px 2px}
+.export-status{font-family:var(--mono);font-size:11.5px;color:var(--ink-mute);min-height:1em}
+.export-status a{color:var(--accent)}
+.export-status.err{color:var(--bad)}
+.export-status.ok{color:var(--good)}
+
+@media (max-width:880px){.acct-shell{grid-template-columns:1fr;padding:14px}#account-sidebar{position:static}.metric-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){
+.acct-shell{grid-template-columns:1fr;gap:16px;padding:16px 14px 36px;max-width:100%}
+#account-sidebar{position:static;top:auto;font-size:13.5px}
+#account-sidebar ul{flex-direction:row;flex-wrap:wrap;gap:6px}
+#account-sidebar a{font-size:13px;padding:7px 11px}
+.acct-content h1{font-size:23px}
+.acct-content .lede{font-size:14px;max-width:100%}
+.toolbar{flex-direction:column;align-items:stretch}
+.toolbar .btn,.toolbar button{width:100%}
+.metric-grid{grid-template-columns:1fr}
+.kpanel{padding:14px}
+.export-menu{left:0;right:auto}
+}
+</style>
+<link rel="stylesheet" href="/design-tokens.css">
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+<script defer src="/nav.js"></script>
+</head>
+<body class="kolm-account-surface ks">
+<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
+<a href="#main" class="ks-skip">Skip to content</a>
+
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/wrapper">Wrapper</a></li>
+      <li><a href="/studio">Studio</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
+    </ul>
+    <div class="ks-nav__right">
+      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
+      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
+    </div>
+  </nav>
+  <div class="ks-nav__sheet" id="navSheet">
+    <a href="/wrapper">Wrapper</a><a href="/studio">Studio</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+  </div>
+</div>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<main id="main">
+<p id="loading-status" aria-live="polite" class="ks-loading-status" hidden></p>
+<div class="acct-shell">
+<nav id="account-sidebar" aria-label="Account sections"><h2>Account</h2><ul><li><a href="/account/overview">Overview</a></li><li><a href="/account/connectors">Connectors</a></li><li><a href="/account/captured">Captured calls</a></li><li><a href="/account/datasets">Datasets</a></li><li><a href="/account/bakeoffs">Bakeoffs</a></li><li><a href="/account/builds">Artifact jobs</a></li><li><a href="/account/artifacts">Artifacts</a></li><li><a href="/account/models" aria-current="page">Models</a></li><li><a href="/account/serve">Serve</a></li><li><a href="/account/devices">Devices</a></li><li><a href="/account/storage">Storage truth</a></li><li><a href="/account/billing">Billing</a></li></ul></nav>
+<section class="acct-content">
+<h1>Models.</h1>
+<p class="lede">Every model you have trained and hosted. Chat with a ready model, export it to your own storage or registry, or share a per-account link with your team.</p>
+
+<div class="metric-grid" id="metrics" aria-busy="true">
+  <div class="metric-card"><div class="label">Models</div><div class="value" id="m-total">--</div><div class="delta">trained + hosted</div></div>
+  <div class="metric-card"><div class="label">Ready</div><div class="value" id="m-ready">--</div><div class="delta">downloadable</div></div>
+  <div class="metric-card"><div class="label">Serving</div><div class="value" id="m-serving">--</div><div class="delta">live pods</div></div>
+  <div class="metric-card"><div class="label">Training</div><div class="value" id="m-training">--</div><div class="delta">in progress</div></div>
+</div>
+
+<div class="toolbar">
+  <a class="btn primary" href="/account/distill/new">Train a model</a>
+  <a class="btn" href="/account/serve/new">Host a model</a>
+  <a class="btn" href="/account/artifacts">All artifacts</a>
+</div>
+
+<section class="kpanel" style="background:transparent;border:0;padding:0">
+  <div id="models-list" class="model-grid" aria-busy="true">
+    <div class="model-card"><div class="skel" style="width:60%"></div><div class="skel" style="width:40%;margin-top:10px"></div><div class="skel" style="width:80%;margin-top:14px"></div></div>
+    <div class="model-card"><div class="skel" style="width:50%"></div><div class="skel" style="width:35%;margin-top:10px"></div><div class="skel" style="width:75%;margin-top:14px"></div></div>
+  </div>
+  <div id="empty-state" class="empty" hidden>
+    <strong>No models yet.</strong> Distill one in the <a href="/account/distill/new">distill console</a>, or host an existing artifact from <a href="/account/serve/new">Serve &rarr; New deployment</a>. Every completed <code>.kolm</code> artifact shows up here automatically.
+  </div>
+</section>
+
+<section class="kpanel">
+  <h2>What each status means</h2>
+  <p class="pdesc">Status rolls up the artifact job state and any live <code>kolm serve</code> pod for the same model.</p>
+  <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px">
+    <tbody>
+      <tr><td style="padding:6px 8px"><span class="pill warn">training</span></td><td style="padding:6px 8px;color:var(--ink-mute)">Distill/compile job still running. Chat and Export unlock when it completes.</td></tr>
+      <tr><td style="padding:6px 8px"><span class="pill mute">ready</span></td><td style="padding:6px 8px;color:var(--ink-mute)">Built and signed. Download, export, or host it with <code>kolm serve</code>.</td></tr>
+      <tr><td style="padding:6px 8px"><span class="pill ok">serving</span></td><td style="padding:6px 8px;color:var(--ink-mute)">A live pod is answering on an OpenAI-compatible endpoint. Chat opens it directly.</td></tr>
+    </tbody>
+  </table>
+</section>
+</section>
+</div>
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col">
+        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
+        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Product</h4>
+        <a href="/gateway">Gateway</a>
+        <a href="/capture">Capture</a>
+        <a href="/distill">Distill</a>
+        <a href="/compile">Compile</a>
+        <a href="/runtimes">Runtime</a>
+        <a href="/registry">Registry</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Build</h4>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/docs">Docs</a>
+        <a href="/sdks">SDKs</a>
+        <a href="/models">Models</a>
+        <a href="/benchmarks">Benchmarks</a>
+        <a href="/compare">Compare</a>
+        <a href="/blog">Blog</a>
+        <a href="/faq">FAQ</a>
+        <a href="/changelog">Changelog</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Trust</h4>
+        <a href="/security">Security</a>
+        <a href="/soc2">SOC 2</a>
+        <a href="/hipaa-mapping">HIPAA</a>
+        <a href="/baa">BAA</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/status">Status</a>
+        <a href="/subprocessors">Subprocessors</a>
+        <a href="/verify-prod">Verify a .kolm</a>
+      </div>
+      <div class="ks-foot__col">
+        <h4>Company</h4>
+        <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
+        <a href="/about">About</a>
+        <a href="/why-kolm">Why kolm</a>
+        <a href="/press">Press</a>
+        <a href="/contact">Contact</a>
+        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+      </div>
+    </div>
+    <div class="ks-foot__base">
+      <span>&copy; 2026 kolm.ai - Apache-2.0 - Made with .kolm</span>
+      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var key=null; try{key=localStorage.getItem("kolm-key")||localStorage.getItem("ks_api_key")||localStorage.getItem("kolm_api_key")||localStorage.getItem("KOLM_API_KEY");}catch(_){}
+  window.KOLM_AUTH=key?{"Authorization":"Bearer "+key,"Accept":"application/json"}:{"Accept":"application/json"};
+  window.kfetch=function(u,o){o=o||{};o.headers=Object.assign({},window.KOLM_AUTH,o.headers||{});return fetch(u,o).then(function(r){if(!r.ok)throw Object.assign(new Error("HTTP "+r.status),{status:r.status});var ct=r.headers.get("content-type")||"";return ct.indexOf("application/json")>=0?r.json():r.text();});};
+  window.kesc=function(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});};
+  window.kbytes=function(b){if(b==null)return "-";if(b<1024)return b+" B";if(b<1048576)return (b/1024).toFixed(1)+" KB";if(b<1073741824)return (b/1048576).toFixed(1)+" MB";return (b/1073741824).toFixed(2)+" GB";};
+  if(!key){location.href="/signin?next="+encodeURIComponent(location.pathname);return;}
+})();
+
+(function(){
+  var listEl=document.getElementById("models-list");
+  var emptyEl=document.getElementById("empty-state");
+  var metrics=document.getElementById("metrics");
+  var esc=window.kesc;
+
+  function statusPill(s){
+    var cls=s==="serving"?"ok":(s==="training"?"warn":(s==="ready"?"mute":"mute"));
+    return "<span class=\"pill "+cls+"\">"+esc(s||"unknown")+"</span>";
+  }
+
+  // A "model" is a completed (or in-flight) artifact, enriched with any live
+  // serve pod for the same artifact id. Chat opens the live pod's endpoint
+  // when serving, else the model detail page.
+  function deriveStatus(m){
+    if(m.serving) return "serving";
+    if(m.job_status==="completed"||m.status==="ready"||m.download_url) return "ready";
+    return "training";
+  }
+
+  function chatHref(m){
+    // Serving: open the live OpenAI-compatible endpoint the pod reports.
+    if(m.serving && m.endpoint) return esc(m.endpoint);
+    // Ready but not yet served: send the user to host it, pre-filled.
+    if(m.derived==="ready") return "/account/serve/new?artifact="+encodeURIComponent(m.id);
+    return null;
+  }
+
+  // Share = a per-account link to this model's detail view. Copies to the
+  // clipboard so the user can paste it to a teammate (same-tenant gated by
+  // the account session on the other end).
+  function shareUrl(m){
+    return location.origin+"/account/artifacts?artifact="+encodeURIComponent(m.id);
+  }
+
+  function card(m){
+    m.derived=deriveStatus(m);
+    var name=esc(m.name||m.id||"model");
+    var sub=esc(m.id||"");
+    var ch=chatHref(m);
+    var chatDisabled = !ch;
+    var meta=[];
+    if(m.base_model) meta.push("<span>base <b>"+esc(m.base_model)+"</b></span>");
+    if(m.tier) meta.push("<span>tier <b>"+esc(m.tier)+"</b></span>");
+    if(m.bytes!=null) meta.push("<span>size <b>"+window.kbytes(m.bytes)+"</b></span>");
+    if(m.k_score!=null) meta.push("<span>K-score <b>"+Number(m.k_score).toFixed(3)+"</b></span>");
+
+    var chatBtn = chatDisabled
+      ? "<a class=\"btn\" aria-disabled=\"true\" tabindex=\"-1\" title=\"Available when the model is ready or serving\">Chat</a>"
+      : "<a class=\"btn primary\" href=\""+ch+"\""+(m.serving?" target=\"_blank\" rel=\"noopener\"":"")+">Chat</a>";
+
+    var exportBtn = (m.derived==="training")
+      ? "<a class=\"btn\" aria-disabled=\"true\" tabindex=\"-1\" title=\"Available when training completes\">Export</a>"
+      : "<div class=\"export-wrap\"><button class=\"btn\" type=\"button\" data-export-toggle aria-haspopup=\"true\" aria-expanded=\"false\">Export</button>"
+        + "<div class=\"export-menu\" hidden role=\"menu\">"
+        + "<div class=\"em-h\">Push to</div>"
+        + "<button type=\"button\" data-dest=\"kolm\" role=\"menuitem\">kolm storage</button>"
+        + "<button type=\"button\" data-dest=\"github\" role=\"menuitem\">GitHub</button>"
+        + "<button type=\"button\" data-dest=\"huggingface\" role=\"menuitem\">Hugging Face</button>"
+        + "<button type=\"button\" data-dest=\"ollama\" role=\"menuitem\">Ollama</button>"
+        + "</div></div>";
+
+    return "<article class=\"model-card\" data-id=\""+esc(m.id||"")+"\" data-serving=\""+(m.serving?"1":"0")+"\">"
+      + "<div class=\"model-card__head\">"
+      +   "<div><h3 class=\"model-card__name\">"+name+"</h3><p class=\"model-card__sub\">"+sub+"</p></div>"
+      +   statusPill(m.derived)
+      + "</div>"
+      + (meta.length?"<div class=\"model-card__meta\">"+meta.join("")+"</div>":"")
+      + "<div class=\"export-status\" data-export-status aria-live=\"polite\"></div>"
+      + "<div class=\"model-card__actions\">"
+      +   chatBtn
+      +   exportBtn
+      +   "<button class=\"btn\" type=\"button\" data-share role=\"button\">Share</button>"
+      + "</div>"
+      + "</article>";
+  }
+
+  function paint(models){
+    metrics.removeAttribute("aria-busy");
+    listEl.removeAttribute("aria-busy");
+    var total=models.length;
+    var ready=models.filter(function(m){return m.derived==="ready";}).length;
+    var serving=models.filter(function(m){return m.derived==="serving";}).length;
+    var training=models.filter(function(m){return m.derived==="training";}).length;
+    document.getElementById("m-total").textContent=total;
+    document.getElementById("m-ready").textContent=ready;
+    document.getElementById("m-serving").textContent=serving;
+    document.getElementById("m-training").textContent=training;
+    if(!total){listEl.innerHTML="";emptyEl.hidden=false;return;}
+    // Order: serving first, then ready, then training.
+    var rank={serving:0,ready:1,training:2};
+    models.sort(function(a,b){return (rank[a.derived]-rank[b.derived])||0;});
+    listEl.innerHTML=models.map(card).join("");
+  }
+
+  // Build the model list from two sources:
+  //   1. /v1/artifacts   -> trained/compiled artifacts (the canonical list).
+  //   2. /v1/serve/pods  -> live pods, to mark which artifacts are serving.
+  // TODO: when a dedicated GET /v1/models list endpoint ships, prefer it here
+  // and fall back to /v1/artifacts. /v1/exports is consumed by the export
+  // handler below (POST to create, GET /v1/exports/:id to poll state).
+  function load(){
+    var pArt=window.kfetch("/v1/artifacts").catch(function(){return {artifacts:[]};});
+    var pPods=window.kfetch("/v1/serve/pods").catch(function(){return {pods:[]};});
+    Promise.all([pArt,pPods]).then(function(res){
+      var aj=res[0]||{};
+      var artifacts=Array.isArray(aj)?aj:(aj.artifacts||aj.data||[]);
+      var pj=res[1]||{};
+      var pods=Array.isArray(pj)?pj:(pj.pods||pj.data||[]);
+      var podBy={};
+      pods.forEach(function(p){
+        var aid=p.artifact_id; if(!aid)return;
+        var s=p.status||p.health;
+        podBy[aid]={endpoint:p.endpoint||(p.host?("http://"+p.host+":"+(p.port||8000)+"/v1"):null),healthy:(s==="ok"||s==="healthy"||s==="running")};
+      });
+      var models=artifacts.map(function(a){
+        var id=a.id||a.artifact_id;
+        var pod=podBy[id];
+        return {
+          id:id,
+          name:a.name||id,
+          base_model:a.base_model||null,
+          tier:a.tier||null,
+          bytes:a.bytes!=null?a.bytes:(a.size_bytes!=null?a.size_bytes:null),
+          k_score:a.k_score!=null?a.k_score:null,
+          job_status:a.status||null,
+          download_url:a.download_url||null,
+          serving:!!pod,
+          endpoint:pod?pod.endpoint:null
+        };
+      });
+      paint(models);
+    }).catch(function(e){
+      metrics.removeAttribute("aria-busy");
+      listEl.removeAttribute("aria-busy");
+      listEl.innerHTML="";
+      emptyEl.hidden=false;
+      emptyEl.innerHTML="<strong>Could not load models.</strong> "+esc(String((e&&e.message)||e))+" Try <a href=\"\" onclick=\"location.reload();return false;\">refreshing</a>.";
+    });
+  }
+
+  // --- Export: POST /v1/exports, then poll GET /v1/exports/:id for state. ---
+  // The export API is owned by the backend (src/router.js). If it is not yet
+  // mounted (404), we surface a clear "coming soon" note instead of an error.
+  function setStatus(card,msg,cls){
+    var el=card.querySelector("[data-export-status]");
+    if(!el)return;
+    el.className="export-status"+(cls?" "+cls:"");
+    el.innerHTML=msg;
+  }
+
+  function pollExport(card,exportId,tries){
+    tries=tries||0;
+    if(tries>40){setStatus(card,"Export still running. Check <a href=\"/account/serve\">your jobs</a>.","");return;}
+    window.kfetch("/v1/exports/"+encodeURIComponent(exportId)).then(function(j){
+      var state=(j&&(j.state||(j.json&&j.json.state)))||"running";
+      var url=(j&&(j.target_url||(j.json&&j.json.target_url)))||null;
+      var err=(j&&(j.error||(j.json&&j.json.error)))||null;
+      if(state==="succeeded"){
+        setStatus(card,"Exported"+(url?" → <a href=\""+esc(url)+"\" target=\"_blank\" rel=\"noopener\">"+esc(url)+"</a>":"."),"ok");
+      } else if(state==="failed"){
+        setStatus(card,"Export failed"+(err?": "+esc(err):"."),"err");
+      } else {
+        setStatus(card,"Exporting… ("+esc(state)+")","");
+        setTimeout(function(){pollExport(card,exportId,tries+1);},2000);
+      }
+    }).catch(function(){
+      setTimeout(function(){pollExport(card,exportId,tries+1);},2500);
+    });
+  }
+
+  function startExport(card,dest){
+    var id=card.getAttribute("data-id");
+    if(!id)return;
+    setStatus(card,"Requesting export to "+esc(dest)+"…","");
+    var body={artifact_id:id,destination:dest,options:{}};
+    // github / huggingface / custom need a user token + target. We collect the
+    // minimum here; the backend validates and never persists the secret.
+    if(dest==="github"){
+      var repo=prompt("GitHub repo (owner/name):"); if(!repo){setStatus(card,"",null);return;}
+      var pat=prompt("GitHub token (PAT with repo scope). Used once, never stored:"); if(!pat){setStatus(card,"",null);return;}
+      body.options.repo=repo; body.token=pat;
+    } else if(dest==="huggingface"){
+      var hrepo=prompt("Hugging Face repo (user/model):"); if(!hrepo){setStatus(card,"",null);return;}
+      var htok=prompt("Hugging Face write token. Used once, never stored:"); if(!htok){setStatus(card,"",null);return;}
+      body.options.repo=hrepo; body.token=htok;
+    }
+    // ollama default mode (a) returns a Modelfile, no token needed.
+    window.kfetch("/v1/exports",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(body)
+    }).then(function(j){
+      var exportId=j&&(j.export_id||j.id);
+      if(exportId){setStatus(card,"Export queued ("+esc(dest)+")…","");pollExport(card,exportId,0);}
+      else if(j&&j.modelfile){setStatus(card,"Modelfile ready — copy it from the response.","ok");}
+      else setStatus(card,"Export queued ("+esc(dest)+").","ok");
+    }).catch(function(e){
+      var status=e&&e.status;
+      if(status===404||status===501){
+        setStatus(card,"Export to "+esc(dest)+" is rolling out. For now, download the artifact from <a href=\"/account/artifacts\">Artifacts</a>.","");
+      } else {
+        setStatus(card,"Export failed: "+esc(String((e&&e.message)||e)),"err");
+      }
+    });
+  }
+
+  // Event delegation for export menu, export destination, and share.
+  document.addEventListener("click",function(e){
+    var toggle=e.target.closest("[data-export-toggle]");
+    if(toggle){
+      var menu=toggle.parentNode.querySelector(".export-menu");
+      var open=menu && menu.hidden;
+      // close any other open menus first
+      Array.prototype.forEach.call(document.querySelectorAll(".export-menu"),function(m){m.hidden=true;});
+      Array.prototype.forEach.call(document.querySelectorAll("[data-export-toggle]"),function(t){t.setAttribute("aria-expanded","false");});
+      if(menu){menu.hidden=!open;toggle.setAttribute("aria-expanded",open?"true":"false");}
+      return;
+    }
+    var destBtn=e.target.closest(".export-menu [data-dest]");
+    if(destBtn){
+      var card=destBtn.closest(".model-card");
+      var menu2=destBtn.closest(".export-menu");
+      if(menu2)menu2.hidden=true;
+      var tog=card.querySelector("[data-export-toggle]"); if(tog)tog.setAttribute("aria-expanded","false");
+      startExport(card,destBtn.getAttribute("data-dest"));
+      return;
+    }
+    var shareBtn=e.target.closest("[data-share]");
+    if(shareBtn){
+      var c=shareBtn.closest(".model-card");
+      var url=shareUrl({id:c.getAttribute("data-id")});
+      var done=function(){var p=shareBtn.textContent;shareBtn.textContent="Link copied";setTimeout(function(){shareBtn.textContent=p;},1800);};
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(url).then(done,function(){prompt("Copy this share link:",url);});
+      } else { prompt("Copy this share link:",url); }
+      return;
+    }
+    // click outside an open menu closes it
+    if(!e.target.closest(".export-menu")){
+      Array.prototype.forEach.call(document.querySelectorAll(".export-menu"),function(m){m.hidden=true;});
+      Array.prototype.forEach.call(document.querySelectorAll("[data-export-toggle]"),function(t){t.setAttribute("aria-expanded","false");});
+    }
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

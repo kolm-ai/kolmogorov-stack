@@ -113,6 +113,14 @@ import * as forgeExperts from './forge-experts.js';
 // mergeAdapters() is local-CLI-only (spawnSync over merge_adapters.py); the
 // /v1/merge route enqueues it on a background fiber and returns 202 + merge_id.
 import * as modelMerge from './model-merge.js';
+// CONVERSATIONS + EXPORTS — tenant-scoped chat backup + model-export surfaces.
+// conversations.js persists chat history as event-store rows (provider tag
+// 'kolm-chat'); model-export.js pushes a trained artifact to R2/GitHub/HF/
+// Ollama/custom and records progress as event rows (provider 'kolm-export').
+// Both fence reads on req.tenant_record.id; the routes are wired near the end
+// of buildRouter() after authMiddleware.
+import * as conversations from './conversations.js';
+import * as modelExport from './model-export.js';
 // W729 — graceful degradation under load. enqueue() gates the hot inference
 // routes with a FIFO + priority lane queue; queue_full / queue_timeout
 // rejections surface as HTTP 429 + Retry-After via the loadQueueMiddleware
@@ -26273,6 +26281,115 @@ res.json({
       });
     } catch (e) {
       res.status(500).json({ ok: false, error: String(e.message || e) });
+    }
+  });
+
+  // ---------------------------------------------------------------------------
+  // CONVERSATIONS API — tenant-scoped chat backup over the event-store.
+  // All routes are mounted after r.use(authMiddleware) so req.tenant_record is
+  // set; every handler hard-fences on it. Persistence lives in
+  // src/conversations.js (namespace 'chat.conversation', provider 'kolm-chat').
+  // The save path is rate-limited per IP via freeChatLimiter (same limiter the
+  // free chat surface uses) so a runaway client can't spam upserts.
+  // ---------------------------------------------------------------------------
+
+  // POST /v1/conversations — save/upsert one conversation.
+  r.post('/v1/conversations', freeChatLimiter, async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const out = await conversations.saveConversation(req.tenant_record.id, req.body || {});
+      res.json(out);
+    } catch (e) {
+      const status = e && e.status ? e.status : 500;
+      res.status(status).json({ ok: false, error: (e && e.code) || 'conversation_save_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // GET /v1/conversations — list metadata only (never full messages).
+  r.get('/v1/conversations', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const out = await conversations.listConversations(req.tenant_record.id, {
+        limit: req.query.limit,
+        model: req.query.model,
+        since: req.query.since,
+      });
+      res.json(out);
+    } catch (e) {
+      const status = e && e.status ? e.status : 500;
+      res.status(status).json({ ok: false, error: (e && e.code) || 'conversation_list_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // GET /v1/conversations/:id — full conversation (404 on miss/tenant-mismatch).
+  r.get('/v1/conversations/:id', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const out = await conversations.getConversation(req.tenant_record.id, req.params.id);
+      res.json(out);
+    } catch (e) {
+      const status = e && e.status ? e.status : 500;
+      res.status(status).json({ ok: false, error: (e && e.code) || 'conversation_get_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // DELETE /v1/conversations/:id — soft delete (tombstone upsert).
+  r.delete('/v1/conversations/:id', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const out = await conversations.deleteConversation(req.tenant_record.id, req.params.id);
+      res.json(out);
+    } catch (e) {
+      const status = e && e.status ? e.status : 500;
+      res.status(status).json({ ok: false, error: (e && e.code) || 'conversation_delete_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // ---------------------------------------------------------------------------
+  // EXPORTS API — push a trained model/artifact to a destination + status poll.
+  // Mounted after authMiddleware; fenced on req.tenant_record.id. The artifact
+  // ownership check is done by passing a tenant-bound getJob resolver into
+  // startExport so the model-export module never imports compile.js. Tokens
+  // arrive only in the POST body and are never persisted (see model-export.js).
+  // ---------------------------------------------------------------------------
+
+  // POST /v1/exports — start an export job (async; returns 202 + export_id).
+  r.post('/v1/exports', forgeLimiter, async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const tenantId = req.tenant_record.id;
+      // tenant-bound artifact resolver: only this tenant's completed compile
+      // jobs resolve. getJob returns null for ids the caller doesn't own.
+      const resolveArtifact = (artifactId) => getJob(artifactId, req.is_admin ? null : req.tenant);
+      const out = await modelExport.startExport(tenantId, req.body || {}, resolveArtifact);
+      res.status(202).json(out);
+    } catch (e) {
+      const status = e && e.status ? e.status : 500;
+      res.status(status).json({ ok: false, error: (e && e.code) || 'export_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // GET /v1/exports — list caller's export jobs (newest first).
+  r.get('/v1/exports', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const out = await modelExport.listExports(req.tenant_record.id, { limit: req.query.limit });
+      res.json(out);
+    } catch (e) {
+      const status = e && e.status ? e.status : 500;
+      res.status(status).json({ ok: false, error: (e && e.code) || 'export_list_error', detail: String(e && e.message || e) });
+    }
+  });
+
+  // GET /v1/exports/:id — single job state + target_url (tenant-checked).
+  r.get('/v1/exports/:id', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const out = await modelExport.getExport(req.tenant_record.id, req.params.id);
+      res.json(out);
+    } catch (e) {
+      const status = e && e.status ? e.status : 500;
+      res.status(status).json({ ok: false, error: (e && e.code) || 'export_get_error', detail: String(e && e.message || e) });
     }
   });
 
