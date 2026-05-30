@@ -105,13 +105,24 @@ export function billingReady({ plans } = {}) {
 
   const secret = stripeSecretKey();
   const haveSecret = !!secret;
-  if (!haveSecret) missing.push('STRIPE_SECRET_KEY');
 
+  // A plan is chargeable via EITHER a Checkout-API price id (KOLM_STRIPE_PRICE_<PLAN>)
+  // OR a hosted Stripe Payment Link (STRIPE_PAYMENT_LINK_<PLAN> — the path
+  // src/billing-upgrade.js already uses). Payment links collect revenue with just the
+  // links + webhook secret (no Stripe secret key), so the secret key is only required
+  // when no payment link covers a plan.
+  const PAYMENT_LINK_ENVS = { indie: 'STRIPE_PAYMENT_LINK_STARTER', pro: 'STRIPE_PAYMENT_LINK_PRO', teams: 'STRIPE_PAYMENT_LINK_TEAMS', business: 'STRIPE_PAYMENT_LINK_BUSINESS' };
+  let anyLink = false;
   for (const plan of wanted) {
-    const have = !!priceIdFor(plan);
-    prices[plan] = have;
-    if (!have) missing.push(priceEnvVar(plan));
+    const havePrice = !!priceIdFor(plan);
+    const linkEnv = PAYMENT_LINK_ENVS[plan] || `STRIPE_PAYMENT_LINK_${String(plan).toUpperCase()}`;
+    const haveLink = !!envSecret(linkEnv);
+    if (haveLink) anyLink = true;
+    const have = havePrice || haveLink;
+    prices[plan] = have ? (havePrice ? 'price_id' : 'payment_link') : false;
+    if (!have) missing.push(`${priceEnvVar(plan)} (or ${linkEnv})`);
   }
+  if (!haveSecret && !anyLink) missing.push('STRIPE_SECRET_KEY');
 
   const webhookSecret = envSecret('STRIPE_WEBHOOK_SECRET');
   if (!webhookSecret) missing.push('STRIPE_WEBHOOK_SECRET');
