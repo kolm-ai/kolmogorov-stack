@@ -1,0 +1,149 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kolm.fullname" . }}
+  labels:
+    {{- include "kolm.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  # Recreate (not RollingUpdate): the gateway holds a ReadWriteOnce data volume,
+  # so two pods cannot mount it simultaneously during a rollout.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "kolm.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "kolm.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- /* Roll the pod when signing secrets or gateway config change. */}}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- if .Values.gateway.configToml }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- end }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "kolm.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: gateway
+          image: {{ include "kolm.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- if .Values.gateway.configToml }}
+          # Boot the gateway against the mounted config file.
+          args:
+            - gateway
+            - start
+            - --config
+            - {{ .Values.gateway.configPath }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.gateway.port }}
+              protocol: TCP
+          env:
+            - name: PORT
+              value: {{ .Values.gateway.port | quote }}
+            - name: KOLM_DATA_DIR
+              value: {{ .Values.gateway.dataDir | quote }}
+            - name: KOLM_ED25519_KEY_STORE
+              value: {{ .Values.gateway.signingKeyDir | quote }}
+            {{- if .Values.gateway.configToml }}
+            - name: KOLM_GATEWAY_CONFIG
+              value: {{ .Values.gateway.configPath | quote }}
+            {{- end }}
+            {{- if .Values.gateway.publicUrl }}
+            - name: KOLM_PUBLIC_URL
+              value: {{ .Values.gateway.publicUrl | quote }}
+            {{- end }}
+            - name: {{ .Values.secrets.receiptSecretKey }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kolm.secretName" . }}
+                  key: {{ .Values.secrets.receiptSecretKey }}
+            {{- if .Values.secrets.artifactSecret }}
+            - name: {{ .Values.secrets.artifactSecretKey }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kolm.secretName" . }}
+                  key: {{ .Values.secrets.artifactSecretKey }}
+            {{- end }}
+            {{- if .Values.byoc.enrollToken }}
+            - name: KOLM_ENROLL_TOKEN
+              value: {{ .Values.byoc.enrollToken | quote }}
+            - name: KOLM_REPORT_URL
+              value: {{ .Values.byoc.reportUrl | quote }}
+            {{- end }}
+            {{- with .Values.gateway.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if .Values.probes.liveness.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.gateway.healthPath }}
+              port: http
+            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+          {{- end }}
+          {{- if .Values.probes.readiness.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.gateway.healthPath }}
+              port: http
+            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.gateway.dataDir }}
+            {{- if .Values.gateway.configToml }}
+            - name: config
+              mountPath: {{ .Values.gateway.configPath }}
+              subPath: gateway.toml
+              readOnly: true
+            {{- end }}
+      volumes:
+        - name: data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "kolm.pvcName" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- if .Values.gateway.configToml }}
+        - name: config
+          configMap:
+            name: {{ include "kolm.fullname" . }}-config
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

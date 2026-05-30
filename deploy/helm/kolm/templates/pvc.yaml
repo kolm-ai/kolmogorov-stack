@@ -1,0 +1,33 @@
+{{- /*
+PersistentVolumeClaim backing KOLM_DATA_DIR. The receipt signing keystore lives
+under this same volume (gateway.keystoreDir is a subpath of gateway.dataDir),
+so signing keys + receipts ledger survive pod restarts and rolling upgrades —
+which is what makes a BYOC redeploy non-destructive.
+
+Skipped when persistence is disabled or an existing claim is reused.
+*/ -}}
+{{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "kolm.pvcName" . }}
+  labels:
+    {{- include "kolm.labels" . | nindent 4 }}
+  {{- with .Values.persistence.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- toYaml .Values.persistence.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size | quote }}
+  {{- if .Values.persistence.storageClass }}
+  {{- if eq "-" .Values.persistence.storageClass }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: {{ .Values.persistence.storageClass | quote }}
+  {{- end }}
+  {{- end }}
+{{- end }}

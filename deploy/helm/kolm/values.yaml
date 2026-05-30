@@ -1,0 +1,197 @@
+# Default values for the kolm BYOC chart.
+# Override any of these with `--set key=value` or a custom `-f my-values.yaml`.
+# Every value below is referenced from templates/*.yaml.
+#
+# Defaults mirror the published gateway image (Dockerfile.gateway):
+#   - listens on 8080, serves GET /v1/health
+#   - KOLM_DATA_DIR defaults to /var/lib/kolm
+#   - the Ed25519 receipt signing key persists under KOLM_DATA_DIR/keys
+#   - runs as the non-root `node` user (uid 1000)
+
+# ---------------------------------------------------------------------------
+# Replicas + image
+# ---------------------------------------------------------------------------
+# The gateway keeps local state on a ReadWriteOnce PVC, so the default is a
+# single replica. To scale out you must point KOLM_DATA_DIR at a shared
+# (RWX) volume or an external store; see deploy/BYOC.md "Scaling".
+replicaCount: 1
+
+image:
+  # Public gateway image. Mirror it into your own registry for air-gapped
+  # installs and override `repository` + `tag`. Matches Dockerfile.gateway.
+  repository: ghcr.io/sneaky-hippo/kolm-gateway
+  tag: ""              # defaults to .Chart.AppVersion when empty
+  pullPolicy: IfNotPresent
+
+# Secret(s) used to pull `image.repository` from a private registry.
+imagePullSecrets: []
+  # - name: my-registry-cred
+
+nameOverride: ""
+fullnameOverride: ""
+
+# ---------------------------------------------------------------------------
+# Gateway runtime configuration
+# ---------------------------------------------------------------------------
+gateway:
+  # Container port the Kolm gateway listens on. Matches the EXPOSE in
+  # Dockerfile.gateway. Do not change unless you also rebuild the image.
+  port: 8080
+
+  # Path the /v1/health probe lives at on the gateway image.
+  healthPath: /v1/health
+
+  # Directory the gateway uses for all persistent state (receipts ledger,
+  # tenant DB, deploy records) and the Ed25519 signing key (under keys/).
+  # MUST resolve onto the persistence volume below. The image default is
+  # /var/lib/kolm; we set it explicitly so the mount path always matches.
+  dataDir: /var/lib/kolm
+
+  # Where the Ed25519 signing key is persisted. ensure-signing-key.js defaults
+  # this to KOLM_DATA_DIR/keys; we pin KOLM_ED25519_KEY_STORE to that same
+  # subpath so signing keys live on the persistent volume and survive restarts
+  # + rolling upgrades — which is what keeps previously issued receipts
+  # verifiable. The signer, keys.js, and /health all read this env var.
+  signingKeyDir: /var/lib/kolm/keys
+
+  # Gateway config file (gateway.toml) consumed by `kolm gateway start`.
+  # Provide its contents via gateway.configToml to mount it from a ConfigMap;
+  # leave empty to let the gateway boot with built-in defaults.
+  configPath: /etc/kolm/gateway.toml
+  configToml: ""
+
+  # Public base URL the gateway advertises in receipts / attestations.
+  # Set to your ingress host once known, e.g. https://kolm.acme.internal
+  publicUrl: ""
+
+  # Extra plain (non-secret) env vars injected verbatim into the container.
+  extraEnv: []
+    # - name: KOLM_LOG_LEVEL
+    #   value: info
+
+# ---------------------------------------------------------------------------
+# Secrets
+# ---------------------------------------------------------------------------
+# The receipt signing secret is the root of trust for receipt verification and
+# artifact signatures. Provide it ONE of two ways:
+#
+#   1. Let the chart create a Secret from `secrets.receiptSecret` (simple, but
+#      the value lands in `helm get values` / release history — prefer #2 in
+#      production).
+#   2. Set `secrets.existingSecret` to the name of a Secret you manage out of
+#      band (sealed-secrets, External Secrets Operator, Vault CSI, etc.) that
+#      contains the keys named below.
+secrets:
+  # If non-empty, the chart renders templates/secret.yaml with this value.
+  receiptSecret: ""
+  # Optional legacy artifact-signing secret (back-compat with older artifacts).
+  artifactSecret: ""
+
+  # If set, the chart does NOT create a Secret and instead references this one.
+  existingSecret: ""
+
+  # Keys read from whichever Secret is used, and the env-var names injected
+  # into the container. These MUST be the names the gateway code actually reads:
+  #   - RECIPE_RECEIPT_SECRET : the receipt/artifact signing secret
+  #     (src/env.js effectiveReceiptSecret reads RECIPE_RECEIPT_SECRET, falling
+  #     back to KOLM_ARTIFACT_SECRET). In production it must be >= 32 chars and
+  #     must NOT look like a placeholder (ks_receipt_live/test/dev/change...),
+  #     or effectiveReceiptSecret returns null and receipts go unsigned.
+  #     `openssl rand -hex 32` satisfies this.
+  #   - KOLM_ARTIFACT_SECRET  : optional legacy alias also accepted by the code.
+  # Override only to match an externally managed Secret's key names.
+  receiptSecretKey: RECIPE_RECEIPT_SECRET
+  artifactSecretKey: KOLM_ARTIFACT_SECRET
+
+# ---------------------------------------------------------------------------
+# BYOC enrollment (optional)
+# ---------------------------------------------------------------------------
+# If you issued a deploy manifest from kolm.ai, paste its enroll token here so
+# the gateway POSTs an attestation back on first boot. Leave empty for fully
+# disconnected installs.
+byoc:
+  enrollToken: ""
+  reportUrl: https://kolm.ai/v1/byoc/attestation
+
+# ---------------------------------------------------------------------------
+# Persistence (KOLM_DATA_DIR + signing key)
+# ---------------------------------------------------------------------------
+persistence:
+  enabled: true
+  # Reuse an existing PVC instead of creating one.
+  existingClaim: ""
+  # Leave empty to use the cluster default StorageClass.
+  # Set to "-" to explicitly select "" (no StorageClass / static binding).
+  storageClass: ""
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
+  # Annotations applied to the generated PVC.
+  annotations: {}
+
+# ---------------------------------------------------------------------------
+# Service
+# ---------------------------------------------------------------------------
+service:
+  type: ClusterIP
+  port: 80
+  # Node port when service.type == NodePort (optional).
+  nodePort: ""
+  annotations: {}
+
+# ---------------------------------------------------------------------------
+# Health probes (the gateway exposes GET /v1/health)
+# ---------------------------------------------------------------------------
+probes:
+  liveness:
+    enabled: true
+    initialDelaySeconds: 20
+    periodSeconds: 20
+    timeoutSeconds: 3
+    failureThreshold: 6
+  readiness:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 6
+
+# ---------------------------------------------------------------------------
+# Pod scheduling + security
+# ---------------------------------------------------------------------------
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+
+podAnnotations: {}
+podLabels: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# The gateway image runs as the base-image `node` user, uid/gid 1000. fsGroup
+# 1000 makes Kubernetes chown the mounted data volume to that group on attach
+# so the non-root process can write KOLM_DATA_DIR (incl. keys/) without a
+# root entrypoint.
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}

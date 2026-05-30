@@ -1,0 +1,28 @@
+kolm gateway (BYOC) is installing.
+
+Release:   {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+Image:     {{ include "kolm.image" . }}
+
+1. Wait for the pod to become Ready:
+
+   kubectl -n {{ .Release.Namespace }} rollout status deploy/{{ include "kolm.fullname" . }}
+
+2. Port-forward and check health:
+
+   kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "kolm.fullname" . }} 8080:{{ .Values.service.port }}
+   curl -fsS http://127.0.0.1:8080{{ .Values.gateway.healthPath }}
+
+{{- if not .Values.persistence.enabled }}
+
+   WARNING: persistence.enabled=false — KOLM_DATA_DIR uses an emptyDir.
+   Receipts ledger and the signing key will be LOST on pod restart.
+   Set persistence.enabled=true for any non-throwaway install.
+{{- end }}
+{{- if .Values.byoc.enrollToken }}
+
+3. This release carries a BYOC enroll token; the gateway will POST an
+   attestation to {{ .Values.byoc.reportUrl }} on first boot.
+{{- end }}
+
+Full runbook: deploy/BYOC.md

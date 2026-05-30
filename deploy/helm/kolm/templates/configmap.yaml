@@ -1,0 +1,16 @@
+{{- /*
+Optional gateway.toml mounted into the container at gateway.configPath.
+Rendered only when the operator supplies gateway.configToml; otherwise the
+gateway boots with its built-in defaults.
+*/ -}}
+{{- if .Values.gateway.configToml }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "kolm.fullname" . }}-config
+  labels:
+    {{- include "kolm.labels" . | nindent 4 }}
+data:
+  gateway.toml: |
+    {{- .Values.gateway.configToml | nindent 4 }}
+{{- end }}

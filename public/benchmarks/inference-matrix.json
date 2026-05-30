@@ -1,0 +1,49 @@
+{
+  "schema": "kolm-inference-matrix/1",
+  "title": "Inference economics matrix — $/1k-token, latency, tokens/sec",
+  "description": "Reproducible per-endpoint inference-economics measurements produced by src/inference-bench.js against an OpenAI-compatible /v1/chat/completions endpoint, with and without speculative decoding. Every row carries a content digest (and, when a signing key is configured, a detached ed25519 signature) so the numbers can be re-verified off the wire. Re-generate a row with: kolm bench inference --endpoint <url> --model <id> --speculative auto. Do NOT hand-edit measured rows.",
+  "generated_at": "1970-01-01T00:00:00.000Z",
+  "units": {
+    "tokens_per_sec": "single-stream output tokens per wall-second (concurrency=1)",
+    "mean_ms": "end-to-end per-call latency, milliseconds (includes any proxy hop)",
+    "p95_ms": "95th-percentile per-call latency, milliseconds",
+    "cost_per_1k_usd": "blended USD to produce 1000 tokens (input+output) at the supplied published per-token prices; 0 when prices are not supplied",
+    "throughput_speedup": "with-speculative tokens_per_sec / baseline tokens_per_sec; null unless BOTH arms ran error-free",
+    "latency_speedup": "baseline mean_ms / with-speculative mean_ms; null unless BOTH arms ran error-free"
+  },
+  "caveats": [
+    "tokens_per_sec is single-stream (concurrency=1) by construction — it is not an aggregate-throughput claim. Re-run with a load generator for batched-throughput numbers.",
+    "speculative_speedup is only populated when both the baseline and the with-speculative arms actually ran against the live endpoint. A null speedup means it was not measured, never that there is none.",
+    "cost_per_1k_usd reflects the per-token prices passed to the runner; for local hardware it is 0 unless an amortized per-token price is supplied.",
+    "the with-speculative arm sends the draft-model hint the OpenAI-compatible route accepts (vLLM/SGLang extra_body). A server that ignores the hint will produce numbers indistinguishable from baseline — confirm acceptance in the server logs before citing a speedup.",
+    "rows marked dry_run:true are deterministic offline stubs (no network, no API key) used to exercise the schema in CI; they are NOT measurements."
+  ],
+  "rows": [
+    {
+      "schema": "kolm-inference-matrix/1",
+      "placeholder": true,
+      "model": "REPLACE-ME/your-served-model-id",
+      "hardware": "REPLACE-ME (e.g. 1x RTX 4090 24GB)",
+      "runtime": "vllm",
+      "dry_run": true,
+      "measured_at": "1970-01-01T00:00:00.000Z",
+      "baseline": {
+        "tokens_per_sec": null,
+        "mean_ms": null,
+        "p95_ms": null,
+        "cost_per_1k_usd": null
+      },
+      "speculative": {
+        "draft_model": "REPLACE-ME/your-draft-model-id",
+        "tokens_per_sec": null,
+        "mean_ms": null,
+        "p95_ms": null,
+        "cost_per_1k_usd": null
+      },
+      "throughput_speedup": null,
+      "latency_speedup": null,
+      "content_digest": null,
+      "signed": false
+    }
+  ]
+}

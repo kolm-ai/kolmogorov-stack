@@ -1,0 +1,32 @@
+apiVersion: v2
+name: kolm
+description: >-
+  Bring-Your-Own-Cloud (BYOC) deployment of the Kolm gateway. Runs the signed
+  Kolm runtime + your .kolm artifact on infrastructure you control, with a
+  persistent volume for KOLM_DATA_DIR (state, receipts ledger) and the receipt
+  signing keystore. kolm.ai never touches this runtime.
+type: application
+
+# Chart version is the packaging version; bump on template changes.
+version: 0.1.0
+
+# appVersion tracks the gateway image tag this chart was validated against.
+# Override with `--set image.tag=<tag>` at install time.
+appVersion: "latest"
+
+home: https://kolm.ai
+sources:
+  - https://github.com/sneaky-hippo/kolmogorov-stack
+keywords:
+  - kolm
+  - byoc
+  - gateway
+  - inference
+  - llm
+  - self-hosted
+maintainers:
+  - name: Kolm
+    url: https://kolm.ai
+annotations:
+  category: AI/MachineLearning
+  licenses: Apache-2.0
