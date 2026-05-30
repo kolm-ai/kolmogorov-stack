@@ -13,8 +13,8 @@ implemented / partial / process-only status, see [`SOC2-EVIDENCE.md`](./SOC2-EVI
 |---|---|
 | API-key authentication, hashed key storage, tenant resolution, identity (`whoami`) | `src/auth.js`, `src/keys.js` |
 | Role-based access control (role → permission model) | `src/rbac.js` |
-| Enterprise SSO — SAML 2.0 ACS + IdP metadata | `src/saml-acs.js` |
-| SCIM 2.0 provisioning / de-provisioning (Users, Groups, ServiceProviderConfig) | `src/scim-provisioning.js` |
+| Enterprise SSO — SAML 2.0 ACS + IdP metadata (`/v1/account/saml/acs`, `/v1/account/saml/metadata`, `/v1/sso/status`) | `src/saml-acs.js` |
+| SCIM 2.0 provisioning / de-provisioning (`/v1/scim/v2/Users`, `/v1/scim/v2/Groups`, `/v1/scim/v2/ServiceProviderConfig`) | `src/scim-provisioning.js` |
 | Per-tenant capture authorization | `src/team-capture-rbac.js` |
 
 ## Auditability & accountability (CC2, CC7, PI1)

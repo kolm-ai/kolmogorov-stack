@@ -42,7 +42,7 @@ All file paths are relative to the repository root. Routes are served by the pla
 
 | Criterion | Control (as implemented) | Evidence (file / route) | Status |
 |---|---|---|---|
-| CC3.1 Objectives specified | Spend/usage caps express financial-exposure objectives enforced at runtime. | `src/spend-caps.js` | Implemented |
+| CC3.1 Objectives specified | Per-tenant spend caps (per-plan USD ceilings) express financial-exposure objectives, enforced at runtime as gateway middleware (HTTP 402 when over budget) with 80%/100% budget alerts. | `src/spend-caps.js` (`checkBudget`, `enforceBudget`); wired in `src/router.js`; budget surfaced at `GET /v1/usage/budget` | Implemented |
 | CC3.2 Risk identification | Drift / anomaly detection identifies operational and model-behavior risk. | `src/drift-alert.js`, `src/continuous-monitoring.js` | Partial |
 | CC3.3 Fraud risk | Anomaly detection over capture/usage streams; spend caps bound abuse blast radius. | `src/spend-caps.js`, `src/continuous-monitoring.js` | Partial |
 | CC3.4 Change risk assessment | Pre-release verification gates assess risk before ship (see CC8). | `package.json` (`release-verify`/test scripts), `scripts/` | Partial |
@@ -72,14 +72,14 @@ All file paths are relative to the repository root. Routes are served by the pla
 
 | Criterion | Control (as implemented) | Evidence (file / route) | Status |
 |---|---|---|---|
-| CC6.1 Logical access — authentication | API-key authentication with hashed key storage; tenant identity resolution; `whoami` identity endpoint. | `src/auth.js`, `src/keys.js` | Implemented |
-| CC6.1 Logical access — SSO/SAML | Enterprise SSO via SAML 2.0 ACS + IdP metadata handling. | `src/saml-acs.js` | Partial (enterprise-tier gated) |
-| CC6.2 Provisioning / de-provisioning | SCIM 2.0 user & group provisioning (Users, Groups, ServiceProviderConfig) for lifecycle management. | `src/scim-provisioning.js` | Partial (enterprise-tier gated) |
+| CC6.1 Logical access — authentication | API-key authentication; keys stored as SHA-256 hashes only (never plaintext), constant-time comparison, per-tenant rate limiting + quota; key rotation. Identity at `GET /v1/whoami`. | `src/auth.js` (`hashApiKey`, `constantTimeEqual`, `authMiddleware`, `rotateTenantKey`), `src/keys.js`; routes `/v1/whoami`, `/v1/keys/*`, `/v1/account/keys` | Implemented |
+| CC6.1 Logical access — SSO/SAML | Enterprise SSO via SAML 2.0 ACS (signed-assertion verification with `node:crypto`) + IdP metadata. | `src/saml-acs.js` (`consumeAssertion`, `_verifyXmlSignature`); routes `POST /v1/account/saml/acs`, `GET /v1/account/saml/metadata`, `GET /v1/sso/status` | Partial (enterprise-tier gated) |
+| CC6.2 Provisioning / de-provisioning | SCIM 2.0 user & group provisioning + de-provisioning (RFC 7644). PATCH/DELETE `active:false` revokes seat + API keys. | `src/scim-provisioning.js`; routes under `/v1/scim/v2/Users`, `/v1/scim/v2/Groups`, `/v1/scim/v2/ServiceProviderConfig` | Partial (enterprise-tier gated) |
 | CC6.3 Role-based authorization | RBAC role→permission model gates privileged operations. | `src/rbac.js` | Implemented |
 | CC6.4 Physical access | Hosting (Vercel/Railway/cloud) physical security inherited from sub-processors; covered by their SOC 2 reports. | — (sub-processor; inherited) | Process-only |
-| CC6.5 Data disposal | Audit-log retention enforces time-bounded disposal; capture-forget supports record deletion. | `src/audit-retention.js`, `src/capture-forget.js` | Implemented |
+| CC6.5 Data disposal | Audit-log retention (365-day default, configurable 90–2555d) enforces time-bounded disposal; capture-forget supports record deletion. Eviction is opt-in (confirm-gated, dry-run by default). | `src/audit-retention.js` (`enforceRetentionPolicy`), `src/capture-forget.js`; route `GET /v1/security/audit-retention/status` | Implemented |
 | CC6.6 External-access protections | Authentication required on protected routes; rate limiting / public-path allowlist in auth layer. | `src/auth.js` | Implemented |
-| CC6.7 Restricting data movement | Data-residency enforcement constrains where tenant data is stored/processed; BYOC keeps data in customer cloud. | `src/data-residency.js`, `src/byoc.js` | Partial |
+| CC6.7 Restricting data movement | Data-residency tagging + region-policy enforcement (9-region taxonomy, fail-closed on mismatch) constrains where tenant data lives; BYOC runs the artifact in the customer's own cloud (Fly/Nitro/GCP-CVM/Azure-CVM/Docker) with attestation. Export-control geo-fence on signup. | `src/data-residency.js` (`enforceRegionPolicy`), `src/byoc.js`, `src/auth.js` (`EXPORT_CONTROL_DENYLIST`); routes `/v1/residency/*`, `/v1/byoc/*` | Partial |
 | CC6.8 Malicious-software protections | Dependency provenance (SBOM) + signed artifacts establish supply-chain integrity. | `src/sbom-emit.js`, `src/ed25519.js` | Partial |
 
 ---
@@ -89,8 +89,8 @@ All file paths are relative to the repository root. Routes are served by the pla
 | Criterion | Control (as implemented) | Evidence (file / route) | Status |
 |---|---|---|---|
 | CC7.1 Detection of vulnerabilities/config drift | Drift detection + continuous monitoring; SBOM enables dependency-vulnerability review. | `src/drift-alert.js`, `src/continuous-monitoring.js`, `src/sbom-emit.js` | Partial |
-| CC7.2 Monitoring of anomalies | Telemetry (OpenTelemetry) + Prometheus metrics + health endpoint; anomaly detection over usage. | `src/otel.js`, `src/prometheus-exporter.js`, `src/continuous-monitoring.js`; `/health`, `/metrics` | Implemented |
-| CC7.3 Evaluation of security events | Audit event store retains security-relevant events for investigation; exportable for review. | `src/audit.js`, `src/audit-export.js` | Implemented |
+| CC7.2 Monitoring of anomalies | Telemetry (OpenTelemetry) + Prometheus metrics + health endpoint; TSC→signal continuous-monitoring snapshot for auditor read access. | `src/otel.js`, `src/prometheus-exporter.js`, `src/continuous-monitoring.js`; routes `/health`, `/metrics`, `GET /v1/security/continuous-monitoring/snapshot` | Implemented |
+| CC7.3 Evaluation of security events | Hash-chained audit event store (HMAC per-tenant chain) retains security-relevant events; exportable to SIEM (CSV/CEF/LEEF/JSONL) and chain-verifiable. | `src/audit.js` (`appendAudit`, `verifyAuditChain`), `src/audit-export.js`; routes `GET /v1/audit/log`, `GET /v1/audit/verify`, `GET /v1/audit/export` | Implemented |
 | CC7.4 Incident response | Documented rollback / alert runbooks drive response. | `docs/runbook-alerts.md`, `docs/runbook-rollback.md` | Partial (runbooks present; drill cadence is operator process) |
 | CC7.5 Recovery | Rollback runbook + deploy rollback/canary tooling for recovery. | `docs/runbook-rollback.md`, `src/deploy-canary.js`, `src/deploy-rolling.js` | Partial |
 
@@ -108,7 +108,7 @@ All file paths are relative to the repository root. Routes are served by the pla
 
 | Criterion | Control (as implemented) | Evidence (file / route) | Status |
 |---|---|---|---|
-| CC9.1 Risk mitigation (business disruption) | Spend caps bound financial exposure; canary/rolling deploy limit blast radius; rollback runbook. | `src/spend-caps.js`, `src/deploy-canary.js`, `docs/runbook-rollback.md` | Partial |
+| CC9.1 Risk mitigation (business disruption) | Spend caps bound financial exposure (HTTP 402 over-budget); canary/rolling deploy limit blast radius; rollback runbook. | `src/spend-caps.js`, `src/deploy-canary.js`, `src/deploy-rolling.js`, `docs/runbook-rollback.md` | Partial |
 | CC9.2 Vendor / sub-processor management | Vendor/sub-processor risk review is an organizational process; BYOC reduces vendor data-exposure surface. | `src/byoc.js`; vendor reviews (organizational) | Process-only |
 
 ---
@@ -161,6 +161,26 @@ For a SOC 2 **Type II** engagement, the auditor samples *operating effectiveness
 3. **Change management (CC8):** version-control history + changelog; CI/`release-verify` run logs across the window; canary/rollback records.
 4. **Audit integrity (CC2/CC7/PI1):** periodic audit-log export + signature/hash-chain verification runs proving tamper-evidence held over the period.
 5. **Confidentiality/Privacy (C1/P):** sampled redaction outputs; residency configuration snapshots; erasure-request fulfillment records.
+
+## Route appendix — exact paths backing the control matrix
+
+Every path below was confirmed present in `src/router.js`. These are the HTTP surfaces an auditor can probe.
+
+| Control area | Routes (as registered) |
+|---|---|
+| Authentication / identity | `GET /v1/whoami`, `POST /v1/signup`, `POST /v1/auth/login`, `GET /v1/keys/public`, `POST /v1/keys/register`, `GET /v1/account/keys` |
+| SSO (SAML) | `POST /v1/account/saml/acs`, `GET /v1/account/saml/metadata`, `GET /v1/sso/status`, `POST /v1/account/sso/configure` |
+| SCIM provisioning | `/v1/scim/v2/Users`, `/v1/scim/v2/Users/:id`, `/v1/scim/v2/Groups`, `/v1/scim/v2/Groups/:id`, `GET /v1/scim/v2/ServiceProviderConfig` |
+| RBAC (capture scope) | `GET /v1/capture/rbac/policy`, `POST /v1/capture/rbac/evaluate` |
+| Audit log + export | `GET /v1/audit/log`, `GET /v1/audit/verify`, `GET /v1/audit/export`, `GET /v1/audit/export/formats`, `GET /v1/audit/export/preview`, `GET /v1/account/audit-log`, `GET /v1/account/audit-log/verify` |
+| Audit retention | `GET /v1/security/audit-retention/status`, `GET /v1/account/audit/retention` |
+| Continuous monitoring | `GET /v1/security/continuous-monitoring/snapshot`, `/health`, `/metrics` |
+| Data residency | `POST /v1/residency/tag-capture`, `GET /v1/residency/capture-region/:capture_id`, `POST /v1/residency/configure-namespace`, `GET /v1/residency/regions` |
+| BYOC | `POST /v1/byoc/deploy`, `GET /v1/byoc/deployments`, `GET /v1/byoc/deployments/:id`, `DELETE /v1/byoc/deployments/:id`, `POST /v1/byoc/attestation`, `GET /v1/byoc/targets`, `GET /v1/byoc/status` |
+| Spend caps / budget | `GET /v1/usage/budget` (enforcement is middleware in `src/router.js`) |
+| SBOM / supply chain | `POST /v1/sbom/emit`, `GET /v1/sbom/repo`, `POST /v1/sbom/verify` |
+| Verification / provenance | `GET /v1/verify/:cid`, `GET /v1/verify/:receipt_id`, `POST /v1/receipts/verify` |
+| Compliance packet | `GET /v1/compliance/certification-packet`, `GET /v1/compliance/status` |
 
 ## Caveats
 
