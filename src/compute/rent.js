@@ -16,6 +16,7 @@
 
 import { info as backendInfo, run as runBackend } from './index.js';
 import { estimate, estimateAll } from './estimator.js';
+import { assertPodEligible, classifyTrainingData, teardownPolicy } from '../secure-training.js';
 
 // Backends that own their own lifecycle. We delegate teardown to their SDK.
 const PLATFORM_MANAGED = new Set(['modal', 'runpod', 'together', 'replicate', 'fal']);
@@ -44,6 +45,27 @@ export async function rent(spec, opts = {}) {
   if (!b) throw new Error(`unknown backend: ${backend}`);
   if (NOT_RENTABLE.has(backend)) {
     throw new Error(`backend ${backend} is local — nothing to rent. Use "kolm compute use ${backend}" then "kolm compile" directly.`);
+  }
+
+  // Secure-training guarantee: a rented pod is a third-party machine. Public data
+  // is fine to upload; sensitive/customer data must stay on local hardware, an
+  // air-gapped host, or BYOC (the customer's own cloud). Classify the corpus and
+  // refuse ineligible (data, backend) pairs before we provision or upload.
+  const classification = opts.data_classification
+    || (opts.training_samples ? classifyTrainingData(opts.training_samples) : { sensitive: false, classes: [] });
+  try {
+    assertPodEligible({
+      sensitivity: classification,
+      backend,
+      byoc: !!opts.byoc,
+      airgap: !!opts.airgap,
+      override: !!opts.allow_sensitive_on_pod,
+    });
+  } catch (err) {
+    if (err && err.code === 'secure_training_policy') {
+      return { ok: false, backend, reason: err.message, policy: 'secure-training', classification, detail: err.detail };
+    }
+    throw err;
   }
 
   const est = estimate(spec, backend);
@@ -92,6 +114,7 @@ export async function rent(spec, opts = {}) {
     rental: {
       managed_by: PLATFORM_MANAGED.has(backend) ? 'platform' : KOLM_PROVISIONED.has(backend) ? 'kolm' : 'unknown',
       teardown: 'automatic',
+      secure_teardown: teardownPolicy(backend),
     },
     result,
   };
