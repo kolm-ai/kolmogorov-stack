@@ -378,7 +378,7 @@
 
   // --- Export: POST /v1/exports, then poll GET /v1/exports/:id for state. ---
   // The export API is owned by the backend (src/router.js). If it is not yet
-  // mounted (404), we surface a clear "coming soon" note instead of an error.
+  // mounted (404), we surface a clear unavailable-for-now note instead of an error.
   function setStatus(card,msg,cls){
     var el=card.querySelector("[data-export-status]");
     if(!el)return;
