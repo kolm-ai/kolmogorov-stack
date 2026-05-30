@@ -1552,6 +1552,20 @@ export function buildRouter() {
       signingKeyState = 'unknown';
     }
 
+    // Storage diagnostic: pinpoints the data-volume writability problem (uid the
+    // process runs as + whether the mounted data dir is writable). Read-only.
+    let storage;
+    try {
+      const dd = process.env.KOLM_DATA_DIR || path.join(os.homedir(), '.kolm');
+      const ed = path.join(dd, 'events');
+      const testW = (d) => { try { const t = path.join(d, '.hwtest'); fs.writeFileSync(t, '1'); fs.unlinkSync(t); return true; } catch { return false; } };
+      storage = {
+        uid: (typeof process.getuid === 'function') ? process.getuid() : 'n/a',
+        data_dir: dd,
+        data_dir_writable: fs.existsSync(dd) ? testW(dd) : 'absent',
+        events_dir_writable: fs.existsSync(ed) ? testW(ed) : 'absent',
+      };
+    } catch (e) { storage = { error: String((e && e.message) || e) }; }
     res.json({
       ok: true,
       status: 'ok',
@@ -1563,6 +1577,7 @@ export function buildRouter() {
       gateway: 'ok',
       capture_store: captureStoreState,
       signing_key: signingKeyState,
+      storage,
       stats: storeStats(),
     });
   });
