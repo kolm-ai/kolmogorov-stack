@@ -1,0 +1,30 @@
+{
+  "name": "function-calling-qwen2.5-3b",
+  "description": "Agentic tool/function-calling LoRA for Qwen2.5-3B-Instruct — the #1 in-demand distill in mid-2026 (Grok analysis + the GitHub/HF agent-framework wave: Google ADK, smolagents, goose, codex-cli). Teaches the model to emit Qwen-native <tool_call> for in-scope queries, ask for missing params, and answer naturally when no tool fits.",
+  "base_model": "Qwen/Qwen2.5-3B-Instruct",
+  "task": "function_calling",
+  "dataset": {
+    "source": "glaiveai/glaive-function-calling-v2",
+    "license": "open (no gating)",
+    "format": "qwen2.5-native tool-calling (tools rendered via chat template, <tool_call> completions)",
+    "pairs": 3000,
+    "mix": "670 tool-call turns / 2330 natural (clarify + final-answer)",
+    "prep_script": "scripts/prep-function-calling.py"
+  },
+  "train": {
+    "method": "lora",
+    "precision": "bf16",
+    "lora_rank": 32,
+    "lora_alpha": 64,
+    "epochs": 2,
+    "batch_size": 4,
+    "max_length": 1536,
+    "lr": 2e-4,
+    "trainer": "workers/distill/scripts/train_lora.py",
+    "steps": 1500
+  },
+  "eval_script": "scripts/eval-function-calling.py",
+  "hardware": "RTX 5090 (local) — bf16, ~29 min",
+  "out": "data/fc-qwen3b-adapter",
+  "cloud_alternative": "Same recipe runs on a rented RunPod GPU via the Vercel-key proxy (api/runpod.js); set KOLM_API_KEY + KOLM_RUNPOD_ENDPOINT_ID for the serverless path."
+}
