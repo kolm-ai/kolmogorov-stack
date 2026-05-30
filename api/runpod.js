@@ -75,8 +75,38 @@ export default async function handler(req, res) {
   }
 
   const body = (req.body && typeof req.body === 'object') ? req.body : {};
+
+  // Serverless REST branch: proxy /v2/{endpointId}/{run|status/jobId} (api.runpod.ai)
+  // for the training path (compute/backends/runpod.js) using the Vercel key.
+  if (body.serverless && typeof body.serverless === 'object') {
+    const sv = body.serverless;
+    const endpointId = String(sv.endpointId || sv.endpoint_id || '').replace(/[^A-Za-z0-9_-]/g, '');
+    const op = sv.op === 'status' ? 'status' : 'run';
+    if (!endpointId) return res.status(400).json({ ok: false, error: 'missing_endpointId' });
+    const jobId = String(sv.jobId || sv.job_id || '').replace(/[^A-Za-z0-9_-]/g, '');
+    if (op === 'status' && !jobId) return res.status(400).json({ ok: false, error: 'missing_jobId_for_status' });
+    const url = op === 'status'
+      ? `https://api.runpod.ai/v2/${endpointId}/status/${jobId}`
+      : `https://api.runpod.ai/v2/${endpointId}/run`;
+    try {
+      const r = await fetch(url, {
+        method: op === 'status' ? 'GET' : 'POST',
+        headers: { 'content-type': 'application/json', authorization: 'Bearer ' + hit.key },
+        body: op === 'status' ? undefined : JSON.stringify(sv.payload || { input: sv.input || {} }),
+      });
+      const text = await r.text();
+      let json = null; try { json = JSON.parse(text); } catch { /* raw */ }
+      return res.status(r.ok ? 200 : 502).json({
+        ok: r.ok, status: r.status, result: json, raw: r.ok ? undefined : text.slice(0, 1000),
+        proxy_key_source: hit.var, tenant: a.tenant, served_by: 'vercel-function',
+      });
+    } catch (e) {
+      return res.status(502).json({ ok: false, error: 'runpod_serverless_proxy_failed', detail: String(e && e.message || e) });
+    }
+  }
+
   const query = typeof body.query === 'string' ? body.query : '';
-  if (!query) return res.status(400).json({ ok: false, error: 'missing_query', detail: 'POST { query, variables? } — a RunPod GraphQL query' });
+  if (!query) return res.status(400).json({ ok: false, error: 'missing_query', detail: 'POST { query, variables? } (GraphQL) or { serverless:{endpointId,op,...} }' });
   const variables = (body.variables && typeof body.variables === 'object') ? body.variables : {};
 
   try {
