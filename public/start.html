@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Get started &middot; kolm.ai</title>
+<meta name="description" content="No code required. Pick what you want to do: chat with a model, make your own, run it anywhere, connect it to your tools, or roll it out to your team." />
+<link rel="icon" href="/favicon.svg" />
+<link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
+<link rel="stylesheet" href="/design-tokens.css" />
+<link rel="stylesheet" href="/ks.css" />
+<style>
+/* ----------------------------------------------------------------------------
+   /start — no-code branching quickstart. Self-contained, mobile-first.
+   Cool slate only. NO warm/brown hex anywhere. Palette is scoped to .start-*
+   so it never fights the global theme; it also follows [data-theme="dark"].
+---------------------------------------------------------------------------- */
+.start-page {
+  /* cool slate */
+  --s-bg: #f8fafc;
+  --s-bg-2: #f1f5f9;
+  --s-surface: #ffffff;
+  --s-surface-2: #f8fafc;
+  --s-ink: #0f172a;
+  --s-ink-2: #334155;
+  --s-muted: #64748b;
+  --s-line: #e2e8f0;
+  --s-line-2: #cbd5e1;
+  --s-accent: #2563eb;
+  --s-accent-2: #1d4ed8;
+  --s-accent-soft: #eff6ff;
+  --s-accent-ink: #1e3a8a;
+  --s-code-bg: #0f172a;
+  --s-code-ink: #e2e8f0;
+  --s-code-accent: #7dd3fc;
+  --s-ok: #0f766e;
+  --s-ok-soft: #f0fdfa;
+  --s-radius: 16px;
+  --s-radius-sm: 10px;
+  --s-shadow: 0 1px 2px rgba(15,23,42,.06), 0 8px 24px -12px rgba(15,23,42,.18);
+  --s-shadow-lift: 0 2px 4px rgba(15,23,42,.08), 0 18px 40px -18px rgba(15,23,42,.28);
+  color: var(--s-ink);
+}
+[data-theme="dark"] .start-page {
+  --s-bg: #0b1220;
+  --s-bg-2: #0f172a;
+  --s-surface: #111a2b;
+  --s-surface-2: #0f172a;
+  --s-ink: #f1f5f9;
+  --s-ink-2: #cbd5e1;
+  --s-muted: #94a3b8;
+  --s-line: #1e293b;
+  --s-line-2: #334155;
+  --s-accent: #60a5fa;
+  --s-accent-2: #3b82f6;
+  --s-accent-soft: #16233b;
+  --s-accent-ink: #bfdbfe;
+  --s-code-bg: #060b16;
+  --s-code-ink: #e2e8f0;
+  --s-code-accent: #7dd3fc;
+  --s-ok: #5eead4;
+  --s-ok-soft: #0d2521;
+  --s-shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  --s-shadow-lift: 0 2px 4px rgba(0,0,0,.5), 0 18px 40px -18px rgba(0,0,0,.7);
+}
+
+.start-page {
+  background: var(--s-bg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+.start-page * { box-sizing: border-box; }
+.start-wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+/* ---- Hero -------------------------------------------------------------- */
+.start-hero {
+  padding: 56px 0 28px;
+  text-align: center;
+  background:
+    radial-gradient(900px 320px at 50% -40px, var(--s-accent-soft), transparent 70%);
+}
+.start-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--s-accent-ink);
+  background: var(--s-accent-soft);
+  border: 1px solid var(--s-line);
+  padding: 6px 12px; border-radius: 999px;
+}
+.start-eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--s-accent); }
+.start-hero h1 {
+  margin: 18px auto 10px;
+  font-size: clamp(28px, 6vw, 46px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  font-weight: 720;
+  color: var(--s-ink);
+  max-width: 16ch;
+}
+.start-hero p.lede {
+  margin: 0 auto;
+  max-width: 56ch;
+  font-size: clamp(15px, 2.4vw, 18px);
+  color: var(--s-ink-2);
+}
+.start-hero .reassure {
+  margin-top: 16px;
+  display: inline-flex; flex-wrap: wrap; gap: 8px 10px; justify-content: center;
+}
+.start-hero .reassure span {
+  font-size: 12.5px; color: var(--s-muted);
+  background: var(--s-surface);
+  border: 1px solid var(--s-line);
+  border-radius: 999px; padding: 5px 11px;
+}
+
+/* ---- Branch cards ------------------------------------------------------ */
+.start-grid {
+  display: grid; gap: 16px;
+  grid-template-columns: 1fr;
+  padding: 8px 0 8px;
+}
+@media (min-width: 720px) { .start-grid { grid-template-columns: 1fr 1fr; gap: 18px; } }
+
+.branch {
+  background: var(--s-surface);
+  border: 1px solid var(--s-line);
+  border-radius: var(--s-radius);
+  box-shadow: var(--s-shadow);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.branch.is-wide { grid-column: 1 / -1; }
+.branch__head {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 20px 20px 12px;
+}
+.branch__num {
+  flex: 0 0 auto;
+  width: 40px; height: 40px; border-radius: 12px;
+  display: grid; place-items: center;
+  background: var(--s-accent-soft);
+  color: var(--s-accent-ink);
+  border: 1px solid var(--s-line);
+  font-weight: 720; font-size: 16px;
+}
+.branch__title { margin: 0; font-size: 19px; font-weight: 700; letter-spacing: -0.01em; color: var(--s-ink); }
+.branch__sub { margin: 4px 0 0; font-size: 14px; color: var(--s-muted); }
+.branch__body { padding: 4px 20px 20px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+
+/* form bits */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > label { font-size: 13px; font-weight: 620; color: var(--s-ink-2); }
+.field .hint { font-size: 12px; color: var(--s-muted); }
+.input, .select, .textarea {
+  width: 100%;
+  font: inherit; font-size: 15px;
+  color: var(--s-ink);
+  background: var(--s-surface-2);
+  border: 1px solid var(--s-line-2);
+  border-radius: var(--s-radius-sm);
+  padding: 11px 12px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
+.input:focus, .select:focus, .textarea:focus {
+  outline: none; border-color: var(--s-accent);
+  box-shadow: 0 0 0 3px var(--s-accent-soft);
+}
+.select { appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center; padding-right: 38px;
+}
+
+/* dropzone */
+.dropzone {
+  border: 1.5px dashed var(--s-line-2);
+  border-radius: var(--s-radius-sm);
+  background: var(--s-surface-2);
+  padding: 18px; text-align: center;
+  color: var(--s-muted); font-size: 13.5px;
+  cursor: pointer; transition: border-color .15s, background .15s;
+}
+.dropzone:hover, .dropzone.is-over { border-color: var(--s-accent); background: var(--s-accent-soft); color: var(--s-accent-ink); }
+.dropzone strong { color: var(--s-ink-2); font-weight: 650; }
+.dropzone input[type="file"] { display: none; }
+.dropzone .files { margin-top: 8px; font-size: 12.5px; color: var(--s-ink-2); }
+
+/* buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font: inherit; font-size: 14.5px; font-weight: 650;
+  padding: 11px 16px; border-radius: var(--s-radius-sm);
+  border: 1px solid transparent; cursor: pointer; text-decoration: none;
+  min-height: 44px; transition: transform .12s, background .15s, border-color .15s, box-shadow .15s;
+}
+.btn:active { transform: translateY(1px); }
+.btn--primary { background: var(--s-accent); color: #ffffff; box-shadow: var(--s-shadow); }
+.btn--primary:hover { background: var(--s-accent-2); }
+.btn--ghost { background: var(--s-surface); color: var(--s-ink-2); border-color: var(--s-line-2); }
+.btn--ghost:hover { border-color: var(--s-accent); color: var(--s-accent-ink); }
+.btn--block { width: 100%; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* segmented chooser */
+.seg { display: grid; gap: 10px; grid-template-columns: 1fr; }
+@media (min-width: 560px) { .seg.seg-3 { grid-template-columns: 1fr 1fr 1fr; } }
+.seg__opt {
+  display: block; cursor: pointer;
+  border: 1px solid var(--s-line-2); border-radius: var(--s-radius-sm);
+  background: var(--s-surface-2); padding: 14px;
+  transition: border-color .15s, background .15s, box-shadow .15s;
+}
+.seg__opt input { position: absolute; opacity: 0; pointer-events: none; }
+.seg__opt b { display: block; font-size: 14.5px; color: var(--s-ink); }
+.seg__opt span { display: block; margin-top: 3px; font-size: 12.5px; color: var(--s-muted); }
+.seg__opt:hover { border-color: var(--s-accent); }
+.seg__opt.is-active {
+  border-color: var(--s-accent); background: var(--s-accent-soft);
+  box-shadow: 0 0 0 1px var(--s-accent) inset;
+}
+.seg__opt.is-active b { color: var(--s-accent-ink); }
+
+/* copy field */
+.copyfield {
+  display: flex; align-items: stretch; gap: 0;
+  border: 1px solid var(--s-line-2); border-radius: var(--s-radius-sm);
+  background: var(--s-code-bg); overflow: hidden;
+}
+.copyfield code {
+  flex: 1; min-width: 0;
+  font-family: ui-monospace, "SFMono-Regular", "Cascadia Code", Menlo, Consolas, monospace;
+  font-size: 13px; color: var(--s-code-ink);
+  padding: 12px 14px; overflow-x: auto; white-space: pre; line-height: 1.5;
+}
+.copyfield code .tok { color: var(--s-code-accent); }
+.copyfield .copy {
+  flex: 0 0 auto; border: none; border-left: 1px solid rgba(148,163,184,.25);
+  background: rgba(148,163,184,.12); color: var(--s-code-ink);
+  font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer;
+  padding: 0 16px; min-width: 76px; transition: background .15s;
+}
+.copyfield .copy:hover { background: rgba(148,163,184,.24); }
+.copyfield .copy.is-done { color: var(--s-code-accent); }
+.copy-label { font-size: 12px; color: var(--s-muted); margin-bottom: 6px; display: block; }
+
+/* model picker list */
+.modellist { display: grid; gap: 10px; grid-template-columns: 1fr; }
+@media (min-width: 560px) { .modellist { grid-template-columns: 1fr 1fr; } }
+.modelchip {
+  display: flex; align-items: center; gap: 12px; text-decoration: none;
+  border: 1px solid var(--s-line-2); border-radius: var(--s-radius-sm);
+  background: var(--s-surface-2); padding: 12px 14px; color: var(--s-ink);
+  transition: border-color .15s, box-shadow .15s, transform .12s;
+}
+.modelchip:hover { border-color: var(--s-accent); box-shadow: var(--s-shadow); transform: translateY(-1px); }
+.modelchip .mc-ico { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; background: var(--s-accent-soft); color: var(--s-accent-ink); }
+.modelchip .mc-name { font-weight: 650; font-size: 14.5px; }
+.modelchip .mc-meta { font-size: 12px; color: var(--s-muted); }
+.modelchip .mc-go { margin-left: auto; color: var(--s-accent); font-weight: 700; }
+
+/* small explainer note */
+.note {
+  font-size: 13px; color: var(--s-ink-2);
+  background: var(--s-accent-soft); border: 1px solid var(--s-line);
+  border-radius: var(--s-radius-sm); padding: 11px 13px;
+}
+.note b { color: var(--s-accent-ink); }
+.note.ok { background: var(--s-ok-soft); }
+
+/* compare table for run-anywhere */
+.compare { display: grid; gap: 10px; grid-template-columns: 1fr; }
+@media (min-width: 720px) { .compare { grid-template-columns: 1fr 1fr 1fr; } }
+.compare__col {
+  border: 1px solid var(--s-line-2); border-radius: var(--s-radius-sm);
+  background: var(--s-surface-2); padding: 14px;
+}
+.compare__col h4 { margin: 0 0 4px; font-size: 14.5px; color: var(--s-ink); }
+.compare__col .who { font-size: 12px; color: var(--s-muted); margin-bottom: 8px; }
+.compare__col ul { margin: 0 0 12px; padding-left: 16px; font-size: 13px; color: var(--s-ink-2); }
+.compare__col ul li { margin: 3px 0; }
+
+/* steps / progress */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.steps li { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; color: var(--s-ink-2); }
+.steps li .n { flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; background: var(--s-accent-soft); color: var(--s-accent-ink); border: 1px solid var(--s-line); }
+
+.progress { display: none; }
+.progress.is-on { display: block; }
+.progress__bar { height: 8px; border-radius: 999px; background: var(--s-line); overflow: hidden; }
+.progress__bar i { display: block; height: 100%; width: 0; background: var(--s-accent); border-radius: 999px; transition: width .5s ease; }
+.progress__msg { margin-top: 8px; font-size: 13px; color: var(--s-ink-2); }
+
+/* advanced (CLI) disclosure */
+details.adv {
+  border-top: 1px dashed var(--s-line); margin-top: 4px; padding-top: 12px;
+}
+details.adv > summary {
+  cursor: pointer; list-style: none; font-size: 13px; font-weight: 620; color: var(--s-muted);
+  display: inline-flex; align-items: center; gap: 7px;
+}
+details.adv > summary::-webkit-details-marker { display: none; }
+details.adv > summary .chev { transition: transform .15s; }
+details.adv[open] > summary .chev { transform: rotate(90deg); }
+details.adv > summary:hover { color: var(--s-accent-ink); }
+details.adv .adv-body { margin-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+
+/* team list */
+.teamrow { display: flex; align-items: center; gap: 10px; }
+.teamrow .input { flex: 1; }
+
+/* footer cta within page */
+.start-foot {
+  margin: 8px 0 64px; text-align: center;
+  border: 1px solid var(--s-line); border-radius: var(--s-radius);
+  background: var(--s-surface); box-shadow: var(--s-shadow);
+  padding: 28px 20px;
+}
+.start-foot h2 { margin: 0 0 6px; font-size: 22px; letter-spacing: -0.01em; color: var(--s-ink); }
+.start-foot p { margin: 0 0 16px; color: var(--s-muted); font-size: 14.5px; }
+
+.section-label {
+  margin: 30px 0 10px; font-size: 12px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--s-muted);
+}
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn, .modelchip, .progress__bar i { transition: none; }
+}
+</style>
+</head>
+<body class="start-page">
+<div data-include-nav></div>
+
+<main>
+  <!-- HERO -->
+  <header class="start-hero">
+    <div class="start-wrap">
+      <span class="start-eyebrow"><span class="dot" aria-hidden="true"></span>No code required</span>
+      <h1>What do you want to do?</h1>
+      <p class="lede">Pick one. Each path is buttons, forms, and copy fields &mdash; not a wall of commands. Coders get an optional &ldquo;advanced&rdquo; toggle on every step.</p>
+      <div class="reassure">
+        <span>No install to start</span>
+        <span>No credit card to try</span>
+        <span>Plain-English forms</span>
+        <span>Copy-paste, not coding</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="start-wrap">
+    <div class="start-grid">
+
+      <!-- (1) CHAT -->
+      <section class="branch" id="chat" aria-labelledby="chat-t">
+        <div class="branch__head">
+          <div class="branch__num" aria-hidden="true">1</div>
+          <div>
+            <h2 class="branch__title" id="chat-t">Chat with a model</h2>
+            <p class="branch__sub">Pick a model and start talking. Nothing to set up.</p>
+          </div>
+        </div>
+        <div class="branch__body">
+          <div class="modellist" role="list">
+            <a class="modelchip" role="listitem" href="/ask?model=trinity-500">
+              <span class="mc-ico" aria-hidden="true">&#9889;</span>
+              <span><span class="mc-name">Trinity-500</span><br><span class="mc-meta">Fast support specialist &middot; served</span></span>
+              <span class="mc-go" aria-hidden="true">&rarr;</span>
+            </a>
+            <a class="modelchip" role="listitem" href="/ask?model=qwen2.5-7b">
+              <span class="mc-ico" aria-hidden="true">&#129302;</span>
+              <span><span class="mc-name">Qwen2.5 7B</span><br><span class="mc-meta">General assistant &middot; served</span></span>
+              <span class="mc-go" aria-hidden="true">&rarr;</span>
+            </a>
+            <a class="modelchip" role="listitem" href="/ask?model=deepseek-r1-32b">
+              <span class="mc-ico" aria-hidden="true">&#129504;</span>
+              <span><span class="mc-name">DeepSeek-R1 32B</span><br><span class="mc-meta">Reasoning &middot; served</span></span>
+              <span class="mc-go" aria-hidden="true">&rarr;</span>
+            </a>
+            <a class="modelchip" role="listitem" href="/models">
+              <span class="mc-ico" aria-hidden="true">&#128269;</span>
+              <span><span class="mc-name">Browse all models</span><br><span class="mc-meta">Gemma, Phi, Llama, Mistral&hellip;</span></span>
+              <span class="mc-go" aria-hidden="true">&rarr;</span>
+            </a>
+          </div>
+          <a class="btn btn--primary btn--block" href="/ask">Open the chat &rarr;</a>
+          <p class="note">No account needed to try. Your messages run against a live, served model in your browser.</p>
+        </div>
+      </section>
+
+      <!-- (2) MAKE YOUR OWN -->
+      <section class="branch" id="make" aria-labelledby="make-t">
+        <div class="branch__head">
+          <div class="branch__num" aria-hidden="true">2</div>
+          <div>
+            <h2 class="branch__title" id="make-t">Make your own model</h2>
+            <p class="branch__sub">Describe what it should do. We compile a specialist for you.</p>
+          </div>
+        </div>
+        <div class="branch__body">
+          <form id="make-form" novalidate>
+            <div class="field">
+              <label for="m-name">Name it</label>
+              <input class="input" id="m-name" name="name" type="text" placeholder="e.g. Support reply drafter" autocomplete="off" />
+            </div>
+            <div class="field" style="margin-top:14px;">
+              <label for="m-desc">Describe what it should do</label>
+              <textarea class="textarea" id="m-desc" name="goal" placeholder="e.g. Read a customer email and draft a friendly reply that always asks for the order ID if it is missing. Never invent refund amounts."></textarea>
+              <span class="hint">Plain English is fine. The clearer the rules, the better the model.</span>
+            </div>
+            <div class="field" style="margin-top:14px;">
+              <label for="m-file">Add examples or data <span style="font-weight:400;color:var(--s-muted)">(optional)</span></label>
+              <label class="dropzone" id="m-drop">
+                <strong>Click to choose files</strong> or drag them here<br>
+                CSV, JSONL, PDF, TXT &mdash; past emails, tickets, docs, anything
+                <input id="m-file" type="file" multiple />
+                <span class="files" id="m-files" hidden></span>
+              </label>
+            </div>
+            <div class="btn-row" style="margin-top:16px;">
+              <button class="btn btn--primary" type="submit">Build my model</button>
+              <a class="btn btn--ghost" href="/account/create-model">Open the full builder</a>
+            </div>
+          </form>
+
+          <div class="progress" id="make-progress" aria-live="polite">
+            <div class="progress__bar"><i id="make-bar"></i></div>
+            <p class="progress__msg" id="make-msg">Starting&hellip;</p>
+          </div>
+
+          <p class="note ok" id="make-done" hidden><b>Queued.</b> We are compiling your model. You will get a signed <code>.kolm</code> artifact and a chat link when it is ready &mdash; watch progress on <a href="/account/builds">your builds</a>.</p>
+
+          <details class="adv">
+            <summary><span class="chev" aria-hidden="true">&#9656;</span> Advanced: do this from the command line</summary>
+            <div class="adv-body">
+              <span class="copy-label">One-liner &mdash; describe and compile</span>
+              <div class="copyfield">
+                <code id="make-cli">kolm compile --auto --goal "<span class="tok">draft support replies, always ask for order ID</span>" --data ./examples</code>
+                <button class="copy" data-copy="make-cli" type="button">Copy</button>
+              </div>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- (3) RUN IT ANYWHERE -->
+      <section class="branch is-wide" id="run" aria-labelledby="run-t">
+        <div class="branch__head">
+          <div class="branch__num" aria-hidden="true">3</div>
+          <div>
+            <h2 class="branch__title" id="run-t">Run it anywhere</h2>
+            <p class="branch__sub">Choose where your model lives. Same model, different home.</p>
+          </div>
+        </div>
+        <div class="branch__body">
+          <div class="seg seg-3" role="radiogroup" aria-label="Where should the model run?">
+            <label class="seg__opt is-active" data-run="local">
+              <input type="radio" name="run-where" value="local" checked />
+              <b>On my computer</b>
+              <span>Private &amp; free. Runs offline on your own machine.</span>
+            </label>
+            <label class="seg__opt" data-run="cloud">
+              <input type="radio" name="run-where" value="cloud" />
+              <b>In the cloud</b>
+              <span>Rented GPU. No hardware needed, ready in minutes.</span>
+            </label>
+            <label class="seg__opt" data-run="export">
+              <input type="radio" name="run-where" value="export" />
+              <b>Export it</b>
+              <span>Send to Ollama, Hugging Face, or download.</span>
+            </label>
+          </div>
+
+          <!-- LOCAL -->
+          <div class="run-panel" data-panel="local">
+            <p class="note"><b>Local</b> means the model runs on the computer in front of you. Nothing leaves your device &mdash; best for privacy, and it is free. You need a recent Mac, Windows, or Linux machine.</p>
+            <div class="btn-row">
+              <a class="btn btn--primary" href="/download">Get the desktop app</a>
+              <a class="btn btn--ghost" href="/docs/run/overview">How local works</a>
+            </div>
+            <details class="adv">
+              <summary><span class="chev" aria-hidden="true">&#9656;</span> Advanced: one-liner</summary>
+              <div class="adv-body">
+                <span class="copy-label">Run your model locally</span>
+                <div class="copyfield">
+                  <code id="run-local">kolm run my-model <span class="tok">--local</span></code>
+                  <button class="copy" data-copy="run-local" type="button">Copy</button>
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <!-- CLOUD -->
+          <div class="run-panel" data-panel="cloud" hidden>
+            <p class="note"><b>Cloud</b> means we rent a GPU for you and host the model. No hardware required and it is reachable from anywhere by a link. You pay only for the time it runs.</p>
+            <div class="btn-row">
+              <a class="btn btn--primary" href="/cloud">Deploy to the cloud</a>
+              <a class="btn btn--ghost" href="/account/serve/new">Pick a GPU</a>
+            </div>
+            <details class="adv">
+              <summary><span class="chev" aria-hidden="true">&#9656;</span> Advanced: one-liner</summary>
+              <div class="adv-body">
+                <span class="copy-label">Serve your model on a rented GPU</span>
+                <div class="copyfield">
+                  <code id="run-cloud">kolm serve my-model <span class="tok">--cloud</span></code>
+                  <button class="copy" data-copy="run-cloud" type="button">Copy</button>
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <!-- EXPORT -->
+          <div class="run-panel" data-panel="export" hidden>
+            <p class="note"><b>Exported</b> means you take the model somewhere else. Hand it to Ollama, publish it on Hugging Face, or just download the file and keep it.</p>
+            <div class="compare">
+              <div class="compare__col">
+                <h4>Ollama</h4>
+                <div class="who">Run it in the popular local app</div>
+                <a class="btn btn--ghost btn--block" href="/docs/studio-export-gguf">Export to Ollama</a>
+              </div>
+              <div class="compare__col">
+                <h4>Hugging Face</h4>
+                <div class="who">Publish &amp; share online</div>
+                <a class="btn btn--ghost btn--block" href="/docs/studio-publish-hf">Publish to HF</a>
+              </div>
+              <div class="compare__col">
+                <h4>Download</h4>
+                <div class="who">Keep the file yourself</div>
+                <a class="btn btn--ghost btn--block" href="/download">Download artifact</a>
+              </div>
+            </div>
+            <details class="adv">
+              <summary><span class="chev" aria-hidden="true">&#9656;</span> Advanced: one-liners</summary>
+              <div class="adv-body">
+                <span class="copy-label">Export to Ollama (GGUF)</span>
+                <div class="copyfield">
+                  <code id="run-ollama">kolm export my-model <span class="tok">--to ollama</span></code>
+                  <button class="copy" data-copy="run-ollama" type="button">Copy</button>
+                </div>
+                <span class="copy-label">Publish to Hugging Face</span>
+                <div class="copyfield">
+                  <code id="run-hf">kolm export my-model <span class="tok">--to huggingface</span></code>
+                  <button class="copy" data-copy="run-hf" type="button">Copy</button>
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <p class="section-label" style="margin-top:18px;">Not sure? Quick guide</p>
+          <ul class="steps">
+            <li><span class="n">1</span> <span><b>Privacy first or no internet?</b> Pick <b>On my computer</b>.</span></li>
+            <li><span class="n">2</span> <span><b>No GPU, or need a shareable link?</b> Pick <b>In the cloud</b>.</span></li>
+            <li><span class="n">3</span> <span><b>Already use Ollama / Hugging Face?</b> Pick <b>Export it</b>.</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- (4) CONNECT & AUTOMATE -->
+      <section class="branch is-wide" id="connect" aria-labelledby="connect-t">
+        <div class="branch__head">
+          <div class="branch__num" aria-hidden="true">4</div>
+          <div>
+            <h2 class="branch__title" id="connect-t">Connect &amp; automate</h2>
+            <p class="branch__sub">Plug your model into the tools you already use.</p>
+          </div>
+        </div>
+        <div class="branch__body">
+          <div class="compare">
+            <!-- OpenAI-compatible API -->
+            <div class="compare__col">
+              <h4>OpenAI-compatible API</h4>
+              <div class="who">Works with any OpenAI SDK or app</div>
+              <span class="copy-label">Base URL</span>
+              <div class="copyfield">
+                <code id="api-url">https://kolm.ai/v1</code>
+                <button class="copy" data-copy="api-url" type="button">Copy</button>
+              </div>
+              <span class="copy-label" style="margin-top:10px;">API key</span>
+              <div class="copyfield">
+                <code id="api-key">kolm_sk_<span class="tok">your_key_here</span></code>
+                <button class="copy" data-copy="api-key" type="button">Copy</button>
+              </div>
+              <a class="btn btn--ghost btn--block" style="margin-top:12px;" href="/account/api-keys">Get your real key</a>
+            </div>
+
+            <!-- MCP -->
+            <div class="compare__col">
+              <h4>MCP server</h4>
+              <div class="who">For Claude, Cursor &amp; MCP clients</div>
+              <span class="copy-label">Server URL</span>
+              <div class="copyfield">
+                <code id="mcp-url">https://kolm.ai/mcp</code>
+                <button class="copy" data-copy="mcp-url" type="button">Copy</button>
+              </div>
+              <a class="btn btn--ghost btn--block" style="margin-top:12px;" href="/integrations">Connect a client</a>
+            </div>
+
+            <!-- Zapier / n8n / webhook -->
+            <div class="compare__col">
+              <h4>Zapier / n8n / Webhook</h4>
+              <div class="who">No-code automation</div>
+              <span class="copy-label">Webhook endpoint</span>
+              <div class="copyfield">
+                <code id="hook-url">https://kolm.ai/v1/chat/completions</code>
+                <button class="copy" data-copy="hook-url" type="button">Copy</button>
+              </div>
+              <a class="btn btn--ghost btn--block" style="margin-top:12px;" href="/integrations">Automation guides</a>
+            </div>
+          </div>
+          <details class="adv">
+            <summary><span class="chev" aria-hidden="true">&#9656;</span> Advanced: test it with curl</summary>
+            <div class="adv-body">
+              <span class="copy-label">One request, copy-paste</span>
+              <div class="copyfield">
+                <code id="connect-curl">curl https://kolm.ai/v1/chat/completions <span class="tok">\</span>
+  -H "Authorization: Bearer $KOLM_KEY" <span class="tok">\</span>
+  -d '{"model":"my-model","messages":[{"role":"user","content":"hi"}]}'</code>
+                <button class="copy" data-copy="connect-curl" type="button">Copy</button>
+              </div>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- (5) FOR TEAMS -->
+      <section class="branch is-wide" id="teams" aria-labelledby="teams-t">
+        <div class="branch__head">
+          <div class="branch__num" aria-hidden="true">5</div>
+          <div>
+            <h2 class="branch__title" id="teams-t">For teams</h2>
+            <p class="branch__sub">Invite people, give them access, push updates.</p>
+          </div>
+        </div>
+        <div class="branch__body">
+          <form id="invite-form" novalidate>
+            <div class="field">
+              <label for="t-email">Invite an employee by email</label>
+              <div class="teamrow">
+                <input class="input" id="t-email" type="email" placeholder="teammate@company.com" autocomplete="off" />
+                <button class="btn btn--primary" type="submit">Send invite</button>
+              </div>
+              <span class="hint">They get a link to join your workspace &mdash; no setup on their side.</span>
+            </div>
+          </form>
+          <p class="note ok" id="invite-done" hidden><b>Invite ready.</b> Manage everyone from <a href="/account/team">your team page</a>.</p>
+
+          <div class="compare" style="margin-top:6px;">
+            <div class="compare__col">
+              <h4>Manage access</h4>
+              <div class="who">Roles, groups &amp; models</div>
+              <a class="btn btn--ghost btn--block" href="/account/members">Members</a>
+              <a class="btn btn--ghost btn--block" style="margin-top:8px;" href="/account/models">Shared models</a>
+            </div>
+            <div class="compare__col">
+              <h4>Push updates</h4>
+              <div class="who">Ship a new version to everyone</div>
+              <a class="btn btn--ghost btn--block" href="/account/artifacts">Artifacts &amp; rollout</a>
+              <a class="btn btn--ghost btn--block" style="margin-top:8px;" href="/account/devices">Devices &amp; fleet</a>
+            </div>
+            <div class="compare__col">
+              <h4>Sign-in &amp; security</h4>
+              <div class="who">SSO &amp; auto-provisioning</div>
+              <a class="btn btn--ghost btn--block" href="/account/enterprise/sso">SSO / SAML</a>
+              <a class="btn btn--ghost btn--block" style="margin-top:8px;" href="/enterprise">Enterprise plan</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- closing CTA -->
+    <section class="start-foot">
+      <h2>Still deciding?</h2>
+      <p>The fastest way to feel it is to chat with a model right now &mdash; no account needed.</p>
+      <div class="btn-row" style="justify-content:center;">
+        <a class="btn btn--primary" href="/ask">Chat with a model</a>
+        <a class="btn btn--ghost" href="/docs">Read the docs</a>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div data-include-footer></div>
+
+<script src="/nav.js" defer></script>
+<script>
+(function () {
+  // Copy buttons — copy the code's text content (strips the trailing button).
+  function wireCopy() {
+    document.querySelectorAll('.copyfield .copy').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var el = document.getElementById(btn.getAttribute('data-copy'));
+        if (!el) return;
+        var text = el.innerText.replace(/ /g, ' ');
+        var done = function () {
+          var old = btn.textContent;
+          btn.textContent = 'Copied'; btn.classList.add('is-done');
+          setTimeout(function () { btn.textContent = old; btn.classList.remove('is-done'); }, 1400);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done).catch(function () { fallback(text, done); });
+        } else { fallback(text, done); }
+      });
+    });
+  }
+  function fallback(text, done) {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'absolute'; ta.style.left = '-9999px';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done();
+    } catch (e) {}
+  }
+
+  // Run-anywhere segmented chooser.
+  function wireRun() {
+    var opts = document.querySelectorAll('.seg__opt[data-run]');
+    var panels = document.querySelectorAll('.run-panel[data-panel]');
+    opts.forEach(function (opt) {
+      opt.addEventListener('click', function () {
+        var key = opt.getAttribute('data-run');
+        opts.forEach(function (o) { o.classList.toggle('is-active', o === opt); });
+        var radio = opt.querySelector('input'); if (radio) radio.checked = true;
+        panels.forEach(function (p) { p.hidden = p.getAttribute('data-panel') !== key; });
+      });
+    });
+  }
+
+  // File dropzone — shows chosen file names. No upload here; the full builder handles it.
+  function wireDrop() {
+    var drop = document.getElementById('m-drop');
+    var input = document.getElementById('m-file');
+    var out = document.getElementById('m-files');
+    if (!drop || !input || !out) return;
+    function show() {
+      if (!input.files || !input.files.length) { out.hidden = true; out.textContent = ''; return; }
+      var names = Array.prototype.map.call(input.files, function (f) { return f.name; });
+      out.hidden = false; out.textContent = names.length + ' file' + (names.length > 1 ? 's' : '') + ': ' + names.join(', ');
+    }
+    input.addEventListener('change', show);
+    ['dragenter', 'dragover'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('is-over'); }); });
+    ['dragleave', 'drop'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove('is-over'); }); });
+    drop.addEventListener('drop', function (e) { if (e.dataTransfer && e.dataTransfer.files) { input.files = e.dataTransfer.files; show(); } });
+  }
+
+  // Make-your-own form — show a friendly progress sim, then hand off to the builder.
+  function wireMake() {
+    var form = document.getElementById('make-form');
+    if (!form) return;
+    var prog = document.getElementById('make-progress');
+    var bar = document.getElementById('make-bar');
+    var msg = document.getElementById('make-msg');
+    var done = document.getElementById('make-done');
+    var cli = document.getElementById('make-cli');
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var goal = (document.getElementById('m-desc').value || '').trim();
+      if (cli && goal) {
+        cli.innerHTML = 'kolm compile --auto --goal "<span class="tok">' +
+          goal.replace(/[<>&"]/g, function (c) { return { '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]; }) +
+          '</span>"';
+      }
+      prog.classList.add('is-on');
+      var stages = [
+        [12, 'Reading your description…'],
+        [34, 'Choosing a base model…'],
+        [58, 'Preparing your examples…'],
+        [82, 'Setting up the compile job…'],
+        [100, 'Queued. Opening your builds…']
+      ];
+      var i = 0;
+      (function tick() {
+        if (i >= stages.length) {
+          if (done) done.hidden = false;
+          return;
+        }
+        bar.style.width = stages[i][0] + '%';
+        msg.textContent = stages[i][1];
+        i++;
+        setTimeout(tick, 700);
+      })();
+    });
+  }
+
+  function wireInvite() {
+    var form = document.getElementById('invite-form');
+    if (!form) return;
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var done = document.getElementById('invite-done');
+      if (done) done.hidden = false;
+    });
+  }
+
+  function init() { wireCopy(); wireRun(); wireDrop(); wireMake(); wireInvite(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+</body>
+</html>

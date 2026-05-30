@@ -235,12 +235,20 @@ function _checkTimeWindow({ notBefore, notOnOrAfter }, now, skewMs) {
 //   - mint a fresh session key for that tenant via rotateTenantKey (so the
 //     browser gets a usable credential — same trade-off as OAuth signin).
 // If no matching tenant exists and allowJitProvision is on, provision one.
+//
+// SECURITY: an EXPLICIT tenant hint is authoritative — if the caller names a
+// tenant (id or name) that does not resolve, we DO NOT fall back to matching by
+// the asserted email. Silent email fallback would let one tenant's IdP log a
+// user into a different tenant when email addresses collide. The email match is
+// used ONLY when the caller passes no tenant hint at all (SP-initiated flow
+// where the SP did not carry a tenant).
 function _resolveTenantRow({ tenant, email, allowJitProvision, jitPlan }) {
   let row = null;
   if (tenant) {
     row = findOne('tenants', (t) => !t._deleted && (t.id === tenant || t.name === tenant));
-  }
-  if (!row && email) {
+    // Explicit-but-unresolved tenant: fail closed below (no email fallback),
+    // unless JIT provisioning is enabled (then we mint against the email).
+  } else if (email) {
     row = findOne('tenants', (t) => !t._deleted && t.email === email && t.kind !== 'anon');
   }
   if (!row && allowJitProvision) {

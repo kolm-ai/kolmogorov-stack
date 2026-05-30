@@ -3,32 +3,41 @@
 // Tenant-scoped outbound webhooks for the kolm platform.
 //
 // Responsibilities:
-//   - CRUD for webhook subscriptions, persisted through the event-store
-//     (append-only events + a derived current-state projection per tenant).
+//   - CRUD for webhook subscriptions, persisted through the event-store as an
+//     append-only log folded into current state per tenant.
 //   - emit(tenant, event, payload): fan-out to every active subscription that
 //     listens for `event`, with an HMAC-SHA256 signature header, bounded
 //     retries with exponential backoff, and a delivery record appended to the
 //     event-store for auditability.
 //
-// Conventions matched from the codebase:
-//   - ESM ("type":"module" in package.json), Node >= 20 (global fetch + crypto).
-//   - State is durable via src/event-store.js; we never hold authoritative state
-//     only in memory. The in-process Map is a read-through projection cache.
-//   - Strict tenant fencing: every read/write is keyed by tenant id; nothing is
-//     ever returned across tenants.
+// Persistence contract (matched to src/event-store.js + src/event-schema.js):
+//   appendEvent() runs canonicalize(newEvent(partial)) then validateEvent() and
+//   THROWS `EVENT_INVALID` on missing required canonical fields. canonicalize()
+//   REBUILDS the event from the CLOSED EVENT_FIELDS list, so any field NOT in
+//   that list (e.g. a free-form `webhook` key) is silently dropped before the
+//   json column is written. We therefore carry the whole webhook payload exactly
+//   the way conversations.js carries chat history: JSON-serialized into
+//   `media_extracted_text` (a real canonical field, preserved up to 1 MiB)
+//   tagged media_kind:'transcript' + media_mime:'application/json'. listEvents()
+//   round-trips that field intact, so we JSON.parse it back on read. Provider
+//   tag 'kolm-webhooks' (conversations.js uses 'kolm-chat') keeps these rows out
+//   of every gateway/capture surface. required fields (event_id/tenant_id/
+//   namespace/created_at/schema_version) are auto-filled by newEvent().
 //
-// Integration seam: the event-store export surface differs slightly across
-// store drivers, so we resolve the append/query helpers defensively at load
-// time (see resolveEventStore). All names we probe for are present in
-// src/event-store.js; the resolver only exists so a future rename of one helper
-// does not silently break webhook persistence.
+//   Two namespaces, both tenant-fenced:
+//     kolm-webhooks/subscriptions  — create/update/delete subscription ops
+//     kolm-webhooks/deliveries     — per-attempt delivery audit records
+//
+// Conventions: ESM ("type":"module"), Node >= 20 (global fetch + node:crypto).
+// Strict tenant fencing: every read/write is keyed by tenant id; nothing is ever
+// returned across tenants.
 
-import * as eventStoreModule from './event-store.js';
+import { appendEvent, listEvents } from './event-store.js';
 import crypto from 'node:crypto';
 
 // ---------------------------------------------------------------------------
-// Event types we know how to emit. Kept as a frozen allow-list so a typo in a
-// caller surfaces as an error instead of a silently-dropped delivery.
+// Event types we know how to emit. Frozen allow-list so a typo in a caller
+// surfaces as an error instead of a silently-dropped delivery.
 // ---------------------------------------------------------------------------
 export const WEBHOOK_EVENTS = Object.freeze([
   'model.deployed',
@@ -40,98 +49,69 @@ export const WEBHOOK_EVENTS = Object.freeze([
   'webhook.test',
 ]);
 
-const EVENT_KIND_SUBSCRIPTION = 'webhook.subscription'; // create/update/delete log
-const EVENT_KIND_DELIVERY = 'webhook.delivery'; // per-attempt audit record
+const NS_SUBSCRIPTION = 'kolm-webhooks/subscriptions';
+const NS_DELIVERY = 'kolm-webhooks/deliveries';
+const PROVIDER_TAG = 'kolm-webhooks';
 
-const MAX_RETRIES = 4; // total attempts = MAX_RETRIES (1 initial + 3 retries)
+const MAX_RETRIES = 4; // total attempts (1 initial + 3 retries)
 const BASE_BACKOFF_MS = 500;
 const DELIVERY_TIMEOUT_MS = 10_000;
 
 // ---------------------------------------------------------------------------
-// Event-store binding. We accept any of the common shapes so this module stays
-// correct regardless of which helper names the store driver exposes.
+// Event-store envelope. We hand appendEvent() the canonical fields it validates
+// on, and stash the webhook payload as JSON in `media_extracted_text` (the only
+// large free-text field canonicalize() preserves — same trick conversations.js
+// uses). `model` carries a cheap discriminator (create/update/delete/delivery).
 // ---------------------------------------------------------------------------
-function resolveEventStore() {
-  const m = eventStoreModule && eventStoreModule.default
-    ? { ...eventStoreModule, ...eventStoreModule.default }
-    : eventStoreModule || {};
-
-  const append =
-    m.append || m.appendEvent || m.put || m.record || m.emit || m.write || null;
-  const query =
-    m.query || m.queryEvents || m.list || m.findByTenant || m.read || m.find || null;
-
-  if (typeof append !== 'function') {
-    throw new Error(
-      'webhooks: event-store has no append helper (looked for append/appendEvent/put/record/write)'
-    );
-  }
-  if (typeof query !== 'function') {
-    throw new Error(
-      'webhooks: event-store has no query helper (looked for query/queryEvents/list/findByTenant/read/find)'
-    );
-  }
-  return { append, query };
-}
-
-let _store = null;
-function store() {
-  if (!_store) _store = resolveEventStore();
-  return _store;
-}
-
-async function appendEvent(tenant, kind, data) {
-  const { append } = store();
-  const event = {
-    tenant,
-    tenant_id: tenant, // populate both common field names for fencing/queries
-    kind,
-    type: kind,
-    ts: Date.now(),
+async function persist(tenant, namespace, opKind, webhookPayload) {
+  return appendEvent({
+    tenant_id: tenant,
+    namespace,
+    provider: PROVIDER_TAG,
+    model: opKind,
+    status: 'ok',
     created_at: new Date().toISOString(),
-    data,
-  };
-  // Tolerate both (event) and (tenant, kind, data) calling conventions.
-  if (append.length >= 3) return append(tenant, kind, data);
-  return append(event);
-}
-
-async function queryEvents(tenant, kind) {
-  const { query } = store();
-  // Tolerate the common query signatures.
-  let rows;
-  try {
-    rows = await query({ tenant, tenant_id: tenant, kind, type: kind });
-  } catch {
-    rows = await query(kind, tenant);
-  }
-  if (!Array.isArray(rows)) rows = rows && rows.rows ? rows.rows : [];
-  // Defensive re-fence: never trust the store to have fenced for us.
-  return rows.filter((r) => {
-    const t = r && (r.tenant || r.tenant_id || (r.data && (r.data.tenant || r.data.tenant_id)));
-    const k = r && (r.kind || r.type);
-    return t === tenant && (!kind || k === kind);
+    media_kind: 'transcript',
+    media_mime: 'application/json',
+    media_extracted_text: JSON.stringify(webhookPayload),
   });
 }
 
+function payloadOf(ev) {
+  if (!ev || typeof ev.media_extracted_text !== 'string') return null;
+  try {
+    return JSON.parse(ev.media_extracted_text);
+  } catch {
+    return null;
+  }
+}
+
+async function readPayloads(tenant, namespace) {
+  const rows = await listEvents({ tenant_id: tenant, namespace, limit: 0, order: 'asc' });
+  if (!Array.isArray(rows)) return [];
+  const out = [];
+  for (const e of rows) {
+    // Defensive re-fence: never trust the store to have fenced for us.
+    if (!e || e.tenant_id !== tenant || e.namespace !== namespace) continue;
+    const p = payloadOf(e);
+    if (p) out.push(p);
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------------------
-// Subscription projection. We fold the append-only subscription log into the
-// current set of live subscriptions for a tenant.
+// Subscription projection. Fold the append-only op log into the current set of
+// live subscriptions. `payloads` is oldest -> newest (listEvents order:'asc'),
+// so later ops win.
 // ---------------------------------------------------------------------------
-function projectSubscriptions(events) {
+function projectSubscriptions(payloads) {
   const byId = new Map();
-  // Oldest -> newest so later ops win.
-  const sorted = [...events].sort((a, b) => (a.ts || 0) - (b.ts || 0));
-  for (const e of sorted) {
-    const d = (e && e.data) || {};
-    const op = d.op;
-    const sub = d.subscription;
+  for (const w of payloads) {
+    const op = w && w.op;
+    const sub = w && w.subscription;
     if (!sub || !sub.id) continue;
-    if (op === 'delete') {
-      byId.delete(sub.id);
-    } else if (op === 'create' || op === 'update') {
-      byId.set(sub.id, sub);
-    }
+    if (op === 'delete') byId.delete(sub.id);
+    else if (op === 'create' || op === 'update') byId.set(sub.id, sub);
   }
   return [...byId.values()];
 }
@@ -150,14 +130,12 @@ function newSecret() {
   return 'whsec_' + crypto.randomBytes(24).toString('hex');
 }
 
-function validateEvents(events) {
+function validateEventsList(events) {
   if (!Array.isArray(events) || events.length === 0) {
     return { ok: false, error: 'events must be a non-empty array' };
   }
   const bad = events.filter((e) => !WEBHOOK_EVENTS.includes(e));
-  if (bad.length) {
-    return { ok: false, error: `unknown event(s): ${bad.join(', ')}` };
-  }
+  if (bad.length) return { ok: false, error: `unknown event(s): ${bad.join(', ')}` };
   return { ok: true };
 }
 
@@ -172,7 +150,7 @@ function validateUrl(url) {
   if (u.protocol !== 'https:' && u.protocol !== 'http:') {
     return { ok: false, error: 'url must be http(s)' };
   }
-  // Block obvious SSRF targets unless explicitly allowed via env.
+  // Block obvious SSRF targets unless explicitly allowed (e.g. local dev/tests).
   if (process.env.KOLM_WEBHOOKS_ALLOW_LOCAL !== '1') {
     const host = u.hostname;
     const isLocal =
@@ -190,22 +168,21 @@ function validateUrl(url) {
 }
 
 // ---------------------------------------------------------------------------
-// Public CRUD API. Every function takes a tenant id as the first argument and
-// fences strictly on it.
+// Public CRUD API. Every function takes a tenant id first and fences on it.
 // ---------------------------------------------------------------------------
 export async function listWebhooks(tenant) {
-  const events = await queryEvents(tenant, EVENT_KIND_SUBSCRIPTION);
-  return projectSubscriptions(events).map(sanitizeForResponse);
+  const payloads = await readPayloads(tenant, NS_SUBSCRIPTION);
+  return projectSubscriptions(payloads).map(sanitizeForResponse);
 }
 
 export async function getWebhook(tenant, id) {
-  const events = await queryEvents(tenant, EVENT_KIND_SUBSCRIPTION);
-  const sub = projectSubscriptions(events).find((s) => s.id === id);
+  const payloads = await readPayloads(tenant, NS_SUBSCRIPTION);
+  const sub = projectSubscriptions(payloads).find((s) => s.id === id);
   return sub ? sanitizeForResponse(sub) : null;
 }
 
 export async function createWebhook(tenant, { url, events, secret, description, active } = {}) {
-  const ev = validateEvents(events);
+  const ev = validateEventsList(events);
   if (!ev.ok) return { ok: false, error: ev.error };
   const uv = validateUrl(url);
   if (!uv.ok) return { ok: false, error: uv.error };
@@ -221,14 +198,14 @@ export async function createWebhook(tenant, { url, events, secret, description, 
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
-  await appendEvent(tenant, EVENT_KIND_SUBSCRIPTION, { op: 'create', subscription: sub });
+  await persist(tenant, NS_SUBSCRIPTION, 'create', { op: 'create', subscription: sub });
   // Return the secret exactly once, on creation.
   return { ok: true, webhook: { ...sanitizeForResponse(sub), secret: sub.secret } };
 }
 
 export async function updateWebhook(tenant, id, patch = {}) {
-  const events = await queryEvents(tenant, EVENT_KIND_SUBSCRIPTION);
-  const current = projectSubscriptions(events).find((s) => s.id === id);
+  const payloads = await readPayloads(tenant, NS_SUBSCRIPTION);
+  const current = projectSubscriptions(payloads).find((s) => s.id === id);
   if (!current) return { ok: false, error: 'not_found' };
 
   const next = { ...current };
@@ -238,7 +215,7 @@ export async function updateWebhook(tenant, id, patch = {}) {
     next.url = patch.url;
   }
   if (patch.events !== undefined) {
-    const evc = validateEvents(patch.events);
+    const evc = validateEventsList(patch.events);
     if (!evc.ok) return { ok: false, error: evc.error };
     next.events = [...patch.events];
   }
@@ -247,28 +224,26 @@ export async function updateWebhook(tenant, id, patch = {}) {
   if (patch.secret === 'rotate') next.secret = newSecret();
   next.updated_at = new Date().toISOString();
 
-  await appendEvent(tenant, EVENT_KIND_SUBSCRIPTION, { op: 'update', subscription: next });
+  await persist(tenant, NS_SUBSCRIPTION, 'update', { op: 'update', subscription: next });
   const rotated = patch.secret === 'rotate';
   return {
     ok: true,
-    webhook: rotated ? { ...sanitizeForResponse(next), secret: next.secret } : sanitizeForResponse(next),
+    webhook: rotated
+      ? { ...sanitizeForResponse(next), secret: next.secret }
+      : sanitizeForResponse(next),
   };
 }
 
 export async function deleteWebhook(tenant, id) {
-  const events = await queryEvents(tenant, EVENT_KIND_SUBSCRIPTION);
-  const current = projectSubscriptions(events).find((s) => s.id === id);
+  const payloads = await readPayloads(tenant, NS_SUBSCRIPTION);
+  const current = projectSubscriptions(payloads).find((s) => s.id === id);
   if (!current) return { ok: false, error: 'not_found' };
-  await appendEvent(tenant, EVENT_KIND_SUBSCRIPTION, {
-    op: 'delete',
-    subscription: { id, tenant },
-  });
+  await persist(tenant, NS_SUBSCRIPTION, 'delete', { op: 'delete', subscription: { id, tenant } });
   return { ok: true };
 }
 
 export async function listDeliveries(tenant, { id, limit = 50 } = {}) {
-  const events = await queryEvents(tenant, EVENT_KIND_DELIVERY);
-  let rows = events.map((e) => e.data).filter(Boolean);
+  let rows = await readPayloads(tenant, NS_DELIVERY);
   if (id) rows = rows.filter((d) => d.webhook_id === id);
   rows.sort((a, b) => (b.ts || 0) - (a.ts || 0));
   return rows.slice(0, limit);
@@ -279,9 +254,7 @@ export async function listDeliveries(tenant, { id, limit = 50 } = {}) {
 // ---------------------------------------------------------------------------
 function sign(secret, timestamp, body) {
   // Stripe-style signed payload: "<timestamp>.<body>" -> HMAC-SHA256 hex.
-  const mac = crypto.createHmac('sha256', secret);
-  mac.update(`${timestamp}.${body}`);
-  return mac.digest('hex');
+  return crypto.createHmac('sha256', secret).update(`${timestamp}.${body}`).digest('hex');
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -327,10 +300,7 @@ async function deliver(tenant, sub, event, payload) {
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     last = await deliverOnce(sub, event, body);
     if (last.ok) break;
-    if (attempt < MAX_RETRIES) {
-      const backoff = BASE_BACKOFF_MS * 2 ** (attempt - 1);
-      await sleep(backoff);
-    }
+    if (attempt < MAX_RETRIES) await sleep(BASE_BACKOFF_MS * 2 ** (attempt - 1));
   }
 
   const record = {
@@ -340,13 +310,13 @@ async function deliver(tenant, sub, event, payload) {
     url: sub.url,
     delivered: last.ok,
     status_code: last.status,
-    attempts: last.ok ? undefined : MAX_RETRIES,
+    attempts: last.ok ? 1 : MAX_RETRIES,
     error: last.error,
     ts: Date.now(),
   };
-  // Best-effort audit; never let an audit failure break emit fan-out.
+  // Best-effort audit; never let an audit-write failure break emit fan-out.
   try {
-    await appendEvent(tenant, EVENT_KIND_DELIVERY, record);
+    await persist(tenant, NS_DELIVERY, 'delivery', record);
   } catch {
     /* swallow audit-write error */
   }
@@ -364,20 +334,19 @@ export async function emit(tenant, event, payload = {}) {
   }
   const subs = await listSubscriptionsWithSecret(tenant);
   const targets = subs.filter((s) => s.active && s.events.includes(event));
-  const results = await Promise.all(targets.map((s) => deliver(tenant, s, event, payload)));
-  return results;
+  return Promise.all(targets.map((s) => deliver(tenant, s, event, payload)));
 }
 
 // Internal: subscriptions WITH secrets, never exposed over the API.
 async function listSubscriptionsWithSecret(tenant) {
-  const events = await queryEvents(tenant, EVENT_KIND_SUBSCRIPTION);
-  return projectSubscriptions(events);
+  const payloads = await readPayloads(tenant, NS_SUBSCRIPTION);
+  return projectSubscriptions(payloads);
 }
 
 // Convenience used by the route layer to verify a webhook works end-to-end.
 export async function sendTestEvent(tenant, id) {
-  const events = await queryEvents(tenant, EVENT_KIND_SUBSCRIPTION);
-  const sub = projectSubscriptions(events).find((s) => s.id === id);
+  const payloads = await readPayloads(tenant, NS_SUBSCRIPTION);
+  const sub = projectSubscriptions(payloads).find((s) => s.id === id);
   if (!sub) return { ok: false, error: 'not_found' };
   const record = await deliver(tenant, sub, 'webhook.test', {
     message: 'This is a kolm webhook test event.',

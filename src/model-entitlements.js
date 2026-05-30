@@ -1,348 +1,448 @@
-'use strict';
-/**
- * src/model-entitlements.js — employee model-access entitlements.
- *
- * Lets an org decide which employees (users) or teams (groups) may
- * access which registered models, and at what access role. This is the
- * authorization layer that sits between the model registry (what models
- * exist) and chargeback (who spent what): before a user may invoke a
- * model we check that an entitlement grants them access; when they do,
- * the usage-attribution hook records the spend back through chargeback.
- *
- * Storage: event-store, tenant-fenced. Each grant is an append-only
- * record under collection 'model_entitlements'. Revocation is itself an
- * append (a tombstone record) so the log stays append-only and auditable;
- * the materialized view (listEntitlements) folds the log into live grants.
- *
- * Conventions mirrored from groups.js / model-registry.js / chargeback.js:
- *   - every exported fn takes (tenant, ...) as first arg
- *   - all reads go through evStore.findByTenant(collection, tenant)
- *   - all writes go through evStore.append(collection, tenant, record)
- *   - ids are prefixed + crypto.randomUUID()
- *
- * Access roles on a grant mirror the rbac role hierarchy
- * (viewer < member < admin < owner). A model-access role of `viewer`
- * means "may read/list this model"; `member` and above means "may use
- * (invoke) this model". This lets a single grant cover both the read
- * and the use capability without a second record.
- */
+// Employee model-access entitlements (P1).
+//
+// Lets an org decide which employees or teams may access which models, and at
+// what access role. This is the authorization layer between the model registry
+// (which models exist) and chargeback (who spent what): before a principal
+// invokes a model we check an entitlement grants access; when they do, the
+// usage-attribution hook writes a tenant-fenced event the chargeback report
+// rolls up per user / team / namespace.
+//
+// IDENTITY MODEL (matches src/teams.js): in this codebase an "employee" is a
+// TENANT (tenant_id) and a "team/group" is a team_<rand> from teams.js. A
+// tenant's team memberships live in the `team_members` table. So a grant's
+// subject is either:
+//   - a user  : the member tenant_id          (e.g. tenant_abc)
+//   - a group : a team id                      (e.g. team_xyz)
+// We detect a group subject by the `team_`/`grp_`/`group_` id prefix, or via an
+// explicit { kind } override.
+//
+// TENANT FENCING: every entitlement row carries `tenant_id` = the OWNING org
+// tenant (the org that administers the grant). All reads filter on it, exactly
+// like src/groups.js scopes to tenant_id and soft-deletes via `_deleted`.
+//
+// ACCESS-ROLE LADDER (this module's own, separate from team roles):
+//   viewer < user < admin
+//   - viewer : may READ/list the model
+//   - user   : may READ and USE (invoke) the model
+//   - admin  : may READ, USE, and is flagged a model steward
+// One grant therefore covers both read and use without a second record.
+//
+// USAGE ATTRIBUTION: attributeUsage() enforces use-access then appendEvent()s a
+// tenant-fenced row (provider 'kolm-model-access'); src/chargeback.js reads the
+// same event-store so per-team / per-user spend rolls up for free.
 
-const crypto = require('crypto');
-const evStore = require('./event-store');
-const rbac = require('./rbac');
-const groups = require('./groups');
-const modelRegistry = require('./model-registry');
-const chargeback = require('./chargeback');
+import { id as storeId, insert, findOne, update, all } from './store.js';
+import { appendEvent } from './event-store.js';
+import { membershipOf, listTeamsForTenant } from './teams.js';
+import { FRONTIER_MODELS, CANDIDATE_MODELS, BACKBONES } from './model-registry.js';
 
-const ENTITLEMENTS = 'model_entitlements';
+const TABLE = 'model_entitlements';
 
-// Access roles a grant may carry, reusing the rbac hierarchy.
-const ACCESS_ROLES = rbac.ROLE_ORDER; // ['viewer','member','admin','owner']
-const DEFAULT_ROLE = 'member';
+// Ordered access-role ladder. Index = rank (higher = more access).
+export const ACCESS_ROLES = Object.freeze(['viewer', 'user', 'admin']);
+const DEFAULT_ROLE = 'user';
 
-// Subject kinds an entitlement may target.
-const SUBJECT_GROUP = 'group';
 const SUBJECT_USER = 'user';
+const SUBJECT_GROUP = 'group';
 
-function _now() { return new Date().toISOString(); }
+function _now() {
+  return new Date().toISOString();
+}
 
-function _genId() { return 'ent_' + crypto.randomUUID().replace(/-/g, '').slice(0, 24); }
+function _rank(role) {
+  const i = ACCESS_ROLES.indexOf(String(role || '').toLowerCase());
+  return i < 0 ? -1 : i;
+}
 
 function _normRole(role) {
   const r = String(role || '').toLowerCase();
-  return ACCESS_ROLES.indexOf(r) >= 0 ? r : DEFAULT_ROLE;
+  return ACCESS_ROLES.includes(r) ? r : DEFAULT_ROLE;
 }
 
-/**
- * Classify a subject id. Group ids are prefixed `grp_` (see groups.js);
- * everything else is treated as a user id. Callers may also pass an
- * explicit { kind } to override.
- */
+function _err(message, code, status) {
+  const e = new Error(message);
+  e.code = code;
+  if (status) e.status = status;
+  return e;
+}
+
+// Classify a subject id. Team/group ids are prefixed `team_` (teams.js),
+// `grp_`, or `group_`; anything else is a user (member tenant) id. An explicit
+// kind overrides.
 function _subjectKind(subjectId, explicitKind) {
   if (explicitKind === SUBJECT_GROUP || explicitKind === SUBJECT_USER) return explicitKind;
-  return String(subjectId || '').startsWith('grp_') ? SUBJECT_GROUP : SUBJECT_USER;
+  const s = String(subjectId || '');
+  return (s.startsWith('team_') || s.startsWith('grp_') || s.startsWith('group_'))
+    ? SUBJECT_GROUP
+    : SUBJECT_USER;
 }
 
-/**
- * Fold the append-only log into the set of live grants for a tenant.
- * A grant is identified by (subject_kind, subject_id, model_id). A later
- * revoke tombstone (action: 'revoke') for the same key removes it; a
- * later grant for the same key replaces (re-grants / updates role).
- * Returns an array of live grant records (most-recent state per key).
- */
-function _liveGrants(tenant) {
-  const log = evStore.findByTenant(ENTITLEMENTS, tenant) || [];
-  const byKey = new Map();
-  // log is chronological (append order); last write wins per key.
-  for (const rec of log) {
-    const key = rec.subject_kind + '|' + rec.subject_id + '|' + rec.model_id;
-    if (rec.action === 'revoke') {
-      byKey.delete(key);
-    } else {
-      byKey.set(key, rec);
-    }
-  }
-  return Array.from(byKey.values());
+// ---------------------------------------------------------------------------
+// Model-registry helpers. The registry is a static catalog keyed by string id
+// across three lists; a model "exists" if its id appears in any of them.
+// ---------------------------------------------------------------------------
+function _catalog() {
+  return [
+    ...(Array.isArray(FRONTIER_MODELS) ? FRONTIER_MODELS : []),
+    ...(Array.isArray(CANDIDATE_MODELS) ? CANDIDATE_MODELS : []),
+    ...(Array.isArray(BACKBONES) ? BACKBONES : []),
+  ];
 }
 
-/**
- * Grant a group or user access to a model at a given access role.
- *
- * @param tenant          tenant id (required, fences all storage)
- * @param groupOrUser     subject id — a `grp_…` group id or a user id
- * @param modelId         model id (`mdl_…`) from the model registry
- * @param role            access role: viewer|member|admin|owner (default member)
- * @param opts.kind       optional explicit subject kind ('group'|'user')
- * @param opts.granted_by optional principal id recording who granted it
- * @returns the appended grant record
- */
-function grantModelAccess(tenant, groupOrUser, modelId, role, opts = {}) {
-  if (!tenant) throw new Error('tenant required');
-  if (!groupOrUser) throw new Error('subject (group or user) required');
-  if (!modelId) throw new Error('model_id required');
-
-  // Fence the model: a tenant may only grant access to its own models.
-  const model = modelRegistry.getModel(tenant, modelId);
-  if (!model) {
-    const e = new Error('model not found');
-    e.status = 404;
-    e.code = 'not_found';
-    throw e;
-  }
-
-  const subject_kind = _subjectKind(groupOrUser, opts.kind);
-
-  // If the subject is a group, fence it to the tenant too.
-  if (subject_kind === SUBJECT_GROUP) {
-    const g = groups.getGroup(tenant, groupOrUser);
-    if (!g) {
-      const e = new Error('group not found');
-      e.status = 404;
-      e.code = 'not_found';
-      throw e;
-    }
-  }
-
-  const rec = {
-    id: _genId(),
-    tenant,
-    action: 'grant',
-    subject_kind,
-    subject_id: String(groupOrUser),
-    model_id: String(modelId),
-    role: _normRole(role),
-    granted_by: opts.granted_by ? String(opts.granted_by) : null,
-    created_at: _now(),
-  };
-  evStore.append(ENTITLEMENTS, tenant, rec);
-  return rec;
-}
-
-/**
- * Revoke a subject's access to a model. Appends a tombstone so the log
- * stays append-only. Idempotent: revoking a non-existent grant is a
- * no-op that still records the intent. Returns the tombstone record.
- */
-function revokeModelAccess(tenant, groupOrUser, modelId, opts = {}) {
-  if (!tenant) throw new Error('tenant required');
-  if (!groupOrUser) throw new Error('subject (group or user) required');
-  if (!modelId) throw new Error('model_id required');
-
-  const subject_kind = _subjectKind(groupOrUser, opts.kind);
-  const rec = {
-    id: _genId(),
-    tenant,
-    action: 'revoke',
-    subject_kind,
-    subject_id: String(groupOrUser),
-    model_id: String(modelId),
-    role: null,
-    granted_by: opts.granted_by ? String(opts.granted_by) : null,
-    created_at: _now(),
-  };
-  evStore.append(ENTITLEMENTS, tenant, rec);
-  return rec;
-}
-
-/**
- * Resolve the effective access role a user has on a model, considering
- * both direct user grants and grants to any group the user belongs to.
- * Returns the highest-ranked role across all matching live grants, or
- * null if the user has no access.
- */
-function effectiveRole(tenant, user, modelId) {
-  if (!tenant) throw new Error('tenant required');
-  if (!user || !user.id) return null;
+// Resolve a catalog row by id. Catalog ids are global (not tenant-scoped);
+// tenant fencing applies to ENTITLEMENTS, not to which base models exist. A
+// tenant may also grant access to a tenant-private model id absent from the
+// static catalog (e.g. a compiled artifact id) — see opts.requireKnownModel.
+export function getCatalogModel(modelId) {
   if (!modelId) return null;
+  const want = String(modelId);
+  return _catalog().find((m) => m && m.id === want) || null;
+}
 
-  const live = _liveGrants(tenant).filter((g) => g.model_id === modelId);
-  if (live.length === 0) return null;
+export function modelExists(modelId) {
+  return !!getCatalogModel(modelId);
+}
 
-  // Build the set of group ids this user belongs to.
-  const groupIds = new Set((groups.groupsForUser(tenant, user.id) || []).map((g) => g.id));
+// ---------------------------------------------------------------------------
+// Membership resolution against teams.js. A grant to a team_ id matches a user
+// if that user (member tenant) has an active membership in the team. We resolve
+// the user's team ids from teams.js (server-side, authoritative) so callers
+// cannot spoof group access by supplying fake ids.
+// ---------------------------------------------------------------------------
+function _userId(user) {
+  if (!user) return null;
+  // The principal IS a tenant in this codebase; accept several field names.
+  return user.tenant_id || user.id || user.user_id || null;
+}
 
-  let best = null; // highest rank seen
-  for (const g of live) {
+function _teamIdsForUser(user) {
+  const uid = _userId(user);
+  if (!uid) return new Set();
+  try {
+    const teams = listTeamsForTenant(uid) || [];
+    return new Set(teams.map((t) => t.id));
+  } catch {
+    return new Set();
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Live-grant fold. grant inserts/updates a row; revoke soft-deletes it
+// (_deleted, mirroring groups.deleteGroup). A grant for an existing
+// (subject, model) key UPDATES the role in place so live rows never duplicate.
+// ---------------------------------------------------------------------------
+function _liveGrants(tenant) {
+  return all(TABLE).filter((r) => r && !r._deleted && r.tenant_id === tenant);
+}
+
+function _findLive(tenant, subjectId, modelId) {
+  return findOne(TABLE, (r) =>
+    r
+    && !r._deleted
+    && r.tenant_id === tenant
+    && r.subject_id === String(subjectId)
+    && r.model_id === String(modelId),
+  ) || null;
+}
+
+/**
+ * Grant a team or user access to a model at a given access role.
+ *
+ * @param {string} tenant        OWNING org tenant id (required; fences storage)
+ * @param {string} groupOrUser   subject id — a `team_` group id or a user/member tenant id
+ * @param {string} modelId       model id from the registry (or a tenant-private id)
+ * @param {string} [role]        access role: viewer|user|admin (default 'user')
+ * @param {object} [opts]
+ * @param {'group'|'user'} [opts.kind]    explicit subject kind override
+ * @param {string} [opts.granted_by]      principal id recording who granted it
+ * @param {boolean} [opts.requireKnownModel=false]  reject unknown model ids when true
+ * @returns {object} the live grant row
+ */
+export function grantModelAccess(tenant, groupOrUser, modelId, role, opts = {}) {
+  if (!tenant) throw _err('tenant required', 'bad_request', 400);
+  if (!groupOrUser) throw _err('subject (group or user) required', 'bad_request', 400);
+  if (!modelId) throw _err('model_id required', 'bad_request', 400);
+
+  if (opts.requireKnownModel && !modelExists(modelId)) {
+    throw _err(`model '${modelId}' not found in registry`, 'not_found', 404);
+  }
+
+  const subject_kind = _subjectKind(groupOrUser, opts.kind);
+  const normRole = _normRole(role);
+  const now = _now();
+
+  // Update-in-place if a live grant already exists for this (subject, model).
+  const existing = _findLive(tenant, groupOrUser, modelId);
+  if (existing) {
+    update(TABLE, (r) => r.id === existing.id, {
+      role: normRole,
+      granted_by: opts.granted_by ? String(opts.granted_by) : (existing.granted_by || null),
+      updated_at: now,
+    });
+    return _findLive(tenant, groupOrUser, modelId);
+  }
+
+  const row = {
+    id: storeId('ent'),
+    tenant_id: tenant,
+    subject_kind,
+    subject_id: String(groupOrUser),
+    model_id: String(modelId),
+    role: normRole,
+    granted_by: opts.granted_by ? String(opts.granted_by) : null,
+    created_at: now,
+    updated_at: now,
+  };
+  insert(TABLE, row);
+  return row;
+}
+
+/**
+ * Revoke a subject's access to a model. Soft-deletes the live grant row.
+ * Idempotent: revoking a non-existent grant returns { revoked: false }.
+ *
+ * @returns {{ revoked: boolean, grant?: object }}
+ */
+export function revokeModelAccess(tenant, groupOrUser, modelId, _opts = {}) {
+  if (!tenant) throw _err('tenant required', 'bad_request', 400);
+  if (!groupOrUser) throw _err('subject (group or user) required', 'bad_request', 400);
+  if (!modelId) throw _err('model_id required', 'bad_request', 400);
+
+  const existing = _findLive(tenant, groupOrUser, modelId);
+  if (!existing) return { revoked: false };
+  update(TABLE, (r) => r.id === existing.id, { _deleted: true, deleted_at: _now() });
+  return { revoked: true, grant: { ...existing, _deleted: true } };
+}
+
+/**
+ * Effective access role a user holds on a model within an org tenant,
+ * considering BOTH direct user grants AND grants to any team the user belongs
+ * to. Returns the highest-ranked role across matching live grants, or null.
+ */
+export function effectiveRole(tenant, user, modelId) {
+  if (!tenant) throw _err('tenant required', 'bad_request', 400);
+  if (!modelId) return null;
+  const uid = _userId(user);
+  const teamIds = _teamIdsForUser(user);
+
+  let best = null;
+  for (const g of _liveGrants(tenant)) {
+    if (g.model_id !== String(modelId)) continue;
     const matches =
-      (g.subject_kind === SUBJECT_USER && g.subject_id === user.id) ||
-      (g.subject_kind === SUBJECT_GROUP && groupIds.has(g.subject_id));
+      (g.subject_kind === SUBJECT_USER && uid != null && g.subject_id === String(uid)) ||
+      (g.subject_kind === SUBJECT_GROUP && teamIds.has(g.subject_id));
     if (!matches) continue;
-    if (best === null || rbac.roleRank(g.role) > rbac.roleRank(best)) {
-      best = g.role;
-    }
+    if (best === null || _rank(g.role) > _rank(best)) best = g.role;
   }
   return best;
 }
 
 /**
- * True if the user may access (read) the model. A model-access role of
- * viewer or higher grants read access. Tenant-fenced.
+ * Decide whether a user may access a model.
+ * Returns { allowed, role, can_read, can_use, reason }.
  *
- * Returns a decision object so callers can branch on read vs. use:
- *   { allowed, role, can_read, can_use, reason }
+ * The org admin/owner of the OWNING tenant implicitly has full access (the
+ * principal's `org_role`/`role` of owner|admin short-circuits). Entitlements
+ * are an additive grant layer on top of base org-admin capability.
+ *
+ * @param {string} tenant   owning org tenant id
+ * @param {object} user     principal { tenant_id|id, role?/org_role? }
+ * @param {string} modelId
  */
-function checkModelAccess(tenant, user, modelId) {
-  if (!tenant) throw new Error('tenant required');
+export function checkModelAccess(tenant, user, modelId) {
+  if (!tenant) throw _err('tenant required', 'bad_request', 400);
   if (!modelId) {
     return { allowed: false, role: null, can_read: false, can_use: false, reason: 'model_id required' };
   }
 
-  // Fence the model to the tenant.
-  const model = modelRegistry.getModel(tenant, modelId);
-  if (!model) {
-    return { allowed: false, role: null, can_read: false, can_use: false, reason: 'model not found' };
-  }
-
-  // Tenant owners/admins implicitly have full access to their own models.
-  if (user && rbac.roleAtLeast(user.role, 'admin')) {
-    return { allowed: true, role: user.role, can_read: true, can_use: true, reason: 'tenant_admin' };
+  const orgRole = String((user && (user.org_role || user.role)) || '').toLowerCase();
+  if (orgRole === 'owner' || orgRole === 'admin') {
+    return { allowed: true, role: 'admin', can_read: true, can_use: true, reason: 'org_admin' };
   }
 
   const role = effectiveRole(tenant, user, modelId);
   if (!role) {
     return { allowed: false, role: null, can_read: false, can_use: false, reason: 'no_entitlement' };
   }
-  const can_read = rbac.roleAtLeast(role, 'viewer');
-  const can_use = rbac.roleAtLeast(role, 'member');
+  const can_read = _rank(role) >= _rank('viewer');
+  const can_use = _rank(role) >= _rank('user');
   return { allowed: can_read, role, can_read, can_use, reason: 'entitled' };
 }
 
 /**
- * List the live entitlements for a tenant. Each record is annotated with
- * the resolved model name (best-effort) for display. Tenant-fenced.
+ * List the live entitlements for an org tenant, annotated with resolved model
+ * name (best-effort from the catalog). Tenant-fenced.
  *
- * @param tenant
- * @param filter.model_id   restrict to one model
- * @param filter.subject_id restrict to one subject (group or user)
+ * @param {string} tenant
+ * @param {object} [filter]
+ * @param {string} [filter.model_id]    restrict to one model
+ * @param {string} [filter.subject_id]  restrict to one subject (team or user)
  */
-function listEntitlements(tenant, filter = {}) {
-  if (!tenant) throw new Error('tenant required');
+export function listEntitlements(tenant, filter = {}) {
+  if (!tenant) throw _err('tenant required', 'bad_request', 400);
   let live = _liveGrants(tenant);
-  if (filter.model_id) live = live.filter((g) => g.model_id === filter.model_id);
-  if (filter.subject_id) live = live.filter((g) => g.subject_id === filter.subject_id);
-
-  const modelsById = new Map((modelRegistry.listModels(tenant) || []).map((m) => [m.id, m]));
-  return live.map((g) => ({
-    ...g,
-    model_name: modelsById.has(g.model_id) ? modelsById.get(g.model_id).name : null,
-  }));
+  if (filter.model_id) live = live.filter((g) => g.model_id === String(filter.model_id));
+  if (filter.subject_id) live = live.filter((g) => g.subject_id === String(filter.subject_id));
+  return live
+    .map((g) => {
+      const m = getCatalogModel(g.model_id);
+      return {
+        id: g.id,
+        tenant_id: g.tenant_id,
+        subject_kind: g.subject_kind,
+        subject_id: g.subject_id,
+        model_id: g.model_id,
+        model_name: m ? (m.id || null) : null,
+        model_known: !!m,
+        role: g.role,
+        granted_by: g.granted_by || null,
+        created_at: g.created_at,
+        updated_at: g.updated_at,
+      };
+    })
+    .sort((a, b) => String(a.model_id).localeCompare(String(b.model_id))
+      || String(a.subject_id).localeCompare(String(b.subject_id)));
 }
 
 /**
- * List the models the given user can access within a tenant, annotated
- * with the effective access role + read/use flags. Tenant-fenced.
+ * Models the given user can access within an org tenant, annotated with
+ * effective role + read/use flags. Tenant-fenced.
  *
- * Tenant admins/owners see the full catalog (implicit full access);
- * other users see only models for which they hold a live entitlement
- * (directly or via group membership).
+ * Org admins/owners see the full catalog (implicit full access). Other users
+ * see only models for which they hold a live entitlement (directly or via a
+ * team), plus catalog metadata we can resolve.
  */
-function modelsForUser(tenant, user) {
-  if (!tenant) throw new Error('tenant required');
-  const catalog = modelRegistry.listModels(tenant) || [];
+export function modelsForUser(tenant, user) {
+  if (!tenant) throw _err('tenant required', 'bad_request', 400);
 
-  if (user && rbac.roleAtLeast(user.role, 'admin')) {
-    return catalog.map((m) => ({
-      ...m,
-      access_role: user.role,
+  const orgRole = String((user && (user.org_role || user.role)) || '').toLowerCase();
+  if (orgRole === 'owner' || orgRole === 'admin') {
+    return _catalog().map((m) => ({
+      model_id: m.id,
+      model: m,
+      model_known: true,
+      access_role: 'admin',
       can_read: true,
       can_use: true,
-      via: 'tenant_admin',
+      via: 'org_admin',
     }));
   }
 
   const out = [];
-  for (const m of catalog) {
-    const role = effectiveRole(tenant, user, m.id);
+  const seen = new Set();
+  for (const g of _liveGrants(tenant)) {
+    if (seen.has(g.model_id)) continue;
+    const role = effectiveRole(tenant, user, g.model_id);
     if (!role) continue;
+    seen.add(g.model_id);
+    const m = getCatalogModel(g.model_id);
     out.push({
-      ...m,
+      model_id: g.model_id,
+      model: m || null,
+      model_known: !!m,
       access_role: role,
-      can_read: rbac.roleAtLeast(role, 'viewer'),
-      can_use: rbac.roleAtLeast(role, 'member'),
+      can_read: _rank(role) >= _rank('viewer'),
+      can_use: _rank(role) >= _rank('user'),
       via: 'entitlement',
     });
   }
-  return out;
+  return out.sort((a, b) => String(a.model_id).localeCompare(String(b.model_id)));
 }
 
 /**
- * Usage-attribution hook. Call this at the moment a user invokes a model
- * (e.g. an inference request) to (a) enforce the entitlement and (b)
- * attribute the spend through chargeback. Throws a 403-style error if the
- * user is not entitled to USE the model.
+ * Usage-attribution hook. Call at the moment a user invokes a model to
+ * (a) ENFORCE the entitlement and (b) attribute the spend through the
+ * event-store so src/chargeback.js rolls it up per user / team / namespace.
  *
- * Resolves the user's primary group (first group membership, if any) so
- * the usage event carries a group_id for per-team chargeback aggregation.
+ * Throws a 403 (code 'forbidden') if the user lacks USE access. Returns the
+ * persisted event row.
  *
- * @param tenant
- * @param user        principal { id, role }
- * @param modelId     model being invoked
- * @param usage.units number of units consumed (tokens, requests, …)
- * @param usage.kind  unit kind (default 'tokens')
- * @param usage.group_id optional explicit group to attribute to
- * @param usage.metadata optional extra context
- * @returns the recorded usage event (from chargeback.recordUsage)
+ * @param {string} tenant            owning org tenant id
+ * @param {object} user              principal { tenant_id|id, role?/org_role? }
+ * @param {string} modelId
+ * @param {object} [usage]
+ * @param {number} [usage.tokens_in=0]
+ * @param {number} [usage.tokens_out=0]
+ * @param {number} [usage.cost_usd=0]
+ * @param {string} [usage.namespace]   defaults to 'model-access'
+ * @param {string} [usage.group_id]    explicit team to attribute to (else first membership)
+ * @param {object} [usage.metadata]    extra context merged into the event metadata
  */
-function attributeUsage(tenant, user, modelId, usage = {}) {
-  if (!tenant) throw new Error('tenant required');
-  if (!user || !user.id) {
-    const e = new Error('user required for usage attribution');
-    e.status = 401;
-    e.code = 'unauthorized';
-    throw e;
-  }
+export async function attributeUsage(tenant, user, modelId, usage = {}) {
+  if (!tenant) throw _err('tenant required', 'bad_request', 400);
+  const uid = _userId(user);
+  if (!uid) throw _err('user required for usage attribution', 'unauthorized', 401);
+  if (!modelId) throw _err('model_id required', 'bad_request', 400);
 
   const decision = checkModelAccess(tenant, user, modelId);
   if (!decision.can_use) {
-    const e = new Error('forbidden: no use-access entitlement for model ' + modelId);
-    e.status = 403;
-    e.code = 'forbidden';
-    throw e;
+    throw _err(`forbidden: no use-access entitlement for model ${modelId}`, 'forbidden', 403);
   }
 
-  // Attribute to an explicit group, else the user's first group, else null.
+  // Attribute to an explicit team, else the user's first team membership.
   let group_id = usage.group_id || null;
   if (!group_id) {
-    const mine = groups.groupsForUser(tenant, user.id) || [];
-    group_id = mine.length ? mine[0].id : null;
+    const teamIds = _teamIdsForUser(user);
+    group_id = teamIds.size ? Array.from(teamIds)[0] : null;
   }
 
-  return chargeback.recordUsage(tenant, {
-    user_id: user.id,
+  // The event-store canonicalises to a fixed column set; `metadata` is best-
+  // effort (it does not round-trip on every driver) but the first-class
+  // columns (namespace, estimated_cost_usd, prompt/completion_tokens) always
+  // do, and src/chargeback.js groups on those. To keep per-user / per-team
+  // chargeback reliable WITHOUT depending on metadata persistence, we encode
+  // the attribution into the namespace as `model-access/<group>/<user>` (the
+  // chargeback project/department mappers split on the first segment, so this
+  // still rolls up cleanly under "model-access"). We ALSO stamp metadata for
+  // richer stores. We do not read the returned event back for these fields —
+  // the caller gets whatever the store returns.
+  const baseNs = usage.namespace || 'model-access';
+  const attributionNs = `${baseNs}/${group_id || 'no-team'}/${uid}`;
+  const cost = Number(usage.cost_usd) || 0;
+  const attribution = {
+    kind: 'model_usage',
+    user_id: uid,
     group_id,
-    model_id: modelId,
-    units: Number(usage.units) || 0,
-    kind: usage.kind || 'tokens',
-    metadata: Object.assign({ access_role: decision.role }, usage.metadata || {}),
+    model_id: String(modelId),
+    access_role: decision.role,
+  };
+  const ev = await appendEvent({
+    tenant_id: tenant,
+    namespace: attributionNs,
+    provider: 'kolm-model-access',
+    model: String(modelId),
+    status: 'ok',
+    estimated_cost_usd: cost,
+    prompt_tokens: Number(usage.tokens_in) || 0,
+    completion_tokens: Number(usage.tokens_out) || 0,
+    metadata: {
+      ...attribution,
+      ...(usage.metadata && typeof usage.metadata === 'object' ? usage.metadata : {}),
+    },
   });
+  // Return a normalized result that always carries the attribution fields the
+  // caller asked us to record, regardless of how the store canonicalised them.
+  return {
+    ok: true,
+    event_id: ev && ev.event_id ? ev.event_id : null,
+    tenant_id: tenant,
+    namespace: attributionNs,
+    estimated_cost_usd: cost,
+    prompt_tokens: Number(usage.tokens_in) || 0,
+    completion_tokens: Number(usage.tokens_out) || 0,
+    attribution,
+    event: ev,
+  };
 }
 
-module.exports = {
+export default {
   ACCESS_ROLES,
+  getCatalogModel,
+  modelExists,
   grantModelAccess,
   revokeModelAccess,
-  checkModelAccess,
   effectiveRole,
+  checkModelAccess,
   listEntitlements,
   modelsForUser,
   attributeUsage,

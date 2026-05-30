@@ -54,6 +54,16 @@ import * as tunnel from './tunnel.js';
 import * as byoc from './byoc.js';
 import { buildDeployPlan, deploymentMatrix } from './deployment-plans.js';
 import { dependencyBlastRadius, dependencyGraphFromManifest } from './artifact-dependency-graph.js';
+// W-INTEG — wire 7 already-built enterprise modules into the route surface.
+// All exported as standalone ESM functions that read/write store.js directly;
+// every route handler below fences to req.tenant_record.id.
+import * as scimProvisioning from './scim-provisioning.js';
+import { consumeAssertion as samlConsumeAssertion } from './saml-acs.js';
+import { checkBudget as spendCheckBudget } from './spend-caps.js';
+import { handleMcpRequest } from './mcp-server.js';
+import * as webhooksModule from './webhooks.js';
+import * as modelEntitlements from './model-entitlements.js';
+import { evaluateAndGate as compileEvaluateAndGate } from './compile-eval-gate.js';
 // R-2 — artifact lifecycle state machine. Routes below expose the per-artifact
 // `lifecycle.json` (created → signed → deployed → monitored → superseded →
 // revoked → archived). The download handler reads canPull() to block pulls
@@ -11034,7 +11044,7 @@ export function buildRouter() {
     res.json({
       schemas: ['urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig'],
       documentationUri: `https://${host}/enterprise#scim`,
-      patch: { supported: false },
+      patch: { supported: true },
       bulk: { supported: false, maxOperations: 0, maxPayloadSize: 0 },
       filter: { supported: true, maxResults: 200 },
       changePassword: { supported: false },
@@ -11139,6 +11149,246 @@ export function buildRouter() {
     });
     res.status(201).json(_scimUserFromRow(row, req.get('host') || 'kolm.ai'));
   });
+  // ==========================================================================
+  // W-INTEG — SCIM per-resource lifecycle + Groups CRUD, SAML ACS, MCP,
+  // webhooks, model entitlements, eval gate. Each handler is tenant-fenced via
+  // req.tenant_record.id and gated by the same _ssoEntitled(plan) check the
+  // inline SCIM list/create routes use. Delegates to the already-built modules.
+  // ==========================================================================
+  function _integTenant(req, res) {
+    if (!req.tenant_record) { res.status(401).json({ error: 'auth_required' }); return null; }
+    return req.tenant_record;
+  }
+  function _scimGuard(req, res) {
+    const tenant = _integTenant(req, res);
+    if (!tenant) return null;
+    if (!_ssoEntitled(tenant.plan || 'free')) {
+      res.status(402).json({ ok: false, error: 'enterprise_only', plan: tenant.plan || 'free', upgrade: '/v1/account/change-plan', contact: 'sales@kolm.ai' });
+      return null;
+    }
+    return tenant;
+  }
+  function _scimThrew(res, err) {
+    if (err && typeof err.toJSON === 'function') { res.status(err.status || 400).json(err.toJSON()); return; }
+    _scimError(res, err && err.status ? err.status : 500, (err && err.message) || 'scim_error');
+  }
+  function _scimHost(req) { return req.get('host') || 'kolm.ai'; }
+  function _integPrincipal(tenant) {
+    // model-entitlements principal shape; the owning tenant is its own org admin.
+    return { tenant_id: tenant.id, id: tenant.id, org_role: tenant.org_role || tenant.role || 'owner', role: tenant.role || 'owner' };
+  }
+  // ---- SCIM Users per-resource lifecycle (RFC 7644 §3.5/§3.6) ----
+  r.get('/v1/scim/v2/Users/:id', (req, res) => {
+    const tenant = _scimGuard(req, res); if (!tenant) return;
+    try { res.json(scimProvisioning.getUser(tenant.id, req.params.id, _scimHost(req))); }
+    catch (e) { _scimThrew(res, e); }
+  });
+  r.put('/v1/scim/v2/Users/:id', (req, res) => {
+    const tenant = _scimGuard(req, res); if (!tenant) return;
+    try {
+      const out = scimProvisioning.replaceUser(tenant.id, req.params.id, req.body || {}, _scimHost(req));
+      tryAppendAudit({ tenant_id: tenant.id, tenant_name: tenant.name || null, actor: 'scim', op: 'enterprise.scim_user_replaced', payload: { scim_user_id: req.params.id, deprovisioned: !!out.deprovisioned } });
+      res.json(out.resource);
+    } catch (e) { _scimThrew(res, e); }
+  });
+  r.patch('/v1/scim/v2/Users/:id', (req, res) => {
+    const tenant = _scimGuard(req, res); if (!tenant) return;
+    try {
+      const out = scimProvisioning.patchUser(tenant.id, req.params.id, req.body || {}, _scimHost(req));
+      tryAppendAudit({ tenant_id: tenant.id, tenant_name: tenant.name || null, actor: 'scim', op: 'enterprise.scim_user_patched', payload: { scim_user_id: req.params.id, deprovisioned: !!out.deprovisioned } });
+      res.json(out.resource);
+    } catch (e) { _scimThrew(res, e); }
+  });
+  r.delete('/v1/scim/v2/Users/:id', (req, res) => {
+    const tenant = _scimGuard(req, res); if (!tenant) return;
+    try {
+      scimProvisioning.deleteUser(tenant.id, req.params.id);
+      tryAppendAudit({ tenant_id: tenant.id, tenant_name: tenant.name || null, actor: 'scim', op: 'enterprise.scim_user_deleted', payload: { scim_user_id: req.params.id } });
+      res.status(204).end();
+    } catch (e) { _scimThrew(res, e); }
+  });
+  // ---- SCIM Groups CRUD (bound to kolm rbac roles) ----
+  r.get('/v1/scim/v2/Groups', (req, res) => {
+    const tenant = _scimGuard(req, res); if (!tenant) return;
+    try {
+      res.json(scimProvisioning.listGroups(tenant.id, { startIndex: req.query.startIndex, count: req.query.count, filter: req.query.filter }, _scimHost(req)));
+    } catch (e) { _scimThrew(res, e); }
+  });
+  r.post('/v1/scim/v2/Groups', (req, res) => {
+    const tenant = _scimGuard(req, res); if (!tenant) return;
+    try {
+      const grp = scimProvisioning.createGroup(tenant.id, req.body || {}, _scimHost(req));
+      tryAppendAudit({ tenant_id: tenant.id, tenant_name: tenant.name || null, actor: 'scim', op: 'enterprise.scim_group_created', payload: { scim_group_id: grp.id, displayName: grp.displayName } });
+      res.status(201).json(grp);
+    } catch (e) { _scimThrew(res, e); }
+  });
+  r.get('/v1/scim/v2/Groups/:id', (req, res) => {
+    const tenant = _scimGuard(req, res); if (!tenant) return;
+    try { res.json(scimProvisioning.getGroup(tenant.id, req.params.id, _scimHost(req))); }
+    catch (e) { _scimThrew(res, e); }
+  });
+  r.put('/v1/scim/v2/Groups/:id', (req, res) => {
+    const tenant = _scimGuard(req, res); if (!tenant) return;
+    try {
+      const grp = scimProvisioning.replaceGroup(tenant.id, req.params.id, req.body || {}, _scimHost(req));
+      tryAppendAudit({ tenant_id: tenant.id, tenant_name: tenant.name || null, actor: 'scim', op: 'enterprise.scim_group_replaced', payload: { scim_group_id: req.params.id } });
+      res.json(grp);
+    } catch (e) { _scimThrew(res, e); }
+  });
+  r.patch('/v1/scim/v2/Groups/:id', (req, res) => {
+    const tenant = _scimGuard(req, res); if (!tenant) return;
+    try {
+      const grp = scimProvisioning.patchGroup(tenant.id, req.params.id, req.body || {}, _scimHost(req));
+      tryAppendAudit({ tenant_id: tenant.id, tenant_name: tenant.name || null, actor: 'scim', op: 'enterprise.scim_group_patched', payload: { scim_group_id: req.params.id } });
+      res.json(grp);
+    } catch (e) { _scimThrew(res, e); }
+  });
+  r.delete('/v1/scim/v2/Groups/:id', (req, res) => {
+    const tenant = _scimGuard(req, res); if (!tenant) return;
+    try {
+      scimProvisioning.deleteGroup(tenant.id, req.params.id);
+      tryAppendAudit({ tenant_id: tenant.id, tenant_name: tenant.name || null, actor: 'scim', op: 'enterprise.scim_group_deleted', payload: { scim_group_id: req.params.id } });
+      res.status(204).end();
+    } catch (e) { _scimThrew(res, e); }
+  });
+  // ---- SAML 2.0 ACS: validate signed assertion + establish a kolm session ----
+  r.post('/v1/account/saml/acs', async (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    const cfg = _ssoConfigForTenant(tenant.id);
+    const body = req.body || {};
+    const samlResponseB64 = body.SAMLResponse || body.samlResponse || null;
+    if (!samlResponseB64) { _scimError(res, 400, 'missing SAMLResponse'); return; }
+    const idpCertPem = (cfg && (cfg.idp_cert_pem || cfg.saml_idp_cert || cfg.metadata_xml)) || process.env.KOLM_SAML_IDP_CERT || null;
+    if (!idpCertPem) { res.status(503).json({ error: 'saml_not_configured', detail: 'no IdP signing certificate configured for this tenant' }); return; }
+    const host = _scimHost(req);
+    try {
+      const out = await samlConsumeAssertion({
+        samlResponseB64,
+        tenant: tenant.id,
+        idpCertPem,
+        audience: (cfg && cfg.saml_audience) || `https://${host}/saml/sp`,
+        acsUrl: `https://${host}/v1/account/saml/acs`,
+        allowJitProvision: !!(cfg && cfg.jit_provisioning),
+      });
+      if (!out.ok) { res.status(out.status || 401).json({ error: out.error || 'saml_assertion_invalid', detail: out.detail }); return; }
+      setSessionCookie(res, out.key);
+      tryAppendAudit({ tenant_id: tenant.id, tenant_name: tenant.name || null, actor: 'saml', op: 'enterprise.saml_acs_consumed', payload: { name_id: out.nameId, email: out.email, session_id: out.sessionId } });
+      res.json({ ok: true, tenant: out.tenant, email: out.email, name_id: out.nameId, session_id: out.sessionId });
+    } catch (err) {
+      res.status(500).json({ error: 'saml_acs_failed', detail: String(err && err.message) });
+    }
+  });
+  // ---- Spend-cap budget status ----
+  r.get('/v1/usage/budget', async (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    try { res.json({ tenant: tenant.id, ...(await spendCheckBudget(tenant.id, { plan: tenant.plan })) }); }
+    catch (e) { res.status(500).json({ error: 'budget_status_failed', detail: String(e && e.message) }); }
+  });
+  // ---- Model entitlements (employee/team model access) ----
+  r.get('/v1/me/models', (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    try { res.json({ tenant: tenant.id, models: modelEntitlements.modelsForUser(tenant.id, _integPrincipal(tenant)) }); }
+    catch (e) { res.status(e && e.status ? e.status : 500).json({ error: (e && e.code) || 'me_models_failed', detail: String(e && e.message) }); }
+  });
+  r.get('/v1/models/:id/access', (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    try { res.json({ tenant: tenant.id, model_id: req.params.id, ...modelEntitlements.checkModelAccess(tenant.id, _integPrincipal(tenant), req.params.id) }); }
+    catch (e) { res.status(e && e.status ? e.status : 500).json({ error: (e && e.code) || 'model_access_failed', detail: String(e && e.message) }); }
+  });
+  r.post('/v1/models/:id/access', (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    const body = req.body || {};
+    const subject = body.subject || body.subject_id || body.group || body.user;
+    if (!subject) { res.status(400).json({ error: 'bad_request', detail: 'subject (user or group id) required' }); return; }
+    try {
+      const grant = modelEntitlements.grantModelAccess(tenant.id, subject, req.params.id, body.role, { kind: body.kind, granted_by: tenant.id });
+      tryAppendAudit({ tenant_id: tenant.id, tenant_name: tenant.name || null, actor: 'tenant', op: 'model_access.granted', payload: { model_id: req.params.id, subject, role: grant.role } });
+      res.status(201).json(grant);
+    } catch (e) { res.status(e && e.status ? e.status : 500).json({ error: (e && e.code) || 'model_access_grant_failed', detail: String(e && e.message) }); }
+  });
+  r.delete('/v1/models/:id/access', (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    const subject = (req.body && (req.body.subject || req.body.subject_id || req.body.group || req.body.user)) || req.query.subject;
+    if (!subject) { res.status(400).json({ error: 'bad_request', detail: 'subject (user or group id) required' }); return; }
+    try {
+      const out = modelEntitlements.revokeModelAccess(tenant.id, subject, req.params.id);
+      tryAppendAudit({ tenant_id: tenant.id, tenant_name: tenant.name || null, actor: 'tenant', op: 'model_access.revoked', payload: { model_id: req.params.id, subject, revoked: out.revoked } });
+      res.json(out);
+    } catch (e) { res.status(e && e.status ? e.status : 500).json({ error: (e && e.code) || 'model_access_revoke_failed', detail: String(e && e.message) }); }
+  });
+  // ---- MCP server (JSON-RPC 2.0) ----
+  r.post('/v1/mcp', async (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    try {
+      const out = await handleMcpRequest({ tenant: tenant.id, auth: { tenant: tenant.id, key: (req.api_key_record && req.api_key_record.id) || null } }, req.body);
+      res.status(out.status || 200);
+      if (out.body == null) { res.end(); return; }
+      res.json(out.body);
+    } catch (e) { res.status(500).json({ jsonrpc: '2.0', id: null, error: { code: -32603, message: String(e && e.message) } }); }
+  });
+  // ---- Webhooks CRUD ----
+  r.get('/v1/webhooks', async (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    try { res.json({ tenant: tenant.id, webhooks: await webhooksModule.listWebhooks(tenant.id) }); }
+    catch (e) { res.status(500).json({ error: 'webhooks_list_failed', detail: String(e && e.message) }); }
+  });
+  r.post('/v1/webhooks', async (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    try {
+      const hook = await webhooksModule.createWebhook(tenant.id, req.body || {});
+      if (hook && hook.ok === false) { res.status(400).json({ error: 'webhook_create_failed', detail: hook.error }); return; }
+      tryAppendAudit({ tenant_id: tenant.id, tenant_name: tenant.name || null, actor: 'tenant', op: 'webhook.created', payload: { webhook_id: hook.id, url: hook.url, events: hook.events } });
+      res.status(201).json(hook);
+    } catch (e) { res.status(400).json({ error: 'webhook_create_failed', detail: String(e && e.message) }); }
+  });
+  r.get('/v1/webhooks/:id', async (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    try {
+      const hook = await webhooksModule.getWebhook(tenant.id, req.params.id);
+      if (!hook) { res.status(404).json({ error: 'not_found' }); return; }
+      res.json(hook);
+    } catch (e) { res.status(500).json({ error: 'webhook_get_failed', detail: String(e && e.message) }); }
+  });
+  r.put('/v1/webhooks/:id', async (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    try {
+      const hook = await webhooksModule.updateWebhook(tenant.id, req.params.id, req.body || {});
+      if (!hook) { res.status(404).json({ error: 'not_found' }); return; }
+      tryAppendAudit({ tenant_id: tenant.id, tenant_name: tenant.name || null, actor: 'tenant', op: 'webhook.updated', payload: { webhook_id: req.params.id } });
+      res.json(hook);
+    } catch (e) { res.status(400).json({ error: 'webhook_update_failed', detail: String(e && e.message) }); }
+  });
+  r.patch('/v1/webhooks/:id', async (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    try {
+      const hook = await webhooksModule.updateWebhook(tenant.id, req.params.id, req.body || {});
+      if (!hook) { res.status(404).json({ error: 'not_found' }); return; }
+      tryAppendAudit({ tenant_id: tenant.id, tenant_name: tenant.name || null, actor: 'tenant', op: 'webhook.updated', payload: { webhook_id: req.params.id } });
+      res.json(hook);
+    } catch (e) { res.status(400).json({ error: 'webhook_update_failed', detail: String(e && e.message) }); }
+  });
+  r.delete('/v1/webhooks/:id', async (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    try {
+      const out = await webhooksModule.deleteWebhook(tenant.id, req.params.id);
+      tryAppendAudit({ tenant_id: tenant.id, tenant_name: tenant.name || null, actor: 'tenant', op: 'webhook.deleted', payload: { webhook_id: req.params.id } });
+      res.json(out && typeof out === 'object' ? out : { deleted: true });
+    } catch (e) { res.status(500).json({ error: 'webhook_delete_failed', detail: String(e && e.message) }); }
+  });
+  // ---- Compile/promote eval gate (standalone evaluation endpoint) ----
+  r.post('/v1/eval/gate', (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    const body = req.body || {};
+    try {
+      const gate = compileEvaluateAndGate({
+        candidate_artifact: body.candidate_artifact || body.candidate,
+        baseline: body.baseline,
+        thresholds: body.thresholds,
+      });
+      res.json({ tenant: tenant.id, ...gate });
+    } catch (e) { res.status(400).json({ error: 'eval_gate_failed', detail: String(e && e.message) }); }
+  });
+  // ---- end W-INTEG enterprise endpoints ----
 
   // W452 — multimodal redactor surface. The fail-closed redactor in
   // src/privacy-membrane.js + src/phi-redactor.js has shipped since the v7

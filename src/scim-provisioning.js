@@ -1,15 +1,16 @@
 // SCIM 2.0 provisioning + deprovisioning (RFC 7644) — P0.
 //
-// The existing /v1/scim/v2/Users GET (list) + POST (create) routes live
-// inline in src/router.js and persist to the `scim_users` collection in
-// src/store.js with snake_case columns:
-//   { id, tenant_id, user_name, external_id, name_json, emails_json,
-//     active, created_at, updated_at }
+// The existing /v1/scim/v2/Users GET (list) + POST (create) routes live inline
+// in src/router.js and persist to the `scim_users` table via store.insert with
+// CAMELCASE columns (matching router._scimUserFromRow):
+//   { id, tenant_id, externalId, userName, active, name, displayName,
+//     emails, groups, created_at, updated_at }
 //
-// This module adds the per-resource lifecycle operations that the IdP
-// (Okta / Azure AD / OneLogin) drives for deprovisioning, plus Groups CRUD
-// mapped onto kolm rbac roles. It reuses the same store.js primitives and
-// the auth.js seat/key helpers so deprovisioning is a real side effect:
+// This module adds the per-resource lifecycle operations an IdP (Okta / Azure
+// AD / OneLogin) drives for deprovisioning, plus Groups CRUD mapped onto kolm
+// rbac roles. It reuses src/store.js primitives only (no dependency on
+// helper modules whose export surface might drift), so the seat/key revocation
+// is a real, tenant-fenced side effect:
 //
 //   getUser(tenant, id)            GET    /Users/:id
 //   patchUser(tenant, id, ops)     PATCH  /Users/:id   (active:false -> revoke seat + keys)
@@ -17,35 +18,36 @@
 //   deleteUser(tenant, id)         DELETE /Users/:id   (hard deprovision -> revoke + remove)
 //
 //   listGroups / getGroup / createGroup / patchGroup / replaceGroup / deleteGroup
-//     SCIM Group <-> rbac role binding. A Group whose displayName matches a
-//     kolm rbac role (owner/admin/member/viewer) grants that role to its
-//     members; removing a member or deleting the Group revokes it.
+//     SCIM Group <-> kolm rbac role binding. A Group whose displayName matches
+//     a kolm rbac role (owner/admin/member/billing — see src/rbac.js ROLES)
+//     grants that role to its members; removing a member or deleting the Group
+//     revokes the grant.
 //
 // Tenant fencing: `tenant` here is the tenant_id (req.tenant_record.id). Every
-// read/write is scoped by tenant_id; cross-tenant access is impossible because
-// the row predicate always pins tenant_id.
+// store predicate pins tenant_id, so cross-tenant access is impossible.
+//
+// Deprovisioning side effects, expressed directly over store.js tables:
+//   * Seat release: org membership rows (org_members) for this tenant whose
+//     member email matches the user's seat email are removed; if the tenant
+//     row tracks a `seats_used` counter it is decremented (never below 0).
+//   * Key revocation: rows in the `api_keys` table for this tenant whose
+//     member binding (member_email / member / email / label) matches the seat
+//     email are tombstoned with revoked_at = now (the auth.js multi-key
+//     fallback already treats revoked_at as "no longer authenticates").
 //
 // Errors: throws a ScimError carrying an RFC 7644 §3.12 status + scimType so
-// the router can translate to the SCIM Error envelope (the router already has
-// _scimError(res, status, detail); ScimError.toJSON() matches that shape).
+// the router can translate to the SCIM Error envelope. ScimError.toJSON()
+// matches the shape the router's _scimError already emits.
 
 import {
-  all,
+  id as storeId,
   insert,
   findOne,
   findByField,
   update,
   remove,
-  storeId,
 } from './store.js';
-import {
-  revokeKey,
-  listKeys,
-  removeMember,
-  setMemberRole,
-  addMember,
-} from './auth.js';
-import { isValidRole } from './rbac.js';
+import { isValidRole, ROLES } from './rbac.js';
 
 const SCIM_USER_SCHEMA = 'urn:ietf:params:scim:schemas:core:2.0:User';
 const SCIM_GROUP_SCHEMA = 'urn:ietf:params:scim:schemas:core:2.0:Group';
@@ -54,11 +56,17 @@ const SCIM_ERROR_SCHEMA = 'urn:ietf:params:scim:api:messages:2.0:Error';
 
 const USERS = 'scim_users';
 const GROUPS = 'scim_groups';
+const ORG_MEMBERS = 'org_members';
+const API_KEYS = 'api_keys';
+const TENANTS = 'tenants';
 
 // SCIM Group displayNames that bind to a kolm rbac role. Matched
-// case-insensitively against rbac.ROLES. A Group with any other displayName
-// is stored as a plain group with no role binding (role = null).
-const ROLE_NAMES = ['owner', 'admin', 'member', 'viewer'];
+// case-insensitively against src/rbac.js ROLES (owner/admin/member/billing).
+// A Group with any other displayName is stored as a plain group, role=null.
+const ROLE_NAMES = Object.values(ROLES); // ['owner','admin','member','billing']
+// Lowest-privilege role to demote to when a role grant is revoked but the seat
+// itself must survive (a Group only governs the GRANT, not seat lifecycle).
+const DEMOTE_ROLE = ROLES.MEMBER;
 
 // ── Typed error → SCIM Error envelope (RFC 7644 §3.12) ──────────────────────
 export class ScimError extends Error {
@@ -67,7 +75,7 @@ export class ScimError extends Error {
     this.name = 'ScimError';
     this.status = status;
     this.detail = detail;
-    this.scimType = scimType; // optional detail keyword: invalidValue, mutability, ...
+    this.scimType = scimType; // optional detail keyword: invalidValue, mutability, uniqueness, ...
   }
 
   toJSON() {
@@ -96,9 +104,8 @@ function coerceBool(v, dflt = true) {
   return Boolean(v);
 }
 
-// Strip the optional schema-URN prefix Azure AD/Okta sometimes put on a PATCH
-// path (e.g. "urn:...:User:active" -> "active"). Returns a lower-cased head
-// token plus the raw path for filter-expression handling.
+// Strip the optional schema-URN prefix Okta/Azure AD sometimes put on a PATCH
+// path (e.g. "urn:...:User:active" -> "active").
 function normalizePath(p) {
   if (!p) return '';
   return String(p)
@@ -110,18 +117,15 @@ function normalizePath(p) {
 function userResource(row, host) {
   const created = row.created_at || nowIso();
   const updated = row.updated_at || created;
-  let name;
-  let emails;
-  try { name = row.name_json ? JSON.parse(row.name_json) : undefined; } catch { name = undefined; }
-  try { emails = row.emails_json ? JSON.parse(row.emails_json) : undefined; } catch { emails = undefined; }
   return {
     schemas: [SCIM_USER_SCHEMA],
     id: row.id,
-    externalId: row.external_id || undefined,
-    userName: row.user_name,
-    name,
-    emails,
-    active: row.active !== false && row.active !== 0,
+    externalId: row.externalId || undefined,
+    userName: row.userName,
+    active: row.active !== false,
+    name: row.name || {},
+    displayName: row.displayName || undefined,
+    emails: Array.isArray(row.emails) ? row.emails : [],
     groups: Array.isArray(row.groups) ? row.groups : [],
     meta: {
       resourceType: 'User',
@@ -136,50 +140,62 @@ function getUserRow(tenantId, scimId) {
   return findOne(USERS, (u) => u.id === scimId && u.tenant_id === tenantId);
 }
 
-// The email used for team-seat binding. SCIM userName for kolm is always an
-// email (the create route enforces userName.includes('@')). Fall back to the
-// primary email if a userName somehow isn't an address.
+// The email used for seat binding. SCIM userName for kolm is always an email
+// (the create route enforces it). Fall back to the primary email if needed.
 function seatEmail(row) {
-  if (row.user_name && String(row.user_name).includes('@')) return row.user_name;
-  try {
-    const emails = row.emails_json ? JSON.parse(row.emails_json) : [];
-    if (Array.isArray(emails) && emails.length) {
-      const primary = emails.find((e) => e && e.primary) || emails[0];
-      if (primary && primary.value) return primary.value;
-    }
-  } catch { /* fall through */ }
-  return row.user_name || null;
+  if (row.userName && String(row.userName).includes('@')) return String(row.userName).toLowerCase();
+  if (Array.isArray(row.emails) && row.emails.length) {
+    const primary = row.emails.find((e) => e && e.primary) || row.emails[0];
+    if (primary && primary.value) return String(primary.value).toLowerCase();
+  }
+  return row.userName ? String(row.userName).toLowerCase() : null;
 }
 
 // ── The actual deprovisioning side effect ───────────────────────────────────
-// Revoke every active API key the user's seat owns + release the team seat.
-// Best-effort + idempotent: returns a structured summary for the audit log.
+// Release the seat + revoke API keys bound to this user's email. Best-effort,
+// idempotent, tenant-fenced. Returns a structured summary for the audit log.
 function revokeUserAccess(tenantId, row) {
-  const summary = { seat_released: false, keys_revoked: 0, email: null };
+  const summary = { email: null, seat_released: false, keys_revoked: 0, memberships_removed: 0 };
   const email = seatEmail(row);
   summary.email = email;
+  if (!email) return summary;
 
-  // 1) Release the team seat (membership) for this tenant.
+  // 1) Release org seats: remove every membership row for this tenant whose
+  //    email matches. (org_members rows carry tenant_id + email + role.)
   try {
-    if (email) {
-      const removed = removeMember(tenantId, email);
+    const seatRows = findByField(ORG_MEMBERS, 'tenant_id', tenantId)
+      .filter((m) => m && String(m.email || '').toLowerCase() === email);
+    if (seatRows.length) {
+      const removed = remove(
+        ORG_MEMBERS,
+        (m) => m.tenant_id === tenantId && String(m.email || '').toLowerCase() === email,
+      );
+      summary.memberships_removed = removed;
       summary.seat_released = removed > 0;
+      // Decrement the tenant seat counter if present (never below 0).
+      const tenant = findOne(TENANTS, (t) => t.id === tenantId);
+      if (tenant && typeof tenant.seats_used === 'number') {
+        update(TENANTS, (t) => t.id === tenantId, {
+          seats_used: Math.max(0, tenant.seats_used - removed),
+        });
+      }
     }
   } catch { /* best-effort */ }
 
-  // 2) Revoke API keys bound to this seat. Keys carry an optional `member` /
-  //    `member_email` / `label` binding (team-issued keys label themselves
-  //    with the member email). We revoke every non-revoked key whose binding
-  //    matches the seat email — never the tenant's other keys.
+  // 2) Revoke API keys bound to this seat (member-scoped keys only — never the
+  //    tenant's default/owner key, which is not a per-user credential).
   try {
-    if (email) {
-      const keys = listKeys(tenantId) || [];
-      for (const k of keys) {
-        if (k.revoked) continue;
-        const bound = k.member_email || k.member || k.email || k.label;
-        if (bound && String(bound).toLowerCase() === String(email).toLowerCase()) {
-          if (revokeKey(k.id, tenantId)) summary.keys_revoked += 1;
-        }
+    const keyRows = findByField(API_KEYS, 'tenant_id', tenantId);
+    for (const k of keyRows) {
+      if (!k || k.revoked_at || k.revoked === true) continue;
+      const bound = k.member_email || k.member || k.email || k.label;
+      if (bound && String(bound).toLowerCase() === email) {
+        const n = update(
+          API_KEYS,
+          (x) => x.id === k.id && x.tenant_id === tenantId,
+          { revoked: true, revoked_at: nowIso(), revoked_by: 'scim' },
+        );
+        if (n > 0) summary.keys_revoked += 1;
       }
     }
   } catch { /* best-effort */ }
@@ -204,7 +220,7 @@ export function getUser(tenantId, scimId, host) {
 //
 // The deprovisioning path. Both forms set active=false and revoke access:
 //   { Operations: [{ op:"replace", path:"active", value:false }] }
-//   { Operations: [{ op:"replace", value:{ active:false } }] }  (no path)
+//   { Operations: [{ op:"replace", value:{ active:false } }] }   (no path)
 export function patchUser(tenantId, scimId, ops, host) {
   if (!tenantId) throw scimError(401, 'auth_required');
   if (!scimId) throw scimError(400, 'missing id', 'invalidValue');
@@ -216,7 +232,7 @@ export function patchUser(tenantId, scimId, ops, host) {
   const row = getUserRow(tenantId, scimId);
   if (!row) throw scimError(404, `User ${scimId} not found`);
 
-  const activeBefore = row.active !== false && row.active !== 0;
+  const activeBefore = row.active !== false;
   const patch = { updated_at: nowIso() };
 
   for (const op of operations) {
@@ -239,10 +255,11 @@ export function patchUser(tenantId, scimId, ops, host) {
       // No-path add/replace: value is a partial User resource.
       if (value && typeof value === 'object') {
         if ('active' in value) patch.active = coerceBool(value.active);
-        if ('userName' in value) patch.user_name = value.userName;
-        if ('externalId' in value) patch.external_id = value.externalId || null;
-        if ('name' in value) patch.name_json = value.name ? JSON.stringify(value.name) : null;
-        if ('emails' in value) patch.emails_json = value.emails ? JSON.stringify(value.emails) : null;
+        if ('userName' in value) patch.userName = value.userName;
+        if ('externalId' in value) patch.externalId = value.externalId || null;
+        if ('name' in value) patch.name = value.name || {};
+        if ('displayName' in value) patch.displayName = value.displayName || null;
+        if ('emails' in value) patch.emails = Array.isArray(value.emails) ? value.emails : [];
       }
       continue;
     }
@@ -252,16 +269,19 @@ export function patchUser(tenantId, scimId, ops, host) {
         patch.active = coerceBool(value);
         break;
       case 'userName':
-        patch.user_name = value;
+        patch.userName = value;
         break;
       case 'externalId':
-        patch.external_id = value || null;
+        patch.externalId = value || null;
         break;
       case 'name':
-        patch.name_json = value ? JSON.stringify(value) : null;
+        patch.name = value || {};
+        break;
+      case 'displayName':
+        patch.displayName = value || null;
         break;
       case 'emails':
-        patch.emails_json = value ? JSON.stringify(value) : null;
+        patch.emails = Array.isArray(value) ? value : [];
         break;
       default:
         // Unknown attribute — accept silently (forward-compatible).
@@ -273,7 +293,7 @@ export function patchUser(tenantId, scimId, ops, host) {
   const next = getUserRow(tenantId, scimId);
 
   // Deprovision only on a true -> false transition.
-  const activeAfter = next.active !== false && next.active !== 0;
+  const activeAfter = next.active !== false;
   let revocation = null;
   if (activeBefore && !activeAfter) {
     revocation = revokeUserAccess(tenantId, next);
@@ -295,14 +315,15 @@ export function replaceUser(tenantId, scimId, resource, host) {
     throw scimError(400, 'userName must be a valid email address', 'invalidValue');
   }
 
-  const activeBefore = row.active !== false && row.active !== 0;
+  const activeBefore = row.active !== false;
   const activeAfter = coerceBool(body.active, true); // absent => active (RFC 7643 §4.1.1)
 
   const patch = {
-    user_name: body.userName != null ? body.userName : row.user_name,
-    external_id: 'externalId' in body ? (body.externalId || null) : row.external_id,
-    name_json: 'name' in body ? (body.name ? JSON.stringify(body.name) : null) : row.name_json,
-    emails_json: 'emails' in body ? (body.emails ? JSON.stringify(body.emails) : null) : row.emails_json,
+    userName: body.userName != null ? body.userName : row.userName,
+    externalId: 'externalId' in body ? (body.externalId || null) : row.externalId,
+    name: 'name' in body ? (body.name || {}) : row.name,
+    displayName: 'displayName' in body ? (body.displayName || null) : row.displayName,
+    emails: 'emails' in body ? (Array.isArray(body.emails) ? body.emails : []) : row.emails,
     active: activeAfter,
     updated_at: nowIso(),
     // id, tenant_id, created_at are immutable (RFC 7644 §3.5.1).
@@ -339,10 +360,10 @@ export function deleteUser(tenantId, scimId) {
 //  Groups  ->  rbac roles
 // ════════════════════════════════════════════════════════════════════════════
 //
-// scim_groups row: { id, tenant_id, display_name, role, members:[{value,display}],
-//                    created_at, updated_at }
-// `role` is the bound rbac role (or null for a non-role group). `members[].value`
-// is a SCIM User id; we resolve it to a seat email to grant/revoke the role.
+// scim_groups row: { id, tenant_id, displayName, externalId, role,
+//                    members:[{value,display}], created_at, updated_at }
+// `role` is the bound rbac role (or null). `members[].value` is a SCIM User id;
+// we resolve it to a seat email to grant/revoke the role on the org membership.
 
 function roleForDisplayName(displayName) {
   if (!displayName) return null;
@@ -360,7 +381,7 @@ function groupResource(row, host) {
   return {
     schemas: [SCIM_GROUP_SCHEMA],
     id: row.id,
-    displayName: row.display_name,
+    displayName: row.displayName,
     members: (row.members || []).map((m) => ({
       value: m.value || m,
       display: m.display,
@@ -375,33 +396,59 @@ function groupResource(row, host) {
   };
 }
 
+function normalizeMembers(members) {
+  if (!Array.isArray(members)) return [];
+  return members
+    .map((m) => {
+      const value = m && (m.value || m);
+      if (!value) return null;
+      return { value: String(value), display: (m && m.display) || undefined };
+    })
+    .filter(Boolean);
+}
+
 // Resolve a member ref (a SCIM User id) to a seat email for role binding.
 function memberEmail(tenantId, member) {
   const uid = member && (member.value || member);
   if (!uid) return null;
   const urow = getUserRow(tenantId, uid);
   if (urow) return seatEmail(urow);
-  // Some IdPs send the email/userName directly as the member value.
-  if (typeof uid === 'string' && uid.includes('@')) return uid;
+  if (typeof uid === 'string' && uid.includes('@')) return String(uid).toLowerCase();
   return null;
 }
 
-// Grant or revoke the group's rbac role for a set of members.
+// Grant or revoke the group's rbac role for a set of members. The grant is
+// applied to the org_members row (upserted) — never the seat lifecycle.
 function applyRole(tenantId, role, members, grant) {
   if (!role) return;
   for (const m of members || []) {
     const email = memberEmail(tenantId, m);
     if (!email) continue;
     try {
+      const existing = findByField(ORG_MEMBERS, 'tenant_id', tenantId)
+        .find((row) => String(row.email || '').toLowerCase() === email);
       if (grant) {
-        // Idempotent: addMember upserts the role for an existing member.
-        addMember(tenantId, email, role);
-      } else {
-        // Revoke the role binding. We demote to 'viewer' (lowest privilege)
-        // rather than removing the seat outright — seat lifecycle is the
-        // User resource's job (active:false / DELETE). A group only governs
-        // the role grant, so removal of the grant must not orphan the seat.
-        setMemberRole(tenantId, email, 'viewer');
+        if (existing) {
+          update(ORG_MEMBERS, (row) => row.id === existing.id && row.tenant_id === tenantId, {
+            role, updated_at: nowIso(),
+          });
+        } else {
+          insert(ORG_MEMBERS, {
+            id: storeId('member'),
+            tenant_id: tenantId,
+            email,
+            role,
+            source: 'scim',
+            created_at: nowIso(),
+            updated_at: nowIso(),
+          });
+        }
+      } else if (existing) {
+        // Revoke the GRANT by demoting to the lowest role — do NOT remove the
+        // seat (seat lifecycle belongs to the User resource, not the group).
+        update(ORG_MEMBERS, (row) => row.id === existing.id && row.tenant_id === tenantId, {
+          role: DEMOTE_ROLE, updated_at: nowIso(),
+        });
       }
     } catch { /* best-effort; reconciled on next IdP sync */ }
   }
@@ -427,7 +474,7 @@ export function listGroups(tenantId, { startIndex = 1, count = 100, filter } = {
   if (filter) {
     const m = String(filter).match(/(\w+)\s+eq\s+"([^"]*)"/i);
     if (m) {
-      const field = m[1] === 'displayName' ? 'display_name' : m[1];
+      const field = m[1];
       rows = rows.filter((g) => String(g[field] || '') === m[2]);
     }
   }
@@ -460,7 +507,7 @@ export function createGroup(tenantId, resource, host) {
   if (!body.displayName) throw scimError(400, 'displayName is required', 'invalidValue');
 
   const existing = findByField(GROUPS, 'tenant_id', tenantId)
-    .find((g) => String(g.display_name || '').toLowerCase() === String(body.displayName).toLowerCase());
+    .find((g) => String(g.displayName || '').toLowerCase() === String(body.displayName).toLowerCase());
   if (existing) throw scimError(409, 'a Group with this displayName already exists for this tenant', 'uniqueness');
 
   const members = normalizeMembers(body.members);
@@ -468,8 +515,8 @@ export function createGroup(tenantId, resource, host) {
   const row = {
     id: storeId('scim_group'),
     tenant_id: tenantId,
-    display_name: body.displayName,
-    external_id: body.externalId || null,
+    displayName: body.displayName,
+    externalId: body.externalId || null,
     role: roleForDisplayName(body.displayName),
     members,
     created_at: now,
@@ -478,17 +525,6 @@ export function createGroup(tenantId, resource, host) {
   insert(GROUPS, row);
   if (row.role) applyRole(tenantId, row.role, members, true);
   return groupResource(row, host);
-}
-
-function normalizeMembers(members) {
-  if (!Array.isArray(members)) return [];
-  return members
-    .map((m) => {
-      const value = m && (m.value || m);
-      if (!value) return null;
-      return { value: String(value), display: (m && m.display) || undefined };
-    })
-    .filter(Boolean);
 }
 
 // PATCH /v1/scim/v2/Groups/:id  (member add/remove/replace; displayName replace)
@@ -503,7 +539,7 @@ export function patchGroup(tenantId, scimId, ops, host) {
   if (!row) throw scimError(404, `Group ${scimId} not found`);
 
   let members = Array.isArray(row.members) ? row.members.slice() : [];
-  let displayName = row.display_name;
+  let displayName = row.displayName;
   let role = row.role;
   const granted = [];
   const revoked = [];
@@ -564,7 +600,7 @@ export function patchGroup(tenantId, scimId, ops, host) {
   }
 
   update(GROUPS, (g) => g.id === scimId && g.tenant_id === tenantId, {
-    display_name: displayName,
+    displayName,
     role,
     members,
     updated_at: nowIso(),
@@ -589,13 +625,13 @@ export function replaceGroup(tenantId, scimId, resource, host) {
 
   const oldMembers = Array.isArray(row.members) ? row.members : [];
   const oldRole = row.role;
-  const newDisplay = body.displayName != null ? body.displayName : row.display_name;
+  const newDisplay = body.displayName != null ? body.displayName : row.displayName;
   const newRole = roleForDisplayName(newDisplay);
   const newMembers = normalizeMembers(body.members);
 
   update(GROUPS, (g) => g.id === scimId && g.tenant_id === tenantId, {
-    display_name: newDisplay,
-    external_id: 'externalId' in body ? (body.externalId || null) : row.external_id,
+    displayName: newDisplay,
+    externalId: 'externalId' in body ? (body.externalId || null) : row.externalId,
     role: newRole,
     members: newMembers,
     updated_at: nowIso(),
