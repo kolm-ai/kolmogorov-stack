@@ -33,8 +33,9 @@ RUN apk del .build-deps
 FROM node:22-alpine@sha256:8ea2348b068a9544dae7317b4f3aafcdc032df1647bb7d768a05a5cad1a7683f AS runtime
 
 # wget for HEALTHCHECK; tini for clean PID 1 signal forwarding so SIGTERM
-# reaches the node process and graceful-shutdown hooks fire.
-RUN apk add --no-cache wget tini
+# reaches the node process and graceful-shutdown hooks fire; su-exec to drop from
+# root to `node` after the entrypoint chowns the mounted data volume.
+RUN apk add --no-cache wget tini su-exec
 
 WORKDIR /app
 
@@ -49,7 +50,9 @@ ENV NODE_ENV=production \
     PORT=8787 \
     KOLM_DATA_DIR=/var/lib/kolm
 
-USER node
+# No USER directive: the entrypoint starts as root to chown the mounted data
+# volume, then drops to the unprivileged `node` user via su-exec before exec'ing
+# the server (so the server itself never runs as root).
 
 EXPOSE 8787
 
@@ -58,5 +61,5 @@ EXPOSE 8787
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=5 \
   CMD wget -qO- http://localhost:8787/health || exit 1
 
-ENTRYPOINT ["/sbin/tini", "--"]
+ENTRYPOINT ["/sbin/tini", "--", "sh", "/app/docker-entrypoint.sh"]
 CMD ["node", "server.js"]
