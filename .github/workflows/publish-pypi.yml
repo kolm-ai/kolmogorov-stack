@@ -1,0 +1,87 @@
+name: Publish Python SDK to PyPI
+
+# Publishes sdk/python to PyPI when a version tag is pushed.
+#
+# Trigger: push a tag matching `pyv*` (e.g. `pyv0.1.0`).
+# This keeps the Python-SDK release tags namespaced away from any
+# repo-wide / other-language tags.
+#
+# Two publish paths are supported, tried in order:
+#   1. Trusted Publishing (OIDC) — preferred, no long-lived secret.
+#      Configure on PyPI: project "kolm" -> Publishing -> add a
+#      "GitHub" trusted publisher for this repo + this workflow file +
+#      environment "pypi". If configured, the upload uses OIDC and the
+#      `password` input below is ignored by gh-action-pypi-publish.
+#   2. API token fallback — used when the `PYPI_API_TOKEN` secret is set
+#      and trusted publishing is not configured. Set the secret named
+#      exactly `PYPI_API_TOKEN` (Settings -> Secrets and variables ->
+#      Actions) to a PyPI token scoped to the `kolm` project.
+
+on:
+  push:
+    tags:
+      - "pyv*"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build distributions
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sdk/python
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build tooling
+        run: python -m pip install --upgrade pip build twine
+
+      - name: Build sdist and wheel
+        run: python -m build --sdist --wheel --outdir dist .
+
+      - name: Check distribution metadata
+        run: python -m twine check dist/*
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-dist
+          path: sdk/python/dist/*
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/kolm/
+    permissions:
+      # Required for Trusted Publishing (OIDC).
+      id-token: write
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: python-dist
+          path: dist
+
+      # Path 1 + 2: gh-action-pypi-publish prefers OIDC trusted publishing
+      # when available; if `password` is provided (PYPI_API_TOKEN secret),
+      # it falls back to token auth. Leaving `password` empty when the
+      # secret is unset is harmless — OIDC is then the only path.
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          # Set to true to require trusted publishing only and ignore token.
+          # attestations: true

@@ -12,6 +12,8 @@ license = { text = "Apache-2.0" }
 authors = [{ name = "Kolm", email = "dev@kolm.ai" }]
 keywords = ["llm", "compiler", "lora", "agents", "claude", "openai", "fine-tuning", "edge", "offline"]
 classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
   "License :: OSI Approved :: Apache Software License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
@@ -21,10 +23,14 @@ classifiers = [
 ]
 dependencies = []
 
+[project.optional-dependencies]
+dev = ["build>=1.2", "twine>=5.0", "pytest>=7.0"]
+
 [project.urls]
 Homepage = "https://kolm.ai"
 Repository = "https://github.com/kolm-ai/kolm"
 Documentation = "https://kolm.ai/docs"
+Issues = "https://github.com/kolm-ai/kolm/issues"
 
 [project.scripts]
 recipe = "recipe.cli:main"
