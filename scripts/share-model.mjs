@@ -5,6 +5,16 @@
 // opens a cloudflared quick tunnel, prints the public https link, and tears both down on exit.
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+
+// Pre-auth the phone link from the terminal session: read the kolm key saved by
+// `kolm login` / `kolm signup` (~/.kolm/config.json) and embed it in the link
+// fragment (#k=...), so opening the link on a phone is already signed in — no key
+// pasting. The fragment never hits a server/log. Falls back to the manual sign-in
+// gate if no CLI session exists.
+let cfgKey = '';
+try { cfgKey = (JSON.parse(fs.readFileSync(path.join(os.homedir(), '.kolm', 'config.json'), 'utf8')).api_key) || ''; } catch {}
 
 const argv = process.argv.slice(2);
 const get = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : d; };
@@ -33,9 +43,12 @@ function startTunnel() {
   const onData = (d) => {
     const m = d.toString().match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/);
     if (m) {
+      const link = cfgKey ? `${m[0]}/#k=${cfgKey}` : m[0];
       console.log(`\n  ============================================================`);
-      console.log(`   📱  PUBLIC LINK (open on your phone): ${m[0]}`);
+      console.log(`   📱  PHONE LINK (${cfgKey ? 'pre-authed via your kolm login' : 'sign in with your kolm key'}):`);
+      console.log(`   ${link}`);
       console.log(`   model: ${name}`);
+      if (!cfgKey) console.log(`   tip: run \`kolm login\` first to get a pre-authed link.`);
       console.log(`  ============================================================\n`);
     }
   };
