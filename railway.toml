@@ -5,7 +5,10 @@
 builder = "DOCKERFILE"
 
 [deploy]
-startCommand = "node server.js"
+# No startCommand: Railway runs a startCommand as the raw container command, which
+# BYPASSES the Dockerfile ENTRYPOINT (the su-exec wrapper) and runs as root. By
+# omitting it, the image's ENTRYPOINT (docker-entrypoint.sh: chown volume as root ->
+# su-exec node) + CMD (node server.js) run, so the server drops to the node user.
 healthcheckPath = "/health"
 healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"
