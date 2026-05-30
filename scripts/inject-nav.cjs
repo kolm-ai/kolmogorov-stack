@@ -28,7 +28,7 @@ const END = '<!-- KOLM_NAV_END (W221) -->';
 // nav-item--<slug> classnames so CSS can size individual menus.
 const NAV_ITEMS = [
   { href: '/about',      label: 'About',      slug: 'product' },
-  { href: '/models',     label: 'Models',     slug: 'models' },
+  { href: '/proof',      label: 'Proof',      slug: 'proof' },
   { href: '/docs',       label: 'Docs',       slug: 'docs' },
   { href: '/pricing',    label: 'Pricing',    slug: 'pricing' },
   { href: '/enterprise', label: 'Enterprise', slug: 'enterprise' },
@@ -50,8 +50,23 @@ const MEGA = {
     ]},
     { heading: 'Run', links: [
       { href: '/runtimes',                 label: 'Runtimes' },
+      { href: '/models',                   label: 'Models' },
       { href: '/docs/devices',             label: 'Devices' },
       { href: '/trust',                    label: 'Verify' },
+    ]},
+  ],
+  proof: [
+    { heading: 'Benchmarks', links: [
+      { href: '/proof',                    label: 'Proof overview' },
+      { href: '/benchmarks',               label: 'Benchmarks' },
+      { href: '/compare',                  label: 'Compare' },
+      { href: '/leaderboard',              label: 'Leaderboard' },
+      { href: '/k-score',                  label: 'K-score' },
+    ]},
+    { heading: 'Receipts', links: [
+      { href: '/verify',                   label: 'Verify a receipt' },
+      { href: '/trust',                    label: 'Trust center' },
+      { href: '/security',                 label: 'Security' },
     ]},
   ],
   models: [

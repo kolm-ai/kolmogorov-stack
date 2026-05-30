@@ -27,7 +27,7 @@ const SLUGS = [
   'env-vars',
 ];
 
-const NAV_LABELS = ['About', 'Models', 'Docs', 'Pricing', 'Enterprise'];
+const NAV_LABELS = ['About', 'Proof', 'Docs', 'Pricing', 'Enterprise'];
 
 function readSlug(slug) {
   return fs.readFileSync(path.join(INTEG_DIR, `${slug}.html`), 'utf8');

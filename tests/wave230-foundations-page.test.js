@@ -94,7 +94,7 @@ test('W230 every page links back up to /foundations', () => {
 
 test('W230 hub uses W221 5-anchor canonical nav', () => {
   const html = read(HUB);
-  for (const anchor of ['About', 'Models', 'Docs', 'Pricing', 'Enterprise']) {
+  for (const anchor of ['About', 'Proof', 'Docs', 'Pricing', 'Enterprise']) {
     assert.match(html, new RegExp(`>${anchor}<`), `hub nav missing ${anchor}`);
   }
 });

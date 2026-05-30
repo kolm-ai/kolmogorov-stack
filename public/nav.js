@@ -142,12 +142,14 @@ installSurfaceGuard();
 var prdRe = /^\/(product|whitepaper|motion|capture|captures|quickstart|compile|distill|training|train|run|recall|serve|evolve|anatomy|k-score|build-your-own|integrations|use-cases|healthcare|finance)(\/|$)/;
 var solRe = /^\/(use-cases|healthcare|finance|legal|defense|edge|devtools|insure|health-insurance|saas|eu|gov|compare|vs-|how-vs|migrate|case-studies|frontier-stack|sovereign-ai|why-now|why-kolm)(\/|$)/;
 var modRe = /^\/(models|runtimes|frontier-stack|compute|device|hub|registry|marketplace|atlas)(\/|$)/;
+var proofRe = /^\/(proof|benchmarks|leaderboard|k-score|kscore|kscore-bench|kscore-leaderboard)(\/|$)/;
 var devRe = /^\/(docs|research|training|train|spec|api|sdk|articles|cookbook|architecture|launch|troubleshooting|faq|press|changelog|benchmarks|leaderboard|kscore-bench|kscore-leaderboard)(\/|$)/;
  var entRe = /^\/(enterprise|customers|roi|baa|teams|tunnels|byoc|airgap|hipaa-mapping|soc2|security|subprocessors|trust|threat-model|slsa|sbom|compliance|compliance-packs|self-host|cloud)(\/|$)/;
  var prRe = /^\/pricing(\/|$)/;
  var topSection = prRe.test(path) ? 'pricing'
  : entRe.test(path) ? 'enterprise'
  : modRe.test(path) ? 'models'
+ : proofRe.test(path) ? 'proof'
  : solRe.test(path) ? 'solutions'
  : prdRe.test(path) ? 'product'
  : devRe.test(path) ? 'docs'
@@ -159,6 +161,7 @@ var devRe = /^\/(docs|research|training|train|spec|api|sdk|articles|cookbook|arc
  var href = a.getAttribute('href') || '';
  var isActive =
  (href === '/product' && topSection === 'product') ||
+ (href === '/proof' && topSection === 'proof') ||
  (href === '/use-cases' && topSection === 'solutions') ||
  (href === '/models' && topSection === 'models') ||
  (href === '/docs' && topSection === 'docs') ||
