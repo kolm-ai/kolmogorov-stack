@@ -48,6 +48,11 @@ function _isTestRunner() {
     || process.argv.some((arg) => arg === '--test' || arg.startsWith('--test-') || /[\\/]tests[\\/].+\.test\.js$/i.test(arg));
 }
 
+function _dirWritable(d) {
+  try { const t = path.join(d, '.wtest-' + process.pid); fs.writeFileSync(t, 'x'); fs.unlinkSync(t); return true; }
+  catch { return false; }
+}
+
 function _ensureDirs() {
   if (_eventsDir && fs.existsSync(_eventsDir)) return;
   const testMode = _isTestRunner();
@@ -58,28 +63,24 @@ function _ensureDirs() {
     : path.join(_home(), '.kolm');
   _eventsDir = path.join(base, 'events');
   fs.mkdirSync(_eventsDir, { recursive: true });
+  // Self-heal: on a mounted volume, an events dir created by an earlier root-owned
+  // deploy can be unwritable for a later non-root process — every append then fails
+  // EACCES (broke conversation backup). If the default dir isn't writable, fall back
+  // to a fresh app-owned sibling under the SAME data root, so writes succeed AND
+  // persist on the volume. If even the data root is unwritable, the operator must fix
+  // the volume mount perms (nothing we can do in-process).
+  if (!_dirWritable(_eventsDir)) {
+    const alt = path.join(base, 'events-rw');
+    try { fs.mkdirSync(alt, { recursive: true }); } catch { /* */ }
+    if (_dirWritable(alt)) {
+      if (process.env.KOLM_DEBUG) console.error(`[event-store] ${_eventsDir} not writable; using ${alt}`);
+      _eventsDir = alt;
+    }
+  }
   _dbPath = process.env.KOLM_EVENT_STORE_PATH
     ? path.resolve(process.env.KOLM_EVENT_STORE_PATH)
     : path.join(_eventsDir, 'events.sqlite');
   _jsonlPath = path.join(_eventsDir, 'events.jsonl');
-  // Self-heal stale, non-writable store files. On a mounted volume, a file
-  // created by an earlier root-owned deploy can become unwritable for a later
-  // non-root process — every append then fails EACCES. If the target exists but
-  // is not writable, rename it aside so a fresh, app-owned file is created on
-  // first write. Best-effort: if the directory itself is unwritable, the rename
-  // also fails (a genuine volume-permission problem the operator must fix).
-  for (const p of [_dbPath, _jsonlPath]) {
-    try {
-      if (!fs.existsSync(p)) continue;
-      try { fs.accessSync(p, fs.constants.W_OK); }
-      catch {
-        try {
-          fs.renameSync(p, `${p}.stale-${Date.now()}`);
-          if (process.env.KOLM_DEBUG) console.error(`[event-store] renamed unwritable ${p} aside (self-heal)`);
-        } catch { /* dir not writable — operator must fix the volume mount perms */ }
-      }
-    } catch { /* best-effort */ }
-  }
 }
 
 function _openSqlite() {
