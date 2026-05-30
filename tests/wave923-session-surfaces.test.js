@@ -33,13 +33,16 @@ test('spend-caps: free plan allowed, cap 5; missing tenant denied', async () => 
   assert.equal(none.allowed, false);
 });
 
-test('conversations: save + list is tenant-fenced', async () => {
+test('conversations: save returns ok + list is tenant-fenced', async () => {
   const c = await import('../src/conversations.js');
-  await c.saveConversation('t_w923b', { model: 'm', messages: [{ role: 'user', content: 'hi' }] });
-  const mine = await c.listConversations('t_w923b', {});
-  assert.ok(mine.length >= 1);
-  const other = await c.listConversations('t_w923c', {});
-  assert.equal(other.length, 0, 'tenant fence: other tenant sees none');
+  const tA = 't_w923_' + process.pid + '_A';
+  const tB = 't_w923_' + process.pid + '_B';
+  const saved = await c.saveConversation(tA, { model: 'm', messages: [{ role: 'user', content: 'hi' }] });
+  assert.equal(saved.ok, true);
+  const listA = await c.listConversations(tA, {});
+  assert.ok(listA.some((x) => x.conversation_id === saved.conversation_id), 'A sees its own convo');
+  const listB = await c.listConversations(tB, {});
+  assert.ok(!listB.some((x) => x.conversation_id === saved.conversation_id), 'tenant fence: B cannot see A');
 });
 
 test('model-entitlements: grant then check', async () => {
@@ -62,10 +65,12 @@ test('billing-activation: not-ready lists exact missing env vars', async () => {
   assert.ok(Array.isArray(r.missing));
 });
 
-test('connectors: listConnectors returns recipes with ids', async () => {
+test('connectors: listConnectors returns recipe list', async () => {
   const c = await import('../src/connectors.js');
-  const list = c.listConnectors({ baseUrl: 'https://kolm.ai' });
-  assert.ok(Array.isArray(list) && list.length > 0);
+  const out = c.listConnectors({ baseUrl: 'https://kolm.ai' });
+  // Returns { object:'list', count, data:[{id,...}] } — not a bare array.
+  assert.ok(out && Array.isArray(out.data) && out.data.length > 0, 'has recipe data[]');
+  assert.ok(out.data.every((x) => x && x.id), 'each recipe has an id');
 });
 
 test('inference-bench: dry_run produces a signed result with no network', async () => {
