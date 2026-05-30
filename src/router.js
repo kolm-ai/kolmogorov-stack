@@ -11419,6 +11419,58 @@ export function buildRouter() {
       res.json({ tenant: tenant.id, ...gate });
     } catch (e) { res.status(400).json({ error: 'eval_gate_failed', detail: String(e && e.message) }); }
   });
+
+  // ---- W-INTEG-3: on-device model self-update (signed, offline-verifiable) ----
+  r.get('/v1/models/:id/updates', (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    try {
+      const out = modelUpdateChannel.checkForUpdate({ tenant: tenant.id, model_id: req.params.id, current_version: req.query.current_version || '0.0.0' });
+      if (req.query.list === '1' || req.query.list === 'true') out.versions = modelUpdateChannel.listVersions(tenant.id, req.params.id);
+      res.json(out);
+    } catch (e) { res.status(e && e.status ? e.status : 500).json({ error: (e && e.code) || 'update_check_failed', detail: String(e && e.message) }); }
+  });
+  r.post('/v1/models/:id/versions', async (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    const body = req.body || {};
+    if (!body.artifact_path) { res.status(400).json({ error: 'bad_request', detail: 'artifact_path required' }); return; }
+    try {
+      const row = await modelUpdateChannel.publishVersion({ tenant: tenant.id, model_id: req.params.id, artifact_path: body.artifact_path, notes: body.notes, version: body.version, signed_url: body.signed_url, published_by: tenant.id });
+      tryAppendAudit({ tenant_id: tenant.id, tenant_name: tenant.name || null, actor: 'tenant', op: 'model_version.published', payload: { model_id: req.params.id, version: row.version } });
+      res.status(201).json(row);
+    } catch (e) { res.status(e && e.status ? e.status : 500).json({ error: (e && e.code) || 'publish_version_failed', detail: String(e && e.message) }); }
+  });
+
+  // ---- W-INTEG-3: signed inference-economics benchmark ----
+  r.get('/v1/bench/inference', (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    try {
+      const p = path.join(ROUTER_REPO_ROOT, 'public', 'benchmarks', 'inference-matrix.json');
+      res.json(fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf8')) : { schema: inferenceBench.INFERENCE_MATRIX_SCHEMA, rows: [] });
+    } catch (e) { res.status(500).json({ error: 'bench_read_failed', detail: String(e && e.message) }); }
+  });
+  r.post('/v1/bench/inference/run', async (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    try {
+      const out = await inferenceBench.runInferenceBench({ ...(req.body || {}), tenant: tenant.id });
+      res.json(out);
+    } catch (e) { res.status(e && e.status ? e.status : 500).json({ error: (e && e.code) || 'bench_run_failed', detail: String(e && e.message) }); }
+  });
+
+  // ---- W-INTEG-3: Stripe billing activation (operator sets price-id env vars) ----
+  r.get('/v1/billing/ready', (req, res) => {
+    try { res.json(billingActivation.billingReady()); }
+    catch (e) { res.status(500).json({ error: 'billing_ready_failed', detail: String(e && e.message) }); }
+  });
+  r.post('/v1/billing/checkout', async (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    try {
+      const session = await billingActivation.createCheckoutSession({ tenant: tenant.id, plan: (req.body && req.body.plan), email: (req.body && req.body.email), quantity: (req.body && req.body.quantity) });
+      res.json(session);
+    } catch (e) {
+      if (e && typeof e.toJSON === 'function') return res.status(e.statusCode || 503).json(e.toJSON());
+      res.status(e && e.statusCode ? e.statusCode : 500).json({ error: (e && e.code) || 'checkout_failed', detail: String(e && e.message) });
+    }
+  });
   // ---- end W-INTEG enterprise endpoints ----
 
   // W452 — multimodal redactor surface. The fail-closed redactor in
