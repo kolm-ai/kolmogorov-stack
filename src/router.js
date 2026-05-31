@@ -26567,6 +26567,16 @@ res.json({
     }
   });
 
+  // GET /v1/serve/pods — live serving pods for the tenant (which artifacts are
+  // currently served). No live-pod tracker is wired yet, so this returns an empty
+  // set; the /account/models UI uses it to badge "serving" state and degrades
+  // gracefully (it already .catch()es to {pods:[]}). Registering the route stops
+  // the prod 404 the models page hit.
+  r.get('/v1/serve/pods', authMiddleware, async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    res.json({ ok: true, pods: [] });
+  });
+
   // POST /v1/serve — emit a deployment manifest (docker run / k8s yaml) for
   // a .kolm artifact and runtime target.
   // Body: { artifact, runtime, port?, docker?, k8s? } → { manifest, runtime, port }
