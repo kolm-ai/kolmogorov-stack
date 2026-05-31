@@ -16131,6 +16131,50 @@ export function buildRouter() {
     res.json({ ok: true, endpoint: tnl.public_url, tunnel_id: tnl.id, note: 'a stable team endpoint; it does not expire on the idle TTL' });
   });
 
+  // W936 — team-scoped data export (admin + lake:export scope). Streams the
+  // team's captured events so a team can hand an auditor or analyst the lake.
+  r.get('/v1/teams/:idOrSlug/export', async (req, res) => {
+    const t = tenantOf(req);
+    const team = teams.getTeam(req.params.idOrSlug);
+    if (!team) return res.status(404).json({ error: 'team not found' });
+    try { teams.requireRole(team.id, t.id, 'admin'); } catch (e) { return res.status(403).json({ error: e.message || 'admin role required' }); }
+    if (!keyHasScope(req, 'lake:export') && !(req.key_scopes && req.key_scopes.includes('lake:*'))) {
+      return res.status(403).json({ error: 'insufficient_scope', required: 'lake:export' });
+    }
+    try {
+      const { exportEvents } = await import('./event-store.js');
+      const format = String(req.query.format || 'jsonl').toLowerCase();
+      const out = await exportEvents({ format, team_id: team.id, since: req.query.since || undefined, limit: Math.min(50000, Number(req.query.limit) || 10000) });
+      const ext = format === 'json' ? 'json' : format === 'csv' ? 'csv' : 'jsonl';
+      res.set('Content-Type', format === 'csv' ? 'text/csv' : format === 'json' ? 'application/json' : 'application/x-ndjson');
+      res.set('Content-Disposition', `attachment; filename="team-${team.id}-export.${ext}"`);
+      res.send(out);
+    } catch (e) { res.status(400).json({ error: String(e.message || e) }); }
+  });
+
+  // W936 — team data-retention policy (admin sets retain_days; 0 = keep forever).
+  r.get('/v1/teams/:idOrSlug/retention', (req, res) => {
+    const t = tenantOf(req);
+    const team = teams.getTeam(req.params.idOrSlug);
+    if (!team) return res.status(404).json({ error: 'team not found' });
+    if (!teams.isMember(team.id, t.id) && !req.is_admin) return res.status(403).json({ error: 'not a team member' });
+    const row = store.findOne('team_retention', (x) => x && x.team_id === team.id && !x._deleted);
+    res.json({ team_id: team.id, retain_days: row ? row.retain_days : null, updated_at: row ? row.updated_at : null });
+  });
+  r.post('/v1/teams/:idOrSlug/retention', (req, res) => {
+    const t = tenantOf(req);
+    const team = teams.getTeam(req.params.idOrSlug);
+    if (!team) return res.status(404).json({ error: 'team not found' });
+    try { teams.requireRole(team.id, t.id, 'admin'); } catch (e) { return res.status(403).json({ error: e.message || 'admin role required' }); }
+    const days = Math.max(0, Math.trunc(Number((req.body && req.body.retain_days) || 0)));
+    const existing = store.findOne('team_retention', (x) => x && x.team_id === team.id && !x._deleted);
+    const now = new Date().toISOString();
+    if (existing) store.update('team_retention', (x) => x.id === existing.id, { retain_days: days, updated_at: now });
+    else store.insert('team_retention', { id: 'ret_' + Math.random().toString(36).slice(2, 10), team_id: team.id, tenant_id: t.id, retain_days: days, updated_at: now });
+    tryAppendAudit({ tenant_id: t.id, actor: 'tenant', op: 'team_retention.set', payload: { team_id: team.id, retain_days: days } });
+    res.json({ ok: true, team_id: team.id, retain_days: days });
+  });
+
   // Team update - admin-only rename, plan, and seat-limit updates.
   r.patch('/v1/teams/:idOrSlug', (req, res) => {
     const t = tenantOf(req);

@@ -416,6 +416,7 @@ export async function exportEvents(opts = {}) {
   const rows = await listEvents({
     namespace: opts.namespace,
     tenant_id: opts.tenant_id || opts.tenant || null,
+    team_id: opts.team_id || null, // W936 — team-scoped export
     since: opts.since,
     until: opts.until,
     limit: opts.limit == null ? 0 : opts.limit,
