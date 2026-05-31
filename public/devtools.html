@@ -4,27 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
-<title>Defense AI on air-gapped hardware (CUI/ITAR) · kolm.ai</title>
-<meta name="description" content="Compile CUI- and ITAR-handling workflows on air-gapped hardware. CMMC L2+, DFARS 7012, no cloud egress, signed artifacts at every step.">
+<title>AI features for devtools (without lock-in) · kolm.ai</title>
+<meta name="description" content="Ship AI features inside your dev product without lock-in to a single inference provider. Compile, evaluate, deploy on the runtime you pick.">
 <meta name="robots" content="index,follow">
-<link rel="canonical" href="https://kolm.ai/defense">
+<link rel="canonical" href="https://kolm.ai/devtools">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/ks.css">
     <link rel="stylesheet" href="/warm-paper.css">
-<meta property="og:title" content="Defense AI on air-gapped hardware">
-<meta property="og:description" content="CUI/ITAR-grade AI compilation for DoD primes and integrators.">
-<meta property="og:image" content="https://kolm.ai/og/defense-v2.svg">
-<meta property="og:url" content="https://kolm.ai/defense">
+<meta property="og:title" content="AI features for devtools without lock-in">
+<meta property="og:description" content="Compile AI features for platform teams.">
+<meta property="og:image" content="https://kolm.ai/og/devtools-v2.svg">
+<meta property="og:url" content="https://kolm.ai/devtools">
 <meta property="og:type" content="website">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "kolm for Defense",
+  "name": "kolm for Devtools",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
-  "url": "https://kolm.ai/defense",
-  "description": "CUI- and ITAR-safe AI compilation. Air-gapped deployment with CMMC L2+ and DFARS 7012 controls.",
+  "url": "https://kolm.ai/devtools",
+  "description": "Compile AI features for devtools without inference-provider lock-in. PR review, ticket triage, code search.",
   "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
   "publisher": {"@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org"}
 }
@@ -141,124 +141,120 @@
   <section class="hero">
     <div class="hero-grid">
       <div>
-        <p class="eyebrow">For DoD primes, integrators, and program offices</p>
-        <h1 class="v2-h1">CUI and ITAR-grade AI on air-gapped hardware.</h1>
-        <p class="lede">Compile mission workflows on disconnected GPUs. No SaaS dependency, no cloud egress, no third-party telemetry. Every artifact signed and replayable for IV&amp;V.</p>
+        <p class="eyebrow">For platform teams shipping AI features</p>
+        <h1 class="v2-h1">Ship the AI feature without picking a provider for life.</h1>
+        <p class="lede">Compile your AI feature once into a <code>.kolm</code> artifact, then swap inference providers as price and latency change. Evals, prompts, and prod metrics all stay portable.</p>
         <div class="cta-row">
-          <a class="primary" href="/enterprise#demo">Book air-gap eval</a>
-          <a class="secondary" href="/enterprise/self-hosted">Self-hosted reference</a>
+          <a class="primary" href="/enterprise#demo">Book platform-team eval</a>
+          <a class="secondary" href="/registry?vertical=devtools">Browse devtools recipes</a>
         </div>
       </div>
       <div>
-        <div class="terminal" aria-label="kolm defense quickstart">
-<span class="h"># tag CUI markings at the capture edge, no cloud egress</span>
-<span class="p">$</span> <span class="c">kolm capture log --namespace mission.isr \</span>
-                  <span class="c">--redact cui --sign</span>
-<span class="o">ok &middot;</span> <span class="x">31 captures &middot; CUI tagged in-process</span>
+        <div class="terminal" aria-label="kolm devtools quickstart">
+<span class="h"># capture prompts + tools as portable IR, sign each step</span>
+<span class="p">$</span> <span class="c">kolm capture log --namespace pr.review \</span>
+                  <span class="c">--include-tools --sign</span>
+<span class="o">ok &middot;</span> <span class="x">412 captures &middot; tool calls included</span>
 
-<span class="h"># compile mission specialist on the SCIF GPU</span>
-<span class="p">$</span> <span class="c">kolm distill --from mission.isr \</span>
-              <span class="c">--student qwen2.5-7b --quantize int4 \</span>
-              <span class="c">--airgap</span>
-<span class="o">ok &middot;</span> <span class="x">isr-triage.kolm (5.2 GB) &middot; egress=none</span>
+<span class="h"># compile into a portable .kolm artifact</span>
+<span class="p">$</span> <span class="c">kolm compile --from pr.review \</span>
+              <span class="c">--target portable --quantize int4</span>
+<span class="o">ok &middot;</span> <span class="x">pr-review.kolm (5.2 GB) &middot; provider-agnostic</span>
 
-<span class="h"># verify Ed25519 + eval pack before IV&amp;V handoff</span>
-<span class="p">$</span> <span class="c">kolm verify isr-triage.kolm --offline</span>
-<span class="o">ok &middot;</span> <span class="x">ed25519 &middot; CMMC L2 manifest &middot; replayable</span>
+<span class="h"># swap inference targets without changing the artifact</span>
+<span class="p">$</span> <span class="c">kolm serve pr-review.kolm --runtime vllm</span>
+<span class="p">$</span> <span class="c">kolm serve pr-review.kolm --runtime anthropic</span>
+<span class="o">ok &middot;</span> <span class="x">same evals replayable on either backend</span>
         </div>
       </div>
     </div>
     <div class="product-strip">
-      <div><b>Air-gap</b><span>Zero egress</span></div>
-      <div><b>CMMC</b><span>L2+ controls</span></div>
-      <div><b>DFARS 7012</b><span>CUI-aware</span></div>
-      <div><b>IV&amp;V</b><span>Replayable receipts</span></div>
+      <div><b>Provider</b><span>Any (OpenAI / Anthropic / vLLM)</span></div>
+      <div><b>Eval</b><span>Frozen seed split</span></div>
+      <div><b>Receipts</b><span>Ed25519 across backends</span></div>
+      <div><b>Latency knob</b><span>Per-route model class</span></div>
     </div>
   </section>
 
   <section class="section">
-    <h2 class="v2-h2">What program offices tell us.</h2>
-    <p class="sub">Concrete pains we hear from prime integrators and government program offices.</p>
+    <h2 class="v2-h2">What platform teams tell us.</h2>
+    <p class="sub">Concrete pains we hear from teams shipping AI features inside developer tooling.</p>
     <div class="pain-grid">
       <div class="pain-card">
-        <h3>CUI and ITAR exposure</h3>
+        <h3>Provider lock-in</h3>
         <ul>
-          <li>SaaS LLMs are not authorized for CUI handling under DFARS 7012</li>
-          <li>ITAR export controls forbid foreign-national operator access</li>
-          <li>FedRAMP High is not enough for many programs</li>
+          <li>Switching providers rewrites every prompt</li>
+          <li>Evals get rebuilt from scratch on each model change</li>
+          <li>Pricing renegotiation hands the provider all leverage</li>
         </ul>
       </div>
       <div class="pain-card">
-        <h3>Air-gap constraint</h3>
+        <h3>Eval drift on every model upgrade</h3>
         <ul>
-          <li>SCIFs and forward sites have no inbound internet</li>
-          <li>Model updates must move over sneakernet with signed bundles</li>
-          <li>Hosted inference is not an option at all</li>
+          <li>Hosted models silently version-bump and break regressions</li>
+          <li>No way to pin model + prompt + tools as one artifact</li>
+          <li>AI feature quality regresses without alert</li>
         </ul>
       </div>
       <div class="pain-card">
-        <h3>Mission-specific reasoning</h3>
+        <h3>Cost and latency unpredictability</h3>
         <ul>
-          <li>ISR triage, ATO chat, after-action analysis differ per program</li>
-          <li>Generic models hallucinate doctrine and platform specs</li>
-          <li>On-prem retraining with cleared data is required</li>
+          <li>Per-token bills scale with feature adoption</li>
+          <li>p99 latency spikes during provider incidents</li>
+          <li>No knob to choose smaller model for cold paths</li>
         </ul>
       </div>
     </div>
   </section>
 
   <section class="section">
-    <h2 class="v2-h2">Architecture: zero cloud egress.</h2>
-    <p class="sub">Capture, compile, and inference all run inside the SCIF. The only thing kolm ships is signed software bundles over sneakernet.</p>
+    <h2 class="v2-h2">Architecture: provider-agnostic artifact.</h2>
+    <p class="sub">Compile once, run anywhere. Same signed bytes, your choice of inference layer.</p>
     <div class="arch-box">
 <pre>
-   Cleared operator workstation
+   Your dev product
               |
               v
    +------------------------+
-   |  Capture proxy         |  CUI/ITAR tagging at edge
+   |  kolm compile          |  prompt+tool+eval -> artifact
    +------------------------+
               |
-              v
-   +------------------------+
-   |  kolm compile          |  signed .kolm artifact
-   +------------------------+
+              +---> hosted (OpenAI, Anthropic)
               |
-              v
-   +------------------------+
-   |  Air-gapped runtime    |  GPU in SCIF, no egress
-   +------------------------+
+              +---> open-source (Llama, Qwen on vLLM)
+              |
+              +---> on-prem GPU (your inference layer)
 </pre>
     </div>
   </section>
 
   <section class="section">
-    <h2 class="v2-h2">Defense recipes.</h2>
-    <p class="sub">Pre-built <code>.kolm</code> artifacts. Fork, audit, recompile against your cleared corpus, deploy in the SCIF.</p>
+    <h2 class="v2-h2">Devtools recipes.</h2>
+    <p class="sub">Pre-built <code>.kolm</code> artifacts. Fork, audit, recompile against your traffic, swap runtimes at will.</p>
     <div class="recipe-list">
-      <div class="recipe-row"><a href="/registry?vertical=defense">cui-redactor.kolm</a><span class="desc">&middot; tag CUI markings on free-text inputs before model call</span></div>
-      <div class="recipe-row"><a href="/registry?vertical=defense">itar-classify.kolm</a><span class="desc">&middot; classify documents against ITAR Category 22 controls</span></div>
+      <div class="recipe-row"><a href="/registry?vertical=devtools">pr-review.kolm</a><span class="desc">&middot; auto-comment on diffs with style and bug rationale</span></div>
+      <div class="recipe-row"><a href="/registry?vertical=devtools">ticket-triage.kolm</a><span class="desc">&middot; classify, route, and draft first-response to issues</span></div>
     </div>
   </section>
 
   <section class="section">
     <h2 class="v2-h2">ROI calculator.</h2>
-    <p class="sub">Estimate the annual swing from migrating one mission workflow off a hosted LLM onto an air-gapped compiled model.</p>
+    <p class="sub">Estimate the annual swing from compiling one AI feature and self-hosting the inference path.</p>
     <div class="roi-grid">
-      <div><label>Mission prompts per day <input type="number" id="roi-prompts" value="600"></label></div>
-      <div><label>Cost per 1K tokens (USD cents) <input type="number" id="roi-cost" value="5"></label></div>
-      <div><label>Operator-hours saved per task (%) <input type="number" id="roi-churn" value="30"></label></div>
-      <div><label>Infra cost / month (USD) <input type="number" id="roi-infra" value="4500"></label></div>
+      <div><label>AI feature calls per day <input type="number" id="roi-prompts" value="12000"></label></div>
+      <div><label>Cost per 1K tokens (USD cents) <input type="number" id="roi-cost" value="2"></label></div>
+      <div><label>Churn risk reduction (%) <input type="number" id="roi-churn" value="15"></label></div>
+      <div><label>Infra cost / month (USD) <input type="number" id="roi-infra" value="1800"></label></div>
     </div>
     <div class="roi-out" id="roi-out">Estimated savings: ...</div>
 
     <div class="cta-row" style="margin-top:36px">
-      <a class="primary" href="/enterprise#demo">Book air-gap eval</a>
-      <a class="secondary" href="/enterprise/self-hosted">/enterprise/self-hosted</a>
+      <a class="primary" href="/enterprise#demo">Book platform-team eval</a>
+      <a class="secondary" href="/registry?vertical=devtools">Browse devtools recipes</a>
     </div>
   </section>
 
-  <p class="footnote">See also <a href="/defense">/defense</a> (v1 overview) &middot; <a href="/enterprise/self-hosted">/enterprise/self-hosted</a> &middot; <a href="/enterprise">/enterprise</a></p>
+  <p class="footnote">See also <a href="/runtimes">/runtimes</a> &middot; <a href="/enterprise">/enterprise</a> &middot; <a href="/security">/security</a></p>
 </main>
 
 <script>
@@ -268,13 +264,11 @@
     var c = Number(document.getElementById('roi-cost').value)||0;
     var ch = Number(document.getElementById('roi-churn').value)||0;
     var inf = Number(document.getElementById('roi-infra').value)||0;
-    var tokensPerTask = 2400;
-    var saasAnnual = (p*250*tokensPerTask/1000)*(c/100);
+    var tokensPerCall = 600;
+    var saasAnnual = (p*365*tokensPerCall/1000)*(c/100);
     var infraAnnual = inf*12;
-    var operatorRate = 140;
-    var hoursSaved = 0.8*(ch/100);
-    var laborSavings = p*250*hoursSaved*operatorRate;
-    var net = (saasAnnual - infraAnnual) + laborSavings;
+    var churnSavings = saasAnnual*(ch/100);
+    var net = (saasAnnual - infraAnnual) + churnSavings;
     document.getElementById('roi-out').textContent =
       'Estimated annual savings: $' + Math.max(0, Math.round(net)).toLocaleString();
   }

@@ -36,7 +36,8 @@ const VERTICALS = [
   },
   {
     slug: 'legal-v2',
-    canonical: 'https://kolm.ai/legal-v2',
+    redirect: '/legal',
+    canonical: 'https://kolm.ai/legal',
     hero_keyword: /[Pp]rivileged/,
     cta_label: /Book private-cloud demo/,
     recipes: ['contract-review.kolm', 'privilege-flag.kolm'],
@@ -44,7 +45,8 @@ const VERTICALS = [
   },
   {
     slug: 'finance-v2',
-    canonical: 'https://kolm.ai/finance-v2',
+    redirect: '/finance',
+    canonical: 'https://kolm.ai/finance',
     hero_keyword: /KYC|SAR/,
     cta_label: /Book regulated-finance demo/,
     recipes: ['kyc-redact.kolm', 'sar-narrative.kolm'],
@@ -52,7 +54,8 @@ const VERTICALS = [
   },
   {
     slug: 'defense-v2',
-    canonical: 'https://kolm.ai/defense-v2',
+    redirect: '/defense',
+    canonical: 'https://kolm.ai/defense',
     hero_keyword: /CUI|ITAR/,
     cta_label: /Book air-gap eval/,
     // Defense per spec has no recipe-download section (no recipes named in spec).
@@ -61,7 +64,8 @@ const VERTICALS = [
   },
   {
     slug: 'devtools-v2',
-    canonical: 'https://kolm.ai/devtools-v2',
+    redirect: '/devtools',
+    canonical: 'https://kolm.ai/devtools',
     hero_keyword: /provider|AI feature/,
     cta_label: /Book platform-team eval/,
     recipes: ['pr-review.kolm', 'ticket-triage.kolm'],
@@ -256,9 +260,9 @@ test('W272 #14 - sw.js wave-floor is >= 272', () => {
   assert.ok(Number(m[1]) >= 272, `sw.js cache wave must be >= 272, got ${m[1]}`);
 });
 
-test('W272 #15 - defense-v2 references /enterprise/self-hosted per W264 cross-link', () => {
-  const html = readPage('defense-v2');
-  assert.match(html, /\/enterprise\/self-hosted/, 'defense-v2 must cross-link to /enterprise/self-hosted');
+test('W272 #15 - defense (promoted from defense-v2) references /enterprise/self-hosted per W264 cross-link', () => {
+  const html = readPage('defense');
+  assert.match(html, /\/enterprise\/self-hosted/, 'defense must cross-link to /enterprise/self-hosted');
 });
 
 test('W272 #16 - each page has a meta description tag', () => {
