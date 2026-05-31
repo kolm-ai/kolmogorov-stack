@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Compile DeepSeek-R1-Distill-Qwen-7B to GGUF Q4_K_M &middot; kolm.ai</title>
+<title>Compile DeepSeek-R1-Distill-Qwen-7B to GGUF Q4_K_M with kolm</title>
 <meta name="description" content="Compile DeepSeek-R1-Distill-Qwen-7B to GGUF Q4_K_M (llama.cpp / Ollama / LM Studio) with kolm. Open-source AI compiler, signed receipts, runs on your own hardware.">
 <meta name="keywords" content="kolm, deepseek-r1-distill-7b, gguf-q4_k_m, gguf, compile, quantize, DeepSeek, distill, local LLM">
 <meta name="theme-color" content="#0b0d10">
@@ -60,8 +60,8 @@
 </script>
 <style>
 :root{--ink:#1f2937;--ink-mute:#56606c;--ink-faint:#8a93a0;--bg:#ffffff;--bg-elev:#f3f5f7;--accent:#1f2937;--cta-fg:#ffffff;--cta-hover-bg:#56606c;--line:rgba(31,41,55,.12);--mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter','Segoe UI',system-ui,sans-serif}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#e6e9ee;--ink-mute:#9aa3b2;--ink-faint:#6b7280;--bg:#0b0d10;--bg-elev:#11151b;--accent:#a8b3c2;--cta-fg:#0b0d10;--cta-hover-bg:#cdd4dd;--line:var(--line-2)}}
-[data-theme="dark"]{--ink:#e6e9ee;--ink-mute:#9aa3b2;--ink-faint:#6b7280;--bg:#0b0d10;--bg-elev:#11151b;--accent:#a8b3c2;--cta-fg:#0b0d10;--cta-hover-bg:#cdd4dd;--line:var(--line-2)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#e6e9ee;--ink-mute:#9aa3b2;--ink-faint:#6b7280;--bg:#0b0d10;--bg-elev:#11151b;--accent:#a8b3c2;--cta-fg:#0b0d10;--cta-hover-bg:#cdd4dd;--line:rgba(230,233,238,.10)}}
+[data-theme="dark"]{--ink:#e6e9ee;--ink-mute:#9aa3b2;--ink-faint:#6b7280;--bg:#0b0d10;--bg-elev:#11151b;--accent:#a8b3c2;--cta-fg:#0b0d10;--cta-hover-bg:#cdd4dd;--line:rgba(230,233,238,.10)}
 *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.65}
 a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 header.site{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);z-index:50}
@@ -93,11 +93,11 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 </head>
 <body>
 <a href="#main" style="position:absolute;left:-9999px" onfocus="this.style.cssText='position:fixed;top:8px;left:8px;background:#111;color:#fff;padding:8px 12px;border-radius:6px;z-index:100'">Skip to content</a>
-<header class="site"><div class="wrap"><a class="logo" href="/">kolm.ai</a><nav><a href="/forge">Forge</a><a href="/models">Models</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/signup">Sign up</a></nav></div></header>
+<header class="site"><div class="wrap"><a class="logo" href="/">kolm.ai</a><nav><a href="/product">Product</a><a href="/proof">Proof</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav></div></header>
 <main id="main">
 
 <p class="muted"><a href="/compile/all">&larr; Compile catalog</a></p>
-<h1>Compile DeepSeek-R1-Distill-Qwen-7B to GGUF Q4_K_M with kolm.</h1>
+<h1>Compile DeepSeek-R1-Distill-Qwen-7B to GGUF Q4_K_M on consumer hardware with kolm.</h1>
 <p class="lede"><strong>DeepSeek-R1-Distill-Qwen-7B</strong> is DeepSeek's 7B reasoning-distilled checkpoint. <strong>GGUF Q4_K_M</strong> is a 4.5-bit GGUF mixed-precision quantization that balances size and quality. Q4_K_M is the most popular GGUF level for consumer GPUs and CPU offload.</p>
 
 <p>DeepSeek-R1-Distill-Qwen-7B is an open-weight checkpoint (7B parameters from DeepSeek). kolm compile pulls the bf16 weights, runs GGUF mixed-precision quantization via llama.cpp, and emits a signed .kolm artifact with the quantized weights and the original bf16 SHA-256 hashes for reproducibility.</p>
@@ -141,8 +141,8 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 </ul>
 
 <h2>Try it</h2>
-<a class="cta" href="/signup">Start free <span aria-hidden="true">&rarr;</span></a>
-<a class="cta-alt" href="/forge">See the Forge surface</a>
+<a class="cta" href="/quickstart">Start free <span aria-hidden="true">&rarr;</span></a>
+<a class="cta-alt" href="/verify">Verify a receipt</a>
 
 <h2>See also</h2>
 <ul>
