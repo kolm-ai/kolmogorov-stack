@@ -16067,6 +16067,70 @@ export function buildRouter() {
     });
   });
 
+  // W936 — team model registry. A member shares an artifact (a completed
+  // compile job) with the team; members list it and reach it via a STABLE
+  // endpoint. Backs "train a model your team owns, then everyone uses it"
+  // (including the intense cloud/GPU training path — any completed artifact).
+  r.get('/v1/teams/:idOrSlug/models', (req, res) => {
+    const t = tenantOf(req);
+    const team = teams.getTeam(req.params.idOrSlug);
+    if (!team) return res.status(404).json({ error: 'team not found' });
+    if (!teams.isMember(team.id, t.id) && !req.is_admin) return res.status(403).json({ error: 'not a team member' });
+    const models = store.find('team_models', (m) => m && !m._deleted && m.team_id === team.id).map((m) => {
+      let art = null; try { const j = getJob(m.artifact_job_id, null); art = j ? jobToArtifact(j) : null; } catch (_) { art = null; }
+      return { id: m.id, name: m.name, artifact_id: m.artifact_job_id, shared_by: m.shared_by, created_at: m.created_at, endpoint: m.endpoint_url || null, artifact: art };
+    });
+    res.json({ team: { id: team.id, name: team.name || team.slug || team.id }, models });
+  });
+
+  r.post('/v1/teams/:idOrSlug/models', (req, res) => {
+    const t = tenantOf(req);
+    const team = teams.getTeam(req.params.idOrSlug);
+    if (!team) return res.status(404).json({ error: 'team not found' });
+    try { teams.requireRole(team.id, t.id, 'member'); } catch (e) { return res.status(403).json({ error: e.message || 'member role required' }); }
+    const artifactId = (req.body && req.body.artifact_id) || '';
+    const j = getJob(artifactId, req.is_admin ? null : req.tenant);
+    if (!j) return res.status(404).json({ error: 'artifact not found or not yours' });
+    if (j.status !== 'completed') return res.status(409).json({ error: 'artifact not ready', status: j.status });
+    const existing = store.findOne('team_models', (m) => m && !m._deleted && m.team_id === team.id && m.artifact_job_id === artifactId);
+    if (existing) return res.json({ ok: true, model: existing, deduped: true });
+    const row = {
+      id: 'tm_' + Math.random().toString(36).slice(2, 12),
+      team_id: team.id, tenant: req.tenant, tenant_id: t.id,
+      artifact_job_id: artifactId, name: (req.body && req.body.name) || j.recipe || j.name || artifactId,
+      shared_by: t.id, created_at: new Date().toISOString(), endpoint_url: null, endpoint_tunnel_id: null,
+    };
+    store.insert('team_models', row);
+    tryAppendAudit({ tenant_id: t.id, actor: 'tenant', op: 'team_model.shared', payload: { team_id: team.id, artifact_id: artifactId } });
+    res.json({ ok: true, model: row });
+  });
+
+  r.delete('/v1/teams/:idOrSlug/models/:modelId', (req, res) => {
+    const t = tenantOf(req);
+    const team = teams.getTeam(req.params.idOrSlug);
+    if (!team) return res.status(404).json({ error: 'team not found' });
+    const row = store.findOne('team_models', (m) => m && m.id === req.params.modelId && m.team_id === team.id && !m._deleted);
+    if (!row) return res.status(404).json({ error: 'model not found' });
+    const m = teams.membershipOf(team.id, t.id);
+    const isAdmin = !!(m && ['admin', 'owner'].includes(m.role));
+    if (row.shared_by !== t.id && !isAdmin) return res.status(403).json({ error: 'only the sharer or an admin can remove a team model' });
+    store.remove('team_models', (x) => x.id === row.id);
+    res.json({ ok: true, removed: row.id });
+  });
+
+  r.post('/v1/teams/:idOrSlug/models/:modelId/endpoint', (req, res) => {
+    const t = tenantOf(req);
+    const team = teams.getTeam(req.params.idOrSlug);
+    if (!team) return res.status(404).json({ error: 'team not found' });
+    try { teams.requireRole(team.id, t.id, 'member'); } catch (e) { return res.status(403).json({ error: e.message || 'member role required' }); }
+    const row = store.findOne('team_models', (m) => m && m.id === req.params.modelId && m.team_id === team.id && !m._deleted);
+    if (!row) return res.status(404).json({ error: 'model not found' });
+    if (row.endpoint_url) return res.json({ ok: true, endpoint: row.endpoint_url, deduped: true });
+    const tnl = tunnel.registerTunnel({ tenantId: t.id, tenantName: req.tenant, teamId: team.id, name: 'team-model-' + row.id, stable: true });
+    store.update('team_models', (x) => x.id === row.id, { endpoint_url: tnl.public_url, endpoint_tunnel_id: tnl.id });
+    res.json({ ok: true, endpoint: tnl.public_url, tunnel_id: tnl.id, note: 'a stable team endpoint; it does not expire on the idle TTL' });
+  });
+
   // Team update - admin-only rename, plan, and seat-limit updates.
   r.patch('/v1/teams/:idOrSlug', (req, res) => {
     const t = tenantOf(req);

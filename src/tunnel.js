@@ -32,22 +32,27 @@ function sanitizeName(s) {
   return String(s || '').replace(/[<>"']/g, '').slice(0, 60).trim();
 }
 
-export function registerTunnel({ tenantId, tenantName, teamId = null, name = 'tunnel', publicBase = 'https://kolm.ai' }) {
+export function registerTunnel({ tenantId, tenantName, teamId = null, name = 'tunnel', publicBase = 'https://kolm.ai', stable = false }) {
   if (!tenantId) throw new Error('tenantId required');
   const token = newToken();
   const now = new Date();
+  // W936 — a `stable` team-model endpoint must not expire on the 7-day idle TTL
+  // (members share one persistent URL). Use a 100-year expiry so every existing
+  // expires_at check and purgeExpired() naturally treats it as live.
+  const STABLE_TTL_MS = 100 * 365 * 24 * 60 * 60 * 1000;
   const tunnel = {
     id: id('tnl'),
     token,
     tenant_id: tenantId,
     tenant_name: tenantName,
     team_id: teamId || null,
+    stable: !!stable,
     name: sanitizeName(name),
     public_url: `${publicBase.replace(/\/+$/, '')}/r/${token}`,
     status: 'pending',           // pending → active when agent first connects
     created_at: now.toISOString(),
     last_seen_at: null,
-    expires_at: new Date(now.getTime() + TUNNEL_TTL_MS).toISOString(),
+    expires_at: new Date(now.getTime() + (stable ? STABLE_TTL_MS : TUNNEL_TTL_MS)).toISOString(),
     requests_count: 0,
     bytes_in: 0,
     bytes_out: 0,
