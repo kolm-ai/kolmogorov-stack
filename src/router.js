@@ -18,7 +18,7 @@ import { effectiveReceiptSecret, isProductionRuntime, runtimeReadiness, tenantRe
 import * as registry from './registry.js';
 import * as runtime from './runtime.js';
 import * as cache from './cache.js';
-import { authMiddleware, provisionTenant, provisionAnonTenant, claimAnonTenant, chargeUsage, rotateTenantKey, rotateTenantReceiptSecret, listTenantReceiptSecrets, pruneTenantReceiptSecret, adminApiKey, findTenantByApiKey, findTenantByEmail, constantTimeEqual as constantTimeEq, requirePlan, isGeoFenced } from './auth.js';
+import { authMiddleware, provisionTenant, provisionAnonTenant, claimAnonTenant, chargeUsage, rotateTenantKey, rotateTenantReceiptSecret, listTenantReceiptSecrets, pruneTenantReceiptSecret, adminApiKey, findTenantByApiKey, findTenantByEmail, constantTimeEqual as constantTimeEq, requirePlan, isGeoFenced, mintScopedKey, listScopedKeys, revokeScopedKey, keyHasScope } from './auth.js';
 import { mountOAuth, oauthConfigured } from './oauth.js';
 import { sendWelcome, sendBillingActivated, sendBillingFailed, emailConfigured, sendEmail, tEmailSignup, tEmailCompileDone, tEmailUsageAlert } from './email.js';
 import { compileJs, verify } from './verifier.js';
@@ -10447,6 +10447,28 @@ export function buildRouter() {
     res.json(out);
   });
 
+  // --- Scoped member API keys (multi-key, least-privilege) ---
+  // Mint keys with a subset of scopes (e.g. capture:read, lake:export,
+  // namespace:<slug>, or *) so a teammate or a CI job gets only what it needs.
+  // Non-breaking: the tenant-primary key (rotate via /v1/account/keys) is full.
+  r.get('/v1/account/scoped-keys', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth required' });
+    res.json({ keys: listScopedKeys(req.tenant_record.id) });
+  });
+  r.post('/v1/account/scoped-keys', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth required' });
+    // minting a key cannot escalate: a scoped caller cannot mint a broader key.
+    if (!keyHasScope(req, '*')) return res.status(403).json({ error: 'a scoped key cannot mint keys' });
+    const b = req.body || {};
+    const out = mintScopedKey(req.tenant_record.id, { scopes: b.scopes || [], label: b.label || '' });
+    tryAppendAudit({ tenant_id: req.tenant_record.id, actor: 'tenant', op: 'scoped_key.minted', payload: { key_prefix: out.key_prefix, scopes: b.scopes || [] } });
+    res.json({ ok: true, api_key: out.key, key_prefix: out.key_prefix, scopes: b.scopes || [], note: 'store this now; it is not shown again' });
+  });
+  r.delete('/v1/account/scoped-keys/:id', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth required' });
+    res.json(revokeScopedKey(req.tenant_record.id, req.params.id));
+  });
+
   // Account API key revoke - rotates away a key prefix and returns the replacement secret.
   r.delete('/v1/account/keys/:prefix', (req, res) => {
     if (!req.tenant_record) return res.status(403).json({ error: 'cannot revoke keys without a tenant context' });
@@ -16011,6 +16033,11 @@ export function buildRouter() {
     if (!teams.isMember(team.id, t.id) && !req.is_admin) {
       return res.status(403).json({ error: 'not a team member' });
     }
+    // W936 — capture:read RBAC (role + key scope). A viewer+ member with a
+    // capture:read / capture:* / * scope may read; a scoped key without it is denied.
+    const _mem = teams.membershipOf(team.id, t.id);
+    const _authz = authorizeCaptureAction({ action: 'capture:read', tenantId: t.id, memberRole: req.is_admin ? 'admin' : ((_mem && _mem.role) || 'viewer'), keyScopes: req.key_scopes || ['*'], allowedNamespaces: ['*'] });
+    if (!_authz.ok) return res.status(403).json({ error: 'forbidden', reason: _authz.reason, ..._authz });
     const q = req.query || {};
     let rows = [];
     try {
@@ -19334,6 +19361,11 @@ res.json({
   // W409l — GET /v1/lake/export → bulk export of canonical events.
   // Supports format=jsonl (default) | json | csv. Streams the buffer back.
   r.get('/v1/lake/export', async (req, res) => {
+    // W936 — a scoped key needs lake:export (or lake:* / *) to bulk-export the
+    // lake. The tenant-primary key (req.key_scopes null) is unrestricted.
+    if (!keyHasScope(req, 'lake:export') && !(req.key_scopes && req.key_scopes.includes('lake:*'))) {
+      return res.status(403).json({ error: 'insufficient_scope', required: 'lake:export' });
+    }
     try {
       const { exportEvents } = await import('./event-store.js');
       const format = String(req.query.format || 'jsonl').toLowerCase();

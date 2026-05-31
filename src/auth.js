@@ -524,6 +524,52 @@ export function adminApiKey() {
   return process.env.ADMIN_KEY || null;
 }
 
+// --- W936 scoped member API keys ---------------------------------------
+// A first-class multi-key surface alongside the single tenant-primary key.
+// Each row: { id, tenant_id, hash(sha256 hex), key_prefix, scopes[], label,
+// created_at, last_used_at, revoked_at }. scopes like 'capture:read',
+// 'lake:export', 'namespace:<slug>', or '*'. A request authenticated by one of
+// these keys carries req.key_scopes (an array); the tenant-primary key carries
+// req.key_scopes = null, meaning full access.
+export function mintScopedKey(tenant_id, { scopes = [], label = '' } = {}) {
+  if (!tenant_id) throw Object.assign(new Error('tenant required'), { code: 'no_tenant' });
+  const key = 'ks_' + crypto.randomBytes(24).toString('hex');
+  const rawHex = crypto.createHash('sha256').update(key).digest('hex');
+  insert('api_keys', {
+    id: 'key_' + crypto.randomBytes(8).toString('hex'),
+    tenant_id, hash: rawHex, key_prefix: key.slice(0, 12),
+    scopes: Array.isArray(scopes) ? scopes.map(String).filter(Boolean) : [],
+    label: String(label || '').slice(0, 80),
+    created_at: new Date().toISOString(), last_used_at: null, revoked_at: null,
+  });
+  return { key, key_prefix: key.slice(0, 12) };
+}
+export function listScopedKeys(tenant_id) {
+  return all('api_keys')
+    .filter((k) => k && !k._deleted && k.tenant_id === tenant_id)
+    .map((k) => ({ id: k.id, key_prefix: k.key_prefix, scopes: k.scopes || [], label: k.label || '', created_at: k.created_at, last_used_at: k.last_used_at || null, revoked: !!k.revoked_at }));
+}
+export function revokeScopedKey(tenant_id, id) {
+  const n = update('api_keys', (k) => k && k.tenant_id === tenant_id && k.id === id && !k.revoked_at, { revoked_at: new Date().toISOString() });
+  return { ok: true, revoked: n > 0 };
+}
+// Returns the scope array for a raw key authenticated via the api_keys table,
+// or null when the key is the tenant-primary key (full access).
+export function scopesForKey(key) {
+  try {
+    const rawHex = crypto.createHash('sha256').update(String(key || '')).digest('hex');
+    const row = findOne('api_keys', (x) => x && !x._deleted && !x.revoked_at && (x.hash === rawHex || x.hash === 'sha256:' + rawHex || x.api_key_hash === rawHex));
+    return row ? (Array.isArray(row.scopes) ? row.scopes : []) : null;
+  } catch (_) { return null; }
+}
+// Convenience for routes: a full (null-scope) key passes everything; a scoped
+// key passes only when '*' or the exact action scope is present.
+export function keyHasScope(req, action) {
+  const sc = req && req.key_scopes;
+  if (sc == null) return true;
+  return Array.isArray(sc) && (sc.includes('*') || sc.includes(action));
+}
+
 export function authMiddleware(req, res, next) {
   const p = req.path;
   // Non-API paths bypass auth entirely (page routes, static, 404 fallback handle them)
@@ -614,6 +660,10 @@ export function authMiddleware(req, res, next) {
   // mirroring api_key into a sliding-session cookie). Tenants store only
   // api_key_hash post-migration, so without this the raw key is unrecoverable.
   req.api_key = key;
+  // W936 — scoped keys: null for the tenant-primary key (full access), an array
+  // of scopes for keys minted via mintScopedKey. Routes gate with keyHasScope /
+  // authorizeCaptureAction({ keyScopes: req.key_scopes || ['*'] }).
+  req.key_scopes = scopesForKey(key);
   next();
 }
 
