@@ -156,7 +156,9 @@ function harvestComments(lines, routeLineIdx) {
     }
     if (trimmed.startsWith('//')) {
       const content = trimmed.replace(/^\/\/+\s?/, '');
-      collected.unshift(content);
+      // W934b: strip leading internal wave tag (e.g. "W888-D ") from public API descriptions
+      const cleaned = content.replace(/^W\d+[a-z]?(?:-[A-Z0-9]+)?[\s:.\-]+/, '') || content;
+      collected.unshift(cleaned);
       taken++;
       continue;
     }

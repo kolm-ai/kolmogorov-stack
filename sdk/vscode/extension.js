@@ -14,6 +14,7 @@ const https = require('node:https');
 const http = require('node:http');
 const path = require('node:path');
 const { URL } = require('node:url');
+const cp = require('node:child_process');
 
 const DEFAULT_BASE = 'https://kolm.ai';
 
@@ -252,7 +253,13 @@ async function cmdRun(uri) {
     { location: vscode.ProgressLocation.Notification, title: `Running ${path.basename(p)}...` },
     async () => {
       try {
-        const r = await api('POST', '/v1/run/inline', { artifact: path.basename(p), input });
+        const r = await new Promise((resolve, reject) => {
+          cp.execFile('kolm', ['run', p, input, '--json'], { maxBuffer: 1e7 }, (err, stdout, stderr) => {
+            if (err && !stdout) return reject(new Error((stderr && stderr.trim()) || err.message));
+            let parsed; try { parsed = JSON.parse(stdout); } catch { parsed = { output: (stdout || '').trim() }; }
+            resolve(parsed);
+          });
+        });
         const c = chan();
         c.show(true);
         c.appendLine('');
@@ -262,7 +269,7 @@ async function cmdRun(uri) {
         c.appendLine(`  latency:     ${r.latency_us != null ? r.latency_us + ' us' : '?'}`);
         c.appendLine(`  verified:    ${r.verified === true ? 'yes' : 'no'}`);
         if (info.manifest && info.manifest.k_score) c.appendLine(`  k_score:     ${fmtKScore(info.manifest.k_score)}`);
-        logRestEquivalent('POST', '/v1/run/inline', { artifact: path.basename(p), input });
+        c.appendLine('  (ran locally via the kolm CLI â the artifact never left this machine)');
       } catch (e) {
         vscode.window.showErrorMessage(`Kolm run failed: ${e.message}`);
       }

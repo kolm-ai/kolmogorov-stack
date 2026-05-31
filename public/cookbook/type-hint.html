@@ -116,6 +116,10 @@
  <span class="pill">Recipe &middot; coding</span>
  <h1>Type-hint, <span class="tone">mypy-verified.</span></h1>
  <p class="lede">A local <code>.kolm</code> file that takes an untyped Python function and returns the same function with parameter and return annotations. The verifier runs <code>mypy --strict</code> at compile time on every gold pair, so an output that doesn't type-check never lands in the training set.</p>
+ <div class="rcta">
+  <a class="rcta-primary" href="/quickstart">Start free &rarr;</a>
+  <a class="rcta-alt" href="/verify">Verify a receipt</a>
+ </div>
 
  <div class="meta-row">
  <div class="item"><span class="label">base model</span><span class="value">qwen2.5-coder-3b</span></div>
@@ -217,7 +221,7 @@ def first_match(xs: Iterable[T], pred: Callable[[T], bool]) -&gt; T | None:
  <span class="k-value">0.88</span>
  <span class="k-detail">held-out 45 pairs &middot; mypy-pass 94% &middot; body-preservation 100% &middot; latency-ratio 0.83</span>
  </div>
- <p>3 of 45 outputs failed <code>mypy --strict</code> on first try (typically a missing import for <code>TypeVar</code> or <code>Callable</code>). Recompile with the offending pairs surfaced as hard negatives took the pass-rate to 94%.</p>
+ <p>3 of 45 outputs failed <code>mypy --strict</code> on first try (typically a missing import for <code>TypeVar</code> or <code>Callable</code>). Recompile with the offending pairs marked to drop from training took the pass-rate to 94%.</p>
  </div>
 
  <div class="group">

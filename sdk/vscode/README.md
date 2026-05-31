@@ -41,7 +41,7 @@ Open the command palette (`Cmd/Ctrl+Shift+P`) and type `Kolm:`.
 |---|---|
 | **Kolm: Inspect this .kolm artifact** | Shows manifest + receipt summary in the output channel. Works on the active editor, an explorer right-click, or a file picker. |
 | **Kolm: Verify this .kolm artifact** | Re-verifies the 4-ring HMAC receipt chain via `/v1/receipts/verify`. |
-| **Kolm: Run a .kolm artifact with an input** | Prompts for input, POSTs `/v1/run/inline`, prints the output + latency + verified flag. |
+| **Kolm: Run a .kolm artifact with an input** | Prompts for input, runs the artifact locally via the `kolm` CLI, prints the output + latency + verified flag. |
 | **Kolm: Compile a new artifact from a spec** | Plain-English task description → `/v1/compile` job. Track progress in the dashboard. |
 | **Kolm: Search the public registry** | Search the public `/v1/registry/export` catalog and copy a slug to the clipboard. |
 | **Kolm: Replace this LLM call with a kolm artifact** | Swap a highlighted LLM call for a `kolm.run(...)` invocation. |
@@ -57,7 +57,7 @@ Sample log line after running an artifact:
 
 ```
 > REST equivalent
-  POST https://kolm.ai/v1/run/inline
+  kolm run ./artifact.kolm "<input>"   # runs locally; the artifact never leaves your machine
   Authorization: Bearer ks_169...
   Content-Type: application/json
   {

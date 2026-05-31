@@ -32,7 +32,7 @@ Build:
 
 ```
 cc -DKOLM_IMPLEMENTATION -o hello hello.c -lcurl
-KOLM_API_KEY=sk-... ./hello
+KOLM_API_KEY=ks_... ./hello
 ```
 
 ## CLI demo
@@ -143,7 +143,7 @@ typedef struct {
 } kolm_response_t;
 ```
 
-## Honesty contract
+## Failure-mode contract
 
 - `status` is the literal HTTP status code. `0` means the request never reached a server (DNS, TLS, timeout).
 - `body` is the raw response bytes with a sentinel NUL appended for convenience. The SDK does NOT parse JSON; pair with cJSON, jansson, or json-c if you need structured access. For binary downloads (`kolm_marketplace_download`) use `body_len` to walk the buffer — a `.kolm` artifact can contain embedded zeros.

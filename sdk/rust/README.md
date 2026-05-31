@@ -27,7 +27,7 @@ fn main() -> Result<(), kolm::Error> {
 Run the bundled example:
 
 ```
-KOLM_API_KEY=sk-... cargo run --example whoami
+KOLM_API_KEY=ks_... cargo run --example whoami
 ```
 
 The example walks `whoami`, `account`, and `marketplace_list` in one shot so a freshly-installed SDK can verify auth, billing, and the public catalog from a single binary.
@@ -115,7 +115,7 @@ impl Response {
 
 All methods return a raw `Response` whose `status` and `body` are surfaced verbatim - no method papers over a 4xx, and JSON parsing stays opt-in via `r.json::<T>()`.
 
-## Honesty contract
+## Failure-mode contract
 
 - `Response.status` is the raw HTTP status code. There is no `is_success()` sugar that hides a 4xx; you handle status codes yourself.
 - `Response.body` is the raw bytes as a UTF-8 string. JSON parsing is opt-in via `r.json::<T>()` so the SDK never forces a schema on an evolving API.

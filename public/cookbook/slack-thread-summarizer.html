@@ -117,6 +117,10 @@
  <span class="pill">Recipe &middot; ops</span>
  <h1>"What did <span class="tone">I miss?"</span></h1>
  <p class="lede">A local <code>.kolm</code> file that takes a long Slack thread (50-500 messages) and returns three blocks: <em>TL;DR, decisions made, open questions</em>. Trained on 100 of your team's actual threads. Runs in your environment; never sends a thread out for summarization.</p>
+ <div class="rcta">
+  <a class="rcta-primary" href="/quickstart">Start free &rarr;</a>
+  <a class="rcta-alt" href="/verify">Verify a receipt</a>
+ </div>
 
  <div class="meta-row">
  <div class="item"><span class="label">base model</span><span class="value">qwen2.5-7b-instruct</span></div>
@@ -177,7 +181,7 @@
  <div class="pair-h">input - 38-message thread (truncated)</div>
  <pre class="code">[1761843102.001 sara] proposed: switch the worker queue from sqs to redis-streams
 [1761843223.005 luis] +1 · sqs receive-loop tax is killing us at 50qps
-[1761843541.008 ana] concern: ops surface for redis is harder than sqs
+[1761843541.008 ana] concern: redis operations are harder than sqs
 [1761844210.012 luis] benchmarks attached, redis-streams 4x cheaper at scale
 [1761845882.018 sara] decision: roll redis-streams behind a feature flag, sqs stays as fallback
 [1761846430.021 ana] who owns the rollout?

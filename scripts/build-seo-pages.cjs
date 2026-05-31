@@ -184,7 +184,7 @@ function buildPage(model, format) {
   // Intro paragraphs
   const intro1 = `<strong>${model.name}</strong> is ${model.desc}. <strong>${format.name}</strong> is ${format.desc}`;
   const intro2 = model.family === 'frontier'
-    ? `Closed-weight frontier models like ${model.name} cannot be quantized directly — the weights are not public. The kolm path is distill-then-compile: a smaller open-weight student is trained against the frontier teacher with kolm capture + kolm distill, then the compiled student is exported to ${format.name}. See the <a href="/docs/distillation">distillation pipeline</a> and the <a href="/wrapper">gateway</a> that produces the training pairs.`
+    ? `Closed-weight frontier models like ${model.name} cannot be quantized directly — the weights are not public. The kolm path is distill-then-compile: a smaller open-weight student is trained against the frontier teacher with kolm capture + kolm distill, then the compiled student is exported to ${format.name}. See the <a href="/docs/distillation">distillation pipeline</a> and the <a href="/gateway">gateway</a> that produces the training pairs.`
     : `${model.name} is an open-weight checkpoint (${model.params_b}B parameters from ${model.vendor}). kolm compile pulls the bf16 weights, runs ${format.family === 'gguf' ? 'GGUF mixed-precision quantization via llama.cpp' : format.family === 'exl2' ? 'EXL2 packed quantization with calibration' : format.family === 'gptq' ? 'GPTQ calibration with C4 calibration samples' : format.family === 'awq' ? 'activation-aware AWQ quantization with calibration' : 'MLX conversion targeting Apple Silicon unified memory'}, and emits a signed .kolm artifact with the quantized weights and the original bf16 SHA-256 hashes for reproducibility.`;
   const intro3 = `The output is a single ${format.name} file plus a receipt. The receipt records every input weight hash, the quantization method, wall-clock duration, and the host hardware profile. You can verify a compiled artifact end-to-end at <a href="/verify-prod">/verify-prod</a> or with <code>kolm verify ./artifact.kolm</code>.`;
   const intro4 = est.grounded
@@ -252,9 +252,9 @@ function buildPage(model, format) {
 }
 </script>
 <style>
-:root{--ink:#1f2937;--ink-mute:#56606c;--ink-faint:#8a93a0;--bg:#ffffff;--bg-elev:#f3f5f7;--accent:#1f2937;--cta-fg:#ffffff;--cta-hover-bg:#56606c;--line:rgba(31,41,55,.12);--mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter','Segoe UI',system-ui,sans-serif}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#e6e9ee;--ink-mute:#9aa3b2;--ink-faint:#6b7280;--bg:#0b0d10;--bg-elev:#11151b;--accent:#a8b3c2;--cta-fg:#0b0d10;--cta-hover-bg:#cdd4dd;--line:rgba(230,233,238,.10)}}
-[data-theme="dark"]{--ink:#e6e9ee;--ink-mute:#9aa3b2;--ink-faint:#6b7280;--bg:#0b0d10;--bg-elev:#11151b;--accent:#a8b3c2;--cta-fg:#0b0d10;--cta-hover-bg:#cdd4dd;--line:rgba(230,233,238,.10)}
+:root{--ink:#1f2937;--ink-mute:#56606c;--ink-faint:#8a93a0;--bg:#ffffff;--bg-elev:#f3f5f7;--accent:#2563eb;--cta-fg:#ffffff;--cta-hover-bg:#56606c;--line:rgba(31,41,55,.12);--mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter','Segoe UI',system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#e6e9ee;--ink-mute:#9aa3b2;--ink-faint:#6b7280;--bg:#0b0d10;--bg-elev:#11151b;--accent:#6f9bff;--cta-fg:#0b0d10;--cta-hover-bg:#cdd4dd;--line:rgba(230,233,238,.10)}}
+[data-theme="dark"]{--ink:#e6e9ee;--ink-mute:#9aa3b2;--ink-faint:#6b7280;--bg:#0b0d10;--bg-elev:#11151b;--accent:#6f9bff;--cta-fg:#0b0d10;--cta-hover-bg:#cdd4dd;--line:rgba(230,233,238,.10)}
 *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.65}
 a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 header.site{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);z-index:50}
@@ -367,9 +367,9 @@ function buildCatalogPage(pages) {
 <link rel="canonical" href="https://kolm.ai/compile">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
-:root{--ink:#1f2937;--ink-mute:#56606c;--ink-faint:#8a93a0;--bg:#ffffff;--bg-elev:#f3f5f7;--accent:#1f2937;--line:rgba(31,41,55,.12);--mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter','Segoe UI',system-ui,sans-serif}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#e6e9ee;--ink-mute:#9aa3b2;--ink-faint:#6b7280;--bg:#0b0d10;--bg-elev:#11151b;--accent:#a8b3c2;--line:rgba(230,233,238,.10)}}
-[data-theme="dark"]{--ink:#e6e9ee;--ink-mute:#9aa3b2;--ink-faint:#6b7280;--bg:#0b0d10;--bg-elev:#11151b;--accent:#a8b3c2;--line:rgba(230,233,238,.10)}
+:root{--ink:#1f2937;--ink-mute:#56606c;--ink-faint:#8a93a0;--bg:#ffffff;--bg-elev:#f3f5f7;--accent:#2563eb;--line:rgba(31,41,55,.12);--mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter','Segoe UI',system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#e6e9ee;--ink-mute:#9aa3b2;--ink-faint:#6b7280;--bg:#0b0d10;--bg-elev:#11151b;--accent:#6f9bff;--line:rgba(230,233,238,.10)}}
+[data-theme="dark"]{--ink:#e6e9ee;--ink-mute:#9aa3b2;--ink-faint:#6b7280;--bg:#0b0d10;--bg-elev:#11151b;--accent:#6f9bff;--line:rgba(230,233,238,.10)}
 *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.65}
 a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 header.site{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);z-index:50}

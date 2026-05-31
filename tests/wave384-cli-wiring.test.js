@@ -118,10 +118,14 @@ test('W384 #6 — HELP._root mentions the 8 W384 verbs', () => {
   for (const v of ['privacy', 'pipeline', 'agents', 'shell-init']) {
     assert.ok(KOLM_JS.includes(`  ${v}`), `HELP._root must list ${v}`);
   }
-  // Tag W384 should appear in the HELP block so a `kolm help | grep W384`
-  // surfaces the new verbs at a glance.
-  assert.ok((KOLM_JS.match(/\[W384\]/g) || []).length >= 4,
-    'HELP._root must tag W384 lines');
+  // W934: internal [W384] wave tags were stripped from the user-facing --help
+  // block (they were jargon leakage). The real invariant is that each verb is
+  // listed WITH a description in the help block — not that an internal wave tag
+  // is present in output a user reads.
+  for (const v of ['privacy', 'pipeline', 'agents', 'shell-init']) {
+    const re = new RegExp('\\n\\s+' + v + '\\b[^\\n]{8,}');
+    assert.ok(re.test(KOLM_JS), `HELP._root must describe ${v}, not just name it`);
+  }
 });
 
 // =============================================================================

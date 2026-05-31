@@ -649,7 +649,7 @@ function prompt(q) {
 }
 
 const HELP = {
-  _root: `kolm v${VERSION} - the AI control plane for owned models, signed runtimes, and enterprise evidence.
+  _root: `kolm v${VERSION} - the AI compiler. Distill frontier quality into a small, private model you run anywhere, with a signed receipt on every call.
 
 PRODUCT LOOP
   gateway -> capture -> privacy -> datasets -> evals -> train/distill -> runtime -> govern
@@ -680,7 +680,7 @@ COMMANDS
   trace <sub>                      structured agent/workflow trace inspector (stats|chain|export|new|span)
   ir <sub>                         workflow IR compile + inspect (compile|stats|validate|replay)
   device <sub>                     device capability inspector (list|profile|probe|check)
-  devices <sub>                    operator device fleet (list|register|show|test)   [W372]
+  devices <sub>                    operator device fleet (list|register|show|test)
   install-device <art> --device d  push a .kolm onto a registered device (local/ssh/http)
   cc <sub>                         confidential compute attestation inspector (kinds|shape|verify)
   fl <sub>                         federated learning helpers — local only (strategies|new-round|verify|aggregate)
@@ -720,6 +720,11 @@ COMMANDS
   tunnel <sub>                     remote access to a self-hosted .kolm (new|list|start|close)
   cloud <sub>                      real GPU train + BYOC deploy (broker|train|targets|deploy|list|show|destroy)
   surfaces                         product journey map across account, CLI, TUI, API, cloud, privacy, and proof (--json)
+  gateway <sub>                    OpenAI-compatible gateway (start|health|providers|routes|status|call)
+  wrapper up                       alias for gateway start (boot the capture gateway)
+  studio <sub>                     browser compiler UI (open|status|list|sessions|recipes)
+  forge <sub>                      compile + distill engine (status|run)
+  deploy <sub>                     HTTP control plane for hosted artifacts (list|create|status)
   packages <sub>                   SDK/runtime/installer package release readiness (release-readiness)
   evidence <sub>                   local proof packets for open readiness gates
   airgap <sub>                     hard-offline mode (status|enable|disable|verify)
@@ -748,12 +753,12 @@ COMMANDS
   dataset <sub>                    labeled training corpora (candidates|approve|reject|create|split|inspect|export|list)
   label <sub>                      reviewer queue (next|approve|fix|reject|stats)
   demo <sub>                       close-the-loop seed corpus (list|seed-log-triage|reset)
-  privacy <sub>                    privacy membrane (scan|test|smoke|policy|report)  [W384]
+  privacy <sub>                    privacy membrane (scan|test|smoke|policy|report)
   sync <sub>                       cloud-sync state (status|enable|disable|push|pull) + legacy git mirror
-  pipeline <sub>                   end-to-end compile (tokenize|distill|compile|full)  [W384]
+  pipeline <sub>                   end-to-end compile (tokenize|distill|compile|full)
   wrap <agent-cmd> [args...]       spawn with kolm env injected (legacy: wrap <config> --out <spec.json>)
-  shell-init [--shell ...]         emit shell-export snippet (sh|bash|zsh|fish|pwsh|powershell|cmd|auto)  [W384]
-  agents <sub>                     dev-agent telemetry (stats|sessions|recommend|failing)  [W384]
+  shell-init [--shell ...]         emit shell-export snippet (sh|bash|zsh|fish|pwsh|powershell|cmd|auto)
+  agents <sub>                     dev-agent telemetry (stats|sessions|recommend|failing)
 
 ENVIRONMENT
   KOLM_BASE             cloud endpoint (default: https://kolm.ai)
@@ -2891,7 +2896,7 @@ USAGE
 COMMANDS (inside the REPL)
   open <path>                          load an artifact (drag-drop a .kolm into the terminal works)
   inspect                              show the manifest + receipt summary in an ANSI box
-  run <text>                           inference against the loaded artifact (uses /v1/run/inline)
+  run <text>                           inference against the loaded artifact (runs locally)
   verify                               re-verify the receipt chain (POST /v1/receipts/verify)
   :connectors                          show OpenAI / Claude / OpenRouter connector status
   rest                                 reprint the equivalent REST call for the last action
@@ -4358,7 +4363,7 @@ USAGE
   kolm pipeline distill  <dataset-id|path>     [--json]
   kolm pipeline compile  <dataset-id|path>     [--json]
   kolm pipeline full     <dataset-id|path>     [--json]
-  kolm pipeline run --continuous [--namespace ns] [--interval-ms 60000] [--once]   [W710]
+  kolm pipeline run --continuous [--namespace ns] [--interval-ms 60000] [--once]
 
 FLAGS
   --json                deterministic JSON output
@@ -9950,7 +9955,7 @@ async function cmdRun(args) {
         const lat = typeof r.latency_us === 'number' ? `${r.latency_us}us` : '?';
         const recipe = r.recipe_name || r.recipe_id || '?';
         process.stderr.write(`recipe: ${recipe}  ·  ${lat}\n`);
-        printRestEquivalent('POST', '/v1/run/inline', { artifact: path.basename(ap), input });
+        printRestEquivalent('POST', '/v1/run', { version_id: '<your-version-id>', input });
       }
       // W341 — warning + --strict gate already emitted before runArtifact;
       // here we only need to persist the run log and fire post-hooks.
@@ -41723,7 +41728,8 @@ async function cmdTui(args) {
       if (!sel) { state.status = 'run: no artifact selected'; return; }
       if (!arg) { state.status = 'run: usage :run <prompt>'; return; }
       try {
-        const out = await api(c, 'POST', '/v1/run/inline', { artifact: sel.path, input: arg });
+        const { runArtifact } = await import('../src/artifact-runner.js');
+        const out = await runArtifact(sel.path, arg, {});
         state.status = 'run ok: ' + ((out.output || out.text || '') + '').slice(0, 80);
       } catch (e) { state.status = 'run: ' + e.message; }
       return;
@@ -48122,6 +48128,9 @@ async function main() {
       // dispatcher. Distinct-named (cmdW742Gateway) so parallel W740/W741/W743
       // wave agents cannot collide on this case.
       case 'gateway':    await withErrorContext('gateway',    () => cmdW742Gateway(rest)); break;
+      // `kolm wrapper up` — homepage-advertised alias that boots the gateway (the
+      // "wrapper" is the gateway in product terms). `up` maps to gateway `start`.
+      case 'wrapper':    await withErrorContext('wrapper',    () => cmdW742Gateway(rest[0] === 'up' ? ['start', ...rest.slice(1)] : rest)); break;
       // W746 — `kolm staleness <show|apply-ttl|sampler-weights>` routes the
       // capture-staleness dispatcher. Distinct-named (cmdW746Staleness) so
       // parallel W744/W745/W747 wave agents cannot collide on this case.

@@ -26,7 +26,7 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"kolm.ai","item":"https://kolm.ai/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://kolm.ai/docs"},{"@type":"ListItem","position":3,"name":"API reference","item":"https://kolm.ai/docs/api"}]}</script>
 <style>
 :root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#2563eb;--accent-soft:rgba(16,185,129,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#2563eb;--accent-soft:rgba(5,150,105,0.10)}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#2563eb;--accent-soft:rgba(37,99,235,0.10)}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
 .skip-link{position:absolute;left:12px;top:12px;z-index:9999;transform:translateY(-160%);border:1px solid var(--accent);border-radius:999px;background:var(--accent);color:#06120b;padding:10px 14px;font:700 13px/1 var(--mono);text-decoration:none}
@@ -607,8 +607,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-account-audit-log">
   <h3><span class="m m-get">GET</span> <code>/v1/account/audit-log</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W409f – /v1/account/audit-log surfaces the audit ledger for the calling</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409f – /v1/account/audit-log surfaces the audit ledger for the calling tenant. The audit-log.html page renders {entries:[{at,actor,op,payload}]}. W448 – added ?format=csv (defaults to json) so the page&#39;s export button and `kolm audit --format csv` CLI verb hit the same route. Also added ?since=&lt;iso|epoch&gt; filter so the CLI can scope to a recent window.</p></details>
+  <p class="route-desc">– /v1/account/audit-log surfaces the audit ledger for the calling</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– /v1/account/audit-log surfaces the audit ledger for the calling tenant. The audit-log.html page renders {entries:[{at,actor,op,payload}]}. W448 – added ?format=csv (defaults to json) so the page&#39;s export button and `kolm audit --format csv` CLI verb hit the same route. Also added ?since=&lt;iso|epoch&gt; filter so the CLI can scope to a recent window.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/account/audit-log&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -619,8 +619,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-account-audit-log-verify">
   <h3><span class="m m-get">GET</span> <code>/v1/account/audit-log/verify</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W409f – GET /v1/account/audit-log/verify – chain-verify the calling</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409f – GET /v1/account/audit-log/verify – chain-verify the calling tenant&#39;s audit ledger (no body). Returns { ok, verified, chain_length, broken_at? } so the audit-log page can render a green/red state.</p></details>
+  <p class="route-desc">– GET /v1/account/audit-log/verify – chain-verify the calling</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– GET /v1/account/audit-log/verify – chain-verify the calling tenant&#39;s audit ledger (no body). Returns { ok, verified, chain_length, broken_at? } so the audit-log page can render a green/red state.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/account/audit-log/verify&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -1038,8 +1038,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-agents">
   <h3><span class="m m-get">GET</span> <code>/v1/agents</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W424 – agent telemetry routes fence on req.tenant_record and forward</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W424 – agent telemetry routes fence on req.tenant_record and forward req.tenant_record.id as tenant_id into the helper so cross-tenant rows never appear in the rollup. _tenantScope() returns null for admin (cross-tenant reads allowed) and the canonical tenant_id otherwise.</p></details>
+  <p class="route-desc">– agent telemetry routes fence on req.tenant_record and forward</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– agent telemetry routes fence on req.tenant_record and forward req.tenant_record.id as tenant_id into the helper so cross-tenant rows never appear in the rollup. _tenantScope() returns null for admin (cross-tenant reads allowed) and the canonical tenant_id otherwise.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/agents&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -1318,7 +1318,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <section class="api-route" id="POST-v1-approvals-request">
   <h3><span class="m m-post">POST</span> <code>/v1/approvals/request</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Tenant fence: tenant_id forced from req.tenant_record.id. Status</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Tenant fence: tenant_id forced from req.tenant_record.id. Status transitions return honest invalid_transition envelopes - never silently re-write state. version stamp matches /^w782-/.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Tenant fence: tenant_id forced from req.tenant_record.id. Status transitions return structured invalid_transition envelopes - never silently re-write state. version stamp matches /^w782-/.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/approvals/request&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -1578,8 +1578,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="POST-v1-audio-speech">
   <h3><span class="m m-post">POST</span> <code>/v1/audio/speech</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span> <span class="route-stub">array-literal expansion</span></h3>
-  <p class="route-desc">W409k – audio routes. Real proxy when configured; fixture returns deterministic</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409k – audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise honest 501 with a structured &quot;not yet supported&quot; envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.</p></details>
+  <p class="route-desc">– audio routes. Real proxy when configured; fixture returns deterministic</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise structured 501 with a structured &quot;not yet supported&quot; envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/audio/speech&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -1617,8 +1617,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="POST-v1-audio-transcriptions">
   <h3><span class="m m-post">POST</span> <code>/v1/audio/transcriptions</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span> <span class="route-stub">array-literal expansion</span></h3>
-  <p class="route-desc">W409k – audio routes. Real proxy when configured; fixture returns deterministic</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409k – audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise honest 501 with a structured &quot;not yet supported&quot; envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.</p></details>
+  <p class="route-desc">– audio routes. Real proxy when configured; fixture returns deterministic</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise structured 501 with a structured &quot;not yet supported&quot; envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/audio/transcriptions&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -1631,8 +1631,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="POST-v1-audio-translations">
   <h3><span class="m m-post">POST</span> <code>/v1/audio/translations</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span> <span class="route-stub">array-literal expansion</span></h3>
-  <p class="route-desc">W409k – audio routes. Real proxy when configured; fixture returns deterministic</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409k – audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise honest 501 with a structured &quot;not yet supported&quot; envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.</p></details>
+  <p class="route-desc">– audio routes. Real proxy when configured; fixture returns deterministic</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise structured 501 with a structured &quot;not yet supported&quot; envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/audio/translations&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -1711,8 +1711,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-auth-github">
   <h3><span class="m m-get">GET</span> <code>/v1/auth/github</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W889-8.4 – short OAuth aliases: GET /v1/auth/github redirects to the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W889-8.4 – short OAuth aliases: GET /v1/auth/github redirects to the canonical /v1/oauth/github/start (preserving any ?redirect= query). Same for /v1/auth/github/callback (forwards code+state to the canonical callback). When env vars are missing, the canonical route returns the operator-facing 503 oauth_not_configured envelope.</p></details>
+  <p class="route-desc">4 – short OAuth aliases: GET /v1/auth/github redirects to the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>4 – short OAuth aliases: GET /v1/auth/github redirects to the canonical /v1/oauth/github/start (preserving any ?redirect= query). Same for /v1/auth/github/callback (forwards code+state to the canonical callback). When env vars are missing, the canonical route returns the operator-facing 503 oauth_not_configured envelope.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/auth/github&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -2052,8 +2052,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-build-preview">
   <h3><span class="m m-post">POST</span> <code>/v1/build/preview</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W347 – POST /v1/build/preview. Richer dry-run preview that powers the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W347 – POST /v1/build/preview. Richer dry-run preview that powers the builder UI&#39;s results pane: returns k_score, first 3 train rows, first 3 holdout rows, production_ready verdict + gate reasons, and the synth metadata. Public + rate-limited; no artifact write, no charge. Accepts {spec, seeds_jsonl_text}. Errors map to 400 (validation) or 500.</p></details>
+  <p class="route-desc">– POST /v1/build/preview. Richer dry-run preview that powers the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– POST /v1/build/preview. Richer dry-run preview that powers the builder UI&#39;s results pane: returns k_score, first 3 train rows, first 3 holdout rows, production_ready verdict + gate reasons, and the synth metadata. Public + rate-limited; no artifact write, no charge. Accepts {spec, seeds_jsonl_text}. Errors map to 400 (validation) or 500.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/build/preview&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -2315,8 +2315,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-capture-browse">
   <h3><span class="m m-get">GET</span> <code>/v1/capture/browse</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W409f – /v1/capture/browse / /v1/capture/bulk / /v1/capture/export – page</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409f – /v1/capture/browse / /v1/capture/bulk / /v1/capture/export – page surface for the captures.html admin view. Browse paginates, bulk acts on a set of capture ids, export streams JSONL/CSV. Empty-tenant safe.</p></details>
+  <p class="route-desc">– /v1/capture/browse / /v1/capture/bulk / /v1/capture/export – page</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– /v1/capture/browse / /v1/capture/bulk / /v1/capture/export – page surface for the captures.html admin view. Browse paginates, bulk acts on a set of capture ids, export streams JSONL/CSV. Empty-tenant safe.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/capture/browse&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -2351,8 +2351,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="POST-v1-capture-export">
   <h3><span class="m m-post">POST</span> <code>/v1/capture/export</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W899 – POST shim so account/captures.html bulk-export button (sends</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W899 – POST shim so account/captures.html bulk-export button (sends {capture_ids:[...]} in body) doesn&#39;t 404. Filters to the listed ids and returns the rows inline as JSON so the page can blob-download client-side.</p></details>
+  <p class="route-desc">– POST shim so account/captures.html bulk-export button (sends</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– POST shim so account/captures.html bulk-export button (sends {capture_ids:[...]} in body) doesn&#39;t 404. Filters to the listed ids and returns the rows inline as JSON so the page can blob-download client-side.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/capture/export&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -2715,8 +2715,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-changelog">
   <h3><span class="m m-get">GET</span> <code>/v1/changelog</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W456: public changelog – marketing surface, no auth, no tenant scoping.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W456: public changelog – marketing surface, no auth, no tenant scoping. Source of truth lives in src/changelog.js (a single static WAVES array).</p></details>
+  <p class="route-desc">public changelog – marketing surface, no auth, no tenant scoping.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>public changelog – marketing surface, no auth, no tenant scoping. Source of truth lives in src/changelog.js (a single static WAVES array).</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/changelog&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -3356,8 +3356,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-deploy">
   <h3><span class="m m-post">POST</span> <code>/v1/deploy</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W888-D HTTP control plane: POST /v1/deploy + /v1/deploy/canary +</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W888-D HTTP control plane: POST /v1/deploy + /v1/deploy/canary + /v1/test-device + /v1/test-quants. All require auth (auth.js gates via PUBLIC_API allowlist; these paths are NOT in PUBLIC_API, so an unauth request returns 401 from the auth middleware). The handlers below simply do shape-validation + delegate to the same modules the CLI calls.</p></details>
+  <p class="route-desc">HTTP control plane: POST /v1/deploy + /v1/deploy/canary +</p>
+  <details class="route-detail"><summary>Full comment</summary><p>HTTP control plane: POST /v1/deploy + /v1/deploy/canary + /v1/test-device + /v1/test-quants. All require auth (auth.js gates via PUBLIC_API allowlist; these paths are NOT in PUBLIC_API, so an unauth request returns 401 from the auth middleware). The handlers below simply do shape-validation + delegate to the same modules the CLI calls.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/deploy&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -3593,8 +3593,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="POST-v1-devices-add">
   <h3><span class="m m-post">POST</span> <code>/v1/devices/add</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W896 – browser-form translator for /account/fleet &quot;Add device&quot; modal.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W896 – browser-form translator for /account/fleet &quot;Add device&quot; modal. The form posts {name, type, tags, connection:{host,user,key_path|base_url|kubeconfig,namespace}} which we flatten to DeviceRegistry.register() args.</p></details>
+  <p class="route-desc">– browser-form translator for /account/fleet &quot;Add device&quot; modal.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– browser-form translator for /account/fleet &quot;Add device&quot; modal. The form posts {name, type, tags, connection:{host,user,key_path|base_url|kubeconfig,namespace}} which we flatten to DeviceRegistry.register() args.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/devices/add&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -3692,8 +3692,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="POST-v1-devices-remove">
   <h3><span class="m m-post">POST</span> <code>/v1/devices/remove</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W896 – POST shim for /v1/devices/remove (fleet.html &quot;Remove&quot; button uses POST not DELETE).</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W896 – POST shim for /v1/devices/remove (fleet.html &quot;Remove&quot; button uses POST not DELETE). Accepts {name|id, hard?}. Soft delete by default.</p></details>
+  <p class="route-desc">– POST shim for /v1/devices/remove (fleet.html &quot;Remove&quot; button uses POST not DELETE).</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– POST shim for /v1/devices/remove (fleet.html &quot;Remove&quot; button uses POST not DELETE). Accepts {name|id, hard?}. Soft delete by default.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/devices/remove&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -3765,8 +3765,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="POST-v1-distill-onpolicy">
   <h3><span class="m m-post">POST</span> <code>/v1/distill/onpolicy</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W480 - Run an on-policy distillation against a teacher-student pair via the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W480 - Run an on-policy distillation against a teacher-student pair via the tenant-installed trainer plug-in. Auth-gated. Body: { pairs_path, student_path, out_dir, namespace, max_steps }. Returns trainer envelope or no_trainer_installed.</p></details>
+  <p class="route-desc">Run an on-policy distillation against a teacher-student pair via the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>Run an on-policy distillation against a teacher-student pair via the tenant-installed trainer plug-in. Auth-gated. Body: { pairs_path, student_path, out_dir, namespace, max_steps }. Returns trainer envelope or no_trainer_installed.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/distill/onpolicy&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -3791,8 +3791,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="POST-v1-distill-preference">
   <h3><span class="m m-post">POST</span> <code>/v1/distill/preference</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W480 - Train a preference-pair objective (dpo/simpo/orpo/kto) via the tenant</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W480 - Train a preference-pair objective (dpo/simpo/orpo/kto) via the tenant installed trainer plug-in. Auth-gated. Body: { pairs_path, student_path, objective, out_dir, namespace, beta }. Returns trainer envelope.</p></details>
+  <p class="route-desc">Train a preference-pair objective (dpo/simpo/orpo/kto) via the tenant</p>
+  <details class="route-detail"><summary>Full comment</summary><p>Train a preference-pair objective (dpo/simpo/orpo/kto) via the tenant installed trainer plug-in. Auth-gated. Body: { pairs_path, student_path, objective, out_dir, namespace, beta }. Returns trainer envelope.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/distill/preference&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -4031,8 +4031,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="POST-v1-drift-alert-snapshot">
   <h3><span class="m m-post">POST</span> <code>/v1/drift-alert/snapshot</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W709 tie-in: when shouldAlert() fires the route calls</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W709 tie-in: when shouldAlert() fires the route calls driftAlertStore.registerDriftWarning() so the NEXT W709 routing decision can stamp `drift_warning:true`. Honest fallback: if the W709 routing-events module is not loaded, the warning is still registered (it is in-memory) and the W709 hook simply never reads it.</p></details>
+  <p class="route-desc">tie-in: when shouldAlert() fires the route calls</p>
+  <details class="route-detail"><summary>Full comment</summary><p>tie-in: when shouldAlert() fires the route calls driftAlertStore.registerDriftWarning() so the NEXT W709 routing decision can stamp `drift_warning:true`. Honest fallback: if the W709 routing-events module is not loaded, the warning is still registered (it is in-memory) and the W709 hook simply never reads it.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/drift-alert/snapshot&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -4727,8 +4727,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-gateway-health">
   <h3><span class="m m-get">GET</span> <code>/v1/gateway/health</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W891-16.5 – public gateway liveness probe. Mirrors /health for the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W891-16.5 – public gateway liveness probe. Mirrors /health for the gateway sub-system: ok:true + version + module-loadable signal. Mounted before r.use(authMiddleware) so it is reachable without an API key. Ship-gate consumers use this to confirm the gateway dispatch path is wired without paying for a real upstream call.</p></details>
+  <p class="route-desc">5 – public gateway liveness probe. Mirrors /health for the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>5 – public gateway liveness probe. Mirrors /health for the gateway sub-system: ok:true + version + module-loadable signal. Mounted before r.use(authMiddleware) so it is reachable without an API key. Ship-gate consumers use this to confirm the gateway dispatch path is wired without paying for a real upstream call.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/gateway/health&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -4739,8 +4739,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-gateway-mode">
   <h3><span class="m m-get">GET</span> <code>/v1/gateway/mode</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W742 – GET /v1/gateway/mode reports the current gateway mode + reachability.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W742 – GET /v1/gateway/mode reports the current gateway mode + reachability. Auth-gated (mounted after r.use(authMiddleware)). Probes both local backends with a 1-second HEAD timeout so a slow / unreachable backend never blocks the dashboard. The response surfaces the resolved mode (NOT the raw env value) so a callers sees what currentMode() actually decided.</p></details>
+  <p class="route-desc">– GET /v1/gateway/mode reports the current gateway mode + reachability.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– GET /v1/gateway/mode reports the current gateway mode + reachability. Auth-gated (mounted after r.use(authMiddleware)). Probes both local backends with a 1-second HEAD timeout so a slow / unreachable backend never blocks the dashboard. The response surfaces the resolved mode (NOT the raw env value) so a callers sees what currentMode() actually decided.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/gateway/mode&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -5287,8 +5287,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-kscore-series">
   <h3><span class="m m-get">GET</span> <code>/v1/kscore/series</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W920 – K-score time series for the namespaces flywheel chart (recorded by</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W920 – K-score time series for the namespaces flywheel chart (recorded by the autopilot lifecycle). Tenant-fenced; honest empty series when none.</p></details>
+  <p class="route-desc">– K-score time series for the namespaces flywheel chart (recorded by</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– K-score time series for the namespaces flywheel chart (recorded by the autopilot lifecycle). Tenant-fenced; honest empty series when none.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/kscore/series&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -5303,8 +5303,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-label-queue-audit-event-id">
   <h3><span class="m m-get">GET</span> <code>/v1/label-queue/audit/:event_id</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W409o – full audit trail for a single event_id. Tests assert that every</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409o – full audit trail for a single event_id. Tests assert that every approval/reject/edit decision is recorded with reviewer + timestamp + before/after output. The legacy /v1/labels/:event_id returns the last label only; this endpoint returns the whole sequence.</p></details>
+  <p class="route-desc">– full audit trail for a single event_id. Tests assert that every</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– full audit trail for a single event_id. Tests assert that every approval/reject/edit decision is recorded with reviewer + timestamp + before/after output. The legacy /v1/labels/:event_id returns the last label only; this endpoint returns the whole sequence.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/label-queue/audit/&lt;event_id&gt;&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -5430,8 +5430,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-lake-export">
   <h3><span class="m m-get">GET</span> <code>/v1/lake/export</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W409l – GET /v1/lake/export → bulk export of canonical events.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409l – GET /v1/lake/export → bulk export of canonical events. Supports format=jsonl (default) | json | csv. Streams the buffer back.</p></details>
+  <p class="route-desc">– GET /v1/lake/export → bulk export of canonical events.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– GET /v1/lake/export → bulk export of canonical events. Supports format=jsonl (default) | json | csv. Streams the buffer back.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/lake/export&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -5493,8 +5493,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-lake-storage">
   <h3><span class="m m-get">GET</span> <code>/v1/lake/storage</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W409l – GET /v1/lake/storage → small env probe for the Account UI so the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409l – GET /v1/lake/storage → small env probe for the Account UI so the dashboard can show &quot;Local storage: ~/.kolm/events/events.sqlite (12 MB)&quot;. Returns the same envelope storeInfo() emits, plus a coarse byte total.</p></details>
+  <p class="route-desc">– GET /v1/lake/storage → small env probe for the Account UI so the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– GET /v1/lake/storage → small env probe for the Account UI so the dashboard can show &quot;Local storage: ~/.kolm/events/events.sqlite (12 MB)&quot;. Returns the same envelope storeInfo() emits, plus a coarse byte total.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/lake/storage&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -5505,8 +5505,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-lake-tail">
   <h3><span class="m m-get">GET</span> <code>/v1/lake/tail</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W409l – GET /v1/lake/tail → recent canonical events for the inbox UI.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409l – GET /v1/lake/tail → recent canonical events for the inbox UI. Reads directly from the event-store (NOT capture-store). Default limit 50, capped at 500. Returns newest first.</p></details>
+  <p class="route-desc">– GET /v1/lake/tail → recent canonical events for the inbox UI.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– GET /v1/lake/tail → recent canonical events for the inbox UI. Reads directly from the event-store (NOT capture-store). Default limit 50, capped at 500. Returns newest first.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/lake/tail&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -5730,7 +5730,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <section class="api-route" id="GET-v1-long-context-p90">
   <h3><span class="m m-get">GET</span> <code>/v1/long-context/p90</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Tenant fence: tenant_id forced from req.tenant_record.id; query/body</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Tenant fence: tenant_id forced from req.tenant_record.id; query/body never override. Returns honest envelope (no_captures, insufficient_samples) rather than throwing. version stamp matches /^w781-/.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Tenant fence: tenant_id forced from req.tenant_record.id; query/body never override. Returns structured envelope (no_captures, insufficient_samples) rather than throwing. version stamp matches /^w781-/.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/long-context/p90&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -5745,8 +5745,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <details class="group-intro"><summary>About this group</summary><p>Public surface. No auth header required. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-loop-try">
   <h3><span class="m m-post">POST</span> <code>/v1/loop/try</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W313 – public anonymous &quot;try it&quot; demo of the capture-receipt shape.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W313 – public anonymous &quot;try it&quot; demo of the capture-receipt shape. No auth, no write side-effects; visitors on /value-loop POST a prompt+response and see the exact same receipt envelope a real authenticated /v1/bridges/observe would emit, with `demo:true` + `durable:false` so the body cannot lie.</p></details>
+  <p class="route-desc">– public anonymous &quot;try it&quot; demo of the capture-receipt shape.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– public anonymous &quot;try it&quot; demo of the capture-receipt shape. No auth, no write side-effects; visitors on /value-loop POST a prompt+response and see the exact same receipt envelope a real authenticated /v1/bridges/observe would emit, with `demo:true` + `durable:false` so the body cannot lie.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/loop/try&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -5860,8 +5860,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-marketplace-list">
   <h3><span class="m m-get">GET</span> <code>/v1/marketplace/list</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W342 – explicit list endpoint used by /marketplace.html client render.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W342 – explicit list endpoint used by /marketplace.html client render. Always returns { artifacts: [...] } with live verified flag.</p></details>
+  <p class="route-desc">– explicit list endpoint used by /marketplace.html client render.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– explicit list endpoint used by /marketplace.html client render. Always returns { artifacts: [...] } with live verified flag.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/marketplace/list&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -6046,8 +6046,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-media-redact-job-doctor">
   <h3><span class="m m-get">GET</span> <code>/v1/media/redact-job/doctor</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W454 – worker self-doctor proxied through the API so `kolm media</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W454 – worker self-doctor proxied through the API so `kolm media doctor --remote` can ask the server which extractors are wired.</p></details>
+  <p class="route-desc">– worker self-doctor proxied through the API so `kolm media</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– worker self-doctor proxied through the API so `kolm media doctor --remote` can ask the server which extractors are wired.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/media/redact-job/doctor&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -6415,8 +6415,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="POST-v1-multimodal-redact-audio">
   <h3><span class="m m-post">POST</span> <code>/v1/multimodal/redact-audio</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W464 – multimodal audio voiceprint scrub. Anonymizes the speaker&#39;s</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W464 – multimodal audio voiceprint scrub. Anonymizes the speaker&#39;s voiceprint while preserving content. Complementary to W462 image redact (faces/plates) and W454 audio transcript redact (text). Body: { media_uri | path, output_path?, strength?, max_bytes? }</p></details>
+  <p class="route-desc">– multimodal audio voiceprint scrub. Anonymizes the speaker&#39;s</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– multimodal audio voiceprint scrub. Anonymizes the speaker&#39;s voiceprint while preserving content. Complementary to W462 image redact (faces/plates) and W454 audio transcript redact (text). Body: { media_uri | path, output_path?, strength?, max_bytes? }</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/multimodal/redact-audio&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -6429,7 +6429,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-multimodal-redact-audio-doctor">
   <h3><span class="m m-get">GET</span> <code>/v1/multimodal/redact-audio/doctor</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W464 – audio-redact worker self-doctor.</p>
+  <p class="route-desc">– audio-redact worker self-doctor.</p>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/multimodal/redact-audio/doctor&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -6454,8 +6454,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-multimodal-redact-image-doctor">
   <h3><span class="m m-get">GET</span> <code>/v1/multimodal/redact-image/doctor</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W462 – image-redact worker self-doctor, proxied so the CLI&#39;s</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W462 – image-redact worker self-doctor, proxied so the CLI&#39;s `kolm media image-doctor --remote` can ask the server.</p></details>
+  <p class="route-desc">– image-redact worker self-doctor, proxied so the CLI&#39;s</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– image-redact worker self-doctor, proxied so the CLI&#39;s `kolm media image-doctor --remote` can ask the server.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/multimodal/redact-image/doctor&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -6480,8 +6480,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-multimodal-tokenize-doctor">
   <h3><span class="m m-get">GET</span> <code>/v1/multimodal/tokenize/doctor</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W554 - multimodal sidecar tokenizer. API mirror of</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W554 - multimodal sidecar tokenizer. API mirror of `kolm media tokenize`: local-safe by default, hosted-disabled unless the operator explicitly allows server-side file access. Creates compile-ready Markdown sidecars using deterministic local feature tokens, with optional provider captions/transcripts when configured.</p></details>
+  <p class="route-desc">multimodal sidecar tokenizer. API mirror of</p>
+  <details class="route-detail"><summary>Full comment</summary><p>multimodal sidecar tokenizer. API mirror of `kolm media tokenize`: local-safe by default, hosted-disabled unless the operator explicitly allows server-side file access. Creates compile-ready Markdown sidecars using deterministic local feature tokens, with optional provider captions/transcripts when configured.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/multimodal/tokenize/doctor&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -6570,8 +6570,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-namespaces-slug-stats">
   <h3><span class="m m-get">GET</span> <code>/v1/namespaces/:slug/stats</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W899 – GET /v1/namespaces/:slug/stats – counts of pending/approved/</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W899 – GET /v1/namespaces/:slug/stats – counts of pending/approved/ rejected/quarantined captures in a namespace. Powers the &quot;ready to compile?&quot; readiness signal on /account/overview and the namespace badge on /account/namespaces. Tenant-union pattern to handle name-vs-id keys.</p></details>
+  <p class="route-desc">– GET /v1/namespaces/:slug/stats – counts of pending/approved/</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– GET /v1/namespaces/:slug/stats – counts of pending/approved/ rejected/quarantined captures in a namespace. Powers the &quot;ready to compile?&quot; readiness signal on /account/overview and the namespace badge on /account/namespaces. Tenant-union pattern to handle name-vs-id keys.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/namespaces/&lt;slug&gt;/stats&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -6874,8 +6874,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-opportunities">
   <h3><span class="m m-get">GET</span> <code>/v1/opportunities</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W419 – every opportunity surface must be tenant-scoped. Without auth the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W419 – every opportunity surface must be tenant-scoped. Without auth the engine would surface another tenant&#39;s pattern detections (cache_candidate request_hash, repeated prompt clusters, etc). 401s use the canonical {ok:false, error:&#39;auth required&#39;} envelope.</p></details>
+  <p class="route-desc">– every opportunity surface must be tenant-scoped. Without auth the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– every opportunity surface must be tenant-scoped. Without auth the engine would surface another tenant&#39;s pattern detections (cache_candidate request_hash, repeated prompt clusters, etc). 401s use the canonical {ok:false, error:&#39;auth required&#39;} envelope.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/opportunities&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -6927,8 +6927,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="POST-v1-opportunities-id-promote">
   <h3><span class="m m-post">POST</span> <code>/v1/opportunities/:id/promote</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W409m – POST /v1/opportunities/:id/promote → dataset.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409m – POST /v1/opportunities/:id/promote → dataset. Turns the opportunity into a real dataset by calling dataset-workbench createDataset() with the opportunity&#39;s namespace + provenance. Returns { ok, dataset_id, train_count, holdout_count, ... }. Marks the opportunity status=&#39;promoted&#39; so subsequent reads show the badge.</p></details>
+  <p class="route-desc">– POST /v1/opportunities/:id/promote → dataset.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– POST /v1/opportunities/:id/promote → dataset. Turns the opportunity into a real dataset by calling dataset-workbench createDataset() with the opportunity&#39;s namespace + provenance. Returns { ok, dataset_id, train_count, holdout_count, ... }. Marks the opportunity status=&#39;promoted&#39; so subsequent reads show the badge.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/opportunities/&lt;id&gt;/promote&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -7158,8 +7158,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-pipeline-compile">
   <h3><span class="m m-post">POST</span> <code>/v1/pipeline/compile</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W420 – tenant gate. The pipeline runs compileFull which reads from the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W420 – tenant gate. The pipeline runs compileFull which reads from the event store; without forcing tenant scope it would compile another tenant&#39;s corpus into the caller&#39;s artifact namespace. opts.tenant_id is injected from req.tenant_record.id and supersedes anything the body sent.</p></details>
+  <p class="route-desc">– tenant gate. The pipeline runs compileFull which reads from the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– tenant gate. The pipeline runs compileFull which reads from the event store; without forcing tenant scope it would compile another tenant&#39;s corpus into the caller&#39;s artifact namespace. opts.tenant_id is injected from req.tenant_record.id and supersedes anything the body sent.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/pipeline/compile&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -7403,8 +7403,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-poisoning-bind-teacher">
   <h3><span class="m m-post">POST</span> <code>/v1/poisoning/bind-teacher</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W761 – Model Poisoning Anomaly Detection routes. Distinct-named handlers so</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W761 – Model Poisoning Anomaly Detection routes. Distinct-named handlers so parallel wave agents on W760 + W762..W765 do not collide on the suffix. Builds on W808 capture-anomaly + W750-followup copyright-detector + the W761-3 teacher-response HMAC primitive.</p></details>
+  <p class="route-desc">– Model Poisoning Anomaly Detection routes. Distinct-named handlers so</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– Model Poisoning Anomaly Detection routes. Distinct-named handlers so parallel wave agents on W760 + W762..W765 do not collide on the suffix. Builds on W808 capture-anomaly + W750-followup copyright-detector + the W761-3 teacher-response HMAC primitive.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/poisoning/bind-teacher&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -8105,7 +8105,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-reg-classify-risk">
   <h3><span class="m m-post">POST</span> <code>/v1/reg/classify-risk</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W834-2 – POST /v1/reg/classify-risk</p>
+  <p class="route-desc">– POST /v1/reg/classify-risk</p>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/reg/classify-risk&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -8118,7 +8118,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-reg-data-governance">
   <h3><span class="m m-get">GET</span> <code>/v1/reg/data-governance</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W834-4 – GET /v1/reg/data-governance?namespace=X&amp;period=YYYY-MM</p>
+  <p class="route-desc">– GET /v1/reg/data-governance?namespace=X&amp;period=YYYY-MM</p>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/reg/data-governance&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -8141,7 +8141,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="POST-v1-reg-eu-aiact-docs">
   <h3><span class="m m-post">POST</span> <code>/v1/reg/eu-aiact-docs</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W834-1 – POST /v1/reg/eu-aiact-docs</p>
+  <p class="route-desc">– POST /v1/reg/eu-aiact-docs</p>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/reg/eu-aiact-docs&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -8154,7 +8154,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="POST-v1-reg-grc-export">
   <h3><span class="m m-post">POST</span> <code>/v1/reg/grc-export</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W834-6 – POST /v1/reg/grc-export</p>
+  <p class="route-desc">– POST /v1/reg/grc-export</p>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/reg/grc-export&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -8167,7 +8167,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-reg-hil-threshold">
   <h3><span class="m m-get">GET</span> <code>/v1/reg/hil/threshold</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W834-3 – GET /v1/reg/hil/threshold?namespace=X</p>
+  <p class="route-desc">– GET /v1/reg/hil/threshold?namespace=X</p>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/reg/hil/threshold&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -8178,7 +8178,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="POST-v1-reg-hil-threshold">
   <h3><span class="m m-post">POST</span> <code>/v1/reg/hil/threshold</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W834-3 – POST /v1/reg/hil/threshold</p>
+  <p class="route-desc">– POST /v1/reg/hil/threshold</p>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/reg/hil/threshold&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -8191,7 +8191,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="POST-v1-reg-model-card">
   <h3><span class="m m-post">POST</span> <code>/v1/reg/model-card</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W834-5 – POST /v1/reg/model-card</p>
+  <p class="route-desc">– POST /v1/reg/model-card</p>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/reg/model-card&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -8905,8 +8905,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-seeds-from-nl-health">
   <h3><span class="m m-get">GET</span> <code>/v1/seeds/from-nl/health</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W347 – GET /v1/seeds/from-nl/health. Lets the UI hide the NL-seeds</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W347 – GET /v1/seeds/from-nl/health. Lets the UI hide the NL-seeds button when no LLM backend is configured. Stable, no auth.</p></details>
+  <p class="route-desc">– GET /v1/seeds/from-nl/health. Lets the UI hide the NL-seeds</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– GET /v1/seeds/from-nl/health. Lets the UI hide the NL-seeds button when no LLM backend is configured. Stable, no auth.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/seeds/from-nl/health&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -9280,8 +9280,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="POST-v1-spec-decode">
   <h3><span class="m m-post">POST</span> <code>/v1/spec-decode</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W480 - Train a speculative-decoding draft head (eagle/eagle2/eagle3/medusa)</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W480 - Train a speculative-decoding draft head (eagle/eagle2/eagle3/medusa) via the tenant-installed trainer plug-in. Auth-gated. Body: { pairs_path, base_path, draft_kind, out_dir, namespace }. Returns trainer envelope.</p></details>
+  <p class="route-desc">Train a speculative-decoding draft head (eagle/eagle2/eagle3/medusa)</p>
+  <details class="route-detail"><summary>Full comment</summary><p>Train a speculative-decoding draft head (eagle/eagle2/eagle3/medusa) via the tenant-installed trainer plug-in. Auth-gated. Body: { pairs_path, base_path, draft_kind, out_dir, namespace }. Returns trainer envelope.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/spec-decode&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -9294,8 +9294,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-spec-decode-doctor">
   <h3><span class="m m-get">GET</span> <code>/v1/spec-decode/doctor</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W480 - Speculative decoding draft-head trainer doctor (EAGLE-2/3, Medusa).</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W480 - Speculative decoding draft-head trainer doctor (EAGLE-2/3, Medusa). Reports whether $KOLM_SPECDECODE_TRAINER is resolvable; install_hint when not.</p></details>
+  <p class="route-desc">Speculative decoding draft-head trainer doctor (EAGLE-2/3, Medusa).</p>
+  <details class="route-detail"><summary>Full comment</summary><p>Speculative decoding draft-head trainer doctor (EAGLE-2/3, Medusa). Reports whether $KOLM_SPECDECODE_TRAINER is resolvable; install_hint when not.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/spec-decode/doctor&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -9897,7 +9897,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-metrics-extended">
   <h3><span class="m m-get">GET</span> <code>/metrics/extended</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W824-3 – /metrics/extended</p>
+  <p class="route-desc">– /metrics/extended</p>
   <pre><code>curl -X GET &quot;https://kolm.ai/metrics/extended&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -9946,7 +9946,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-ready-deep">
   <h3><span class="m m-get">GET</span> <code>/ready/deep</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W824-2 – /ready/deep</p>
+  <p class="route-desc">– /ready/deep</p>
   <pre><code>curl -X GET &quot;https://kolm.ai/ready/deep&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -10108,8 +10108,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-team-invites">
   <h3><span class="m m-get">GET</span> <code>/v1/team/invites</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W409f – /v1/team/invites – team.html invite list / create endpoint.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W409f – /v1/team/invites – team.html invite list / create endpoint. GET returns the calling tenant&#39;s outstanding invites; POST creates one.</p></details>
+  <p class="route-desc">– /v1/team/invites – team.html invite list / create endpoint.</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– /v1/team/invites – team.html invite list / create endpoint. GET returns the calling tenant&#39;s outstanding invites; POST creates one.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/team/invites&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -10658,8 +10658,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 
 <section class="api-route" id="GET-v1-verify-cid">
   <h3><span class="m m-get">GET</span> <code>/v1/verify/:cid</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W436 – DoD step 9 closer. If the registry row carries `manifest.hashes`,</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W436 – DoD step 9 closer. If the registry row carries `manifest.hashes`, recompute the CID from those hashes (cidFromManifestHashes) and refuse to return verified=true unless the recomputed CID matches the requested CID. Surfaces `manifest_hash_mismatch` envelope with both expected_cid and actual_cid so an auditor can diff the discrepancy without trusting us.</p></details>
+  <p class="route-desc">– DoD step 9 closer. If the registry row carries `manifest.hashes`,</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– DoD step 9 closer. If the registry row carries `manifest.hashes`, recompute the CID from those hashes (cidFromManifestHashes) and refuse to return verified=true unless the recomputed CID matches the requested CID. Surfaces `manifest_hash_mismatch` envelope with both expected_cid and actual_cid so an auditor can diff the discrepancy without trusting us.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/verify/&lt;cid&gt;&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -10905,8 +10905,8 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
 <section class="api-route" id="GET-v1-whoami">
   <h3><span class="m m-get">GET</span> <code>/v1/whoami</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">W433 – /v1/whoami alias. SDKs (OpenAI/Anthropic/LangChain) follow the</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W433 – /v1/whoami alias. SDKs (OpenAI/Anthropic/LangChain) follow the convention `GET /v1/whoami` (or `/v1/me`) for &quot;who is this key?&quot;. The canonical kolm endpoint is GET /v1/account, but /v1/whoami forwards to the same handler so SDKs probing the conventional path get an answer instead of a 404 + bad first-impression. Auth-gated identically.</p></details>
+  <p class="route-desc">– /v1/whoami alias. SDKs (OpenAI/Anthropic/LangChain) follow the</p>
+  <details class="route-detail"><summary>Full comment</summary><p>– /v1/whoami alias. SDKs (OpenAI/Anthropic/LangChain) follow the convention `GET /v1/whoami` (or `/v1/me`) for &quot;who is this key?&quot;. The canonical kolm endpoint is GET /v1/account, but /v1/whoami forwards to the same handler so SDKs probing the conventional path get an answer instead of a 404 + bad first-impression. Auth-gated identically.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/whoami&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -10969,7 +10969,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <section class="api-route" id="POST-v1-xlang-balanced-sample">
   <h3><span class="m m-post">POST</span> <code>/v1/xlang/balanced-sample</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">* Hosted route has NO runOnArtifact/judge wired by default –</p>
-  <details class="route-detail"><summary>Full comment</summary><p>* Hosted route has NO runOnArtifact/judge wired by default – production injects via req.app.locals._w774_run_on_artifact + ._w774_judge. The honest envelope on missing wiring is the contract, not a 500. * All four routes are W411 tenant-fenced.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>* Hosted route has NO runOnArtifact/judge wired by default – production injects via req.app.locals._w774_run_on_artifact + ._w774_judge. The structured envelope on missing wiring is the contract, not a 500. * All four routes are W411 tenant-fenced.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/xlang/balanced-sample&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \

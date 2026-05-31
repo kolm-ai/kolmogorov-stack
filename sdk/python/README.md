@@ -22,7 +22,7 @@ Two surfaces ship in the same package:
 ```python
 from kolm import Kolm
 
-k = Kolm(api_key="k_live_...")  # or KOLM_API_KEY env var
+k = Kolm(api_key="ks_...")  # or KOLM_API_KEY env var
 
 # Compile a task into a signed .kolm artifact
 job = k.compile(
@@ -93,7 +93,7 @@ recipe run is-spam "WIN free Bitcoin"
 | `KOLM_BASE`      | `https://kolm.ai`    | Override base URL (self-hosted)      |
 | `RECIPE_API_KEY` | _(none)_             | Bearer token for the recipe API      |
 
-## Honest envelope
+## Status envelope
 
 The Python client never sugars away non-2xx responses - `KolmError(status, body)` is raised verbatim so you can log the upstream response and decide how to react.
 

@@ -3218,7 +3218,7 @@
         ],
         "operationId": "postV1ApprovalsRequest",
         "summary": "Tenant fence: tenant_id forced from req.tenant_record.id. Status",
-        "description": "Tenant fence: tenant_id forced from req.tenant_record.id. Status transitions return honest invalid_transition envelopes - never silently re-write state. version stamp matches /^w782-/.",
+        "description": "Tenant fence: tenant_id forced from req.tenant_record.id. Status transitions return structured invalid_transition envelopes - never silently re-write state. version stamp matches /^w782-/.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -4142,7 +4142,7 @@
         ],
         "operationId": "postV1AudioSpeech",
         "summary": "audio routes. Real proxy when configured; fixture returns deterministic",
-        "description": "audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise honest 501 with a structured \"not yet supported\" envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.",
+        "description": "audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise structured 501 with a structured \"not yet supported\" envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -4249,7 +4249,7 @@
         ],
         "operationId": "postV1AudioTranscriptions",
         "summary": "audio routes. Real proxy when configured; fixture returns deterministic",
-        "description": "audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise honest 501 with a structured \"not yet supported\" envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.",
+        "description": "audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise structured 501 with a structured \"not yet supported\" envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -4289,7 +4289,7 @@
         ],
         "operationId": "postV1AudioTranslations",
         "summary": "audio routes. Real proxy when configured; fixture returns deterministic",
-        "description": "audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise honest 501 with a structured \"not yet supported\" envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.",
+        "description": "audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise structured 501 with a structured \"not yet supported\" envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -6061,8 +6061,8 @@
           "capture"
         ],
         "operationId": "postV1CaptureExport",
-        "summary": "W899 – POST shim so account/captures.html bulk-export button (sends",
-        "description": "W899 – POST shim so account/captures.html bulk-export button (sends {capture_ids:[...]} in body) doesn't 404. Filters to the listed ids and returns the rows inline as JSON so the page can blob-download client-side.",
+        "summary": "– POST shim so account/captures.html bulk-export button (sends",
+        "description": "– POST shim so account/captures.html bulk-export button (sends {capture_ids:[...]} in body) doesn't 404. Filters to the listed ids and returns the rows inline as JSON so the page can blob-download client-side.",
         "requestBody": {
           "required": false,
           "content": {
@@ -9164,8 +9164,8 @@
           "devices"
         ],
         "operationId": "postV1DevicesAdd",
-        "summary": "W896 – browser-form translator for /account/fleet \"Add device\" modal.",
-        "description": "W896 – browser-form translator for /account/fleet \"Add device\" modal. The form posts {name, type, tags, connection:{host,user,key_path|base_url|kubeconfig,namespace}} which we flatten to DeviceRegistry.register() args.",
+        "summary": "– browser-form translator for /account/fleet \"Add device\" modal.",
+        "description": "– browser-form translator for /account/fleet \"Add device\" modal. The form posts {name, type, tags, connection:{host,user,key_path|base_url|kubeconfig,namespace}} which we flatten to DeviceRegistry.register() args.",
         "requestBody": {
           "required": false,
           "content": {
@@ -9428,8 +9428,8 @@
           "devices"
         ],
         "operationId": "postV1DevicesRemove",
-        "summary": "W896 – POST shim for /v1/devices/remove (fleet.html \"Remove\" button uses POST not DELETE).",
-        "description": "W896 – POST shim for /v1/devices/remove (fleet.html \"Remove\" button uses POST not DELETE). Accepts {name|id, hard?}. Soft delete by default.",
+        "summary": "– POST shim for /v1/devices/remove (fleet.html \"Remove\" button uses POST not DELETE).",
+        "description": "– POST shim for /v1/devices/remove (fleet.html \"Remove\" button uses POST not DELETE). Accepts {name|id, hard?}. Soft delete by default.",
         "requestBody": {
           "required": false,
           "content": {
@@ -12444,8 +12444,8 @@
           "gateway"
         ],
         "operationId": "getV1GatewayHealth",
-        "summary": "W891-16.5 – public gateway liveness probe. Mirrors /health for the",
-        "description": "W891-16.5 – public gateway liveness probe. Mirrors /health for the gateway sub-system: ok:true + version + module-loadable signal. Mounted before r.use(authMiddleware) so it is reachable without an API key. Ship-gate consumers use this to confirm the gateway dispatch path is wired without paying for a real upstream call.",
+        "summary": "5 – public gateway liveness probe. Mirrors /health for the",
+        "description": "5 – public gateway liveness probe. Mirrors /health for the gateway sub-system: ok:true + version + module-loadable signal. Mounted before r.use(authMiddleware) so it is reachable without an API key. Ship-gate consumers use this to confirm the gateway dispatch path is wired without paying for a real upstream call.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -13918,8 +13918,8 @@
           "kscore"
         ],
         "operationId": "getV1KscoreSeries",
-        "summary": "W920 – K-score time series for the namespaces flywheel chart (recorded by",
-        "description": "W920 – K-score time series for the namespaces flywheel chart (recorded by the autopilot lifecycle). Tenant-fenced; honest empty series when none.",
+        "summary": "– K-score time series for the namespaces flywheel chart (recorded by",
+        "description": "– K-score time series for the namespaces flywheel chart (recorded by the autopilot lifecycle). Tenant-fenced; honest empty series when none.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -15034,7 +15034,7 @@
         ],
         "operationId": "getV1LongcontextP90",
         "summary": "Tenant fence: tenant_id forced from req.tenant_record.id; query/body",
-        "description": "Tenant fence: tenant_id forced from req.tenant_record.id; query/body never override. Returns honest envelope (no_captures, insufficient_samples) rather than throwing. version stamp matches /^w781-/.",
+        "description": "Tenant fence: tenant_id forced from req.tenant_record.id; query/body never override. Returns structured envelope (no_captures, insufficient_samples) rather than throwing. version stamp matches /^w781-/.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
@@ -17212,8 +17212,8 @@
           "namespaces"
         ],
         "operationId": "getV1NamespacesSlugStats",
-        "summary": "W899 – GET /v1/namespaces/:slug/stats – counts of pending/approved/",
-        "description": "W899 – GET /v1/namespaces/:slug/stats – counts of pending/approved/ rejected/quarantined captures in a namespace. Powers the \"ready to compile?\" readiness signal on /account/overview and the namespace badge on /account/namespaces. Tenant-union pattern to handle name-vs-id keys.",
+        "summary": "– GET /v1/namespaces/:slug/stats – counts of pending/approved/",
+        "description": "– GET /v1/namespaces/:slug/stats – counts of pending/approved/ rejected/quarantined captures in a namespace. Powers the \"ready to compile?\" readiness signal on /account/overview and the namespace badge on /account/namespaces. Tenant-union pattern to handle name-vs-id keys.",
         "parameters": [
           {
             "name": "slug",
@@ -28601,7 +28601,7 @@
         ],
         "operationId": "postV1XlangBalancedsample",
         "summary": "* Hosted route has NO runOnArtifact/judge wired by default –",
-        "description": "* Hosted route has NO runOnArtifact/judge wired by default – production injects via req.app.locals._w774_run_on_artifact +._w774_judge. The honest envelope on missing wiring is the contract, not a 500. * All four routes are tenant-fenced.",
+        "description": "* Hosted route has NO runOnArtifact/judge wired by default – production injects via req.app.locals._w774_run_on_artifact +._w774_judge. The structured envelope on missing wiring is the contract, not a 500. * All four routes are tenant-fenced.",
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"

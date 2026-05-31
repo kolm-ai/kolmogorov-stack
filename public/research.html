@@ -82,7 +82,7 @@
  font-size: 11.5px !important;
  letter-spacing: 0.2em !important;
  text-transform: uppercase !important;
- color: var(--ink-faint, #6a727c) !important;
+ color: var(--ks-accent, #6f9bff) !important;
  font-weight: 400 !important;
  margin: 0 0 28px !important;
  display: inline-flex; align-items: center; gap: 12px;
@@ -90,24 +90,24 @@
  background: transparent !important;
  padding: 0 !important;
 }
-[data-theme=light] .research-hero .hero-eyebrow { color: #6a727c !important; }
+[data-theme=light] .research-hero .hero-eyebrow { color: var(--ks-accent, #2563eb) !important; }
 .research-hero .hero-eyebrow .he-dot {
  width: 6px !important; height: 6px !important; border-radius: 50% !important;
- background: #111111 !important; box-shadow: 0 0 8px rgba(17, 17, 17,0.6) !important;
+ background: var(--ks-accent, #2563eb) !important; box-shadow: 0 0 8px rgba(37, 99, 235,0.5) !important;
  display: inline-block !important;
 }
 
 .research-hero .actions { margin-top: 36px !important; gap: 12px !important; display: flex; flex-wrap: wrap; }
 .research-hero .btn.primary {
- background: var(--ink, #e6e9ee) !important;
- color: var(--bg, #08090b) !important;
+ background: var(--ks-accent, #6f9bff) !important;
+ color: #fff !important;
  padding: 13px 24px !important;
  font-size: 14.5px !important;
  letter-spacing: 0.01em !important;
  border-radius: 8px !important;
  font-weight: 500 !important;
 }
-[data-theme=light] .research-hero .btn.primary { background: #1f2429 !important; color: #f3f5f7 !important; }
+[data-theme=light] .research-hero .btn.primary { background: var(--ks-accent, #2563eb) !important; color: #fff !important; }
 .research-hero .btn.ghost {
  border: 1px solid var(--line-3) !important;
  color: var(--ink-mute, #aab0b8) !important;
@@ -269,7 +269,7 @@
  font-size: 11.5px !important;
  letter-spacing: 0.2em !important;
  text-transform: uppercase !important;
- color: var(--ink-faint, #6a727c) !important;
+ color: var(--ks-accent, #6f9bff) !important;
  font-weight: 400 !important;
  margin: 0 0 24px !important;
  display: inline-flex; align-items: center; gap: 12px;
@@ -465,7 +465,7 @@
  font-size: 12px !important;
  letter-spacing: 0.18em !important;
  text-transform: uppercase !important;
- color: var(--ink-faint, #6a727c) !important;
+ color: var(--ks-accent, #6f9bff) !important;
  font-weight: 400 !important;
  margin: 56px 0 0 !important;
  padding-top: 24px !important;
@@ -576,7 +576,7 @@
  <div class="wrap">
  <div class="hero-eyebrow"><span class="he-dot"></span>kolm lab &middot; Research index</div>
  <h1>Compiling intelligence.</h1>
- <p class="lede">How kolm turns your data into an AI you can ship on your own hardware. Compile path, the <code>.kolm</code> file, the ship gate, the audit trail. Every paper here is open-source and reproducible.</p>
+ <p class="lede">Distill frontier quality into a small, private model you run on your own hardware. Compile path, the <code>.kolm</code> file, the ship gate, the audit trail &mdash; every paper here is open-source and reproducible.</p>
  <div class="actions">
  <a href="/whitepaper" class="btn primary lg">Read the whitepaper &rarr;</a>
  <a href="/benchmarks" class="btn ghost lg">Benchmark methodology</a><a href="/compare" hidden aria-hidden="true">compare</a>
@@ -1466,7 +1466,7 @@
  <div class="stamp"><span class="topic">deployment</span>May 14, 2026</div>
  <div class="body">
  <h3>BYOC deploy modes &middot; choosing among five attestation tiers.</h3>
- <p>Fly, aws-nitro, gcp-cvm, azure-cvm, docker. Nitro COSE_Sign1+PCR0, SEV-SNP 1184-byte report, TDX quote, MAA JWT, image sha256. The TOFU pinning model, the CLI surface, and which tier the regulator will actually accept.</p>
+ <p>Fly, aws-nitro, gcp-cvm, azure-cvm, docker. Nitro COSE_Sign1+PCR0, SEV-SNP 1184-byte report, TDX quote, MAA JWT, image sha256. The TOFU pinning model, the CLI, and which tier the regulator will actually accept.</p>
  </div>
  <div class="read">12 min &rarr;</div>
  </a>

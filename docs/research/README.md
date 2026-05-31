@@ -89,6 +89,7 @@ This directory is the living research base for Kolm / the Kolm stack. It is mean
 | `tune-evolution-governance-matrix-2026-05-12.csv` | Row-level tune/evolution proof and promotion-governance matrix. |
 | `source-register-2026-05-12.md` | Primary-source register for the first research pass. |
 | `research-backlog-2026-05-12.md` | Open research threads to keep this repository moving. |
+| `spec-dec-student-as-draft.md` | Research roadmap (not for V1 launch) design doc for speculative decoding with a kolm-distilled student as the draft model: architecture, routing tier, envelope math, validation plan, and phased implementation. |
 
 ## Maintenance Rules
 

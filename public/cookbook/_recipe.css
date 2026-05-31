@@ -2,7 +2,7 @@
  --bg: #f3f5f7; --bg-elev: #ffffff; --bg-card: #ffffff;
  --line: rgba(17,17,17,0.06); --line-strong: rgba(17,17,17,0.12);
  --ink: #111111; --ink-mute: #56606c; --ink-faint: #a8b3c2;
- --accent: #1f2937; --accent-strong: #111111; --good: #2d5a37; --bad: #7f2121;
+ --accent: #2563eb; --accent-strong: #111111; --good: #2d5a37; --bad: #7f2121;
  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
 }
@@ -10,7 +10,7 @@
  --bg: #050607; --bg-elev: #0b0f10; --bg-card: #101514;
  --line: rgba(255,255,255,0.06); --line-strong: rgba(255,255,255,0.12);
  --ink: #e6e9ee; --ink-mute: #aab0b8; --ink-faint: #6a727c;
- --accent: #e6e9ee; --accent-strong: #e6e9ee; --good: #e6e9ee; --bad: #ff6b91;
+ --accent: #6f9bff; --accent-strong: #e6e9ee; --good: #e6e9ee; --bad: #ff6b91;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
@@ -29,7 +29,7 @@ header.site nav a { color: var(--ink-mute); font-size: 13.5px; }
 header.site nav a:hover { color: var(--ink); }
 header.site .right { display: flex; align-items: center; gap: 14px; }
 header.site .right .ghost { color: var(--ink-mute); font-size: 13.5px; }
-header.site .right .cta { color: var(--bg); background: var(--ink); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
+header.site .right .cta { color: #fff; background: var(--accent); border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
 @media (max-width: 720px) { header.site nav { display: none; } }
 
 section.hero { padding: 72px 0 28px; }
@@ -40,6 +40,13 @@ section.hero { padding: 72px 0 28px; }
 h1 { margin: 18px 0 14px; font-size: clamp(32px, 4.4vw, 44px); line-height: 1.08; font-weight: 500; max-width: 24ch; }
 h1 .tone { color: var(--accent); }
 p.lede { margin: 0 0 22px; font-size: 16.5px; line-height: 1.55; color: var(--ink-mute); max-width: 64ch; }
+
+.rcta { display: flex; gap: 12px; flex-wrap: wrap; margin: 22px 0 4px; }
+.rcta a { font-family: var(--sans); font-size: 14px; font-weight: 500; border-radius: 7px; padding: 9px 18px; transition: opacity 120ms ease, background 120ms ease; }
+.rcta .rcta-primary { background: var(--accent); color: #fff; }
+.rcta .rcta-primary:hover { opacity: 0.9; }
+.rcta .rcta-alt { border: 1px solid var(--accent); color: var(--accent); }
+.rcta .rcta-alt:hover { background: var(--accent); color: #fff; }
 
 .meta-row { display: flex; flex-wrap: wrap; gap: 18px 28px; margin: 18px 0 0; padding: 14px 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-elev); }
 .meta-row .item { font-size: 13px; }

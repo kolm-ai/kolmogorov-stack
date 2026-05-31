@@ -946,7 +946,7 @@
           "short": "Tenant fence: tenant_id forced from req.tenant_record.id. Status",
           "comments": [
             "Tenant fence: tenant_id forced from req.tenant_record.id. Status",
-            "transitions return honest invalid_transition envelopes - never silently",
+            "transitions return structured invalid_transition envelopes - never silently",
             "re-write state. version stamp matches /^w782-/."
           ],
           "stub": false,
@@ -1217,7 +1217,7 @@
           "short": "W409k – audio routes. Real proxy when configured; fixture returns deterministic",
           "comments": [
             "W409k – audio routes. Real proxy when configured; fixture returns deterministic",
-            "bodies; otherwise honest 501 with a structured \"not yet supported\" envelope so",
+            "bodies; otherwise structured 501 with a structured \"not yet supported\" envelope so",
             "SDKs see something better than 404. These concrete audio endpoints use",
             "the OpenAI connector when a key is present."
           ],
@@ -1257,7 +1257,7 @@
           "short": "W409k – audio routes. Real proxy when configured; fixture returns deterministic",
           "comments": [
             "W409k – audio routes. Real proxy when configured; fixture returns deterministic",
-            "bodies; otherwise honest 501 with a structured \"not yet supported\" envelope so",
+            "bodies; otherwise structured 501 with a structured \"not yet supported\" envelope so",
             "SDKs see something better than 404. These concrete audio endpoints use",
             "the OpenAI connector when a key is present."
           ],
@@ -1272,7 +1272,7 @@
           "short": "W409k – audio routes. Real proxy when configured; fixture returns deterministic",
           "comments": [
             "W409k – audio routes. Real proxy when configured; fixture returns deterministic",
-            "bodies; otherwise honest 501 with a structured \"not yet supported\" envelope so",
+            "bodies; otherwise structured 501 with a structured \"not yet supported\" envelope so",
             "SDKs see something better than 404. These concrete audio endpoints use",
             "the OpenAI connector when a key is present."
           ],
@@ -5633,7 +5633,7 @@
           "short": "Tenant fence: tenant_id forced from req.tenant_record.id; query/body",
           "comments": [
             "Tenant fence: tenant_id forced from req.tenant_record.id; query/body",
-            "never override. Returns honest envelope (no_captures, insufficient_samples)",
+            "never override. Returns structured envelope (no_captures, insufficient_samples)",
             "rather than throwing. version stamp matches /^w781-/."
           ],
           "stub": false,
@@ -11243,7 +11243,7 @@
           "comments": [
             "* Hosted route has NO runOnArtifact/judge wired by default –",
             "production injects via req.app.locals._w774_run_on_artifact +",
-            "._w774_judge. The honest envelope on missing wiring is the",
+            "._w774_judge. The structured envelope on missing wiring is the",
             "contract, not a 500.",
             "* All four routes are W411 tenant-fenced."
           ],
