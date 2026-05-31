@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>kolm for teams &middot; The AI control plane for teams</title>
+<meta name="description" content="Get your whole team's AI under control: see every call and what it costs, keep sensitive data in, build models you own, and govern it all. Built for teams that aren't AI experts.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://kolm.ai/solutions/teams">
+<meta property="og:title" content="kolm for teams">
+<meta property="og:description" content="Every employee's AI use, captured, owned, and governed in one place. Built for teams that aren't AI experts.">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/solutions/teams">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/design-tokens.css">
+<style>
+:root{ --c:var(--ks-accent,#2563eb); --ink:var(--ks-ink,#11151b); --ink2:var(--ks-ink-2,#3b444f); --mut:var(--ks-ink-3,#6a7480); --bg:var(--ks-bg,#f5f7f9); --pan:var(--ks-bg-1,#fff); --line:var(--ks-line-2,#e3e7ec); --line2:var(--ks-line-3,#cfd6de); --mono:var(--ks-mono,ui-monospace,SFMono-Regular,Menlo,Consolas,monospace); }
+html[data-theme=dark]{ --c:var(--ks-accent,#6f9bff); --ink:#eef1f5; --ink2:#aeb8c4; --mut:#7c8794; --bg:#0b0e13; --pan:#11151b; --line:#1d2430; --line2:#2a3340; }
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:0 28px}
+.sec{padding:clamp(48px,6vw,88px) 0;border-top:1px solid var(--line)}
+.idx{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--mut);margin:0 0 18px}
+.idx b{color:var(--c);font-weight:600}
+.h1{font-family:var(--ks-display,Inter,sans-serif);font-weight:580;letter-spacing:-.03em;font-size:clamp(34px,4.6vw,56px);line-height:1.04;margin:0 0 18px}
+.h2{font-family:var(--ks-display,Inter,sans-serif);font-weight:560;letter-spacing:-.02em;font-size:clamp(26px,3.2vw,40px);line-height:1.1;margin:0 0 14px;max-width:22ch}
+.lede{font-size:clamp(16px,1.4vw,18px);line-height:1.55;color:var(--ink2);max-width:60ch;margin:0 0 26px}
+.eye{font-family:var(--mono);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--c);margin:0 0 16px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-size:14.5px;font-weight:540;border-radius:8px;padding:12px 20px;text-decoration:none;margin:0 8px 8px 0}
+.btn--p{background:var(--c);color:#fff}.btn--p:hover{opacity:.92}
+.btn--g{border:1px solid var(--line2);color:var(--ink)}.btn--g:hover{border-color:var(--c);color:var(--c)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:var(--pan);border:1px solid var(--line);border-radius:12px;padding:24px}
+.card .t{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin:0 0 10px}
+.card h3{font-size:18px;font-weight:560;margin:0 0 8px;letter-spacing:-.01em}
+.card p{margin:0;font-size:14.5px;line-height:1.55;color:var(--ink2)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}@media(max-width:760px){.steps{grid-template-columns:1fr}}
+.step{border:1px solid var(--line);border-radius:12px;padding:20px;background:var(--pan)}
+.step .n{font-family:var(--mono);color:var(--c);font-weight:600}
+.trust{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--mut);text-transform:uppercase;margin-top:22px}
+.ctas{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.link{color:var(--c);text-decoration:none;border-bottom:1px solid transparent;font-weight:500}.link:hover{border-bottom-color:var(--c)}
+</style>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
+</head>
+<body class="ks">
+<div class="ks-nav-wrap">
+  <nav class="ks-nav" aria-label="Primary">
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
+    <ul class="ks-nav__list">
+      <li><a href="/product">Product</a></li>
+      <li><a href="/solutions/teams">For teams</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="/enterprise">Enterprise</a></li>
+    </ul>
+    <div class="ks-nav__right"><a href="/signup?intent=login" class="ks-nav__signin">Sign in</a><a href="/account/connect" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a></div>
+  </nav>
+</div>
+
+<main id="main">
+<section class="sec" style="border-top:0;padding-top:clamp(36px,5vw,72px)">
+  <div class="wrap">
+    <p class="eye">kolm for teams</p>
+    <h1 class="h1">Your team's AI,<br>finally under control.</h1>
+    <p class="lede">Your people already use ChatGPT, Claude, and a dozen tools to do real work. kolm puts all of it in one place you control: you see every call and what it costs, keep sensitive data in, turn the work into models you own, and govern who can do what. No AI background required.</p>
+    <div class="ctas"><a class="btn btn--p" href="/account/connect">See your team's AI <span aria-hidden="true">&rarr;</span></a><a class="btn btn--g" href="/book-demo">Book a demo</a></div>
+    <p class="trust">Connect in an afternoon &middot; no migration &middot; keep your existing tools</p>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <p class="idx"><b>01</b> What your team gets</p>
+    <h2 class="h2">Four things go wrong with scattered AI. kolm fixes all four.</h2>
+    <div class="grid">
+      <div class="card"><p class="t">See it</p><h3>Every call, by person and team.</h3><p>Point any tool at kolm and watch a live feed of who asked what, which model, and how much it cost. The visibility scattered usage never gave you.</p></div>
+      <div class="card"><p class="t">Control it</p><h3>Cost, access, and PII in one place.</h3><p>Meter spend per team, set who can use which providers, and redact sensitive data before it leaves your boundary. You set the rules.</p></div>
+      <div class="card"><p class="t">Own it</p><h3>Models trained on your own work.</h3><p>kolm turns the work your team repeats into a model you own and run cheaply. Light runs finish in minutes; intense runs train on cloud GPUs. You keep the weights.</p></div>
+      <div class="card"><p class="t">Prove it</p><h3>A signed record for every call.</h3><p>SSO, SCIM, and RBAC plus a verifiable receipt on every call, so your security and finance teams can answer "what AI touched our data" with evidence.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <p class="idx"><b>02</b> How a team starts</p>
+    <h2 class="h2">Three steps, no AI team required.</h2>
+    <div class="steps">
+      <div class="step"><p><span class="n">01</span> Connect</p><p style="color:var(--ink2);font-size:14.5px;margin-top:6px">Add the provider keys you already pay for. Their traffic routes through kolm.</p></div>
+      <div class="step"><p><span class="n">02</span> Invite</p><p style="color:var(--ink2);font-size:14.5px;margin-top:6px">Bring your people into one workspace and set who can use what, by role.</p></div>
+      <div class="step"><p><span class="n">03</span> Control</p><p style="color:var(--ink2);font-size:14.5px;margin-top:6px">Watch usage, cost, and risk become visible. Build a model you own when you are ready.</p></div>
+    </div>
+    <div class="ctas" style="margin-top:26px"><a class="btn btn--p" href="/account/connect">Get started <span aria-hidden="true">&rarr;</span></a><a class="link" href="/pricing">See pricing</a></div>
+  </div>
+</section>
+
+<section class="sec" style="text-align:center">
+  <div class="wrap">
+    <h2 class="h2" style="margin:0 auto 14px;max-width:20ch">Get your team's AI under control.</h2>
+    <p class="lede" style="margin:0 auto 24px">Most teams are seeing their usage within an afternoon. Keep your tools, keep your data, and finally know what your company's AI is doing.</p>
+    <div class="ctas" style="justify-content:center"><a class="btn btn--p" href="/account/connect">See your team's AI <span aria-hidden="true">&rarr;</span></a><a class="btn btn--g" href="/book-demo">Book a demo</a></div>
+    <p class="trust">Apache&#8209;2.0 &middot; Self&#8209;hostable &middot; Air&#8209;gapped &middot; SOC&nbsp;2 Type&nbsp;I &middot; 6 SDKs</p>
+  </div>
+</section>
+</main>
+
+<footer class="ks-foot">
+  <div class="ks-wrap">
+    <div class="ks-foot__grid">
+      <div class="ks-foot__col"><div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div><p class="ks-foot__tag">The AI control plane for teams.</p></div>
+      <div class="ks-foot__col"><h4>Product</h4><a href="/product">Product</a><a href="/solutions/teams">For teams</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></div>
+      <div class="ks-foot__col"><h4>Trust</h4><a href="/security">Security</a><a href="/proof">Proof</a><a href="/enterprise">Enterprise</a><a href="/verify">Verify a receipt</a></div>
+    </div>
+    <div class="ks-foot__base"><span>&copy; 2026 kolm.ai - Apache-2.0</span></div>
+  </div>
+</footer>
+</body>
+</html>
