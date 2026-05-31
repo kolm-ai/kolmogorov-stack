@@ -85,7 +85,7 @@ td code{font-size:12px}
 <main id="main" tabindex="-1"><div class="wrap">
 
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / gateway-faq</div>
-<p class="eyebrow">Wrapper / Gateway</p>
+<p class="eyebrow">Gateway</p>
 <h1>Frequently asked.</h1>
 <p class="lede">Quick answers to the questions we get most often. Cross-linked to the doc that goes deeper.</p>
 
@@ -108,7 +108,7 @@ td code{font-size:12px}
 <p>Dev: <code>jsonl</code>. Single-node prod: <code>sqlite</code>. Multi-node prod: <code>postgres</code>. Audit / cold storage: <code>s3</code>. You can also run two in parallel - e.g. <code>postgres</code> for live + <code>s3</code> for archive - via the <code>KOLM_CAPTURE_LAKE_SECONDARY</code> env.</p>
 
 <h2 id="can-i-send-a-request-that-bypasses-the-gateway-pipeline-entirely">Can I send a request that bypasses the gateway pipeline entirely?</h2>
-<p>Yes - <code>POST /v1/teacher/chat</code> is the no-wrapper proxy. Useful for benchmarking the gateway overhead. It does NOT sign a receipt or write to the capture lake.</p>
+<p>Yes - <code>POST /v1/teacher/chat</code> is the direct proxy. Useful for benchmarking the gateway overhead. It does NOT sign a receipt or write to the capture lake.</p>
 
 <div class="related">
   <a href="/docs/gateway-bench"><b>Benchmark &rarr;</b><span>Live latency + cost numbers.</span></a>

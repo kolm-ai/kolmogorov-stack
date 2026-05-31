@@ -78,7 +78,7 @@ hr.rule{border:none;border-top:1px solid var(--line);margin:36px 0}
 
 <p>Every other "AI ops" platform picks a side. Wrapper-only tools (LiteLLM, OpenRouter) get you a gateway but no path to local. Fine-tune-only tools (OpenPipe, Predibase) get you a custom model but no gateway, no receipts, no traffic to learn from. Hosted distillation services lock the artifact behind their API. Each solves a third of the problem; you glue the rest.</p>
 
-<p>kolm V1 collapses the three. Use any surface independently; the value compounds when you use them together. The Wrapper sees real traffic, captures the rows that mattered, hands the dataset to Studio, and Studio hands a signed local artifact back to the Wrapper for routing. Run and Govern wraps the loop with deployment, monitoring, and audit export.</p>
+<p>kolm V1 collapses the three. Use any surface independently; the value compounds when you use them together. The Wrapper sees real traffic, captures the rows that mattered, hands the dataset to Studio, and Studio hands a signed local artifact back to the gateway for routing. Run and Govern wraps the loop with deployment, monitoring, and audit export.</p>
 
 <h2>Surface 1: Wrapper</h2>
 
@@ -104,7 +104,7 @@ hr.rule{border:none;border-top:1px solid var(--line);margin:36px 0}
 kolm distill --namespace support --base qwen2.5-7b --teachers claude,gpt-4o,deepseek-r1
 kolm compile --target gguf-q4km --target ollama-modelfile</code></pre>
 
-<p>Studio runs the Forge under the hood: a council distillation pipeline letting multiple teachers (Claude, GPT-4o, DeepSeek-R1, Gemini, anything you route through the Wrapper) generate rationale-bearing pairs for one student, weighted by your cost budget. Trinity-500 (the first published kolm artifact) was distilled this way: 410 pairs in 79 seconds of LoRA on a 5090.</p>
+<p>Studio runs the Forge under the hood: a council distillation pipeline letting multiple teachers (Claude, GPT-4o, DeepSeek-R1, Gemini, anything you route through the gateway) generate rationale-bearing pairs for one student, weighted by your cost budget. Trinity-500 (the first published kolm artifact) was distilled this way: 410 pairs in 79 seconds of LoRA on a 5090.</p>
 
 <p>Compile exports to GGUF (Q2 through Q8 plus IQ family), Ollama Modelfile, EXL2, GPTQ, AWQ, FP8, NVFP4, HQQ, and MLX. Each export carries a runtime passport: target, precision, memory, quality delta from FP16.</p>
 
@@ -161,7 +161,7 @@ kolm captures list --namespace support
 kolm distill --namespace support --base qwen2.5-7b
 kolm serve artifact.kolm</code></pre>
 
-<p>The Wrapper, Studio, and Run and Govern docs each have a top-level overview at <a href="/wrapper">/wrapper</a>, <a href="/studio">/studio</a>, and <a href="/docs/run/overview">/docs/run/overview</a>. The Trinity-500 case study (a 7B that beats Claude Haiku and ties gpt-4o-mini on the customer-support rubric at half the response length) is up next on the blog.</p>
+<p>The Wrapper, Studio, and Run and Govern docs each have a top-level overview at <a href="/capture">/wrapper</a>, <a href="/studio">/studio</a>, and <a href="/docs/run/overview">/docs/run/overview</a>. The Trinity-500 case study (a 7B that beats Claude Haiku and ties gpt-4o-mini on the customer-support rubric at half the response length) is up next on the blog.</p>
 
 <div class="endnote">
 <b>Caveats.</b> The 40% wrapper-overhead figure is from our managed deployment that proxies provider keys through Vercel; a Railway-direct deployment with the provider key on the same host cuts that to roughly 10 to 50 milliseconds. Trinity-500 is one customer-support distillation on Qwen2.5-7B; your numbers will vary by domain, base model, and council composition. The whole product is V1, not 1.0 perfect; we will write about the rough edges as we find them.

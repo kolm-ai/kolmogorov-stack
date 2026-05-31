@@ -203,7 +203,7 @@ npm run ship:gate -- --only=run</code></pre>
     <tr><td class="col-id">perf.gateway-p95</td><td>perf</td><td>p95 latency &lt; 6000ms.</td><td>Same; check 95th-percentile outliers.</td></tr>
     <tr><td class="col-id">perf.receipt-rate</td><td>perf</td><td>10/10 captures yield receipts.</td><td>Inspect receipt writer + queue depth.</td></tr>
     <tr><td class="col-id">perf.upstream-2xx</td><td>perf</td><td>10/10 upstream calls return 2xx.</td><td>Confirm provider key + quota.</td></tr>
-    <tr><td class="col-id">perf.cost-delta</td><td>perf</td><td>Wrapper tax &lt;= 5% vs direct provider call.</td><td>Profile the hop; reduce middleware allocations.</td></tr>
+    <tr><td class="col-id">perf.cost-delta</td><td>perf</td><td>Gateway overhead &lt;= 5% vs direct provider call.</td><td>Profile the hop; reduce middleware allocations.</td></tr>
   </tbody>
 </table>
 

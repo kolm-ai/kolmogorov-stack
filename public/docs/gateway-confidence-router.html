@@ -85,9 +85,9 @@ td code{font-size:12px}
 <main id="main" tabindex="-1"><div class="wrap">
 
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / gateway-confidence-router</div>
-<p class="eyebrow">Wrapper / Gateway</p>
+<p class="eyebrow">Gateway</p>
 <h1>Local first. Frontier on doubt. Capture the doubt.</h1>
-<p class="lede">The confidence router (introduced in) is the link between Wrapper and Studio. It runs your local <code>.kolm</code> artifact first, measures the response confidence, and falls back to a frontier provider only when the local model isn't sure. Every fallback is tagged <code>capture_eligible:true</code> - that's the row you want to add to the next distill.</p>
+<p class="lede">The confidence router (introduced in) is the link between the gateway and the compiler. It runs your local <code>.kolm</code> artifact first, measures the response confidence, and falls back to a frontier provider only when the local model isn't sure. Every fallback is tagged <code>capture_eligible:true</code> - that's the row you want to add to the next distill.</p>
 
 <h2 id="how-the-gate-decides">How the gate decides</h2>
 <p>Confidence is computed from three signals in priority order:</p>

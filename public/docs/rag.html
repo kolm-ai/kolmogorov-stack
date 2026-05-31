@@ -119,7 +119,7 @@ client.capture_with_context(
     prompt="When did kolm.ai launch?",
     retrieved=[
         {"source": "kolm.ai/changelog", "text": "Launched 2026-05", "score": 0.92},
-        {"source": "kolm.ai/about", "text": "kolm.ai is the open-source AI compiler.", "score": 0.71},
+        {"source": "kolm.ai/about", "text": "kolm.ai is the AI control plane for teams.", "score": 0.71},
     ],
     response="kolm.ai launched in May 2026.",
     namespace="customer-support",
@@ -134,7 +134,7 @@ await client.captureWithContext({
   prompt: "When did kolm.ai launch?",
   retrieved: [
     { source: "kolm.ai/changelog", text: "Launched 2026-05", score: 0.92 },
-    { source: "kolm.ai/about", text: "kolm.ai is the open-source AI compiler.", score: 0.71 },
+    { source: "kolm.ai/about", text: "kolm.ai is the AI control plane for teams.", score: 0.71 },
   ],
   response: "kolm.ai launched in May 2026.",
   namespace: "customer-support",
@@ -159,7 +159,7 @@ await client.captureWithContext({
 
 <pre><code>[
   { "source": "kolm.ai/changelog", "text": "Launched 2026-05", "score": 0.92 },
-  { "source": "kolm.ai/about", "text": "kolm.ai is the open-source AI compiler.", "score": 0.71 }
+  { "source": "kolm.ai/about", "text": "kolm.ai is the AI control plane for teams.", "score": 0.71 }
 ]</code></pre>
 
 <p>On a malformed header the server returns HTTP 400 with the loud-fail envelope:</p>
@@ -181,7 +181,7 @@ Content-Type: application/json
 Launched 2026-05
 &lt;/RETRIEVED&gt;
 &lt;RETRIEVED source=kolm.ai/about score=0.71&gt;
-kolm.ai is the open-source AI compiler.
+kolm.ai is the AI control plane for teams.
 &lt;/RETRIEVED&gt;
 
 USER: When did kolm.ai launch?

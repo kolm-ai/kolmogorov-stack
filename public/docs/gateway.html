@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <title>Gateway - the gateway around any LLM provider &middot; kolm.ai</title>
-<meta name="description" content="Drop-in wrapper for any LLM provider. 11 adapters, Ed25519-signed receipts, capture lake with PII redaction, local-first routing with frontier fallback. Three-line client install.">
+<meta name="description" content="Drop-in gateway for any LLM provider. 11 adapters, Ed25519-signed receipts, capture lake with PII redaction, local-first routing with frontier fallback. Three-line client install.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Gateway - the gateway around any LLM provider">
@@ -85,12 +85,12 @@ td code{font-size:12px}
 <main id="main" tabindex="-1"><div class="wrap">
 
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / gateway</div>
-<p class="eyebrow">Wrapper / Gateway</p>
-<h1>One wrapper. Eleven providers. Every call signed.</h1>
+<p class="eyebrow">Gateway</p>
+<h1>One gateway. Every provider. Every call captured and signed.</h1>
 <p class="lede">The kolm gateway is the receipt-signed, capture-on, locally-first proxy in front of every LLM you call. <code>POST /v1/gateway/dispatch</code> takes an OpenAI-shaped request, walks a namespace-configured routing chain (local artifact → frontier fallback), runs the response through a 4-mode PII redactor + 5-signal poison detector, signs a 19-field <code>kolm-audit-1</code> receipt with Ed25519, and stamps a capture row that can be approved into a training set.</p>
 
 <h2 id="what-the-gateway-adds-on-top-of-a-raw-provider-call">What the gateway adds on top of a raw provider call</h2>
-<p>The minimum surface to call a frontier LLM in production is a key, a URL, and a retry loop. The kolm gateway is the next layer up - what you'd otherwise build over six months as your wrapper grows. Every dispatch goes through these stages:</p>
+<p>The minimum surface to call a frontier LLM in production is a key, a URL, and a retry loop. The kolm gateway is the next layer up - what you'd otherwise build over six months as your gateway grows. Every dispatch goes through these stages:</p>
 <table>
   <thead><tr><th>Stage</th><th>What it does</th><th>Code path</th></tr></thead>
   <tbody>

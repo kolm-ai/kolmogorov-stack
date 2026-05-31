@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
-<title>kolm.ai blog &middot; receipts, distillation, the wrapper</title>
-<meta name="description" content="Notes from kolm.ai on the wrapper, the distillation pipeline, and the receipt format. Engineering posts about routing, training, and evidence.">
+<title>kolm.ai blog &middot; receipts, distillation, the gateway</title>
+<meta name="description" content="Notes from kolm.ai on the gateway, the distillation pipeline, and the receipt format. Engineering posts about routing, training, and evidence.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="kolm.ai blog">
-<meta property="og:description" content="Receipts, distillation, the wrapper. Engineering notes from kolm.ai.">
+<meta property="og:description" content="Receipts, distillation, the gateway. Engineering notes from kolm.ai.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/blog">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -17,7 +17,7 @@
 <link rel="canonical" href="https://kolm.ai/blog">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="alternate" type="application/rss+xml" title="kolm.ai blog" href="/feed.xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Blog","name":"kolm.ai blog","description":"Receipts, distillation, the wrapper.","url":"https://kolm.ai/blog","publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Blog","name":"kolm.ai blog","description":"Receipts, distillation, the gateway.","url":"https://kolm.ai/blog","publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/ks.css">
 <style>
@@ -64,7 +64,7 @@ h1{font-size:34px;line-height:1.12;font-weight:520;letter-spacing:-0.02em;margin
 <a class="back" href="/">&larr; kolm.ai</a>
 <p class="crumbs"><a href="/">Home</a> &middot; Blog</p>
 <p class="eyebrow">kolm.ai blog</p>
-<h1>Receipts, distillation, the wrapper.</h1>
+<h1>Receipts, distillation, the gateway.</h1>
 <p class="lede">Engineering notes from the team building kolm. Routing, training recipes, evidence formats, and the boring details that determine whether any of it actually works in production.</p>
 <p class="sub">6 posts &middot; <a href="/feed.xml">RSS</a> &middot; <a href="/changelog">Changelog</a></p>
 
@@ -86,7 +86,7 @@ h1{font-size:34px;line-height:1.12;font-weight:520;letter-spacing:-0.02em;margin
 
 <li class="post">
 <p class="date">2026-05-26 <span class="reading">10 min read</span></p>
-<h2><a href="/blog/2026-05-26-the-wrapper-tax-decomposed">The wrapper tax, decomposed: where 703 milliseconds went</a></h2>
+<h2><a href="/blog/2026-05-26-the-wrapper-tax-decomposed">The gateway overhead, decomposed: where 703 milliseconds went</a></h2>
 <p>We measured the kolm gateway against direct OpenAI on 10 paired prompts. The wrapper adds 703 ms of mean latency, 40 percent end-to-end. This post breaks that number down phase by phase: pipeline overhead splits into routing, fingerprinting, receipt signing, and write-ahead log; transport overhead splits into the Vercel hop, the Railway leg, and the SSL handshake. The Vercel proxy alone accounts for 400 to 500 ms. Railway-direct is faster but costs you receipt-on-edge and the public domain.</p>
 <a class="more" href="/blog/2026-05-26-the-wrapper-tax-decomposed">Read &rarr;</a>
 </li>
@@ -108,7 +108,7 @@ h1{font-size:34px;line-height:1.12;font-weight:520;letter-spacing:-0.02em;margin
 <li class="post">
 <p class="date">2026-05-26 <span class="reading">10 min read</span></p>
 <h2><a href="/blog/2026-05-26-from-frontier-to-local-in-five-minutes">From frontier to local in five minutes: a minute-by-minute walkthrough</a></h2>
-<p>A live capture-distill-deploy run from kolm.ai. Minute zero: install. Minute one: point the wrapper at GPT-4o, send fifty turns of real support traffic. Minute two: kolm studio distill starts a LoRA on a captured slice. Minute three: the adapter merges and quantizes to a 4.3 GB GGUF. Minute four: kolm run loads it on local hardware and serves the OpenAI-compatible API. Minute five: the wrapper starts routing easy traffic to local, hard traffic to GPT-4o, and the cost graph in the dashboard starts to bend. With caveats about what fits in five minutes and what does not.</p>
+<p>A live capture-distill-deploy run from kolm.ai. Minute zero: install. Minute one: point the gateway at GPT-4o, send fifty turns of real support traffic. Minute two: kolm studio distill starts a LoRA on a captured slice. Minute three: the adapter merges and quantizes to a 4.3 GB GGUF. Minute four: kolm run loads it on local hardware and serves the OpenAI-compatible API. Minute five: the gateway starts routing easy traffic to local, hard traffic to GPT-4o, and the cost graph in the dashboard starts to bend. With caveats about what fits in five minutes and what does not.</p>
 <a class="more" href="/blog/2026-05-26-from-frontier-to-local-in-five-minutes">Read &rarr;</a>
 </li>
 

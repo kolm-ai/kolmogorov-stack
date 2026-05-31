@@ -139,7 +139,7 @@ curl https://kolm.ai/v1/verify/rcpt_01KYC1ZVTGDCW3FX06JQSC
 
 <h2>Why every call</h2>
 
-<p>The temptation is to receipt only the "important" calls. Auditors care about completeness, integrity, and verifiability. Skipping receipts on some calls breaks completeness. The discipline costs about 25 ms of signing plus 40 ms of capture write (see the wrapper-tax post) and is worth it.</p>
+<p>The temptation is to receipt only the "important" calls. Auditors care about completeness, integrity, and verifiability. Skipping receipts on some calls breaks completeness. The discipline costs about 25 ms of signing plus 40 ms of capture write (see the gateway-tax post) and is worth it.</p>
 
 <p>Receipt-on-failure is part of the contract: when upstream returns 5xx, the gateway still writes a receipt with <code>fallback_reason: "upstream_5xx"</code> and zero-token cost. Auditors specifically ask about failed calls; an audit trail that goes dark on failure is a suspect trail.</p>
 

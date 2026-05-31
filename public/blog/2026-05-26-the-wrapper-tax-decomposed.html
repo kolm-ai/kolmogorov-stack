@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
-<title>The wrapper tax, decomposed &middot; kolm.ai blog</title>
+<title>The gateway overhead, decomposed &middot; kolm.ai blog</title>
 <meta name="description" content="production benchmark: 703 ms of overhead on a 2478 ms call, broken down by phase. PII scan plus chain resolve plus Ed25519 sign plus capture write plus Vercel hop, with the cost of the audit trail isolated.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="The wrapper tax, decomposed · kolm.ai blog">
+<meta property="og:title" content="The gateway overhead, decomposed · kolm.ai blog">
 <meta property="og:description" content="703 ms of overhead on a 2478 ms call, broken down by phase, measured live against kolm.ai.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/blog/2026-05-26-the-wrapper-tax-decomposed">
@@ -17,7 +17,7 @@
 <link rel="canonical" href="https://kolm.ai/blog/2026-05-26-the-wrapper-tax-decomposed">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="alternate" type="application/rss+xml" title="kolm.ai blog" href="/feed.xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"The wrapper tax, decomposed","description":"703 ms of overhead on a 2478 ms call, broken down by phase.","url":"https://kolm.ai/blog/2026-05-26-the-wrapper-tax-decomposed","datePublished":"2026-05-26","dateModified":"2026-05-26","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"The gateway overhead, decomposed","description":"703 ms of overhead on a 2478 ms call, broken down by phase.","url":"https://kolm.ai/blog/2026-05-26-the-wrapper-tax-decomposed","datePublished":"2026-05-26","dateModified":"2026-05-26","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
 <link rel="stylesheet" href="/design-tokens.css">
 <link rel="stylesheet" href="/ks.css">
 <style>
@@ -70,7 +70,7 @@ table.tabular td:not(:first-child){text-align:right}
 
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/blog">blog</a> / the-wrapper-tax-decomposed</div>
 <p class="eyebrow">Benchmark &middot;</p>
-<h1>The wrapper tax, decomposed.</h1>
+<h1>The gateway overhead, decomposed.</h1>
 <p class="meta">2026-05-26 &middot; ~10 minute read</p>
 
 <article class="kolm-post">
@@ -107,7 +107,7 @@ receipt_sign              ~25  |
 capture_write             ~40  |
 -----------------------------------------------------------------
 
-TOTAL kolm pipeline       ~203  (the part the wrapper adds)
+TOTAL kolm pipeline       ~203  (the part the gateway adds)
 + Vercel proxy hop        ~500  (managed config only; Railway-direct kills this)
 + Upstream round trip    ~1775  (the part you would pay anyway)
 = End-to-end mean         2478
@@ -115,7 +115,7 @@ TOTAL kolm pipeline       ~203  (the part the wrapper adds)
 
 <p>Read as a table:</p>
 
-<table class="tabular" aria-label="Wrapper tax phase decomposition">
+<table class="tabular" aria-label="Gateway overhead phase decomposition">
 <thead><tr><th>Component</th><th>Wall clock</th></tr></thead>
 <tbody>
 <tr><td>Direct Anthropic round trip (mean)</td><td>1774 ms</td></tr>
@@ -146,7 +146,7 @@ TOTAL kolm pipeline       ~203  (the part the wrapper adds)
 <p>The 400 to 500 ms cross-host hop is a deployment choice, not a fundamental cost. Two configurations:</p>
 
 <table class="tabular" aria-label="Deployment configuration tradeoff">
-<thead><tr><th>Configuration</th><th>chain_dispatch (mean)</th><th>wrapper tax (mean)</th><th>end-to-end</th></tr></thead>
+<thead><tr><th>Configuration</th><th>chain_dispatch (mean)</th><th>gateway overhead (mean)</th><th>end-to-end</th></tr></thead>
 <tbody>
 <tr><td>Railway-direct (provider key on the gateway host)</td><td>~1500 to 1800 ms</td><td>~10 to 50 ms</td><td>~1550 to 1850 ms</td></tr>
 <tr><td>Vercel-proxy (managed kolm.ai)</td><td>~1900 to 2200 ms</td><td>~400 to 700 ms</td><td>~2300 to 2900 ms</td></tr>
