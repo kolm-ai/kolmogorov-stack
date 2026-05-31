@@ -292,6 +292,9 @@ function _matchEvent(ev, q) {
   // restricts the read to that tenant; the seam is enforced here.
   const tenantFilter = q.tenant_id || q.tenant;
   if (tenantFilter && ev.tenant_id !== tenantFilter) return false;
+  // W936 — team attribution filters (team dashboard "who asked what").
+  if (q.team_id && ev.team_id !== q.team_id) return false;
+  if (q.actor_id && ev.actor_id !== q.actor_id) return false;
   if (q.provider && ev.provider !== q.provider) return false;
   if (q.model && ev.model !== q.model) return false;
   if (q.workflow_id && ev.workflow_id !== q.workflow_id) return false;
@@ -329,9 +332,13 @@ export async function listEvents(query = {}) {
     const whereSql = where.length ? ('WHERE ' + where.join(' AND ')) : '';
     const limSql = limit > 0 ? ('LIMIT ' + limit) : '';
     const sql = `SELECT json FROM events ${whereSql} ORDER BY created_at ${order} ${limSql}`;
-    const rows = db.prepare(sql).all(...args).map(r => {
+    let rows = db.prepare(sql).all(...args).map(r => {
       try { return backfillLegacy(JSON.parse(r.json)); } catch { return null; }
     }).filter(Boolean);
+    // W936 — team_id/actor_id live in the JSON payload, not as indexed columns,
+    // so filter them post-parse (same place query.filter applies).
+    if (query.team_id) rows = rows.filter(r => r.team_id === query.team_id);
+    if (query.actor_id) rows = rows.filter(r => r.actor_id === query.actor_id);
     if (query.filter) return rows.filter(query.filter);
     return rows;
   }

@@ -23,6 +23,11 @@ import crypto from 'node:crypto';
 
 export const EVENT_FIELDS = [
   'event_id', 'tenant_id', 'workspace_id', 'app_id', 'user_id', 'session_id', 'workflow_id', 'trace_id',
+  // W936 — team attribution. team_id scopes a capture to a team workspace and
+  // actor_id pins it to the member whose key/session produced it, so a team
+  // dashboard can show "who asked what" across the whole org. Both default null
+  // (NOT required) — solo/unauthenticated rows still validate.
+  'team_id', 'actor_id',
   'provider', 'model', 'upstream_url', 'request_hash', 'response_hash',
   'prompt_redacted', 'response_redacted', 'raw_prompt_path', 'raw_response_path',
   'prompt_tokens', 'completion_tokens', 'estimated_cost_usd', 'latency_ms', 'status', 'error_type',
@@ -163,6 +168,8 @@ export function newEvent(partial = {}) {
     event_id: partial.event_id || _stableId(partial.tenant_id),
     tenant_id: partial.tenant_id || 'local-tenant',
     workspace_id: partial.workspace_id || 'default',
+    team_id: partial.team_id || null,
+    actor_id: partial.actor_id || null,
     app_id: partial.app_id || null,
     user_id: partial.user_id || null,
     session_id: partial.session_id || null,
@@ -252,6 +259,8 @@ export function canonicalize(ev = {}) {
   out.event_id = _str(ev.event_id, 128) || _stableId(ev.tenant_id);
   out.tenant_id = _str(ev.tenant_id, 128) || 'local-tenant';
   out.workspace_id = ev.workspace_id == null ? 'default' : _str(ev.workspace_id, 128);
+  out.team_id = ev.team_id == null ? null : _str(ev.team_id, 128);
+  out.actor_id = ev.actor_id == null ? null : _str(ev.actor_id, 128);
   out.app_id = ev.app_id == null ? null : _str(ev.app_id, 128);
   out.user_id = ev.user_id == null ? null : _str(ev.user_id, 128);
   out.session_id = ev.session_id == null ? null : _str(ev.session_id, 128);

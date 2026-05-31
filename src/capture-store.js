@@ -135,6 +135,10 @@ export function observationToCanonicalEvent(row, opts = {}) {
   return {
     event_id,
     tenant_id,
+    // W936 — carry team attribution through to the canonical event so the team
+    // dashboard ("who asked what across the org") can query by team_id/actor_id.
+    team_id: row.team_id || null,
+    actor_id: row.actor_id || row.user_id || null,
     namespace,
     workspace_id: namespace,
     created_at,

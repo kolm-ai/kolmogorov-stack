@@ -71,7 +71,7 @@ function writeVault(vault) {
   try { fs.chmodSync(vaultPath(), 0o600); } catch {} // deliberate: cleanup
 }
 
-function encrypt(value) {
+export function encrypt(value) {
   const key = getOrCreateKey();
   const iv = crypto.randomBytes(12);
   const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
@@ -85,7 +85,7 @@ function encrypt(value) {
   };
 }
 
-function decrypt(record) {
+export function decrypt(record) {
   const key = getOrCreateKey();
   const iv = Buffer.from(record.iv, 'base64url');
   const tag = Buffer.from(record.tag, 'base64url');

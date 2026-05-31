@@ -49,6 +49,7 @@ import {
   autoExtractReasoningTrace,
 } from './capture.js';
 import * as teams from './teams.js';
+import * as providerVault from './provider-vault.js';
 import * as groupsModule from './groups.js';
 import * as tunnel from './tunnel.js';
 import * as byoc from './byoc.js';
@@ -6473,8 +6474,18 @@ export function buildRouter() {
       const _proxyBase = process.env.KOLM_BASE_URL
         || process.env.KOLM_PROXY_BASE
         || 'https://kolm.ai';
+      // Provider-key vault: a team member can store their own OpenAI/Anthropic/etc.
+      // key so their traffic routes under it and lands in the team lake attributed
+      // to them. Precedence: this member's key -> the team key -> env -> proxy.
+      const _vaultCtx = {
+        tenantId: (req.tenant_record && req.tenant_record.id) || req.tenant || null,
+        teamId: req.headers['x-kolm-team'] || (req.tenant_record && req.tenant_record.active_team_id) || null,
+        actorId: (req.tenant_record && req.tenant_record.id) || req.tenant || null,
+      };
       for (const entry of chain) {
-        entry.upstreamKey = upstreamKeys[entry.provider] || null;
+        let _vaultKey = null;
+        try { _vaultKey = providerVault.resolveProviderKey({ ..._vaultCtx, provider: entry.provider }); } catch (_) { /* vault is best-effort */ }
+        entry.upstreamKey = _vaultKey || upstreamKeys[entry.provider] || null;
         if (!entry.upstreamKey && _proxyBearer) {
           entry.proxyBearer = _proxyBearer;
           entry.proxyBase   = _proxyBase;
@@ -6598,6 +6609,8 @@ export function buildRouter() {
         store.insert('observations', {
           id: receipt.receipt_id,
           tenant,
+          team_id: _vaultCtx.teamId || null,
+          actor_id: _vaultCtx.actorId || null,
           namespace: nsConfig.slug,
           provider: receipt.provider,
           model: receipt.model,
@@ -10381,6 +10394,57 @@ export function buildRouter() {
       payload: { source: 'POST /v1/account/keys', label: (req.body && req.body.label) || null },
     });
     res.json({ api_key: k, label: (req.body && req.body.label) || null });
+  });
+
+  // --- Provider-key vault: per-employee / per-team upstream provider keys ---
+  // The core of "every employee's AI use, in one place you control": a member
+  // stores their OpenAI/Anthropic/etc. key here; the gateway routes their
+  // traffic under it (see dispatch) and the call lands in the team lake
+  // attributed to them. Responses are always redacted (never the raw secret).
+  r.get('/v1/account/provider-keys', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth required' });
+    const tenantId = req.tenant_record.id;
+    const teamId = req.query.team_id || req.headers['x-kolm-team'] || null;
+    const m = teamId ? teams.membershipOf(teamId, tenantId) : null;
+    const isAdmin = !!(m && ['admin', 'owner'].includes(m.role));
+    res.json({
+      keys: providerVault.listProviderKeys({ tenantId, teamId, actorId: tenantId, isAdmin }),
+      providers: providerVault.supportedProviders(),
+    });
+  });
+
+  r.post('/v1/account/provider-keys', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth required' });
+    const tenantId = req.tenant_record.id;
+    const b = req.body || {};
+    const scope = b.scope === 'team' ? 'team' : 'member';
+    const teamId = b.team_id || req.headers['x-kolm-team'] || null;
+    if (scope === 'team') {
+      try { teams.requireRole(teamId, tenantId, 'admin'); }
+      catch (e) { return res.status(403).json({ error: e.message || 'admin role required for team-scope keys' }); }
+    }
+    try {
+      const out = providerVault.putProviderKey({
+        tenantId, teamId, actorId: tenantId, scope,
+        provider: b.provider, value: b.value || b.key, label: b.label,
+      });
+      tryAppendAudit({
+        tenant_id: tenantId, tenant_name: req.tenant_record.name || null, actor: 'tenant',
+        op: 'provider_key.stored', payload: { provider: out.provider, scope: out.scope, key_prefix: out.key_prefix },
+      });
+      res.json({ ok: true, key: out });
+    } catch (e) { res.status(400).json({ error: e.message || 'could not store key', code: e.code || 'bad_request' }); }
+  });
+
+  r.delete('/v1/account/provider-keys/:id', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth required' });
+    const tenantId = req.tenant_record.id;
+    const teamId = req.query.team_id || req.headers['x-kolm-team'] || null;
+    const m = teamId ? teams.membershipOf(teamId, tenantId) : null;
+    const isAdmin = !!(m && ['admin', 'owner'].includes(m.role));
+    const out = providerVault.deleteProviderKey({ tenantId, id: req.params.id, actorId: tenantId, isAdmin });
+    if (!out.ok) return res.status(out.reason === 'forbidden' ? 403 : 400).json(out);
+    res.json(out);
   });
 
   // Account API key revoke - rotates away a key prefix and returns the replacement secret.
@@ -15935,6 +15999,45 @@ export function buildRouter() {
     const members = teams.listMembers(team.id);
     const invites = (() => { try { return teams.listInvites(team.id, t.id); } catch { return []; } })();
     res.json({ team, members, invites });
+  });
+
+  // W936 — team activity dashboard. Every member's captured AI traffic,
+  // attributed (who / model / namespace / cost), plus a rollup. Any active team
+  // member may read; finer-grained capture:read RBAC is layered in Part A3.
+  r.get('/v1/teams/:idOrSlug/captures', async (req, res) => {
+    const t = tenantOf(req);
+    const team = teams.getTeam(req.params.idOrSlug);
+    if (!team) return res.status(404).json({ error: 'team not found' });
+    if (!teams.isMember(team.id, t.id) && !req.is_admin) {
+      return res.status(403).json({ error: 'not a team member' });
+    }
+    const q = req.query || {};
+    let rows = [];
+    try {
+      rows = await eventList({
+        team_id: team.id,
+        actor_id: q.member || undefined,
+        model: q.model || undefined,
+        namespace: q.namespace || undefined,
+        since: q.since || undefined,
+        limit: Math.min(2000, Number(q.limit) || 500),
+      });
+    } catch (_) { rows = []; }
+    const costOf = (r) => Number(r.estimated_cost_usd) || (Number(r.cost_micro_usd) ? r.cost_micro_usd / 1e6 : 0);
+    const by = (key) => { const m = {}; for (const r of rows) { const k = r[key] || 'unknown'; m[k] = (m[k] || 0) + 1; } return m; };
+    res.json({
+      team: { id: team.id, name: team.name || team.slug || team.id },
+      total_calls: rows.length,
+      total_cost_usd: Math.round(rows.reduce((s, r) => s + costOf(r), 0) * 1e6) / 1e6,
+      by_member: by('actor_id'),
+      by_model: by('model'),
+      by_namespace: by('namespace'),
+      rows: rows.slice(0, 200).map((r) => ({
+        event_id: r.event_id, actor_id: r.actor_id, provider: r.provider, model: r.model,
+        namespace: r.namespace, status: r.status, created_at: r.created_at,
+        cost_usd: costOf(r), sensitive: !!r.sensitive_data_detected,
+      })),
+    });
   });
 
   // Team update - admin-only rename, plan, and seat-limit updates.
