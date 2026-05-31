@@ -573,10 +573,10 @@ html[data-theme=dark] .hp-govern{ background:var(--hp-bg); }
         <div class="hp-rcpt" id="hp-receipt" aria-label="A signed kolm receipt">
           <div class="hp-rcpt__bar"><span>kolm receipt</span><span>RS&#8209;1</span></div>
           <div class="hp-rcpt__rows">
-            <div class="hp-rcpt__r"><span class="hp-rcpt__k">model</span><span class="hp-rcpt__v">trinity-500 &middot; Qwen2.5-7B &middot; INT4 NF4</span></div>
+            <div class="hp-rcpt__r"><span class="hp-rcpt__k">model</span><span class="hp-rcpt__v">qwen2.5-7b &middot; INT4 NF4</span></div>
             <div class="hp-rcpt__r"><span class="hp-rcpt__k">artifact</span><span class="hp-rcpt__v">specialist.kolm</span></div>
             <div class="hp-rcpt__r"><span class="hp-rcpt__k">data</span><span class="hp-rcpt__v">sha256:9f2c&hellip; approved-rows</span></div>
-            <div class="hp-rcpt__r"><span class="hp-rcpt__k">recipe</span><span class="hp-rcpt__v">council-distill &middot; 3 teachers</span></div>
+            <div class="hp-rcpt__r"><span class="hp-rcpt__k">recipe</span><span class="hp-rcpt__v">distill &middot; signed</span></div>
             <div class="hp-rcpt__r"><span class="hp-rcpt__k">prompt</span><span class="hp-rcpt__v">sha256:4b81&hellip;</span></div>
             <div class="hp-rcpt__r"><span class="hp-rcpt__k">output</span><span class="hp-rcpt__v">sha256:e7a0&hellip;</span></div>
             <div class="hp-rcpt__r"><span class="hp-rcpt__k">key</span><span class="hp-rcpt__v">ed25519:kolm-tenant-pub</span></div>
@@ -696,30 +696,10 @@ kolm compile --task support --teachers 3 --sign
   </div>
 </section>
 
-<!-- 06 Trinity: one bounded proof number -->
-<section class="hp-sec hp-reveal" aria-label="Trinity-500 benchmark">
-  <div class="hp-wrap">
-    <p class="hp-idx"><b>06</b> Proof, measured</p>
-    <h2 class="hp-h2" style="max-width:24ch;">A 7B you own, matching gpt-4o-mini on the task that matters.</h2>
-    <p class="hp-lede">Trinity-500 is a Qwen2.5-7B council-distilled from three frontier teachers. On a 57-prompt held-out support-clarification set it asks the right clarifying question 96.5% of the time, equal to gpt-4o-mini and well above claude-haiku, at about 1.24s and 210 characters, running INT4 on a single RTX 5090.</p>
-    <table class="hp-bench">
-      <thead><tr><th>Model</th><th>Asks the right question</th><th>Mean latency</th></tr></thead>
-      <tbody>
-        <tr class="win"><td>trinity-500 (7B &middot; INT4)</td><td>96.5%</td><td>1.24s</td></tr>
-        <tr><td>gpt-4o-mini</td><td>96.5%</td><td>1.74s</td></tr>
-        <tr><td>claude-haiku-4-5</td><td>64.9%</td><td>2.72s</td></tr>
-      </tbody>
-    </table>
-    <p class="hp-foot-note">57-prompt held-out set &middot; INT4 NF4 on RTX 5090 &middot; about 1/30th the active params &middot; every number at trinity-500-benchmark.json</p>
-    <p class="hp-lede" style="margin-top:18px; max-width:64ch;">This is the support-clarification task. We do not claim it beats the frontier everywhere; we claim you can check the cases we do.</p>
-    <div class="hp-ctas" style="margin-top:8px;"><a class="hp-link" href="/benchmarks/trinity-500-benchmark.json">Read the raw benchmark <span aria-hidden="true">&rarr;</span></a></div>
-  </div>
-</section>
-
-<!-- 07 Close -->
+<!-- 06 Close -->
 <section class="hp-sec hp-close hp-reveal" aria-label="Get started">
   <div class="hp-wrap">
-    <p class="hp-idx" style="justify-content:center;"><b>07</b> Start</p>
+    <p class="hp-idx" style="justify-content:center;"><b>06</b> Start</p>
     <h2 class="hp-h2">Stop renting intelligence you cannot prove.</h2>
     <p class="hp-lede">Compile your first signed .kolm in under a minute, on a clean machine. Keep the model, the data, and the receipt. No per-token bill after you compile, no vendor lock-in, Apache-2.0 all the way down.</p>
     <div class="hp-ctas">
