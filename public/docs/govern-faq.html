@@ -22,8 +22,8 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I know a runtime passport row is real?","acceptedAnswer":{"@type":"Answer","text":"Every row carries a status field that is one of tested, estimated, or unsupported. Tested rows require a measured_at timestamp; estimated rows are computed from model params and a quantization formula."}},{"@type":"Question","name":"Can the evidence DAG be tampered with?","acceptedAnswer":{"@type":"Answer","text":"The DAG rides inside the artifact manifest. It is not bound into the artifact_hash_input field, by design (it is operational fingerprint, not the bytes themselves). The artifact bytes are signed; the DAG can be re-walked and re-emitted by any re-prover."}}]}</script>
 <link rel="stylesheet" href="/design-tokens.css">
 <style>
-:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:var(--line-2);--bg:#0b0d10;--bg-elev:#101316;--accent:#0e7490;--accent-soft:rgba(14,116,144,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:var(--line-2);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#0e7490;--accent-soft:rgba(14,116,144,0.10)}
+:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:var(--line-2);--bg:#0b0d10;--bg-elev:#101316;--accent:#2563eb;--accent-soft:rgba(14,116,144,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:var(--line-2);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#2563eb;--accent-soft:rgba(14,116,144,0.10)}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
 .skip-link{position:absolute;left:-9999px}

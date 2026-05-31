@@ -104,8 +104,10 @@ for (const harness of HARNESSES) {
       html.includes('--accent:#10b981')
         || html.includes('--accent:#111111')
         || html.includes('--accent:#111')
-        || html.includes('--accent:#e6e9ee'),
-      'must include the kolm accent token (mint, cool-slate black, or monochrome)',
+        || html.includes('--accent:#e6e9ee')
+        || html.includes('--accent:#2563eb')
+        || html.includes('--accent:#6f9bff'),
+      'must include the kolm accent token (cobalt, cool-slate black, or monochrome)',
     );
     assert.ok(html.includes("data-theme='light'") || html.includes('data-theme="light"'),
       'must include the light-theme switch IIFE');

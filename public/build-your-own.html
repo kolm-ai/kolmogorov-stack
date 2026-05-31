@@ -29,7 +29,7 @@
  * 3) Section rhythm 96/56 with subtle hairline dividers
  * 4) Eyebrow caps mono 11.5px 0.2em
  * 5) Code blocks: ensure mono var + light-mode readable
- * 6) Light mode: ink #1f2429, ink-mute #4b5158, accent #059669
+ * 6) Light mode: ink #1f2429, ink-mute #4b5158, accent #2563eb
  * 7) Roadmap banner: monochrome emerald, no orange, no pill
  * 8) Tables: 16px radius, 32/24 padding cells
  */
@@ -43,9 +43,9 @@
  border-bottom: 1px solid var(--line-strong) !important;
  transition: color 120ms, border-color 120ms;
 }
-.bxo-link:hover { color: #34d399 !important; border-color: rgba(52,211,153,0.6) !important; }
-[data-theme=light] .bxo-link { color: #059669 !important; border-bottom-color: rgba(5,150,105,0.32) !important; }
-[data-theme=light] .bxo-link:hover { color: #047857 !important; }
+.bxo-link:hover { color: #6f9bff !important; border-color: rgba(52,211,153,0.6) !important; }
+[data-theme=light] .bxo-link { color: #2563eb !important; border-bottom-color: rgba(5,150,105,0.32) !important; }
+[data-theme=light] .bxo-link:hover { color: #2563eb !important; }
 
 /* Hero scale + dot-grid backdrop */
 main > section.hero {
@@ -203,8 +203,8 @@ pre.terminal {
  border-color: var(--line-2) !important;
  color: #e6e4dd !important;
 }
-[data-theme=light] pre.terminal .prompt { color: #34d399 !important; }
-[data-theme=light] pre.terminal .ok { color: #34d399 !important; }
+[data-theme=light] pre.terminal .prompt { color: #6f9bff !important; }
+[data-theme=light] pre.terminal .ok { color: #6f9bff !important; }
 [data-theme=light] pre.terminal .comment,
 [data-theme=light] pre.terminal .dim { color: #9ca3af !important; }
 @media (max-width: 720px) {
@@ -225,7 +225,7 @@ pre.terminal {
  color: #111111;
  font-weight: 400;
 }
-[data-theme=light] .bxo-tag { color: #059669; border-color: rgba(5,150,105,0.4); }
+[data-theme=light] .bxo-tag { color: #2563eb; border-color: rgba(5,150,105,0.4); }
 .bxo-roadmap-banner {
  padding: 16px 20px;
  border: 1px solid var(--line-3);
@@ -243,7 +243,7 @@ pre.terminal {
  text-decoration: none;
  border-bottom: 1px solid var(--line-strong);
 }
-.bxo-roadmap-banner a:hover { color: #34d399; border-color: rgba(52,211,153,0.6); }
+.bxo-roadmap-banner a:hover { color: #6f9bff; border-color: rgba(52,211,153,0.6); }
 
 /* btn.accent: emerald monochrome (legacy mint .btn.accent overridden) */
 main .btn.accent {
@@ -253,18 +253,18 @@ main .btn.accent {
 }
 main .btn.accent:hover {
  background: var(--line-3) !important;
- color: #34d399 !important;
+ color: #6f9bff !important;
  border-color: var(--line-strong) !important;
  box-shadow: 0 0 0 1px var(--line-2) !important;
 }
 [data-theme=light] main .btn.accent {
  background: rgba(5,150,105, 0.06) !important;
- color: #059669 !important;
+ color: #2563eb !important;
  border-color: rgba(5,150,105, 0.32) !important;
 }
 [data-theme=light] main .btn.accent:hover {
  background: rgba(5,150,105, 0.12) !important;
- color: #047857 !important;
+ color: #2563eb !important;
 }
 [data-theme=light] .bxo-roadmap-banner {
  background: rgba(5,150,105,0.05);
@@ -272,8 +272,8 @@ main .btn.accent:hover {
  color: #4b5158;
 }
 [data-theme=light] .bxo-roadmap-banner b { color: #1f2429; }
-[data-theme=light] .bxo-roadmap-banner a { color: #059669; border-bottom-color: rgba(5,150,105,0.32); }
-[data-theme=light] .bxo-roadmap-banner a:hover { color: #047857; }
+[data-theme=light] .bxo-roadmap-banner a { color: #2563eb; border-bottom-color: rgba(5,150,105,0.32); }
+[data-theme=light] .bxo-roadmap-banner a:hover { color: #2563eb; }
 
 /* Tables: 16px radius, real padding */
 .vs-tbl {
@@ -361,7 +361,7 @@ main > section.hero .actions {
 
 /* Tone helper */
 .tone { color: #111111; }
-[data-theme=light] .tone { color: #059669; }
+[data-theme=light] .tone { color: #2563eb; }
 </style>
 <script type="application/ld+json">
 {

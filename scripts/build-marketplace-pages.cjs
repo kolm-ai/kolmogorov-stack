@@ -195,7 +195,7 @@ function buildPage(a) {
 }
 </script>
 <style>
-:root{--ink:#ece7dc;--ink-mute:#a8b0bb;--ink-faint:#5a6471;--bg:#0b0d10;--bg-elev:#11151b;--accent:#10b981;--warn:#f0b86b;--mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter','Segoe UI',system-ui,sans-serif}
+:root{--ink:#ece7dc;--ink-mute:#a8b0bb;--ink-faint:#5a6471;--bg:#0b0d10;--bg-elev:#11151b;--accent:#2563eb;--warn:#f0b86b;--mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter','Segoe UI',system-ui,sans-serif}
 html[data-theme="light"]{--ink:#1a1d22;--ink-mute:#4b5260;--ink-faint:#7a818c;--bg:#f7f4ec;--bg-elev:#fff}
 *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.65}
 a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
@@ -221,10 +221,10 @@ pre{font-family:var(--mono);font-size:13px;background:var(--bg-elev);padding:16p
 .facts .f{font-size:13px}.facts .f b{display:block;color:var(--ink-faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:500}.facts .f span{color:var(--ink);font-family:var(--mono)}
 .badges{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 18px}
 .badge{font-size:11px;font-family:var(--mono);padding:3px 8px;border-radius:99px;border:1px solid rgba(255,255,255,.1);color:var(--ink-mute);text-transform:uppercase;letter-spacing:.6px}
-.badge-HIPAA,.badge-BAA,.badge-GDPR{color:#10b981;border-color:rgba(16,185,129,.4)}
+.badge-HIPAA,.badge-BAA,.badge-GDPR{color:#2563eb;border-color:rgba(16,185,129,.4)}
 .badge-Permissive{color:#a8b0bb}
 .badge-Verified{color:var(--accent);border-color:rgba(16,185,129,.55);background:rgba(16,185,129,.06)}
-.cta{display:inline-block;background:var(--accent);color:#0b0d10;padding:12px 22px;border-radius:8px;font-weight:600;font-family:var(--mono);font-size:14px;margin:8px 12px 8px 0}.cta:hover{text-decoration:none;background:#34d399}
+.cta{display:inline-block;background:var(--accent);color:#0b0d10;padding:12px 22px;border-radius:8px;font-weight:600;font-family:var(--mono);font-size:14px;margin:8px 12px 8px 0}.cta:hover{text-decoration:none;background:#6f9bff}
 .cta-alt{display:inline-block;background:transparent;color:var(--accent);border:1px solid var(--accent);padding:11px 22px;border-radius:8px;font-weight:600;font-family:var(--mono);font-size:14px;margin:8px 12px 8px 0}.cta-alt:hover{text-decoration:none;background:rgba(16,185,129,.08)}
 .muted{color:var(--ink-faint);font-size:14px}
 footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);font-size:13px;border-top:1px solid rgba(255,255,255,.06)}
@@ -337,7 +337,7 @@ function buildOgSvg(a) {
   </g>
   <text x="96" y="350" fill="#ece7dc" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter','Segoe UI',system-ui,sans-serif" font-size="58" font-weight="640" letter-spacing="-1.4">${safeName}</text>
   <text x="96" y="430" fill="#a8b0bb" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Text','Inter','Segoe UI',system-ui,sans-serif" font-size="26" font-weight="400">${safeShort}</text>
-  <text x="96" y="500" fill="#10b981" font-family="ui-monospace,'SF Mono',Menlo,Consolas,monospace" font-size="22" font-weight="600">K-score &middot; ${(kScoreFor(a.slug) || 0.97).toFixed(4)}</text>
+  <text x="96" y="500" fill="#2563eb" font-family="ui-monospace,'SF Mono',Menlo,Consolas,monospace" font-size="22" font-weight="600">K-score &middot; ${(kScoreFor(a.slug) || 0.97).toFixed(4)}</text>
   <text x="96" y="600" fill="#5a6471" font-family="ui-monospace,'SF Mono',Menlo,Consolas,monospace" font-size="14" letter-spacing="1.6">signed &middot; sha256-pinned &middot; apache-2.0</text>
 </svg>`;
 }
