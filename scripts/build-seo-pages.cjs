@@ -286,7 +286,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 </head>
 <body>
 <a href="#main" style="position:absolute;left:-9999px" onfocus="this.style.cssText='position:fixed;top:8px;left:8px;background:#111;color:#fff;padding:8px 12px;border-radius:6px;z-index:100'">Skip to content</a>
-<header class="site"><div class="wrap"><a class="logo" href="/">kolm.ai</a><nav><a href="/product">Product</a><a href="/proof">Proof</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav></div></header>
+<header class="site"><div class="wrap"><a class="logo" href="/">kolm.ai</a><nav><a href="/product">Product</a><a href="/solutions/teams">For teams</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav></div></header>
 <main id="main">
 
 <p class="muted"><a href="/compile/all">&larr; Compile catalog</a></p>
@@ -388,7 +388,7 @@ footer{max-width:1080px;margin:0 auto;padding:32px 24px;color:var(--ink-faint);f
 </style>
 </head>
 <body>
-<header class="site"><div class="wrap"><a class="logo" href="/">kolm.ai</a><nav><a href="/product">Product</a><a href="/proof">Proof</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav></div></header>
+<header class="site"><div class="wrap"><a class="logo" href="/">kolm.ai</a><nav><a href="/product">Product</a><a href="/solutions/teams">For teams</a><a href="/docs">Docs</a><a href="/pricing">Pricing</a><a href="/enterprise">Enterprise</a></nav></div></header>
 <main>
   <h1>Compile catalog</h1>
   <p class="lede">${pages.length} per-pair compile guides: ${SOURCE_MODELS.length} source models &rarr; ${TARGET_FORMATS.length} target formats. Every page documents the <code>kolm compile</code> one-liner, a resource estimate, and a verify step.</p>

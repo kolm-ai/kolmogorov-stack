@@ -106,7 +106,7 @@ function render(v) {
     <a href="/" class="ks-nav__brand"><span class="ks-nav__mark">k</span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/product">Product</a></li>
-      <li><a href="/proof">Proof</a></li>
+      <li><a href="/solutions/teams">For teams</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs" aria-current="page">Docs</a></li>
       <li><a href="${KOLM_GITHUB_URL}" rel="noopener">GitHub</a></li>
@@ -118,7 +118,7 @@ function render(v) {
     </div>
   </nav>
   <div class="ks-nav__sheet" id="navSheet">
-    <a href="/product">Product</a><a href="/proof">Proof</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="${KOLM_GITHUB_URL}" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <a href="/product">Product</a><a href="/solutions/teams">For teams</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="${KOLM_GITHUB_URL}" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
   </div>
 </div>
 
