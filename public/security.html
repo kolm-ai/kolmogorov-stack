@@ -184,6 +184,7 @@
     </div>
     <nav class="sec-jump" aria-label="Jump to security section">
       <a href="#boundary">Boundary</a>
+      <a href="#training">Training</a>
       <a href="#signing">Signing</a>
       <a href="#deployment">Deployment</a>
       <a href="#compliance">Compliance</a>
@@ -221,6 +222,21 @@
         <dt>Receipt CIDs</dt><dd>If you publish to the public registry, a content-addressed hash of the receipt (no weights, no captures) becomes resolvable at <code>kolm.ai/verify/&lt;cid&gt;</code> for downstream verifiers.</dd>
         <dt>Telemetry (off by default)</dt><dd>Opt-in usage counters help us prioritize. Set <code>KOLM_TELEMETRY=0</code> to disable; the CLI never sends prompts or completions either way.</dd>
         <dt>Anthropic / OpenAI calls</dt><dd>Only if you use the hosted teacher path. Bring-your-own-key and self-hosted vLLM, SGLang, and TGI teachers keep all traffic in your network.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section class="sec-section" id="training">
+  <div class="ks-wrap">
+    <h2>Training data boundary</h2>
+    <p class="sub">A rented GPU is someone else's machine. kolm enforces a simple rule before any corpus is uploaded: public data may train on a rented pod; sensitive or customer data may not. The rent path classifies the corpus and refuses to send PII, PHI, secrets, or other sensitive classes to a third-party pod. This is enforced in code, not policy text.</p>
+    <div class="pact">
+      <h3>Where each kind of data trains</h3>
+      <dl>
+        <dt>Public or open data</dt><dd>May train on a rented pod (RunPod, Vast, Lambda, and similar). Nothing else about your account leaves with it.</dd>
+        <dt>Sensitive or customer data</dt><dd>Trains on local hardware, an air-gapped host, or BYOC (your own cloud), so it never crosses your boundary. The compiler refuses a rented pod for this data unless you pass an explicit, logged override that acknowledges the data will leave.</dd>
+        <dt>On a rented pod</dt><dd>The corpus and adapter are encrypted at rest, and the workspace is shredded on teardown before the instance is released. No corpus is left behind on a machine you no longer hold.</dd>
       </dl>
     </div>
   </div>
