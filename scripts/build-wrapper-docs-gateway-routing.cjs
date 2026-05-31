@@ -24,7 +24,7 @@ const ROUTING_DIR = path.join(ROOT, 'public', 'docs', 'routing');
 
 function pageShell({ slug, family, title, description, eyebrow, h1, lede, sections, related }) {
   const canonical = `https://kolm.ai/docs/${family}/${slug}`;
-  const fullTitle = `${title} · Wrapper docs · kolm.ai`;
+  const fullTitle = `${title} · Gateway docs · kolm.ai`;
   const body = sections.map(renderSection).join('\n');
   const relatedHTML = (related && related.length)
     ? `<p class="muted" style="margin-top:48px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:var(--ink-3)">See also: ${related.map(r => `<a href="${r.href}">${r.label}</a>`).join(' &middot; ')}</p>`
@@ -168,11 +168,11 @@ function escHTML(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt
 const GATEWAY_PAGES = [
   {
     slug: 'overview',
-    title: 'Wrapper gateway overview',
+    title: 'Gateway overview',
     description: 'The kolm Wrapper is a signing, redacting, capturing reverse-proxy that sits in front of any LLM API. Eleven providers, one auditable receipt per call.',
-    eyebrow: 'Wrapper gateway',
+    eyebrow: 'Gateway',
     h1: 'A signing gateway in front of every LLM call.',
-    lede: 'The Wrapper is a thin reverse-proxy that turns every chat-completion request into a signed, captured, metered event. Eleven providers behind one OpenAI-compatible surface. No vendor lock, no SDK rewrite.',
+    lede: 'The gateway is a thin reverse-proxy that turns every chat-completion request into a signed, captured, metered event. Eleven providers behind one OpenAI-compatible interface. No vendor lock, no SDK rewrite.',
     sections: [
       {
         h2: 'What it does',
@@ -215,7 +215,7 @@ const GATEWAY_PAGES = [
       {
         h2: 'What it is not',
         paragraphs: [
-          'The Wrapper is not a model. It does not host inference unless you point a route at <code>local-vLLM</code>, <code>local-Ollama</code>, or a <code>.kolm</code> artifact. It is not a prompt cache; it forwards every request to the routed provider. It does not modify prompts beyond optional PII redaction in the captured copy.',
+          'The gateway is not a model. It does not host inference unless you point a route at <code>local-vLLM</code>, <code>local-Ollama</code>, or a <code>.kolm</code> artifact. It is not a prompt cache; it forwards every request to the routed provider. It does not modify prompts beyond optional PII redaction in the captured copy.',
         ],
       },
       {

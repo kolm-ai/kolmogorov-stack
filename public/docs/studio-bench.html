@@ -84,7 +84,7 @@ td code{font-size:12px}
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / studio-bench</div>
 <p class="eyebrow">Studio / Benchmark</p>
 <h1>One eval. Many models. One table.</h1>
-<p class="lede">The benchmark harness (<code>src/bench-harness.js</code>) takes a list of models and an eval set, and produces a side-by-side comparison: K-Score per axis, mean latency, p95 latency, cost per call, and the judge's per-axis disagreement matrix. Models can be any mix of local <code>.kolm</code> files, Ollama models, GGUFs, vLLM endpoints, or remote API providers &mdash; the harness uses the same provider adapters as the Wrapper.</p>
+<p class="lede">The benchmark harness (<code>src/bench-harness.js</code>) takes a list of models and an eval set, and produces a side-by-side comparison: K-Score per axis, mean latency, p95 latency, cost per call, and the judge's per-axis disagreement matrix. Models can be any mix of local <code>.kolm</code> files, Ollama models, GGUFs, vLLM endpoints, or remote API providers &mdash; the harness uses the same provider adapters as the gateway.</p>
 
 <h2 id="why-one-harness">Why one harness</h2>
 <p>The unfair-comparison trap of LLM evals is that vendors pick different test sets, different system prompts, different sampling params, and different scoring rubrics &mdash; then publish numbers that disagree. The kolm bench harness eliminates the trap by fixing everything except the model under test: same prompts, same system prompt, same temperature, same judge, same rubric. The only variable is the model.</p>

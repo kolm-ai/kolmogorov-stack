@@ -189,7 +189,7 @@ kolm capture --prompt "summarize this email" --teacher local-ollama</code></pre>
     <h2 id="network-leak-audit" data-w779="leak-audit">Network-leak audit</h2>
     <p>
       <code>kolm airgap test</code> reports the active air-gap envelope without making real network calls.
-      Pass <code>--probe</code> to also attempt a real probe and confirm the wrapper actually blocks
+      Pass <code>--probe</code> to also attempt a real probe and confirm the gateway actually blocks
       non-loopback URLs.
     </p>
     <pre><code>kolm airgap test
@@ -205,7 +205,7 @@ kolm capture --prompt "summarize this email" --teacher local-ollama</code></pre>
 
 kolm airgap test --probe
 # Attempts a HEAD against a synthetic remote URL. Should throw
-# airgap_blocks_network; "leaked":false confirms the wrapper held.</code></pre>
+# airgap_blocks_network; "leaked":false confirms the gateway held.</code></pre>
     <p>The audit accepts the same hostnames the runtime allows: <code>localhost</code>,
     <code>127.0.0.1</code>, <code>0.0.0.0</code>, <code>::1</code>, plus whatever
     <code>KOLM_LOCAL_TEACHER_URL</code> resolves to. Any other URL throws the loud-fail envelope:</p>

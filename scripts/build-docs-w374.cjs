@@ -311,7 +311,7 @@ print(r.choices[0].message.content)</code></pre>
     ogSlug: 'docs-connect-gemini',
     title: 'Connect Gemini',
     description: 'Wire Google AI Studio (Gemini) through the kolm.ai local proxy. Use the OpenAI-compatible Gemini endpoint, captures land in your local lake.',
-    lede: 'Google AI Studio ships an OpenAI-compatible surface at <code>generativelanguage.googleapis.com/v1beta/openai</code>. Point the kolm.ai proxy at it, point your OpenAI SDK at the proxy, and Gemini calls land in your local lake just like any other provider.',
+    lede: 'Google AI Studio ships an OpenAI-compatible interface at <code>generativelanguage.googleapis.com/v1beta/openai</code>. Point the kolm.ai proxy at it, point your OpenAI SDK at the proxy, and Gemini calls land in your local lake just like any other provider.',
     crumbs: [
       { href: '/', label: 'kolm.ai' },
       { href: '/docs', label: 'docs' },

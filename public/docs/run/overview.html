@@ -74,7 +74,7 @@ li{margin:4px 0}
 <h1>Run a signed .kolm in production.</h1>
 <p class="lede">Run is the third surface of the compiler. Studio produces a signed <code>.kolm</code>; Run turns it into a serving pod that speaks the OpenAI Chat Completions API, exposes <code>/health</code> and <code>/metrics</code>, and writes a receipt for every request. The pod reports back to your tenant so the <a href="/account/serve">Serve dashboard</a> can show what is live, where, and how it is performing.</p>
 
-<h2 id="surfaces">Three surfaces, one runtime</h2>
+<h2 id="surfaces">Three ways in, one runtime</h2>
 <p>Run is reachable from the CLI, the TUI, and from the account UI. They all drive the same underlying <code>kolm serve</code>:</p>
 <ul>
   <li><b>CLI.</b> <code>kolm serve &lt;artifact&gt; --port 8000 --runtime auto</code> is the canonical entry point. Pair with <code>kolm doctor</code> first to verify the host has the runtime it needs.</li>

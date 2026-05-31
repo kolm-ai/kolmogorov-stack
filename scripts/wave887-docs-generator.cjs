@@ -175,7 +175,7 @@ ${relatedHtml}
 const docs = [
   {
     slug: 'gateway',
-    title: 'Gateway — the wrapper around any LLM provider',
+    title: 'Gateway — the gateway around any LLM provider',
     desc: 'The kolm gateway sits in front of 11 LLM providers (OpenAI, Anthropic, Google, DeepSeek, Groq, Together, Fireworks, OpenRouter, local-vLLM, local-Ollama, local-kolm), signs an Ed25519 receipt on every call, captures the trace for replay, and routes locally-first via a confidence gate.',
     eyebrow: 'Wrapper / Gateway',
     h1: 'One wrapper. Eleven providers. Every call signed.',
@@ -1050,7 +1050,7 @@ tar -tzf kolm-gateway-airgap-2026-05-26.tar.gz | head
       },
       {
         h2: 'Can I send a request that bypasses the gateway pipeline entirely?',
-        html: `<p>Yes — <code>POST /v1/teacher/chat</code> is the no-wrapper proxy. Useful for benchmarking the wrapper overhead. It does NOT sign a receipt or write to the capture lake.</p>`,
+        html: `<p>Yes — <code>POST /v1/teacher/chat</code> is the no-wrapper proxy. Useful for benchmarking the gateway overhead. It does NOT sign a receipt or write to the capture lake.</p>`,
       },
     ],
     related: [

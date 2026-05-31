@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
-<title>Wrapper gateway overview · Wrapper docs · kolm.ai</title>
+<title>Gateway overview · Gateway docs · kolm.ai</title>
 <meta name="description" content="The kolm Wrapper is a signing, redacting, capturing reverse-proxy that sits in front of any LLM API. Eleven providers, one auditable receipt per call.">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
@@ -66,9 +66,9 @@
 <section class="wd-hero">
   <div class="ks-wrap">
     <p class="wd-crumbs"><a href="/docs">docs</a> / <a href="/docs/gateway/overview">gateway</a> / overview</p>
-    <p class="brand-eyebrow">Wrapper gateway</p>
+    <p class="brand-eyebrow">Gateway</p>
     <h1>A signing gateway in front of every LLM call.</h1>
-    <p class="lede">The Wrapper is a thin reverse-proxy that turns every chat-completion request into a signed, captured, metered event. Eleven providers behind one OpenAI-compatible surface. No vendor lock, no SDK rewrite.</p>
+    <p class="lede">The gateway is a thin reverse-proxy that turns every chat-completion request into a signed, captured, metered event. Eleven providers behind one OpenAI-compatible interface. No vendor lock, no SDK rewrite.</p>
   </div>
 </section>
 
@@ -103,7 +103,7 @@
       <li><b>Multi-provider shops</b> who want one billing dashboard and one failover policy across OpenAI, Anthropic, Google, and self-hosted vLLM.</li>
     </ul>
     <h2>What it is not</h2>
-    <p>The Wrapper is not a model. It does not host inference unless you point a route at <code>local-vLLM</code>, <code>local-Ollama</code>, or a <code>.kolm</code> artifact. It is not a prompt cache; it forwards every request to the routed provider. It does not modify prompts beyond optional PII redaction in the captured copy.</p>
+    <p>The gateway is not a model. It does not host inference unless you point a route at <code>local-vLLM</code>, <code>local-Ollama</code>, or a <code>.kolm</code> artifact. It is not a prompt cache; it forwards every request to the routed provider. It does not modify prompts beyond optional PII redaction in the captured copy.</p>
     <h2>Performance overhead</h2>
     <p>Target p50 latency overhead is under 5 ms when running co-located with your application (same VPC, same region as the upstream provider). Signing is a single Ed25519 operation (~50 us). Capture writes are append-only and buffered; the response is released to the caller before the capture is durable.</p>
     <div class="wd-caveat"><b>Caveats.</b> The 5 ms target assumes co-location. If you route through the hosted <code>kolm.ai</code> endpoint from a different region, add the round-trip. Self-host (Docker Compose or Kubernetes) for production workloads where overhead matters.</div>

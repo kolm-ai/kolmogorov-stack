@@ -24,7 +24,7 @@ const RECEIPTS_DIR = path.join(ROOT, 'public', 'docs', 'receipts');
 
 function pageShell({ slug, family, title, description, eyebrow, h1, lede, sections, related }) {
   const canonical = `https://kolm.ai/docs/${family}/${slug}`;
-  const fullTitle = `${title} · Wrapper docs · kolm.ai`;
+  const fullTitle = `${title} · Gateway docs · kolm.ai`;
   const body = sections.map(renderSection).join('\n');
   const relatedHTML = (related && related.length)
     ? `<p class="muted" style="margin-top:48px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:var(--ink-3)">See also: ${related.map(r => `<a href="${r.href}">${r.label}</a>`).join(' &middot; ')}</p>`
@@ -172,7 +172,7 @@ const CAPTURE_PAGES = [
     description: 'The capture lake is the append-only, hash-chained record of every gateway call. Four storage backends, one schema, tamper-evident by construction.',
     eyebrow: 'Capture lake',
     h1: 'Every call, captured. Every row, chained.',
-    lede: 'The capture lake is an append-only ledger of every request that walks the wrapper pipeline. Same schema across four storage backends, HMAC-SHA256 hash-chained between rows, indexed by tenant + namespace + timestamp.',
+    lede: 'The capture lake is an append-only ledger of every request that walks the gateway pipeline. Same schema across four storage backends, HMAC-SHA256 hash-chained between rows, indexed by tenant + namespace + timestamp.',
     sections: [
       {
         h2: 'What the lake is',
@@ -947,7 +947,7 @@ const RECEIPT_PAGES = [
       {
         h2: 'What a receipt is',
         paragraphs: [
-          'When a request finishes the wrapper pipeline, stage 8 computes a receipt and signs it with the tenant Ed25519 key. The receipt is stored on the capture row, returned to the caller as response header <code>X-Kolm-Receipt-CID</code>, and made fetchable at <code>https://kolm.ai/v1/receipts/&lt;cid&gt;</code>.',
+          'When a request finishes the gateway pipeline, stage 8 computes a receipt and signs it with the tenant Ed25519 key. The receipt is stored on the capture row, returned to the caller as response header <code>X-Kolm-Receipt-CID</code>, and made fetchable at <code>https://kolm.ai/v1/receipts/&lt;cid&gt;</code>.',
           'The receipt is the unit of verifiability. Anyone with the tenant public key can fetch a receipt and confirm: this exact request was handled by this exact model at this exact time, the response bytes match the recorded hash, the cost was computed against this rate card.',
         ],
       },

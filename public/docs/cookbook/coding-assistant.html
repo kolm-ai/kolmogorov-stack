@@ -167,7 +167,7 @@ export OPENAI_BASE_URL=https://gpu.internal:8000/v1
  <ul>
    <li><b>Low capture diversity.</b> If 80% of your captures are auto-complete on the same file, the student over-fits to one shape and falls over on review-style requests. Filter for diversity before compile with <code>kolm capture filter --min-distinct-files 200</code>.</li>
    <li><b>Misreading K-Score.</b> K-Score is a relative score against the teacher on your corpus. A 0.87 means the student matches teacher behavior on 87% of your holdout &mdash; it does not mean the assistant is 87% correct in absolute terms. Always pair K-Score with at least one task-level eval.</li>
-   <li><b>Drift after a teacher update.</b> When the frontier teacher ships a new version, the student starts to drift. The wrapper logs the teacher hash on every capture; re-compile when the rolling K-Score on fresh traffic drops more than 5 points.</li>
+   <li><b>Drift after a teacher update.</b> When the frontier teacher ships a new version, the student starts to drift. The gateway logs the teacher hash on every capture; re-compile when the rolling K-Score on fresh traffic drops more than 5 points.</li>
  </ul>
 </section>
 
