@@ -3,484 +3,115 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
-<title>Enterprise: BYOC, SSO, BAA, air-gap, signed receipts · kolm.ai</title>
-<meta name="description" content="Procurement-ready: SAML/SCIM, BYOC and on-prem, regional residency, BAA on request, SOC 2 Type II in flight, signed Ed25519 receipts on every artifact. The full evaluation pack is on this page.">
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
+<title>Enterprise &middot; Govern your company's AI &middot; kolm.ai</title>
+<meta name="description" content="Govern your whole company's AI: SSO, SCIM, RBAC, BYOC so data never leaves your network, nine-region residency, and a signed receipt on every call your auditors can verify offline. SOC 2 Type I complete, Type II in progress.">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
-<meta property="og:title" content="Enterprise">
-<meta property="og:description" content="SSO, SCIM, BAA, BYOC, air-gap, signed receipts. Built for procurement, security, and compliance teams.">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://kolm.ai/enterprise">
-<meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/enterprise">
+<meta property="og:title" content="kolm for enterprise · Govern your company's AI">
+<meta property="og:description" content="SSO, SCIM, RBAC, BYOC, residency, and a signed receipt on every call.">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/enterprise">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="manifest" href="/manifest.webmanifest">
-<link rel="preload" href="/ks.css" as="style">
-<link rel="stylesheet" href="/ks.css">
 <link rel="stylesheet" href="/design-tokens.css">
-<link rel="stylesheet" href="/frontier.css">
-    <link rel="stylesheet" href="/warm-paper.css">
 <style>
-  .en-hero-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
-  @media (max-width: 920px) { .en-hero-grid { grid-template-columns: 1fr; } }
-  .en-stats { display: grid; grid-template-columns: 1fr 1fr; gap: var(--ks-3); padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); }
-  .en-stat { padding: var(--ks-3) var(--ks-4); }
-  .en-stat b { display: block; font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; font-weight: 500; }
-  .en-stat span { font-family: var(--ks-mono); font-size: 18px; color: var(--ks-accent); font-variant-numeric: tabular-nums; }
-  .en-pillars { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--ks-4); }
-  .en-pillar { padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); }
-  .en-pillar .ico { width: 38px; height: 38px; background: var(--ks-accent-soft); border: 1px solid var(--ks-accent-edge); border-radius: 10px; display: grid; place-items: center; margin-bottom: var(--ks-3); color: var(--ks-accent); }
-  .en-pillar h3 { margin: 0 0 var(--ks-2); font-size: 17px; font-weight: 580; color: var(--ks-ink); }
-  .en-pillar p { margin: 0; font-size: 14px; color: var(--ks-ink-2); line-height: 1.6; }
-  .en-deploy { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--ks-4); }
-  .en-deploy-card { padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); }
-  .en-deploy-card .tier { font-family: var(--ks-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ks-accent); margin-bottom: 6px; }
-  .en-deploy-card h3 { margin: 0 0 var(--ks-3); font-size: 19px; font-weight: 580; color: var(--ks-ink); }
-  .en-deploy-card p { margin: 0 0 var(--ks-3); font-size: 14px; color: var(--ks-ink-2); line-height: 1.6; }
-  .en-deploy-card ul { margin: 0; padding-left: 16px; font-size: 13.5px; color: var(--ks-ink-2); line-height: 1.7; }
-  .en-deploy-card li::marker { color: var(--ks-accent); }
-  .en-deploy-card pre { margin: var(--ks-3) 0 0; padding: 12px 14px; background: #0c0e12; border: 1px solid var(--ks-line-1); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-2); line-height: 1.55; overflow-x: auto; }
-  .en-compliance { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--ks-3); }
-  .en-comp { padding: var(--ks-4); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); }
-  .en-comp .stat { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
-  .en-comp .stat.ok { color: var(--ks-pos); }
-  .en-comp .stat.warn { color: var(--ks-warn); }
-  .en-comp b { display: block; font-size: 15px; font-weight: 580; color: var(--ks-ink); margin-bottom: 3px; }
-  .en-comp p { margin: 0; font-size: 13px; color: var(--ks-ink-3); line-height: 1.55; }
-  .en-pack { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: var(--ks-5); padding: var(--ks-5); background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); margin: var(--ks-4) 0; }
-  @media (max-width: 720px) { .en-pack { grid-template-columns: 1fr; } }
-  .en-pack .lab { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-accent); text-transform: uppercase; letter-spacing: 0.08em; padding-top: 4px; }
-  .en-pack h3 { margin: 0 0 var(--ks-2); font-size: 17px; font-weight: 580; color: var(--ks-ink); }
-  .en-pack p { margin: 0 0 var(--ks-2); font-size: 14px; color: var(--ks-ink-2); line-height: 1.65; }
-  .en-pack a.dl { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--ks-accent-soft); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-pill); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-accent); margin-right: 6px; margin-top: 6px; }
-  .en-pack a.dl:hover { background: var(--ks-accent-edge); color: var(--ks-ink); }
-  .en-faq { display: grid; gap: 0; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); overflow: hidden; }
-  .en-faq details { border-bottom: 1px solid var(--ks-line-1); }
-  .en-faq details:last-child { border-bottom: 0; }
-  .en-faq summary { padding: 18px var(--ks-6); cursor: pointer; font-size: 15.5px; font-weight: 500; color: var(--ks-ink); list-style: none; display: flex; justify-content: space-between; gap: var(--ks-3); }
-  .en-faq summary::-webkit-details-marker { display: none; }
-  .en-faq summary::after { content: "+"; font-family: var(--ks-mono); color: var(--ks-ink-3); font-size: 20px; transition: transform 200ms; }
-  .en-faq details[open] summary::after { transform: rotate(45deg); }
-  .en-faq .a { padding: 0 var(--ks-6) var(--ks-5); font-size: 14.5px; color: var(--ks-ink-2); line-height: 1.7; max-width: 70ch; }
-  .en-faq .a code { background: var(--ks-bg-2); padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
-  .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
-
-  
-  .en-glyph { display: inline-grid; place-items: center; width: 22px; height: 22px; background: var(--ks-accent-soft); border: 1px solid var(--ks-accent-edge); border-radius: 6px; color: var(--ks-accent); vertical-align: -5px; margin-right: 10px; }
-  .en-comp-warn { color: var(--ks-warn) !important; }
-  .en-deploy-bullets { margin: 6px 0 0; padding-left: 16px; font-size: 13.5px; color: var(--ks-ink-2); line-height: 1.7; }
-  .en-deploy-bullets li::marker { color: var(--ks-accent); }
-  .en-deploy-pre { margin: 12px 0 0; padding: 12px 14px; background: #0c0e12; border: 1px solid var(--ks-line-1); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-2); line-height: 1.55; overflow-x: auto; white-space: pre; }
-  .en-pack-dls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-  .en-pack-dl { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--ks-accent-soft); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-pill); font-family: var(--ks-mono); font-size: 12px; color: var(--ks-accent); text-decoration: none; }
-  .en-pack-dl:hover { background: var(--ks-accent-edge); color: var(--ks-ink); }
-  @media (max-width: 560px) {
-    .en-card, .en-list, .en-row { padding: 14px; }
-    .en-pack-dl { width: 100%; justify-content: center; }
-    pre { white-space: pre-wrap; overflow-wrap: anywhere; }
-  }
+:root{ --c:var(--ks-accent,#2563eb); --ink:var(--ks-ink,#11151b); --ink2:var(--ks-ink-2,#3b444f); --mut:var(--ks-ink-3,#6a7480); --bg:var(--ks-bg,#f5f7f9); --pan:var(--ks-bg-1,#fff); --line:var(--ks-line-2,#e3e7ec); --line2:var(--ks-line-3,#cfd6de); --mono:var(--ks-mono,ui-monospace,SFMono-Regular,Menlo,Consolas,monospace); }
+html[data-theme=dark]{ --c:var(--ks-accent,#6f9bff); --ink:#eef1f5; --ink2:#aeb8c4; --mut:#7c8794; --bg:#0b0e13; --pan:#11151b; --line:#1d2430; --line2:#2a3340; }
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:0 28px}
+.sec{padding:clamp(48px,6vw,84px) 0;border-top:1px solid var(--line)}
+.idx{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--mut);display:flex;align-items:center;gap:10px;margin:0 0 18px}
+.idx b{color:var(--c);font-weight:600}.idx::after{content:"";flex:0 0 28px;height:1px;background:var(--c);opacity:.5}
+.h1{font-family:var(--ks-display,Inter,sans-serif);font-weight:580;letter-spacing:-.03em;font-size:clamp(34px,4.6vw,56px);line-height:1.04;margin:0 0 18px}
+.h2{font-family:var(--ks-display,Inter,sans-serif);font-weight:560;letter-spacing:-.02em;font-size:clamp(24px,3vw,38px);line-height:1.1;margin:0 0 12px;max-width:24ch}
+.lede{font-size:clamp(16px,1.4vw,18px);line-height:1.55;color:var(--ink2);max-width:62ch;margin:0 0 24px}
+.eye{font-family:var(--mono);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--c);margin:0 0 16px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-size:14.5px;font-weight:540;border-radius:8px;padding:12px 20px;text-decoration:none;margin:0 8px 8px 0}
+.btn--p{background:var(--c);color:#fff}.btn--p:hover{opacity:.92}.btn--g{border:1px solid var(--line2);color:var(--ink)}.btn--g:hover{border-color:var(--c);color:var(--c)}
+.ctas{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.link{color:var(--c);text-decoration:none;border-bottom:1px solid transparent;font-weight:500}.link:hover{border-bottom-color:var(--c)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:12px;overflow:hidden}@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.cell{padding:20px 22px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.cell .l{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin:0 0 8px}
+.cell.byoc .l{color:var(--c)} .cell p{margin:0;font-size:13.5px;line-height:1.5;color:var(--ink2)}
+.soc{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin:16px 0 0}
+.trust{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--mut);text-transform:uppercase;margin-top:22px}
 </style>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "kolm",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Linux, macOS, Windows (WSL)",
-  "url": "https://kolm.ai/enterprise",
-  "description": "Procurement-ready: SAML/SCIM, BYOC and on-prem, regional residency, BAA on request, SOC 2 Type II in flight, signed Ed25519 receipts on every artifact. The full evaluation pack is on this page.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "kolm.ai",
-    "@id": "https://kolm.ai/#org"
-  }
-}
-</script>
+<link rel="stylesheet" href="/ks.css">
+<link rel="stylesheet" href="/warm-paper.css">
 </head>
 <body class="ks">
-<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<a href="#main" class="ks-skip">Skip to content</a>
-
 <div class="ks-nav-wrap">
   <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
+    <a href="/" class="ks-nav__brand" aria-label="kolm.ai"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
       <li><a href="/product">Product</a></li>
       <li><a href="/solutions/teams">For teams</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
+      <li><a href="/enterprise">Enterprise</a></li>
     </ul>
-    <div class="ks-nav__right">
-      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
-      <a href="/contact?topic=enterprise" class="ks-btn ks-btn--primary ks-btn--sm">Talk to sales <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
-        <svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
-      </button>
-    </div>
+    <div class="ks-nav__right"><a href="/signup?intent=login" class="ks-nav__signin">Sign in</a><a href="/book-demo" class="ks-btn ks-btn--primary ks-btn--sm">Talk to sales <span class="ks-btn-arrow">&rarr;</span></a></div>
   </nav>
-  <div class="ks-nav__sheet" id="navSheet">
-    <a href="/product">Product</a>
-    <a href="/proof">Proof</a>
-    <a href="/pricing">Pricing</a>
-    <a href="/docs">Docs</a>
-    <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
-    <a href="/signup?intent=login">Sign in</a>
-    <a href="/signup">Get started &rarr;</a>
-  </div>
 </div>
 
 <main id="main">
-
-<section class="ks-hero">
-  <div class="ks-hero__bg" aria-hidden="true"></div>
-  <div class="ks-wrap">
-    <div class="en-hero-grid">
-      <div>
-        <span class="ks-eyebrow">For procurement, security, and compliance</span>
-        <h1 class="ks-hero__h1" style="font-size: clamp(38px, 5.5vw, 64px); max-width: 18ch;">
-          AI infrastructure your <span class="grad">compliance team</span> can sign off on.
-        </h1>
-        <p class="ks-hero__lede">
-          BYOC, on-prem, or air-gap appliance. SAML + SCIM out of the box. BAA on request. Every artifact ships a signed receipt your auditor verifies without our cooperation.
-        </p>
-        <div style="margin:18px 0 6px; padding:14px 18px; background:var(--ks-bg-1); border:1px solid var(--ks-line-2); border-radius:var(--ks-r-md); font-family:var(--ks-mono); font-size:13px; color:var(--ks-ink-2); overflow-x:auto;"><span style="color:var(--ks-accent)">$</span> helm install kolm kolm/byoc --set kms.arn=arn:aws:kms:... <br><span style="color:var(--ks-accent)">$</span> kolm verify cm-claims-v4.kolm <span style="color:var(--ks-ink-3)"># offline. your auditor runs the same command.</span></div>
-        <div class="ks-hero__ctas">
-          <a class="ks-btn ks-btn--primary ks-btn--lg" href="/contact?topic=enterprise">Talk to sales <span class="ks-btn-arrow">&rarr;</span></a>
-          <a class="ks-btn ks-btn--ghost ks-btn--lg" href="#pack">Get the evaluation pack</a>
-        </div>
-        <p class="ks-hero__meta">
-          <span style="color: var(--ks-pos);">&#9679;</span> 30-day enterprise trial on your cloud, with your data, against your evals.
-        </p>
-      </div>
-      <div class="en-stats">
-        <div class="en-stat"><b>SOC 2 Type I</b><span>Available</span></div>
-        <div class="en-stat"><b>SOC 2 Type II</b><span>Q3 2026</span></div>
-        <div class="en-stat"><b>HIPAA BAA</b><span>On request</span></div>
-        <div class="en-stat"><b>ISO 27001</b><span>In flight</span></div>
-        <div class="en-stat"><b>GDPR DPA</b><span>Standard</span></div>
-        <div class="en-stat"><b>EU AI Act</b><span>Article 13 ready</span></div>
-        <div class="en-stat"><b>Residency</b><span>US / EU / APAC</span></div>
-        <div class="en-stat"><b>Signed receipts</b><span>Ed25519 default</span></div>
-      </div>
-    </div>
+<section class="sec" style="border-top:0;padding-top:clamp(36px,5vw,72px)">
+  <div class="wrap">
+    <p class="eye">Enterprise</p>
+    <h1 class="h1">Govern your<br>company's AI.</h1>
+    <p class="lede">A security questionnaire should not decide which model your company ships. kolm puts every employee's AI use behind one control plane, keeps sensitive data inside your boundary, and produces a signed record your security, compliance, and finance teams can verify, without you in the room.</p>
+    <div class="ctas"><a class="btn btn--p" href="/book-demo">Talk to sales <span aria-hidden="true">&rarr;</span></a><a class="btn btn--g" href="/account/connect">Try it first</a></div>
   </div>
 </section>
 
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Guarantees</span>
-      <h2 class="ks-h2">What every regulated buyer asks for.</h2>
-      <p class="ks-lede">Every kolm install ships these by default. Not a roadmap. Not a paywall. Apache-2.0, verifiable in your VPC.</p>
+<section class="sec">
+  <div class="wrap">
+    <p class="idx"><b>01</b> Controls</p>
+    <h2 class="h2">The control plane your reviewers ask for.</h2>
+    <p class="lede">SSO, SCIM, and RBAC are the floor. The part no other gateway ships is the signed receipt chain underneath all of it.</p>
+    <div class="grid">
+      <div class="cell"><p class="l">SSO / SAML</p><p>Your identity provider decides access. Okta, Azure AD, Google, and more.</p></div>
+      <div class="cell"><p class="l">SCIM</p><p>Automatic provisioning and deprovisioning; revoke a leaver everywhere at once.</p></div>
+      <div class="cell"><p class="l">RBAC</p><p>Who can route, build, export, and govern, by role, enforced on every route.</p></div>
+      <div class="cell byoc"><p class="l">BYOC</p><p>Train and serve in your own VPC. Data never leaves your network.</p></div>
+      <div class="cell"><p class="l">Data residency</p><p>Pin training and serving to one of nine regions.</p></div>
+      <div class="cell"><p class="l">Audit + signed receipts</p><p>A verifiable Ed25519 record of every call. Hand an auditor receipts they check offline.</p></div>
     </div>
-    <ul class="fr-spec-list en-guarantees-list">
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head">
-          <h3><span class="en-glyph"><svg width="14" height="14" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg></span>Tenant isolation</h3>
-          <span class="fr-spec-list__delta">physically isolated &middot; not just permissioned</span>
-        </div>
-        <p class="fr-spec-list__p">Per-tenant data fences enforced at the storage layer. Cross-tenant reads are not a permission check; they are physically impossible. Verified by tests on every release.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head">
-          <h3><span class="en-glyph"><svg width="14" height="14" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9" /><path d="M21 3v6h-6" /></svg></span>Signed receipts</h3>
-          <span class="fr-spec-list__delta">Ed25519 &middot; public CID</span>
-        </div>
-        <p class="fr-spec-list__p">Every artifact and every distill run produces an Ed25519-signed receipt with a public CID. Your auditor verifies independently. No vendor portal required.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head">
-          <h3><span class="en-glyph"><svg width="14" height="14" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><path d="M9 22V12h6v10" /></svg></span>BYOC or on-prem</h3>
-          <span class="fr-spec-list__delta">no outbound calls &middot; your KMS</span>
-        </div>
-        <p class="fr-spec-list__p">Helm chart, Docker Compose, and a bare-metal install script. Runs entirely in your VPC. Your KMS, your bucket, your audit trail.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head">
-          <h3><span class="en-glyph"><svg width="14" height="14" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></svg></span>Real-time auditability</h3>
-          <span class="fr-spec-list__delta">SIEM-ready &middot; CID-linked</span>
-        </div>
-        <p class="fr-spec-list__p">Per-request immutable audit log streamed to your SIEM (Splunk, Datadog, Elastic). Each entry references the receipt that produced it. Full chain of custody.</p>
-      </li>
-    </ul>
+    <p class="soc">SOC&nbsp;2 Type&nbsp;I complete &middot; Type&nbsp;II in progress &middot; BAA on request &middot; Apache&#8209;2.0 core</p>
   </div>
 </section>
 
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Deployment patterns</span>
-      <h2 class="ks-h2">Pick the topology that matches your risk model.</h2>
-      <p class="ks-lede">Same product. Same artifacts. Different placement.</p>
-    </div>
-    <ol class="fr-numbered-list en-deploy-list">
-      <li class="fr-numbered-list__row">
-        <span class="fr-numbered-list__k">01 &middot; SaaS multi-tenant</span>
-        <div class="fr-numbered-list__body">
-          <h3>Hosted on kolm.ai</h3>
-          <p>The fastest path. Tenant-isolated database, regional residency (US, EU, APAC), SOC 2 controls applied to the shared infrastructure. Most teams start here, then graduate.</p>
-          <ul class="en-deploy-bullets"><li>5-minute setup, no infra</li><li>Same uptime SLA as the Pro plan</li><li>Optional VPC peering (Enterprise)</li></ul>
-        </div>
-      </li>
-      <li class="fr-numbered-list__row">
-        <span class="fr-numbered-list__k">02 &middot; SaaS dedicated</span>
-        <div class="fr-numbered-list__body">
-          <h3>Hosted, but single-tenant</h3>
-          <p>Your own database, your own queue, your own region. We operate it; you own the data plane. Adds a dedicated VPN for ingress and your KMS for signing keys.</p>
-          <ul class="en-deploy-bullets"><li>Dedicated database, dedicated workers</li><li>Bring-your-own KMS (AWS / GCP / Azure)</li><li>Custom domain, custom TLS</li></ul>
-        </div>
-      </li>
-      <li class="fr-numbered-list__row">
-        <span class="fr-numbered-list__k">03 &middot; BYOC</span>
-        <div class="fr-numbered-list__body">
-          <h3>Your cloud, our control plane</h3>
-          <p>The data plane runs in your AWS, GCP, or Azure account. We operate the control plane (deploys, upgrades, paging). No customer data leaves your perimeter.</p>
-          <ul class="en-deploy-bullets"><li>Private subnets, your VPC, your IAM</li><li>Outbound to control plane is opt-in</li><li>You can pull the plug and keep running</li></ul>
-          <pre class="en-deploy-pre">helm install kolm kolm/byoc \
-  --set tenant=acme \
-  --set region=us-east-1 \
-  --set kms.arn=arn:aws:kms:...</pre>
-        </div>
-      </li>
-      <li class="fr-numbered-list__row">
-        <span class="fr-numbered-list__k">04 &middot; On-prem</span>
-        <div class="fr-numbered-list__body">
-          <h3>Your data center, your control plane</h3>
-          <p>Kubernetes or bare metal. No outbound calls. Upgrades shipped as signed bundles you verify before applying. Used by health systems, governments, and defense integrators.</p>
-          <ul class="en-deploy-bullets"><li>Helm chart, Docker Compose, RPM/DEB</li><li>Signed upgrade bundles via SSH or USB</li><li>Detached license model, offline activation</li></ul>
-          <pre class="en-deploy-pre">kolm install --on-prem \
-  --bundle kolm-2026-05-22.tar.zst \
-  --signature kolm-2026-05-22.sig</pre>
-        </div>
-      </li>
-      <li class="fr-numbered-list__row">
-        <span class="fr-numbered-list__k">05 &middot; Air-gap appliance</span>
-        <div class="fr-numbered-list__body">
-          <h3>Single-host, zero outbound</h3>
-          <p>A signed appliance image (qcow2 or OVA) that runs in a SCIF or PSE-zoned host. Boots offline, ships with a pre-loaded model registry, signed by us, verified by you.</p>
-          <ul class="en-deploy-bullets"><li>OVA, qcow2, or raw disk image</li><li>Sealed model registry, offline updates</li><li>FedRAMP-friendly hardening profile</li></ul>
-        </div>
-      </li>
-    </ol>
+<section class="sec">
+  <div class="wrap">
+    <p class="idx"><b>02</b> Deployment</p>
+    <h2 class="h2">Run it where your data already lives.</h2>
+    <p class="lede">kolm self-hosts in your cloud or on-prem, runs fully air-gapped for the work that can never touch the internet, and exports models to GGUF, Ollama, or Hugging Face with no proprietary loader. You own the weights and the receipts.</p>
+    <div class="ctas"><a class="link" href="/security">Security &amp; architecture</a> &nbsp; <a class="link" href="/proof">How verification works</a> &nbsp; <a class="link" href="/self-host">Self-host</a></div>
   </div>
 </section>
 
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Compliance posture</span>
-      <h2 class="ks-h2">What ships, what is in flight, what is frankly not.</h2>
-      <p class="ks-lede">No "trust us" pages. The status field on each card is the actual status. Audit reports and policies attach to the evaluation pack below.</p>
-    </div>
-    <ul class="fr-spec-list en-comp-list">
-      <li class="fr-spec-list__row"><div class="fr-spec-list__head"><h3>SOC 2 Type I</h3><span class="fr-spec-list__delta">AVAILABLE NOW</span></div><p class="fr-spec-list__p">Independent attestation against the Trust Services Criteria. Letter on request under NDA.</p></li>
-      <li class="fr-spec-list__row"><div class="fr-spec-list__head"><h3>SOC 2 Type II</h3><span class="fr-spec-list__delta en-comp-warn">IN FLIGHT &middot; Q3 2026</span></div><p class="fr-spec-list__p">12-month observation window underway. Auditor letter expected Q3 2026.</p></li>
-      <li class="fr-spec-list__row"><div class="fr-spec-list__head"><h3>HIPAA BAA</h3><span class="fr-spec-list__delta">AVAILABLE NOW</span></div><p class="fr-spec-list__p">Mutual BAA covering PHI in BYOC and on-prem topologies. Standard 30-day turnaround on legal.</p></li>
-      <li class="fr-spec-list__row"><div class="fr-spec-list__head"><h3>GDPR DPA</h3><span class="fr-spec-list__delta">AVAILABLE NOW</span></div><p class="fr-spec-list__p">Standard Contractual Clauses, regional data residency, right-to-erasure tooling.</p></li>
-      <li class="fr-spec-list__row"><div class="fr-spec-list__head"><h3>ISO 27001</h3><span class="fr-spec-list__delta en-comp-warn">IN FLIGHT &middot; 2026</span></div><p class="fr-spec-list__p">Statement of Applicability complete. Stage-1 audit booked for Q2 2026.</p></li>
-      <li class="fr-spec-list__row"><div class="fr-spec-list__head"><h3>EU AI Act</h3><span class="fr-spec-list__delta">ARTICLE 13 READY</span></div><p class="fr-spec-list__p">Model cards, intended-use documentation, automatic logging map to high-risk obligations.</p></li>
-      <li class="fr-spec-list__row"><div class="fr-spec-list__head"><h3>CCPA</h3><span class="fr-spec-list__delta">AVAILABLE NOW</span></div><p class="fr-spec-list__p">"Sell" definition opt-out endpoints, do-not-train flag honored across all artifacts.</p></li>
-      <li class="fr-spec-list__row"><div class="fr-spec-list__head"><h3>FedRAMP Moderate</h3><span class="fr-spec-list__delta en-comp-warn">ROADMAP &middot; 2027</span></div><p class="fr-spec-list__p">Air-gap appliance hardening profile aligned to NIST 800-53 controls. Sponsor in conversation.</p></li>
-      <li class="fr-spec-list__row"><div class="fr-spec-list__head"><h3>PCI DSS scope</h3><span class="fr-spec-list__delta">AVAILABLE NOW</span></div><p class="fr-spec-list__p">Kolm is not in PCI scope when used outside cardholder data flow. Tokenization guidance on request.</p></li>
-    </ul>
+<section class="sec" style="text-align:center">
+  <div class="wrap">
+    <h2 class="h2" style="margin:0 auto 14px;max-width:22ch">Bring your reviewers. We will pass.</h2>
+    <p class="lede" style="margin:0 auto 24px">Most evaluations move faster when the answer to every control question is a receipt, not a promise.</p>
+    <div class="ctas" style="justify-content:center"><a class="btn btn--p" href="/book-demo">Talk to sales <span aria-hidden="true">&rarr;</span></a><a class="btn btn--g" href="/account/connect">Start a trial</a></div>
+    <p class="trust">SSO &middot; SCIM &middot; RBAC &middot; BYOC &middot; 9 regions &middot; SOC&nbsp;2 Type&nbsp;I &middot; signed receipts</p>
   </div>
 </section>
-
-<section class="ks-section" id="pack">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Evaluation pack</span>
-      <h2 class="ks-h2">The packet your security review needs, ready to download.</h2>
-      <p class="ks-lede">Single-shot: every artifact your CISO, DPO, and procurement reviewer ask for. No NDA required for the docs marked public; the rest unlock after we exchange paper.</p>
-    </div>
-    <ul class="fr-spec-list en-pack-list">
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Architecture, data flow, threat model</h3><span class="fr-spec-list__delta">PUBLIC</span></div>
-        <p class="fr-spec-list__p">Live pages describing the four data planes (gateway, capture, compile, runtime), where customer data is stored, what it is keyed by, and what the attacker model is.</p>
-        <div class="en-pack-dls">
-          <a class="en-pack-dl" href="/legal/architecture" rel="noopener">architecture</a>
-          <a class="en-pack-dl" href="/security/threat-model" rel="noopener">threat-model</a>
-          <a class="en-pack-dl" href="/contact?ask=dpia-template" rel="noopener">request DPIA template</a>
-        </div>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Subprocessor list, SLA, status history</h3><span class="fr-spec-list__delta">PUBLIC</span></div>
-        <p class="fr-spec-list__p">The full subprocessor list with regions and purposes. The committed SLA per plan tier. Twelve months of status history with root-cause notes.</p>
-        <div class="en-pack-dls">
-          <a class="en-pack-dl" href="/subprocessors">subprocessors</a>
-          <a class="en-pack-dl" href="/sla">sla</a>
-          <a class="en-pack-dl" href="/status">status &amp; incidents</a>
-        </div>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>SOC 2 Type I letter, pen test report, audit log sample</h3><span class="fr-spec-list__delta en-comp-warn">UNDER NDA</span></div>
-        <p class="fr-spec-list__p">Audit letter from the SOC 2 Type I attestation, the last third-party penetration test report, and a redacted audit log sample showing the receipts an artifact actually emits.</p>
-        <div class="en-pack-dls">
-          <a class="en-pack-dl" href="/contact?ask=soc2-letter">request soc2-letter</a>
-          <a class="en-pack-dl" href="/contact?ask=pentest-report">request pentest</a>
-          <a class="en-pack-dl" href="/contact?ask=audit-log-sample">request audit-sample</a>
-        </div>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Sandboxed pilot in your tenant</h3><span class="fr-spec-list__delta">CUSTOM &middot; 30 days</span></div>
-        <p class="fr-spec-list__p">A 30-day pilot in your own cloud against your own data. We help install, you keep the keys. Includes weekly office hours and a written success scorecard at day 30.</p>
-        <div class="en-pack-dls">
-          <a class="en-pack-dl" href="/contact?topic=pilot">start a pilot</a>
-        </div>
-      </li>
-    </ul>
-  </div>
-</section>
-
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Identity &amp; access</span>
-      <h2 class="ks-h2">Identity that your IT team already runs.</h2>
-      <p class="ks-lede">Standards, not adapters. SAML 2.0 against any IdP, SCIM 2.0 against any directory, OAuth/OIDC for human sessions, signed JWTs for service-to-service. No proprietary glue.</p>
-    </div>
-    <ul class="fr-spec-list en-identity-list">
-      <li class="fr-spec-list__row"><div class="fr-spec-list__head"><h3>SAML SSO</h3><span class="fr-spec-list__delta">Okta / Azure / Google / Ping / Auth0</span></div><p class="fr-spec-list__p">Tested against Okta, Azure AD, Google Workspace, OneLogin, Ping, JumpCloud, Auth0. Metadata published at <code>/v1/sso/saml/metadata</code>.</p></li>
-      <li class="fr-spec-list__row"><div class="fr-spec-list__head"><h3>SCIM provisioning</h3><span class="fr-spec-list__delta">SCIM 2.0 &middot; JIT</span></div><p class="fr-spec-list__p">SCIM 2.0 endpoints for user and group lifecycle. Service-provider config at <code>/v1/sso/scim/ServiceProviderConfig</code>. Just-in-time provisioning supported.</p></li>
-      <li class="fr-spec-list__row"><div class="fr-spec-list__head"><h3>OIDC for humans</h3><span class="fr-spec-list__delta">OAuth 2.1 &middot; PKCE</span></div><p class="fr-spec-list__p">OAuth 2.1 / OIDC for the CLI device flow and the dashboard. PKCE everywhere. Refresh-token rotation by default.</p></li>
-      <li class="fr-spec-list__row"><div class="fr-spec-list__head"><h3>Signed JWT for services</h3><span class="fr-spec-list__delta">per-namespace &middot; mTLS optional</span></div><p class="fr-spec-list__p">Per-namespace API keys, signed JWTs for service-to-service, mTLS available on enterprise plans. Keys rotate via SCIM lifecycle events.</p></li>
-      <li class="fr-spec-list__row"><div class="fr-spec-list__head"><h3>Audit trail</h3><span class="fr-spec-list__delta">JSON / CEF &middot; SIEM-ready</span></div><p class="fr-spec-list__p">Every auth event is in the audit log with the originating IP, IdP attributes, and the resulting tenant/namespace scope.</p></li>
-      <li class="fr-spec-list__row"><div class="fr-spec-list__head"><h3>Break-glass</h3><span class="fr-spec-list__delta">escrow &middot; dual-control &middot; forced rotate</span></div><p class="fr-spec-list__p">Optional break-glass account with key escrow at your custodian, dual-control activation, and forced rotation after use. Required for regulated tenants.</p></li>
-    </ul>
-  </div>
-</section>
-
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div class="ks-shead">
-      <span class="ks-eyebrow">Real customer questions</span>
-      <h2 class="ks-h2">Procurement questions and our straight answers.</h2>
-      <p class="ks-lede">The actual exchange from the last twenty enterprise reviews, deduplicated.</p>
-    </div>
-    <div class="en-faq">
-      <details><summary>Where is customer data stored?</summary><div class="a">Captures, distill runs, and registry artifacts live in your selected region (US, EU, or APAC). On BYOC and on-prem, "your region" is whatever bucket you configured. Metadata (org name, billing) lives in the US control plane. The full storage map is in the DPA appendix.</div></details>
-      <details><summary>Do you train on our data?</summary><div class="a">No. Captured payloads are encrypted at rest with a per-tenant key. We never read your captures, never use them for model training, and never share them. The CLI has a <code>--do-not-train</code> flag (default on) and the gateway honors <code>X-Kolm-DoNotTrain: 1</code> headers end-to-end.</div></details>
-      <details><summary>How do we audit what your service does on our behalf?</summary><div class="a">Every request emits an audit log entry with the receipt CID. We ship a Splunk app, a Datadog integration, and a CEF formatter for arbitrary SIEMs. The audit log is append-only and signed; replay is detectable.</div></details>
-      <details><summary>What if you get acquired or go out of business?</summary><div class="a">The product is Apache-2.0. The .kolm artifact format is open. The CLI runs offline. Your captures and distilled models keep working on your own infrastructure without any kolm-operated service. We additionally offer source escrow through Iron Mountain for enterprise contracts.</div></details>
-      <details><summary>Can we self-host upgrades to avoid network egress?</summary><div class="a">Yes. Upgrades are shipped as signed bundles (tar.zst with a detached Ed25519 signature). Apply with <code>kolm upgrade --bundle path --signature path</code>. Verify the signature before applying; the CLI refuses to apply an unverified bundle.</div></details>
-      <details><summary>What is your SLA?</summary><div class="a">99.9% monthly uptime on Pro, 99.95% on Enterprise SaaS, BYOC and on-prem have no kolm-side SLA (the product runs in your cloud). Credit schedule is in the MSA. Twelve months of status history at <a href="/status">status</a>.</div></details>
-      <details><summary>How are signing keys handled?</summary><div class="a">SaaS: per-tenant Ed25519 keys stored in our HSM, rotated quarterly, never exported. BYOC: keys in your KMS (AWS KMS, Google Cloud KMS, Azure Key Vault). On-prem: keys on your HSM or YubiKey-backed file. The kolm process never sees the private key in plaintext; signing is delegated.</div></details>
-      <details><summary>Do you have a vulnerability disclosure program?</summary><div class="a">Yes. <code>security@kolm.ai</code>, PGP key at <a href="/.well-known/security.txt">/.well-known/security.txt</a>. Triage SLO is 1 business day; remediation depends on severity. Hall of fame at <a href="/security/hof">/security/hof</a>.</div></details>
-      <details><summary>Can we run a pilot before signing?</summary><div class="a">Yes. 30-day pilot, in your own cloud, against your own data, with a written success scorecard at day 30. We do not charge for the pilot. We do not require a credit card. We do require a mutual NDA before access to the SOC 2 letter and pen test report.</div></details>
-      <details><summary>What is the cost?</summary><div class="a">Enterprise SaaS starts at $4,000/mo for 5M gateway calls and 5 BYOC deployments. BYOC and on-prem are usage-priced on artifact builds and audit log volume; ask for a quote. We publish all our pricing on <a href="/pricing">/pricing</a>; the enterprise number is on this page so you do not have to email us.</div></details>
-    </div>
-  </div>
-</section>
-
-<section class="ks-section">
-  <div class="ks-wrap">
-    <div style="background: linear-gradient(180deg, var(--ks-accent-soft) 0%, transparent 100%); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-lg); padding: var(--ks-10); text-align: center;">
-      <span class="ks-eyebrow">Next step</span>
-      <h2 class="ks-h2" style="font-size: clamp(28px, 4vw, 40px); margin: var(--ks-3) auto; max-width: 24ch;">Send us a question. We answer in plain English.</h2>
-      <p class="ks-prose" style="margin: 0 auto var(--ks-5); max-width: 60ch;">No multi-stage funnel. No "schedule a demo to see pricing." You will hear back from a real human inside one business day, with the actual answer to your actual question.</p>
-      <div style="display: inline-flex; gap: var(--ks-3); flex-wrap: wrap; justify-content: center;">
-        <a class="ks-btn ks-btn--primary ks-btn--lg" href="/contact?topic=enterprise">Talk to sales <span class="ks-btn-arrow">&rarr;</span></a>
-        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/quickstart">Try the quickstart first</a>
-        <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/security">Read the security model</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="test-anchor">
-  <span data-test="w220-claim">kolm.ai</span>
-  <span data-test="w260-trust">SOC 2 Type I</span>
-  <span data-test="w271-frontier">Frontier methods</span>
-  <span data-test="w335-claim">Open-source AI compiler</span>
-  <span data-test="w373-receipts">Ed25519 receipts</span>
-  <span data-test="w408-quantize-matrix">DeepSeek-R1 32B INT4</span>
-  <a href="/k-score" data-test="kscore-link">/k-score</a>
-</div>
-
 </main>
 
 <footer class="ks-foot">
   <div class="ks-wrap">
     <div class="ks-foot__grid">
-      <div class="ks-foot__col">
-        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
-        <p class="ks-foot__tag">The open-source AI compiler. Route, distill, quantize, and run signed models on your own hardware.</p>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Product</h4>
-        <a href="/gateway">Gateway</a>
-        <a href="/capture">Capture</a>
-        <a href="/distill">Distill</a>
-        <a href="/compile">Compile</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/registry">Registry</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/sdks">SDKs</a>
-        <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
-        <a href="/blog">Blog</a>
-        <a href="/faq">FAQ</a>
-        <a href="/changelog">Changelog</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Trust</h4>
-        <a href="/security">Security</a>
-        <a href="/soc2">SOC 2</a>
-        <a href="/hipaa-mapping">HIPAA</a>
-        <a href="/baa">BAA</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/verify-prod">Verify a .kolm</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/about">About</a>
-        <a href="/why-kolm">Why kolm</a>
-        <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub &rarr;</a>
-      </div>
+      <div class="ks-foot__col"><div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div><p class="ks-foot__tag">The AI control plane for teams.</p></div>
+      <div class="ks-foot__col"><h4>Product</h4><a href="/product">Product</a><a href="/solutions/teams">For teams</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></div>
+      <div class="ks-foot__col"><h4>Trust</h4><a href="/security">Security</a><a href="/proof">Proof</a><a href="/enterprise">Enterprise</a><a href="/verify">Verify a receipt</a></div>
     </div>
-    <div class="ks-foot__base">
-      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
-      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
-    </div>
+    <div class="ks-foot__base"><span>&copy; 2026 kolm.ai - Apache-2.0</span></div>
   </div>
- &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">kolm.ai vs Kolm therapeutics</a></footer>
-
-<script>
-  (function(){
-    var btn = document.getElementById('navToggle');
-    var sheet = document.getElementById('navSheet');
-    if (!btn || !sheet) return;
-    btn.addEventListener('click', function(){
-      var open = sheet.style.display === 'block';
-      sheet.style.display = open ? 'none' : 'block';
-      btn.setAttribute('aria-expanded', String(!open));
-    });
-  })();
-</script>
-
-<div hidden aria-hidden="true" data-w260-anchors="enterprise-external-review" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
-  <section data-w260="external-review">
-    <h2>External Enterprise architecture review scope</h2>
-    <p>Enterprise architecture review scope summary: kolm.ai cleared the procurement fit bar for enterprises that need to route providers (OpenAI, Anthropic, vLLM, SGLang, TGI, TRT-LLM, self-hosted), distill approved work into signed student artifacts, and export proof of every captured pair for downstream audit. The review covered identity (SSO/SAML/SCIM), network (VPC peering, PrivateLink, on-prem docker-compose), data isolation (per-tenant event-store fencing), compute (bring-your-own-GPU default), compliance (BAA, DPA, SOC 2 Type I under MNDA, Halborn April 2026 pentest), and observability (OpenTelemetry spans, audit log export).</p>
-    <p>Review attributed to Enterprise architecture review scope as part of a third-party AI infrastructure review covering open-source and managed alternatives across the compile-and-own loop.</p>
-  </section>
-  <span class="enterprise-w220-anchor">live demo &middot; team-private publish</span>
-  <a href="/baa">BAA on request</a>
-  <a href="/articles/kolm-ai-vs-kolm-therapeutics">Brand disambiguation: kolm.ai vs Kolm therapeutics</a>
-</div>
+</footer>
 </body>
 </html>
