@@ -1,0 +1,24 @@
+{
+  "category": "The AI Compiler",
+  "one_liner": "Own your AI. Compile frontier-model quality into a small, private model you run anywhere — with a signed receipt for every call.",
+  "short_tagline": "Own your AI.",
+  "moat_sentence": "A cryptographic, offline-verifiable receipt for every call — the one thing no competitor ships.",
+  "pillars": [
+    { "key": "own", "label": "Own it", "line": "Distill frontier-model quality into a small, private model you run on your own hardware." },
+    { "key": "prove", "label": "Prove it", "line": "A signed receipt for every call, verifiable by anyone with the public key — offline, no account." },
+    { "key": "govern", "label": "Govern it", "line": "SSO/SCIM/RBAC, spend caps, model entitlements, data residency, BYOC, and audit export." }
+  ],
+  "ctas": {
+    "primary": { "label": "Start free", "href": "/quickstart" },
+    "secondary_proof": { "label": "Verify a receipt", "href": "/verify" },
+    "enterprise": { "label": "Talk to sales", "href": "/enterprise" }
+  },
+  "contact_email": "dev@kolm.ai",
+  "banned_terms": ["wrapper", "studio", "surface", "evidence-to-artifact", "powerful", "seamless", "unlock", "leverage", "robust", "world-class", "next-generation", "honest", "bill goes to zero"],
+  "claims": {
+    "soc2": "SOC 2 Type I available; Type II in progress",
+    "trinity500": "On a 57-prompt held-out support-clarification set, a Qwen2.5-7B council-distilled from Claude 3.5 Sonnet + GPT-4o + DeepSeek-R1-32B asks the right clarifying question 96.5% of the time — equal to gpt-4o-mini, above claude-haiku-4-5 (64.9%) and base Qwen (84.2%) — INT4 NF4 on one RTX 5090. Scope: support-clarification only.",
+    "int4_32b": "Run a 32B reasoning model in INT4 on one consumer GPU = inference (DeepSeek-R1-32B ~17.9 GB). Never training.",
+    "cost": "No per-token bill after you compile — you run the model yourself on hardware you control."
+  }
+}

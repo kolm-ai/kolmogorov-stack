@@ -260,9 +260,9 @@ test('W272 #14 - sw.js wave-floor is >= 272', () => {
   assert.ok(Number(m[1]) >= 272, `sw.js cache wave must be >= 272, got ${m[1]}`);
 });
 
-test('W272 #15 - defense (promoted from defense-v2) references /enterprise/self-hosted per W264 cross-link', () => {
+test('W272 #15 - defense vertical cross-links the self-host / air-gap deployment page (W264)', () => {
   const html = readPage('defense');
-  assert.match(html, /\/enterprise\/self-hosted/, 'defense must cross-link to /enterprise/self-hosted');
+  assert.match(html, /\/self-host|\/enterprise\/self-hosted/, 'defense must cross-link to the self-host / air-gap page');
 });
 
 test('W272 #16 - each page has a meta description tag', () => {
