@@ -11,7 +11,7 @@ Click it, pick (or compile) a `.kolm` artifact, and the LLM call gets swapped fo
 ## Install
 
 ```bash
-code --install-extension kolm-vscode-0.2.0.vsix
+code --install-extension kolm-vscode-0.3.0.vsix
 ```
 
 Or build from source:

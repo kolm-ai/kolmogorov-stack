@@ -2659,7 +2659,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <section class="api-route" id="GET-v1-carbon-estimate">
   <h3><span class="m m-get">GET</span> <code>/v1/carbon/estimate</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">→ savingsReport envelope comparing local run vs frontier baseline.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>→ savingsReport envelope comparing local run vs frontier baseline. Auth required (same pattern as billing/breakdown). Every envelope carries methodology=&#39;public-research-estimate&#39; so a downstream consumer cannot mistake the estimate for a measured value. W786 honesty contract.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>→ savingsReport envelope comparing local run vs frontier baseline. Auth required (same pattern as billing/breakdown). Every envelope carries methodology=&#39;public-research-estimate&#39; so a downstream consumer cannot mistake the estimate for a measured value. W786 transparency contract.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/carbon/estimate&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -2889,7 +2889,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <section class="api-route" id="POST-v1-cloud-distill-submit">
   <h3><span class="m m-post">POST</span> <code>/v1/cloud/distill/submit</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Tenant fence: tenant_id forced from req.tenant_record.id; body/path never</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Tenant fence: tenant_id forced from req.tenant_record.id; body/path never override. Backend honesty: when KOLM_CLOUD_DISTILL_ENDPOINT is unset, the submit response carries cloud_backend_status=&#39;no_pool_configured&#39; so the caller knows the work is queued but not yet executing. version stamp /^w785-/.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Tenant fence: tenant_id forced from req.tenant_record.id; body/path never override. Backend transparency: when KOLM_CLOUD_DISTILL_ENDPOINT is unset, the submit response carries cloud_backend_status=&#39;no_pool_configured&#39; so the caller knows the work is queued but not yet executing. version stamp /^w785-/.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/cloud/distill/submit&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \

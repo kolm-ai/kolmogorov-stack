@@ -171,7 +171,7 @@ The aggregate is signed by the coordinator key; the local runtime verifies the s
 
 ## 7. Honest contract
 
-The consortium runtime carries an explicit honesty contract in the response envelope:
+The consortium runtime carries an explicit transparency contract in the response envelope:
 
 - Every aggregate response includes a `noise_applied` field with the Laplace scale used.
 - When a release has zero noise (rare; only happens during diagnostics or test mode), the response envelope MUST include `raw_present:true`. This flag is the operator-visible signal that the privacy mechanism is bypassed; production consortiums MUST NOT consume a release with `raw_present:true`.
