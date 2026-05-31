@@ -23,5 +23,5 @@ Quick use::
 
 from .client import Kolm, KolmError, CompileJob, RunResult
 
-__version__ = "0.2.0"
+__version__ = "0.2.6"
 __all__ = ["Kolm", "KolmError", "CompileJob", "RunResult"]
