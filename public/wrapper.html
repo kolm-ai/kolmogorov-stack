@@ -73,7 +73,7 @@
   <nav class="ks-nav" aria-label="Primary">
     <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
-      <li><a href="/wrapper" aria-current="page">Wrapper</a></li>
+      <li><a href="/wrapper" aria-current="page">Gateway</a></li>
       <li><a href="/proof">Proof</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
@@ -274,12 +274,12 @@ cap_3b08e...   k 0.82   gpt-5-mini      201ms   parse this ...
           <a class="ks-btn ks-btn--link" href="/airgap">Offline mode</a>
         </div>
       </div>
-      <pre class="ks-code"><span class="com"># point the wrapper at a local artifact.</span>
+      <pre class="ks-code"><span class="com"># point the gateway at a local artifact.</span>
 <span class="pmpt">$</span> kolm runtime serve ./inbox-router.kolm --port 8080
 <span class="ok">&check;</span> loaded inbox-router.kolm (124 MB, INT4, RTX 5090)
 <span class="ok">&check;</span> listening on http://localhost:8080/v1
 
-<span class="com"># the wrapper now points at your hardware.</span>
+<span class="com"># the gateway now points at your hardware.</span>
 <span class="pmpt">$</span> export OPENAI_BASE_URL=http://localhost:8080/v1
 <span class="pmpt">$</span> python inbox.py
 <span class="ok">&check;</span> 4.1 ms/token   1182 rows/min
@@ -329,7 +329,7 @@ console.log(body.suggested_model);  <span class="com">// &quot;qwen2.5-3b.kolm&q
   <div class="ks-wrap ks-wrap--narrow" style="text-align: center;">
     <span class="ks-eyebrow">Looking for the other side</span>
     <h2 class="ks-h2" style="text-wrap: balance;">If you train, distill, or quantize models, go to Studio.</h2>
-    <p class="ks-prose" style="margin: var(--ks-3) auto var(--ks-6); max-width: 64ch;">The wrapper is for application developers. Studio is the same product, for the ML team. It runs <b style="color:var(--ks-ink);">LoRA + QLoRA adapters</b> over a frozen frontier teacher, applies <b style="color:var(--ks-ink);">NF4 / GPTQ / AWQ quantization</b> to the student, bootstraps synthetic eval sets from captured traffic, and compiles a portable <code>.kolm</code> the wrapper can serve.</p>
+    <p class="ks-prose" style="margin: var(--ks-3) auto var(--ks-6); max-width: 64ch;">The gateway is for application developers. Studio is the same product, for the ML team. It runs <b style="color:var(--ks-ink);">LoRA + QLoRA adapters</b> over a frozen frontier teacher, applies <b style="color:var(--ks-ink);">NF4 / GPTQ / AWQ quantization</b> to the student, bootstraps synthetic eval sets from captured traffic, and compiles a portable <code>.kolm</code> the gateway can serve.</p>
     <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
       <a class="ks-btn ks-btn--primary ks-btn--lg" href="/studio">Open Studio &rarr;</a>
       <a class="ks-btn ks-btn--ghost ks-btn--lg" href="/about">See both products</a>

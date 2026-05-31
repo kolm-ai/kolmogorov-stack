@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Studio &middot; the kolm compiler in your browser &middot; kolm.ai</title>
-<meta name="description" content="Studio is the browser face of the kolm compiler. Pick captures, distill from teachers, compile to a portable .kolm, export to GGUF / AWQ / EXL2 / MLX, publish to Hugging Face. Same compiler that powers the CLI and TUI.">
+<meta name="description" content="The no-code browser studio for the kolm compiler. Pick captures, distill from teachers, compile to a portable .kolm, export to GGUF / AWQ / EXL2 / MLX. Same compiler as the CLI and TUI.">
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="https://kolm.ai/studio/">
@@ -43,7 +43,7 @@
   .shub-card__foot code { color: var(--ks-ink); }
   .shub-card__foot .arrow { color: var(--ks-ink); margin-left: auto; }
 
-  /* CLI/TUI parity strip — Studio is one of three surfaces */
+  /* CLI/TUI parity strip — Studio is one of three ways in */
   .shub-faces { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ks-4); margin: var(--ks-8) 0 0; }
   @media (max-width: 720px) { .shub-faces { grid-template-columns: 1fr; } }
   .shub-face { padding: var(--ks-5); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); background: var(--ks-bg-1); }
@@ -87,7 +87,7 @@
   <header class="shub-head">
     <p class="shub-eyebrow">Studio</p>
     <h1 class="shub-h1">The kolm compiler, in your browser.</h1>
-    <p class="shub-lede">Distill a frontier teacher into a smaller student. Compile a portable <code>.kolm</code> artifact. Export to GGUF, AWQ, EXL2, MLX. Publish a Hugging Face model card. Every flow has the matching CLI verb on the same backend &mdash; pick the surface that fits how you work.</p>
+    <p class="shub-lede">Distill a frontier teacher into a smaller student. Compile a portable <code>.kolm</code> artifact. Export to GGUF, AWQ, EXL2, MLX. Publish a Hugging Face model card. Every flow has the matching CLI verb on the same backend &mdash; pick the path that fits how you work.</p>
   </header>
 
   <div class="shub-meta" id="meta">
@@ -168,10 +168,10 @@
   </section>
 
   <section class="shub-section" aria-labelledby="faces-h">
-    <h2 class="shub-section__h" id="faces-h">Same compiler, three surfaces</h2>
+    <h2 class="shub-section__h" id="faces-h">Same compiler, three ways in</h2>
     <div class="shub-faces">
       <div class="shub-face">
-        <p class="shub-face__step">surface 1</p>
+        <p class="shub-face__step">path 1</p>
         <h3>Studio (you are here)</h3>
         <p>Forms, status boards, quote-first wizards. Best for first runs and demos.</p>
         <div class="shub-face__row">
@@ -180,7 +180,7 @@
         </div>
       </div>
       <div class="shub-face">
-        <p class="shub-face__step">surface 2</p>
+        <p class="shub-face__step">path 2</p>
         <h3>CLI</h3>
         <p>Same verbs, scriptable, JSON output. Best for CI, ops, repeat work.</p>
         <div class="shub-face__row">
@@ -189,7 +189,7 @@
         </div>
       </div>
       <div class="shub-face">
-        <p class="shub-face__step">surface 3</p>
+        <p class="shub-face__step">path 3</p>
         <h3>TUI</h3>
         <p>Full keyboard navigation inside your terminal. Best when SSH'd into a GPU box.</p>
         <div class="shub-face__row">

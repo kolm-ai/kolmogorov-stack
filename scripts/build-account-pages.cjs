@@ -215,7 +215,7 @@ BODIES.overview = {
     '  <h2>Product command center</h2>',
     '  <p class="pdesc">Choose the workflow first, then drop into the matching account surface, CLI verb, API route, or TUI view. Bring OpenAI, Claude, OpenRouter, Gemini-compatible, or self-hosted traffic; run on R2-compatible object storage, S3-compatible storage, AWS, Supabase, Modal, RunPod, Lambda, Together, or remote SSH.</p>',
     '  <div class="journey-grid">',
-    '    <a class="journey-card" href="/account/connectors" data-journey-id="gateway-capture" data-surface="api-wrapper"><span>Gateway</span><b>Wrap any model API</b><small>OpenAI, Claude, OpenRouter, Gemini, local, and internal endpoints.</small></a>',
+    '    <a class="journey-card" href="/account/connectors" data-journey-id="gateway-capture" data-surface="api-wrapper"><span>Gateway</span><b>Route any model API</b><small>OpenAI, Claude, OpenRouter, Gemini, local, and internal endpoints.</small></a>',
     '    <a class="journey-card" href="/account/privacy-events" data-journey-id="privacy-lake" data-surface="privacy-lake"><span>Privacy lake</span><b>Capture, redact, govern</b><small>Zero-retention, policy gates, vault links, and class-level privacy controls.</small></a>',
     '    <a class="journey-card" href="/account/datasets" data-journey-id="datasets-labeling" data-surface="datasets-labeling"><span>Datasets</span><b>Promote reviewed rows</b><small>Holdouts, labels, accepted corrections, and dataset lineage.</small></a>',
     '    <a class="journey-card" href="/account/builds" data-journey-id="train-distill" data-surface="training-distill"><span>Train/distill</span><b>Turn traffic into specialists</b><small>Training, distillation, synthetic data, eval gates, and hosted or local compute.</small></a>',

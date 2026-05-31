@@ -145,7 +145,7 @@
 
 <div class="q" id="q-2"><p class="label"><a href="#q-2">Q2 &middot; #q-2</a></p>
 <p class="ask">Is data ever transferred outside the chosen region?</p>
-<p class="ans">No, with one exception: <b>frontier-model fallback</b>. If you route a call through the Wrapper to (e.g.) <code>anthropic</code>, that call hits Anthropic's US endpoint. Disable cross-region fallback in <code>gateway.toml</code> with <code>region_lock = true</code> and the gateway will refuse to fall back to a non-region-pinned provider.</p>
+<p class="ans">No, with one exception: <b>frontier-model fallback</b>. If you route a call through the gateway to (e.g.) <code>anthropic</code>, that call hits Anthropic's US endpoint. Disable cross-region fallback in <code>gateway.toml</code> with <code>region_lock = true</code> and the gateway will refuse to fall back to a non-region-pinned provider.</p>
 <p class="meta">see: <a href="/docs/gateway-region-lock">/docs/gateway-region-lock</a></p>
 </div>
 
@@ -156,7 +156,7 @@
 
 <div class="q" id="q-4"><p class="label"><a href="#q-4">Q4 &middot; #q-4</a></p>
 <p class="ask">What customer data do you hold by default?</p>
-<p class="ans">Authentication metadata (email, hashed API key), namespace metadata, capture envelopes you ship to the Wrapper, and compiled artifact manifests. <b>Prompts / completions are captured only when the namespace has capture enabled</b> &mdash; default is off.</p>
+<p class="ans">Authentication metadata (email, hashed API key), namespace metadata, capture envelopes you ship to the gateway, and compiled artifact manifests. <b>Prompts / completions are captured only when the namespace has capture enabled</b> &mdash; default is off.</p>
 </div>
 
 <div class="q" id="q-5"><p class="label"><a href="#q-5">Q5 &middot; #q-5</a></p>

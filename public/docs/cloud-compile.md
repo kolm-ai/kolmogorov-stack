@@ -93,7 +93,7 @@ finished in 125 s on an RTX 5090 (see the SOTA quantize matrix in MEMORY).
   surface; this wave (S-8) ships the driver and Modal app only. Use
   `node scripts/compile-cloud.cjs` directly for now.
 - **No artifact stitch-back.** The Modal function writes to a `modal.Volume`;
-  pulling it locally is a manual `modal volume get` until the wrapper lands.
+  pulling it locally is a manual `modal volume get` until the gateway lands.
 - **GGUF profiles are deferred** on the Modal path. V1 covers
   `nf4-int4`, `int4`, and `int8` via bitsandbytes. GGUF (q4_k_m, q5_k_m, q8_0)
   needs llama.cpp `convert.py` + `quantize` and is a follow-up wave.
