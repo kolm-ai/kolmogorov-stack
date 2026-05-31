@@ -27,12 +27,12 @@ const swaps = [
   {
     // ks-nav__list line, with or without aria-current="page" on Product
     from: /<li><a href="\/product"(?:\s+aria-current="page")?>Product<\/a><\/li>\s*<li><a href="\/models">Models<\/a><\/li>/g,
-    to:   '<li><a href="/wrapper">Wrapper</a></li>\n      <li><a href="/studio">Studio</a></li>',
+    to:   '<li><a href="/product">Product</a></li>\n      <li><a href="/proof">Proof</a></li>',
   },
   {
     // ks-nav__sheet (mobile) pattern
     from: /<a href="\/product">Product<\/a>\s*<a href="\/models">Models<\/a>/g,
-    to:   '<a href="/wrapper">Wrapper</a><a href="/studio">Studio</a>',
+    to:   '<a href="/product">Product</a><a href="/proof">Proof</a>',
   },
 ];
 

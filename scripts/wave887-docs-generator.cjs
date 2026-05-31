@@ -113,8 +113,8 @@ table{display:block;max-width:100%}
   <nav class="ks-nav" aria-label="Primary">
     <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
-      <li><a href="/wrapper">Wrapper</a></li>
-      <li><a href="/studio">Studio</a></li>
+      <li><a href="/product">Product</a></li>
+      <li><a href="/proof">Proof</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
       <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
@@ -149,11 +149,11 @@ ${relatedHtml}
         <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
       </div>
       <div>
-        <h4>Wrapper</h4>
+        <h4>Product</h4>
         <ul><li><a href="/wrapper">Overview</a></li><li><a href="/gateway">Gateway</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/docs/gateway">Gateway docs</a></li></ul>
       </div>
       <div>
-        <h4>Studio</h4>
+        <h4>Build</h4>
         <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
       </div>
       <div>
@@ -1178,8 +1178,8 @@ pre::-webkit-scrollbar-thumb{background:rgba(230,233,238,0.18);border-radius:4px
   <nav class="ks-nav" aria-label="Primary">
     <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
     <ul class="ks-nav__list">
-      <li><a href="/wrapper">Wrapper</a></li>
-      <li><a href="/studio">Studio</a></li>
+      <li><a href="/product">Product</a></li>
+      <li><a href="/proof">Proof</a></li>
       <li><a href="/pricing">Pricing</a></li>
       <li><a href="/docs">Docs</a></li>
       <li><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a></li>
@@ -1283,11 +1283,11 @@ curl https://kolm.ai/v1/verify/&lt;receipt_id&gt;</code></pre>
         <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
       </div>
       <div>
-        <h4>Wrapper</h4>
+        <h4>Product</h4>
         <ul><li><a href="/wrapper">Overview</a></li><li><a href="/gateway">Gateway</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/docs/gateway">Gateway docs</a></li></ul>
       </div>
       <div>
-        <h4>Studio</h4>
+        <h4>Build</h4>
         <ul><li><a href="/studio">Overview</a></li><li><a href="/distill">Distill</a></li><li><a href="/compile">Compile</a></li><li><a href="/k-score">k-score</a></li><li><a href="/models">Models</a></li></ul>
       </div>
       <div>

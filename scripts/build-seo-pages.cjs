@@ -335,7 +335,7 @@ ${est.receipt ? `<p class="muted">Reference receipt: <code>${safe(est.receipt)}<
 
 <h2>Try it</h2>
 <a class="cta" href="/signup">Start free <span aria-hidden="true">&rarr;</span></a>
-<a class="cta-alt" href="/forge">See the Forge surface</a>
+<a class="cta-alt" href="/forge">See the Model Forge</a>
 
 <h2>See also</h2>
 <ul>
