@@ -424,7 +424,7 @@
 <!-- ================== Hero ================== -->
 <section class="ks-hero" data-w260="framing-anchor" data-w271="hero">
   <div class="ks-hero__bg" aria-hidden="true"></div>
-  <div class="ks-hero__wrap">
+  <div class="ks-hero__wrap ks-hero__wrap--split">
     <div>
       <span class="ks-eyebrow" data-w220="category-claim">The AI compiler</span>
       
@@ -471,8 +471,40 @@
         <p class="ks-hero__sub">Apache-2.0 &middot; self-hostable &middot; air-gapped &middot; 6 SDKs</p>
       </span>
     </div>
-
-    
+    <style>
+      .ks-hero__wrap--split { grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr) !important; gap: clamp(32px, 4vw, 64px) !important; max-width: var(--ks-container) !important; align-items: center; }
+      @media (max-width: 920px) { .ks-hero__wrap--split { grid-template-columns: 1fr !important; } }
+      .ks-hero__viz { align-self: center; }
+      @media (max-width: 920px) { .ks-hero__viz { display: none; } }
+      .hviz-card { background: var(--ks-bg-1, #fff); border: 1px solid var(--ks-line-2); border-radius: 16px; padding: 20px; box-shadow: 0 1px 0 rgba(255,255,255,0.5) inset, 0 28px 64px -34px rgba(37,99,235,0.40); }
+      .hviz-top { display: flex; align-items: center; gap: 8px; font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-2); padding-bottom: 12px; border-bottom: 1px solid var(--ks-line-1); }
+      .hviz-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ks-accent); box-shadow: 0 0 10px var(--ks-accent); }
+      .hviz-sig { margin-left: auto; color: var(--ks-accent); font-weight: 600; }
+      .hviz-flow { display: grid; gap: 7px; padding: 14px 0; }
+      .hviz-step { display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: var(--ks-ink); }
+      .hviz-step em { font-style: normal; color: var(--ks-ink-3); font-size: 12.5px; }
+      .hviz-n { flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-family: var(--ks-mono); font-size: 11px; color: var(--ks-accent); background: var(--ks-accent-soft); border: 1px solid var(--ks-accent-edge); }
+      .hviz-step--out .hviz-n { background: var(--ks-accent); color: #fff; border-color: var(--ks-accent); }
+      .hviz-receipt { font-family: var(--ks-mono); font-size: 11.5px; line-height: 1.75; color: var(--ks-ink-2); background: var(--ks-bg-0, #f3f5f7); border: 1px solid var(--ks-line-1); border-radius: 10px; padding: 12px 14px; }
+      .hviz-receipt .k { color: var(--ks-ink-3); display: inline-block; width: 44px; }
+      .hviz-cobalt { color: var(--ks-accent); }
+      .hviz-foot { margin-top: 12px; font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); }
+      .hviz-foot a { color: var(--ks-accent); }
+    </style>
+    <aside class="ks-hero__viz" aria-label="How kolm works: route any model, compile a signed model you run">
+      <div class="hviz-card">
+        <div class="hviz-top"><span class="hviz-dot" aria-hidden="true"></span>support.kolm<span class="hviz-sig">&check; signed</span></div>
+        <div class="hviz-flow">
+          <div class="hviz-step"><span class="hviz-n">1</span>Route <em>any model</em></div>
+          <div class="hviz-step"><span class="hviz-n">2</span>Capture <em>what is worth keeping</em></div>
+          <div class="hviz-step"><span class="hviz-n">3</span>Distill <em>a small specialist</em></div>
+          <div class="hviz-step"><span class="hviz-n">4</span>Compile <em>INT4, signed</em></div>
+          <div class="hviz-step hviz-step--out"><span class="hviz-n">5</span>Run <em>on your hardware</em></div>
+        </div>
+        <div class="hviz-receipt"><span class="k">model</span> qwen2.5-7b &middot; INT4<br><span class="k">data</span> sha256:9f2c&hellip;approved<br><span class="k">sig</span> <span class="hviz-cobalt">ed25519:3045&hellip;f1c9</span></div>
+        <div class="hviz-foot">Verifiable at <a href="/verify">kolm.ai/verify</a></div>
+      </div>
+    </aside>
   </div>
 </section>
 
