@@ -1,0 +1,497 @@
+{
+  "schema": "kolm-audit-report-1",
+  "report_version": "asr-report/0.1",
+  "spec_version": "asr-audit/0.1",
+  "report_id": "asrr_sample",
+  "generated_at": "2026-06-08T00:00:00.000Z",
+  "subject": {
+    "name": "Helpwise · support & billing agents (demo)",
+    "source": "litellm",
+    "records": 5,
+    "events": 9
+  },
+  "summary": {
+    "readiness_pct": 0,
+    "total_findings": 6,
+    "by_severity": {
+      "critical": 0,
+      "high": 5,
+      "medium": 0,
+      "low": 1,
+      "info": 0
+    },
+    "tamper_evident": false,
+    "assessed_controls": [
+      "ASR-1",
+      "ASR-2",
+      "ASR-3"
+    ],
+    "controls": [
+      {
+        "id": "ASR-1",
+        "name": "Least privilege",
+        "status": "blocking",
+        "findings": 3,
+        "by_severity": {
+          "high": 3
+        }
+      },
+      {
+        "id": "ASR-2",
+        "name": "Audit trail",
+        "status": "blocking",
+        "findings": 2,
+        "by_severity": {
+          "high": 1,
+          "low": 1
+        }
+      },
+      {
+        "id": "ASR-3",
+        "name": "Data egress",
+        "status": "blocking",
+        "findings": 1,
+        "by_severity": {
+          "high": 1
+        }
+      }
+    ],
+    "not_assessed": [
+      {
+        "id": "ASR-4",
+        "reason": "Injection: requires the red-team / prompt-injection tester (not run in this audit)."
+      },
+      {
+        "id": "ASR-5",
+        "reason": "Provenance: requires model/dependency + MCP supply-chain enumeration (not run in this audit)."
+      },
+      {
+        "id": "ASR-6",
+        "reason": "Evidence: established by signing + logging the report itself, not by log analysis."
+      }
+    ],
+    "blocking_count": 5
+  },
+  "findings": [
+    {
+      "id": "over-permission",
+      "severity": "high",
+      "pillar": "permission",
+      "title": "Over-permissioned: support-agent (key shared-prod-key) grants 10 tools, uses 4",
+      "detail": "6 of 10 granted tools (60%) were never exercised in the observed window. Least privilege means scoping the credential down to the 4 actually used: tool:search_kb, tool:issue_refund, tool:export_customers, tool:list_users, tool:update_billing, tool:get_invoice.",
+      "asr": {
+        "id": "ASR-1",
+        "name": "Least privilege"
+      },
+      "frameworks": [
+        "OWASP LLM & Agentic Top 10 ASI",
+        "NIST AI RMF MANAGE-1",
+        "SOC 2 TSC CC6",
+        "ISO/IEC 42001 A.9"
+      ],
+      "evidence": [
+        "7705c0796f635e3f",
+        "8a8a6f8d438e8ede",
+        "b625f0625f836254",
+        "86b7967ee75fbe5c",
+        "621604a14faef03b"
+      ]
+    },
+    {
+      "id": "high-privilege-action",
+      "severity": "high",
+      "pillar": "tool-abuse",
+      "title": "High-privilege actions exercised by support-agent (key shared-prod-key)",
+      "detail": "3 exercised scope(s) are destructive or data-leaving-the-boundary (tier 4): tool:send_email, tool:delete_customer, tool:charge_card. These should require step-up controls (approval, scoped short-lived credentials, or human-in-the-loop) rather than a standing grant.",
+      "asr": {
+        "id": "ASR-1",
+        "name": "Least privilege"
+      },
+      "frameworks": [
+        "OWASP LLM & Agentic Top 10 LLM08",
+        "OWASP LLM & Agentic Top 10 ASI",
+        "NIST AI RMF MAP-2",
+        "EU AI Act Art.14",
+        "ISO/IEC 42001 A.9"
+      ],
+      "evidence": [
+        "7705c0796f635e3f",
+        "8a8a6f8d438e8ede",
+        "b625f0625f836254",
+        "86b7967ee75fbe5c",
+        "621604a14faef03b"
+      ]
+    },
+    {
+      "id": "sensitive-egress",
+      "severity": "high",
+      "pillar": "data-egress",
+      "title": "Sensitive data left the boundary via support-agent (key shared-prod-key)",
+      "detail": "4 call(s) carrying detected sensitive content reached an external host. Confirm these destinations are approved sub-processors and that redaction is applied before egress.",
+      "asr": {
+        "id": "ASR-3",
+        "name": "Data egress"
+      },
+      "frameworks": [
+        "OWASP LLM & Agentic Top 10 LLM02",
+        "NIST AI RMF MEASURE-2",
+        "EU AI Act Art.10",
+        "SOC 2 TSC CC6",
+        "ISO/IEC 42001 A.7"
+      ],
+      "evidence": [
+        "7705c0796f635e3f",
+        "8a8a6f8d438e8ede",
+        "b625f0625f836254",
+        "86b7967ee75fbe5c",
+        "621604a14faef03b"
+      ]
+    },
+    {
+      "id": "shared-credential",
+      "severity": "high",
+      "pillar": "permission",
+      "title": "Shared credential: key shared-prod-key used by 2 agents",
+      "detail": "One API key is shared across 2 distinct agents/services (support-agent, billing-agent). A shared key cannot be revoked or scoped per agent and destroys per-agent attribution in the audit trail. Issue one least-privilege key per agent.",
+      "asr": {
+        "id": "ASR-1",
+        "name": "Least privilege"
+      },
+      "frameworks": [
+        "OWASP LLM & Agentic Top 10 LLM06",
+        "MITRE ATLAS AML.T0012",
+        "NIST AI RMF MANAGE-1",
+        "SOC 2 TSC CC6",
+        "ISO/IEC 42001 A.9"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "no-tamper-evidence",
+      "severity": "high",
+      "pillar": "audit-trail",
+      "title": "No tamper-evident audit trail",
+      "detail": "None of the recorded actions carry a chain hash, so any entry can be altered or deleted after the fact without detection. An append-only, hash-chained log (each entry linking the previous) is the baseline an enterprise reviewer requires to trust the trail.",
+      "asr": {
+        "id": "ASR-2",
+        "name": "Audit trail"
+      },
+      "frameworks": [
+        "EU AI Act Art.12",
+        "SOC 2 TSC CC7",
+        "NIST AI RMF MANAGE-4",
+        "ISO/IEC 42001 A.6"
+      ],
+      "evidence": [
+        "7705c0796f635e3f",
+        "8a8a6f8d438e8ede",
+        "b625f0625f836254",
+        "86b7967ee75fbe5c",
+        "621604a14faef03b"
+      ]
+    },
+    {
+      "id": "short-retention-window",
+      "severity": "low",
+      "pillar": "audit-trail",
+      "title": "Observed trail spans 57.88 days (< ~182)",
+      "detail": "The observed events cover 57.88 days, below the ~182-day record-keeping expectation. Confirm retention policy keeps the full trail for the required window; this may simply reflect the sample provided rather than the retained history.",
+      "asr": {
+        "id": "ASR-2",
+        "name": "Audit trail"
+      },
+      "frameworks": [
+        "EU AI Act Art.12",
+        "NIST AI RMF MANAGE-4"
+      ],
+      "evidence": []
+    }
+  ],
+  "frameworks": [
+    {
+      "framework": "EU AI Act",
+      "controls_touched": 3,
+      "findings": 4,
+      "worst_severity": "high",
+      "controls": [
+        {
+          "id": "Art.10",
+          "label": "Data & data governance",
+          "findings": 1,
+          "max_severity": "high"
+        },
+        {
+          "id": "Art.12",
+          "label": "Record-keeping / automatic logging",
+          "findings": 2,
+          "max_severity": "high"
+        },
+        {
+          "id": "Art.14",
+          "label": "Human oversight",
+          "findings": 1,
+          "max_severity": "high"
+        }
+      ]
+    },
+    {
+      "framework": "ISO/IEC 42001",
+      "controls_touched": 3,
+      "findings": 5,
+      "worst_severity": "high",
+      "controls": [
+        {
+          "id": "A.6",
+          "label": "AI system lifecycle",
+          "findings": 1,
+          "max_severity": "high"
+        },
+        {
+          "id": "A.7",
+          "label": "Data for AI systems",
+          "findings": 1,
+          "max_severity": "high"
+        },
+        {
+          "id": "A.9",
+          "label": "Use & operation of AI systems",
+          "findings": 3,
+          "max_severity": "high"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATLAS",
+      "controls_touched": 1,
+      "findings": 1,
+      "worst_severity": "high",
+      "controls": [
+        {
+          "id": "AML.T0012",
+          "label": "Valid accounts / credential reuse",
+          "findings": 1,
+          "max_severity": "high"
+        }
+      ]
+    },
+    {
+      "framework": "NIST AI RMF",
+      "controls_touched": 4,
+      "findings": 6,
+      "worst_severity": "high",
+      "controls": [
+        {
+          "id": "MANAGE-1",
+          "label": "Least-privilege risk treatment",
+          "findings": 2,
+          "max_severity": "high"
+        },
+        {
+          "id": "MANAGE-4",
+          "label": "Logging, monitoring & documentation",
+          "findings": 2,
+          "max_severity": "high"
+        },
+        {
+          "id": "MAP-2",
+          "label": "Tool-call authorization & system boundaries",
+          "findings": 1,
+          "max_severity": "high"
+        },
+        {
+          "id": "MEASURE-2",
+          "label": "Egress & data-flow measurement",
+          "findings": 1,
+          "max_severity": "high"
+        }
+      ]
+    },
+    {
+      "framework": "OWASP LLM & Agentic Top 10",
+      "controls_touched": 4,
+      "findings": 5,
+      "worst_severity": "high",
+      "controls": [
+        {
+          "id": "ASI",
+          "label": "Agentic Security Initiative · agent threats",
+          "findings": 2,
+          "max_severity": "high"
+        },
+        {
+          "id": "LLM02",
+          "label": "Sensitive information disclosure",
+          "findings": 1,
+          "max_severity": "high"
+        },
+        {
+          "id": "LLM06",
+          "label": "Sensitive disclosure / shared credential",
+          "findings": 1,
+          "max_severity": "high"
+        },
+        {
+          "id": "LLM08",
+          "label": "Excessive agency",
+          "findings": 1,
+          "max_severity": "high"
+        }
+      ]
+    },
+    {
+      "framework": "SOC 2 TSC",
+      "controls_touched": 2,
+      "findings": 4,
+      "worst_severity": "high",
+      "controls": [
+        {
+          "id": "CC6",
+          "label": "Logical access controls / least privilege",
+          "findings": 3,
+          "max_severity": "high"
+        },
+        {
+          "id": "CC7",
+          "label": "System operations & monitoring",
+          "findings": 1,
+          "max_severity": "high"
+        }
+      ]
+    }
+  ],
+  "remediation": [
+    {
+      "priority": "P0",
+      "severity": "high",
+      "finding_id": "over-permission",
+      "title": "Over-permissioned: support-agent (key shared-prod-key) grants 10 tools, uses 4",
+      "action": "Scope each agent credential to only the tools it calls; remove the unused grants.",
+      "asr": "ASR-1",
+      "frameworks": [
+        "OWASP LLM & Agentic Top 10 ASI",
+        "NIST AI RMF MANAGE-1",
+        "SOC 2 TSC CC6",
+        "ISO/IEC 42001 A.9"
+      ]
+    },
+    {
+      "priority": "P0",
+      "severity": "high",
+      "finding_id": "high-privilege-action",
+      "title": "High-privilege actions exercised by support-agent (key shared-prod-key)",
+      "action": "Gate destructive / financial tool calls behind human approval or a separate narrowly-scoped credential.",
+      "asr": "ASR-1",
+      "frameworks": [
+        "OWASP LLM & Agentic Top 10 LLM08",
+        "OWASP LLM & Agentic Top 10 ASI",
+        "NIST AI RMF MAP-2",
+        "EU AI Act Art.14",
+        "ISO/IEC 42001 A.9"
+      ]
+    },
+    {
+      "priority": "P0",
+      "severity": "high",
+      "finding_id": "sensitive-egress",
+      "title": "Sensitive data left the boundary via support-agent (key shared-prod-key)",
+      "action": "Redact sensitive fields before they leave the boundary and enumerate every egress destination.",
+      "asr": "ASR-3",
+      "frameworks": [
+        "OWASP LLM & Agentic Top 10 LLM02",
+        "NIST AI RMF MEASURE-2",
+        "EU AI Act Art.10",
+        "SOC 2 TSC CC6",
+        "ISO/IEC 42001 A.7"
+      ]
+    },
+    {
+      "priority": "P0",
+      "severity": "high",
+      "finding_id": "shared-credential",
+      "title": "Shared credential: key shared-prod-key used by 2 agents",
+      "action": "Issue a distinct, scoped key per agent; stop sharing one key across isolation boundaries.",
+      "asr": "ASR-1",
+      "frameworks": [
+        "OWASP LLM & Agentic Top 10 LLM06",
+        "MITRE ATLAS AML.T0012",
+        "NIST AI RMF MANAGE-1",
+        "SOC 2 TSC CC6",
+        "ISO/IEC 42001 A.9"
+      ]
+    },
+    {
+      "priority": "P0",
+      "severity": "high",
+      "finding_id": "no-tamper-evidence",
+      "title": "No tamper-evident audit trail",
+      "action": "Emit an append-only, hash-chained activity log so the audit trail is tamper-evident.",
+      "asr": "ASR-2",
+      "frameworks": [
+        "EU AI Act Art.12",
+        "SOC 2 TSC CC7",
+        "NIST AI RMF MANAGE-4",
+        "ISO/IEC 42001 A.6"
+      ]
+    },
+    {
+      "priority": "P2",
+      "severity": "low",
+      "finding_id": "short-retention-window",
+      "title": "Observed trail spans 57.88 days (< ~182)",
+      "action": "Extend and document the retention window to meet the buyer requirement (e.g. EU AI Act Art.12).",
+      "asr": "ASR-2",
+      "frameworks": [
+        "EU AI Act Art.12",
+        "NIST AI RMF MANAGE-4"
+      ]
+    }
+  ],
+  "caveats": [
+    "This report assesses ASR-1, ASR-2, ASR-3 from the supplied logs. The controls listed under \"Not assessed\" were not evaluated in this run. Each carries its reason.",
+    "Findings reflect only the activity present in the supplied export. The absence of a finding is not proof that the underlying risk is absent.",
+    "The readiness percentage is a graduated rollup over the assessed controls only (pass = 1, attention = 0.5, blocking = 0). It is not a certification or an attestation of compliance.",
+    "Framework references map each finding to the control an enterprise reviewer cites; they do not assert certification against that framework."
+  ],
+  "asr_checklist": [
+    {
+      "id": "ASR-1",
+      "name": "Least privilege",
+      "requires": "Scopes held match scopes used; no shared keys across isolation boundaries."
+    },
+    {
+      "id": "ASR-2",
+      "name": "Audit trail",
+      "requires": "Append-only, tamper-evident activity log with a stated retention policy."
+    },
+    {
+      "id": "ASR-3",
+      "name": "Data egress",
+      "requires": "Egress destinations enumerated; sensitive fields redacted before they leave."
+    },
+    {
+      "id": "ASR-4",
+      "name": "Injection",
+      "requires": "Direct/indirect injection and jailbreaks tested and reported with reproductions."
+    },
+    {
+      "id": "ASR-5",
+      "name": "Provenance",
+      "requires": "Model and dependency provenance; MCP/vendor surface enumerated."
+    },
+    {
+      "id": "ASR-6",
+      "name": "Evidence",
+      "requires": "Findings signed, logged, and offline-verifiable."
+    }
+  ],
+  "contact": "dev@kolm.ai",
+  "verify_url": "https://kolm.ai/verify",
+  "signature_ed25519": {
+    "spec": "kolm-ed25519-v1",
+    "alg": "ed25519",
+    "public_key": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAcNW1vj5BUnzmEjH6iAdKM2p5of35Oe6znRifqpuLF7A=\n-----END PUBLIC KEY-----\n",
+    "key_fingerprint": "410302c93becdcc3a8091ef0c33c24ed",
+    "signature": "0XCoqRkbLg9hzpm4HeliDIMF3SyyG_5ca4dekgIV94pFhhiBVsTICDXBxRoxuheI2NrFR1rurhIxCCI7sEjBDw",
+    "signed_at": "2026-06-08T00:00:00.000Z"
+  }
+}

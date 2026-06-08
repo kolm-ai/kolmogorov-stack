@@ -10544,6 +10544,15 @@ export function buildRouter() {
       default_role: row.default_role || 'member',
       jit_provisioning: row.jit_provisioning !== false,
       scim_enabled: row.scim_enabled === true,
+      // SAML signing material + SCIM secret are surfaced as presence booleans
+      // (+ a non-reversible cert fingerprint) ONLY - the cert PEM body is never
+      // echoed and the SCIM bearer token is stored hashed and never returned.
+      idp_cert_configured: !!row.idp_cert_pem,
+      idp_cert_sha256: row.idp_cert_pem
+        ? 'sha256:' + crypto.createHash('sha256').update(String(row.idp_cert_pem)).digest('hex')
+        : null,
+      saml_audience: row.saml_audience || null,
+      scim_token_set: !!row.scim_token_sha256,
       created_at: row.created_at,
       updated_at: row.updated_at,
       secret_values_included: false,
@@ -10891,6 +10900,29 @@ export function buildRouter() {
       res.status(500).json({ ok: false, error: 'passport_build_failed', detail: String(e && e.message || e), version: 'w869-v1' });
     }
   });
+  // ── SSO signing/credential helpers (W-SSO-LIVE) ─────────────────────────────
+  // Normalize + validate an IdP signing certificate. Accepts a full PEM or the
+  // bare base64 DER body an IdP embeds in <X509Certificate>. Throws
+  // 'idp_cert_invalid' when the bytes do not parse as an X.509 certificate so
+  // the configure route returns a clean 400. The cert is PUBLIC key material -
+  // it is stored to verify assertions but is never echoed back in API responses.
+  function _normalizeIdpCert(raw) {
+    const s = _str(raw, 40000);
+    if (!s) return null;
+    let pem = s;
+    if (!s.includes('BEGIN CERTIFICATE')) {
+      const b64 = s.replace(/\s+/g, '');
+      const lines = b64.match(/.{1,64}/g) || [b64];
+      pem = '-----BEGIN CERTIFICATE-----\n' + lines.join('\n') + '\n-----END CERTIFICATE-----\n';
+    }
+    try { new crypto.X509Certificate(pem); } catch { throw new Error('idp_cert_invalid'); }
+    return pem;
+  }
+  // Hash a SCIM bearer token for storage. The plaintext token is shown to the
+  // admin exactly once (on generation) and is NEVER persisted or logged.
+  function _hashScimToken(token) {
+    return 'sha256:' + crypto.createHash('sha256').update(String(token)).digest('hex');
+  }
   r.get('/v1/account/sso/status', (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
     const plan = req.tenant_record.plan || 'free';
@@ -10938,8 +10970,12 @@ export function buildRouter() {
       const metadataUrl = _httpsUrl(body.metadata_url || '', 'metadata_url');
       const oidcIssuer = _httpsUrl(body.oidc_issuer || '', 'oidc_issuer');
       const metadataXml = _str(body.metadata_xml || '', 200000);
-      if (!metadataUrl && !metadataXml && !oidcIssuer) {
-        return res.status(400).json({ ok: false, error: 'identity_metadata_required', required_any: ['metadata_url', 'metadata_xml', 'oidc_issuer'] });
+      // Manual SAML config (no IdP metadata document): an admin can supply the
+      // signing certificate + IdP entityID directly. The ACS resolves a tenant
+      // by Issuer==idp_entity_id and verifies against idp_cert_pem.
+      const hasManualSaml = !!((body.idp_cert_pem || body.idp_x509_cert || body.x509_cert || body.signing_cert) && body.idp_entity_id);
+      if (!metadataUrl && !metadataXml && !oidcIssuer && !hasManualSaml) {
+        return res.status(400).json({ ok: false, error: 'identity_metadata_required', required_any: ['metadata_url', 'metadata_xml', 'oidc_issuer', 'idp_cert_pem + idp_entity_id'] });
       }
       const now = new Date().toISOString();
       const metadataHash = metadataXml
@@ -10949,6 +10985,21 @@ export function buildRouter() {
       const domains = Array.isArray(body.domains)
         ? body.domains.map((d) => _str(d, 120).toLowerCase()).filter((d) => /^[a-z0-9.-]+\.[a-z]{2,}$/.test(d)).slice(0, 25)
         : [];
+      const existing = _ssoConfigForTenant(req.tenant_record.id);
+      // IdP signing certificate (public key material). Validate now so a bad
+      // PEM is a clean 400, not a runtime ACS failure. Preserve the stored cert
+      // when the caller omits it (partial updates must not silently wipe it).
+      const idpCertRaw = body.idp_cert_pem || body.idp_x509_cert || body.x509_cert || body.signing_cert || '';
+      const idpCertPem = idpCertRaw ? _normalizeIdpCert(idpCertRaw) : ((existing && existing.idp_cert_pem) || null);
+      // Expected SAML Audience (our SP entityID). Accept a URN or URL string;
+      // null means the ACS falls back to https://<host>/saml/sp.
+      const samlAudience = ('saml_audience' in body || 'audience' in body)
+        ? (_str(body.saml_audience || body.audience, 1024) || null)
+        : ((existing && existing.saml_audience) || null);
+      // SCIM bearer token (secret). Stored hashed only; preserved when omitted.
+      const scimTokenHash = body.scim_token
+        ? _hashScimToken(_str(body.scim_token, 512))
+        : ((existing && existing.scim_token_sha256) || null);
       const patch = {
         provider,
         enabled: body.enabled !== false,
@@ -10957,13 +11008,15 @@ export function buildRouter() {
         oidc_issuer: oidcIssuer || null,
         idp_entity_id: _str(body.idp_entity_id || '', 512) || null,
         sso_url: body.sso_url ? _httpsUrl(body.sso_url, 'sso_url') : null,
+        idp_cert_pem: idpCertPem,
+        saml_audience: samlAudience,
+        scim_token_sha256: scimTokenHash,
         domains,
         default_role: ['viewer', 'member', 'admin'].includes(defaultRole) ? defaultRole : 'member',
         jit_provisioning: body.jit_provisioning !== false,
-        scim_enabled: body.scim_enabled === true,
+        scim_enabled: body.scim_enabled === true || !!scimTokenHash,
         updated_at: now,
       };
-      const existing = _ssoConfigForTenant(req.tenant_record.id);
       let row;
       if (existing) {
         update('enterprise_identity_configs', (r) => r.tenant_id === req.tenant_record.id, patch);
@@ -10995,6 +11048,47 @@ export function buildRouter() {
     } catch (e) {
       res.status(400).json({ ok: false, error: 'invalid_identity_config', detail: String(e && e.message || e) });
     }
+  });
+  // Generate (or rotate) the per-tenant SCIM bearer token an IdP uses to drive
+  // SCIM 2.0 provisioning. Returned in plaintext exactly ONCE (on generation);
+  // only the hash is persisted. Rotating invalidates the previous token. The
+  // token is never written to logs or the audit payload.
+  r.post('/v1/account/sso/scim-token', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
+    const plan = req.tenant_record.plan || 'free';
+    if (!_ssoEntitled(plan)) {
+      return res.status(402).json({ ok: false, error: 'enterprise_only', plan, upgrade: '/v1/account/change-plan', contact: 'sales@kolm.ai', docs: 'https://kolm.ai/enterprise#scim' });
+    }
+    const existing = _ssoConfigForTenant(req.tenant_record.id);
+    const token = 'scim_' + crypto.randomBytes(24).toString('hex');
+    const tokenHash = _hashScimToken(token);
+    const now = new Date().toISOString();
+    if (existing) {
+      update('enterprise_identity_configs', (rrow) => rrow.tenant_id === req.tenant_record.id, {
+        scim_token_sha256: tokenHash, scim_enabled: true, scim_token_rotated_at: now, updated_at: now,
+      });
+    } else {
+      insert('enterprise_identity_configs', {
+        id: storeId('sso'), tenant_id: req.tenant_record.id, provider: 'saml-generic', enabled: true,
+        scim_enabled: true, scim_token_sha256: tokenHash, scim_token_rotated_at: now,
+        jit_provisioning: true, default_role: 'member', created_at: now, updated_at: now,
+      });
+    }
+    tryAppendAudit({
+      tenant_id: req.tenant_record.id,
+      tenant_name: req.tenant_record.name || null,
+      actor: 'tenant',
+      op: 'enterprise.scim_token_rotated',
+      payload: { rotated_at: now, token_prefix: token.slice(0, 10) },
+    });
+    const host = req.get('host') || 'kolm.ai';
+    res.json({
+      ok: true,
+      scim_token: token,
+      token_type: 'Bearer',
+      scim_base_url: `https://${host}/v1/scim/v2/`,
+      note: 'Store this token now - it is shown once and persisted only as a hash. Configure it as the SCIM bearer token in your IdP (Okta/Azure AD).',
+    });
   });
   // SP metadata is a static document an IdP fetches at federation-config
   // time. It does NOT depend on entitlement (publishing the SP entity ID
@@ -11048,21 +11142,11 @@ export function buildRouter() {
     });
   });
   r.get('/v1/scim/v2/Users', (req, res) => {
-    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
-    const plan = req.tenant_record.plan || 'free';
-    if (!_ssoEntitled(plan)) {
-      return res.status(402).json({
-        ok: false,
-        error: 'enterprise_only',
-        plan,
-        upgrade: '/v1/account/change-plan',
-        contact: 'sales@kolm.ai',
-      });
-    }
-    // SCIM ListResponse shape (RFC 7644 §3.4.2). Empty list when entitled
+    const tenant = _scimGuard(req, res); if (!tenant) return;
+    // SCIM ListResponse shape (RFC 7644 §3.4.2). Empty list when entitled.
     // Supports tenant-scoped create/list and simple SCIM equality filters.
     const host = req.get('host') || 'kolm.ai';
-    let rows = findByField('scim_users', 'tenant_id', req.tenant_record.id);
+    let rows = findByField('scim_users', 'tenant_id', tenant.id);
     const filter = _str(req.query.filter || '', 500);
     const m = filter.match(/^(userName|externalId|id)\s+eq\s+"([^"]{1,512})"$/i);
     if (m) {
@@ -11082,29 +11166,19 @@ export function buildRouter() {
     });
   });
   r.post('/v1/scim/v2/Users', (req, res) => {
-    if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
-    const plan = req.tenant_record.plan || 'free';
-    if (!_ssoEntitled(plan)) {
-      return res.status(402).json({
-        ok: false,
-        error: 'enterprise_only',
-        plan,
-        upgrade: '/v1/account/change-plan',
-        contact: 'sales@kolm.ai',
-      });
-    }
+    const tenant = _scimGuard(req, res); if (!tenant) return;
     const body = (req.body && typeof req.body === 'object') ? req.body : {};
     const userName = _str(body.userName, 320).toLowerCase();
     if (!userName || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(userName)) {
       return _scimError(res, 400, 'userName must be a valid email address');
     }
-    const existing = findByField('scim_users', 'tenant_id', req.tenant_record.id)
+    const existing = findByField('scim_users', 'tenant_id', tenant.id)
       .find((row) => String(row.userName || '').toLowerCase() === userName);
     if (existing) return _scimError(res, 409, 'SCIM user already exists for this tenant');
     const now = new Date().toISOString();
     const row = {
       id: storeId('scim_user'),
-      tenant_id: req.tenant_record.id,
+      tenant_id: tenant.id,
       externalId: _str(body.externalId, 256) || null,
       userName,
       active: body.active !== false,
@@ -11127,8 +11201,8 @@ export function buildRouter() {
     };
     insert('scim_users', row);
     tryAppendAudit({
-      tenant_id: req.tenant_record.id,
-      tenant_name: req.tenant_record.name || null,
+      tenant_id: tenant.id,
+      tenant_name: tenant.name || null,
       actor: 'scim',
       op: 'enterprise.scim_user_created',
       payload: { scim_user_id: row.id, userName: row.userName, externalId: row.externalId },
@@ -11145,9 +11219,32 @@ export function buildRouter() {
     if (!req.tenant_record) { res.status(401).json({ error: 'auth_required' }); return null; }
     return req.tenant_record;
   }
+  // Resolve the SCIM principal tenant from EITHER (a) the tenant API key, which
+  // the soft-auth gate has already promoted to req.tenant_record, OR (b) a
+  // dedicated per-tenant SCIM bearer token (Authorization: Bearer scim_...). The
+  // SCIM token lets an admin hand the IdP a provisioning-only credential instead
+  // of the tenant's full API key. Both paths are tenant-fenced downstream, so a
+  // resolved principal can only ever touch its own tenant's SCIM resources.
+  function _scimResolveTenant(req) {
+    if (req.tenant_record) return req.tenant_record;
+    const header = req.headers.authorization || '';
+    const m = /^Bearer\s+(.+)$/i.exec(header);
+    const token = m ? m[1].trim() : '';
+    if (!token) return null;
+    const tokenHash = 'sha256:' + crypto.createHash('sha256').update(token).digest('hex');
+    const cfg = findOne(
+      'enterprise_identity_configs',
+      (rrow) => rrow && !rrow._deleted && rrow.scim_token_sha256 && rrow.scim_token_sha256 === tokenHash
+    );
+    if (!cfg) return null;
+    return findOne('tenants', (t) => t && !t._deleted && t.id === cfg.tenant_id) || null;
+  }
   function _scimGuard(req, res) {
-    const tenant = _integTenant(req, res);
-    if (!tenant) return null;
+    const tenant = _scimResolveTenant(req);
+    if (!tenant) {
+      _scimError(res, 401, 'authentication required: present the tenant API key or the per-tenant SCIM bearer token as Authorization: Bearer');
+      return null;
+    }
     if (!_ssoEntitled(tenant.plan || 'free')) {
       res.status(402).json({ ok: false, error: 'enterprise_only', plan: tenant.plan || 'free', upgrade: '/v1/account/change-plan', contact: 'sales@kolm.ai' });
       return null;
@@ -11238,28 +11335,101 @@ export function buildRouter() {
     } catch (e) { _scimThrew(res, e); }
   });
   // ---- SAML 2.0 ACS: validate signed assertion + establish a kolm session ----
+  // PUBLIC route (see auth.js PUBLIC_API): an IdP POSTs the SAMLResponse from
+  // the user's browser with NO kolm API key. We resolve which tenant the
+  // assertion belongs to from the (still UNTRUSTED) <Issuer> entityID -> that
+  // tenant's configured IdP, then verify the XML signature against THAT tenant's
+  // pinned x509 certificate before trusting any claim. On success we mint a
+  // per-login session credential, drop the kolm_session cookie (same attributes
+  // as /v1/signin), and 302 the browser to /dashboard. API/SP callers can send
+  // Accept: application/json to receive the session envelope instead of a 302.
+  function _setSsoSessionCookie(res, key) {
+    res.cookie('kolm_session', key, {
+      httpOnly: true,
+      secure: isProductionRuntime(),
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+  }
+  function _resolveAcsTenant(req, samlResponseB64, relayState) {
+    // 1) explicit tenant hint: body/query 'tenant', or a RelayState of the
+    //    form 'tenant:<id>' (used for IdP-initiated flows we originate).
+    let hint = _str((req.body && (req.body.tenant || req.body.tenant_id)) || (req.query && req.query.tenant) || '', 128);
+    if (!hint && relayState) {
+      const rm = /^tenant:([A-Za-z0-9_-]{1,80})$/.exec(String(relayState));
+      if (rm) hint = rm[1];
+    }
+    if (hint) {
+      const t = findOne('tenants', (x) => x && !x._deleted && (x.id === hint || x.name === hint));
+      if (t) return t;
+    }
+    // 2) by IdP Issuer entityID -> the tenant whose SSO config pins it. The
+    //    Issuer is read pre-verification for ROUTING only; trust is established
+    //    later by verifying the signature against the pinned cert.
+    try {
+      const xml = Buffer.from(String(samlResponseB64 || ''), 'base64').toString('utf8');
+      const im = /<(?:[\w.-]+:)?Issuer\b[^>]*>([\s\S]*?)<\/(?:[\w.-]+:)?Issuer>/i.exec(xml);
+      const issuer = im ? im[1].trim() : '';
+      if (issuer) {
+        const cfg = findOne('enterprise_identity_configs', (rrow) => rrow && !rrow._deleted && rrow.idp_entity_id && rrow.idp_entity_id === issuer);
+        if (cfg) {
+          const t = findOne('tenants', (x) => x && !x._deleted && x.id === cfg.tenant_id);
+          if (t) return t;
+        }
+      }
+    } catch { /* fall through to soft-auth */ }
+    // 3) soft-auth fallback (SP-initiated with an existing session/API key, or
+    //    an admin driving the ACS in tests). req.tenant_record is populated by
+    //    the gate's public soft-auth when a valid key is attached.
+    if (req.tenant_record) return req.tenant_record;
+    return null;
+  }
   r.post('/v1/account/saml/acs', async (req, res) => {
-    const tenant = _integTenant(req, res); if (!tenant) return;
-    const cfg = _ssoConfigForTenant(tenant.id);
     const body = req.body || {};
-    const samlResponseB64 = body.SAMLResponse || body.samlResponse || null;
+    const samlResponseB64 = body.SAMLResponse || body.samlResponse || (req.query && req.query.SAMLResponse) || null;
     if (!samlResponseB64) { _scimError(res, 400, 'missing SAMLResponse'); return; }
-    const idpCertPem = (cfg && (cfg.idp_cert_pem || cfg.saml_idp_cert || cfg.metadata_xml)) || process.env.KOLM_SAML_IDP_CERT || null;
-    if (!idpCertPem) { res.status(503).json({ error: 'saml_not_configured', detail: 'no IdP signing certificate configured for this tenant' }); return; }
+    const relayState = body.RelayState || body.relayState || (req.query && req.query.RelayState) || null;
+
+    const tenant = _resolveAcsTenant(req, samlResponseB64, relayState);
+    if (!tenant) {
+      res.status(404).json({ error: 'sso_tenant_not_resolved', detail: 'no tenant matched the assertion Issuer; set idp_entity_id via POST /v1/account/sso/configure' });
+      return;
+    }
+    if (!_ssoEntitled(tenant.plan || 'free')) {
+      res.status(402).json({ error: 'enterprise_only', plan: tenant.plan || 'free', upgrade: '/v1/account/change-plan', contact: 'sales@kolm.ai' });
+      return;
+    }
+    const cfg = _ssoConfigForTenant(tenant.id);
+    if (!cfg || cfg.enabled === false) {
+      res.status(501).json({ error: 'sso_not_configured', detail: 'tenant has no enabled SSO configuration' });
+      return;
+    }
+    const idpCertPem = cfg.idp_cert_pem || process.env.KOLM_SAML_IDP_CERT || null;
+    if (!idpCertPem) {
+      res.status(503).json({ error: 'saml_not_configured', detail: 'no IdP signing certificate configured for this tenant' });
+      return;
+    }
     const host = _scimHost(req);
     try {
       const out = await samlConsumeAssertion({
         samlResponseB64,
         tenant: tenant.id,
         idpCertPem,
-        audience: (cfg && cfg.saml_audience) || `https://${host}/saml/sp`,
+        audience: cfg.saml_audience || `https://${host}/saml/sp`,
         acsUrl: `https://${host}/v1/account/saml/acs`,
-        allowJitProvision: !!(cfg && cfg.jit_provisioning),
+        allowJitProvision: cfg.jit_provisioning !== false,
+        jitPlan: tenant.plan || 'enterprise',
       });
       if (!out.ok) { res.status(out.status || 401).json({ error: out.error || 'saml_assertion_invalid', detail: out.detail }); return; }
-      setSessionCookie(res, out.key);
+      _setSsoSessionCookie(res, out.key);
       tryAppendAudit({ tenant_id: tenant.id, tenant_name: tenant.name || null, actor: 'saml', op: 'enterprise.saml_acs_consumed', payload: { name_id: out.nameId, email: out.email, session_id: out.sessionId } });
-      res.json({ ok: true, tenant: out.tenant, email: out.email, name_id: out.nameId, session_id: out.sessionId });
+      const accept = String(req.headers.accept || '');
+      if (accept.includes('application/json') && !accept.includes('text/html')) {
+        res.json({ ok: true, tenant: out.tenant, email: out.email, name_id: out.nameId, session_id: out.sessionId, redirect: '/dashboard' });
+        return;
+      }
+      res.redirect(302, '/dashboard');
     } catch (err) {
       res.status(500).json({ error: 'saml_acs_failed', detail: String(err && err.message) });
     }

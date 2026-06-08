@@ -31,9 +31,10 @@ import {
   findByField,
   insert,
   update,
+  remove,
   id as storeId,
 } from './store.js';
-import { provisionTenant, rotateTenantKey } from './auth.js';
+import { provisionTenant, mintScopedKey } from './auth.js';
 
 export const DEFAULT_SKEW_MS = 5 * 60 * 1000; // 5 minutes, RFC-typical tolerance
 
@@ -283,6 +284,7 @@ export async function consumeAssertion(opts) {
     allowJitProvision = false,
     jitPlan = 'enterprise',
     clockSkewMs = DEFAULT_SKEW_MS,
+    allowReplay = false,
     now = Date.now(),
   } = opts || {};
 
@@ -310,7 +312,8 @@ export async function consumeAssertion(opts) {
   // was signed, descend to its Assertion; if the Assertion was signed, use it.
   const signed = ver.signedElement;
   const innerAssertion = _findEl(signed, 'Assertion');
-  const assertion = innerAssertion ? innerAssertion.full : signed;
+  const assertionEl = innerAssertion || { attrs: '', inner: signed, full: signed };
+  const assertion = assertionEl.full;
 
   // 3) Conditions: time window + audience
   const conditionsEl = _findEl(assertion, 'Conditions');
@@ -379,6 +382,46 @@ export async function consumeAssertion(opts) {
   const tenantId = tenantRow.id;
   const nowIso = new Date(now).toISOString();
 
+  // 6a) Replay protection (SAML 2.0 §1.3.4 / RFC 7522): an Assertion ID may be
+  // consumed at most once per tenant. The consumed-ID cache is durable (store
+  // table, survives restarts) so a process bounce does not reopen the replay
+  // window. We burn the ID immediately on first sight - before linking the user
+  // or minting a session - so a concurrent double-submit cannot both succeed.
+  const assertionId = _attr(assertionEl.attrs, 'ID') || null;
+  if (!allowReplay && assertionId) {
+    const seen = findOne(
+      'sso_consumed_assertions',
+      (a) => !a._deleted && a.tenant_id === tenantId && a.assertion_id === assertionId
+    );
+    if (seen) return { ok: false, status: 401, error: 'assertion_replayed', detail: assertionId };
+  }
+  if (assertionId) {
+    const replayExpiry =
+      _attr((scd || {}).attrs, 'NotOnOrAfter') ||
+      _attr((conditionsEl || {}).attrs, 'NotOnOrAfter') ||
+      null;
+    insert('sso_consumed_assertions', {
+      id: storeId('saml_aid'),
+      tenant_id: tenantId,
+      assertion_id: assertionId,
+      not_on_or_after: replayExpiry,
+      consumed_at: nowIso,
+    });
+    // Opportunistic prune: drop this tenant's already-expired replay rows so the
+    // cache stays bounded (an expired ID can never be replayed within its window
+    // again - the time-window check would reject it first).
+    try {
+      const cutoff = now - clockSkewMs;
+      const rows = findByField('sso_consumed_assertions', 'tenant_id', tenantId);
+      if (rows.some((a) => a && a.not_on_or_after && Date.parse(a.not_on_or_after) < cutoff)) {
+        remove(
+          'sso_consumed_assertions',
+          (a) => a.tenant_id === tenantId && a.not_on_or_after && Date.parse(a.not_on_or_after) < cutoff
+        );
+      }
+    } catch { /* prune is best-effort */ }
+  }
+
   // sso_users link table: one row per (tenant_id, name_id).
   const linkKey = `${tenantId}:${nameId}`;
   const existingLink = findOne(
@@ -405,10 +448,16 @@ export async function consumeAssertion(opts) {
     });
   }
 
-  // Mint a fresh session key for this tenant. rotateTenantKey returns the raw
-  // ks_ key (only the hash is persisted) - caller sets it as the kolm_session
-  // cookie, exactly like /v1/signup and the OAuth callback do.
-  const sessionKey = rotateTenantKey(tenantId);
+  // Mint a per-login scoped session credential for the browser. We deliberately
+  // do NOT rotate the tenant-primary key here: rotateTenantKey would invalidate
+  // every other member's session and any server-to-server key on every single
+  // SSO login - unacceptable for a multi-seat enterprise tenant. mintScopedKey
+  // inserts a fresh api_keys row that findTenantByApiKey resolves, so the
+  // browser gets a usable session while the tenant's primary key and peers'
+  // sessions stay intact. Only the hash is persisted; we return the raw ks_ key
+  // for the caller to set as the kolm_session cookie (exactly like signin).
+  const minted = mintScopedKey(tenantId, { scopes: ['*'], label: `sso:${String(nameId).slice(0, 64)}` });
+  const sessionKey = minted.key;
 
   // Audit row for the SSO session (no secret stored - key_prefix only).
   const sessionId = 'sso_' + crypto.randomBytes(12).toString('hex');
@@ -433,6 +482,21 @@ export async function consumeAssertion(opts) {
     attributes,
     sessionId,
   };
+}
+
+// Peek the (still UNTRUSTED) Issuer entityID from a base64 SAMLResponse. Used
+// only to resolve which tenant's IdP config + pinned signing certificate to
+// verify the assertion against - the value MUST NOT be trusted for any security
+// decision until consumeAssertion has verified the XML signature.
+export function extractIssuer(samlResponseB64) {
+  let xml;
+  try {
+    xml = Buffer.from(String(samlResponseB64 || ''), 'base64').toString('utf8');
+  } catch {
+    return null;
+  }
+  const el = _findEl(xml, 'Issuer');
+  return el ? _text(el.inner) : null;
 }
 
 // Exported internals for unit testing.

@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kolm"
-version = "0.2.6"
-description = "kolm - the AI compiler. Compile any AI task into a signed .kolm file you own. Python client over the public HTTP API."
+version = "0.3.0"
+description = "kolm - the AI compiler + Agent Security-Review. Compile any AI task into a signed .kolm file you own, or verify a kolm agent-security evidence report fully offline. Python client over the public HTTP API."
 readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "Apache-2.0" }
 authors = [{ name = "Kolm", email = "dev@kolm.ai" }]
-keywords = ["llm", "compiler", "lora", "agents", "claude", "openai", "fine-tuning", "edge", "offline"]
+keywords = ["llm", "compiler", "lora", "agents", "claude", "openai", "fine-tuning", "edge", "offline", "ed25519", "attestation", "audit", "soc2", "iso42001", "nist-ai-rmf", "eu-ai-act"]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
@@ -19,9 +19,14 @@ classifiers = [
   "Programming Language :: Python :: 3 :: Only",
   "Operating System :: OS Independent",
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Security :: Cryptography",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-dependencies = []
+# `cryptography` powers the offline Ed25519 verification of signed evidence
+# reports (kolm.audit.verify_report). It is a hard dependency so the killer
+# feature - a buyer verifying a kolm report with no server and no account -
+# works on a fresh `pip install kolm`.
+dependencies = ["cryptography>=41.0"]
 
 [project.optional-dependencies]
 dev = ["build>=1.2", "twine>=5.0", "pytest>=7.0"]
@@ -38,3 +43,8 @@ recipe = "recipe.cli:main"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["kolm*", "recipe*"]
+
+[tool.setuptools.package-data]
+# Ship the issuer keyring inside the wheel so tier-2 issuer provenance works
+# with zero network (offline verification of who signed a report).
+kolm = ["kolm-issuers.json"]

@@ -37,6 +37,69 @@ out = k.run(artifact_path, input="user can't log in")
 print(out.text)
 ```
 
+### `kolm.audit` - Agent Security-Review + offline evidence verification
+
+Upload agent logs (JSONL) and get back an **Ed25519-signed, offline-verifiable
+evidence report** mapped to SOC 2 / ISO 42001 / NIST AI RMF / EU AI Act / OWASP /
+MITRE.
+
+```python
+from kolm import AuditClient
+
+a = AuditClient(api_key="ks_...")  # or KOLM_API_KEY env var
+
+# One-shot: logs -> signed evidence report
+scan = a.scan(open("agent-logs.jsonl").read(), subject="support & billing agents")
+print(scan.report_id, scan.summary["readiness_pct"], "%")
+
+a.reports()                      # every report this tenant owns
+a.buy_report(scan.id)            # $750 Signed Readiness Report checkout link
+a.subscribe("starter")           # Continuous re-attestation checkout link
+a.trust("<slug>")                # fetch a public Trust link's signed report (no auth)
+```
+
+#### The killer feature: verify a kolm report in pure Python, fully offline
+
+A buyer can confirm a kolm evidence report was signed by the holder of the
+embedded key and **has not been altered since** - with **no server, no account,
+no shared secret**. The verifier reproduces the exact canonicalization used by
+the Node signer and the in-browser verifier **byte-for-byte**, checks the
+Ed25519 signature locally (via the `cryptography` library), then checks issuer
+provenance against a keyring **bundled inside the package**.
+
+```python
+import json
+from kolm import verify_report
+
+report = json.load(open("agent-security-report.json"))
+result = verify_report(report)          # zero network, runs on an air-gapped box
+
+if result.ok:
+    # ok == tier1_signature AND tier2_issuer
+    print("trusted:", result.issuer.status, result.key_fingerprint)
+else:
+    print("NOT trusted:", result.reason)
+
+result.tier1_signature   # signature valid + report untampered
+result.tier2_issuer      # signing key is a recognized kolm issuer
+result.key_fingerprint   # fingerprint recomputed from the embedded key
+```
+
+Tamper with any byte - a downgraded readiness number, a deleted finding, a
+flipped tamper-evident flag - and `tier1_signature` becomes `False`. Re-sign a
+tampered report with a rogue key and `tier1_signature` passes but `tier2_issuer`
+(and therefore `ok`) is `False`: always check `ok`, not just the signature.
+
+A custom keyring (e.g. to pin your own issuer) is accepted as a path, a
+`{"issuers": [...]}` mapping, or a list of issuer dicts:
+
+```python
+verify_report(report, keyring="my-issuers.json")
+```
+
+Offline verification requires the `cryptography` library, which installs
+automatically with this package.
+
 ### `recipe` - the Skills layer
 
 ```python
@@ -87,11 +150,14 @@ recipe run is-spam "WIN free Bitcoin"
 
 ## Configuration
 
-| Env var          | Default              | Purpose                              |
-|------------------|----------------------|--------------------------------------|
-| `KOLM_API_KEY`   | _(none)_             | Bearer token for the compile/run API |
-| `KOLM_BASE`      | `https://kolm.ai`    | Override base URL (self-hosted)      |
-| `RECIPE_API_KEY` | _(none)_             | Bearer token for the recipe API      |
+| Env var          | Default              | Purpose                                          |
+|------------------|----------------------|--------------------------------------------------|
+| `KOLM_API_KEY`   | _(none)_             | Bearer token for the compile/run + audit API     |
+| `KOLM_BASE`      | `https://kolm.ai`    | Override base URL (self-hosted)                  |
+| `RECIPE_API_KEY` | _(none)_             | Bearer token for the recipe API                  |
+
+`kolm.audit.verify_report` is fully offline and reads **no** env vars or network -
+it only needs the signed report and the bundled issuer keyring.
 
 ## Status envelope
 

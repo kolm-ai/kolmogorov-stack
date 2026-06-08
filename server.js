@@ -14,6 +14,7 @@ import { initSentry } from './src/sentry-init.js';
 import { synthesize } from './src/synthesis.js';
 import { createConcept, publishVersion } from './src/registry.js';
 import { all } from './src/store.js';
+import { backupNow, pruneBackups, backupDir } from './src/store-backup.js';
 import { runDueReattestations, resignPendingReports } from './src/asr-fulfillment.js';
 
 // W922 — normalize provider-key env-var names at startup. Operators keep keys in
@@ -282,6 +283,17 @@ if (process.argv[1] && process.argv[1].endsWith('server.js')) {
   // requests on rolling restarts.
   const onSig = (sig) => () => {
     console.log(`[${sig}] graceful shutdown initiated`);
+    // Best-effort durable snapshot before exit so every deploy / rolling
+    // restart leaves behind a fresh, consistent recovery point. backupNow() is
+    // synchronous and never throws (store-backup contract), so it completes
+    // before we begin draining connections without risking the clean exit.
+    if (process.env.KOLM_BACKUP_DISABLE !== '1') {
+      try {
+        const b = backupNow();
+        if (b && b.ok) console.log(`[backup] shutdown snapshot -> ${b.path}`);
+        else if (b) console.error(`[backup] shutdown snapshot failed: ${b.error}`);
+      } catch (e) { console.error('[backup] shutdown error:', e && e.message); }
+    }
     try {
       if (globalThis.__kolmServer && typeof globalThis.__kolmServer.close === 'function') {
         globalThis.__kolmServer.close(() => process.exit(0));
@@ -375,6 +387,39 @@ if (process.argv[1] && process.argv[1].endsWith('server.js')) {
     const kick = setTimeout(sweep, 60 * 1000);
     if (kick.unref) kick.unref();
     console.log(`  reattest:   in-process sweep every ${everyMin}m`);
+  }
+
+  // Durable backups: in-process snapshot scheduler so the data layer self-protects
+  // with no external cron. SQLite snapshots use VACUUM INTO (consistent + online);
+  // JSON snapshots copy the table files. Runs every KOLM_BACKUP_INTERVAL_H hours
+  // (default 6), unref'd so it never holds the event loop open, and prunes to the
+  // most recent 14 snapshots after each run. Disable with KOLM_BACKUP_DISABLE=1.
+  // A best-effort snapshot also runs on SIGTERM/SIGINT (see onSig above). See
+  // docs/durability.md for the restore runbook.
+  if (process.env.KOLM_BACKUP_DISABLE !== '1') {
+    const everyH = Math.max(1, parseInt(process.env.KOLM_BACKUP_INTERVAL_H || '6', 10) || 6);
+    const snapshot = (reason) => {
+      try {
+        const r = backupNow();
+        if (r && r.ok) {
+          console.log(`[backup] ${reason} snapshot -> ${r.path}`);
+          const pruned = pruneBackups();
+          if (pruned && pruned.pruned && pruned.pruned.length) {
+            console.log(`[backup] pruned ${pruned.pruned.length} old snapshot(s), kept ${pruned.kept}`);
+          }
+        } else {
+          console.error(`[backup] ${reason} snapshot failed: ${r && r.error}`);
+        }
+      } catch (e) { console.error('[backup] sweep error:', e && e.message); }
+    };
+    const everyMs = everyH * 60 * 60 * 1000;
+    const bt = setInterval(() => snapshot('scheduled'), everyMs);
+    if (bt.unref) bt.unref();
+    // Kick an initial snapshot a couple minutes after boot so a fresh deploy
+    // has a recovery point immediately, without waiting a full interval.
+    const bkick = setTimeout(() => snapshot('startup'), 2 * 60 * 1000);
+    if (bkick.unref) bkick.unref();
+    console.log(`  backup:     snapshot every ${everyH}h -> ${backupDir() || 'data/backups'}`);
   }
 }
 

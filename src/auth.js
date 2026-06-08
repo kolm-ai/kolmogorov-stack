@@ -465,6 +465,22 @@ const PUBLIC_API = (p) =>
   // configure + SCIM Users endpoints stay auth-gated.
   p === '/v1/account/saml/metadata' ||
   p === '/v1/scim/v2/ServiceProviderConfig' ||
+  // W-SSO-LIVE - the SAML 2.0 ACS receives an IdP-initiated POST from the user's
+  // browser, which carries NO kolm API key. The handler self-authenticates: it
+  // resolves the tenant from the assertion Issuer and verifies the XML signature
+  // against that tenant's pinned x509 cert before trusting any claim, then mints
+  // a session. Public so the browser POST is not rejected at the gate.
+  p === '/v1/account/saml/acs' ||
+  // W-SSO-LIVE - SCIM 2.0 resource endpoints are authenticated INSIDE the
+  // handler by _scimGuard, which accepts either the tenant API key or a
+  // dedicated per-tenant SCIM bearer token (so an IdP can be given a
+  // provisioning-only credential). Every handler is tenant-fenced. Public here
+  // so a SCIM-token-only request (not a full API key) reaches the guard rather
+  // than being rejected by the API-key gate.
+  p === '/v1/scim/v2/Users' ||
+  /^\/v1\/scim\/v2\/Users\/[A-Za-z0-9:._-]{1,128}$/.test(p) ||
+  p === '/v1/scim/v2/Groups' ||
+  /^\/v1\/scim\/v2\/Groups\/[A-Za-z0-9:._-]{1,128}$/.test(p) ||
   // W756 - KolmBench v1 spec + leaderboard are public marketing/discovery
   // surfaces (same policy as /v1/verticals + /v1/changelog). validate +
   // submit stay auth-gated above; submit additionally requires confirm:true.
