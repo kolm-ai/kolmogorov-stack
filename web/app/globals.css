@@ -1,0 +1,266 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =====================================================================
+   kolm.ai design tokens - ported verbatim from public/kolm-2026.css.
+
+   THREE VOICES, each with a job:
+     DISPLAY  Cabinet Grotesk - headlines (h1/h2 + the few load-bearing numbers)
+     TEXT     Switzer - everything a person reads as prose
+     MACHINE  Spline Sans Mono - ONLY where a machine speaks (hashes, control
+              IDs, the live verifier, verdict chips)
+
+   Light is the page (warm paper); dark is the machine (the deep "ledger").
+   COLOUR is one hue, one meaning: a single signal green = VERIFIED.
+   ===================================================================== */
+
+/* ---------- the three faces (self-hosted woff2 - CSP-safe, no CDN) ---------- */
+@font-face {
+  font-family: "Spline Sans Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/SplineSansMono-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Spline Sans Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/SplineSansMono-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Spline Sans Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/SplineSansMono-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Cabinet Grotesk";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/CabinetGrotesk-Variable.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Switzer";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/Switzer-Variable.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Switzer";
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/Switzer-VariableItalic.woff2") format("woff2");
+}
+
+@layer base {
+  :root {
+    /* ---- light surfaces (the page / editorial world) ---- */
+    --paper: #f6f7f4;
+    --paper-2: #ffffff;
+    --paper-sink: #eff1ec;
+
+    /* ---- dark surfaces (the ledger / proof world) ---- */
+    --ink-deep: #0b0f0d;
+    --ink-deep-2: #121714;
+    --ink-deep-sink: #080b0a;
+
+    /* ink ramp on light (role, not shade) */
+    --ink: #0e1310;
+    --ink-2: #39413c;
+    --ink-3: #565c57;
+    --ink-faint: #8a908b;
+
+    /* ink ramp on dark (text on the ledger) */
+    --on-ink: #ecefea;
+    --on-ink-2: #a7aea7;
+    --on-ink-3: #767d76;
+    --on-ink-faint: #4a514b;
+
+    /* lines */
+    --line: #e1e4de;
+    --line-2: #8a908b;
+    --line-ink: rgba(236, 239, 234, 0.11);
+    --line-ink-2: rgba(236, 239, 234, 0.22);
+
+    /* accent - signal green (verification semantic) */
+    --accent: #11875a;
+    --accent-deep: #0f7a50;
+    --accent-press: #0c6b45;
+    --accent-text: #0b6b45;
+    --accent-soft: #e7f2ec;
+    --accent-tint: rgba(17, 135, 90, 0.07);
+    --accent-edge: #cce2d6;
+    --accent-on-ink: #45d98e;
+    --accent-on-ink-soft: rgba(69, 217, 142, 0.12);
+    --accent-on-ink-edge: rgba(69, 217, 142, 0.34);
+
+    /* void - tampered / not-verified. desaturated, NOT alarm-red */
+    --void: #6e5854;
+    --void-soft: #f0eae9;
+    --void-edge: #d9cfcd;
+    --void-on-ink: #e0a89f;
+
+    --on-accent: #ffffff;
+
+    /* ---- type ---- */
+    --font-display: "Cabinet Grotesk", "Switzer", system-ui, sans-serif;
+    --font-sans: "Switzer", system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", Roboto, sans-serif;
+    --font-mono: "Spline Sans Mono", ui-monospace, "SFMono-Regular", "SF Mono",
+      Menlo, Consolas, "Liberation Mono", monospace;
+
+    /* grain - a single tileable fractal-noise sheet for tactile depth */
+    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+    /* spacing scale + geometry */
+    --r-sm: 5px;
+    --r-md: 9px;
+    --r-lg: 16px;
+    --r-xl: 22px;
+    --r-pill: 999px;
+    --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+    /* shadcn radius hook */
+    --radius: 9px;
+  }
+
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    color-scheme: light;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(
+        120% 72% at 50% -10%,
+        #ffffff 0%,
+        rgba(255, 255, 255, 0) 52%
+      ),
+      var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16.5px;
+    line-height: 1.62;
+    letter-spacing: -0.002em;
+    font-feature-settings: "ss01" 1, "cv01" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  @media (max-width: 767px) {
+    body {
+      font-size: 15.5px;
+    }
+  }
+
+  /* the grain sheet - fixed, whisper-low, paper tooth so flat surfaces don't
+     read as a screenshot */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    background-image: var(--grain);
+    background-size: 180px 180px;
+    opacity: 0.022;
+    mix-blend-mode: multiply;
+  }
+
+  ::selection {
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+}
+
+@layer components {
+  /* the running-head / eyebrow - the document-register marker, MACHINE voice */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-ink-3;
+  }
+  .eyebrow::before {
+    content: "§";
+    color: var(--ink-faint);
+    font-weight: 400;
+  }
+
+  /* control-id chip - MACHINE voice */
+  .ctrlid {
+    @apply inline-flex items-center whitespace-nowrap rounded-sm border border-line bg-paper-2 px-[10px] py-[5px] font-mono text-[11px] font-medium tracking-[0.02em] text-ink-2;
+  }
+
+  /* live dot cue */
+  .livedot::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex: none;
+    box-shadow: 0 0 0 0 rgba(17, 135, 90, 0.5);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .livedot::before {
+      animation: livedot 2.4s var(--ease) infinite;
+    }
+  }
+  @keyframes livedot {
+    0% {
+      box-shadow: 0 0 0 0 rgba(17, 135, 90, 0.45);
+    }
+    70%,
+    100% {
+      box-shadow: 0 0 0 7px rgba(17, 135, 90, 0);
+    }
+  }
+
+  /* hero dot field - the editorial grid behind the headline */
+  .hero-dots::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      rgba(14, 19, 16, 0.045) 1px,
+      transparent 1.6px
+    );
+    background-size: 26px 26px;
+    -webkit-mask-image: linear-gradient(
+      180deg,
+      #000 0%,
+      rgba(0, 0, 0, 0.45) 42%,
+      transparent 78%
+    );
+    mask-image: linear-gradient(
+      180deg,
+      #000 0%,
+      rgba(0, 0, 0, 0.45) 42%,
+      transparent 78%
+    );
+  }
+}
+
+/* DISPLAY voice for headings rendered through prose */
+.font-display {
+  letter-spacing: -0.025em;
+}

@@ -30,6 +30,7 @@ import {
   verifySignatureBlock,
 } from './ed25519.js';
 import { ASR_CONTROLS } from './control-mapper.js';
+import { runRedTeam } from './red-team.js';
 
 // Versioned so a re-attestation is a comparable delta and a signed report
 // records exactly which builder shape produced it.
@@ -159,6 +160,45 @@ function buildCaveats(summary) {
 }
 
 // ---------------------------------------------------------------------------
+// Red-team block - the ASR-4 injection-resistance evidence for the signed
+// envelope. Reads the orchestrator's red_team result (src/red-team.js); if a
+// caller built the audit without one, it is derived deterministically from the
+// same events, so the deliverable is always self-consistent. The block carries
+// only the score, the per-status counts, and the probe table (opaque event-id
+// evidence, never raw log bodies), so adding it to the envelope cannot leak PII.
+// ---------------------------------------------------------------------------
+export function buildRedTeamBlock(auditResult) {
+  const rt = auditResult && auditResult.red_team && typeof auditResult.red_team === 'object'
+    ? auditResult.red_team
+    : runRedTeam(Array.isArray(auditResult && auditResult.events) ? auditResult.events : []);
+  const sum = rt.summary || {};
+  const probes = Array.isArray(rt.probes) ? rt.probes : [];
+  return {
+    spec_version: rt.spec_version || null,
+    domain: rt.domain || sum.domain || 'generic',
+    score: rt.red_team_score == null ? null : rt.red_team_score,
+    summary: {
+      probes_total: sum.probes_total ?? probes.length,
+      tested: sum.tested ?? 0,
+      resisted: sum.resisted ?? 0,
+      exposed: sum.exposed ?? 0,
+      untested: sum.untested ?? 0,
+      note: sum.note,
+    },
+    probes: probes.map((p) => ({
+      id: p.id,
+      category: p.category,
+      severity: p.severity,
+      status: p.status,
+      title: p.title || p.id,
+      detail: p.detail || null,
+      frameworks: Array.isArray(p.frameworks) ? p.frameworks.slice(0, 8) : [],
+      evidence: Array.isArray(p.evidence) ? p.evidence.slice(0, 6) : [],
+    })),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Build the unsigned report envelope from a runAudit() result.
 //
 // Deliberately excludes the raw `events` array: the report carries findings,
@@ -252,6 +292,14 @@ export function buildReportEnvelope(auditResult, opts = {}) {
     verify_url: verifyUrl,
   };
   if (s.note) envelope.summary.note = s.note;
+
+  // ASR-4 red-team resistance. A NEW top-level field: the canonicalizer is a
+  // generic key-sort, so adding it is signature-safe and does not change how any
+  // existing field is canonicalized. Gated by opts.includeRedTeam (default on)
+  // so a caller can build the pre-red_team baseline for a canonicalization diff.
+  if (options.includeRedTeam !== false) {
+    envelope.red_team = buildRedTeamBlock(auditResult);
+  }
   return envelope;
 }
 
@@ -417,6 +465,25 @@ export function renderReportHtml(envelope) {
 
   const caveats = (e.caveats || []).map((c) => `<li>${esc(c)}</li>`).join('');
 
+  // Red-team resistance section (ASR-4). score==null renders n/a (no fake number).
+  const rt = e.red_team && typeof e.red_team === 'object' ? e.red_team : null;
+  const rtSum = rt && rt.summary ? rt.summary : {};
+  const rtScore = rt ? (rt.score == null ? 'n/a' : `${rt.score}/100`) : 'n/a';
+  const RT_STATUS_LABEL = { resisted: 'RESISTED', exposed: 'EXPOSED', untested: 'UNTESTED' };
+  const RT_STATUS_COLOR = { resisted: '#166534', exposed: '#991b1b', untested: '#5b6472' };
+  const rtRows = rt ? (rt.probes || []).map((p) => `
+    <tr>
+      <td>${esc(p.title || p.id)}<div class="small" style="color:var(--muted)">${esc(p.category || '')}</div></td>
+      <td><span class="sev" style="color:${_sevColor(p.severity)}">${esc((p.severity || '').toUpperCase())}</span></td>
+      <td><span class="pill" style="background:${RT_STATUS_COLOR[p.status] || '#555'}">${esc(RT_STATUS_LABEL[p.status] || p.status)}</span></td>
+      <td class="mono small">${esc((p.frameworks || []).join(' · '))}</td>
+    </tr>`).join('') : '';
+  const rtSection = rt ? `
+  <h2>Red-Team Resistance: ${esc(rtScore)}</h2>
+  <p class="sub small">Deterministic injection / agent-abuse battery (${esc(rt.domain || 'generic')} suite) over the ingested events. ${esc(rtSum.resisted ?? 0)} resisted, ${esc(rtSum.exposed ?? 0)} exposed, ${esc(rtSum.untested ?? 0)} untested of ${esc(rtSum.probes_total ?? 0)} probes. The score is a graduated rollup over the exercised probes only; untested probes are marked, never scored as a pass.</p>
+  <table><thead><tr><th>Probe</th><th>Severity</th><th>Observed resistance</th><th>Mapped to</th></tr></thead>
+  <tbody>${rtRows}</tbody></table>` : '';
+
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
@@ -464,6 +531,7 @@ export function renderReportHtml(envelope) {
   <div class="headline">
     <div><div class="big">${esc(readiness)}</div><div class="small">readiness (assessed controls)</div></div>
     <div><div class="big">${esc(s.blocking_count ?? 0)}</div><div class="small">deal-blocking findings</div></div>
+    <div><div class="big">${esc(rtScore)}</div><div class="small">red-team resistance</div></div>
     <div><div class="big">${s.tamper_evident ? 'Yes' : 'No'}</div><div class="small">tamper-evident trail</div></div>
   </div>
 
@@ -475,6 +543,7 @@ export function renderReportHtml(envelope) {
 
   <h2>Findings</h2>
   ${findingRows || '<p class="sub">No deal-blocking or attention findings in the assessed controls.</p>'}
+  ${rtSection}
 
   <h2>Remediation roadmap</h2>
   ${remediation ? `<table><thead><tr><th>Priority</th><th>Finding</th><th>Action</th><th>Frameworks</th></tr></thead><tbody>${remediation}</tbody></table>` : '<p class="sub">No remediation items.</p>'}
@@ -535,6 +604,11 @@ export async function renderReportPdf(envelope, outputStream) {
   }
   const e = envelope || {};
   const s = e.summary || {};
+  const rt = e.red_team && typeof e.red_team === 'object' ? e.red_team : null;
+  const rtSum = rt && rt.summary ? rt.summary : {};
+  const rtScore = rt ? (rt.score == null ? 'n/a' : `${rt.score}/100`) : 'n/a';
+  const RT_PDF_STATUS = { resisted: 'RESISTED', exposed: 'EXPOSED', untested: 'UNTESTED' };
+  const _rtStatusColor = (st) => (st === 'resisted' ? PDF_COLOR.ok : st === 'exposed' ? PDF_COLOR.bad : PDF_COLOR.muted);
 
   return new Promise((resolve, reject) => {
     const doc = new PDFDocumentCtor({ size: 'LETTER', margin: 54, info: {
@@ -586,6 +660,7 @@ export async function renderReportPdf(envelope, outputStream) {
     doc.font('Helvetica').fontSize(11).fillColor(PDF_COLOR.ink)
       .text(`Readiness (assessed controls): ${readiness}`)
       .text(`Deal-blocking findings: ${s.blocking_count ?? 0}`)
+      .text(`Red-team resistance: ${rtScore}`)
       .text(`Tamper-evident trail: ${s.tamper_evident ? 'yes' : 'no'}`)
       .text(`Total findings: ${s.total_findings ?? 0}`);
     doc.moveDown(0.8);
@@ -633,6 +708,28 @@ export async function renderReportPdf(envelope, outputStream) {
     }
     doc.moveDown(0.2);
     rule();
+
+    // --- Red-team resistance (ASR-4) ---
+    if (rt) {
+      heading(`Red-team resistance: ${rtScore}`);
+      doc.font('Helvetica').fontSize(9).fillColor(PDF_COLOR.muted).text(
+        `Deterministic injection / agent-abuse battery (${rt.domain || 'generic'} suite) over the ingested events. ${rtSum.resisted ?? 0} resisted, ${rtSum.exposed ?? 0} exposed, ${rtSum.untested ?? 0} untested of ${rtSum.probes_total ?? 0} probes. The score is a graduated rollup over the exercised probes only; untested probes are marked, never scored as a pass.`,
+        { width: contentWidth },
+      );
+      doc.moveDown(0.4);
+      for (const p of (rt.probes || [])) {
+        if (doc.y > 690) doc.addPage();
+        doc.font('Helvetica-Bold').fontSize(10).fillColor(_sevColor(p.severity))
+          .text(`[${(p.severity || '').toUpperCase()}] `, { continued: true });
+        doc.fillColor(PDF_COLOR.ink).text(`${p.title || p.id}  `, { continued: true });
+        doc.fillColor(_rtStatusColor(p.status)).text(RT_PDF_STATUS[p.status] || (p.status || '').toUpperCase());
+        if (p.detail) doc.font('Helvetica').fontSize(9).fillColor(PDF_COLOR.ink).text(p.detail, { width: contentWidth });
+        doc.font('Courier').fontSize(8).fillColor(PDF_COLOR.muted).text((p.frameworks || []).join(' · '), { width: contentWidth });
+        doc.moveDown(0.4);
+      }
+      doc.moveDown(0.2);
+      rule();
+    }
 
     // --- Remediation ---
     heading('Remediation roadmap');

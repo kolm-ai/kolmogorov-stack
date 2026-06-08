@@ -548,8 +548,10 @@ const PUBLIC_API = (p) =>
   // the paid signed report (html / json / pdf) and verifies offline. The slug
   // is an unguessable capability token (crypto.randomBytes), so possession of
   // the link is the grant - no account needed. Audit + subscription slugs both
-  // resolve here.
-  /^\/v1\/trust\/[A-Za-z0-9_-]{1,64}$/.test(p) ||
+  // resolve here. The optional /export suffix serves the same paid report as a
+  // procurement artifact (CSV / .xls / Drata / Vanta / exec / crosswalk) so a
+  // buyer's GRC team can ingest it without a kolm account.
+  /^\/v1\/trust\/[A-Za-z0-9_-]{1,64}(?:\/export)?$/.test(p) ||
   // The continuous re-attestation tick is gated by KOLM_CRON_SECRET (a request
   // header), not tenant auth, so it must bypass the API-key gate; the route
   // handler itself rejects any call without the correct secret.

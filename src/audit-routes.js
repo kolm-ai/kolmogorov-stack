@@ -40,6 +40,7 @@ import {
   AUDIT_REPORT_SCHEMA,
   AUDIT_REPORT_VERSION,
 } from './attestation-report-builder.js';
+import { EXPORTERS as FRAMEWORK_EXPORTERS, EXPORT_FORMATS } from './framework-export.js';
 import { loadOrCreateDefaultSigner } from './ed25519.js';
 import { tryAppendAudit } from './audit.js';
 import { createAsrCheckout, asrBillingReady } from './asr-billing.js';
@@ -283,6 +284,27 @@ function _runAndSign(logsText, { source, subject, retentionDays, sign, tier }) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Procurement exports (src/framework-export.js). Turns a signed report envelope
+// into the artifact a buyer's GRC / procurement team ingests: CSV (findings x
+// controls), a SpreadsheetML .xls workbook, Drata / Vanta control-evidence JSON,
+// an executive summary, or the framework crosswalk. The formatter is a pure,
+// read-only view over the SAME signed envelope (it never re-signs), so it shares
+// the report route's auth/tenant fence. Sends the artifact as a download with
+// the formatter's own Content-Type + filename; an unknown format is a clean 400.
+// ---------------------------------------------------------------------------
+function _sendExport(res, envelope, formatRaw) {
+  const fmt = String(formatRaw == null ? 'csv' : formatRaw).toLowerCase();
+  const fn = FRAMEWORK_EXPORTERS[fmt];
+  if (!fn) return _err(res, 400, 'invalid_format', `format must be one of: ${EXPORT_FORMATS.join('|')}`);
+  let art;
+  try { art = fn(envelope); }
+  catch (e) { return _err(res, 500, 'export_failed', e && e.message); }
+  res.setHeader('Content-Type', art.contentType);
+  res.setHeader('Content-Disposition', `attachment; filename="${art.filename}"`);
+  return res.send(art.body);
+}
+
 export function register(r, deps = {}) {
   if (!r || typeof r.get !== 'function' || typeof r.post !== 'function') {
     throw new Error('audit-routes.register: router with get/post required');
@@ -486,6 +508,25 @@ export function register(r, deps = {}) {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="${fname}.json"`);
     return res.send(json);
+  });
+
+  // -------------------------------------------------------------------------
+  // GET /v1/audit/sessions/:id/export?format=csv|xlsx|drata|vanta|exec|crosswalk
+  // The signed report reshaped into a procurement-ingestible artifact. Auth-
+  // gated + tenant-fenced exactly like the sibling /report route (the export is
+  // a view over the SAME signed envelope - it carries the key fingerprint +
+  // verify URL so an importer can always trace it back to the signed source).
+  // -------------------------------------------------------------------------
+  r.get('/v1/audit/sessions/:id/export', (req, res) => {
+    const trec = _authOrReject(req, res);
+    if (!trec) return;
+    const id = req.params && req.params.id;
+    const sess = _getSession(trec.id, id);
+    if (!sess) return _err(res, 404, 'session_not_found', `no audit session ${id} for this tenant`);
+    if (!sess.report) return _err(res, 409, 'report_not_ready', 'run the session before exporting its report');
+    const format = (req.query && req.query.format) || 'csv';
+    tryAppendAudit({ tenant_id: trec.id, actor: trec.id, op: 'agent_audit.export', payload: { id, report_id: sess.report_id, format: String(format).toLowerCase() } });
+    return _sendExport(res, sess.report, format);
   });
 
   // -------------------------------------------------------------------------
@@ -789,6 +830,25 @@ export function register(r, deps = {}) {
     return res.send(html);
   });
 
+  // -------------------------------------------------------------------------
+  // GET /v1/trust/:slug/export?format=...  (PUBLIC) - the same procurement
+  // exports off the shareable Trust link, so a buyer's review group can pull a
+  // CSV / .xls / Drata / Vanta / exec / crosswalk artifact straight into their
+  // GRC tool with no kolm account. Possession of the unguessable slug is the
+  // grant; resolveTrust only yields an envelope for a PAID audit or an active /
+  // lapsed Continuous subscription (a not-yet-generated subscription is 409).
+  // -------------------------------------------------------------------------
+  r.get('/v1/trust/:slug/export', (req, res) => {
+    const slug = req.params && req.params.slug;
+    const hit = resolveTrust(slug);
+    if (!hit) return _err(res, 404, 'not_found', 'no published report at this link');
+    if (hit.pending || !hit.envelope) {
+      return _err(res, 409, 'report_not_ready', 'this Continuous link has not generated its first report yet');
+    }
+    res.setHeader('Cache-Control', 'no-store');
+    return _sendExport(res, hit.envelope, req.query && req.query.format);
+  });
+
   return r;
 }
 
@@ -799,12 +859,14 @@ export const AUDIT_ROUTES_SPEC = {
   spec_version: AUDIT_SPEC_VERSION,
   report_schema: AUDIT_REPORT_SCHEMA,
   report_version: AUDIT_REPORT_VERSION,
+  export_formats: [...EXPORT_FORMATS],
   routes: [
     'POST /v1/audit/sessions',
     'POST /v1/audit/sessions/:id/ingest',
     'POST /v1/audit/sessions/:id/run',
     'GET /v1/audit/sessions/:id',
     'GET /v1/audit/sessions/:id/report',
+    'GET /v1/audit/sessions/:id/export',
     'POST /v1/audit/scan',
     'GET /v1/audit/reports',
     'POST /v1/audit/report/checkout',
@@ -814,5 +876,6 @@ export const AUDIT_ROUTES_SPEC = {
     'POST /v1/audit/report/verify (public)',
     'GET /v1/audit/issuer-key (public)',
     'GET /v1/trust/:slug (public)',
+    'GET /v1/trust/:slug/export (public)',
   ],
 };

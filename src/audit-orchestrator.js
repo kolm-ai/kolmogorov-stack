@@ -19,6 +19,7 @@ import { ingestForAudit } from './audit-ingest.js';
 import { analyzePermissions } from './permission-analyzer.js';
 import { analyzeAuditTrail } from './audit-trail-analyzer.js';
 import { mapControls } from './control-mapper.js';
+import { runRedTeam } from './red-team.js';
 
 // Versioned so a re-attestation is a cheap, comparable delta and so a signed
 // report records exactly which engine shape produced it.
@@ -30,7 +31,13 @@ export const AUDIT_SPEC_VERSION = 'asr-audit/0.1';
 // rather than silently scoring them as clean.
 const ASSESSED_CONTROLS = ['ASR-1', 'ASR-2', 'ASR-3'];
 const NOT_ASSESSED = {
-  'ASR-4': 'Injection: requires the red-team / prompt-injection tester (not run in this audit).',
+  // ASR-4 is covered by the deterministic red-team battery (src/red-team.js),
+  // reported as its own resistance score in the red_team block rather than
+  // folded into the readiness rollup: the battery marks probes the logs never
+  // exercised as untested, so scoring it as a pass/fail control would overstate
+  // coverage. The readiness rollup stays a clean graduated number over the three
+  // controls the trinity fully assesses.
+  'ASR-4': 'Injection: assessed by the deterministic red-team battery and reported separately in the red_team block (graduated resistance score); not folded into the readiness rollup because untested probes are marked, not scored.',
   'ASR-5': 'Provenance: requires model/dependency + MCP supply-chain enumeration (not run in this audit).',
   'ASR-6': 'Evidence: established by signing + logging the report itself, not by log analysis.',
 };
@@ -94,6 +101,17 @@ export function runAudit(logs, opts = {}) {
   const allFindings = [...permission.findings, ...trail.findings];
   const controls = mapControls(allFindings);
 
+  // 3.5 Deterministic red-team / injection battery (ASR-4) over the SAME events.
+  // Offline, never-throwing, reproducible; reported as its own resistance block
+  // rather than folded into the readiness rollup. runRedTeam already guards
+  // itself, but keep the orchestrator's never-throw contract belt-and-braces.
+  let redTeam;
+  try {
+    redTeam = runRedTeam(events, { domain: options.domain });
+  } catch (_e) {
+    redTeam = { spec_version: 'asr-redteam/0.1', domain: 'generic', red_team_score: null, probes: [], summary: { domain: 'generic', red_team_score: null, probes_total: 0, tested: 0, resisted: 0, exposed: 0, untested: 0 } };
+  }
+
   // 4. Readiness rollup - explicit about coverage, never inflated.
   const asrById = new Map((controls.asr || []).map((a) => [a.id, a]));
   const controlRows = ASSESSED_CONTROLS.map((id) => {
@@ -152,6 +170,7 @@ export function runAudit(logs, opts = {}) {
     trail,
     controls,
     findings: allFindings,
+    red_team: redTeam,
     summary,
   };
 }
