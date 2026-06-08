@@ -29,6 +29,12 @@
 node_modules/
 .git/
 
+# The Next.js app (web/) is deployed to Vercel, not bundled into the API
+# container. Exclude its build output + caches (node_modules already covered).
+web/.next/
+web/out/
+web/.vercel/
+
 # SDK source trees (Rust/C/Python build artifacts can be huge)
 sdk/rust/target/
 sdk/c/build/
