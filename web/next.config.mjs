@@ -10,10 +10,14 @@ const nextConfig = {
   // change at cutover. Override the upstream with KOLM_API_ORIGIN at build/run
   // time; default is the production origin.
   async rewrites() {
-    const apiOrigin = process.env.KOLM_API_ORIGIN || "https://kolm.ai";
+    // Proxy the API straight to the Railway backend - NOT to kolm.ai, which is
+    // this very app after cutover (that would self-loop). Mirrors the static
+    // site's vercel.json which rewrites /v1/* to the Railway origin directly.
+    const apiOrigin = process.env.KOLM_API_ORIGIN || "https://kolmogorov-stack-production.up.railway.app";
     return [
       { source: "/v1/:path*", destination: `${apiOrigin}/v1/:path*` },
       { source: "/health", destination: `${apiOrigin}/health` },
+      { source: "/ready", destination: `${apiOrigin}/ready` },
     ];
   },
 
